@@ -66,9 +66,11 @@ Reconstitution Calculator (Dialog)
   - Range: [minIU, maxIU]; labels show IU and syringe capacity
 - Summary (always visible within dialog)
   - Syringe label and IU, concentration per mL, vial volume (and limit if provided)
-- Submit
+- Submit / Apply
+  - Full-screen calculator route: /medications/reconstitution (also available as a dialog)
   - Auto-populates on Multi Dose Vial screen: Per mL concentration and Vial Volume
   - Remembers last-used Dose, Unit, Syringe, and Vial Size for subsequent openings
+  - Sticky summary footer available in the full-screen variant (roadmap)
 
 Save behavior
 - On Submit in any Add/Edit medication screen, show confirmation dialog with Cancel/Confirm.

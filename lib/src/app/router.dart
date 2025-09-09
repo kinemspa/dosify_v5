@@ -13,6 +13,7 @@ import '../features/medications/presentation/add_edit_capsule_page.dart';
 import '../features/medications/presentation/add_edit_injection_pfs_page.dart';
 import '../features/medications/presentation/add_edit_injection_single_vial_page.dart';
 import '../features/medications/presentation/add_edit_injection_multi_vial_page.dart';
+import '../features/medications/presentation/reconstitution_calculator_page.dart';
 import '../features/schedules/presentation/schedules_page.dart';
 import '../features/settings/presentation/settings_page.dart';
 import 'shell_scaffold.dart';
@@ -82,6 +83,21 @@ final router = GoRouter(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
           builder: (context, state) => const AddEditInjectionMultiVialPage(),
+        ),
+        GoRoute(
+          path: '/medications/reconstitution',
+          name: 'reconstitutionCalculator',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return ReconstitutionCalculatorPage(
+              initialStrengthValue: (extra?['strength'] as double?) ?? 0,
+              unitLabel: (extra?['unit'] as String?) ?? 'mg',
+              initialDoseValue: extra?['dose'] as double?,
+              initialDoseUnit: extra?['doseUnit'] as String?,
+              initialSyringeSize: extra?['syringe'] as SyringeSizeMl?,
+              initialVialSize: extra?['vialSize'] as double?,
+            );
+          },
         ),
       ],
     ),

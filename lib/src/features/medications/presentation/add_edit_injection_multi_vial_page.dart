@@ -256,7 +256,44 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
               const SizedBox(height: 4),
               const Text('Enter the total liquid volume in this vial after reconstitution. Use the calculator to compute it if unsure.'),
               const SizedBox(height: 8),
-              OutlinedButton.icon(onPressed: _openReconstitutionDialog, icon: const Icon(Icons.calculate), label: const Text('Reconstitution Calculator')),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  final initialUnitLabel = (_strengthUnit == Unit.mcg)
+                      ? 'mcg'
+                      : (_strengthUnit == Unit.mg)
+                          ? 'mg'
+                          : (_strengthUnit == Unit.g)
+                              ? 'g'
+                              : 'units';
+                  final result = await context.push(
+                    '/medications/reconstitution',
+                    extra: {
+                      'strength': double.tryParse(_strengthValueCtrl.text) ?? 0.0,
+                      'unit': initialUnitLabel,
+                      'dose': _lastCalcDose,
+                      'doseUnit': _lastCalcDoseUnit,
+                      'syringe': _lastCalcSyringe,
+                      'vialSize': _lastCalcVialSize ?? double.tryParse(_vialVolumeCtrl.text),
+                    },
+                  ) as ReconstitutionResult?;
+                  if (result != null && mounted) {
+                    setState(() {
+                      _perMlCtrl.text = fmt2(result.perMlConcentration);
+                      _vialVolumeCtrl.text = fmt2(result.solventVolumeMl);
+                      _lastCalcVialSize = result.solventVolumeMl;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Reconstituted: ${fmt2(result.perMlConcentration)} ${initialUnitLabel}/mL • Add ${fmt2(result.solventVolumeMl)} mL • Dose ~ ${fmt2(result.recommendedUnits)} IU on ${result.syringeSizeMl.toStringAsFixed(1)} mL',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.calculate),
+                label: const Text('Reconstitution Calculator'),
+              ),
               const SizedBox(height: 12),
 Row(children: [
                 Expanded(child: StepperField(controller: _stockValueCtrl, label: 'Vials in stock *', onChanged: (_)=>setState((){}), min: 0, step: 1)),

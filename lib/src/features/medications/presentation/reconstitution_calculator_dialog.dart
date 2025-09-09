@@ -140,7 +140,7 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
     double iuMax = totalIU;
     if (vialMax != null && S > 0 && D > 0) {
       final uMaxAllowed = (100 * D * vialMax) / S; // U <= this
-      iuMax = iuMaxAllowed = uMaxAllowed.clamp(0, totalIU);
+      iuMax = uMaxAllowed.clamp(0, totalIU).toDouble();
       if (iuMax < iuMin) iuMin = iuMax; // collapse range if tiny
     }
 
@@ -264,7 +264,7 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
                     '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHighest volume within limit',
               ),
               if (sliderMax <= 0 || sliderMax.isNaN)
-                const _PresetChip(label: 'No valid options', selected: false, onTap: null, subtitle: 'Check strength, dose, or syringe size'),
+                _PresetChip(label: 'No valid options', selected: false, onTap: () {}, subtitle: 'Check strength, dose, or syringe size'),
             ]),
             const SizedBox(height: 16),
             Text('Adjust fill (${_syringe.totalUnits} IU max)'),
