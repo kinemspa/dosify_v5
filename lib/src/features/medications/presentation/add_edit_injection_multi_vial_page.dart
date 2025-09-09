@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
 import '../presentation/providers.dart';
+import 'reconstitution_calculator_dialog.dart';
 
 class AddEditInjectionMultiVialPage extends ConsumerStatefulWidget {
   const AddEditInjectionMultiVialPage({super.key});
@@ -97,14 +98,36 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
   }
 
   Future<void> _openReconstitutionDialog() async {
-    await showDialog(
+    final initialUnitLabel = (_strengthUnit == Unit.mcg)
+        ? 'mcg'
+        : (_strengthUnit == Unit.mg)
+            ? 'mg'
+            : (_strengthUnit == Unit.g)
+                ? 'g'
+                : 'units';
+
+    final result = await showDialog<ReconstitutionResult>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reconstitution Calculator'),
-        content: const Text('Coming soon: full calculator UI with presets and formula.'),
-        actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Close'))],
+      builder: (ctx) => ReconstitutionCalculatorDialog(
+        initialStrengthValue: double.tryParse(_strengthValueCtrl.text) ?? 0,
+        unitLabel: initialUnitLabel,
       ),
     );
+
+    if (result != null) {
+      setState(() {
+        _perMlCtrl.text = result.perMlConcentration.toStringAsFixed(2);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Reconstituted: ${result.perMlConcentration.toStringAsFixed(2)} ${initialUnitLabel}/mL • Add ${result.solventVolumeMl.toStringAsFixed(2)} mL • Dose ~ ${result.recommendedUnits.toStringAsFixed(2)} IU on ${result.syringeSizeMl.toStringAsFixed(1)} mL',
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _submit() async {
