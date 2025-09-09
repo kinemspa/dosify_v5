@@ -33,7 +33,12 @@ class _TypeTile extends StatelessWidget {
         leading: Icon(icon),
         title: Text(title),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
+        onTap: () {
+          if (title == 'Tablet') {
+            // Navigate to Add Tablet screen
+            Navigator.of(context).pushNamed('/medications/add/tablet');
+          }
+        },
       ),
     );
   }
