@@ -38,6 +38,8 @@ class _TypeTile extends StatelessWidget {
           if (title == 'Tablet') {
             // Navigate to Add Tablet screen using go_router
             context.push('/medications/add/tablet');
+          } else if (title == 'Capsule') {
+            context.push('/medications/add/capsule');
           }
         },
       ),

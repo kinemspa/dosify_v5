@@ -6,4 +6,5 @@
 - Home has no back button
 - List empty state helper text: "Add a medication to begin tracking"
 - Screens to add later: Add/Edit flows and Reconstitution Calculator per spec
+- Capsule inventory must be whole numbers; strength units mcg/mg/g per capsule
 

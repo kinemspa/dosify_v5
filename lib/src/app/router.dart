@@ -4,6 +4,7 @@ import '../features/home/presentation/home_page.dart';
 import '../features/medications/presentation/medication_list_page.dart';
 import '../features/medications/presentation/select_medication_type_page.dart';
 import '../features/medications/presentation/add_edit_tablet_page.dart';
+import '../features/medications/presentation/add_edit_capsule_page.dart';
 
 final router = GoRouter(
   routes: [
@@ -26,6 +27,11 @@ final router = GoRouter(
       path: '/medications/add/tablet',
       name: 'addTablet',
       builder: (context, state) => const AddEditTabletPage(),
+    ),
+    GoRoute(
+      path: '/medications/add/capsule',
+      name: 'addCapsule',
+      builder: (context, state) => const AddEditCapsulePage(),
     ),
   ],
 );
