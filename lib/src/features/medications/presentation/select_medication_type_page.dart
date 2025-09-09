@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SelectMedicationTypePage extends StatelessWidget {
   const SelectMedicationTypePage({super.key});
@@ -35,8 +36,8 @@ class _TypeTile extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           if (title == 'Tablet') {
-            // Navigate to Add Tablet screen
-            Navigator.of(context).pushNamed('/medications/add/tablet');
+            // Navigate to Add Tablet screen using go_router
+            context.push('/medications/add/tablet');
           }
         },
       ),
