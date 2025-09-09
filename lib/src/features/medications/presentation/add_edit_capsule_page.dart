@@ -178,6 +178,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text('Add Medication - Capsule'),
       ),
       body: Stack(

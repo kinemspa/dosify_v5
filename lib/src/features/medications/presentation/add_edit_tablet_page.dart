@@ -182,6 +182,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text('Add Medication - Tablet'),
       ),
       body: Stack(

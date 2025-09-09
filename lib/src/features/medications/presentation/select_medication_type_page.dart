@@ -8,6 +8,7 @@ class SelectMedicationTypePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text('Select Medication Type'),
       ),
       body: ListView(

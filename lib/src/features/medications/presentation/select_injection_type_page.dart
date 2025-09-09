@@ -7,7 +7,7 @@ class SelectInjectionTypePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Injection Type')),
+      appBar: AppBar(leading: const BackButton(), title: const Text('Select Injection Type')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

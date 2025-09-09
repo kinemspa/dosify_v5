@@ -138,7 +138,7 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Medication - Single Dose Vial')),
+      appBar: AppBar(leading: const BackButton(), title: const Text('Add Medication - Single Dose Vial')),
       body: Stack(
         children: [
           SingleChildScrollView(

@@ -138,7 +138,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Medication - Pre Filled Syringe')),
+      appBar: AppBar(leading: const BackButton(), title: const Text('Add Medication - Pre Filled Syringe')),
       body: Stack(
         children: [
           SingleChildScrollView(

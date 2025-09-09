@@ -149,7 +149,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Medication - Multi Dose Vial')),
+      appBar: AppBar(leading: const BackButton(), title: const Text('Add Medication - Multi Dose Vial')),
       body: Stack(children: [
         SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 220),

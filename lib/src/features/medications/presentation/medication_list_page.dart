@@ -20,7 +20,7 @@ class MedicationListPage extends ConsumerWidget {
           const Text('Add a medication to begin tracking'),
           const SizedBox(height: 12),
           FilledButton(
-            onPressed: () => context.go('/medications/select-type'),
+onPressed: () => context.push('/medications/select-type'),
             child: const Text('Add Medication'),
           ),
         ],
@@ -42,11 +42,12 @@ class MedicationListPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text('Medications'),
       ),
       body: Center(child: content),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/medications/select-type'),
+onPressed: () => context.push('/medications/select-type'),
         child: const Icon(Icons.add),
       ),
     );

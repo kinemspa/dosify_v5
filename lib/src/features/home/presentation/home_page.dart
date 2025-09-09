@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
               runSpacing: 12,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => context.go('/medications'),
+                  onPressed: () => context.push('/medications'),
                   icon: const Icon(Icons.medication),
                   label: const Text('Medications'),
                 ),
