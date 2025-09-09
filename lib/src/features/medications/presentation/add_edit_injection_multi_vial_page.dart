@@ -9,6 +9,7 @@ import '../../medications/domain/medication.dart';
 import '../presentation/providers.dart';
 import 'reconstitution_calculator_dialog.dart';
 import '../../../core/utils/format.dart';
+import 'package:go_router/go_router.dart';
 
 class AddEditInjectionMultiVialPage extends ConsumerStatefulWidget {
   const AddEditInjectionMultiVialPage({super.key});
@@ -162,16 +163,23 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       storageInstructions: _storageNotesCtrl.text.trim().isEmpty ? null : _storageNotesCtrl.text.trim(),
     );
 
-    await repo.upsert(med);
     if (!mounted) return;
-    showDialog(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Medication added'),
+        title: const Text('Confirm Medication'),
         content: Text(_buildSummary()),
-        actions: [TextButton(onPressed: () { Navigator.of(ctx).pop(); Navigator.of(context).pop(); }, child: const Text('OK'))],
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Confirm')),
+        ],
       ),
     );
+    if (confirmed == true) {
+      await repo.upsert(med);
+      if (!mounted) return;
+      context.go('/medications');
+    }
   }
 
   @override
@@ -245,7 +253,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
               const SizedBox(height: 16),
               Text('Storage Information', style: Theme.of(context).textTheme.titleMedium),
               TextFormField(controller: _batchCtrl, decoration: const InputDecoration(labelText: 'Batch No.')),
-              TextFormField(controller: _storageCtrl, decoration: const InputDecoration(labelText: 'Storage')),
+TextFormField(controller: _storageCtrl, decoration: const InputDecoration(labelText: 'Lot / Storage Location')),
               SwitchListTile(title: const Text('Requires Refrigeration - Enabled/Disabled'), value: _requiresFridge, onChanged: (v)=>setState(()=>_requiresFridge=v)),
               TextFormField(controller: _storageNotesCtrl, decoration: const InputDecoration(labelText: 'Storage Instructions')),
               const SizedBox(height: 8),

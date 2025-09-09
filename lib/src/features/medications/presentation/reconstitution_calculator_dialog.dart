@@ -93,7 +93,7 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
     return (cPerMl: c, vialVolume: v);
   }
 
-  (double, double, double) _presetUnits() {
+  (double, double, double) _presetUnitsRaw() {
     final total = _syringe.totalUnits.toDouble();
     final minU = max(5, (total * 0.05).ceil()).toDouble();
     final midU = _round2(total * 0.33);
@@ -120,41 +120,38 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
 
     final vialMax = double.tryParse(_vialSizeCtrl.text);
 
-    final (minU, midU, highU) = _presetUnits();
+    final (minURaw, midURaw, highURaw) = _presetUnitsRaw();
 
-    // Constrain minimal IU to fit the vial when vialMax provided
-    double _minIUToFit() {
-      if (vialMax == null || S <= 0 || D <= 0) return minU;
-      final needed = (100 * D * vialMax) / S; // U >= this
-      return max(minU, needed.ceilToDouble());
+    // Allowed IU range respecting vial volume max
+    double totalIU = _syringe.totalUnits.toDouble();
+    double iuMin = minURaw; // baseline lower-end comfort
+    double iuMax = totalIU;
+    if (vialMax != null && S > 0 && D > 0) {
+      final uMaxAllowed = (100 * D * vialMax) / S; // U <= this
+      iuMax = iuMaxAllowed = uMaxAllowed.clamp(0, totalIU);
+      if (iuMax < iuMin) iuMin = iuMax; // collapse range if tiny
     }
 
-    // Ensure slider bounds adapt to syringe and vial constraints
-    final sliderMin = _minIUToFit().clamp(minU, _syringe.totalUnits.toDouble());
-    final sliderMax = _syringe.totalUnits.toDouble();
+    final sliderMin = iuMin;
+    final sliderMax = iuMax;
     _selectedUnits = _selectedUnits.clamp(sliderMin, sliderMax);
 
-    // Compute for the current slider selection
+    // Current selection compute
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
     final currentC = _round2(current.cPerMl);
     final currentV = _round2(current.vialVolume);
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
-    // Presets
-    double _fitU(double U) {
-      if (vialMax == null || S <= 0 || D <= 0) return U;
-      var u = U;
-      while (u <= sliderMax) {
-        final vol = _computeForUnits(S: S, D: D, U: u).vialVolume;
-        if (vol <= vialMax + 1e-9) return u;
-        u += 1;
-      }
-      return sliderMax; // fallback
-    }
+    // Evenly spaced presets across [iuMin, iuMax]
+    double u1 = sliderMin;
+    double u3 = sliderMax;
+    double u2 = sliderMin + (sliderMax - sliderMin) / 2.0;
 
-    final conc = _computeForUnits(S: S, D: D, U: _fitU(minU));
-    final std = _computeForUnits(S: S, D: D, U: _fitU(midU));
-    final dil = _computeForUnits(S: S, D: D, U: _fitU(highU));
+    final conc = _computeForUnits(S: S, D: D, U: u1);
+    final std = _computeForUnits(S: S, D: D, U: u2);
+    final dil = _computeForUnits(S: S, D: D, U: u3);
+
+    double _fitU(double U) => U;
 
     String formulaText(double U, double c, double v) =>
         'Units = (Dose / (Strength / Solvent)) × (Syringe Units / Syringe Capacity).\n' // reference text
@@ -210,7 +207,7 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
             DropdownButtonFormField<SyringeSizeMl>(
               value: _syringe,
               items: SyringeSizeMl.values
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s.label)))
+                  .map((s) => DropdownMenuItem(value: s, child: Text('${s.label} • ${s.totalUnits} IU')))
                   .toList(),
               onChanged: (v) => setState(() {
                 _syringe = v!;
@@ -235,25 +232,27 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
             Wrap(spacing: 8, runSpacing: 8, children: [
               _PresetChip(
                 label: 'Concentrated',
-                selected: (_selectedUnits - sliderMin).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = sliderMin),
+                selected: (_selectedUnits - u1).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = u1),
                 subtitle:
-                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(sliderMin)} IU',
+                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLow volume; less injection volume',
               ),
               _PresetChip(
                 label: 'Standard',
-                selected: (_selectedUnits - _fitU(midU)).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = _fitU(midU)),
+                selected: (_selectedUnits - u2).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = u2),
                 subtitle:
-                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(_fitU(midU))} IU',
+                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nBalanced midpoint',
               ),
               _PresetChip(
                 label: 'Diluted',
-                selected: (_selectedUnits - _fitU(highU)).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = _fitU(highU)),
+                selected: (_selectedUnits - u3).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = u3),
                 subtitle:
-                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(_fitU(highU))} IU',
+                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHighest volume within limit',
               ),
+              if (sliderMax <= 0 || sliderMax.isNaN)
+                const _PresetChip(label: 'No valid options', selected: false, onTap: null, subtitle: 'Check strength, dose, or syringe size'),
             ]),
             const SizedBox(height: 16),
             Text('Adjust fill (${_syringe.totalUnits} IU max)'),

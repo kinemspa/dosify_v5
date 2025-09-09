@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
@@ -154,25 +155,23 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
           : _storageNotesCtrl.text.trim(),
     );
 
-    await repo.upsert(med);
-
     if (!mounted) return;
-    showDialog(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Medication added'),
+        title: const Text('Confirm Medication'),
         content: Text(_buildSummary()),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
-          ),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Confirm')),
         ],
       ),
     );
+    if (confirmed == true) {
+      await repo.upsert(med);
+      if (!mounted) return;
+      context.go('/medications');
+    }
   }
 
   @override
@@ -347,7 +346,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   TextFormField(
                     controller: _storageCtrl,
                     decoration: const InputDecoration(
-                      labelText: 'Storage',
+labelText: 'Lot / Storage Location',
                       hintText: 'Enter the Storage Location',
                     ),
                   ),
