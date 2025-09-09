@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
+import '../../../widgets/stepper_field.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
@@ -271,26 +272,15 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   const SizedBox(height: 16),
                   Text('Inventory', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Row(
+Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
+                        child: StepperField(
                           controller: _stockValueCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                          decoration: const InputDecoration(
-                            labelText: 'Stock *',
-                            hintText: 'Enter the number in stock',
-                          ),
-                          validator: (v) {
-                            final d = double.tryParse(v ?? '');
-                            if (d == null) return 'Enter a number';
-                            if (d <= 0) return 'Must be > 0';
-                            if (_stockUnit == StockUnit.capsules && !_isWhole(d)) {
-                              return 'Capsules must be whole numbers';
-                            }
-                            return null;
-                          },
-                          onChanged: (_) => setState(() {}),
+                          label: 'Stock *',
+                          onChanged: (_)=>setState((){}),
+                          min: 0,
+                          step: 1,
                         ),
                       ),
                       const SizedBox(width: 12),

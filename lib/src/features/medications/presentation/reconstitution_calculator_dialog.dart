@@ -37,10 +37,18 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
     super.key,
     required this.initialStrengthValue,
     required this.unitLabel, // e.g., mg, mcg, g, units
+    this.initialDoseValue,
+    this.initialDoseUnit,
+    this.initialSyringeSize,
+    this.initialVialSize,
   });
 
   final double initialStrengthValue; // total quantity in the vial (S)
   final String unitLabel;
+  final double? initialDoseValue;
+  final String? initialDoseUnit; // 'mcg'|'mg'|'g'|'units'
+  final SyringeSizeMl? initialSyringeSize;
+  final double? initialVialSize; // mL
 
   @override
   State<ReconstitutionCalculatorDialog> createState() => _ReconstitutionCalculatorDialogState();
@@ -63,8 +71,12 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
   void initState() {
     super.initState();
     _strengthCtrl = TextEditingController(text: widget.initialStrengthValue.toStringAsFixed(2));
-    _doseCtrl = TextEditingController(text: (widget.initialStrengthValue * 0.05).toStringAsFixed(2));
-    _doseUnit = widget.unitLabel; // default to strength unit label
+    _doseCtrl = TextEditingController(text: (widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05)).toStringAsFixed(2));
+    _doseUnit = widget.initialDoseUnit ?? widget.unitLabel; // default to strength unit label
+    _syringe = widget.initialSyringeSize ?? _syringe;
+    if (widget.initialVialSize != null) {
+      _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
+    }
     _selectedUnits = _syringe.totalUnits * 0.5;
   }
 

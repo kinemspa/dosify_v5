@@ -38,13 +38,15 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       createdAt: fields[18] as DateTime?,
       updatedAt: fields[19] as DateTime?,
       containerVolumeMl: fields[20] as double?,
+      lowStockVialVolumeThresholdMl: fields[21] as double?,
+      lowStockVialsThresholdCount: fields[22] as double?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(21)
+      ..writeByte(23)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -86,7 +88,11 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(19)
       ..write(obj.updatedAt)
       ..writeByte(20)
-      ..write(obj.containerVolumeMl);
+      ..write(obj.containerVolumeMl)
+      ..writeByte(21)
+      ..write(obj.lowStockVialVolumeThresholdMl)
+      ..writeByte(22)
+      ..write(obj.lowStockVialsThresholdCount);
   }
 
   @override

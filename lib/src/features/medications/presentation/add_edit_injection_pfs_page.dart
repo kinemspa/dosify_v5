@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
+import '../../../widgets/stepper_field.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
@@ -193,8 +194,8 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
                   const SizedBox(height: 16),
                   Text('Inventory', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Row(children: [
-                    Expanded(child: TextFormField(controller: _stockValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: false), decoration: const InputDecoration(labelText: 'Syringes in stock *'), validator: (v){ final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0'; if(d!=d.roundToDouble()) return 'Must be whole numbers'; return null; })),
+Row(children: [
+                    Expanded(child: StepperField(controller: _stockValueCtrl, label: 'Syringes in stock *', onChanged: (_)=>setState((){}), min: 0, step: 1)),
                     const SizedBox(width: 12),
                     const Expanded(child: TextField(enabled: false, decoration: InputDecoration(labelText: 'Unit', hintText: 'pre filled syringes'))),
                   ]),

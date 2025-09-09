@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
+import '../../../widgets/stepper_field.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
@@ -282,13 +283,12 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> {
                   Text('Inventory',
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
-                  Row(
+Row(
                     children: [
                       Expanded(
                         child: TextFormField(
                           controller: _stockValueCtrl,
-                          keyboardType:
-                              const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: const InputDecoration(
                             labelText: 'Stock *',
                             hintText: 'Enter the number in stock',

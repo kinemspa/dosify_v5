@@ -8,7 +8,7 @@
 - Screens to add later: Add/Edit flows and Reconstitution Calculator per spec
 - Capsule inventory must be whole numbers; strength units mcg/mg/g per capsule
 - Injection forms:
-  - Pre-Filled Syringe: stock is whole syringes; strength accepts mcg/mL, mg/mL, g/mL, units/mL; show per mL field when selected
-  - Single Dose Vial: stock is whole vials; strength units as above
-  - Multi Dose Vial: stock is whole vials; strength units as above; includes Reconstitution Calculator (planned)
+  - Pre-Filled Syringe: stock is whole syringes (stepper). Strength accepts mcg/mL, mg/mL, g/mL, units/mL; show per mL field when selected
+  - Single Dose Vial: stock is whole vials (stepper)
+  - Multi Dose Vial: Vial Volume (mL) first, then vials in stock (stepper). Includes Reconstitution Calculator; presets evenly divide feasible range; IU shown on chips; summary visible inside dialog
 

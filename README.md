@@ -2,7 +2,7 @@
 
 An Android-only Flutter app scaffold for medication tracking with a modern Material 3 UI.
 
-Status: Project bootstrap created. This README will expand as features land.
+Status: Actively developed. See docs for final design and implementation details. This README is a quick entry point; the docs are the source of truth.
 
 Getting started (Windows PowerShell)
 - Ensure Flutter is installed: `flutter --version`

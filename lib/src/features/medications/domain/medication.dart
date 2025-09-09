@@ -27,6 +27,8 @@ class Medication {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.containerVolumeMl,
+    this.lowStockVialVolumeThresholdMl,
+    this.lowStockVialsThresholdCount,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -95,6 +97,14 @@ class Medication {
   @HiveField(20)
   final double? containerVolumeMl;
 
+  // Multi-dose low stock thresholds
+  // Threshold for the current vial liquid volume (mL)
+  @HiveField(21)
+  final double? lowStockVialVolumeThresholdMl;
+  // Threshold for reserve vials count
+  @HiveField(22)
+  final double? lowStockVialsThresholdCount;
+
   Medication copyWith({
     String? id,
     MedicationForm? form,
@@ -117,6 +127,8 @@ class Medication {
     DateTime? createdAt,
     DateTime? updatedAt,
     double? containerVolumeMl,
+    double? lowStockVialVolumeThresholdMl,
+    double? lowStockVialsThresholdCount,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -140,6 +152,10 @@ class Medication {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       containerVolumeMl: containerVolumeMl ?? this.containerVolumeMl,
+      lowStockVialVolumeThresholdMl:
+          lowStockVialVolumeThresholdMl ?? this.lowStockVialVolumeThresholdMl,
+      lowStockVialsThresholdCount:
+          lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
     );
   }
 }

@@ -10,6 +10,7 @@ import '../presentation/providers.dart';
 import 'reconstitution_calculator_dialog.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
+import '../../../widgets/stepper_field.dart';
 
 class AddEditInjectionMultiVialPage extends ConsumerStatefulWidget {
   const AddEditInjectionMultiVialPage({super.key});
@@ -35,6 +36,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
 
   bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
+  final _lowStockVialsCtrl = TextEditingController();
 
   DateTime? _expiry;
   final _batchCtrl = TextEditingController();
@@ -43,6 +45,12 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
   final _storageNotesCtrl = TextEditingController();
 
   bool _summaryExpanded = true;
+
+  // Remember last calculator inputs
+  double? _lastCalcDose;
+  String? _lastCalcDoseUnit;
+  SyringeSizeMl? _lastCalcSyringe;
+  double? _lastCalcVialSize;
 
   bool get _isPerMl => {
         Unit.mcgPerMl,
@@ -62,6 +70,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
     _stockValueCtrl.dispose();
     _vialVolumeCtrl.dispose();
     _lowStockCtrl.dispose();
+    _lowStockVialsCtrl.dispose();
     _batchCtrl.dispose();
     _storageCtrl.dispose();
     _storageNotesCtrl.dispose();
@@ -115,6 +124,10 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       builder: (ctx) => ReconstitutionCalculatorDialog(
         initialStrengthValue: double.tryParse(_strengthValueCtrl.text) ?? 0,
         unitLabel: initialUnitLabel,
+        initialDoseValue: _lastCalcDose,
+        initialDoseUnit: _lastCalcDoseUnit,
+        initialSyringeSize: _lastCalcSyringe,
+        initialVialSize: _lastCalcVialSize ?? double.tryParse(_vialVolumeCtrl.text),
       ),
     );
 
@@ -122,6 +135,11 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       setState(() {
         _perMlCtrl.text = fmt2(result.perMlConcentration);
         _vialVolumeCtrl.text = fmt2(result.solventVolumeMl);
+        // remember
+        _lastCalcDose = _lastCalcDose ?? double.tryParse(_strengthValueCtrl.text);
+        _lastCalcDoseUnit = initialUnitLabel;
+        _lastCalcSyringe = _lastCalcSyringe ?? SyringeSizeMl.ml1;
+        _lastCalcVialSize = result.solventVolumeMl;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -156,6 +174,8 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       containerVolumeMl: double.tryParse(_vialVolumeCtrl.text),
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty ? double.parse(_lowStockCtrl.text) : null,
+      lowStockVialVolumeThresholdMl: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty ? double.tryParse(_lowStockCtrl.text) : null,
+      lowStockVialsThresholdCount: _lowStockEnabled && _lowStockVialsCtrl.text.isNotEmpty ? double.tryParse(_lowStockVialsCtrl.text) : null,
       expiry: _expiry,
       batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
       storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
@@ -238,17 +258,29 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
               const SizedBox(height: 8),
               OutlinedButton.icon(onPressed: _openReconstitutionDialog, icon: const Icon(Icons.calculate), label: const Text('Reconstitution Calculator')),
               const SizedBox(height: 12),
-              Row(children: [
-                Expanded(child: TextFormField(controller: _stockValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: false), decoration: const InputDecoration(labelText: 'Vials in stock *'), validator: (v){ final d=double.tryParse(v??''); if(d==null) return 'Enter a number'; if(d<=0) return 'Must be > 0'; if(d!=d.roundToDouble()) return 'Whole numbers only'; return null; })),
+Row(children: [
+                Expanded(child: StepperField(controller: _stockValueCtrl, label: 'Vials in stock *', onChanged: (_)=>setState((){}), min: 0, step: 1)),
                 const SizedBox(width: 12),
                 const Expanded(child: TextField(enabled: false, decoration: InputDecoration(labelText: 'Unit', hintText: 'vials'))),
               ]),
               const SizedBox(height: 4),
               const Text('Tip: Number of vials is your reserve stock. Each vial may be reconstituted differently as dosage changes.'),
 
-              SwitchListTile(title: const Text('Low Stock - Enabled/Disabled'), value: _lowStockEnabled, onChanged: (v)=>setState(()=>_lowStockEnabled=v)),
-              if (_lowStockEnabled)
-                TextFormField(controller: _lowStockCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Low Stock *')),
+              SwitchListTile(title: const Text('Low Stock (enable thresholds)'), value: _lowStockEnabled, onChanged: (v)=>setState(()=>_lowStockEnabled=v)),
+              if (_lowStockEnabled) ...[
+                TextFormField(
+                  controller: _lowStockCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: 'Low Stock - Vial Volume (mL)'),
+                ),
+                const SizedBox(height: 8),
+                StepperField(
+                  controller: _lowStockVialsCtrl,
+                  label: 'Low Stock - Vials in Reserve',
+                  min: 0,
+                  step: 1,
+                ),
+              ],
 
               const SizedBox(height: 16),
               Text('Storage Information', style: Theme.of(context).textTheme.titleMedium),
