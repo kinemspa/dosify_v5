@@ -26,6 +26,7 @@ class Medication {
     this.storageInstructions,
     DateTime? createdAt,
     DateTime? updatedAt,
+    this.containerVolumeMl,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -90,6 +91,10 @@ class Medication {
   @HiveField(19)
   final DateTime updatedAt;
 
+  // For multi-dose vials: resulting total vial volume (mL) after reconstitution
+  @HiveField(20)
+  final double? containerVolumeMl;
+
   Medication copyWith({
     String? id,
     MedicationForm? form,
@@ -111,6 +116,7 @@ class Medication {
     String? storageInstructions,
     DateTime? createdAt,
     DateTime? updatedAt,
+    double? containerVolumeMl,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -133,6 +139,7 @@ class Medication {
       storageInstructions: storageInstructions ?? this.storageInstructions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
+      containerVolumeMl: containerVolumeMl ?? this.containerVolumeMl,
     );
   }
 }

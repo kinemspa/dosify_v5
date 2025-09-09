@@ -185,10 +185,12 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
                   Text('Inventory', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Row(children: [
-                    Expanded(child: TextFormField(controller: _stockValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: false), decoration: const InputDecoration(labelText: 'Stock *', hintText: 'Number of single dose vials'), validator: (v){ final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0'; if(d!=d.roundToDouble()) return 'Must be whole numbers'; return null; })),
+                    Expanded(child: TextFormField(controller: _stockValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: false), decoration: const InputDecoration(labelText: 'Vials in stock *'), validator: (v){ final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0'; if(d!=d.roundToDouble()) return 'Must be whole numbers'; return null; })),
                     const SizedBox(width: 12),
                     const Expanded(child: TextField(enabled: false, decoration: InputDecoration(labelText: 'Unit', hintText: 'single use vials'))),
                   ]),
+                  const SizedBox(height: 4),
+                  const Text('Tip: Long explanations show here below the field so they don\'t get truncated.'),
 
                   SwitchListTile(title: const Text('Low Stock - Enabled/Disabled'), value: _lowStockEnabled, onChanged: (v)=>setState(()=>_lowStockEnabled=v)),
                   if (_lowStockEnabled)

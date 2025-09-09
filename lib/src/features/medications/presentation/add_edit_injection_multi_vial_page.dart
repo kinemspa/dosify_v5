@@ -29,6 +29,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
   final _perMlCtrl = TextEditingController();
 
   final _stockValueCtrl = TextEditingController();
+  final _vialVolumeCtrl = TextEditingController();
 
   bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
@@ -57,6 +58,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
     _strengthValueCtrl.dispose();
     _perMlCtrl.dispose();
     _stockValueCtrl.dispose();
+    _vialVolumeCtrl.dispose();
     _lowStockCtrl.dispose();
     _batchCtrl.dispose();
     _storageCtrl.dispose();
@@ -148,6 +150,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       perMlValue: _isPerMl && _perMlCtrl.text.isNotEmpty ? double.parse(_perMlCtrl.text) : null,
       stockValue: double.parse(_stockValueCtrl.text),
       stockUnit: StockUnit.multiDoseVials,
+      containerVolumeMl: double.tryParse(_vialVolumeCtrl.text),
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty ? double.parse(_lowStockCtrl.text) : null,
       expiry: _expiry,
@@ -213,11 +216,23 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
               Text('Inventory', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Row(children: [
-                Expanded(child: TextFormField(controller: _stockValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: false), decoration: const InputDecoration(labelText: 'Stock *', hintText: 'Number of multi dose vials'), validator: (v){ final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0'; if(d!=d.roundToDouble()) return 'Must be whole numbers'; return null; })),
+                Expanded(child: TextFormField(controller: _stockValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: false), decoration: const InputDecoration(labelText: 'Vials in stock *'), validator: (v){ final d=double.tryParse(v??''); if(d==null) return 'Enter a number'; if(d<=0) return 'Must be > 0'; if(d!=d.roundToDouble()) return 'Whole numbers only'; return null; })),
                 const SizedBox(width: 12),
-                const Expanded(child: TextField(enabled: false, decoration: InputDecoration(labelText: 'Unit', hintText: 'multi dose vials'))),
+                const Expanded(child: TextField(enabled: false, decoration: InputDecoration(labelText: 'Unit', hintText: 'vials'))),
               ]),
-
+              const SizedBox(height: 4),
+              const Text('Tip: Number of vials is your reserve stock. Each vial may be reconstituted differently as dosage changes.'),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _vialVolumeCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Vial Volume (mL) *',
+                ),
+                validator: (v){ final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0 mL'; return null; },
+              ),
+              const SizedBox(height: 4),
+              const Text('Enter the total liquid volume in this vial after reconstitution. Use the calculator to compute it if unsure.'),
               const SizedBox(height: 8),
               OutlinedButton.icon(onPressed: _openReconstitutionDialog, icon: const Icon(Icons.calculate), label: const Text('Reconstitution Calculator')),
 

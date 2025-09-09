@@ -51,6 +51,9 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
 
+  // Dose unit selection (must be same dimension as strength)
+  late String _doseUnit; // 'mcg'|'mg'|'g'|'units'
+
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
 
   // Slider-driving IU selection
@@ -61,6 +64,7 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
     super.initState();
     _strengthCtrl = TextEditingController(text: widget.initialStrengthValue.toStringAsFixed(2));
     _doseCtrl = TextEditingController(text: (widget.initialStrengthValue * 0.05).toStringAsFixed(2));
+    _doseUnit = widget.unitLabel; // default to strength unit label
     _selectedUnits = _syringe.totalUnits * 0.5;
   }
 
@@ -76,6 +80,13 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
 
   // Compute per spec: C = D / (U * mL_per_IU) where mL_per_IU = 1/100
   // So C (per mL) = (100 * D) / U. Solvent volume V = S / C.
+  double _toBaseMass(double value, String from) {
+    if (from == 'g') return value * 1000.0; // gram -> mg
+    if (from == 'mg') return value; // mg base
+    if (from == 'mcg') return value / 1000.0; // mcg -> mg
+    return value; // 'units' or mismatched: return as-is
+  }
+
   ({double cPerMl, double vialVolume}) _computeForUnits({required double S, required double D, required double U}) {
     final c = (100 * D) / max(U, 0.01);
     final v = S / max(c, 0.000001);
@@ -92,14 +103,34 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
 
   @override
   Widget build(BuildContext context) {
-    final S = double.tryParse(_strengthCtrl.text) ?? 0;
-    final D = double.tryParse(_doseCtrl.text) ?? 0;
+    final Sraw = double.tryParse(_strengthCtrl.text) ?? 0;
+    final Draw = double.tryParse(_doseCtrl.text) ?? 0;
+
+    // If strength unit is mg-like and dose unit differs, convert dose into strength unit
+    // Only mass conversions mcg/mg/g are supported; 'units' passes through
+    double S = Sraw;
+    double D = Draw;
+    if (widget.unitLabel != 'units') {
+      // Convert everything to mg base for computation
+      final S_mg = _toBaseMass(Sraw, widget.unitLabel);
+      final D_mg = _toBaseMass(Draw, _doseUnit);
+      S = S_mg;
+      D = D_mg;
+    }
+
     final vialMax = double.tryParse(_vialSizeCtrl.text);
 
     final (minU, midU, highU) = _presetUnits();
 
-    // Ensure slider bounds adapt to syringe
-    final sliderMin = minU;
+    // Constrain minimal IU to fit the vial when vialMax provided
+    double _minIUToFit() {
+      if (vialMax == null || S <= 0 || D <= 0) return minU;
+      final needed = (100 * D * vialMax) / S; // U >= this
+      return max(minU, needed.ceilToDouble());
+    }
+
+    // Ensure slider bounds adapt to syringe and vial constraints
+    final sliderMin = _minIUToFit().clamp(minU, _syringe.totalUnits.toDouble());
     final sliderMax = _syringe.totalUnits.toDouble();
     _selectedUnits = _selectedUnits.clamp(sliderMin, sliderMax);
 
@@ -110,9 +141,20 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
     // Presets
-    final conc = _computeForUnits(S: S, D: D, U: minU);
-    final std = _computeForUnits(S: S, D: D, U: midU);
-    final dil = _computeForUnits(S: S, D: D, U: highU);
+    double _fitU(double U) {
+      if (vialMax == null || S <= 0 || D <= 0) return U;
+      var u = U;
+      while (u <= sliderMax) {
+        final vol = _computeForUnits(S: S, D: D, U: u).vialVolume;
+        if (vol <= vialMax + 1e-9) return u;
+        u += 1;
+      }
+      return sliderMax; // fallback
+    }
+
+    final conc = _computeForUnits(S: S, D: D, U: _fitU(minU));
+    final std = _computeForUnits(S: S, D: D, U: _fitU(midU));
+    final dil = _computeForUnits(S: S, D: D, U: _fitU(highU));
 
     String formulaText(double U, double c, double v) =>
         'Units = (Dose / (Strength / Solvent)) × (Syringe Units / Syringe Capacity).\n' // reference text
@@ -135,15 +177,35 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _doseCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: 'Desired Dose (${widget.unitLabel})',
-                helperText: 'Amount per dose',
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: _doseCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Desired Dose',
+                    helperText: 'Amount per dose',
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
               ),
-              onChanged: (_) => setState(() {}),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _doseUnit,
+                  items: [
+                    if (widget.unitLabel == 'units') const DropdownMenuItem(value: 'units', child: Text('units')),
+                    if (widget.unitLabel != 'units') ...const [
+                      DropdownMenuItem(value: 'mcg', child: Text('mcg')),
+                      DropdownMenuItem(value: 'mg', child: Text('mg')),
+                      DropdownMenuItem(value: 'g', child: Text('g')),
+                    ],
+                  ],
+                  onChanged: (v) => setState(() => _doseUnit = v!),
+                  decoration: const InputDecoration(labelText: 'Dose Unit'),
+                ),
+              ),
+            ]),
             const SizedBox(height: 8),
             DropdownButtonFormField<SyringeSizeMl>(
               value: _syringe,
@@ -168,13 +230,13 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 16),
-            Text('Presets'),
+            Text('Presets (IU)'),
             const SizedBox(height: 8),
             Wrap(spacing: 8, children: [
               _PresetChip(
                 label: 'Concentrated',
                 selected: (_selectedUnits - minU).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = minU),
+                onTap: () => setState(() => _selectedUnits = sliderMin),
                 subtitle:
                     '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL',
               ),
@@ -209,9 +271,22 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
               minHeight: 10,
             ),
             const SizedBox(height: 8),
-            Text(
-              formulaText(_selectedUnits, currentC, currentV),
-              style: Theme.of(context).textTheme.bodySmall,
+            // Summary style similar to add-med floating card
+            Card(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Summary', style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 4),
+                    Text('Syringe: ${_syringe.label} • Fill: ${_round2(_selectedUnits)} IU'),
+                    Text('Concentration: ${currentC.toStringAsFixed(2)} ${widget.unitLabel}/mL'),
+                    Text('Vial volume: ${currentV.toStringAsFixed(2)} mL' + (vialMax!=null ? ' (limit ${vialMax!.toStringAsFixed(2)} mL)' : '')),
+                  ],
+                ),
+              ),
             ),
             if (!fitsVial)
               Padding(
