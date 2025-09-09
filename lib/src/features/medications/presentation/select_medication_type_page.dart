@@ -12,7 +12,7 @@ class SelectMedicationTypePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: const [
-          _TypeTile(icon: Icons.tablets, title: 'Tablet'),
+          _TypeTile(icon: Icons.medication, title: 'Tablet'),
           _TypeTile(icon: Icons.medication_liquid, title: 'Capsule'),
           _TypeTile(icon: Icons.vaccines, title: 'Injection'),
         ],
