@@ -40,6 +40,8 @@ class _TypeTile extends StatelessWidget {
             context.push('/medications/add/tablet');
           } else if (title == 'Capsule') {
             context.push('/medications/add/capsule');
+          } else if (title == 'Injection') {
+            context.push('/medications/select-injection-type');
           }
         },
       ),
