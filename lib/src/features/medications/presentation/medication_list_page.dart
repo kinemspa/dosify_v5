@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'providers.dart';
+import '../../../core/utils/format.dart';
 
 class MedicationListPage extends ConsumerWidget {
   const MedicationListPage({super.key});
@@ -34,7 +35,7 @@ onPressed: () => context.push('/medications/select-type'),
           final m = items[index];
           return ListTile(
             title: Text(m.name),
-            subtitle: Text('${m.strengthValue} ${m.strengthUnit.name} • Stock: ${m.stockValue} ${m.stockUnit.name}'),
+            subtitle: Text('${fmt2(m.strengthValue)} ${m.strengthUnit.name} • Stock: ${fmt2(m.stockValue)} ${m.stockUnit.name}'),
           );
         },
       );

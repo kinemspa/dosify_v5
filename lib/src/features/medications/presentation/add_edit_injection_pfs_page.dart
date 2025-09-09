@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/format.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
@@ -72,12 +73,12 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
     if (_strengthValueCtrl.text.isNotEmpty) {
       final unit = _unitLabel(_strengthUnit);
       if (_isPerMl && _perMlCtrl.text.isNotEmpty) {
-        parts.add('${_strengthValueCtrl.text}$unit, ${_perMlCtrl.text} mL');
+        parts.add('${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unit, ${fmt2(double.tryParse(_perMlCtrl.text) ?? 0)} mL');
       } else {
-        parts.add('${_strengthValueCtrl.text}$unit');
+        parts.add('${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unit');
       }
     }
-    if (_stockValueCtrl.text.isNotEmpty) parts.add('${_stockValueCtrl.text} pre filled syringes in stock');
+    if (_stockValueCtrl.text.isNotEmpty) parts.add('${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} pre filled syringes in stock');
     if (_manufacturerCtrl.text.isNotEmpty) parts.add(_manufacturerCtrl.text);
     if (_requiresFridge) parts.add('Keep refrigerated');
     if (_expiry != null) parts.add('Expires - ${DateFormat.yMd().format(_expiry!)}');

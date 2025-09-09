@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/format.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
@@ -61,10 +62,10 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> {
     final parts = <String>['Tablets'];
     if (_nameCtrl.text.isNotEmpty) parts.add(_nameCtrl.text);
     if (_strengthValueCtrl.text.isNotEmpty) {
-      parts.add('${_strengthValueCtrl.text}$unitLabel per tablet');
+      parts.add('${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unitLabel per tablet');
     }
     if (_stockValueCtrl.text.isNotEmpty) {
-      parts.add('${_stockValueCtrl.text} $stockLabel in stock');
+      parts.add('${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} $stockLabel in stock');
     }
     if (_manufacturerCtrl.text.isNotEmpty) parts.add(_manufacturerCtrl.text);
     if (_requiresFridge) parts.add('Keep refrigerated');

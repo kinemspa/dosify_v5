@@ -232,27 +232,27 @@ class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculato
             const SizedBox(height: 16),
             Text('Presets (IU)'),
             const SizedBox(height: 8),
-            Wrap(spacing: 8, children: [
+            Wrap(spacing: 8, runSpacing: 8, children: [
               _PresetChip(
                 label: 'Concentrated',
-                selected: (_selectedUnits - minU).abs() < 0.01,
+                selected: (_selectedUnits - sliderMin).abs() < 0.01,
                 onTap: () => setState(() => _selectedUnits = sliderMin),
                 subtitle:
-                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL',
+                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(sliderMin)} IU',
               ),
               _PresetChip(
                 label: 'Standard',
-                selected: (_selectedUnits - midU).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = midU),
+                selected: (_selectedUnits - _fitU(midU)).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = _fitU(midU)),
                 subtitle:
-                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL',
+                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(_fitU(midU))} IU',
               ),
               _PresetChip(
                 label: 'Diluted',
-                selected: (_selectedUnits - highU).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = highU),
+                selected: (_selectedUnits - _fitU(highU)).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = _fitU(highU)),
                 subtitle:
-                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL',
+                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(_fitU(highU))} IU',
               ),
             ]),
             const SizedBox(height: 16),
