@@ -2,6 +2,8 @@
 
 This document describes the final structure and decisions for the app. Use it to rebuild from scratch.
 
+See also: product design specification at docs/product-design.md for end-to-end UX and feature details.
+
 - Layers per feature: data, domain, presentation
 - State: Riverpod Notifiers
 - Navigation: go_router with typed route names

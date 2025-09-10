@@ -25,4 +25,6 @@ App IDs
 - Android namespace: com.dosifi.dosifi_v5
 
 Docs
+- Product design: docs/product-design.md (full feature and UI/UX specification)
 - See docs/architecture.md and docs/ux-guidelines.md (placeholders for now).
+- Investigation: docs/notification_scheduling_investigation.md (Android scheduling behavior, diagnostics, findings, next steps).

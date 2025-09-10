@@ -1,5 +1,7 @@
 # UX Guidelines
 
+For comprehensive UI/UX specifications and screen-by-screen behaviors, see docs/product-design.md.
+
 - Material 3 throughout
 - Primary gradient: #09A8BD → #18537D
 - Secondary: #EC873F
