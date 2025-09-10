@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
-import '../domain/supply.dart';
-import '../domain/stock_movement.dart';
-import '../data/supply_repository.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
+import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
+import 'package:dosifi_v5/src/features/supplies/data/supply_repository.dart';
 
 class SuppliesPage extends StatelessWidget {
   const SuppliesPage({super.key});
@@ -16,7 +17,7 @@ class SuppliesPage extends StatelessWidget {
     final movementsBox = Hive.box<StockMovement>(SupplyRepository.movementsBoxName);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Supplies')),
+      appBar: const GradientAppBar(title: 'Supplies', forceBackButton: true),
       body: ValueListenableBuilder(
         valueListenable: suppliesBox.listenable(),
         builder: (context, _, __) {
@@ -214,11 +215,11 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
-        title: Text(widget.initial == null ? 'Add Supply' : 'Edit Supply'),
+      appBar: GradientAppBar(
+        title: widget.initial == null ? 'Add Supply' : 'Edit Supply',
+        forceBackButton: true,
         actions: [
-          TextButton(onPressed: _save, child: const Text('Save')),
+          TextButton(onPressed: _save, child: const Text('Save', style: TextStyle(color: Colors.white))),
         ],
       ),
       body: Form(

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../schedules/domain/schedule.dart';
-import '../data/calendar_utils.dart';
-import '../data/calendar_event.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/calendar/data/calendar_utils.dart';
+import 'package:dosifi_v5/src/features/calendar/data/calendar_event.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -25,13 +26,15 @@ class _CalendarPageState extends State<CalendarPage> {
     final box = Hive.box<Schedule>('schedules');
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calendar'),
+      appBar: GradientAppBar(
+        title: 'Calendar',
+        forceBackButton: true,
         actions: [
-IconButton(
+          IconButton(
             tooltip: 'Schedules',
             onPressed: () => context.push('/schedules'),
             icon: const Icon(Icons.list_alt),
+            color: Colors.white,
           ),
         ],
       ),
@@ -297,4 +300,3 @@ class _DayView extends StatelessWidget {
     );
   }
 }
-

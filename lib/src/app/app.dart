@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'router.dart';
+import 'package:dosifi_v5/src/app/router.dart';
 
 class DosifiApp extends ConsumerWidget {
   const DosifiApp({super.key});
@@ -8,7 +8,7 @@ class DosifiApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const primarySeed = Color(0xFF09A8BD);
-    const secondary = Color(0xFFEC873F);
+    // const secondary = Color(0xFFEC873F);
 
     final baseLight = ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: primarySeed, brightness: Brightness.light),
