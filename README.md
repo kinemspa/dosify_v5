@@ -26,5 +26,8 @@ App IDs
 
 Docs
 - Product design: docs/product-design.md (full feature and UI/UX specification)
+- Backlog: docs/backlog.md (prioritized Now/Next/Later)
+- Status: docs/status.md (current focus and paused threads)
+- Journal: docs/journal.md (running log)
 - See docs/architecture.md and docs/ux-guidelines.md (placeholders for now).
 - Investigation: docs/notification_scheduling_investigation.md (Android scheduling behavior, diagnostics, findings, next steps).
