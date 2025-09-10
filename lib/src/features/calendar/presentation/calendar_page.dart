@@ -42,38 +42,45 @@ IconButton(
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SegmentedButton<_CalView>(
-                      segments: const [
-                        ButtonSegment(value: _CalView.month, label: Text('Month')),
-                        ButtonSegment(value: _CalView.week, label: Text('Week')),
-                        ButtonSegment(value: _CalView.day, label: Text('Day')),
+                    Row(
+                      children: [
+                        SegmentedButton<_CalView>(
+                          segments: const [
+                            ButtonSegment(value: _CalView.month, label: Text('Month')),
+                            ButtonSegment(value: _CalView.week, label: Text('Week')),
+                            ButtonSegment(value: _CalView.day, label: Text('Day')),
+                          ],
+                          selected: {_view},
+                          onSelectionChanged: (s) => setState(() => _view = s.first),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          tooltip: 'Previous',
+                          onPressed: () => setState(() {
+                            _anchor = _prev(_view, _anchor);
+                            _selectedDay = null;
+                          }),
+                          icon: const Icon(Icons.chevron_left),
+                        ),
+                        IconButton(
+                          tooltip: 'Next',
+                          onPressed: () => setState(() {
+                            _anchor = _next(_view, _anchor);
+                            _selectedDay = null;
+                          }),
+                          icon: const Icon(Icons.chevron_right),
+                        ),
                       ],
-                      selected: {_view},
-                      onSelectionChanged: (s) => setState(() => _view = s.first),
                     ),
-                    const Spacer(),
-                    Text(
-                      DateFormat.yMMMM().format(_anchor),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      tooltip: 'Previous',
-                      onPressed: () => setState(() {
-                        _anchor = _prev(_view, _anchor);
-                        _selectedDay = null;
-                      }),
-                      icon: const Icon(Icons.chevron_left),
-                    ),
-                    IconButton(
-                      tooltip: 'Next',
-                      onPressed: () => setState(() {
-                        _anchor = _next(_view, _anchor);
-                        _selectedDay = null;
-                      }),
-                      icon: const Icon(Icons.chevron_right),
+                    const SizedBox(height: 4),
+                    Center(
+                      child: Text(
+                        DateFormat.yMMMM().format(_anchor),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ),
                   ],
                 ),

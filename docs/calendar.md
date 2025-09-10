@@ -26,6 +26,10 @@ Navigation
 - New route: `/calendar`
 - Bottom nav shows “Calendar” (Schedules remains available at `/schedules` and via the top-right action on Calendar)
 
+Header layout
+- The view selector (Month/Week/Day) and navigation arrows are on the top row.
+- The month/year label is centered on a second row below the buttons.
+
 Next steps
 - Density modes (Large/Compact/List) in Month accordion and Week columns
 - Visual color coding per medication and status (taken/missed/canceled)

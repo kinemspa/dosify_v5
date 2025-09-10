@@ -2,6 +2,11 @@
 
 Log of key decisions, context, and session outcomes. Append newest entries at the top.
 
+## 2025-09-10 (later)
+- Calendar header: moved month label below the view selector and nav arrows to improve hierarchy and readability.
+- Global compact mode: applied compact visual density, shrunk tap targets, and reduced default paddings for ListTiles, inputs, and buttons.
+- Back navigation: ensured Add/Edit Supply page shows a back button.
+
 ## 2025-09-10
 - Captured full product design in docs/product-design.md.
 - Added tracking system to avoid context loss when we pivot:

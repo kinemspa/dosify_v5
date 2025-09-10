@@ -215,6 +215,7 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: Text(widget.initial == null ? 'Add Supply' : 'Edit Supply'),
         actions: [
           TextButton(onPressed: _save, child: const Text('Save')),
