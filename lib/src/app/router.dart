@@ -21,6 +21,8 @@ import '../features/schedules/presentation/add_edit_schedule_page.dart';
 import '../features/schedules/domain/schedule.dart';
 import '../features/settings/presentation/settings_page.dart';
 import '../features/supplies/presentation/supplies_page.dart';
+import '../features/supplies/domain/supply.dart';
+import '../features/calendar/presentation/calendar_page.dart';
 import 'shell_scaffold.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -52,6 +54,11 @@ final router = GoRouter(
             final med = id != null ? box.get(id) : null;
             return MedicationDetailPage(medicationId: id, initial: med);
           },
+        ),
+        GoRoute(
+          path: '/calendar',
+          name: 'calendar',
+          builder: (context, state) => const CalendarPage(),
         ),
         GoRoute(
           path: '/schedules',
