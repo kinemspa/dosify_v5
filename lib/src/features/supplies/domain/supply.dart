@@ -1,13 +1,129 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
-part 'supply.g.dart';
-
 @HiveType(typeId: 52)
 enum SupplyType {
   @HiveField(0)
   item,
   @HiveField(1)
   fluid,
+}
+
+class SupplyTypeAdapter extends TypeAdapter<SupplyType> {
+  @override
+  final int typeId = 52;
+
+  @override
+  SupplyType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return SupplyType.item;
+      case 1:
+        return SupplyType.fluid;
+      default:
+        return SupplyType.item;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, SupplyType obj) {
+    switch (obj) {
+      case SupplyType.item:
+        writer.writeByte(0);
+        break;
+      case SupplyType.fluid:
+        writer.writeByte(1);
+        break;
+    }
+  }
+}
+
+class SupplyUnitAdapter extends TypeAdapter<SupplyUnit> {
+  @override
+  final int typeId = 53;
+
+  @override
+  SupplyUnit read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return SupplyUnit.pcs;
+      case 1:
+        return SupplyUnit.ml;
+      case 2:
+        return SupplyUnit.l;
+      default:
+        return SupplyUnit.pcs;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, SupplyUnit obj) {
+    switch (obj) {
+      case SupplyUnit.pcs:
+        writer.writeByte(0);
+        break;
+      case SupplyUnit.ml:
+        writer.writeByte(1);
+        break;
+      case SupplyUnit.l:
+        writer.writeByte(2);
+        break;
+    }
+  }
+}
+
+class SupplyAdapter extends TypeAdapter<Supply> {
+  @override
+  final int typeId = 50;
+
+  @override
+  Supply read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{};
+    for (var i = 0; i < numOfFields; i++) {
+      fields[reader.readByte()] = reader.read();
+    }
+    return Supply(
+      id: fields[0] as String,
+      name: fields[1] as String,
+      type: fields[2] as SupplyType,
+      category: fields[3] as String?,
+      unit: fields[4] as SupplyUnit,
+      reorderThreshold: fields[5] as double?,
+      expiry: fields[6] as DateTime?,
+      storageLocation: fields[7] as String?,
+      notes: fields[8] as String?,
+      createdAt: fields[9] as DateTime?,
+      updatedAt: fields[10] as DateTime?,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Supply obj) {
+    writer
+      ..writeByte(11)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.type)
+      ..writeByte(3)
+      ..write(obj.category)
+      ..writeByte(4)
+      ..write(obj.unit)
+      ..writeByte(5)
+      ..write(obj.reorderThreshold)
+      ..writeByte(6)
+      ..write(obj.expiry)
+      ..writeByte(7)
+      ..write(obj.storageLocation)
+      ..writeByte(8)
+      ..write(obj.notes)
+      ..writeByte(9)
+      ..write(obj.createdAt)
+      ..writeByte(10)
+      ..write(obj.updatedAt);
+  }
 }
 
 @HiveType(typeId: 53)
