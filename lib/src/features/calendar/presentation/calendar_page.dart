@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../schedules/domain/schedule.dart';
 import '../data/calendar_utils.dart';
 import '../data/calendar_event.dart';
@@ -26,9 +28,9 @@ class _CalendarPageState extends State<CalendarPage> {
       appBar: AppBar(
         title: const Text('Calendar'),
         actions: [
-          IconButton(
+IconButton(
             tooltip: 'Schedules',
-            onPressed: () => Navigator.of(context).pushNamed('/schedules'),
+            onPressed: () => context.push('/schedules'),
             icon: const Icon(Icons.list_alt),
           ),
         ],
@@ -40,7 +42,7 @@ class _CalendarPageState extends State<CalendarPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
+child: Row(
                   children: [
                     SegmentedButton<_CalView>(
                       segments: const [
@@ -52,6 +54,11 @@ class _CalendarPageState extends State<CalendarPage> {
                       onSelectionChanged: (s) => setState(() => _view = s.first),
                     ),
                     const Spacer(),
+                    Text(
+                      DateFormat.yMMMM().format(_anchor),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(width: 8),
                     IconButton(
                       tooltip: 'Previous',
                       onPressed: () => setState(() {
