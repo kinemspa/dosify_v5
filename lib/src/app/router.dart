@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import '../features/home/presentation/home_page.dart';
 import '../features/medications/presentation/medication_list_page.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../features/home/presentation/home_page.dart';
-import '../features/medications/presentation/medication_list_page.dart';
+import '../features/medications/presentation/medication_detail_page.dart';
 import '../features/medications/presentation/select_medication_type_page.dart';
 import '../features/medications/presentation/select_injection_type_page.dart';
 import '../features/medications/presentation/add_edit_tablet_page.dart';
@@ -14,8 +13,14 @@ import '../features/medications/presentation/add_edit_injection_pfs_page.dart';
 import '../features/medications/presentation/add_edit_injection_single_vial_page.dart';
 import '../features/medications/presentation/add_edit_injection_multi_vial_page.dart';
 import '../features/medications/presentation/reconstitution_calculator_page.dart';
+import '../features/medications/presentation/reconstitution_calculator_dialog.dart';
+import '../features/medications/domain/enums.dart';
+import '../features/medications/domain/medication.dart';
 import '../features/schedules/presentation/schedules_page.dart';
+import '../features/schedules/presentation/add_edit_schedule_page.dart';
+import '../features/schedules/domain/schedule.dart';
 import '../features/settings/presentation/settings_page.dart';
+import '../features/supplies/presentation/supplies_page.dart';
 import 'shell_scaffold.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -39,9 +44,56 @@ final router = GoRouter(
           builder: (context, state) => const MedicationListPage(),
         ),
         GoRoute(
+          path: '/medications/:id',
+          name: 'medicationDetail',
+          builder: (context, state) {
+            final id = state.pathParameters['id'];
+            final box = Hive.box<Medication>('medications');
+            final med = id != null ? box.get(id) : null;
+            return MedicationDetailPage(medicationId: id, initial: med);
+          },
+        ),
+        GoRoute(
           path: '/schedules',
           name: 'schedules',
           builder: (context, state) => const SchedulesPage(),
+        ),
+        GoRoute(
+          path: '/supplies',
+          name: 'supplies',
+          builder: (context, state) => const SuppliesPage(),
+        ),
+        GoRoute(
+          path: '/supplies/add',
+          name: 'addSupply',
+          builder: (context, state) => const AddEditSupplyPage(),
+        ),
+        GoRoute(
+          path: '/supplies/edit/:id',
+          name: 'editSupply',
+          builder: (context, state) {
+            final id = state.pathParameters['id'];
+            if (id == null) return const AddEditSupplyPage();
+            final box = Hive.box<Supply>('supplies');
+            final initial = box.get(id);
+            return AddEditSupplyPage(initial: initial);
+          },
+        ),
+        GoRoute(
+          path: '/schedules/add',
+          name: 'addSchedule',
+          builder: (context, state) => const AddEditSchedulePage(),
+        ),
+        GoRoute(
+          path: '/schedules/edit/:id',
+          name: 'editSchedule',
+          builder: (context, state) {
+            final id = state.pathParameters['id'];
+            if (id == null) return const AddEditSchedulePage();
+            final box = Hive.box<Schedule>('schedules');
+            final initial = box.get(id);
+            return AddEditSchedulePage(initial: initial);
+          },
         ),
         GoRoute(
           path: '/settings',

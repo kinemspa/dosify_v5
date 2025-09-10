@@ -8,6 +8,7 @@ class ShellScaffold extends StatelessWidget {
   static const _items = [
     _NavItem(label: 'Home', icon: Icons.home, location: '/'),
     _NavItem(label: 'Medications', icon: Icons.medication, location: '/medications'),
+    _NavItem(label: 'Supplies', icon: Icons.inventory_2, location: '/supplies'),
     _NavItem(label: 'Schedules', icon: Icons.calendar_month, location: '/schedules'),
     _NavItem(label: 'Settings', icon: Icons.settings, location: '/settings'),
   ];
