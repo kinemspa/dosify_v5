@@ -18,79 +18,84 @@ class SuppliesPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Supplies')),
       body: ValueListenableBuilder(
-        valueListenable: Listenable.merge([suppliesBox.listenable(), movementsBox.listenable()]),
+        valueListenable: suppliesBox.listenable(),
         builder: (context, _, __) {
-          final repo = SupplyRepository();
-          final items = repo.allSupplies();
-          if (items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.inventory_2, size: 48),
-                  const SizedBox(height: 12),
-                  const Text('Add your first supply to begin tracking'),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () => context.push('/supplies/add'),
-                    child: const Text('Add Supply'),
-                  )
-                ],
-              ),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, i) {
-              final s = items[i];
-              final cur = repo.currentStock(s.id);
-              final low = repo.isLowStock(s);
-              final unit = _unitLabel(s.unit);
-              return ListTile(
-                title: Text(s.name),
-                subtitle: Text('Stock: ${cur.toStringAsFixed(2)} $unit' + (s.reorderThreshold != null ? ' • Low if ≤ ${s.reorderThreshold!.toStringAsFixed(2)} $unit' : '')),
-                leading: Icon(low ? Icons.warning_amber_rounded : Icons.inventory_2, color: low ? Colors.orange : null),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (choice) async {
-                    if (choice == 'adjust') {
+          return ValueListenableBuilder(
+            valueListenable: movementsBox.listenable(),
+            builder: (context, __, ___) {
+              final repo = SupplyRepository();
+              final items = repo.allSupplies();
+              if (items.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.inventory_2, size: 48),
+                      const SizedBox(height: 12),
+                      const Text('Add your first supply to begin tracking'),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: () => context.push('/supplies/add'),
+                        child: const Text('Add Supply'),
+                      )
+                    ],
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: items.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, i) {
+                  final s = items[i];
+                  final cur = repo.currentStock(s.id);
+                  final low = repo.isLowStock(s);
+                  final unit = _unitLabel(s.unit);
+                  return ListTile(
+                    title: Text(s.name),
+                    subtitle: Text('Stock: ${cur.toStringAsFixed(2)} $unit' + (s.reorderThreshold != null ? ' • Low if ≤ ${s.reorderThreshold!.toStringAsFixed(2)} $unit' : '')),
+                    leading: Icon(low ? Icons.warning_amber_rounded : Icons.inventory_2, color: low ? Colors.orange : null),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (choice) async {
+                        if (choice == 'adjust') {
+                          await showModalBottomSheet(
+                            context: context,
+                            showDragHandle: true,
+                            isScrollControlled: true,
+                            builder: (_) => StockAdjustSheet(supply: s),
+                          );
+                        } else if (choice == 'edit') {
+                          context.push('/supplies/edit/${s.id}');
+                        } else if (choice == 'delete') {
+                          final ok = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Delete supply?'),
+                                  content: Text('Delete "${s.name}" and its movements?'),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+                                    FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete')),
+                                  ],
+                                ),
+                              ) ??
+                              false;
+                          if (ok) await SupplyRepository().delete(s.id);
+                        }
+                      },
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(value: 'adjust', child: Text('Adjust stock')),
+                        PopupMenuItem(value: 'edit', child: Text('Edit')),
+                        PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      ],
+                    ),
+                    onTap: () async {
                       await showModalBottomSheet(
                         context: context,
                         showDragHandle: true,
                         isScrollControlled: true,
                         builder: (_) => StockAdjustSheet(supply: s),
                       );
-                    } else if (choice == 'edit') {
-                      context.push('/supplies/edit/${s.id}');
-                    } else if (choice == 'delete') {
-                      final ok = await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: const Text('Delete supply?'),
-                              content: Text('Delete "${s.name}" and its movements?'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-                                FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete')),
-                              ],
-                            ),
-                          ) ??
-                          false;
-                      if (ok) await SupplyRepository().delete(s.id);
-                    }
-                  },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'adjust', child: Text('Adjust stock')),
-                    PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    PopupMenuItem(value: 'delete', child: Text('Delete')),
-                  ],
-                ),
-                onTap: () async {
-                  await showModalBottomSheet(
-                    context: context,
-                    showDragHandle: true,
-                    isScrollControlled: true,
-                    builder: (_) => StockAdjustSheet(supply: s),
+                    },
                   );
                 },
               );
