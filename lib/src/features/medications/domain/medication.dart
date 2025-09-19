@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 part 'medication.g.dart';
 

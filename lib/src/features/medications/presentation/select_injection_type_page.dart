@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class SelectInjectionTypePage extends StatelessWidget {
   const SelectInjectionTypePage({super.key});
@@ -7,7 +8,7 @@ class SelectInjectionTypePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackButton(), title: const Text('Select Injection Type')),
+      appBar: const GradientAppBar(title: 'Select Injection Type', forceBackButton: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

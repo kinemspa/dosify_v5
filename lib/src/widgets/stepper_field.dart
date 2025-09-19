@@ -54,6 +54,7 @@ class _StepperFieldState extends State<StepperField> {
             decoration: InputDecoration(
               labelText: widget.label,
               hintText: widget.hint,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             ),
             onChanged: widget.onChanged,
           ),

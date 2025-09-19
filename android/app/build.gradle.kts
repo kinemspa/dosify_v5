@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.dosifi.dosifi_v5"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -25,7 +25,7 @@ android {
         applicationId = "com.dosifi.app"
         // SDK targets for Android.
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

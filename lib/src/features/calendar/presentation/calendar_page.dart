@@ -48,18 +48,21 @@ class _CalendarPageState extends State<CalendarPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: SegmentedButton<_CalView>(
+                        segments: const [
+                          ButtonSegment(value: _CalView.month, label: Text('Month')),
+                          ButtonSegment(value: _CalView.week, label: Text('Week')),
+                          ButtonSegment(value: _CalView.day, label: Text('Day')),
+                        ],
+                        selected: {_view},
+                        onSelectionChanged: (s) => setState(() => _view = s.first),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SegmentedButton<_CalView>(
-                          segments: const [
-                            ButtonSegment(value: _CalView.month, label: Text('Month')),
-                            ButtonSegment(value: _CalView.week, label: Text('Week')),
-                            ButtonSegment(value: _CalView.day, label: Text('Day')),
-                          ],
-                          selected: {_view},
-                          onSelectionChanged: (s) => setState(() => _view = s.first),
-                        ),
-                        const Spacer(),
                         IconButton(
                           tooltip: 'Previous',
                           onPressed: () => setState(() {
@@ -68,6 +71,12 @@ class _CalendarPageState extends State<CalendarPage> {
                           }),
                           icon: const Icon(Icons.chevron_left),
                         ),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat.yMMMM().format(_anchor),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(width: 8),
                         IconButton(
                           tooltip: 'Next',
                           onPressed: () => setState(() {
@@ -77,13 +86,6 @@ class _CalendarPageState extends State<CalendarPage> {
                           icon: const Icon(Icons.chevron_right),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 4),
-                    Center(
-                      child: Text(
-                        DateFormat.yMMMM().format(_anchor),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
                     ),
                   ],
                 ),

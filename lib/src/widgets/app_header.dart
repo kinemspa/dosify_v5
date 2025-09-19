@@ -15,7 +15,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canPop = Navigator.of(context).canPop() || forceBackButton;
+    final showBack = Navigator.of(context).canPop() || forceBackButton;
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
@@ -30,18 +30,60 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      leading: canPop ? const BackButton(color: Colors.white) : null,
+      leading: showBack
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/');
+                }
+              },
+            )
+          : null,
       title: Text(title, style: const TextStyle(color: Colors.white)),
       actions: [
         if (actions != null) ...actions!,
         PopupMenuButton<String>(
           icon: const Icon(Icons.menu, color: Colors.white),
           onSelected: (value) {
-            if (value == 'settings') {
-              context.push('/settings');
+            switch (value) {
+              case 'home':
+                context.go('/');
+                break;
+              case 'medications':
+                context.go('/medications');
+                break;
+              case 'supplies':
+                context.go('/supplies');
+                break;
+              case 'schedules':
+                context.go('/schedules');
+                break;
+              case 'calendar':
+                context.go('/calendar');
+                break;
+              case 'reconstitution':
+                // Calculator is nested under medications; push so back returns to current
+                context.push('/medications/reconstitution');
+                break;
+              case 'analytics':
+                context.go('/analytics');
+                break;
+              case 'settings':
+                context.go('/settings');
+                break;
             }
           },
           itemBuilder: (context) => const [
+            PopupMenuItem(value: 'home', child: Text('Home')),
+            PopupMenuItem(value: 'medications', child: Text('Medications')),
+            PopupMenuItem(value: 'supplies', child: Text('Supplies')),
+            PopupMenuItem(value: 'schedules', child: Text('Schedules')),
+            PopupMenuItem(value: 'calendar', child: Text('Calendar')),
+            PopupMenuItem(value: 'reconstitution', child: Text('Reconstitution Calculator')),
+            PopupMenuItem(value: 'analytics', child: Text('Analytics')),
             PopupMenuItem(value: 'settings', child: Text('Settings')),
           ],
         ),

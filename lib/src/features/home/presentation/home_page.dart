@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -7,10 +8,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dosifi v5'),
-        automaticallyImplyLeading: false, // no back on home
-      ),
+      appBar: const GradientAppBar(title: 'Dosifi v5'),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

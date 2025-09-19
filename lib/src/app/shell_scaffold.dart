@@ -1,52 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'nav_items.dart';
 
-class ShellScaffold extends StatelessWidget {
+final bottomNavIdsProvider = StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
+  return BottomNavIdsController()..load();
+});
+
+class BottomNavIdsController extends StateNotifier<List<String>> {
+  BottomNavIdsController() : super(const []);
+  static const _prefsKey = 'bottom_nav_ids_v1';
+
+  Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids = prefs.getStringList(_prefsKey);
+    if (ids == null || ids.length != 4) {
+      state = const ['home', 'medications', 'schedules', 'calendar'];
+      await prefs.setStringList(_prefsKey, state);
+    } else {
+      state = ids;
+    }
+  }
+}
+
+class ShellScaffold extends ConsumerWidget {
   const ShellScaffold({super.key, required this.child});
   final Widget child;
 
-  static const _items = [
-    _NavItem(label: 'Home', icon: Icons.home, location: '/'),
-    _NavItem(label: 'Medications', icon: Icons.medication, location: '/medications'),
-    _NavItem(label: 'Supplies', icon: Icons.inventory_2, location: '/supplies'),
-    _NavItem(label: 'Calendar', icon: Icons.calendar_month, location: '/calendar'),
-    _NavItem(label: 'Settings', icon: Icons.settings, location: '/settings'),
-  ];
-
-  int _locationToIndex(String location) {
+  int _locationToIndex(String location, List<NavItemConfig> items) {
     // Find the first item whose location is a prefix of the current location
-    final index = _items.indexWhere((e) => location == e.location || location.startsWith(e.location + '/'));
+    final index = items.indexWhere((e) => location == e.location || location.startsWith(e.location + '/'));
     return index == -1 ? 0 : index;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ids = ref.watch(bottomNavIdsProvider);
+    final items = ids.map((id) => findNavItem(id)!).toList(growable: false);
     final location = GoRouterState.of(context).uri.toString();
-    final selectedIndex = _locationToIndex(location);
+    final selectedIndex = _locationToIndex(location, items);
+
+    // If bottom nav hasn't loaded yet or is misconfigured, render without it to avoid assertion.
+    if (items.length < 2) {
+      return Scaffold(body: child);
+    }
 
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         onDestinationSelected: (index) {
-          final target = _items[index].location;
+          final target = items[index].location;
           if (target != location) {
-            // Use go for tab switches so it replaces the stack
             context.go(target);
           }
         },
-        destinations: _items
+        destinations: items
             .map((e) => NavigationDestination(icon: Icon(e.icon), label: e.label))
             .toList(),
       ),
     );
   }
-}
-
-class _NavItem {
-  const _NavItem({required this.label, required this.icon, required this.location});
-  final String label;
-  final IconData icon;
-  final String location;
 }
 

@@ -5,14 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
-import '../../../widgets/stepper_field.dart';
+import '../../../widgets/form_field_styler.dart';
+import '../../../core/prefs/user_prefs.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
 import '../presentation/providers.dart';
 
 class AddEditInjectionSingleVialPage extends ConsumerStatefulWidget {
-  const AddEditInjectionSingleVialPage({super.key});
+  const AddEditInjectionSingleVialPage({super.key, this.initial});
+  
+  final Medication? initial;
 
   @override
   ConsumerState<AddEditInjectionSingleVialPage> createState() => _AddEditInjectionSingleVialPageState();
@@ -31,6 +35,7 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
   final _perMlCtrl = TextEditingController();
 
   final _stockValueCtrl = TextEditingController();
+  StockUnit _stockUnit = StockUnit.singleDoseVials;
 
   bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
@@ -43,12 +48,43 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
 
   bool _summaryExpanded = true;
 
+  int _formStyleIndex = 0;
+
+  Future<void> _loadStylePrefs() async {
+    final f = await UserPrefs.getFormFieldStyle();
+    if (mounted) setState(() => _formStyleIndex = f);
+  }
+
   bool get _isPerMl => {
         Unit.mcgPerMl,
         Unit.mgPerMl,
         Unit.gPerMl,
         Unit.unitsPerMl,
       }.contains(_strengthUnit);
+
+  @override
+  void initState() {
+    super.initState();
+    final med = widget.initial;
+    if (med != null) {
+      _nameCtrl.text = med.name;
+      _manufacturerCtrl.text = med.manufacturer ?? '';
+      _descriptionCtrl.text = med.description ?? '';
+      _notesCtrl.text = med.notes ?? '';
+      _strengthValueCtrl.text = med.strengthValue.toString();
+      _strengthUnit = med.strengthUnit;
+      _perMlCtrl.text = med.perMlValue?.toString() ?? '';
+      _stockValueCtrl.text = med.stockValue.toString();
+      _lowStockEnabled = med.lowStockEnabled;
+      _lowStockCtrl.text = med.lowStockThreshold?.toString() ?? '';
+      _expiry = med.expiry;
+      _batchCtrl.text = med.batchNumber ?? '';
+      _storageCtrl.text = med.storageLocation ?? '';
+      _requiresFridge = med.requiresRefrigeration;
+      _storageNotesCtrl.text = med.storageInstructions ?? '';
+    }
+    _loadStylePrefs();
+  }
 
   @override
   void dispose() {
@@ -102,8 +138,8 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final repo = ref.read(medicationRepositoryProvider);
-    final id = DateTime.now().microsecondsSinceEpoch.toString() +
-        Random().nextInt(9999).toString().padLeft(4, '0');
+    final id = widget.initial?.id ?? (DateTime.now().microsecondsSinceEpoch.toString() +
+        Random().nextInt(9999).toString().padLeft(4, '0'));
 
     final med = Medication(
       id: id,
@@ -145,96 +181,439 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
     }
   }
 
+  Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    final radius = BorderRadius.circular(8);
+    return Material(
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: radius),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: radius,
+        ),
+        child: InkWell(
+          customBorder: RoundedRectangleBorder(borderRadius: radius),
+          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Text(label, style: theme.textTheme.labelLarge),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(leading: const BackButton(), title: const Text('Add Medication - Single Dose Vial')),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 220),
+      appBar: GradientAppBar(
+        title: widget.initial == null ? 'Add Medication - Single Dose Vial' : 'Edit Medication - Single Dose Vial',
+        forceBackButton: true,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
+        backgroundColor: _nameCtrl.text.trim().isNotEmpty ? const Color(0xFF09A8BD) : Colors.grey,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.save),
+        label: Text(widget.initial == null ? 'Save' : 'Update'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('General', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  TextFormField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Name *'), validator: (v) => (v==null||v.trim().isEmpty)?'Required':null, onChanged: (_) => setState(() {})),
-                  const SizedBox(height: 8),
-                  TextFormField(controller: _manufacturerCtrl, decoration: const InputDecoration(labelText: 'Manufacturer'), onChanged: (_) => setState(() {})),
-                  const SizedBox(height: 8),
-                  TextFormField(controller: _descriptionCtrl, decoration: const InputDecoration(labelText: 'Description'), onChanged: (_) => setState(() {})),
-                  const SizedBox(height: 8),
-                  TextFormField(controller: _notesCtrl, decoration: const InputDecoration(labelText: 'Notes'), onChanged: (_) => setState(() {})),
-
-                  const SizedBox(height: 16),
-                  Text('Strength', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  Row(children: [
-                    Expanded(child: TextFormField(controller: _strengthValueCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Strength *'), validator: (v){ final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0'; return null;}, onChanged: (_)=>setState((){}))),
-                    const SizedBox(width: 12),
-                    Expanded(child: DropdownButtonFormField<Unit>(value: _strengthUnit, items: const [
-                      DropdownMenuItem(value: Unit.mcg, child: Text('mcg')),
-                      DropdownMenuItem(value: Unit.mg, child: Text('mg')),
-                      DropdownMenuItem(value: Unit.g, child: Text('g')),
-                      DropdownMenuItem(value: Unit.units, child: Text('units')),
-                      DropdownMenuItem(value: Unit.mcgPerMl, child: Text('mcg/mL')),
-                      DropdownMenuItem(value: Unit.mgPerMl, child: Text('mg/mL')),
-                      DropdownMenuItem(value: Unit.gPerMl, child: Text('g/mL')),
-                      DropdownMenuItem(value: Unit.unitsPerMl, child: Text('units/mL')),
-                    ], onChanged: (v){ setState(()=>_strengthUnit=v!);}, decoration: const InputDecoration(labelText: 'Unit *'))),
-                  ]),
-                  if (_isPerMl)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: TextFormField(controller: _perMlCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Per mL'), validator: (v){ if(!_isPerMl) return null; final d=double.tryParse(v??''); if(d==null||d<=0) return 'Enter > 0'; return null; }),
-                    ),
-
-                  const SizedBox(height: 16),
-                  Text('Inventory', style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-Row(children: [
-                    Expanded(child: StepperField(controller: _stockValueCtrl, label: 'Vials in stock *', onChanged: (_)=>setState((){}), min: 0, step: 1)),
-                    const SizedBox(width: 12),
-                    const Expanded(child: TextField(enabled: false, decoration: InputDecoration(labelText: 'Unit', hintText: 'single use vials'))),
-                  ]),
+children: [
                   const SizedBox(height: 4),
-                  const Text('Tip: Long explanations show here below the field so they don\'t get truncated.'),
+Text(
+                    _buildSummary().isEmpty ? 'Summary will update as you type' : _buildSummary(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  // General card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Name *',
+                            hint: 'Enter the Medication Name',
+                            helper: '',
+                          ),
+                          validator: (v) => (v==null||v.trim().isEmpty)?'Required':null,
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _manufacturerCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Manufacturer',
+                            hint: 'Enter the Medication Manufacturer Brand Name',
+                            helper: '',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _descriptionCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Description',
+                            hint: 'Enter the Medication Description',
+                            helper: '',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _notesCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Notes',
+                            hint: 'Enter Notes about the Medication',
+                            helper: '',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  SwitchListTile(title: const Text('Low Stock - Enabled/Disabled'), value: _lowStockEnabled, onChanged: (v)=>setState(()=>_lowStockEnabled=v)),
-                  if (_lowStockEnabled)
-                    TextFormField(controller: _lowStockCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Low Stock *')),
+                  const SizedBox(height: 12),
+                  // Strength card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Strength', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 8),
+                        Row(children: [
+                          _pillBtn(context, '−', () {
+                            final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
+                            final nv = (v - 1).clamp(0, 1000000);
+                            setState(() => _strengthValueCtrl.text = nv.toString());
+                          }),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 96,
+                            child: TextFormField(
+                              controller: _strengthValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                              decoration: InputDecoration(
+                                labelText: 'Strength *',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                                ),
+                                filled: true,
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          _pillBtn(context, '+', () {
+                            final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
+                            final nv = (v + 1).clamp(0, 1000000);
+                            setState(() => _strengthValueCtrl.text = nv.toString());
+                          }),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DropdownButtonFormField<Unit>(
+                              value: _strengthUnit,
+                              isExpanded: true,
+                              alignment: AlignmentDirectional.center,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              items: const [
+                                DropdownMenuItem(value: Unit.mcg, alignment: AlignmentDirectional.center, child: Center(child: Text('mcg', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.mg, alignment: AlignmentDirectional.center, child: Center(child: Text('mg', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.g, alignment: AlignmentDirectional.center, child: Center(child: Text('g', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.units, alignment: AlignmentDirectional.center, child: Center(child: Text('units', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.mcgPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('mcg/mL', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.mgPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('mg/mL', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.gPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('g/mL', textAlign: TextAlign.center))),
+                                DropdownMenuItem(value: Unit.unitsPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('units/mL', textAlign: TextAlign.center))),
+                              ],
+                              onChanged: (v){ setState(()=>_strengthUnit=v!);},
+                              icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              decoration: InputDecoration(
+                                labelText: 'Unit *',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                                ),
+                                filled: true,
+                              ),
+                              menuMaxHeight: 320,
+                            ),
+                          ),
+                        ]),
+                        if (_isPerMl)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: SizedBox(
+                              width: 160,
+                              child: TextFormField(
+                                controller: _perMlCtrl,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: const InputDecoration(labelText: 'Per mL'),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
 
-                  const SizedBox(height: 16),
-                  Text('Storage Information', style: Theme.of(context).textTheme.titleMedium),
-                  TextFormField(controller: _batchCtrl, decoration: const InputDecoration(labelText: 'Batch No.')),
-TextFormField(controller: _storageCtrl, decoration: const InputDecoration(labelText: 'Lot / Storage Location')),
-                  SwitchListTile(title: const Text('Requires Refrigeration - Enabled/Disabled'), value: _requiresFridge, onChanged: (v)=>setState(()=>_requiresFridge=v)),
-                  TextFormField(controller: _storageNotesCtrl, decoration: const InputDecoration(labelText: 'Storage Instructions')),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(onPressed: _pickExpiry, icon: const Icon(Icons.calendar_month), label: Text(_expiry==null? 'No Expiry' : 'Expiry: ${DateFormat.yMd().format(_expiry!)}')),
+                  const SizedBox(height: 12),
+                  // Inventory card (with Expiry + Low Stock inside)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Inventory', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 8),
+                        Row(children: [
+                          _pillBtn(context, '−', () {
+                            final v = int.tryParse(_stockValueCtrl.text) ?? 0;
+                            final nv = (v - 1).clamp(0, 1000000);
+                            setState(() => _stockValueCtrl.text = nv.toString());
+                          }),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 96,
+                            child: TextFormField(
+                              controller: _stockValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                              decoration: InputDecoration(
+                                labelText: 'Stock *',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                                ),
+                                filled: true,
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          _pillBtn(context, '+', () {
+                            final v = int.tryParse(_stockValueCtrl.text) ?? 0;
+                            final nv = (v + 1).clamp(0, 1000000);
+                            setState(() => _stockValueCtrl.text = nv.toString());
+                          }),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DropdownButtonFormField<StockUnit>(
+                              value: _stockUnit,
+                              isExpanded: true,
+                              alignment: AlignmentDirectional.center,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              items: const [
+                                DropdownMenuItem(
+                                  value: StockUnit.singleDoseVials,
+                                  alignment: AlignmentDirectional.center,
+                                  child: Center(child: Text('single dose vials', textAlign: TextAlign.center)),
+                                ),
+                              ],
+                              onChanged: (v) => setState(() => _stockUnit = v!),
+                              icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              decoration: InputDecoration(
+                                labelText: 'Unit *',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                                ),
+                                filled: true,
+                              ),
+                              menuMaxHeight: 320,
+                            ),
+                          ),
+                        ]),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CheckboxListTile(
+                                title: Text(
+                                  'Low Stock Alerts',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                                ),
+                                subtitle: Text(
+                                  'Get notified when stock is low',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                                ),
+                                value: _lowStockEnabled,
+                                onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
+                                controlAffinity: ListTileControlAffinity.leading,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 150),
+                              child: _lowStockEnabled
+                                  ? SizedBox(
+                                      width: 120,
+                                      child: TextFormField(
+                                        key: const ValueKey('lowStockField'),
+                                        controller: _lowStockCtrl,
+                                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                        decoration: const InputDecoration(
+                                          labelText: 'Threshold',
+                                          hintText: '0',
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox(key: ValueKey('lowStockPlaceholder'), width: 120),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ListTile(
+                          leading: const Icon(Icons.calendar_month),
+                          title: Text(_expiry==null? 'No Expiry' : 'Expiry: ${DateFormat.yMd().format(_expiry!)}'),
+                          trailing: const Icon(Icons.edit_calendar_outlined),
+                          onTap: _pickExpiry,
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  const SizedBox(height: 120),
+                  const SizedBox(height: 12),
+                  // Storage card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.03),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.06)),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Storage Information', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _batchCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Batch No.',
+                            hint: 'Enter the Medication Batch Number',
+                            helper: '',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _storageCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Lot / Storage Location',
+                            hint: 'Enter the Storage Location',
+                            helper: '',
+                          ),
+                        ),
+                        CheckboxListTile(
+                          title: const Text('Requires Refrigeration'),
+                          subtitle: const Text('Must be stored in refrigerator'),
+                          value: _requiresFridge,
+                          onChanged: (v) => setState(() => _requiresFridge = v ?? false),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        TextFormField(
+                          controller: _storageNotesCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Storage Instructions',
+                            hint: 'Enter storage instructions',
+                            helper: '',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, border: Border(top: BorderSide(color: Theme.of(context).dividerColor)), boxShadow: const [BoxShadow(blurRadius: 4, offset: Offset(0,-2), color: Colors.black12)]),
-              padding: const EdgeInsets.fromLTRB(16,12,16,16),
-              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [Expanded(child: Text('Summary', style: Theme.of(context).textTheme.titleMedium)), IconButton(onPressed: ()=>setState(()=>_summaryExpanded=!_summaryExpanded), icon: Icon(_summaryExpanded? Icons.expand_more: Icons.expand_less))]),
-                if (_summaryExpanded) Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(_buildSummary())),
-                Row(children: [Expanded(child: FilledButton(onPressed: _submit, child: const Text('Submit')))]),
-              ]),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

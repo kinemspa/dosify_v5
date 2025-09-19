@@ -1,7 +1,6 @@
 # Product Design Specification
 
-This document captures the complete UI/UX and feature design for the Dosifi v5 Flutter mobile application.
-
+This document captures the complete UI/UX and feature design for the Dosifi v5 Flutter mobile application. It also consolidates the previously separate UX guidelines and feature/module specifications (Schedules, Calendar, Supplies, Reconstitution Calculator, Medications) into a single source of truth.
 Overview
 
 - Flutter Mobile app
@@ -277,6 +276,38 @@ Supply Add (Dialog)
 - Storage Information — text input
 
 Schedules and Calendar
+
+Typed dosing and normalization (v5 roadmap)
+- Each schedule stores both the user’s chosen presentation (display unit) and normalized internal values used for accurate math across meds.
+- Internal stores are integers to avoid floating precision:
+  - Mass: micrograms (int)
+  - Volume: microliters (int)
+  - Tablets: quarters (int; 1 tab = 4 quarters)
+  - Capsules/Syringes/Vials: whole counts (int)
+  - IU/Units: integer IU (or scaled if needed later)
+- New enums (persisted as codes):
+  - DoseUnit: mcg, mg, g, ml, iu, units, tablets, capsules, syringes, vials
+  - DoseInputMode: tablets, capsules, mass, volume, iuUnits, count
+
+Per-medication type rules
+- Tablets
+  - User can input by tablets (whole/half/quarter) OR by strength (mcg/mg/g). We always compute and display both.
+  - Example: 0.5 tab × 1000 mcg/tab = 500 mcg (0.5 mg). Stock decrements by quarters.
+- Capsules
+  - Whole only. If a strength entry doesn’t map to an integer capsule count, prompt to round. Stock decrements by whole capsules.
+- Pre-Filled Syringes (PFS)
+  - Default: 1 syringe per occurrence; optionally show mg/mL and mL equivalence if configured. Stock decrements syringes.
+- Single Dose Vials (SDV)
+  - Default: 1 vial per occurrence; show equivalence if known. Stock decrements vials.
+- Multi Dose Vials (MDV)
+  - Input: mg/mcg, IU/units, or mL. Convert to mL using medication concentration (mg/mL or IU/mL).
+  - Display example: 10 mg ÷ 20 mg/mL = 0.5 mL. Stock decrements mL from vial volume; track open vial remainder.
+
+Precision and rounding
+- Computations use normalized ints. Display uses formatting with sensible decimals (e.g., mL to 2–3 decimals). If rounding occurs, show the exact math line.
+
+Stock decrement mapping
+- Tablets → quarters; Capsules → whole; PFS → syringes; SDV → vials; MDV → mL (derived from mg/IU via concentration).
 
 Calendar Screen
 
