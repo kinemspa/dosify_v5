@@ -56,6 +56,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
 
   bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
+  String? _stockError;
 
   DateTime? _expiry;
   final _batchCtrl = TextEditingController();
@@ -516,36 +517,6 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
       appBar: GradientAppBar(
         title: widget.initial == null ? 'Add Medication - Tablet' : 'Edit Medication - Tablet',
         forceBackButton: true,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'details') {
-                if (widget.initial == null) {
-                  context.push('/medications/add/tablet/details');
-                } else {
-                  context.push('/medications/edit/tablet/details/${widget.initial!.id}');
-                }
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem<String>(value: 'details', child: Text('Open details-style editor')),
-            ],
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'hybrid') {
-                if (widget.initial == null) {
-                  context.push('/medications/add/tablet/hybrid');
-                } else {
-                  context.push('/medications/edit/tablet/hybrid/${widget.initial!.id}');
-                }
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem<String>(value: 'hybrid', child: Text('Open hybrid editor')),
-            ],
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
@@ -777,7 +748,16 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                               ),
                               filled: true,
                             ),
-                            onChanged: (_) => setState(() {}),
+                            onChanged: (v) {
+                              final d = double.tryParse(v);
+                              setState(() {
+                                if (d == null || _isQuarter(d)) {
+                                  _stockError = null;
+                                } else {
+                                  _stockError = 'Stock should be .00, .25, .50 or .75';
+                                }
+                              });
+                            },
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -822,6 +802,17 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                         ),
                       ],
                     ),
+                    if (_stockError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          _stockError!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 4),
                     Text(
                       'Enter current stock quantity and select the unit of measurement',

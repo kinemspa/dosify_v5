@@ -50,3 +50,24 @@ Usage guidance
 Propagation
 
 - Apply these standards to Capsule and Injection editors and any new editors.
+
+---
+
+Hybrid Tablet Specifics
+
+- Strength
+  - Amount field centered; +/- buttons step by 1 (whole numbers)
+  - Keyboard allows up to 2 decimals; deletion to empty allowed
+  - mcg/mg/g units; ensure dropdown text is not cropped
+- Inventory
+  - Stock input centered, 2 decimals; +/- step by 0.25
+  - Live validation for quarter steps (.00, .25, .50, .75); show inline error
+  - Unit locked to "tablets" (disabled dropdown)
+  - Optional low-stock alert with threshold field
+- Expiry
+  - 40px OutlinedButton with calendar icon; shows chosen date
+- Save & Confirmation
+  - Save button 40px tall, centered
+  - Pre-save confirmation dialog with styled summary and detailed rows
+- Routing
+  - Add → Tablet and Edit Tablet both open the same single hybrid page (no menus/toggles). A dedicated hybrid route may exist only for testing.
