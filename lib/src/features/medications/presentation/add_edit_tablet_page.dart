@@ -547,14 +547,6 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
-        backgroundColor: _nameCtrl.text.trim().isNotEmpty ? const Color(0xFF09A8BD) : Colors.grey,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.save),
-        label: Text(widget.initial == null ? 'Save' : 'Update'),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Form(
@@ -679,7 +671,21 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                                 RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
                               ),
                             ],
-                            decoration: const InputDecoration(labelText: 'Amount *'),
+                            decoration: InputDecoration(
+                              labelText: 'Amount *',
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              constraints: const BoxConstraints(minHeight: 40),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                              ),
+                              filled: true,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -758,8 +764,8 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                             ],
                             decoration: InputDecoration(
                               labelText: 'Stock *',
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                              constraints: const BoxConstraints(minHeight: 40),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -824,14 +830,22 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Expiry moved under Inventory
-                    ListTile(
-                      leading: const Icon(Icons.calendar_month),
-                      title: Text(_expiry == null ? 'No Expiry' : 'Expiry: ${DateFormat.yMd().format(_expiry!)}'),
-                      trailing: const Icon(Icons.edit_calendar_outlined),
-                      onTap: _pickExpiry,
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    // Expiry button (40px tall) with date on button
+                    SizedBox(
+                      height: 40,
+                      child: OutlinedButton.icon(
+                        onPressed: _pickExpiry,
+                        icon: const Icon(Icons.calendar_month, size: 18),
+                        label: Text(
+                          _expiry == null ? 'Pick expiry date' : DateFormat.yMd().format(_expiry!),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                          foregroundColor: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 8),
                     // Low stock alerts inside the Inventory card
@@ -938,6 +952,24 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                 ),
               ),
               // (Expiry moved under Inventory)
+
+              const SizedBox(height: 16),
+              // Save button (40px height, not full width)
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  child: SizedBox(
+                    height: 40,
+                    child: FilledButton(
+                      onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
+                      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(40)),
+                      child: Text(widget.initial == null ? 'Save' : 'Update'),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 8),
             ],
           ),
         ),

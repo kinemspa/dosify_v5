@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 class FormFieldStyler {
   // 10 visual variants for Add Medication form fields (excluding summary)
@@ -9,7 +10,24 @@ class FormFieldStyler {
     String? hint,
     String? helper,
   }) {
-    final base = InputDecoration(labelText: label, hintText: hint, helperText: helper);
+    final theme = Theme.of(context);
+    final InputDecoration base = InputDecoration(
+      labelText: label,
+      hintText: hint,
+      helperText: helper,
+      // Global hybrid defaults
+      isDense: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      helperStyle: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.60),
+        fontSize: kHintFontSize,
+      ),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.60),
+        fontSize: kHintFontSize,
+      ),
+    );
     switch (styleIndex) {
       case 0: // Filled tonal
         return base.copyWith(filled: true, fillColor: Theme.of(context).colorScheme.surfaceContainer, contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16));
@@ -24,8 +42,8 @@ class FormFieldStyler {
           border: const OutlineInputBorder(),
           prefixIcon: Container(width: 6, color: Theme.of(context).colorScheme.primary),
         );
-      case 5: // Dense compact
-        return base.copyWith(isDense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10));
+      case 5: // Dense compact (still respect min 40px height)
+        return base.copyWith(contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12));
       case 6: // Borderless + bottom divider style
         return base.copyWith(border: InputBorder.none);
       case 7: // Chip label above
