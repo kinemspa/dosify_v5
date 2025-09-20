@@ -133,15 +133,13 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          // TEMP: point to classic page to restore full form while hybrid is being repaired
-          builder: (context, state) => const AddEditTabletPage(),
+          builder: (context, state) => const AddEditTabletHybridPage(),
         ),
 // removed details-style add route
         GoRoute(
           path: '/medications/add/tablet/hybrid',
           name: 'addTabletHybrid',
-          // TEMP: map to classic page while hybrid is repaired
-          builder: (context, state) => const AddEditTabletPage(),
+          builder: (context, state) => const AddEditTabletHybridPage(),
         ),
         GoRoute(
           path: '/medications/add/capsule',
@@ -171,19 +169,18 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-return AddEditTabletHybridPage(initial: med);
+            return AddEditTabletHybridPage(initial: med);
           },
         ),
 // removed details-style edit route
         GoRoute(
           path: '/medications/edit/tablet/hybrid/:id',
           name: 'editTabletHybrid',
-          // TEMP: map to classic page while hybrid is repaired
           builder: (context, state) {
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditTabletPage(initial: med);
+            return AddEditTabletHybridPage(initial: med);
           },
         ),
         GoRoute(
