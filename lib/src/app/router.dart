@@ -133,7 +133,8 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          builder: (context, state) => const AddEditTabletHybridPage(),
+          // Use classic form to unblock immediately; keep hybrid under /hybrid for testing
+          builder: (context, state) => const AddEditTabletPage(),
         ),
 // removed details-style add route
         GoRoute(
