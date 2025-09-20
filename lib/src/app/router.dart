@@ -10,6 +10,7 @@ import '../features/medications/presentation/select_injection_type_page.dart';
 import '../features/medications/presentation/add_edit_capsule_page.dart';
 import '../features/medications/presentation/add_edit_tablet_hybrid_page.dart';
 import '../features/medications/presentation/add_edit_tablet_page.dart';
+import '../features/medications/presentation/add_tablet_debug_page.dart';
 import '../features/medications/presentation/add_edit_injection_pfs_page.dart';
 import '../features/medications/presentation/add_edit_injection_single_vial_page.dart';
 import '../features/medications/presentation/add_edit_injection_multi_vial_page.dart';
@@ -133,8 +134,8 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          // Use classic form to unblock immediately; keep hybrid under /hybrid for testing
-          builder: (context, state) => const AddEditTabletPage(),
+          // TEMP: route to debug page to isolate body rendering issue
+          builder: (context, state) => AddTabletDebugPage(),
         ),
 // removed details-style add route
         GoRoute(
