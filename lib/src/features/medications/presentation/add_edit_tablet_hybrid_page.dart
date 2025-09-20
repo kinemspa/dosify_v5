@@ -273,10 +273,247 @@ return SizedBox(
           title: widget.initial == null ? 'Add Medication' : 'Edit Medication',
           actions: const [],
         ),
-        body: Center(
-          child: Text(
-            'Add Tablet debug: placeholder',
-            style: Theme.of(context).textTheme.titleMedium,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // General
+                _section(context, 'General', [
+                  _rowLabelField(
+                    label: 'Name *',
+                    field: TextFormField(
+                      controller: _nameCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'e.g., Panadol'),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Manufacturer',
+                    field: TextFormField(
+                      controller: _manufacturerCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'e.g., GSK'),
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Description',
+                    field: TextFormField(
+                      controller: _descriptionCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'e.g., Pain relief'),
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Notes',
+                    field: TextFormField(
+                      controller: _notesCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'e.g., Take with food'),
+                    ),
+                  ),
+                ]),
+
+                const SizedBox(height: 12),
+
+                // Strength
+                _section(context, 'Strength', [
+                  _rowLabelField(
+                    label: 'Amount *',
+                    field: Row(
+                      children: [
+                        _incBtn('−', () {
+                          final d = double.tryParse(_strengthValueCtrl.text.trim());
+                          final base = d?.floor() ?? 0;
+                          final nv = (base - 1).clamp(0, 1000000000);
+                          setState(() => _strengthValueCtrl.text = nv.toString());
+                        }),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 120,
+                          child: TextFormField(
+                            controller: _strengthValueCtrl,
+                            textAlign: TextAlign.center,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: const [_TwoDecimalTextInputFormatter()],
+                            decoration: _dec(hint: '0'),
+                            validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        _incBtn('+', () {
+                          final d = double.tryParse(_strengthValueCtrl.text.trim());
+                          final base = d?.floor() ?? 0;
+                          final nv = (base + 1).clamp(0, 1000000000);
+                          setState(() => _strengthValueCtrl.text = nv.toString());
+                        }),
+                      ],
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Unit *',
+                    field: DropdownButtonFormField<Unit>(
+                      value: _strengthUnit,
+                      isExpanded: true,
+                      items: const [Unit.mcg, Unit.mg, Unit.g]
+                          .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                          .toList(),
+                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                      decoration: _dec(),
+                    ),
+                  ),
+                ]),
+
+                const SizedBox(height: 12),
+
+                // Inventory
+                _section(context, 'Inventory', [
+                  _rowLabelField(
+                    label: 'Stock *',
+                    field: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            _incBtn('−', () {
+                              final v = double.tryParse(_stockValueCtrl.text) ?? 0;
+                              final nv = (v - 0.25).clamp(0, 1000000);
+                              setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
+                            }),
+                            const SizedBox(width: 6),
+                            SizedBox(
+                              width: 120,
+                              child: TextFormField(
+                                controller: _stockValueCtrl,
+                                textAlign: TextAlign.center,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                inputFormatters: const [_TwoDecimalTextInputFormatter()],
+                                decoration: _dec(hint: '0.00'),
+                                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                                onChanged: (v) {
+                                  final d = double.tryParse(v);
+                                  setState(() {
+                                    if (d == null || _isQuarter(d)) {
+                                      _stockError = null;
+                                    } else {
+                                      _stockError = 'Stock should be .00, .25, .50 or .75';
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            _incBtn('+', () {
+                              final v = double.tryParse(_stockValueCtrl.text) ?? 0;
+                              final nv = (v + 0.25).clamp(0, 1000000);
+                              setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
+                            }),
+                          ],
+                        ),
+                        if (_stockError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(_stockError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+                          ),
+                      ],
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Unit *',
+                    field: DropdownButtonFormField<StockUnit>(
+                      value: StockUnit.tablets,
+                      isExpanded: true,
+                      items: const [DropdownMenuItem(value: StockUnit.tablets, child: Text('tablets'))],
+                      onChanged: null,
+                      decoration: _dec(),
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Expiry',
+                    field: SizedBox(
+                      height: kFieldHeight,
+                      child: OutlinedButton.icon(
+                        onPressed: _pickExpiry,
+                        icon: const Icon(Icons.calendar_month, size: 18),
+                        label: Text(_expiry == null ? 'Pick expiry date' : DateFormat.yMd().format(_expiry!)),
+                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 12), minimumSize: const Size(0, kFieldHeight)),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CheckboxListTile(
+                          value: _lowStockEnabled,
+                          onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Low stock alerts'),
+                          subtitle: const Text('Notify when reaching threshold'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 150),
+                        child: _lowStockEnabled
+                            ? SizedBox(
+                                key: const ValueKey('lowStock'),
+                                width: 120,
+                                child: TextFormField(
+                                  controller: _lowStockCtrl,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  inputFormatters: const [_TwoDecimalTextInputFormatter()],
+                                  decoration: _dec(hint: '0'),
+                                ),
+                              )
+                            : const SizedBox(key: ValueKey('lowStockOff'), width: 120),
+                      ),
+                    ],
+                  ),
+                ]),
+
+                const SizedBox(height: 12),
+
+                // Storage
+                _section(context, 'Storage Information', [
+                  _rowLabelField(
+                    label: 'Batch No.',
+                    field: TextFormField(
+                      controller: _batchCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'Enter batch number'),
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Lot / Storage Location',
+                    field: TextFormField(
+                      controller: _storageCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'Enter storage location'),
+                    ),
+                  ),
+                  CheckboxListTile(
+                    title: const Text('Requires Refrigeration'),
+                    subtitle: const Text('Must be stored in refrigerator'),
+                    value: _requiresFridge,
+                    onChanged: (v) => setState(() => _requiresFridge = v ?? false),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  _rowLabelField(
+                    label: 'Storage Instructions',
+                    field: TextFormField(
+                      controller: _storageNotesCtrl,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(hint: 'Enter storage instructions'),
+                    ),
+                  ),
+                ]),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: SafeArea(
