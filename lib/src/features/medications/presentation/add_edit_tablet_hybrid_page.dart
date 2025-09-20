@@ -265,6 +265,7 @@ return SizedBox(
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[HYBRID] build() called, initial=${widget.initial != null}');
     final mq = MediaQuery.of(context);
     return MediaQuery(
       data: mq.copyWith(textScaleFactor: 1.0),
@@ -280,6 +281,14 @@ return SizedBox(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // DEBUG banner to confirm body is rendering
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(8)),
+                  child: const Text('DEBUG: HYBRID FORM BODY RENDERED', style: TextStyle(fontWeight: FontWeight.w800)),
+                ),
                 // General
                 _section(context, 'General', [
                   _rowLabelField(
