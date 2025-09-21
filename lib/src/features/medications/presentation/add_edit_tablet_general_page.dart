@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
 
 /// Minimal Tablet editor that renders ONLY the General section.
 /// This is used to isolate rendering issues step-by-step.
@@ -458,16 +461,59 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              debugPrint('[SAVE] Confirmed: ' + summary.replaceAll('\n', ' | '));
-              // TODO: Wire up persistence in a subsequent step
+              await _persistMedication();
             },
             child: const Text('Confirm'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _persistMedication() async {
+    try {
+      final box = Hive.box<Medication>('medications');
+      final repo = MedicationRepository(box);
+      final id = _newId();
+      final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+      final stock = double.tryParse(_stockCtrl.text.trim()) ?? 0;
+      final lowThresh = double.tryParse(_lowStockThresholdCtrl.text.trim());
+      final med = Medication(
+        id: id,
+        form: MedicationForm.tablet,
+        name: _nameCtrl.text.trim(),
+        manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
+        description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
+        notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+        strengthValue: strength,
+        strengthUnit: _strengthUnit,
+        stockValue: stock,
+        stockUnit: StockUnit.tablets,
+        lowStockEnabled: _lowStockAlert,
+        lowStockThreshold: _lowStockAlert ? lowThresh : null,
+        expiry: _expiryDate,
+        storageLocation: _storageLocationCtrl.text.trim().isEmpty ? null : _storageLocationCtrl.text.trim(),
+        requiresRefrigeration: _keepRefrigerated,
+        storageInstructions: _lightSensitive ? 'Protect from light' : null,
+      );
+      await repo.upsert(med);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medication saved')));
+        Navigator.of(context).maybePop();
+      }
+    } catch (e, st) {
+      debugPrint('Save failed: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+      }
+    }
+  }
+
+  String _newId() {
+    final ms = DateTime.now().millisecondsSinceEpoch;
+    return 'med_$ms';
   }
 
   String _buildSummary() {

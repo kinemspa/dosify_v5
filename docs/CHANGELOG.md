@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file. Dates in UTC.
 
-## [Unreleased]
+## Unreleased
+- Tablet editor: General, Strength, Inventory, Storage sections implemented with hybrid layout (40px controls)
+- UI polish: label vertical centering, fake vendor hints, dropdown styling, reduced save bar height
+- Save flow: pre-save confirmation dialog and Hive persistence for Tablet via MedicationRepository
 - Settings: Added theme mode switch (System/Light/Dark) with persistence. MaterialApp now respects the chosen ThemeMode.
 - Medications: Medication Details sections styled with primary-accent headers, onSurfaceVariant labels, and outlined surface cards.
 - Medications: New alternate Add/Edit Tablet pages:
