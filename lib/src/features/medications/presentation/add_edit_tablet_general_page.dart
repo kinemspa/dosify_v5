@@ -88,13 +88,39 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  Widget _rowLabelField({required String label, required Widget field}) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: field),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('[GENERAL] build() called');
+    debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Add Tablet – General', forceBackButton: true),
+      appBar: AppBar(title: const Text('Add Tablet – General (plain app bar)')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         child: Form(
           key: _formKey,
           child: Column(
@@ -108,69 +134,51 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 margin: const EdgeInsets.only(bottom: 8),
                 color: Colors.teal,
                 child: const Text(
-                  'DEBUG: GENERAL CARD ONLY',
+                  'DEBUG: GENERAL CARD ONLY (hybrid) – step A',
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                 ),
               ),
               _section('General', [
-                TextFormField(
-                  controller: _nameCtrl,
-                  textCapitalization: TextCapitalization.sentences,
-                  inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r"\s{2,}"))],
-                  decoration: _dec(label: 'Name *', hint: 'e.g., Panadol', helper: 'Enter the medication name'),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  onChanged: (_) => setState(() {}),
+                _rowLabelField(
+                  label: 'Name *',
+                  field: TextFormField(
+                    controller: _nameCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Name *', hint: 'e.g., Panadol', helper: 'Enter the medication name'),
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    onChanged: (_) => setState(() {}),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _manufacturerCtrl,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: _dec(label: 'Manufacturer', hint: 'e.g., GlaxoSmithKline', helper: 'Enter the brand or company name'),
+                _rowLabelField(
+                  label: 'Manufacturer',
+                  field: TextFormField(
+                    controller: _manufacturerCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Manufacturer', hint: 'e.g., GlaxoSmithKline', helper: 'Enter the brand or company name'),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _descriptionCtrl,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'What is this medication used for?'),
+                _rowLabelField(
+                  label: 'Description',
+                  field: TextFormField(
+                    controller: _descriptionCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'What is this medication used for?'),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _notesCtrl,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Additional notes or instructions'),
+                _rowLabelField(
+                  label: 'Notes',
+                  field: TextFormField(
+                    controller: _notesCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Additional notes or instructions'),
+                  ),
                 ),
               ]),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: Center(
-            child: SizedBox(
-              height: 40,
-              child: FilledButton.icon(
-                onPressed: _nameCtrl.text.trim().isNotEmpty
-                    ? () async {
-                        if (!_formKey.currentState!.validate()) return;
-                        await showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: const Text('Debug Save'),
-                            content: const Text('General card rendered successfully.'),
-                            actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK'))],
-                          ),
-                        );
-                      }
-                    : null,
-                icon: const Icon(Icons.save),
-                label: const Text('Save'),
-              ),
-            ),
-          ),
-        ),
-      ),
+      // No bottom nav here for this step
     );
   }
 }

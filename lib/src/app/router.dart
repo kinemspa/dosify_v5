@@ -136,7 +136,10 @@ final router = GoRouter(
           path: '/medications/add/tablet',
           name: 'addTablet',
           // TEMP: route to minimal page with ONLY General card to isolate render
-          builder: (context, state) => const AddEditTabletGeneralPage(),
+          builder: (context, state) {
+            debugPrint('[ROUTER] /medications/add/tablet -> AddEditTabletGeneralPage');
+            return const AddEditTabletGeneralPage();
+          },
         ),
 // removed details-style add route
         GoRoute(
