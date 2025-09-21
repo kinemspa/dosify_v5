@@ -9,7 +9,9 @@ import 'package:dosifi_v5/src/features/medications/data/medication_repository.da
 /// Minimal Tablet editor that renders ONLY the General section.
 /// This is used to isolate rendering issues step-by-step.
 class AddEditTabletGeneralPage extends StatefulWidget {
-  const AddEditTabletGeneralPage({super.key});
+  const AddEditTabletGeneralPage({super.key, this.initial});
+
+  final Medication? initial;
 
   @override
   State<AddEditTabletGeneralPage> createState() => _AddEditTabletGeneralPageState();
@@ -40,6 +42,33 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
 
   // Live validation state
   String? _stockError;
+
+  @override
+  void initState() {
+    super.initState();
+    final m = widget.initial;
+    if (m != null) {
+      _nameCtrl.text = m.name;
+      _manufacturerCtrl.text = m.manufacturer ?? '';
+      _descriptionCtrl.text = m.description ?? '';
+      _notesCtrl.text = m.notes ?? '';
+      _strengthValueCtrl.text = (m.strengthValue == m.strengthValue.roundToDouble())
+          ? m.strengthValue.toStringAsFixed(0)
+          : m.strengthValue.toString();
+      _strengthUnit = m.strengthUnit;
+      _stockCtrl.text = (m.stockValue == m.stockValue.roundToDouble())
+          ? m.stockValue.toStringAsFixed(0)
+          : m.stockValue.toStringAsFixed(2);
+      _lowStockAlert = m.lowStockEnabled;
+      _lowStockThresholdCtrl.text = m.lowStockThreshold?.toString() ?? '';
+      _expiryDate = m.expiry;
+      _batchNumberCtrl.text = m.batchNumber ?? '';
+      _storageLocationCtrl.text = m.storageLocation ?? '';
+      _keepRefrigerated = m.requiresRefrigeration;
+      _lightSensitive = (m.storageInstructions?.toLowerCase().contains('light') ?? false);
+      _storageInstructionsCtrl.text = m.storageInstructions ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -158,7 +187,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     return MediaQuery(
       data: mq.copyWith(textScaleFactor: 1.0),
       child: Scaffold(
-        appBar: const GradientAppBar(title: 'Add Tablet'),
+        appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
         body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
         child: Form(
@@ -508,7 +537,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     try {
       final box = Hive.box<Medication>('medications');
       final repo = MedicationRepository(box);
-      final id = _newId();
+      final id = widget.initial?.id ?? _newId();
       final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
       final stock = double.tryParse(_stockCtrl.text.trim()) ?? 0;
       final lowThresh = double.tryParse(_lowStockThresholdCtrl.text.trim());

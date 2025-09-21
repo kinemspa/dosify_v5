@@ -175,7 +175,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditTabletPage(initial: med);
+            return AddEditTabletGeneralPage(initial: med);
           },
         ),
 // removed details-style edit route
