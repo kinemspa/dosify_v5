@@ -216,7 +216,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         width: 120,
                         child: TextFormField(
                           controller: _strengthValueCtrl,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                           decoration: _dec(label: 'Amount *', hint: '0'),
@@ -235,21 +235,26 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Unit *',
-                  field: Padding(
-                    padding: const EdgeInsets.only(left: 36),
-                    child: SizedBox(
-                      height: 40,
-                      width: 120,
-                      child: DropdownButtonFormField<Unit>(
-                        value: _strengthUnit,
-                        isExpanded: false,
-                        items: const [Unit.mcg, Unit.mg, Unit.g]
-                            .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                            .toList(),
-                        onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                        decoration: _dec(label: 'Unit *'),
+                  field: Row(
+                    children: [
+                      const SizedBox(width: 36),
+                      SizedBox(
+                        height: 40,
+                        width: 120,
+                        child: DropdownButtonFormField<Unit>(
+                          value: _strengthUnit,
+                          isExpanded: false,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
+                          items: const [Unit.mcg, Unit.mg, Unit.g]
+                              .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                              .toList(),
+                          onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                          decoration: _dec(label: 'Unit *'),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ]),
@@ -272,7 +277,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         width: 120,
                         child: TextFormField(
                           controller: _stockCtrl,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                           decoration: _dec(label: 'Stock', hint: '0.00'),
@@ -299,19 +304,24 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Unit',
-                  field: Padding(
-                    padding: const EdgeInsets.only(left: 36),
-                    child: SizedBox(
-                      height: 40,
-                      width: 120,
-                      child: DropdownButtonFormField<String>(
-                        value: 'tablets',
-                        isExpanded: false,
-                        items: const [DropdownMenuItem(value: 'tablets', child: Text('tablets'))],
-                        onChanged: null, // locked
-                        decoration: _dec(label: 'Unit'),
+                  field: Row(
+                    children: [
+                      const SizedBox(width: 36),
+                      SizedBox(
+                        height: 40,
+                        width: 120,
+                        child: DropdownButtonFormField<String>(
+                          value: 'tablets',
+                          isExpanded: false,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
+                          items: const [DropdownMenuItem(value: 'tablets', child: Text('tablets'))],
+                          onChanged: null, // locked
+                          decoration: _dec(label: 'Unit'),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ]),
@@ -339,31 +349,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ),
                   ),
                 ),
-                if (_lowStockAlert) _rowLabelField(
-                  label: 'Threshold',
-                  field: SizedBox(
-                    width: 120,
-                    child: TextFormField(
-                      controller: _lowStockThresholdCtrl,
-                      textAlign: TextAlign.left,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: _dec(label: 'Threshold', hint: '0'),
-                    ),
-                  ),
-                ),
-                _rowLabelField(
-                  label: 'Low stock alert',
-                  field: Row(
-                    children: [
-                      Checkbox(
-                        value: _lowStockAlert,
-                        onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
-                      ),
-                      const Text('Enable'),
-                    ],
-                  ),
-                ),
               ]),
             ],
           ),
@@ -371,10 +356,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
       bottomNavigationBar: SafeArea(
         child: SizedBox(
-          height: 56,
+          height: 48,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+            padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
             child: FilledButton(
+              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(40)),
               onPressed: () async {
                 if (!(_formKey.currentState?.validate() ?? false)) return;
                 await _showConfirmDialog();
