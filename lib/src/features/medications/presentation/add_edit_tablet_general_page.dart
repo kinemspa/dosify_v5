@@ -27,6 +27,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   bool _lowStockAlert = false;
   final _lowStockThresholdCtrl = TextEditingController();
   DateTime? _expiryDate;
+  // Storage fields
+  final _storageLocationCtrl = TextEditingController();
+  final _storeBelowCtrl = TextEditingController();
+  bool _keepRefrigerated = false;
+  bool _lightSensitive = false;
 
   @override
   void dispose() {
@@ -37,6 +42,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _strengthValueCtrl.dispose();
     _stockCtrl.dispose();
     _lowStockThresholdCtrl.dispose();
+    _storageLocationCtrl.dispose();
+    _storeBelowCtrl.dispose();
     super.dispose();
   }
 
@@ -326,6 +333,57 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
               ]),
 
+              // Storage
+              const SizedBox(height: 10),
+              _section('Storage', [
+                _rowLabelField(
+                  label: 'Location',
+                  field: TextFormField(
+                    controller: _storageLocationCtrl,
+                    textAlign: TextAlign.left,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Location', hint: 'e.g., Bathroom cabinet'),
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Store below (°C)',
+                  field: SizedBox(
+                    width: 120,
+                    child: TextFormField(
+                      controller: _storeBelowCtrl,
+                      textAlign: TextAlign.center,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,2}(?:\.\d{0,1})?$'))],
+                      decoration: _dec(label: 'Store below (°C)', hint: '25.0'),
+                    ),
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Cold storage',
+                  field: Row(
+                    children: [
+                      Checkbox(
+                        value: _keepRefrigerated,
+                        onChanged: (v) => setState(() => _keepRefrigerated = v ?? false),
+                      ),
+                      const Text('Keep refrigerated'),
+                    ],
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Light sensitive',
+                  field: Row(
+                    children: [
+                      Checkbox(
+                        value: _lightSensitive,
+                        onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+                      ),
+                      const Text('Protect from light'),
+                    ],
+                  ),
+                ),
+              ]),
+
               // Expiry picker
               const SizedBox(height: 10),
               _section('Expiry', [
@@ -422,6 +480,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       'Stock: ' + (_stockCtrl.text.trim().isEmpty ? '(empty)' : _stockCtrl.text.trim()) + ' tablets',
       'Low stock alert: ' + (_lowStockAlert ? 'ON' : 'OFF'),
       if (_lowStockAlert) 'Threshold: ' + (_lowStockThresholdCtrl.text.trim().isEmpty ? '(empty)' : _lowStockThresholdCtrl.text.trim()),
+      'Storage location: ' + (_storageLocationCtrl.text.trim().isEmpty ? '(empty)' : _storageLocationCtrl.text.trim()),
+      'Store below: ' + (_storeBelowCtrl.text.trim().isEmpty ? '(empty)' : (_storeBelowCtrl.text.trim() + ' °C')),
+      'Cold storage: ' + (_keepRefrigerated ? 'Yes' : 'No'),
+      'Light sensitive: ' + (_lightSensitive ? 'Yes' : 'No'),
       'Expiry: ' + (_expiryDate == null ? '(none)' : _fmtDate(_expiryDate!)),
     ].join('\n');
   }
