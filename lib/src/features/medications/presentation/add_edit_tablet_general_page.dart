@@ -224,6 +224,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Manufacturer', hint: 'e.g., Contoso Pharma', helper: 'Enter the brand or company name'),
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
                 _rowLabelField(
@@ -233,6 +234,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'Optional short description'),
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
                 _rowLabelField(
@@ -242,6 +244,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Optional notes'),
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
               ], trailing: _generalSummary()),
@@ -268,7 +271,15 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                           decoration: _dec(label: 'Amount *', hint: '0'),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          validator: (v) {
+                            final t = v?.trim() ?? '';
+                            if (t.isEmpty) return 'Required';
+                            final d = double.tryParse(t);
+                            if (d == null) return 'Invalid number';
+                            if (d <= 0) return 'Must be > 0';
+                            return null;
+                          },
+                          onChanged: (_) => setState(() {}),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -304,7 +315,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                               .map((u) => DropdownMenuItem(value: u, child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')))))
                               .toList(),
                           onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                          decoration: _dec(label: 'Unit *'),
+                          decoration: _dec(label: 'Unit *', helper: 'mcg / mg / g'),
                         ),
                       ),
                     ],
@@ -334,7 +345,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'))],
-                          decoration: _dec(label: 'Stock', hint: '0.00'),
+                          decoration: _dec(label: 'Stock', hint: '0.00', helper: 'Quarter steps: .00 / .25 / .50 / .75'),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return null;
                             final d = double.tryParse(v);
@@ -392,7 +403,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                               .toList(),
                           items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
                           onChanged: null, // locked
-                          decoration: _dec(label: 'Unit'),
+                          decoration: _dec(label: 'Unit', helper: 'Locked to tablets'),
                         ),
                       ),
                     ],
@@ -409,7 +420,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _batchNumberCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
+                    decoration: _dec(label: 'Batch No.', hint: 'Enter batch number', helper: 'Optional'),
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
                 _rowLabelField(
@@ -418,7 +430,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _storageLocationCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Location', hint: 'e.g., Bathroom cabinet'),
+                    decoration: _dec(label: 'Location', hint: 'e.g., Bathroom cabinet', helper: 'Optional'),
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
                 _rowLabelField(
@@ -430,7 +443,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       textAlign: TextAlign.center,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,2}(?:\.\d{0,1})?$'))],
-                      decoration: _dec(label: 'Store below (°C)', hint: '25.0'),
+                      decoration: _dec(label: 'Store below (°C)', hint: '25.0', helper: 'Optional'),
+                      onChanged: (_) => setState(() {}),
                     ),
                   ),
                 ),
@@ -464,7 +478,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _storageInstructionsCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
+                    decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions', helper: 'Optional'),
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
               ], trailing: _storageSummary()),
