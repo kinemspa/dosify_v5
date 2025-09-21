@@ -33,8 +33,13 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   // Storage fields
   final _storageLocationCtrl = TextEditingController();
   final _storeBelowCtrl = TextEditingController();
+  final _batchNumberCtrl = TextEditingController();
+  final _storageInstructionsCtrl = TextEditingController();
   bool _keepRefrigerated = false;
   bool _lightSensitive = false;
+
+  // Live validation state
+  String? _stockError;
 
   @override
   void dispose() {
@@ -47,6 +52,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _lowStockThresholdCtrl.dispose();
     _storageLocationCtrl.dispose();
     _storeBelowCtrl.dispose();
+    _batchNumberCtrl.dispose();
+    _storageInstructionsCtrl.dispose();
     super.dispose();
   }
 
@@ -147,27 +154,18 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Widget build(BuildContext context) {
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
-    return Scaffold(
-      appBar: const GradientAppBar(title: 'Add Tablet'),
-      body: SingleChildScrollView(
+    final mq = MediaQuery.of(context);
+    return MediaQuery(
+      data: mq.copyWith(textScaleFactor: 1.0),
+      child: Scaffold(
+        appBar: const GradientAppBar(title: 'Add Tablet'),
+        body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // High-contrast debug banner to confirm body renders
-              Container(
-                width: double.infinity,
-                alignment: Alignment.center,
-                height: 36,
-                margin: const EdgeInsets.only(bottom: 8),
-                color: Colors.teal,
-                child: const Text(
-                  'DEBUG: GENERAL CARD ONLY (hybrid) – step A',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
-                ),
-              ),
               _section('General', [
                 _rowLabelField(
                   label: 'Name *',
@@ -289,7 +287,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           controller: _stockCtrl,
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'))],
                           decoration: _dec(label: 'Stock', hint: '0.00'),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return null;
@@ -299,8 +297,23 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             if (cents % 25 != 0) return 'Use .00, .25, .50, or .75';
                             return null;
                           },
+                          onChanged: (v) {
+                            final d = double.tryParse(v);
+                            setState(() {
+                              if (d == null || ((d * 100).round() % 25 == 0)) {
+                                _stockError = null;
+                              } else {
+                                _stockError = 'Use .00, .25, .50, or .75';
+                              }
+                            });
+                          },
                         ),
                       ),
+                      if (_stockError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 36 + 120 + 6 + 30 + 6, top: 4),
+                          child: Text(_stockError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+                        ),
                       const SizedBox(width: 6),
                       _incBtn('+', () {
                         final d = double.tryParse(_stockCtrl.text.trim());
@@ -339,6 +352,15 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               // Storage
               const SizedBox(height: 10),
               _section('Storage', [
+                _rowLabelField(
+                  label: 'Batch No.',
+                  field: TextFormField(
+                    controller: _batchNumberCtrl,
+                    textAlign: TextAlign.left,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
+                  ),
+                ),
                 _rowLabelField(
                   label: 'Location',
                   field: TextFormField(
@@ -383,6 +405,15 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       ),
                       const Text('Protect from light'),
                     ],
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Storage instructions',
+                  field: TextFormField(
+                    controller: _storageInstructionsCtrl,
+                    textAlign: TextAlign.left,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
                   ),
                 ),
               ]),
@@ -494,9 +525,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         lowStockEnabled: _lowStockAlert,
         lowStockThreshold: _lowStockAlert ? lowThresh : null,
         expiry: _expiryDate,
+        batchNumber: _batchNumberCtrl.text.trim().isEmpty ? null : _batchNumberCtrl.text.trim(),
         storageLocation: _storageLocationCtrl.text.trim().isEmpty ? null : _storageLocationCtrl.text.trim(),
         requiresRefrigeration: _keepRefrigerated,
-        storageInstructions: _lightSensitive ? 'Protect from light' : null,
+        storageInstructions: _storageInstructionsCtrl.text.trim().isNotEmpty
+            ? _storageInstructionsCtrl.text.trim()
+            : (_lightSensitive ? 'Protect from light' : null),
       );
       await repo.upsert(med);
       if (mounted) {
@@ -526,10 +560,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       'Stock: ' + (_stockCtrl.text.trim().isEmpty ? '(empty)' : _stockCtrl.text.trim()) + ' tablets',
       'Low stock alert: ' + (_lowStockAlert ? 'ON' : 'OFF'),
       if (_lowStockAlert) 'Threshold: ' + (_lowStockThresholdCtrl.text.trim().isEmpty ? '(empty)' : _lowStockThresholdCtrl.text.trim()),
+'Batch: ' + (_batchNumberCtrl.text.trim().isEmpty ? '(empty)' : _batchNumberCtrl.text.trim()),
       'Storage location: ' + (_storageLocationCtrl.text.trim().isEmpty ? '(empty)' : _storageLocationCtrl.text.trim()),
       'Store below: ' + (_storeBelowCtrl.text.trim().isEmpty ? '(empty)' : (_storeBelowCtrl.text.trim() + ' °C')),
       'Cold storage: ' + (_keepRefrigerated ? 'Yes' : 'No'),
       'Light sensitive: ' + (_lightSensitive ? 'Yes' : 'No'),
+      'Storage instructions: ' + (_storageInstructionsCtrl.text.trim().isEmpty ? '(empty)' : _storageInstructionsCtrl.text.trim()),
       'Expiry: ' + (_expiryDate == null ? '(none)' : _fmtDate(_expiryDate!)),
     ].join('\n');
   }

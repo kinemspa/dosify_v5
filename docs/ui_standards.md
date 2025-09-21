@@ -66,7 +66,7 @@ General section (compact variant)
 - Floating labels disabled (labels are rendered in a separate left column)
 - Rows with +/- controls: inset sibling rows by 36 px to align field edges (30 btn + 6 gap)
 - Save bar: 48px container, Save button 40px tall, pre-save confirmation dialog shows summary of fields
-- Storage: include Location (text), Store below (°C) numeric (centered), Cold storage (toggle), Light sensitive (toggle)
+- Storage: include Batch No., Location (text), Store below (°C) numeric (centered), Cold storage (toggle), Light sensitive (toggle), Storage instructions (text)
 
 Hybrid Tablet Specifics
 
