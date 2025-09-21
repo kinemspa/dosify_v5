@@ -276,7 +276,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Optional notes'),
                     onChanged: (_) => setState(() {}),
                   ),
-                  ),
                 ),
               ], trailing: _generalSummary()),
 
@@ -634,7 +633,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Widget _generalSummary() {
     final name = _nameCtrl.text.trim();
     final mfr = _manufacturerCtrl.text.trim();
-    final s = name.isEmpty ? '—' : (mfr.isEmpty ? name : '$name – $mfr');
+    if (name.isEmpty && mfr.isEmpty) return const SizedBox.shrink();
+    final s = name.isEmpty ? mfr : (mfr.isEmpty ? name : '$name – $mfr');
     return Text(s, overflow: TextOverflow.ellipsis);
   }
 
@@ -659,12 +659,13 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final parts = <String>[];
     if (_keepRefrigerated) parts.add('Fridge');
     if (_storageLocationCtrl.text.trim().isNotEmpty) parts.add(_storageLocationCtrl.text.trim());
-    if (parts.isEmpty) return const Text('—');
+    if (parts.isEmpty) return const SizedBox.shrink();
     return Text(parts.join(' · '));
   }
 
   Widget _expirySummary() {
-    return Text(_expiryDate == null ? '—' : _fmtDate(_expiryDate!));
+    if (_expiryDate == null) return const SizedBox.shrink();
+    return Text(_fmtDate(_expiryDate!));
   }
 
   String _fmtDate(DateTime d) {
