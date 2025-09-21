@@ -11,6 +11,7 @@ import '../features/medications/presentation/add_edit_capsule_page.dart';
 import '../features/medications/presentation/add_edit_tablet_hybrid_page.dart';
 import '../features/medications/presentation/add_edit_tablet_page.dart';
 import '../features/medications/presentation/add_tablet_debug_page.dart';
+import '../features/medications/presentation/add_edit_tablet_general_page.dart';
 import '../features/medications/presentation/add_edit_injection_pfs_page.dart';
 import '../features/medications/presentation/add_edit_injection_single_vial_page.dart';
 import '../features/medications/presentation/add_edit_injection_multi_vial_page.dart';
@@ -134,8 +135,8 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          // TEMP: route to debug page to isolate body rendering issue
-          builder: (context, state) => AddTabletDebugPage(),
+          // TEMP: route to minimal page with ONLY General card to isolate render
+          builder: (context, state) => const AddEditTabletGeneralPage(),
         ),
 // removed details-style add route
         GoRoute(
