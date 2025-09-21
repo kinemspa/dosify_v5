@@ -148,7 +148,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Tablet – General (plain app bar)')),
+      appBar: const GradientAppBar(title: 'Add Tablet'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
         child: Form(
