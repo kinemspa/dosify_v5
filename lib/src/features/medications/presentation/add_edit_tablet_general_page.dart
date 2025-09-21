@@ -462,8 +462,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _incBtn(String symbol, VoidCallback onTap) {
     return SizedBox(
