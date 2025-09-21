@@ -24,6 +24,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Unit _strengthUnit = Unit.mg;
   // Inventory fields (next section)
   final _stockCtrl = TextEditingController();
+  bool _lowStockAlert = false;
+  final _lowStockThresholdCtrl = TextEditingController();
+  DateTime? _expiryDate;
 
   @override
   void dispose() {
@@ -33,6 +36,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _notesCtrl.dispose();
     _strengthValueCtrl.dispose();
     _stockCtrl.dispose();
+    _lowStockThresholdCtrl.dispose();
     super.dispose();
   }
 
@@ -47,7 +51,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       constraints: const BoxConstraints(minHeight: 40),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withValues(alpha: 0.60)),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
@@ -108,13 +112,17 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         children: [
           SizedBox(
             width: labelWidth,
-            child: Text(
-              label,
-              textAlign: TextAlign.left,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
+            height: 40,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                textAlign: TextAlign.left,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -155,7 +163,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Name *',
                   field: TextFormField(
                     controller: _nameCtrl,
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Name *', hint: 'e.g., Panadol', helper: 'Enter the medication name'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
@@ -166,7 +174,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Manufacturer',
                   field: TextFormField(
                     controller: _manufacturerCtrl,
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Manufacturer', hint: 'e.g., GlaxoSmithKline', helper: 'Enter the brand or company name'),
                   ),
@@ -175,7 +183,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Description',
                   field: TextFormField(
                     controller: _descriptionCtrl,
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'What is this medication used for?'),
                   ),
@@ -184,7 +192,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Notes',
                   field: TextFormField(
                     controller: _notesCtrl,
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Additional notes or instructions'),
                   ),
@@ -208,7 +216,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         width: 120,
                         child: TextFormField(
                           controller: _strengthValueCtrl,
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.left,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                           decoration: _dec(label: 'Amount *', hint: '0'),
@@ -227,8 +235,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Unit *',
-                  field: Align(
-                    alignment: Alignment.centerLeft,
+                  field: Padding(
+                    padding: const EdgeInsets.only(left: 36),
                     child: SizedBox(
                       height: 40,
                       width: 120,
@@ -264,10 +272,18 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         width: 120,
                         child: TextFormField(
                           controller: _stockCtrl,
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.left,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                           decoration: _dec(label: 'Stock', hint: '0.00'),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return null;
+                            final d = double.tryParse(v);
+                            if (d == null) return 'Invalid number';
+                            final cents = (d * 100).round();
+                            if (cents % 25 != 0) return 'Use .00, .25, .50, or .75';
+                            return null;
+                          },
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -283,8 +299,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Unit',
-                  field: Align(
-                    alignment: Alignment.centerLeft,
+                  field: Padding(
+                    padding: const EdgeInsets.only(left: 36),
                     child: SizedBox(
                       height: 40,
                       width: 120,
@@ -296,6 +312,56 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         decoration: _dec(label: 'Unit'),
                       ),
                     ),
+                  ),
+                ),
+              ]),
+
+              // Expiry picker
+              const SizedBox(height: 10),
+              _section('Expiry', [
+                _rowLabelField(
+                  label: 'Expiry date',
+                  field: SizedBox(
+                    height: 40,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(now.year - 1),
+                          lastDate: DateTime(now.year + 10),
+                          initialDate: _expiryDate ?? now,
+                        );
+                        if (picked != null) setState(() => _expiryDate = picked);
+                      },
+                      icon: const Icon(Icons.calendar_today, size: 18),
+                      label: Text(_expiryDate == null ? 'Select date' : _fmtDate(_expiryDate!)),
+                    ),
+                  ),
+                ),
+                if (_lowStockAlert) _rowLabelField(
+                  label: 'Threshold',
+                  field: SizedBox(
+                    width: 120,
+                    child: TextFormField(
+                      controller: _lowStockThresholdCtrl,
+                      textAlign: TextAlign.left,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: _dec(label: 'Threshold', hint: '0'),
+                    ),
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Low stock alert',
+                  field: Row(
+                    children: [
+                      Checkbox(
+                        value: _lowStockAlert,
+                        onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
+                      ),
+                      const Text('Enable'),
+                    ],
                   ),
                 ),
               ]),
@@ -317,5 +383,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         child: Text(symbol),
       ),
     );
+  }
+  String _fmtDate(DateTime d) {
+    final mm = d.month.toString().padLeft(2, '0');
+    final dd = d.day.toString().padLeft(2, '0');
+    return '${d.year}-$mm-$dd';
   }
 }

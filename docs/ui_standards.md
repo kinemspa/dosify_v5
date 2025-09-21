@@ -57,11 +57,14 @@ General section (compact variant)
 
 - Labels-left, fields-right layout
 - Label column width: responsive 110–120 px depending on width (<400: 110, otherwise 120)
+- Label cell height: 40px; vertically centered to align with fields
 - Card padding: horizontal 8, vertical 6
 - Page body padding (SingleChildScrollView): 10, 8, 10, 12
 - InputDecoration padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10) to keep 40 px total height
+- Hint text: left-aligned, 12 pt (compact variant)
 - Border radius: 12 px; outlineVariant on enabled; 2 px primary on focus
 - Floating labels disabled (labels are rendered in a separate left column)
+- Rows with +/- controls: inset sibling rows by 36 px to align field edges (30 btn + 6 gap)
 
 Hybrid Tablet Specifics
 
