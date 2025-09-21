@@ -278,7 +278,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   ),
                 ),
               ], trailing: _generalSummary()),
-
               const SizedBox(height: 10),
               _section('Strength', [
                 _rowLabelField(
