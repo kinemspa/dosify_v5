@@ -165,7 +165,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _nameCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Name *', hint: 'e.g., Panadol', helper: 'Enter the medication name'),
+                    decoration: _dec(label: 'Name *', hint: 'e.g., AcmeTab-500'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     onChanged: (_) => setState(() {}),
                   ),
@@ -176,7 +176,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _manufacturerCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Manufacturer', hint: 'e.g., GlaxoSmithKline', helper: 'Enter the brand or company name'),
+                    decoration: _dec(label: 'Manufacturer', hint: 'e.g., Contoso Pharma'),
                   ),
                 ),
                 _rowLabelField(
@@ -185,7 +185,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _descriptionCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'What is this medication used for?'),
+                    decoration: _dec(label: 'Description', hint: 'e.g., Pain relief'),
                   ),
                 ),
                 _rowLabelField(
@@ -194,7 +194,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _notesCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Additional notes or instructions'),
+                    decoration: _dec(label: 'Notes', hint: 'e.g., Take with food'),
                   ),
                 ),
               ]),
@@ -242,7 +242,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       width: 120,
                       child: DropdownButtonFormField<Unit>(
                         value: _strengthUnit,
-                        isExpanded: true,
+                        isExpanded: false,
                         items: const [Unit.mcg, Unit.mg, Unit.g]
                             .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
                             .toList(),
@@ -306,7 +306,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       width: 120,
                       child: DropdownButtonFormField<String>(
                         value: 'tablets',
-                        isExpanded: true,
+                        isExpanded: false,
                         items: const [DropdownMenuItem(value: 'tablets', child: Text('tablets'))],
                         onChanged: null, // locked
                         decoration: _dec(label: 'Unit'),
@@ -369,7 +369,21 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           ),
         ),
       ),
-      // No bottom nav here for this step
+      bottomNavigationBar: SafeArea(
+        child: SizedBox(
+          height: 56,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+            child: FilledButton(
+              onPressed: () async {
+                if (!(_formKey.currentState?.validate() ?? false)) return;
+                await _showConfirmDialog();
+              },
+              child: const Text('Save'),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -388,5 +402,41 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final mm = d.month.toString().padLeft(2, '0');
     final dd = d.day.toString().padLeft(2, '0');
     return '${d.year}-$mm-$dd';
+  }
+
+  Future<void> _showConfirmDialog() async {
+    final summary = _buildSummary();
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm Save'),
+        content: SingleChildScrollView(child: Text(summary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              debugPrint('[SAVE] Confirmed: ' + summary.replaceAll('\n', ' | '));
+              // TODO: Wire up persistence in a subsequent step
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _buildSummary() {
+    return [
+      'Name: ' + (_nameCtrl.text.trim().isEmpty ? '(empty)' : _nameCtrl.text.trim()),
+      'Manufacturer: ' + (_manufacturerCtrl.text.trim().isEmpty ? '(empty)' : _manufacturerCtrl.text.trim()),
+      'Description: ' + (_descriptionCtrl.text.trim().isEmpty ? '(empty)' : _descriptionCtrl.text.trim()),
+      'Notes: ' + (_notesCtrl.text.trim().isEmpty ? '(empty)' : _notesCtrl.text.trim()),
+      'Strength: ' + (_strengthValueCtrl.text.trim().isEmpty ? '(empty)' : _strengthValueCtrl.text.trim()) + ' ' + (_strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g'),
+      'Stock: ' + (_stockCtrl.text.trim().isEmpty ? '(empty)' : _stockCtrl.text.trim()) + ' tablets',
+      'Low stock alert: ' + (_lowStockAlert ? 'ON' : 'OFF'),
+      if (_lowStockAlert) 'Threshold: ' + (_lowStockThresholdCtrl.text.trim().isEmpty ? '(empty)' : _lowStockThresholdCtrl.text.trim()),
+      'Expiry: ' + (_expiryDate == null ? '(none)' : _fmtDate(_expiryDate!)),
+    ].join('\n');
   }
 }
