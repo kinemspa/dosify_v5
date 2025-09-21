@@ -43,7 +43,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       constraints: const BoxConstraints(minHeight: 40),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 10, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withValues(alpha: 0.60)),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
@@ -106,6 +106,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             width: labelWidth,
             child: Text(
               label,
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -150,6 +151,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Name *',
                   field: TextFormField(
                     controller: _nameCtrl,
+                    textAlign: TextAlign.center,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Name *', hint: 'e.g., Panadol', helper: 'Enter the medication name'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
@@ -160,6 +162,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Manufacturer',
                   field: TextFormField(
                     controller: _manufacturerCtrl,
+                    textAlign: TextAlign.center,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Manufacturer', hint: 'e.g., GlaxoSmithKline', helper: 'Enter the brand or company name'),
                   ),
@@ -168,6 +171,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Description',
                   field: TextFormField(
                     controller: _descriptionCtrl,
+                    textAlign: TextAlign.center,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'What is this medication used for?'),
                   ),
@@ -176,6 +180,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   label: 'Notes',
                   field: TextFormField(
                     controller: _notesCtrl,
+                    textAlign: TextAlign.center,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Additional notes or instructions'),
                   ),
@@ -218,14 +223,17 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Unit *',
-                  field: DropdownButtonFormField<Unit>(
-                    value: _strengthUnit,
-                    isExpanded: true,
-                    items: const [Unit.mcg, Unit.mg, Unit.g]
-                        .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                        .toList(),
-                    onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                    decoration: _dec(label: 'Unit *'),
+                  field: SizedBox(
+                    height: 40,
+                    child: DropdownButtonFormField<Unit>(
+                      value: _strengthUnit,
+                      isExpanded: true,
+                      items: const [Unit.mcg, Unit.mg, Unit.g]
+                          .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                          .toList(),
+                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                      decoration: _dec(label: 'Unit *'),
+                    ),
                   ),
                 ),
               ]),

@@ -61,6 +61,7 @@ General section (compact variant)
 - Page body padding (SingleChildScrollView): 10, 8, 10, 12
 - InputDecoration padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10) to keep 40 px total height
 - Border radius: 12 px; outlineVariant on enabled; 2 px primary on focus
+- Hint font size (compact): 10 pt
 
 Hybrid Tablet Specifics
 
