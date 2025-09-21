@@ -143,7 +143,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ),
                   ),
                   if (trailing != null) DefaultTextStyle(
-                    style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75)),
+                    style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withOpacity(0.50), fontWeight: FontWeight.w600),
                     child: trailing,
                   ),
                 ],
@@ -154,6 +154,33 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           ],
         ),
       ),
+    );
+  }
+
+  InputDecoration _decDrop({required String label, String? hint, String? helper}) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return InputDecoration(
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      hintText: hint,
+      helperText: helper,
+      isDense: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      constraints: const BoxConstraints(minHeight: 40),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
+      helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
+      filled: true,
+      fillColor: cs.surfaceContainerLowest,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.outlineVariant),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+      labelText: label,
     );
   }
 
@@ -243,8 +270,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _notesCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
+                    keyboardType: TextInputType.multiline,
+                    minLines: 2,
+                    maxLines: null,
                     decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Optional notes'),
                     onChanged: (_) => setState(() {}),
+                  ),
                   ),
                 ),
               ], trailing: _generalSummary()),
@@ -252,7 +283,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               const SizedBox(height: 10),
               _section('Strength', [
                 _rowLabelField(
-                  label: 'Amount *',
+                  label: 'Strength amount (per tablet) *',
                   field: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -293,7 +324,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   ),
                 ),
                 _rowLabelField(
-                  label: 'Unit *',
+                  label: 'Strength unit *',
                   field: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -315,7 +346,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                               .map((u) => DropdownMenuItem(value: u, child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')))))
                               .toList(),
                           onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                          decoration: _dec(label: 'Unit *', helper: 'mcg / mg / g'),
+                          decoration: _decDrop(label: 'Strength unit *', hint: null, helper: 'mcg / mg / g'),
                         ),
                       ),
                     ],
@@ -326,7 +357,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               const SizedBox(height: 10),
               _section('Inventory', [
                 _rowLabelField(
-                  label: 'Stock',
+                  label: 'Stock amount *',
                   field: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -345,11 +376,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'))],
-                          decoration: _dec(label: 'Stock', hint: '0.00', helper: 'Quarter steps: .00 / .25 / .50 / .75'),
+                          decoration: _dec(label: 'Stock amount *', hint: '0.00', helper: 'Quarter steps: .00 / .25 / .50 / .75'),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) return null;
+                            if (v == null || v.trim().isEmpty) return 'Required';
                             final d = double.tryParse(v);
                             if (d == null) return 'Invalid number';
+                            if (d < 0) return 'Must be ≥ 0';
                             final cents = (d * 100).round();
                             if (cents % 25 != 0) return 'Use .00, .25, .50, or .75';
                             return null;
@@ -383,9 +415,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   ),
                 ),
                 _rowLabelField(
-                  label: 'Unit',
+                  label: 'Stock unit',
                   field: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(width: 36),
                       SizedBox(
@@ -403,12 +434,49 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                               .toList(),
                           items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
                           onChanged: null, // locked
-                          decoration: _dec(label: 'Unit', helper: 'Locked to tablets'),
+                          decoration: _decDrop(label: 'Stock unit', helper: 'Locked to tablets'),
                         ),
                       ),
                     ],
                   ),
                 ),
+
+                // Low stock alert toggle + threshold
+                _rowLabelField(
+                  label: 'Low stock alert',
+                  field: Row(
+                    children: [
+                      Checkbox(
+                        value: _lowStockAlert,
+                        onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
+                      ),
+                      const Text('Enable alert when stock is low'),
+                    ],
+                  ),
+                ),
+                if (_lowStockAlert)
+                  _rowLabelField(
+                    label: 'Threshold',
+                    field: SizedBox(
+                      width: 120,
+                      child: TextFormField(
+                        controller: _lowStockThresholdCtrl,
+                        textAlign: TextAlign.center,
+                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        decoration: _dec(label: 'Threshold', hint: '0', helper: 'Required when enabled'),
+                        validator: (v) {
+                          if (!_lowStockAlert) return null;
+                          final t = v?.trim() ?? '';
+                          if (t.isEmpty) return 'Required';
+                          final n = int.tryParse(t);
+                          if (n == null) return 'Invalid number';
+                          if (n <= 0) return 'Must be > 0';
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
               ], trailing: _inventorySummary()),
 
               // Storage
@@ -436,16 +504,32 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Store below (°C)',
-                  field: SizedBox(
-                    width: 120,
-                    child: TextFormField(
-                      controller: _storeBelowCtrl,
-                      textAlign: TextAlign.center,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,2}(?:\.\d{0,1})?$'))],
-                      decoration: _dec(label: 'Store below (°C)', hint: '25.0', helper: 'Optional'),
-                      onChanged: (_) => setState(() {}),
-                    ),
+                  field: Row(
+                    children: [
+                      _incBtn('−', () {
+                        final v = int.tryParse(_storeBelowCtrl.text.trim()) ?? 0;
+                        final nv = (v - 1).clamp(0, 1000);
+                        setState(() => _storeBelowCtrl.text = nv.toString());
+                      }),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        width: 80,
+                        child: TextFormField(
+                          controller: _storeBelowCtrl,
+                          textAlign: TextAlign.center,
+                          keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          decoration: _dec(label: 'Store below (°C)', hint: '25', helper: 'Optional'),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      _incBtn('+', () {
+                        final v = int.tryParse(_storeBelowCtrl.text.trim()) ?? 0;
+                        final nv = (v + 1).clamp(0, 1000);
+                        setState(() => _storeBelowCtrl.text = nv.toString());
+                      }),
+                    ],
                   ),
                 ),
                 _rowLabelField(
@@ -517,17 +601,21 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           height: 48,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
-            child: FilledButton(
-              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(40)),
-              onPressed: () async {
+            child: Center(
+              child: SizedBox(
+                width: 220,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(40)),
+                  onPressed: () async {
                 if (!(_formKey.currentState?.validate() ?? false)) return;
                 await _showConfirmDialog();
               },
-              child: const Text('Save'),
+                  child: const Text('Save'),
+                ),
+              ),
             ),
           ),
         ),
-      ),
     ),
   );
 }
@@ -552,15 +640,19 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
 
   Widget _strengthSummary() {
     final v = _strengthValueCtrl.text.trim();
-    if (v.isEmpty) return const Text('—');
+    final name = _nameCtrl.text.trim();
+    if (v.isEmpty) return const SizedBox.shrink();
     final unit = _strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g';
-    return Text('$v $unit');
+    final med = name.isEmpty ? '' : ' $name Tablets';
+    return Text('$v $unit$med');
   }
 
   Widget _inventorySummary() {
     final v = _stockCtrl.text.trim();
-    if (v.isEmpty) return const Text('—');
-    return Text('$v tablets');
+    final name = _nameCtrl.text.trim();
+    if (v.isEmpty) return const SizedBox.shrink();
+    final med = name.isEmpty ? '' : ' $name Tablets';
+    return Text('$v$med');
   }
 
   Widget _storageSummary() {
@@ -582,12 +674,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   }
 
   Future<void> _showConfirmDialog() async {
-    final summary = _buildSummary();
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Save'),
-        content: SingleChildScrollView(child: Text(summary)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text('Confirm medication', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        content: SingleChildScrollView(child: _buildConfirmContent(ctx)),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
           FilledButton(
@@ -647,6 +739,40 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   String _newId() {
     final ms = DateTime.now().millisecondsSinceEpoch;
     return 'med_$ms';
+  }
+
+  Widget _buildConfirmContent(BuildContext ctx) {
+    final theme = Theme.of(ctx);
+    final labelStyle = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w700);
+    Widget row(String l, String v) => Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 140, child: Text(l, style: labelStyle)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(v.isEmpty ? '-' : v, style: valueStyle)),
+        ],
+      ),
+    );
+    final strengthText = _strengthSummary() is SizedBox ? '' : (_strengthValueCtrl.text.trim().isEmpty ? '' : '${_strengthValueCtrl.text.trim()} ${_strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g'} ${_nameCtrl.text.trim().isEmpty ? '' : _nameCtrl.text.trim() + ' Tablets'}');
+    final inventoryText = _inventorySummary() is SizedBox ? '' : (_stockCtrl.text.trim().isEmpty ? '' : '${_stockCtrl.text.trim()} ${_nameCtrl.text.trim().isEmpty ? '' : _nameCtrl.text.trim() + ' Tablets'}');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        row('Name', _nameCtrl.text.trim()),
+        row('Manufacturer', _manufacturerCtrl.text.trim()),
+        row('Strength', strengthText),
+        row('Stock', inventoryText.isEmpty ? (_stockCtrl.text.trim().isEmpty ? '' : _stockCtrl.text.trim() + ' tablets') : inventoryText),
+        row('Low stock alerts', _lowStockAlert ? 'On at ${_lowStockThresholdCtrl.text.trim()}' : 'Off'),
+        row('Expiry', _expiryDate == null ? '' : _fmtDate(_expiryDate!)),
+        row('Batch', _batchNumberCtrl.text.trim()),
+        row('Storage location', _storageLocationCtrl.text.trim()),
+        row('Requires refrigeration', _keepRefrigerated ? 'Yes' : 'No'),
+        row('Storage instructions', _storageInstructionsCtrl.text.trim()),
+      ],
+    );
   }
 
   String _buildSummary() {
