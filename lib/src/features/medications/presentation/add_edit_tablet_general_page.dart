@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 /// Minimal Tablet editor that renders ONLY the General section.
 /// This is used to isolate rendering issues step-by-step.
@@ -18,6 +19,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _manufacturerCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  // Strength fields (next section)
+  final _strengthValueCtrl = TextEditingController();
+  Unit _strengthUnit = Unit.mg;
 
   @override
   void dispose() {
@@ -25,6 +29,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _manufacturerCtrl.dispose();
     _descriptionCtrl.dispose();
     _notesCtrl.dispose();
+    _strengthValueCtrl.dispose();
     super.dispose();
   }
 
@@ -35,8 +40,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       labelText: label,
       hintText: hint,
       helperText: helper,
-      isDense: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       constraints: const BoxConstraints(minHeight: 40),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withValues(alpha: 0.60)),
@@ -59,13 +64,13 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final isLight = theme.brightness == Brightness.light;
     return Card(
       elevation: 0,
-      color: isLight ? theme.colorScheme.primary.withValues(alpha: 0.05) : theme.colorScheme.surfaceContainerHigh,
+      color: isLight ? theme.colorScheme.primary.withValues(alpha: 0.04) : theme.colorScheme.surfaceContainerHigh,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+        padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -89,6 +94,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   }
 
   Widget _rowLabelField({required String label, required Widget field}) {
+    final width = MediaQuery.of(context).size.width;
+    final labelWidth = width >= 400 ? 120.0 : 110.0;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -96,7 +103,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 120,
+            width: labelWidth,
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -120,7 +127,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Tablet – General (plain app bar)')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
         child: Form(
           key: _formKey,
           child: Column(
@@ -174,11 +181,71 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                   ),
                 ),
               ]),
+
+              const SizedBox(height: 10),
+              _section('Strength', [
+                _rowLabelField(
+                  label: 'Amount *',
+                  field: Row(
+                    children: [
+                      _incBtn('−', () {
+                        final d = double.tryParse(_strengthValueCtrl.text.trim());
+                        final base = d?.floor() ?? 0;
+                        final nv = (base - 1).clamp(0, 1000000000);
+                        setState(() => _strengthValueCtrl.text = nv.toString());
+                      }),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        width: 120,
+                        child: TextFormField(
+                          controller: _strengthValueCtrl,
+                          textAlign: TextAlign.center,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
+                          decoration: _dec(label: 'Amount *', hint: '0'),
+                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      _incBtn('+', () {
+                        final d = double.tryParse(_strengthValueCtrl.text.trim());
+                        final base = d?.floor() ?? 0;
+                        final nv = (base + 1).clamp(0, 1000000000);
+                        setState(() => _strengthValueCtrl.text = nv.toString());
+                      }),
+                    ],
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Unit *',
+                  field: DropdownButtonFormField<Unit>(
+                    value: _strengthUnit,
+                    isExpanded: true,
+                    items: const [Unit.mcg, Unit.mg, Unit.g]
+                        .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                        .toList(),
+                    onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                    decoration: _dec(label: 'Unit *'),
+                  ),
+                ),
+              ]),
             ],
           ),
         ),
       ),
       // No bottom nav here for this step
+    );
+  }
+
+  Widget _incBtn(String symbol, VoidCallback onTap) {
+    return SizedBox(
+      height: 30,
+      width: 30,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, minimumSize: const Size(30, 30)),
+        onPressed: onTap,
+        child: Text(symbol),
+      ),
     );
   }
 }

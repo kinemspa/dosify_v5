@@ -53,6 +53,15 @@ Propagation
 
 ---
 
+General section (compact variant)
+
+- Labels-left, fields-right layout
+- Label column width: responsive 110–120 px depending on width (<400: 110, otherwise 120)
+- Card padding: horizontal 8, vertical 6
+- Page body padding (SingleChildScrollView): 10, 8, 10, 12
+- InputDecoration padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10) to keep 40 px total height
+- Border radius: 12 px; outlineVariant on enabled; 2 px primary on focus
+
 Hybrid Tablet Specifics
 
 - Strength
