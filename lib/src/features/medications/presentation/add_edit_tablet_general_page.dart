@@ -603,18 +603,18 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 child: FilledButton(
                   style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(40)),
                   onPressed: () async {
-                if (!(_formKey.currentState?.validate() ?? false)) return;
-                await _showConfirmDialog();
-              },
+                    if (!(_formKey.currentState?.validate() ?? false)) return;
+                    await _showConfirmDialog();
+                  },
                   child: const Text('Save'),
                 ),
               ),
             ),
           ),
         ),
-  );
-}
-
+      ),
+    );
+  }
   Widget _incBtn(String symbol, VoidCallback onTap) {
     return SizedBox(
       height: 30,
