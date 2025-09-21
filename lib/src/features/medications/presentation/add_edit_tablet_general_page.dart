@@ -221,10 +221,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     final mq = MediaQuery.of(context);
-    return MediaQuery(
-      data: mq.copyWith(textScaleFactor: 1.0),
-      child: Scaffold(
-        appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
+    return Scaffold(
+      appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
         body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
         child: Form(
@@ -614,7 +612,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             ),
           ),
         ),
-    ),
   );
 }
 
