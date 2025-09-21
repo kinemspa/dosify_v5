@@ -113,7 +113,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
-  Widget _section(String title, List<Widget> children) {
+  Widget _section(String title, List<Widget> children, {Widget? trailing}) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     return Card(
@@ -129,14 +129,24 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 2, bottom: 4),
-              child: Text(
-                title,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  color: theme.colorScheme.primary,
-                ),
+              padding: const EdgeInsets.only(left: 2, bottom: 4, right: 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  if (trailing != null) DefaultTextStyle(
+                    style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75)),
+                    child: trailing,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 6),
@@ -167,7 +177,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
                 ),
               ),
             ),
@@ -202,7 +212,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _nameCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Name *', hint: 'e.g., AcmeTab-500'),
+                    decoration: _dec(label: 'Name *', hint: 'e.g., AcmeTab-500', helper: 'Enter the medication name'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     onChanged: (_) => setState(() {}),
                   ),
@@ -213,7 +223,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _manufacturerCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Manufacturer', hint: 'e.g., Contoso Pharma'),
+                    decoration: _dec(label: 'Manufacturer', hint: 'e.g., Contoso Pharma', helper: 'Enter the brand or company name'),
                   ),
                 ),
                 _rowLabelField(
@@ -222,7 +232,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _descriptionCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Description', hint: 'e.g., Pain relief'),
+                    decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'Optional short description'),
                   ),
                 ),
                 _rowLabelField(
@@ -231,16 +241,17 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _notesCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Notes', hint: 'e.g., Take with food'),
+                    decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Optional notes'),
                   ),
                 ),
-              ]),
+              ], trailing: _generalSummary()),
 
               const SizedBox(height: 10),
               _section('Strength', [
                 _rowLabelField(
                   label: 'Amount *',
                   field: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _incBtn('−', () {
                         final d = double.tryParse(_strengthValueCtrl.text.trim());
@@ -273,6 +284,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 _rowLabelField(
                   label: 'Unit *',
                   field: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(width: 36),
                       SizedBox(
@@ -281,11 +293,15 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         child: DropdownButtonFormField<Unit>(
                           value: _strengthUnit,
                           isExpanded: false,
+                          alignment: AlignmentDirectional.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                           dropdownColor: Theme.of(context).colorScheme.surface,
                           menuMaxHeight: 320,
+                          selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                              .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                              .toList(),
                           items: const [Unit.mcg, Unit.mg, Unit.g]
-                              .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                              .map((u) => DropdownMenuItem(value: u, child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')))))
                               .toList(),
                           onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
                           decoration: _dec(label: 'Unit *'),
@@ -294,13 +310,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ],
                   ),
                 ),
-              ]),
+              ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
               _section('Inventory', [
                 _rowLabelField(
                   label: 'Stock',
                   field: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _incBtn('−', () {
                         final d = double.tryParse(_stockCtrl.text.trim());
@@ -357,6 +374,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 _rowLabelField(
                   label: 'Unit',
                   field: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(width: 36),
                       SizedBox(
@@ -365,10 +383,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         child: DropdownButtonFormField<String>(
                           value: 'tablets',
                           isExpanded: false,
+                          alignment: AlignmentDirectional.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                           dropdownColor: Theme.of(context).colorScheme.surface,
                           menuMaxHeight: 320,
-                          items: const [DropdownMenuItem(value: 'tablets', child: Text('tablets'))],
+                          selectedItemBuilder: (ctx) => const ['tablets']
+                              .map((t) => Center(child: Text(t)))
+                              .toList(),
+                          items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
                           onChanged: null, // locked
                           decoration: _dec(label: 'Unit'),
                         ),
@@ -376,7 +398,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ],
                   ),
                 ),
-              ]),
+              ], trailing: _inventorySummary()),
 
               // Storage
               const SizedBox(height: 10),
@@ -445,7 +467,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
                   ),
                 ),
-              ]),
+              ], trailing: _storageSummary()),
 
               // Expiry picker
               const SizedBox(height: 10),
@@ -470,7 +492,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ),
                   ),
                 ),
-              ]),
+              ], trailing: _expirySummary()),
             ],
           ),
         ),
@@ -506,6 +528,38 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
     );
   }
+  Widget _generalSummary() {
+    final name = _nameCtrl.text.trim();
+    final mfr = _manufacturerCtrl.text.trim();
+    final s = name.isEmpty ? '—' : (mfr.isEmpty ? name : '$name – $mfr');
+    return Text(s, overflow: TextOverflow.ellipsis);
+  }
+
+  Widget _strengthSummary() {
+    final v = _strengthValueCtrl.text.trim();
+    if (v.isEmpty) return const Text('—');
+    final unit = _strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g';
+    return Text('$v $unit');
+  }
+
+  Widget _inventorySummary() {
+    final v = _stockCtrl.text.trim();
+    if (v.isEmpty) return const Text('—');
+    return Text('$v tablets');
+  }
+
+  Widget _storageSummary() {
+    final parts = <String>[];
+    if (_keepRefrigerated) parts.add('Fridge');
+    if (_storageLocationCtrl.text.trim().isNotEmpty) parts.add(_storageLocationCtrl.text.trim());
+    if (parts.isEmpty) return const Text('—');
+    return Text(parts.join(' · '));
+  }
+
+  Widget _expirySummary() {
+    return Text(_expiryDate == null ? '—' : _fmtDate(_expiryDate!));
+  }
+
   String _fmtDate(DateTime d) {
     final mm = d.month.toString().padLeft(2, '0');
     final dd = d.day.toString().padLeft(2, '0');
