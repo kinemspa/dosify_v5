@@ -19,9 +19,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _manufacturerCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
-  // Strength fields (next section)
+  // Strength fields (current section)
   final _strengthValueCtrl = TextEditingController();
   Unit _strengthUnit = Unit.mg;
+  // Inventory fields (next section)
+  final _stockCtrl = TextEditingController();
 
   @override
   void dispose() {
@@ -30,6 +32,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _descriptionCtrl.dispose();
     _notesCtrl.dispose();
     _strengthValueCtrl.dispose();
+    _stockCtrl.dispose();
     super.dispose();
   }
 
@@ -37,13 +40,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return InputDecoration(
-      labelText: label,
+      // No floating label; we render labels in the left column
+      floatingLabelBehavior: FloatingLabelBehavior.never,
       hintText: hint,
       helperText: helper,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       constraints: const BoxConstraints(minHeight: 40),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 10, color: cs.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withValues(alpha: 0.60)),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
@@ -106,7 +110,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             width: labelWidth,
             child: Text(
               label,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
@@ -223,16 +227,74 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Unit *',
-                  field: SizedBox(
-                    height: 40,
-                    child: DropdownButtonFormField<Unit>(
-                      value: _strengthUnit,
-                      isExpanded: true,
-                      items: const [Unit.mcg, Unit.mg, Unit.g]
-                          .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                          .toList(),
-                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                      decoration: _dec(label: 'Unit *'),
+                  field: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      height: 40,
+                      width: 120,
+                      child: DropdownButtonFormField<Unit>(
+                        value: _strengthUnit,
+                        isExpanded: true,
+                        items: const [Unit.mcg, Unit.mg, Unit.g]
+                            .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                            .toList(),
+                        onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                        decoration: _dec(label: 'Unit *'),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+
+              const SizedBox(height: 10),
+              _section('Inventory', [
+                _rowLabelField(
+                  label: 'Stock',
+                  field: Row(
+                    children: [
+                      _incBtn('−', () {
+                        final d = double.tryParse(_stockCtrl.text.trim());
+                        final base = (d ?? 0).toStringAsFixed(2);
+                        final current = double.tryParse(base) ?? 0;
+                        final nv = (current - 0.25).clamp(0, 1000000000).toStringAsFixed(2);
+                        setState(() => _stockCtrl.text = nv);
+                      }),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        width: 120,
+                        child: TextFormField(
+                          controller: _stockCtrl,
+                          textAlign: TextAlign.center,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
+                          decoration: _dec(label: 'Stock', hint: '0.00'),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      _incBtn('+', () {
+                        final d = double.tryParse(_stockCtrl.text.trim());
+                        final base = (d ?? 0).toStringAsFixed(2);
+                        final current = double.tryParse(base) ?? 0;
+                        final nv = (current + 0.25).clamp(0, 1000000000).toStringAsFixed(2);
+                        setState(() => _stockCtrl.text = nv);
+                      }),
+                    ],
+                  ),
+                ),
+                _rowLabelField(
+                  label: 'Unit',
+                  field: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      height: 40,
+                      width: 120,
+                      child: DropdownButtonFormField<String>(
+                        value: 'tablets',
+                        isExpanded: true,
+                        items: const [DropdownMenuItem(value: 'tablets', child: Text('tablets'))],
+                        onChanged: null, // locked
+                        decoration: _dec(label: 'Unit'),
+                      ),
                     ),
                   ),
                 ),
