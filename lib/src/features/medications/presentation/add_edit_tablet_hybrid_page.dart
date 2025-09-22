@@ -568,9 +568,20 @@ Widget _confirmRow(BuildContext context, String label, String value) {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(width: 140, child: Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant))),
+        SizedBox(
+          width: 140,
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(color: cs.primary, fontWeight: FontWeight.w800),
+          ),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: Text(value.isEmpty ? '-' : value, style: theme.textTheme.bodyMedium)),
+        Expanded(
+          child: Text(
+            value.isEmpty ? '-' : value,
+            style: theme.textTheme.bodyMedium,
+          ),
+        ),
       ],
     ),
   );

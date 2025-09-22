@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -799,7 +800,7 @@ style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
       await repo.upsert(med);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medication saved')));
-        Navigator.of(context).maybePop();
+        context.go('/medications');
       }
     } catch (e, st) {
       debugPrint('Save failed: $e\n$st');
@@ -816,8 +817,9 @@ style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
 
   Widget _buildConfirmContent(BuildContext ctx) {
     final theme = Theme.of(ctx);
-    final labelStyle = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant);
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w700);
+    // Swap styles: labels bold blue (primary), values standard onSurface
+    final labelStyle = theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w800);
+    final valueStyle = theme.textTheme.bodyMedium;
     Widget row(String l, String v) => Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
