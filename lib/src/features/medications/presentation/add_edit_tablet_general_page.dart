@@ -117,6 +117,25 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  double _labelWidth() {
+    final width = MediaQuery.of(context).size.width;
+    return width >= 400 ? 120.0 : 110.0;
+  }
+
+  Widget _helperBelow(String text) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 2),
+      child: Text(
+        text,
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontSize: 11,
+          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
+      ),
+    );
+  }
+
   Widget _section(String title, List<Widget> children, {Widget? trailing}) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
@@ -287,36 +306,39 @@ return SizedBox(
                   label: 'Name *',
                   field: Field36(
                     child: TextFormField(
-                    controller: _nameCtrl,
-                    textAlign: TextAlign.left,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500', helper: 'Enter the medication name'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    onChanged: (_) => setState(() {}),
-                  )),
+                      controller: _nameCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500'),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      onChanged: (_) => setState(() {}),
+                    )),
                 ),
+                _helperBelow('Enter the medication name'),
                 _rowLabelField(
                   label: 'Manufacturer',
                   field: Field36(
                     child: TextFormField(
-                    controller: _manufacturerCtrl,
-                    textAlign: TextAlign.left,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma', helper: 'Enter the brand or company name'),
-                    onChanged: (_) => setState(() {}),
-                  )),
+                      controller: _manufacturerCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
+                      onChanged: (_) => setState(() {}),
+                    )),
                 ),
+                _helperBelow('Enter the brand or company name'),
                 _rowLabelField(
                   label: 'Description',
                   field: Field36(
                     child: TextFormField(
-                    controller: _descriptionCtrl,
-                    textAlign: TextAlign.left,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Description', hint: 'eg. Pain relief', helper: 'Optional short description'),
-                    onChanged: (_) => setState(() {}),
-                  )),
+                      controller: _descriptionCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
+                      onChanged: (_) => setState(() {}),
+                    )),
                 ),
+                _helperBelow('Optional short description'),
                 _rowLabelField(
                   label: 'Notes',
                   field: TextFormField(
@@ -326,10 +348,11 @@ return SizedBox(
                     keyboardType: TextInputType.multiline,
                     minLines: 2,
                     maxLines: null,
-                    decoration: _dec(label: 'Notes', hint: 'eg. Take with food', helper: 'Optional notes'),
+                    decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
+                _helperBelow('Optional notes'),
               ], trailing: _generalSummary()),
               const SizedBox(height: 10),
               _section('Strength', [
@@ -586,11 +609,12 @@ field: Row(
                       controller: _batchNumberCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(label: 'Batch No.', hint: 'Enter batch number', helper: 'Optional'),
+                      decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
                 ),
+                _helperBelow('Optional'),
                 _rowLabelField(
                   label: 'Location',
                   field: Field36(
@@ -598,11 +622,12 @@ field: Row(
                       controller: _storageLocationCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet', helper: 'Optional'),
+                      decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
                 ),
+                _helperBelow('Optional'),
                 _rowLabelField(
                   label: 'Store below (°C)',
                   field: Column(
@@ -658,11 +683,12 @@ field: Row(
                       controller: _storageInstructionsCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions', helper: 'Optional'),
+                      decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
                 ),
+                _helperBelow('Optional'),
               ], trailing: _storageSummary()),
 
             ],
