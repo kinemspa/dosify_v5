@@ -98,7 +98,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       constraints: const BoxConstraints(minHeight: 40),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
-      helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withValues(alpha: 0.60)),
+helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -118,7 +118,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final isLight = theme.brightness == Brightness.light;
     return Card(
       elevation: 0,
-      color: isLight ? theme.colorScheme.primary.withValues(alpha: 0.04) : theme.colorScheme.surfaceContainerHigh,
+color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme.surfaceContainerHigh,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: theme.colorScheme.outlineVariant),
