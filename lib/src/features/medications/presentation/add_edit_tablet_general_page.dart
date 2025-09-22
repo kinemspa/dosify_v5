@@ -136,6 +136,21 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  Widget _helperBelowLeftCompact(String text) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
+      child: Text(
+        text,
+        textAlign: TextAlign.left,
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontSize: 11,
+          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
+      ),
+    );
+  }
+
   Widget _helperBelowCenter(String text) {
     final theme = Theme.of(context);
     return Padding(
@@ -182,10 +197,22 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                       ),
                     ),
                   ),
-                  if (trailing != null) DefaultTextStyle(
-                    style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withOpacity(0.50), fontWeight: FontWeight.w600),
-                    child: trailing,
-                  ),
+                  if (trailing != null)
+                    Flexible(
+                      child: DefaultTextStyle(
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          color: theme.colorScheme.primary.withOpacity(0.50),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: (trailing is Text)
+                              ? Text((trailing as Text).data ?? '',
+                                  overflow: TextOverflow.ellipsis, maxLines: 1)
+                              : trailing,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -244,7 +271,7 @@ height: 36,
                 textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: 12,
                   color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
                 ),
               ),
@@ -326,6 +353,7 @@ return SizedBox(
                       controller: _nameCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       onChanged: (_) => setState(() {}),
@@ -339,6 +367,7 @@ _helperBelowLeft('Enter the medication name'),
                       controller: _manufacturerCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
                       onChanged: (_) => setState(() {}),
                     )),
@@ -351,6 +380,7 @@ _helperBelowLeft('Enter the brand or company name'),
                       controller: _descriptionCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
                       onChanged: (_) => setState(() {}),
                     )),
@@ -365,6 +395,7 @@ _helperBelowLeft('Optional short description'),
                     keyboardType: TextInputType.multiline,
                     minLines: 2,
                     maxLines: null,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                     decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -395,6 +426,7 @@ height: 36,
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                           decoration: _dec(label: 'Amount *', hint: '0'),
                           validator: (v) {
                             final t = v?.trim() ?? '';
@@ -483,6 +515,7 @@ height: 36,
                                   textAlign: TextAlign.center,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                                   decoration: _dec(label: 'Stock amount *', hint: '0.00'),
                                   validator: (v) {
                                     if (v == null || v.trim().isEmpty) return 'Required';
@@ -574,7 +607,7 @@ field: Row(
                       hint: '0',
                     ),
                   ),
-_helperBelowLeft('Set the stock level that triggers a low stock alert')
+_helperBelowLeftCompact('Set the stock level that triggers a low stock alert')
                 ],
                 _rowLabelField(
                   label: 'Expiry date',
@@ -642,7 +675,7 @@ Text('Refrigerate', style: kMutedLabelStyle(context))
                     ],
                   ),
                 ),
-_helperBelowLeft('Enable if this medication must be kept refrigerated'),
+_helperBelowLeftCompact('Enable if this medication must be kept refrigerated'),
                 _rowLabelField(
                   label: 'Keep frozen',
                   field: Row(
@@ -655,7 +688,7 @@ Text('Freeze', style: kMutedLabelStyle(context))
                     ],
                   ),
                 ),
-                _helperBelowLeft('Enable if this medication must be kept frozen'),
+                _helperBelowLeftCompact('Enable if this medication must be kept frozen'),
                 _rowLabelField(
                   label: 'Keep in dark',
                   field: Row(
@@ -668,7 +701,7 @@ Text('Dark storage', style: kMutedLabelStyle(context))
                     ],
                   ),
                 ),
-                _helperBelowLeft('Enable if this medication must be protected from light'),
+                _helperBelowLeftCompact('Enable if this medication must be protected from light'),
                 _rowLabelField(
                   label: 'Storage instructions',
                   field: Field36(
@@ -676,6 +709,7 @@ Text('Dark storage', style: kMutedLabelStyle(context))
                       controller: _storageInstructionsCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
                       onChanged: (_) => setState(() {}),
                     ),

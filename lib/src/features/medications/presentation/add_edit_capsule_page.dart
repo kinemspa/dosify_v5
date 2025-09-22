@@ -59,6 +59,20 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       ),
     );
   }
+
+  Widget _helperBelowLeftCompact(BuildContext context, String text) {
+    return Padding(
+      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
+      child: Text(
+        text,
+        textAlign: TextAlign.left,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontSize: kHintFontSize,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
+      ),
+    );
+  }
   final _formKey = GlobalKey<FormState>();
 
   final _nameCtrl = TextEditingController();
@@ -245,10 +259,22 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       ),
                     ),
                   ),
-                  if (trailing != null) DefaultTextStyle(
-                    style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withOpacity(0.50), fontWeight: FontWeight.w600),
-                    child: trailing,
-                  ),
+                  if (trailing != null)
+                    Flexible(
+                      child: DefaultTextStyle(
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          color: theme.colorScheme.primary.withOpacity(0.50),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: (trailing is Text)
+                              ? Text((trailing as Text).data ?? '',
+                                  overflow: TextOverflow.ellipsis, maxLines: 1)
+                              : trailing,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -277,7 +303,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: 12,
                   color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
                 ),
               ),
@@ -541,6 +567,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   controller: _nameCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                   decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500'),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   onChanged: (_) => setState(() {}),
@@ -550,6 +577,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   controller: _manufacturerCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                   decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
                   onChanged: (_) => setState(() {}),
                 ))),
@@ -558,6 +586,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   controller: _descriptionCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                   decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
                   onChanged: (_) => setState(() {}),
                 ))),
@@ -580,6 +609,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   height: 36,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       _incBtn('−', () {
                         final d = double.tryParse(_strengthValueCtrl.text.trim());
@@ -594,6 +624,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           controller: _strengthValueCtrl,
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                           decoration: _dec(label: 'Amount *', hint: '0'),
                           onChanged: (_) => setState(() {}),
                         )),
@@ -656,6 +687,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           controller: _stockValueCtrl,
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                           decoration: _dec(label: 'Stock amount *', hint: '0'),
                           onChanged: (_) => setState(() {}),
                         )),
@@ -693,7 +725,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
                 _rowLabelField(label: 'Low stock alert', field: Row(children: [
                   Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
-                  Text('Enable alert when stock is low', style: Theme.of(context).textTheme.bodyMedium),
+                  Text('Enable alert when stock is low', style: kMutedLabelStyle(context)),
                 ])),
                 if (_lowStockEnabled) ...[
                   _rowLabelField(label: 'Threshold', field: _intStepper(
@@ -705,7 +737,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     label: 'Threshold',
                     hint: '0',
                   )),
-                  _helperBelowLeft(context, 'Set the stock level that triggers a low stock alert'),
+                  _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
                 ],
                 _rowLabelField(label: 'Expiry date', field: Field36(
                   width: 120,
@@ -733,6 +765,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   controller: _batchCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                   decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
                 ))),
                 _helperBelowLeft(context, 'Enter the printed batch or lot number'),
@@ -740,6 +773,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   controller: _storageCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                   decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
                 ))),
                 _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
@@ -747,21 +781,22 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   Checkbox(value: _requiresFridge, onChanged: (v) => setState(() => _requiresFridge = v ?? false)),
                   Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ])),
-                _helperBelowLeft(context, 'Enable if this medication must be kept refrigerated'),
+                _helperBelowLeftCompact(context, 'Enable if this medication must be kept refrigerated'),
                 _rowLabelField(label: 'Keep frozen', field: Row(children: [
                   Checkbox(value: _keepFrozen, onChanged: (v) => setState(() => _keepFrozen = v ?? false)),
                   Text('Freeze', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ])),
-                _helperBelowLeft(context, 'Enable if this medication must be kept frozen'),
+                _helperBelowLeftCompact(context, 'Enable if this medication must be kept frozen'),
                 _rowLabelField(label: 'Keep in dark', field: Row(children: [
                   Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
                   Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ])),
-                _helperBelowLeft(context, 'Enable if this medication must be protected from light'),
+                _helperBelowLeftCompact(context, 'Enable if this medication must be protected from light'),
                 _rowLabelField(label: 'Storage instructions', field: Field36(child: TextFormField(
                   controller: _storageNotesCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                   decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
                 ))),
               ]),
