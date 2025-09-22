@@ -687,7 +687,7 @@ _helperBelowLeft('Enable if this medication must be protected from light'),
                     ],
                   ),
                 ),
-                _helperBelow('Enable if this medication must be protected from light'),
+                _helperBelowLeft('Enable if this medication must be protected from light'),
                 _rowLabelField(
                   label: 'Storage instructions',
                   field: Field36(
@@ -716,7 +716,7 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
               child: SizedBox(
                 width: 220,
 child: TextButton(
-style: TextButton.styleFrom(minimumSize: const Size.fromHeight(36))
+style: TextButton.styleFrom(minimumSize: const Size.fromHeight(36)),
                   onPressed: () async {
                     if (!(_formKey.currentState?.validate() ?? false)) return;
                     await _showConfirmDialog();
