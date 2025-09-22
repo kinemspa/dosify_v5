@@ -840,8 +840,6 @@ style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
         : '${_trimZero(strengthRaw)} ${_strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g'}';
     final stockRaw = _stockCtrl.text.trim();
     final inventoryText = stockRaw.isEmpty ? '' : _trimZero(stockRaw) + ' tablets';
-    final stockRaw = _stockCtrl.text.trim();
-    final inventoryText = stockRaw.isEmpty ? '' : _trimZero(stockRaw) + ' tablets';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
