@@ -538,7 +538,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                     controller: _storageLocationCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Location', hint: 'e.g., Bathroom cabinet', helper: 'Optional'),
+                    decoration: _dec(label: 'Location', hint: 'eg Bathroom cabinet', helper: 'Optional'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -554,31 +554,6 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                     hint: '25',
                     helper: 'Optional',
                   ),
-                        final v = int.tryParse(_storeBelowCtrl.text.trim()) ?? 0;
-                        final nv = (v - 1).clamp(0, 1000);
-                        setState(() => _storeBelowCtrl.text = nv.toString());
-                      }),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 80,
-                        child: TextFormField(
-                          controller: _storeBelowCtrl,
-                          textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          decoration: _dec(label: 'Store below (°C)', hint: '25', helper: 'Optional'),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      _incBtn('+', () {
-                        final v = int.tryParse(_storeBelowCtrl.text.trim()) ?? 0;
-                        final nv = (v + 1).clamp(0, 1000);
-                        setState(() => _storeBelowCtrl.text = nv.toString());
-                      }),
-                    ],
-                  ),
-                ),
                 _rowLabelField(
                   label: 'Cold storage',
                   field: Row(
