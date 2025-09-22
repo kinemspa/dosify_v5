@@ -436,13 +436,11 @@ height: 36,
                       const SizedBox(height: 4),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('Unit of measurement', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        child: Text('Specify the amount per tablet and its unit of measurement.', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text('Quantity of active ingredient per tablet', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
@@ -501,16 +499,6 @@ height: 36,
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _stockError ?? 'Use whole-number steps (manual edit allows decimals)',
-                          style: _stockError == null
-                              ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
-                              : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -543,7 +531,7 @@ height: 36,
                       const SizedBox(height: 4),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('Unit of measurement for stock', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        child: Text('Enter stock quantity (whole-number step; decimals allowed via manual edit) and choose its unit.', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ),
                     ],
                   ),
@@ -573,9 +561,9 @@ field: Row(
                       width: 120,
                       label: 'Threshold',
                       hint: '0',
-                      helper: 'Required when enabled',
                     ),
                   ),
+                  _helperBelow('Required when enabled'),
                 _rowLabelField(
                   label: 'Expiry date',
                   field: Field36(
@@ -614,7 +602,7 @@ field: Row(
                     ),
                   ),
                 ),
-                _helperBelow('Optional'),
+                _helperBelow('Enter the printed batch or lot number'),
                 _rowLabelField(
                   label: 'Location',
                   field: Field36(
@@ -627,7 +615,7 @@ field: Row(
                     ),
                   ),
                 ),
-                _helperBelow('Optional'),
+                _helperBelow('Where it’s stored (e.g., Bathroom cabinet)'),
                 _rowLabelField(
                   label: 'Store below (°C)',
                   field: Column(
@@ -664,6 +652,7 @@ field: Row(
                     ],
                   ),
                 ),
+                _helperBelow('Enable if this medication must be kept refrigerated'),
                 _rowLabelField(
                   label: 'Light sensitive',
                   field: Row(
@@ -676,6 +665,7 @@ field: Row(
                     ],
                   ),
                 ),
+                _helperBelow('Enable if this medication must be protected from light'),
                 _rowLabelField(
                   label: 'Storage instructions',
                   field: Field36(
@@ -688,7 +678,7 @@ field: Row(
                     ),
                   ),
                 ),
-                _helperBelow('Optional'),
+                _helperBelow('Special handling notes (e.g., Keep upright)'),
               ], trailing: _storageSummary()),
 
             ],
