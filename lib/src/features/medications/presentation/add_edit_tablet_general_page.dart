@@ -122,15 +122,33 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     return width >= 400 ? 120.0 : 110.0;
   }
 
-  Widget _helperBelow(String text) {
+  Widget _helperBelowLeft(String text) {
     final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 2),
       child: Text(
         text,
+        textAlign: TextAlign.left,
         style: theme.textTheme.bodySmall?.copyWith(
           fontSize: 11,
           color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
+      ),
+    );
+  }
+
+  Widget _helperBelowCenter(String text) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 2),
+      child: Center(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 11,
+            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+          ),
         ),
       ),
     );
@@ -314,7 +332,7 @@ return SizedBox(
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-                _helperBelow('Enter the medication name'),
+_helperBelowLeft('Enter the medication name')
                 _rowLabelField(
                   label: 'Manufacturer',
                   field: Field36(
@@ -326,7 +344,7 @@ return SizedBox(
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-                _helperBelow('Enter the brand or company name'),
+_helperBelowLeft('Enter the brand or company name')
                 _rowLabelField(
                   label: 'Description',
                   field: Field36(
@@ -338,7 +356,7 @@ return SizedBox(
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-                _helperBelow('Optional short description'),
+_helperBelowLeft('Optional short description')
                 _rowLabelField(
                   label: 'Notes',
                   field: TextFormField(
@@ -352,7 +370,7 @@ return SizedBox(
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
-                _helperBelow('Optional notes'),
+_helperBelowLeft('Optional notes')
               ], trailing: _generalSummary()),
               const SizedBox(height: 10),
               _section('Strength', [
@@ -434,14 +452,11 @@ height: 36,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('Specify the amount per tablet and its unit of measurement.', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      ),
                     ],
                   ),
                 ),
               ], trailing: _strengthSummary()),
+              _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
 
               const SizedBox(height: 10),
               _section('Inventory', [
@@ -529,13 +544,10 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('Enter stock quantity (whole-number step; decimals allowed via manual edit) and choose its unit.', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      ),
                     ],
                   ),
                 ),
+                _helperBelowCenter('Enter whole, 1/2, or 1/4 tablets'),
 
                 // Low stock alert toggle + threshold
                 _rowLabelField(
@@ -563,7 +575,7 @@ field: Row(
                       hint: '0',
                     ),
                   ),
-                  _helperBelow('Required when enabled'),
+_helperBelowLeft('Enter the amount to alert when stock is low')
                 _rowLabelField(
                   label: 'Expiry date',
                   field: Field36(
@@ -585,6 +597,7 @@ field: Row(
                     ),
                   ),
                 ),
+                _helperBelowLeft('Enter the expiry date'),
               ], trailing: _inventorySummary()),
 
               // Storage
@@ -602,7 +615,7 @@ field: Row(
                     ),
                   ),
                 ),
-                _helperBelow('Enter the printed batch or lot number'),
+_helperBelowLeft('Enter the printed batch or lot number')
                 _rowLabelField(
                   label: 'Location',
                   field: Field36(
@@ -615,7 +628,7 @@ field: Row(
                     ),
                   ),
                 ),
-                _helperBelow('Where it’s stored (e.g., Bathroom cabinet)'),
+_helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)')
                 _rowLabelField(
                   label: 'Store below (°C)',
                   field: Column(
@@ -634,9 +647,7 @@ field: Row(
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Center(
-                        child: Text('Optional', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      ),
+_helperBelowLeft('Optional')
                     ],
                   ),
                 ),
@@ -663,7 +674,7 @@ onChanged: (v) {
                     ],
                   ),
                 ),
-                _helperBelow('Enable if this medication must be kept refrigerated'),
+_helperBelowLeft('Enable if this medication must be protected from light')
                 _rowLabelField(
                   label: 'Light sensitive',
                   field: Row(
@@ -689,7 +700,7 @@ onChanged: (v) {
                     ),
                   ),
                 ),
-                _helperBelow('Special handling notes (e.g., Keep upright)'),
+_helperBelowLeft('Special handling notes (e.g., Keep upright)')
               ], trailing: _storageSummary()),
 
             ],
