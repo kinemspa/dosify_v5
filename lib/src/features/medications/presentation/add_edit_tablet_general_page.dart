@@ -282,7 +282,7 @@ return SizedBox(
                     controller: _nameCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Name *', hint: 'eg AcmeTab-500', helper: 'Enter the medication name'),
+                    decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500', helper: 'Enter the medication name'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     onChanged: (_) => setState(() {}),
                   ),
@@ -293,7 +293,7 @@ return SizedBox(
                     controller: _manufacturerCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Manufacturer', hint: 'eg Contoso Pharma', helper: 'Enter the brand or company name'),
+                    decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma', helper: 'Enter the brand or company name'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -303,7 +303,7 @@ return SizedBox(
                     controller: _descriptionCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Description', hint: 'eg Pain relief', helper: 'Optional short description'),
+                    decoration: _dec(label: 'Description', hint: 'eg. Pain relief', helper: 'Optional short description'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -316,7 +316,7 @@ return SizedBox(
                     keyboardType: TextInputType.multiline,
                     minLines: 2,
                     maxLines: null,
-                    decoration: _dec(label: 'Notes', hint: 'eg Take with food', helper: 'Optional notes'),
+                    decoration: _dec(label: 'Notes', hint: 'eg. Take with food', helper: 'Optional notes'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -369,39 +369,43 @@ height: 36,
                 ),
                 _rowLabelField(
                   label: 'Strength unit *',
-                  field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  field: Row(
                     children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                          height: 36,
-                          width: 120,
-                          child: DropdownButtonFormField<Unit>(
-                            value: _strengthUnit,
-                            isExpanded: false,
-                            alignment: AlignmentDirectional.center,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                            dropdownColor: Theme.of(context).colorScheme.surface,
-                            menuMaxHeight: 320,
-                            selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
-                                .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                                .toList(),
-                            items: const [Unit.mcg, Unit.mg, Unit.g]
-                                .map((u) => DropdownMenuItem(
-                                      value: u,
-                                      alignment: AlignmentDirectional.center,
-                                      child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
-                                    ))
-                                .toList(),
-                            onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                            // No label/helper inside the field to avoid height squeeze
-                            decoration: _decDrop(label: '', hint: null, helper: null),
+                      SizedBox(
+                        height: kFieldHeight,
+                        width: 120,
+                        child: DropdownButtonFormField<Unit>(
+                          value: _strengthUnit,
+                          isExpanded: false,
+                          alignment: AlignmentDirectional.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
+                          selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                              .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                              .toList(),
+                          items: const [Unit.mcg, Unit.mg, Unit.g]
+                              .map((u) => DropdownMenuItem(
+                                    value: u,
+                                    alignment: AlignmentDirectional.center,
+                                    child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
+                                  ))
+                              .toList(),
+                          onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                          decoration: _decDrop(label: '', hint: null, helper: null),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: kFieldHeight,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'mcg / mg / g',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text('mcg / mg / g', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     ],
                   ),
                 ),
@@ -412,7 +416,7 @@ height: 36,
                 _rowLabelField(
                   label: 'Stock amount *',
                   field: SizedBox(
-                    height: 40,
+                    height: kFieldHeight,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -472,33 +476,34 @@ height: 36,
                 ),
                 _rowLabelField(
                   label: 'Stock unit',
-                  field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  field: Row(
                     children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                          height: 36,
-                          width: 120,
-                          child: DropdownButtonFormField<String>(
-                            value: 'tablets',
-                            isExpanded: false,
-                            alignment: AlignmentDirectional.center,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                            dropdownColor: Theme.of(context).colorScheme.surface,
-                            menuMaxHeight: 320,
-                            selectedItemBuilder: (ctx) => const ['tablets']
-                                .map((t) => Center(child: Text(t)))
-                                .toList(),
-                            items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
-                            onChanged: null, // locked
-                            // No label/helper inside the field to avoid height squeeze
-                            decoration: _decDrop(label: '', hint: null, helper: null),
-                          ),
+                      SizedBox(
+                        height: kFieldHeight,
+                        width: 120,
+                        child: DropdownButtonFormField<String>(
+                          value: 'tablets',
+                          isExpanded: false,
+                          alignment: AlignmentDirectional.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
+                          selectedItemBuilder: (ctx) => const ['tablets']
+                              .map((t) => Center(child: Text(t)))
+                              .toList(),
+                          items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
+                          onChanged: null, // locked
+                          decoration: _decDrop(label: '', hint: null, helper: null),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text('Locked to tablets', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        height: kFieldHeight,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Locked to tablets', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -530,6 +535,27 @@ field: Row(
                       helper: 'Required when enabled',
                     ),
                   ),
+                _rowLabelField(
+                  label: 'Expiry date',
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(now.year - 1),
+                          lastDate: DateTime(now.year + 10),
+                          initialDate: _expiryDate ?? now,
+                        );
+                        if (picked != null) setState(() => _expiryDate = picked);
+                      },
+                      icon: const Icon(Icons.calendar_today, size: 18),
+                      label: Text(_expiryDate == null ? 'Select date' : _fmtDate(_expiryDate!)),
+                      style: OutlinedButton.styleFrom(minimumSize: const Size(0, kFieldHeight)),
+                    ),
+                  ),
+                ),
               ], trailing: _inventorySummary()),
 
               // Storage
@@ -551,7 +577,7 @@ field: Row(
                     controller: _storageLocationCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Location', hint: 'eg Bathroom cabinet', helper: 'Optional'),
+                    decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet', helper: 'Optional'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -604,27 +630,6 @@ field: Row(
                 ),
               ], trailing: _storageSummary()),
 
-              // Expiry moved under Inventory
-              _rowLabelField(
-                label: 'Expiry date',
-                field: SizedBox(
-height: 36,
-                  child: OutlinedButton.icon(
-                      onPressed: () async {
-                        final now = DateTime.now();
-                        final picked = await showDatePicker(
-                          context: context,
-                          firstDate: DateTime(now.year - 1),
-                          lastDate: DateTime(now.year + 10),
-                          initialDate: _expiryDate ?? now,
-                        );
-                        if (picked != null) setState(() => _expiryDate = picked);
-                      },
-                      icon: const Icon(Icons.calendar_today, size: 18),
-                      label: Text(_expiryDate == null ? 'Select date' : _fmtDate(_expiryDate!)),
-                    ),
-                  ),
-                ),
             ],
           ),
         ),

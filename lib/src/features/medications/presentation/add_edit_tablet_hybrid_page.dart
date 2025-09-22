@@ -225,7 +225,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
 InputDecoration _dec({String? hint}) {
         final theme = Theme.of(context);
         final cs = theme.colorScheme;
-        // Enforce a full 40 px input decorator height (matches kFieldHeight)
+        // Enforce a full 36 px input decorator height using kFieldHeight
         // by avoiding dense layout and increasing vertical content padding.
         // Also keep an explicit minHeight guard for older Flutter versions.
         return InputDecoration(
@@ -296,7 +296,7 @@ return SizedBox(
                     field: TextFormField(
                       controller: _nameCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'e.g., Panadol'),
+                      decoration: _dec(hint: 'eg. Panadol'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
@@ -305,7 +305,7 @@ return SizedBox(
                     field: TextFormField(
                       controller: _manufacturerCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'e.g., GSK'),
+                      decoration: _dec(hint: 'eg. GSK'),
                     ),
                   ),
                   _rowLabelField(
@@ -313,7 +313,7 @@ return SizedBox(
                     field: TextFormField(
                       controller: _descriptionCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'e.g., Pain relief'),
+                      decoration: _dec(hint: 'eg. Pain relief'),
                     ),
                   ),
                   _rowLabelField(
@@ -321,7 +321,7 @@ return SizedBox(
                     field: TextFormField(
                       controller: _notesCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'e.g., Take with food'),
+                      decoration: _dec(hint: 'eg. Take with food'),
                     ),
                   ),
                 ]),
@@ -366,7 +366,7 @@ return SizedBox(
                     label: 'Unit *',
                     field: SizedBox(
                       width: 120,
-                      height: 40,
+                      height: kFieldHeight,
                       child: DropdownButtonFormField<Unit>(
                         value: _strengthUnit,
                         isExpanded: false,
@@ -445,12 +445,15 @@ return SizedBox(
                   ),
                   _rowLabelField(
                     label: 'Unit *',
-                    field: DropdownButtonFormField<StockUnit>(
-                      value: StockUnit.tablets,
-                      isExpanded: true,
-                      items: const [DropdownMenuItem(value: StockUnit.tablets, child: Text('tablets'))],
-                      onChanged: null,
-                      decoration: _dec(),
+                    field: SizedBox(
+                      height: kFieldHeight,
+                      child: DropdownButtonFormField<StockUnit>(
+                        value: StockUnit.tablets,
+                        isExpanded: true,
+                        items: const [DropdownMenuItem(value: StockUnit.tablets, child: Text('tablets'))],
+                        onChanged: null,
+                        decoration: _dec(),
+                      ),
                     ),
                   ),
                   _rowLabelField(
@@ -514,7 +517,7 @@ return SizedBox(
                     field: TextFormField(
                       controller: _storageCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'Enter storage location'),
+                      decoration: _dec(hint: 'eg. Bathroom cabinet'),
                     ),
                   ),
                   CheckboxListTile(

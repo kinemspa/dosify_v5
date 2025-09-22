@@ -97,12 +97,12 @@ class _StyleCard extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-                      TextFormField(
-                        decoration: FormFieldStyler.decoration(context: context, styleIndex: index, label: 'Name', hint: 'e.g., Panadol'),
+TextFormField(
+                        decoration: FormFieldStyler.decoration(context: context, styleIndex: index, label: 'Name', hint: 'eg. Panadol'),
                       ),
                       const SizedBox(height: 8),
-                      TextFormField(
-                        decoration: FormFieldStyler.decoration(context: context, styleIndex: index, label: 'Manufacturer', hint: 'e.g., GSK'),
+TextFormField(
+                        decoration: FormFieldStyler.decoration(context: context, styleIndex: index, label: 'Manufacturer', hint: 'eg. GSK'),
                       ),
                     ],
                   ),

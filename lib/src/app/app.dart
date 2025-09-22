@@ -90,6 +90,19 @@ selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
       ),
+      checkboxTheme: CheckboxThemeData(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return baseLight.colorScheme.primary;
+          return Colors.transparent; // no fill when unchecked
+        }),
+        checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
+        side: WidgetStateBorderSide.resolveWith((states) {
+          final color = baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.60);
+          return BorderSide(color: color, width: 1.5);
+        }),
+        overlayColor: WidgetStatePropertyAll(baseLight.colorScheme.primary.withValues(alpha: 0.08)),
+      ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseLight.colorScheme.primary,
         foregroundColor: baseLight.colorScheme.onPrimary,
@@ -173,6 +186,19 @@ selectionColor: baseDark.colorScheme.primary.withValues(alpha: 0.3),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return baseDark.colorScheme.primary;
+          return Colors.transparent;
+        }),
+        checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
+        side: WidgetStateBorderSide.resolveWith((states) {
+          final color = baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.60);
+          return BorderSide(color: color, width: 1.5);
+        }),
+        overlayColor: WidgetStatePropertyAll(baseDark.colorScheme.primary.withValues(alpha: 0.12)),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseDark.colorScheme.primary,
