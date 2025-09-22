@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
 
 /// Minimal Tablet editor that renders ONLY the General section.
 /// This is used to isolate rendering issues step-by-step.
@@ -276,8 +277,7 @@ return SizedBox(
               _section('General', [
                 _rowLabelField(
                   label: 'Name *',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
                     child: TextFormField(
                     controller: _nameCtrl,
                     textAlign: TextAlign.left,
@@ -289,8 +289,7 @@ return SizedBox(
                 ),
                 _rowLabelField(
                   label: 'Manufacturer',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
                     child: TextFormField(
                     controller: _manufacturerCtrl,
                     textAlign: TextAlign.left,
@@ -301,8 +300,7 @@ return SizedBox(
                 ),
                 _rowLabelField(
                   label: 'Description',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
                     child: TextFormField(
                     controller: _descriptionCtrl,
                     textAlign: TextAlign.left,
@@ -328,7 +326,7 @@ return SizedBox(
               const SizedBox(height: 10),
               _section('Strength', [
                 _rowLabelField(
-                  label: 'Strength amount (per tablet) *',
+                  label: 'Strength *',
                   field: SizedBox(
 height: 36,
                     child: Row(
@@ -343,7 +341,8 @@ height: 36,
                       const SizedBox(width: 6),
                       SizedBox(
                         width: 120,
-                        child: TextFormField(
+                        child: Field36(
+                          child: TextFormField(
                           controller: _strengthValueCtrl,
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -358,7 +357,7 @@ height: 36,
                             return null;
                           },
                           onChanged: (_) => setState(() {}),
-                        ),
+                        )),
                       ),
                       const SizedBox(width: 6),
                       _incBtn('+', () {
@@ -372,7 +371,7 @@ height: 36,
                   ),
                 ),
                 _rowLabelField(
-                  label: 'Strength unit *',
+                  label: 'Unit *',
                   field: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -405,18 +404,20 @@ height: 36,
                       ),
                       const SizedBox(height: 4),
                       Align(
-                        alignment: Alignment.center,
-                        child: Text('mcg / mg / g', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        alignment: Alignment.centerLeft,
+                        child: Text('Unit of measurement', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 4),
+                Text('Quantity of active ingredient per tablet', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
               _section('Inventory', [
                 _rowLabelField(
-                  label: 'Stock amount *',
+                  label: 'Stock quantity *',
                   field: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -426,17 +427,14 @@ height: 36,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _incBtn('−', () {
-                              final d = double.tryParse(_stockCtrl.text.trim());
-                              final base = (d ?? 0).toStringAsFixed(2);
-                              final current = double.tryParse(base) ?? 0;
-                              final nv = (current - 0.25).clamp(0, 1000000000).toStringAsFixed(2);
+                              final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
+                              final nv = (d - 1).clamp(0, 1000000000).toStringAsFixed(0);
                               setState(() => _stockCtrl.text = nv);
                             }),
                             const SizedBox(width: 6),
                             SizedBox(
                               width: 120,
-                              child: SizedBox(
-                                height: kFieldHeight,
+                              child: Field36(
                                 child: TextFormField(
                                   controller: _stockCtrl,
                                   textAlign: TextAlign.center,
@@ -448,8 +446,6 @@ height: 36,
                                     final d = double.tryParse(v);
                                     if (d == null) return 'Invalid number';
                                     if (d < 0) return 'Must be ≥ 0';
-                                    final cents = (d * 100).round();
-                                    if (cents % 25 != 0) return 'Use .00, .25, .50, or .75';
                                     return null;
                                   },
                                   onChanged: (v) {
@@ -467,19 +463,18 @@ height: 36,
                             ),
                             const SizedBox(width: 6),
                             _incBtn('+', () {
-                              final d = double.tryParse(_stockCtrl.text.trim());
-                              final base = (d ?? 0).toStringAsFixed(2);
-                              final current = double.tryParse(base) ?? 0;
-                              final nv = (current + 0.25).clamp(0, 1000000000).toStringAsFixed(2);
+                              final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
+                              final nv = (d + 1).clamp(0, 1000000000).toStringAsFixed(0);
                               setState(() => _stockCtrl.text = nv);
                             }),
                           ],
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Center(
-                        child: Text(
-                          _stockError ?? 'Quarter steps: .00 / .25 / .50 / .75',
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Optional',
+                          _stockError ?? 'Use whole-number steps (manual edit allows decimals)',
                           style: _stockError == null
                               ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
                               : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
@@ -489,7 +484,7 @@ height: 36,
                   ),
                 ),
                 _rowLabelField(
-                  label: 'Stock unit',
+                  label: 'Quantity unit',
                   field: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -516,8 +511,8 @@ height: 36,
                       ),
                       const SizedBox(height: 4),
                       Align(
-                        alignment: Alignment.center,
-                        child: Text('Locked to tablets', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        alignment: Alignment.centerLeft,
+                        child: Text('Unit of measurement for stock', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ),
                     ],
                   ),
@@ -544,7 +539,7 @@ field: Row(
                       step: 1,
                       min: 0,
                       max: 100000,
-                      width: 80,
+                      width: 120,
                       label: 'Threshold',
                       hint: '0',
                       helper: 'Required when enabled',
@@ -552,8 +547,8 @@ field: Row(
                   ),
                 _rowLabelField(
                   label: 'Expiry date',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
+                    width: 120,
                     child: OutlinedButton.icon(
                       onPressed: () async {
                         final now = DateTime.now();
@@ -567,7 +562,7 @@ field: Row(
                       },
                       icon: const Icon(Icons.calendar_today, size: 18),
                       label: Text(_expiryDate == null ? 'Select date' : _fmtDate(_expiryDate!)),
-                      style: OutlinedButton.styleFrom(minimumSize: const Size(0, kFieldHeight)),
+                      style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
                     ),
                   ),
                 ),
@@ -578,8 +573,7 @@ field: Row(
               _section('Storage', [
                 _rowLabelField(
                   label: 'Batch No.',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
                     child: TextFormField(
                       controller: _batchNumberCtrl,
                       textAlign: TextAlign.left,
@@ -591,8 +585,7 @@ field: Row(
                 ),
                 _rowLabelField(
                   label: 'Location',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
                     child: TextFormField(
                       controller: _storageLocationCtrl,
                       textAlign: TextAlign.left,
@@ -614,7 +607,7 @@ field: Row(
                           step: 1,
                           min: 0,
                           max: 1000,
-                          width: 80,
+                          width: 120,
                           label: 'Store below (°C)',
                           hint: '25',
                         ),
@@ -652,8 +645,7 @@ field: Row(
                 ),
                 _rowLabelField(
                   label: 'Storage instructions',
-                  field: SizedBox(
-                    height: kFieldHeight,
+                  field: Field36(
                     child: TextFormField(
                       controller: _storageInstructionsCtrl,
                       textAlign: TextAlign.left,
@@ -831,8 +823,21 @@ style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
         ],
       ),
     );
-    final strengthText = _strengthSummary() is SizedBox ? '' : (_strengthValueCtrl.text.trim().isEmpty ? '' : '${_strengthValueCtrl.text.trim()} ${_strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g'} ${_nameCtrl.text.trim().isEmpty ? '' : _nameCtrl.text.trim() + ' Tablets'}');
-    final inventoryText = _inventorySummary() is SizedBox ? '' : (_stockCtrl.text.trim().isEmpty ? '' : '${_stockCtrl.text.trim()} ${_nameCtrl.text.trim().isEmpty ? '' : _nameCtrl.text.trim() + ' Tablets'}');
+    String _trimZero(String s) {
+      if (!s.contains('.')) return s;
+      s = s.replaceFirst(RegExp(r'\.0+
+?$'), '');
+      s = s.replaceFirst(RegExp(r'(\.\d*?)0+
+?$'), r'$1');
+      if (s.endsWith('.')) s = s.substring(0, s.length - 1);
+      return s;
+    }
+    final strengthRaw = _strengthValueCtrl.text.trim();
+    final strengthText = strengthRaw.isEmpty
+        ? ''
+        : '${_trimZero(strengthRaw)} ${_strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g'}';
+    final stockRaw = _stockCtrl.text.trim();
+    final inventoryText = stockRaw.isEmpty ? '' : _trimZero(stockRaw) + ' tablets';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
