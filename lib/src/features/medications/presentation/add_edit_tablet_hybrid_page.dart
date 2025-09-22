@@ -228,10 +228,7 @@ InputDecoration _dec({String? hint}) {
         // Enforce a full 36 px input decorator height using kFieldHeight
         return InputDecoration(
           hintText: hint,
-          isDense: true,
-          isCollapsed: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-          constraints: const BoxConstraints(minHeight: kFieldHeight),
+          // Use global InputDecorationTheme for density/collapsed/height
           floatingLabelBehavior: FloatingLabelBehavior.never,
           hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: kHintFontSize, color: cs.onSurfaceVariant),
           filled: true,

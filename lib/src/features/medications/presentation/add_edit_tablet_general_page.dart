@@ -95,10 +95,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       floatingLabelBehavior: FloatingLabelBehavior.never,
       hintText: hint,
       helperText: helper,
-      isDense: true,
-      isCollapsed: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-      constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
       filled: true,
@@ -166,10 +162,6 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
       floatingLabelBehavior: FloatingLabelBehavior.never,
       hintText: hint,
       helperText: helper,
-      isDense: true,
-      isCollapsed: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-      constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
       filled: true,
@@ -243,12 +235,15 @@ return SizedBox(
           const SizedBox(width: 6),
           SizedBox(
             width: width.toDouble(),
-            child: TextFormField(
-              controller: controller,
-              textAlign: TextAlign.center,
-              keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: _dec(label: label ?? '', hint: hint, helper: helper),
+            child: SizedBox(
+              height: kFieldHeight,
+              child: TextFormField(
+                controller: controller,
+                textAlign: TextAlign.center,
+                keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: _dec(label: label ?? '', hint: hint, helper: helper),
+              ),
             ),
           ),
           const SizedBox(width: 6),
@@ -564,7 +559,6 @@ field: Row(
                     onChanged: (_) => setState(() {}),
                   )),
 
-                ),
                 _rowLabelField(
                   label: 'Location',
                   field: SizedBox(
