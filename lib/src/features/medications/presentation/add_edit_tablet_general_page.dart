@@ -473,8 +473,12 @@ height: 36,
                       const SizedBox(height: 4),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text('Optional',
+                        child: Text(
                           _stockError ?? 'Use whole-number steps (manual edit allows decimals)',
+                          style: _stockError == null
+                              ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
+                              : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                        ),
                           style: _stockError == null
                               ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
                               : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
@@ -825,10 +829,8 @@ style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
     );
     String _trimZero(String s) {
       if (!s.contains('.')) return s;
-      s = s.replaceFirst(RegExp(r'\.0+
-?$'), '');
-      s = s.replaceFirst(RegExp(r'(\.\d*?)0+
-?$'), r'$1');
+      s = s.replaceFirst(RegExp(r'\.0+$'), '');
+      s = s.replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
       if (s.endsWith('.')) s = s.substring(0, s.length - 1);
       return s;
     }
@@ -836,6 +838,8 @@ style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
     final strengthText = strengthRaw.isEmpty
         ? ''
         : '${_trimZero(strengthRaw)} ${_strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g'}';
+    final stockRaw = _stockCtrl.text.trim();
+    final inventoryText = stockRaw.isEmpty ? '' : _trimZero(stockRaw) + ' tablets';
     final stockRaw = _stockCtrl.text.trim();
     final inventoryText = stockRaw.isEmpty ? '' : _trimZero(stockRaw) + ' tablets';
     return Column(
