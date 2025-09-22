@@ -216,6 +216,47 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  Widget _intStepper({
+    required TextEditingController controller,
+    int step = 1,
+    int min = 0,
+    int max = 1000000,
+    int width = 80,
+    String? label,
+    String? hint,
+    String? helper,
+  }) {
+    return SizedBox(
+      height: 40,
+      child: Row(
+        children: [
+          _incBtn('−', () {
+            final v = int.tryParse(controller.text.trim()) ?? 0;
+            final nv = (v - step).clamp(min, max);
+            setState(() => controller.text = nv.toString());
+          }),
+          const SizedBox(width: 6),
+          SizedBox(
+            width: width.toDouble(),
+            child: TextFormField(
+              controller: controller,
+              textAlign: TextAlign.center,
+              keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: _dec(label: label ?? '', hint: hint, helper: helper),
+            ),
+          ),
+          const SizedBox(width: 6),
+          _incBtn('+', () {
+            final v = int.tryParse(controller.text.trim()) ?? 0;
+            final nv = (v + step).clamp(min, max);
+            setState(() => controller.text = nv.toString());
+          }),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('[GENERAL] build() called');
@@ -237,7 +278,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _nameCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Name *', hint: 'e.g., AcmeTab-500', helper: 'Enter the medication name'),
+                    decoration: _dec(label: 'Name *', hint: 'eg AcmeTab-500', helper: 'Enter the medication name'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     onChanged: (_) => setState(() {}),
                   ),
@@ -248,7 +289,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _manufacturerCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Manufacturer', hint: 'e.g., Contoso Pharma', helper: 'Enter the brand or company name'),
+                    decoration: _dec(label: 'Manufacturer', hint: 'eg Contoso Pharma', helper: 'Enter the brand or company name'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -258,7 +299,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     controller: _descriptionCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Description', hint: 'e.g., Pain relief', helper: 'Optional short description'),
+                    decoration: _dec(label: 'Description', hint: 'eg Pain relief', helper: 'Optional short description'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -271,7 +312,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     keyboardType: TextInputType.multiline,
                     minLines: 2,
                     maxLines: null,
-                    decoration: _dec(label: 'Notes', hint: 'e.g., Take with food', helper: 'Optional notes'),
+                    decoration: _dec(label: 'Notes', hint: 'eg Take with food', helper: 'Optional notes'),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -280,9 +321,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               _section('Strength', [
                 _rowLabelField(
                   label: 'Strength amount (per tablet) *',
-                  field: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                  field: SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                       _incBtn('−', () {
                         final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
@@ -316,14 +359,17 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         final nv = (base + 1).clamp(0, 1000000000);
                         setState(() => _strengthValueCtrl.text = nv.toString());
                       }),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 _rowLabelField(
                   label: 'Strength unit *',
-                  field: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                  field: SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                       const SizedBox(width: 36),
                       SizedBox(
                         height: 40,
@@ -345,7 +391,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           decoration: _decDrop(label: 'Strength unit *', hint: null, helper: 'mcg / mg / g'),
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ], trailing: _strengthSummary()),
@@ -354,9 +401,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               _section('Inventory', [
                 _rowLabelField(
                   label: 'Stock amount *',
-                  field: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                  field: SizedBox(
+                    height: 40,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                       _incBtn('−', () {
                         final d = double.tryParse(_stockCtrl.text.trim());
                         final base = (d ?? 0).toStringAsFixed(2);
@@ -407,13 +456,16 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         final nv = (current + 0.25).clamp(0, 1000000000).toStringAsFixed(2);
                         setState(() => _stockCtrl.text = nv);
                       }),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 _rowLabelField(
                   label: 'Stock unit',
-                  field: Row(
-                    children: [
+                  field: SizedBox(
+                    height: 40,
+                    child: Row(
+                      children: [
                       const SizedBox(width: 36),
                       SizedBox(
                         height: 40,
@@ -433,7 +485,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           decoration: _decDrop(label: 'Stock unit', helper: 'Locked to tablets'),
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
@@ -453,24 +506,15 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 if (_lowStockAlert)
                   _rowLabelField(
                     label: 'Threshold',
-                    field: SizedBox(
-                      width: 120,
-                      child: TextFormField(
-                        controller: _lowStockThresholdCtrl,
-                        textAlign: TextAlign.center,
-                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        decoration: _dec(label: 'Threshold', hint: '0', helper: 'Required when enabled'),
-                        validator: (v) {
-                          if (!_lowStockAlert) return null;
-                          final t = v?.trim() ?? '';
-                          if (t.isEmpty) return 'Required';
-                          final n = int.tryParse(t);
-                          if (n == null) return 'Invalid number';
-                          if (n <= 0) return 'Must be > 0';
-                          return null;
-                        },
-                      ),
+                    field: _intStepper(
+                      controller: _lowStockThresholdCtrl,
+                      step: 1,
+                      min: 0,
+                      max: 100000,
+                      width: 80,
+                      label: 'Threshold',
+                      hint: '0',
+                      helper: 'Required when enabled',
                     ),
                   ),
               ], trailing: _inventorySummary()),
@@ -500,9 +544,16 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
                 _rowLabelField(
                   label: 'Store below (°C)',
-                  field: Row(
-                    children: [
-                      _incBtn('−', () {
+                  field: _intStepper(
+                    controller: _storeBelowCtrl,
+                    step: 1,
+                    min: 0,
+                    max: 1000,
+                    width: 80,
+                    label: 'Store below (°C)',
+                    hint: '25',
+                    helper: 'Optional',
+                  ),
                         final v = int.tryParse(_storeBelowCtrl.text.trim()) ?? 0;
                         final nv = (v - 1).clamp(0, 1000);
                         setState(() => _storeBelowCtrl.text = nv.toString());
@@ -564,14 +615,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ),
               ], trailing: _storageSummary()),
 
-              // Expiry picker
-              const SizedBox(height: 10),
-              _section('Expiry', [
-                _rowLabelField(
-                  label: 'Expiry date',
-                  field: SizedBox(
-                    height: 40,
-                    child: OutlinedButton.icon(
+              // Expiry moved under Inventory
+              _rowLabelField(
+                label: 'Expiry date',
+                field: SizedBox(
+                  height: 40,
+                  child: OutlinedButton.icon(
                       onPressed: () async {
                         final now = DateTime.now();
                         final picked = await showDatePicker(
@@ -587,7 +636,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ),
                   ),
                 ),
-              ], trailing: _expirySummary()),
             ],
           ),
         ),
@@ -639,8 +687,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final name = _nameCtrl.text.trim();
     if (v.isEmpty) return const SizedBox.shrink();
     final unit = _strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g';
-    final med = name.isEmpty ? '' : ' $name Tablets';
-    return Text('$v $unit$med');
+    final med = name.isEmpty ? '' : ' per $name tablet';
+    return Text('$v$unit$med');
   }
 
   Widget _inventorySummary() {
