@@ -164,7 +164,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
         side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+        padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -230,7 +230,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
     final labelWidth = width >= 400 ? 120.0 : 110.0;
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -450,11 +450,11 @@ height: 36,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
+                      const SizedBox(height: 2),
                     ],
                   ),
                 ),
+                _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
               ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
@@ -546,7 +546,7 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                     ],
                   ),
                 ),
-_helperBelowCenter('Enter the amount of tablets in stock'),
+_helperBelowLeft('Enter the amount of tablets in stock'),
 
                 // Low stock alert toggle + threshold
                 _rowLabelField(
