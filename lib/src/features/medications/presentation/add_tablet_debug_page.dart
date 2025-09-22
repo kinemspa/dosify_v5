@@ -222,14 +222,27 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
               ),
               _rowLabelField(
                 label: 'Unit *',
-                field: DropdownButtonFormField<Unit>(
-                  value: _strengthUnit,
-                  isExpanded: true,
-                  items: const [Unit.mcg, Unit.mg, Unit.g]
-                      .map((u) => DropdownMenuItem(value: u, child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                      .toList(),
-                  onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                  decoration: _dec(),
+                field: SizedBox(
+                  width: 120,
+                  height: 40,
+                  child: DropdownButtonFormField<Unit>(
+                    value: _strengthUnit,
+                    isExpanded: false,
+                    alignment: AlignmentDirectional.center,
+                    menuMaxHeight: 320,
+                    selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                        .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                        .toList(),
+                    items: const [Unit.mcg, Unit.mg, Unit.g]
+                        .map((u) => DropdownMenuItem(
+                              value: u,
+                              alignment: AlignmentDirectional.center,
+                              child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
+                            ))
+                        .toList(),
+                    onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                    decoration: _dec(),
+                  ),
                 ),
               ),
             ]),
