@@ -365,34 +365,42 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                 ),
                 _rowLabelField(
                   label: 'Strength unit *',
-                  field: SizedBox(
-                    height: 40,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                      const SizedBox(width: 36),
-                      SizedBox(
-                        height: 40,
-                        width: 120,
-                        child: DropdownButtonFormField<Unit>(
-                          value: _strengthUnit,
-                          isExpanded: false,
-                          alignment: AlignmentDirectional.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                          dropdownColor: Theme.of(context).colorScheme.surface,
-                          menuMaxHeight: 320,
-                          selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
-                              .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                              .toList(),
-                          items: const [Unit.mcg, Unit.mg, Unit.g]
-                              .map((u) => DropdownMenuItem(value: u, child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')))))
-                              .toList(),
-                          onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                          decoration: _decDrop(label: 'Strength unit *', hint: null, helper: 'mcg / mg / g'),
-                        ),
+                  field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(width: 36),
+                          SizedBox(
+                            height: 40,
+                            width: 120,
+                            child: DropdownButtonFormField<Unit>(
+                              value: _strengthUnit,
+                              isExpanded: false,
+                              alignment: AlignmentDirectional.center,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                              dropdownColor: Theme.of(context).colorScheme.surface,
+                              menuMaxHeight: 320,
+                              selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                                  .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                                  .toList(),
+                              items: const [Unit.mcg, Unit.mg, Unit.g]
+                                  .map((u) => DropdownMenuItem(
+                                        value: u,
+                                        alignment: AlignmentDirectional.center,
+                                        child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
+                                      ))
+                                  .toList(),
+                              onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                              // No label/helper inside the field to avoid height squeeze
+                              decoration: _decDrop(label: '', hint: null, helper: null),
+                            ),
+                          ),
+                        ],
                       ),
-                      ],
-                    ),
+                      const SizedBox(height: 4),
+                      Text('mcg / mg / g', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    ],
                   ),
                 ),
               ], trailing: _strengthSummary()),
@@ -462,31 +470,36 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                 ),
                 _rowLabelField(
                   label: 'Stock unit',
-                  field: SizedBox(
-                    height: 40,
-                    child: Row(
-                      children: [
-                      const SizedBox(width: 36),
-                      SizedBox(
-                        height: 40,
-                        width: 120,
-                        child: DropdownButtonFormField<String>(
-                          value: 'tablets',
-                          isExpanded: false,
-                          alignment: AlignmentDirectional.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                          dropdownColor: Theme.of(context).colorScheme.surface,
-                          menuMaxHeight: 320,
-                          selectedItemBuilder: (ctx) => const ['tablets']
-                              .map((t) => Center(child: Text(t)))
-                              .toList(),
-                          items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
-                          onChanged: null, // locked
-                          decoration: _decDrop(label: 'Stock unit', helper: 'Locked to tablets'),
-                        ),
+                  field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(width: 36),
+                          SizedBox(
+                            height: 40,
+                            width: 120,
+                            child: DropdownButtonFormField<String>(
+                              value: 'tablets',
+                              isExpanded: false,
+                              alignment: AlignmentDirectional.center,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                              dropdownColor: Theme.of(context).colorScheme.surface,
+                              menuMaxHeight: 320,
+                              selectedItemBuilder: (ctx) => const ['tablets']
+                                  .map((t) => Center(child: Text(t)))
+                                  .toList(),
+                              items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
+                              onChanged: null, // locked
+                              // No label/helper inside the field to avoid height squeeze
+                              decoration: _decDrop(label: '', hint: null, helper: null),
+                            ),
+                          ),
+                        ],
                       ),
-                      ],
-                    ),
+                      const SizedBox(height: 4),
+                      Text('Locked to tablets', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    ],
                   ),
                 ),
 
