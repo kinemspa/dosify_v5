@@ -564,11 +564,12 @@ field: Row(
                   field: SizedBox(
                     height: kFieldHeight,
                     child: TextFormField(
-                    controller: _storageLocationCtrl,
-                    textAlign: TextAlign.left,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet', helper: 'Optional'),
-                    onChanged: (_) => setState(() {}),
+                      controller: _storageLocationCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet', helper: 'Optional'),
+                      onChanged: (_) => setState(() {}),
+                    ),
                   ),
                 ),
                 _rowLabelField(
