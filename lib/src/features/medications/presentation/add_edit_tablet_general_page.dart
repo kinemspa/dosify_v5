@@ -687,7 +687,7 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
             ],
           ),
         ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
         width: 220,
         child: FilledButton(
