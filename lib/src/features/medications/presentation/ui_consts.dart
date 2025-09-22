@@ -1,5 +1,7 @@
 // Shared UI constants for medication editors
 
+import 'package:flutter/material.dart';
+
 const double kFieldWidthFraction = 0.30;
 const double kFieldWidthMin = 110.0;
 const double kFieldWidthMax = 160.0;
@@ -13,7 +15,6 @@ const double kDropdownFontSize = 14.0;   // selected item and menu item font siz
 const double kHintFontSize = 11.0;       // hint/help text
 
 // Shared muted label style
-import 'package:flutter/material.dart';
 TextStyle kMutedLabelStyle(BuildContext context) =>
     Theme.of(context).textTheme.bodyMedium!.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.60),

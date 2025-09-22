@@ -5,6 +5,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 /// Minimal Tablet editor that renders ONLY the General section.
 /// This is used to isolate rendering issues step-by-step.
