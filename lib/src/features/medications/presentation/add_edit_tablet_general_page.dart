@@ -574,7 +574,7 @@ field: Row(
                       hint: '0',
                     ),
                   ),
-                  _helperBelowLeft('Enter the amount to alert when stock is low'),
+_helperBelowLeft('Set the stock level that triggers a low stock alert')
                 ],
                 _rowLabelField(
                   label: 'Expiry date',
@@ -638,11 +638,11 @@ _helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)'),
                         value: _keepRefrigerated,
                         onChanged: (v) => setState(() => _keepRefrigerated = v ?? false),
                       ),
-                      Text('Keep refrigerated', style: kMutedLabelStyle(context)),
+Text('Refrigerate', style: kMutedLabelStyle(context))
                     ],
                   ),
                 ),
-_helperBelowLeft('Enable if this medication must be protected from light'),
+_helperBelowLeft('Enable if this medication must be kept refrigerated'),
                 _rowLabelField(
                   label: 'Keep frozen',
                   field: Row(
@@ -651,7 +651,7 @@ _helperBelowLeft('Enable if this medication must be protected from light'),
                         value: _keepFrozen,
                         onChanged: (v) => setState(() => _keepFrozen = v ?? false),
                       ),
-                      Text('Keep frozen', style: kMutedLabelStyle(context)),
+Text('Freeze', style: kMutedLabelStyle(context))
                     ],
                   ),
                 ),
@@ -664,7 +664,7 @@ _helperBelowLeft('Enable if this medication must be protected from light'),
                         value: _lightSensitive,
                         onChanged: (v) => setState(() => _lightSensitive = v ?? false),
                       ),
-                      Text('Protect from light', style: kMutedLabelStyle(context)),
+Text('Dark storage', style: kMutedLabelStyle(context))
                     ],
                   ),
                 ),
