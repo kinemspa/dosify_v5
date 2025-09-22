@@ -73,6 +73,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   final _batchCtrl = TextEditingController();
   final _storageCtrl = TextEditingController();
   bool _requiresFridge = false;
+  bool _keepFrozen = false;
+  bool _lightSensitive = false;
   final _storageNotesCtrl = TextEditingController();
 
   int _formStyleIndex = 0;
@@ -101,7 +103,10 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       _batchCtrl.text = med.batchNumber ?? '';
       _storageCtrl.text = med.storageLocation ?? '';
       _requiresFridge = med.requiresRefrigeration;
-      _storageNotesCtrl.text = med.storageInstructions ?? '';
+      final si = med.storageInstructions ?? '';
+      _lightSensitive = si.toLowerCase().contains('light');
+      _keepFrozen = si.toLowerCase().contains('frozen');
+      _storageNotesCtrl.text = si;
     }
     _loadStylePrefs();
   }
@@ -292,9 +297,14 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       storageLocation:
           _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
-      storageInstructions: _storageNotesCtrl.text.trim().isEmpty
-          ? null
-          : _storageNotesCtrl.text.trim(),
+      storageInstructions: (() {
+        final parts = <String>[];
+        final s = _storageNotesCtrl.text.trim();
+        if (s.isNotEmpty) parts.add(s);
+        if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) parts.add('Keep frozen');
+        if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) parts.add('Protect from light');
+        return parts.isEmpty ? null : parts.join('. ');
+      })(),
     );
 
     if (!mounted) return;
@@ -661,6 +671,36 @@ Row(
                         Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
+                    const SizedBox(height: 2),
+                    _helperBelowLeft(context, 'Enable if this medication must be kept refrigerated'),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _keepFrozen,
+                          onChanged: (v) => setState(() => _keepFrozen = v ?? false),
+                        ),
+                        Text('Requires freezing', style: Theme.of(context).textTheme.bodyMedium),
+                        const Spacer(),
+                        Text('Freeze', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    _helperBelowLeft(context, 'Enable if this medication must be kept frozen'),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _lightSensitive,
+                          onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+                        ),
+                        Text('Keep in dark', style: Theme.of(context).textTheme.bodyMedium),
+                        const Spacer(),
+                        Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    _helperBelowLeft(context, 'Enable if this medication must be protected from light'),
                     TextFormField(
                       controller: _storageNotesCtrl,
                       textCapitalization: TextCapitalization.sentences,
