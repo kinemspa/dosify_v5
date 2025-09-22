@@ -25,6 +25,34 @@ class AddEditCapsulePage extends ConsumerStatefulWidget {
 }
 
 class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
+  Widget _helperBelowLeft(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 2, top: 4, bottom: 12),
+      child: Text(
+        text,
+        style: Theme.of(context)
+            .textTheme
+            .bodySmall
+            ?.copyWith(fontSize: kHintFontSize, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75)),
+      ),
+    );
+  }
+
+  Widget _helperBelowCenter(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+      child: Center(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
+              ?.copyWith(fontSize: kHintFontSize, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75)),
+        ),
+      ),
+    );
+  }
   final _formKey = GlobalKey<FormState>();
 
   final _nameCtrl = TextEditingController();
@@ -319,16 +347,16 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         title: widget.initial == null ? 'Add Medication - Capsule' : 'Edit Medication - Capsule',
         forceBackButton: true,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
-        backgroundColor: _nameCtrl.text.trim().isNotEmpty ? const Color(0xFF09A8BD) : Colors.grey,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.save),
-        label: Text(widget.initial == null ? 'Save' : 'Update'),
+floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: 220,
+        child: FilledButton(
+          onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
+          child: Text(widget.initial == null ? 'Save' : 'Update'),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 96),
         child: Form(
           key: _formKey,
           child: Column(
@@ -354,8 +382,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
                     TextFormField(
                       controller: _nameCtrl,
                       textCapitalization: TextCapitalization.sentences,
@@ -369,7 +397,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       onChanged: (_) => setState(() {}),
                     ),
-                    const SizedBox(height: 8),
+const SizedBox(height: 6),
                     TextFormField(
                       controller: _manufacturerCtrl,
                       textCapitalization: TextCapitalization.sentences,
@@ -382,7 +410,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
-                    const SizedBox(height: 8),
+const SizedBox(height: 6),
                     TextFormField(
                       controller: _descriptionCtrl,
                       textCapitalization: TextCapitalization.sentences,
@@ -395,7 +423,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
-                    const SizedBox(height: 8),
+const SizedBox(height: 6),
                     TextFormField(
                       controller: _notesCtrl,
                       textCapitalization: TextCapitalization.sentences,
@@ -424,8 +452,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Strength', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+Text('Strength', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
                     StrengthInput(
                       controller: _strengthValueCtrl,
                       unit: _strengthUnit,
@@ -435,16 +463,16 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       labelUnit: 'Unit *',
                       padding: EdgeInsets.zero,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Enter the strength per capsule and select the appropriate unit',
+const SizedBox(height: 2),
+                    
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey.shade600,
                       ),
                     ),
-                  ],
+],
                 ),
               ),
+              _helperBelowCenter(context, 'Enter the strength per capsule and select the appropriate unit'),
               const SizedBox(height: 12),
               // Inventory card
               Container(
@@ -458,8 +486,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Inventory', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+Text('Inventory', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
                         _pillBtn(context, '−', () {
@@ -534,14 +562,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Enter current stock quantity and select the unit of measurement',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+const SizedBox(height: 2),
+                    _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
+                    const SizedBox(height: 6),
                     // Expiry inside Inventory
                     ListTile(
                       leading: const Icon(Icons.calendar_month),
@@ -620,7 +643,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                         helper: '',
                       ),
                     ),
-                    const SizedBox(height: 8),
+const SizedBox(height: 6),
                     TextFormField(
                       controller: _storageCtrl,
                       textCapitalization: TextCapitalization.sentences,
@@ -632,9 +655,17 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                         helper: '',
                       ),
                     ),
-                    CheckboxListTile(
-                      title: const Text('Requires Refrigeration'),
-                      subtitle: const Text('Must be stored in refrigerator'),
+Row(
+                      children: [
+                        Checkbox(
+                          value: _requiresFridge,
+                          onChanged: (v) => setState(() => _requiresFridge = v ?? false),
+                        ),
+                        Text('Requires refrigeration', style: Theme.of(context).textTheme.bodyMedium),
+                        const Spacer(),
+                        Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ],
+                    ),
                       value: _requiresFridge,
                       onChanged: (v) => setState(() => _requiresFridge = v ?? false),
                       controlAffinity: ListTileControlAffinity.leading,
