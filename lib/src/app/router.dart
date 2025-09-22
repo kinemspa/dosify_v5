@@ -150,7 +150,10 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/capsule',
           name: 'addCapsule',
-          builder: (context, state) => const AddEditCapsulePage(),
+          builder: (context, state) {
+            debugPrint('[ROUTER] /medications/add/capsule -> AddEditCapsulePage');
+            return const AddEditCapsulePage();
+          },
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',

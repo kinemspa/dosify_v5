@@ -354,7 +354,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GradientAppBar(
-        title: widget.initial == null ? 'Add Capsule' : 'Edit Capsule',
+title: widget.initial == null ? 'Add Capsule (Blueprint)' : 'Edit Capsule (Blueprint)',
         forceBackButton: true,
       ),
 floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
