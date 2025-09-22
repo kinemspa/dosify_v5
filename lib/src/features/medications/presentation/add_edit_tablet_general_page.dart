@@ -373,31 +373,39 @@ height: 36,
                 _rowLabelField(
                   label: 'Strength unit *',
                   field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: kFieldHeight,
-                        width: 120,
-                        child: DropdownButtonFormField<Unit>(
-                          value: _strengthUnit,
-                          isExpanded: false,
-                          alignment: AlignmentDirectional.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                          dropdownColor: Theme.of(context).colorScheme.surface,
-                          menuMaxHeight: 320,
-                          selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
-                              .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                              .toList(),
-                          items: const [Unit.mcg, Unit.mg, Unit.g]
-                              .map((u) => DropdownMenuItem(
-                                    value: u,
-                                    alignment: AlignmentDirectional.center,
-                                    child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
-                                  ))
-                              .toList(),
-                          onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                          decoration: _decDrop(label: '', hint: null, helper: 'mcg / mg / g'),
+                      Align(
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          height: kFieldHeight,
+                          width: 120,
+                          child: DropdownButtonFormField<Unit>(
+                            value: _strengthUnit,
+                            isExpanded: false,
+                            alignment: AlignmentDirectional.center,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                            dropdownColor: Theme.of(context).colorScheme.surface,
+                            menuMaxHeight: 320,
+                            selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                                .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                                .toList(),
+                            items: const [Unit.mcg, Unit.mg, Unit.g]
+                                .map((u) => DropdownMenuItem(
+                                      value: u,
+                                      alignment: AlignmentDirectional.center,
+                                      child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
+                                    ))
+                                .toList(),
+                            onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                            decoration: _decDrop(label: '', hint: null, helper: null),
+                          ),
                         ),
+                      ),
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text('mcg / mg / g', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ),
                     ],
                   ),
@@ -408,87 +416,107 @@ height: 36,
               _section('Inventory', [
                 _rowLabelField(
                   label: 'Stock amount *',
-                  field: SizedBox(
-                    height: kFieldHeight,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                      _incBtn('−', () {
-                        final d = double.tryParse(_stockCtrl.text.trim());
-                        final base = (d ?? 0).toStringAsFixed(2);
-                        final current = double.tryParse(base) ?? 0;
-                        final nv = (current - 0.25).clamp(0, 1000000000).toStringAsFixed(2);
-                        setState(() => _stockCtrl.text = nv);
-                      }),
-                      const SizedBox(width: 6),
+                  field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                       SizedBox(
-                        width: 120,
-                        child: TextFormField(
-                          controller: _stockCtrl,
-                          textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'))],
-                          decoration: _dec(label: 'Stock amount *', hint: '0.00', helper: 'Quarter steps: .00 / .25 / .50 / .75'),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Required';
-                            final d = double.tryParse(v);
-                            if (d == null) return 'Invalid number';
-                            if (d < 0) return 'Must be ≥ 0';
-                            final cents = (d * 100).round();
-                            if (cents % 25 != 0) return 'Use .00, .25, .50, or .75';
-                            return null;
-                          },
-                          onChanged: (v) {
-                            final d = double.tryParse(v);
-                            setState(() {
-                              if (d == null || ((d * 100).round() % 25 == 0)) {
-                                _stockError = null;
-                              } else {
-                                _stockError = 'Use .00, .25, .50, or .75';
-                              }
-                            });
-                          },
+                        height: kFieldHeight,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _incBtn('−', () {
+                              final d = double.tryParse(_stockCtrl.text.trim());
+                              final base = (d ?? 0).toStringAsFixed(2);
+                              final current = double.tryParse(base) ?? 0;
+                              final nv = (current - 0.25).clamp(0, 1000000000).toStringAsFixed(2);
+                              setState(() => _stockCtrl.text = nv);
+                            }),
+                            const SizedBox(width: 6),
+                            SizedBox(
+                              width: 120,
+                              child: SizedBox(
+                                height: kFieldHeight,
+                                child: TextFormField(
+                                  controller: _stockCtrl,
+                                  textAlign: TextAlign.center,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'))],
+                                  decoration: _dec(label: 'Stock amount *', hint: '0.00'),
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) return 'Required';
+                                    final d = double.tryParse(v);
+                                    if (d == null) return 'Invalid number';
+                                    if (d < 0) return 'Must be ≥ 0';
+                                    final cents = (d * 100).round();
+                                    if (cents % 25 != 0) return 'Use .00, .25, .50, or .75';
+                                    return null;
+                                  },
+                                  onChanged: (v) {
+                                    final d = double.tryParse(v);
+                                    setState(() {
+                                      if (d == null || ((d * 100).round() % 25 == 0)) {
+                                        _stockError = null;
+                                      } else {
+                                        _stockError = 'Use .00, .25, .50, or .75';
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            _incBtn('+', () {
+                              final d = double.tryParse(_stockCtrl.text.trim());
+                              final base = (d ?? 0).toStringAsFixed(2);
+                              final current = double.tryParse(base) ?? 0;
+                              final nv = (current + 0.25).clamp(0, 1000000000).toStringAsFixed(2);
+                              setState(() => _stockCtrl.text = nv);
+                            }),
+                          ],
                         ),
                       ),
-                      if (_stockError != null)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 36 + 120 + 6 + 30 + 6, top: 4),
-                          child: Text(_stockError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+                      const SizedBox(height: 4),
+                      Center(
+                        child: Text(
+                          _stockError ?? 'Quarter steps: .00 / .25 / .50 / .75',
+                          style: _stockError == null
+                              ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
+                              : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
                         ),
-                      const SizedBox(width: 6),
-                      _incBtn('+', () {
-                        final d = double.tryParse(_stockCtrl.text.trim());
-                        final base = (d ?? 0).toStringAsFixed(2);
-                        final current = double.tryParse(base) ?? 0;
-                        final nv = (current + 0.25).clamp(0, 1000000000).toStringAsFixed(2);
-                        setState(() => _stockCtrl.text = nv);
-                      }),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 _rowLabelField(
                   label: 'Stock unit',
                   field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: kFieldHeight,
-                        width: 120,
-                        child: DropdownButtonFormField<String>(
-                          value: 'tablets',
-                          isExpanded: false,
-                          alignment: AlignmentDirectional.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                          dropdownColor: Theme.of(context).colorScheme.surface,
-                          menuMaxHeight: 320,
-                          selectedItemBuilder: (ctx) => const ['tablets']
-                              .map((t) => Center(child: Text(t)))
-                              .toList(),
-                          items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
-                          onChanged: null, // locked
-                          decoration: _decDrop(label: '', hint: null, helper: 'Locked to tablets'),
+                      Align(
+                        alignment: Alignment.center,
+                        child: SizedBox(
+                          height: kFieldHeight,
+                          width: 120,
+                          child: DropdownButtonFormField<String>(
+                            value: 'tablets',
+                            isExpanded: false,
+                            alignment: AlignmentDirectional.center,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                            dropdownColor: Theme.of(context).colorScheme.surface,
+                            menuMaxHeight: 320,
+                            selectedItemBuilder: (ctx) => const ['tablets']
+                                .map((t) => Center(child: Text(t)))
+                                .toList(),
+                            items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
+                            onChanged: null, // locked
+                            decoration: _decDrop(label: '', hint: null, helper: null),
+                          ),
                         ),
+                      ),
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text('Locked to tablets', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ),
                     ],
                   ),
@@ -575,15 +603,26 @@ field: Row(
                 ),
                 _rowLabelField(
                   label: 'Store below (°C)',
-                  field: _intStepper(
-                    controller: _storeBelowCtrl,
-                    step: 1,
-                    min: 0,
-                    max: 1000,
-                    width: 80,
-                    label: 'Store below (°C)',
-                    hint: '25',
-                    helper: 'Optional',
+                  field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: kFieldHeight,
+                        child: _intStepper(
+                          controller: _storeBelowCtrl,
+                          step: 1,
+                          min: 0,
+                          max: 1000,
+                          width: 80,
+                          label: 'Store below (°C)',
+                          hint: '25',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Center(
+                        child: Text('Optional', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ),
+                    ],
                   ),
                 ),
                 _rowLabelField(

@@ -46,7 +46,7 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         isCollapsed: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
         constraints: const BoxConstraints(minHeight: 36),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
@@ -100,7 +100,7 @@ selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
         }),
         checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.60);
+          final color = baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
           return BorderSide(color: color, width: 1.5);
         }),
         overlayColor: WidgetStatePropertyAll(baseLight.colorScheme.primary.withValues(alpha: 0.08)),
@@ -145,7 +145,7 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         isCollapsed: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
         constraints: const BoxConstraints(minHeight: 36),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
@@ -199,7 +199,7 @@ selectionColor: baseDark.colorScheme.primary.withValues(alpha: 0.3),
         }),
         checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.60);
+          final color = baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
           return BorderSide(color: color, width: 1.5);
         }),
         overlayColor: WidgetStatePropertyAll(baseDark.colorScheme.primary.withValues(alpha: 0.12)),

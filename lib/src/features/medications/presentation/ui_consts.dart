@@ -17,7 +17,7 @@ const double kHintFontSize = 11.0;       // hint/help text
 // Shared muted label style
 TextStyle kMutedLabelStyle(BuildContext context) =>
     Theme.of(context).textTheme.bodyMedium!.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.60),
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.50),
         );
 
 // Layout tweaks
