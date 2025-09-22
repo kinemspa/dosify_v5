@@ -95,11 +95,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       floatingLabelBehavior: FloatingLabelBehavior.never,
       hintText: hint,
       helperText: helper,
-      isDense: true,
-contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      isDense: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
-helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
+      helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -369,7 +369,8 @@ height: 36,
                 ),
                 _rowLabelField(
                   label: 'Strength unit *',
-                  field: Row(
+                  field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
                         height: kFieldHeight,
@@ -392,18 +393,7 @@ height: 36,
                                   ))
                               .toList(),
                           onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                          decoration: _decDrop(label: '', hint: null, helper: null),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: kFieldHeight,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'mcg / mg / g',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          ),
+                          decoration: _decDrop(label: '', hint: null, helper: 'mcg / mg / g'),
                         ),
                       ),
                     ],
@@ -476,7 +466,8 @@ height: 36,
                 ),
                 _rowLabelField(
                   label: 'Stock unit',
-                  field: Row(
+                  field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
                         height: kFieldHeight,
@@ -493,15 +484,7 @@ height: 36,
                               .toList(),
                           items: const [DropdownMenuItem(value: 'tablets', child: Center(child: Text('tablets')))],
                           onChanged: null, // locked
-                          decoration: _decDrop(label: '', hint: null, helper: null),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: kFieldHeight,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text('Locked to tablets', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          decoration: _decDrop(label: '', hint: null, helper: 'Locked to tablets'),
                         ),
                       ),
                     ],
@@ -602,7 +585,7 @@ field: Row(
                         value: _keepRefrigerated,
                         onChanged: (v) => setState(() => _keepRefrigerated = v ?? false),
                       ),
-                      const Text('Keep refrigerated'),
+                      Text('Keep refrigerated', style: kMutedLabelStyle(context)),
                     ],
                   ),
                 ),
@@ -614,7 +597,7 @@ field: Row(
                         value: _lightSensitive,
                         onChanged: (v) => setState(() => _lightSensitive = v ?? false),
                       ),
-                      const Text('Protect from light'),
+                      Text('Protect from light', style: kMutedLabelStyle(context)),
                     ],
                   ),
                 ),
