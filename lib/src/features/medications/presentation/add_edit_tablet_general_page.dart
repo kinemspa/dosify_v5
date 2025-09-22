@@ -95,8 +95,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       floatingLabelBehavior: FloatingLabelBehavior.never,
       hintText: hint,
       helperText: helper,
-      isDense: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      isDense: true,
+      isCollapsed: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
@@ -165,8 +166,9 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
       floatingLabelBehavior: FloatingLabelBehavior.never,
       hintText: hint,
       helperText: helper,
-      isDense: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      isDense: true,
+      isCollapsed: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
@@ -278,34 +280,40 @@ return SizedBox(
               _section('General', [
                 _rowLabelField(
                   label: 'Name *',
-                  field: TextFormField(
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: TextFormField(
                     controller: _nameCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500', helper: 'Enter the medication name'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     onChanged: (_) => setState(() {}),
-                  ),
+                  )),
                 ),
                 _rowLabelField(
                   label: 'Manufacturer',
-                  field: TextFormField(
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: TextFormField(
                     controller: _manufacturerCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma', helper: 'Enter the brand or company name'),
                     onChanged: (_) => setState(() {}),
-                  ),
+                  )),
                 ),
                 _rowLabelField(
                   label: 'Description',
-                  field: TextFormField(
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: TextFormField(
                     controller: _descriptionCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Description', hint: 'eg. Pain relief', helper: 'Optional short description'),
                     onChanged: (_) => setState(() {}),
-                  ),
+                  )),
                 ),
                 _rowLabelField(
                   label: 'Notes',
@@ -546,17 +554,22 @@ field: Row(
               _section('Storage', [
                 _rowLabelField(
                   label: 'Batch No.',
-                  field: TextFormField(
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: TextFormField(
                     controller: _batchNumberCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Batch No.', hint: 'Enter batch number', helper: 'Optional'),
                     onChanged: (_) => setState(() {}),
-                  ),
+                  )),
+
                 ),
                 _rowLabelField(
                   label: 'Location',
-                  field: TextFormField(
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: TextFormField(
                     controller: _storageLocationCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
@@ -603,13 +616,15 @@ field: Row(
                 ),
                 _rowLabelField(
                   label: 'Storage instructions',
-                  field: TextFormField(
+                  field: SizedBox(
+                    height: kFieldHeight,
+                    child: TextFormField(
                     controller: _storageInstructionsCtrl,
                     textAlign: TextAlign.left,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions', helper: 'Optional'),
                     onChanged: (_) => setState(() {}),
-                  ),
+                  )),
                 ),
               ], trailing: _storageSummary()),
 

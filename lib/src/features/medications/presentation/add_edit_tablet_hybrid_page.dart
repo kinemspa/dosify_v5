@@ -226,13 +226,11 @@ InputDecoration _dec({String? hint}) {
         final theme = Theme.of(context);
         final cs = theme.colorScheme;
         // Enforce a full 36 px input decorator height using kFieldHeight
-        // by avoiding dense layout and increasing vertical content padding.
-        // Also keep an explicit minHeight guard for older Flutter versions.
         return InputDecoration(
           hintText: hint,
-          isDense: false,
-          isCollapsed: false,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          isDense: true,
+          isCollapsed: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
           constraints: const BoxConstraints(minHeight: kFieldHeight),
           floatingLabelBehavior: FloatingLabelBehavior.never,
           hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: kHintFontSize, color: cs.onSurfaceVariant),
