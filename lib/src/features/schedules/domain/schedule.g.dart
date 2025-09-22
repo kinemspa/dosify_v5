@@ -32,6 +32,16 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       timesOfDayUtc: (fields[13] as List?)?.cast<int>(),
       cycleEveryNDays: fields[14] as int?,
       cycleAnchorDate: fields[15] as DateTime?,
+      doseUnitCode: fields[16] as int?,
+      doseMassMcg: fields[17] as int?,
+      doseVolumeMicroliter: fields[18] as int?,
+      doseTabletQuarters: fields[19] as int?,
+      doseCapsules: fields[20] as int?,
+      doseSyringes: fields[21] as int?,
+      doseVials: fields[22] as int?,
+      doseIU: fields[23] as int?,
+      displayUnitCode: fields[24] as int?,
+      inputModeCode: fields[25] as int?,
       createdAt: fields[8] as DateTime?,
     );
   }
@@ -39,7 +49,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
   @override
   void write(BinaryWriter writer, Schedule obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(26)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -71,7 +81,27 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..writeByte(14)
       ..write(obj.cycleEveryNDays)
       ..writeByte(15)
-      ..write(obj.cycleAnchorDate);
+      ..write(obj.cycleAnchorDate)
+      ..writeByte(16)
+      ..write(obj.doseUnitCode)
+      ..writeByte(17)
+      ..write(obj.doseMassMcg)
+      ..writeByte(18)
+      ..write(obj.doseVolumeMicroliter)
+      ..writeByte(19)
+      ..write(obj.doseTabletQuarters)
+      ..writeByte(20)
+      ..write(obj.doseCapsules)
+      ..writeByte(21)
+      ..write(obj.doseSyringes)
+      ..writeByte(22)
+      ..write(obj.doseVials)
+      ..writeByte(23)
+      ..write(obj.doseIU)
+      ..writeByte(24)
+      ..write(obj.displayUnitCode)
+      ..writeByte(25)
+      ..write(obj.inputModeCode);
   }
 
   @override
