@@ -57,50 +57,57 @@ class _StrengthInputState extends State<StrengthInput> {
     final theme = Theme.of(context);
     return Padding(
       padding: padding ?? EdgeInsets.zero,
-      child: DropdownButtonFormField<Unit>(
-        value: _unit,
-        isExpanded: true,
-        alignment: AlignmentDirectional.center,
-        items: const [
-          DropdownMenuItem(
-            value: Unit.mcg,
-            alignment: AlignmentDirectional.center,
-            child: Center(child: Text('mcg', textAlign: TextAlign.center)),
+      child: SizedBox(
+        height: 40,
+        child: DropdownButtonFormField<Unit>(
+          value: _unit,
+          isExpanded: false,
+          alignment: AlignmentDirectional.center,
+          menuMaxHeight: 320,
+          selectedItemBuilder: (ctx) => const [
+            Unit.mcg, Unit.mg, Unit.g
+          ].map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')))).toList(),
+          items: const [
+            DropdownMenuItem(
+              value: Unit.mcg,
+              alignment: AlignmentDirectional.center,
+              child: Center(child: Text('mcg', textAlign: TextAlign.center)),
+            ),
+            DropdownMenuItem(
+              value: Unit.mg,
+              alignment: AlignmentDirectional.center,
+              child: Center(child: Text('mg', textAlign: TextAlign.center)),
+            ),
+            DropdownMenuItem(
+              value: Unit.g,
+              alignment: AlignmentDirectional.center,
+              child: Center(child: Text('g', textAlign: TextAlign.center)),
+            ),
+          ],
+          onChanged: (v) {
+            final nv = v ?? _unit;
+            setState(() => _unit = nv);
+            widget.onUnitChanged(nv);
+          },
+          icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium,
+          decoration: InputDecoration(
+            labelText: widget.labelUnit,
+            isDense: false,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            constraints: const BoxConstraints(minHeight: 40),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+            ),
+            filled: true,
           ),
-          DropdownMenuItem(
-            value: Unit.mg,
-            alignment: AlignmentDirectional.center,
-            child: Center(child: Text('mg', textAlign: TextAlign.center)),
-          ),
-          DropdownMenuItem(
-            value: Unit.g,
-            alignment: AlignmentDirectional.center,
-            child: Center(child: Text('g', textAlign: TextAlign.center)),
-          ),
-        ],
-        onChanged: (v) {
-          final nv = v ?? _unit;
-          setState(() => _unit = nv);
-          widget.onUnitChanged(nv);
-        },
-        icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
-        style: theme.textTheme.bodyMedium,
-        decoration: InputDecoration(
-          labelText: widget.labelUnit,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
-          ),
-          filled: true,
         ),
-        menuMaxHeight: 320,
       ),
     );
   }
