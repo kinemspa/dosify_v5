@@ -95,6 +95,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     return InputDecoration(
       // No floating label; we render labels in the left column
       floatingLabelBehavior: FloatingLabelBehavior.never,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
       hintText: hint,
       helperText: helper,
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
@@ -162,6 +166,10 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
     final cs = theme.colorScheme;
     return InputDecoration(
       floatingLabelBehavior: FloatingLabelBehavior.never,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
       hintText: hint,
       helperText: helper,
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
