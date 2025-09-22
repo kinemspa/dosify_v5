@@ -518,7 +518,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GradientAppBar(
-        title: widget.initial == null ? 'Add Capsule (Blueprint)' : 'Edit Capsule (Blueprint)',
+        title: widget.initial == null ? 'Add Capsule' : 'Edit Capsule',
         forceBackButton: true,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -608,24 +608,35 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     ],
                   ),
                 )),
-                _rowLabelField(label: 'Unit *', field: SizedBox(
-                  height: 36,
-                  width: 120,
-                  child: DropdownButtonFormField<Unit>(
-                    value: _strengthUnit,
-                    isExpanded: false,
-                    alignment: AlignmentDirectional.center,
-                    items: const [
-                      DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
-                      DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
-                      DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
-                    ],
-                    onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                    decoration: _decDrop(label: '', hint: null, helper: null),
+                _rowLabelField(label: 'Unit *', field: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    height: kFieldHeight,
+                    width: 120,
+                    child: DropdownButtonFormField<Unit>(
+                      value: _strengthUnit,
+                      isExpanded: false,
+                      alignment: AlignmentDirectional.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                      dropdownColor: Theme.of(context).colorScheme.surface,
+                      menuMaxHeight: 320,
+                      selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                          .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                          .toList(),
+                      items: const [Unit.mcg, Unit.mg, Unit.g]
+                          .map((u) => DropdownMenuItem(
+                                value: u,
+                                alignment: AlignmentDirectional.center,
+                                child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
+                              ))
+                          .toList(),
+                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                      decoration: _decDrop(label: '', hint: null, helper: null),
+                    ),
                   ),
                 )),
+                _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
               ]),
-              _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
               const SizedBox(height: 10),
               _section('Inventory', [
                 _rowLabelField(label: 'Stock quantity *', field: SizedBox(
@@ -658,21 +669,44 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     ],
                   ),
                 )),
-                _rowLabelField(label: 'Quantity unit', field: SizedBox(
-                  height: 36,
-                  width: 120,
-                  child: DropdownButtonFormField<StockUnit>(
-                    value: StockUnit.capsules,
-                    isExpanded: false,
-                    items: const [DropdownMenuItem(value: StockUnit.capsules, child: Center(child: Text('capsules')))],
-                    onChanged: null,
-                    decoration: _decDrop(label: '', hint: null, helper: null),
+                _rowLabelField(label: 'Quantity unit', field: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    height: kFieldHeight,
+                    width: 120,
+                    child: DropdownButtonFormField<String>(
+                      value: 'capsules',
+                      isExpanded: false,
+                      alignment: AlignmentDirectional.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                      dropdownColor: Theme.of(context).colorScheme.surface,
+                      menuMaxHeight: 320,
+                      selectedItemBuilder: (ctx) => const ['capsules']
+                          .map((t) => Center(child: Text(t)))
+                          .toList(),
+                      items: const [DropdownMenuItem(value: 'capsules', child: Center(child: Text('capsules')))],
+                      onChanged: null,
+                      decoration: _decDrop(label: '', hint: null, helper: null),
+                    ),
                   ),
                 )),
-              ]),
-              _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
-              const SizedBox(height: 6),
-              _section('Inventory', [
+                _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
+                _rowLabelField(label: 'Low stock alert', field: Row(children: [
+                  Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
+                  Text('Enable alert when stock is low', style: Theme.of(context).textTheme.bodyMedium),
+                ])),
+                if (_lowStockEnabled) ...[
+                  _rowLabelField(label: 'Threshold', field: _intStepper(
+                    controller: _lowStockCtrl,
+                    step: 1,
+                    min: 0,
+                    max: 100000,
+                    width: 120,
+                    label: 'Threshold',
+                    hint: '0',
+                  )),
+                  _helperBelowLeft(context, 'Set the stock level that triggers a low stock alert'),
+                ],
                 _rowLabelField(label: 'Expiry date', field: Field36(
                   width: 120,
                   child: OutlinedButton.icon(
@@ -691,24 +725,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
                   ),
                 )),
-                _rowLabelField(label: 'Low stock alert', field: Row(children: [
-                  Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
-                  Text('Enable alert when stock is low', style: Theme.of(context).textTheme.bodyMedium),
-                ])),
-                if (_lowStockEnabled) ...[
-                  _rowLabelField(label: 'Threshold', field: _intStepper(
-                    controller: _lowStockCtrl,
-                    step: 1,
-                    min: 0,
-                    max: 100000,
-                    width: 120,
-                    label: 'Threshold',
-                    hint: '0',
-                  )),
-                  _helperBelowLeft(context, 'Set the stock level that triggers a low stock alert'),
-                ],
+                _helperBelowLeft(context, 'Enter the expiry date'),
               ]),
-              _helperBelowLeft(context, 'Enter the expiry date'),
               const SizedBox(height: 10),
               _section('Storage', [
                 _rowLabelField(label: 'Batch No.', field: Field36(child: TextFormField(
@@ -727,17 +745,17 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
                 _rowLabelField(label: 'Keep refrigerated', field: Row(children: [
                   Checkbox(value: _requiresFridge, onChanged: (v) => setState(() => _requiresFridge = v ?? false)),
-                  Text('Requires refrigeration'), const Spacer(), Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ])),
                 _helperBelowLeft(context, 'Enable if this medication must be kept refrigerated'),
                 _rowLabelField(label: 'Keep frozen', field: Row(children: [
                   Checkbox(value: _keepFrozen, onChanged: (v) => setState(() => _keepFrozen = v ?? false)),
-                  Text('Requires freezing'), const Spacer(), Text('Freeze', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('Freeze', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ])),
                 _helperBelowLeft(context, 'Enable if this medication must be kept frozen'),
                 _rowLabelField(label: 'Keep in dark', field: Row(children: [
                   Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
-                  Text('Keep in dark'), const Spacer(), Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ])),
                 _helperBelowLeft(context, 'Enable if this medication must be protected from light'),
                 _rowLabelField(label: 'Storage instructions', field: Field36(child: TextFormField(
