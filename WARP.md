@@ -6,6 +6,7 @@ Project: Dosifi v5 (Flutter)
 Platform: Android-first (Windows + PowerShell)
 
 Standing rules
+- Before prompting the user to test, run: `flutter analyze` and attempt a quick compile (e.g., `flutter build apk --debug`) to catch syntax/build errors.
 - Always commit to the local git.
 - Always update the technical documentation.
 

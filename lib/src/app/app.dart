@@ -46,7 +46,7 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         isCollapsed: false,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         constraints: const BoxConstraints(minHeight: 36),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
@@ -145,7 +145,7 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         isCollapsed: false,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         constraints: const BoxConstraints(minHeight: 36),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(

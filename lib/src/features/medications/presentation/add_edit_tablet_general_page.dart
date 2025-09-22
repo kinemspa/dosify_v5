@@ -546,7 +546,7 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                     ],
                   ),
                 ),
-_helperBelowCenter('Enter whole, 1/2, or 1/4 tablets'),
+_helperBelowCenter('Enter the amount of tablets in stock'),
 
                 // Low stock alert toggle + threshold
                 _rowLabelField(

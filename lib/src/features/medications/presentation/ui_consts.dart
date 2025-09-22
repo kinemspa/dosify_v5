@@ -10,9 +10,9 @@ const double kFieldHeight = 36.0; // unified height for text fields and dropdown
 const double kBtnSize = 30.0;     // +/- buttons size
 
 // Typography
-const double kInputFontSize = 14.0;      // typed text size in fields
-const double kDropdownFontSize = 14.0;   // selected item and menu item font size
-const double kHintFontSize = 11.0;       // hint/help text
+const double kInputFontSize = 13.0;      // typed text size in fields (compact)
+const double kDropdownFontSize = 13.0;   // selected item and menu item font size (compact)
+const double kHintFontSize = 10.5;       // hint/help text (compact)
 
 // Shared muted label style
 TextStyle kMutedLabelStyle(BuildContext context) =>
