@@ -37,10 +37,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   DateTime? _expiryDate;
   // Storage fields
   final _storageLocationCtrl = TextEditingController();
-  final _storeBelowCtrl = TextEditingController();
   final _batchNumberCtrl = TextEditingController();
   final _storageInstructionsCtrl = TextEditingController();
   bool _keepRefrigerated = false;
+  bool _keepFrozen = false;
   bool _lightSensitive = false;
 
   // Live validation state
@@ -83,7 +83,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _stockCtrl.dispose();
     _lowStockThresholdCtrl.dispose();
     _storageLocationCtrl.dispose();
-    _storeBelowCtrl.dispose();
     _batchNumberCtrl.dispose();
     _storageInstructionsCtrl.dispose();
     super.dispose();
@@ -125,7 +124,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Widget _helperBelowLeft(String text) {
     final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 2),
+      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
       child: Text(
         text,
         textAlign: TextAlign.left,
@@ -140,7 +139,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Widget _helperBelowCenter(String text) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 2),
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
       child: Center(
         child: Text(
           text,
@@ -310,10 +309,10 @@ return SizedBox(
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     final mq = MediaQuery.of(context);
-    return Scaffold(
+      return Scaffold(
       appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
         body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 12),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
         child: Form(
           key: _formKey,
           child: Column(
@@ -455,8 +454,8 @@ height: 36,
                     ],
                   ),
                 ),
+                ),
               ], trailing: _strengthSummary()),
-              _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
 
               const SizedBox(height: 10),
               _section('Inventory', [
@@ -562,7 +561,7 @@ field: Row(
                     ],
                   ),
                 ),
-                if (_lowStockAlert)
+                if (_lowStockAlert) ...[
                   _rowLabelField(
                     label: 'Threshold',
                     field: _intStepper(
@@ -575,7 +574,8 @@ field: Row(
                       hint: '0',
                     ),
                   ),
-_helperBelowLeft('Enter the amount to alert when stock is low'),
+                  _helperBelowLeft('Enter the amount to alert when stock is low'),
+                ],
                 _rowLabelField(
                   label: 'Expiry date',
                   field: Field36(
@@ -629,46 +629,14 @@ _helperBelowLeft('Enter the printed batch or lot number'),
                   ),
                 ),
 _helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)'),
+                // Removed 'Store below (°C)' per requirements
                 _rowLabelField(
-                  label: 'Store below (°C)',
-                  field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: kFieldHeight,
-                        child: _intStepper(
-                          controller: _storeBelowCtrl,
-                          step: 1,
-                          min: 0,
-                          max: 1000,
-                          width: 120,
-                          label: 'Store below (°C)',
-                          hint: '25',
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-_helperBelowLeft('Optional'),
-                    ],
-                  ),
-                ),
-                _rowLabelField(
-                  label: 'Cold storage',
+                  label: 'Keep refrigerated',
                   field: Row(
                     children: [
                       Checkbox(
                         value: _keepRefrigerated,
-onChanged: (v) {
-                        final nv = v ?? false;
-                        setState(() {
-                          _keepRefrigerated = nv;
-                          if (nv) {
-                            final cur = int.tryParse(_storeBelowCtrl.text.trim());
-                            if (cur == null || cur > 8) {
-                              _storeBelowCtrl.text = '8';
-                            }
-                          }
-                        });
-                      },
+                        onChanged: (v) => setState(() => _keepRefrigerated = v ?? false),
                       ),
                       Text('Keep refrigerated', style: kMutedLabelStyle(context)),
                     ],
@@ -676,7 +644,20 @@ onChanged: (v) {
                 ),
 _helperBelowLeft('Enable if this medication must be protected from light'),
                 _rowLabelField(
-                  label: 'Light sensitive',
+                  label: 'Keep frozen',
+                  field: Row(
+                    children: [
+                      Checkbox(
+                        value: _keepFrozen,
+                        onChanged: (v) => setState(() => _keepFrozen = v ?? false),
+                      ),
+                      Text('Keep frozen', style: kMutedLabelStyle(context)),
+                    ],
+                  ),
+                ),
+                _helperBelowLeft('Enable if this medication must be kept frozen'),
+                _rowLabelField(
+                  label: 'Keep in dark',
                   field: Row(
                     children: [
                       Checkbox(
@@ -707,25 +688,15 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: SizedBox(
-          height: 48,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
-            child: Center(
-              child: SizedBox(
-                width: 220,
-child: TextButton(
-style: TextButton.styleFrom(minimumSize: const Size.fromHeight(36)),
-                  onPressed: () async {
-                    if (!(_formKey.currentState?.validate() ?? false)) return;
-                    await _showConfirmDialog();
-                  },
-                  child: const Text('Save'),
-                ),
-              ),
-            ),
-          ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: 220,
+        child: FilledButton(
+          onPressed: () async {
+            if (!(_formKey.currentState?.validate() ?? false)) return;
+            await _showConfirmDialog();
+          },
+          child: const Text('Save'),
         ),
       ),
     );
