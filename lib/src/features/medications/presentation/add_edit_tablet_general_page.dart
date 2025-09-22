@@ -454,7 +454,6 @@ height: 36,
                       _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
                     ],
                   ),
-                ),
               ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
