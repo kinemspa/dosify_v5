@@ -464,11 +464,6 @@ Text('Strength', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWe
                       padding: EdgeInsets.zero,
                     ),
 const SizedBox(height: 2),
-                    
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
 ],
                 ),
               ),
@@ -665,11 +660,6 @@ Row(
                         const Spacer(),
                         Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
-                    ),
-                      value: _requiresFridge,
-                      onChanged: (v) => setState(() => _requiresFridge = v ?? false),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      contentPadding: EdgeInsets.zero,
                     ),
                     TextFormField(
                       controller: _storageNotesCtrl,
