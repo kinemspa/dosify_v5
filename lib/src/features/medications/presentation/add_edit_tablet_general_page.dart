@@ -332,7 +332,7 @@ return SizedBox(
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-_helperBelowLeft('Enter the medication name')
+_helperBelowLeft('Enter the medication name'),
                 _rowLabelField(
                   label: 'Manufacturer',
                   field: Field36(
@@ -344,7 +344,7 @@ _helperBelowLeft('Enter the medication name')
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-_helperBelowLeft('Enter the brand or company name')
+_helperBelowLeft('Enter the brand or company name'),
                 _rowLabelField(
                   label: 'Description',
                   field: Field36(
@@ -356,7 +356,7 @@ _helperBelowLeft('Enter the brand or company name')
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-_helperBelowLeft('Optional short description')
+_helperBelowLeft('Optional short description'),
                 _rowLabelField(
                   label: 'Notes',
                   field: TextFormField(
@@ -370,7 +370,7 @@ _helperBelowLeft('Optional short description')
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
-_helperBelowLeft('Optional notes')
+_helperBelowLeft('Optional notes'),
               ], trailing: _generalSummary()),
               const SizedBox(height: 10),
               _section('Strength', [
@@ -547,7 +547,7 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                     ],
                   ),
                 ),
-                _helperBelowCenter('Enter whole, 1/2, or 1/4 tablets'),
+_helperBelowCenter('Enter whole, 1/2, or 1/4 tablets'),
 
                 // Low stock alert toggle + threshold
                 _rowLabelField(
@@ -575,7 +575,7 @@ field: Row(
                       hint: '0',
                     ),
                   ),
-_helperBelowLeft('Enter the amount to alert when stock is low')
+_helperBelowLeft('Enter the amount to alert when stock is low'),
                 _rowLabelField(
                   label: 'Expiry date',
                   field: Field36(
@@ -597,7 +597,7 @@ _helperBelowLeft('Enter the amount to alert when stock is low')
                     ),
                   ),
                 ),
-                _helperBelowLeft('Enter the expiry date'),
+_helperBelowLeft('Enter the expiry date'),
               ], trailing: _inventorySummary()),
 
               // Storage
@@ -615,7 +615,7 @@ _helperBelowLeft('Enter the amount to alert when stock is low')
                     ),
                   ),
                 ),
-_helperBelowLeft('Enter the printed batch or lot number')
+_helperBelowLeft('Enter the printed batch or lot number'),
                 _rowLabelField(
                   label: 'Location',
                   field: Field36(
@@ -628,7 +628,7 @@ _helperBelowLeft('Enter the printed batch or lot number')
                     ),
                   ),
                 ),
-_helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)')
+_helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)'),
                 _rowLabelField(
                   label: 'Store below (°C)',
                   field: Column(
@@ -647,7 +647,7 @@ _helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)')
                         ),
                       ),
                       const SizedBox(height: 4),
-_helperBelowLeft('Optional')
+_helperBelowLeft('Optional'),
                     ],
                   ),
                 ),
@@ -674,7 +674,7 @@ onChanged: (v) {
                     ],
                   ),
                 ),
-_helperBelowLeft('Enable if this medication must be protected from light')
+_helperBelowLeft('Enable if this medication must be protected from light'),
                 _rowLabelField(
                   label: 'Light sensitive',
                   field: Row(
@@ -700,7 +700,7 @@ _helperBelowLeft('Enable if this medication must be protected from light')
                     ),
                   ),
                 ),
-_helperBelowLeft('Special handling notes (e.g., Keep upright)')
+_helperBelowLeft('Special handling notes (e.g., Keep upright)'),
               ], trailing: _storageSummary()),
 
             ],
@@ -716,7 +716,7 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)')
               child: SizedBox(
                 width: 220,
 child: TextButton(
-style: TextButton.styleFrom(minimumSize: const Size.fromHeight(36)),
+style: TextButton.styleFrom(minimumSize: const Size.fromHeight(36))
                   onPressed: () async {
                     if (!(_formKey.currentState?.validate() ?? false)) return;
                     await _showConfirmDialog();
