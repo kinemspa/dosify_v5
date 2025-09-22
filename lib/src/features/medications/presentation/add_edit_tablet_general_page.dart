@@ -468,7 +468,7 @@ height: 36,
                                   controller: _stockCtrl,
                                   textAlign: TextAlign.center,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'))],
+inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                                   decoration: _dec(label: 'Stock amount *', hint: '0.00'),
                                   validator: (v) {
                                     if (v == null || v.trim().isEmpty) return 'Required';
@@ -646,7 +646,18 @@ field: Row(
                     children: [
                       Checkbox(
                         value: _keepRefrigerated,
-                        onChanged: (v) => setState(() => _keepRefrigerated = v ?? false),
+onChanged: (v) {
+                        final nv = v ?? false;
+                        setState(() {
+                          _keepRefrigerated = nv;
+                          if (nv) {
+                            final cur = int.tryParse(_storeBelowCtrl.text.trim());
+                            if (cur == null || cur > 8) {
+                              _storeBelowCtrl.text = '8';
+                            }
+                          }
+                        });
+                      },
                       ),
                       Text('Keep refrigerated', style: kMutedLabelStyle(context)),
                     ],
@@ -693,8 +704,8 @@ field: Row(
             child: Center(
               child: SizedBox(
                 width: 220,
-child: FilledButton(
-style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36)),
+child: TextButton(
+style: TextButton.styleFrom(minimumSize: const Size.fromHeight(36)),
                   onPressed: () async {
                     if (!(_formKey.currentState?.validate() ?? false)) return;
                     await _showConfirmDialog();
