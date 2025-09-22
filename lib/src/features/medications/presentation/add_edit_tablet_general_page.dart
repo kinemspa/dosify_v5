@@ -479,10 +479,6 @@ height: 36,
                               ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
                               : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
                         ),
-                          style: _stockError == null
-                              ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)
-                              : TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
-                        ),
                       ),
                     ],
                   ),
