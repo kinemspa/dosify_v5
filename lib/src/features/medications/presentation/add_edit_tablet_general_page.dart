@@ -554,6 +554,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                     hint: '25',
                     helper: 'Optional',
                   ),
+                ),
                 _rowLabelField(
                   label: 'Cold storage',
                   field: Row(
