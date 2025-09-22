@@ -11,7 +11,7 @@ class SelectMedicationTypePage extends StatelessWidget {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Select Medication Type', forceBackButton: true),
 body: ListView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
         children: [
           _Section(title: 'General', children: [
             _TypeTile(icon: Icons.medication, title: 'Tablet'),
@@ -37,7 +37,7 @@ class _Section extends StatelessWidget {
       color: isLight ? theme.colorScheme.primary.withValues(alpha: 0.05) : theme.colorScheme.surfaceContainerHigh,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: theme.colorScheme.outlineVariant)),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+        padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Expanded(
@@ -63,7 +63,7 @@ class _TypeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
@@ -77,7 +77,7 @@ return Padding(
           }
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
