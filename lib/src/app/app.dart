@@ -18,8 +18,8 @@ class DosifiApp extends ConsumerWidget {
     final baseLight = ThemeData(
       colorScheme: schemeLight,
       useMaterial3: true,
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     );
     final light = baseLight.copyWith(
       appBarTheme: const AppBarTheme(
@@ -117,8 +117,8 @@ selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
     final baseDark = ThemeData(
       colorScheme: schemeDark,
       useMaterial3: true,
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     );
     final dark = baseDark.copyWith(
       appBarTheme: const AppBarTheme(
