@@ -95,8 +95,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       hintText: hint,
       helperText: helper,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      constraints: const BoxConstraints(minHeight: 40),
+contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
 helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
       filled: true,
@@ -166,7 +166,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
       helperText: helper,
       isDense: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      constraints: const BoxConstraints(minHeight: 40),
+      constraints: const BoxConstraints(minHeight: 36),
       hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
       helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
       filled: true,
@@ -195,7 +195,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
         children: [
           SizedBox(
             width: labelWidth,
-            height: 40,
+height: 36,
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -226,10 +226,12 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
     String? hint,
     String? helper,
   }) {
-    return SizedBox(
-      height: 40,
-      child: Row(
-        children: [
+return SizedBox(
+      height: 36,
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           _incBtn('−', () {
             final v = int.tryParse(controller.text.trim()) ?? 0;
             final nv = (v - step).clamp(min, max);
@@ -322,7 +324,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                 _rowLabelField(
                   label: 'Strength amount (per tablet) *',
                   field: SizedBox(
-                    height: 40,
+height: 36,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -370,9 +372,9 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                     children: [
                       Row(
                         children: [
-                          const SizedBox(width: 36),
-                          SizedBox(
-                            height: 40,
+Center(
+                          child: SizedBox(
+                            height: 36,
                             width: 120,
                             child: DropdownButtonFormField<Unit>(
                               value: _strengthUnit,
@@ -475,9 +477,9 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                     children: [
                       Row(
                         children: [
-                          const SizedBox(width: 36),
-                          SizedBox(
-                            height: 40,
+Center(
+                          child: SizedBox(
+                            height: 36,
                             width: 120,
                             child: DropdownButtonFormField<String>(
                               value: 'tablets',
@@ -506,13 +508,13 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                 // Low stock alert toggle + threshold
                 _rowLabelField(
                   label: 'Low stock alert',
-                  field: Row(
+field: Row(
                     children: [
                       Checkbox(
                         value: _lowStockAlert,
                         onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
                       ),
-                      const Text('Enable alert when stock is low'),
+                      Text('Enable alert when stock is low', style: kMutedLabelStyle(context)),
                     ],
                   ),
                 ),
@@ -608,7 +610,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
               _rowLabelField(
                 label: 'Expiry date',
                 field: SizedBox(
-                  height: 40,
+height: 36,
                   child: OutlinedButton.icon(
                       onPressed: () async {
                         final now = DateTime.now();
@@ -638,7 +640,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
               child: SizedBox(
                 width: 220,
                 child: FilledButton(
-                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(40)),
+style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(36))
                   onPressed: () async {
                     if (!(_formKey.currentState?.validate() ?? false)) return;
                     await _showConfirmDialog();

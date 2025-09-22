@@ -2,7 +2,7 @@
 
 This document defines the shared visual rules for form controls used across all medication editors (Tablet Hybrid, Capsule, Injection, etc.).
 
-- Field height: 40 px for all single-line TextFields and DropdownButtonFormField controls
+- Field height: 36 px for all single-line TextFields and DropdownButtonFormField controls
 - Increment button size: 30 px square
 - Input font sizes:
   - Text input: 14
@@ -20,8 +20,8 @@ InputDecoration _dec({String? hint}) => InputDecoration(
   hintText: hint,
   isDense: false,
   isCollapsed: false,
-  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-  constraints: const BoxConstraints(minHeight: kFieldHeight), // kFieldHeight = 40
+  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  constraints: const BoxConstraints(minHeight: kFieldHeight), // kFieldHeight = 36
   floatingLabelBehavior: FloatingLabelBehavior.never,
   filled: true,
   // fillColor, borders, and hintStyle follow theme

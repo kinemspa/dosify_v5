@@ -57,8 +57,8 @@ class _StrengthInputState extends State<StrengthInput> {
     final theme = Theme.of(context);
     return Padding(
       padding: padding ?? EdgeInsets.zero,
-      child: SizedBox(
-        height: 40,
+child: SizedBox(
+        height: 36,
         child: DropdownButtonFormField<Unit>(
           value: _unit,
           isExpanded: false,
@@ -95,7 +95,7 @@ class _StrengthInputState extends State<StrengthInput> {
             labelText: widget.labelUnit,
             isDense: false,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            constraints: const BoxConstraints(minHeight: 40),
+constraints: const BoxConstraints(minHeight: 36),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
