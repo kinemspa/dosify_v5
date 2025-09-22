@@ -41,3 +41,12 @@ Android specifics
 Notes & next steps
 - Many analyzer infos/warnings are style/order issues; plan a cleanup pass after UI layout is stabilized.
 - Ensure every file ends with a newline (eol_at_end_of_file) and prefer package imports.
+
+UI Blueprint Adoption
+- Add Capsule screen now mirrors the Add Tablet blueprint:
+  - 36px field height via Field36 and per-field InputDecoration constraints
+  - Sections and rows: General → Strength → Inventory → Storage
+  - Helper texts on their own rows (centered for dual-field rows, left for single-field)
+  - Centered pill-style Save FAB
+  - Storage toggles (Refrigerate/Freeze/Dark) with helpers
+- Apply the same pattern for all medication forms going forward.
