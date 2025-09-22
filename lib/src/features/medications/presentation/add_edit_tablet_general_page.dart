@@ -552,13 +552,14 @@ field: Row(
                   field: SizedBox(
                     height: kFieldHeight,
                     child: TextFormField(
-                    controller: _batchNumberCtrl,
-                    textAlign: TextAlign.left,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Batch No.', hint: 'Enter batch number', helper: 'Optional'),
-                    onChanged: (_) => setState(() {}),
-                  )),
-
+                      controller: _batchNumberCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(label: 'Batch No.', hint: 'Enter batch number', helper: 'Optional'),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
+                ),
                 _rowLabelField(
                   label: 'Location',
                   field: SizedBox(
@@ -614,12 +615,13 @@ field: Row(
                   field: SizedBox(
                     height: kFieldHeight,
                     child: TextFormField(
-                    controller: _storageInstructionsCtrl,
-                    textAlign: TextAlign.left,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions', helper: 'Optional'),
-                    onChanged: (_) => setState(() {}),
-                  )),
+                      controller: _storageInstructionsCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions', helper: 'Optional'),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
                 ),
               ], trailing: _storageSummary()),
 
