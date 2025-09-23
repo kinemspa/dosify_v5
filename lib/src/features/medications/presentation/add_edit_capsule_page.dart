@@ -599,6 +599,13 @@ child: TextFormField(
     return '${d == d.roundToDouble() ? d.toStringAsFixed(0) : d.toString()}$unit$med';
   }
 
+  Widget _errorUnderLabel(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 2, top: 2, bottom: 4),
+      child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error)),
+    );
+  }
+
   Widget _detailRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -650,6 +657,18 @@ child: TextFormField(
 
     final theme = Theme.of(context);
 
+    // Determine if required fields are valid (for Save state)
+    final bool requiredOk = (() {
+      final nameOk = _nameCtrl.text.trim().isNotEmpty;
+      final aTxt = _strengthValueCtrl.text.trim();
+      final a = double.tryParse(aTxt);
+      final amtOk = a != null && a > 0;
+      final sTxt = _stockValueCtrl.text.trim();
+      final s = double.tryParse(sTxt);
+      final stockOk = s != null && s >= 0;
+      return nameOk && amtOk && stockOk;
+    })();
+
     return Scaffold(
       appBar: GradientAppBar(
         title: widget.initial == null ? 'Add Capsule' : 'Edit Capsule',
@@ -659,7 +678,15 @@ child: TextFormField(
       floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
-          onPressed: _nameCtrl.text.trim().isNotEmpty ? () { setState(() => _submitted = true); _submit(); } : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: requiredOk ? null : Theme.of(context).colorScheme.surfaceVariant,
+            foregroundColor: requiredOk ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+          ),
+          onPressed: () {
+            setState(() => _submitted = true);
+            if (!requiredOk) return;
+            _submit();
+          },
           child: Text(widget.initial == null ? 'Save' : 'Update'),
         ),
       ),
@@ -677,17 +704,12 @@ child: TextFormField(
 textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500'),
+                  decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500').copyWith(errorText: gNameError != null ? ' ' : null),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   onChanged: (_) => setState(() { _touchedName = true; }),
                 ))),
-                if (gNameError != null)
-                  Padding(
-                    padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                    child: Text(gNameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                  )
-                else
-                  _helperBelowLeft(context, 'Enter the medication name'),
+                if (gNameError != null) _errorUnderLabel(context, gNameError)
+                else _helperBelowLeft(context, 'Enter the medication name'),
                 _rowLabelField(label: 'Manufacturer', field: Field36(child: TextFormField(
                   controller: _manufacturerCtrl,
                   textAlign: TextAlign.left,
@@ -745,7 +767,7 @@ maxLines: null,
 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Amount *', hint: '0'),
+                          decoration: _dec(label: 'Amount *', hint: '0').copyWith(errorText: gStrengthAmtError != null ? ' ' : null),
                           onChanged: (_) => setState(() { _touchedStrengthAmt = true; }),
                         )),
                       ),
@@ -786,19 +808,8 @@ alignment: AlignmentDirectional.center,
                     ),
                   ),
                 )),
-                if (gStrengthAmtError != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-                    child: Center(
-                      child: Text(
-                        gStrengthAmtError,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
-                      ),
-                    ),
-                  )
-                else
-                  _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
+                if (gStrengthAmtError != null) _errorUnderLabel(context, gStrengthAmtError)
+                else _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
               ], trailing: Text(_strengthSummary(), overflow: TextOverflow.ellipsis)),
               const SizedBox(height: 10),
               _section('Inventory', [
@@ -821,7 +832,7 @@ alignment: AlignmentDirectional.center,
 keyboardType: const TextInputType.numberWithOptions(decimal: false),
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Stock amount *', hint: '0'),
+                          decoration: _dec(label: 'Stock amount *', hint: '0').copyWith(errorText: gStockError != null ? ' ' : null),
                           onChanged: (_) => setState(() { _touchedStock = true; }),
                         )),
                       ),
@@ -855,13 +866,8 @@ alignment: AlignmentDirectional.center,
                     ),
                   ),
                 )),
-                if (gStockError != null)
-                  Padding(
-                    padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                    child: Text(gStockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                  )
-                else
-                  _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
+                if (gStockError != null) _errorUnderLabel(context, gStockError)
+                else _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
                 _rowLabelField(label: 'Low stock alert', field: Row(children: [
                   Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
                   Expanded(child: Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context), softWrap: true, maxLines: 2)),
@@ -876,13 +882,8 @@ alignment: AlignmentDirectional.center,
                     label: 'Threshold',
                     hint: '0',
                   )),
-                  if (gThresholdError != null)
-                    Padding(
-                      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
-                      child: Text(gThresholdError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                    )
-                  else
-                    _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
+                  if (gThresholdError != null) _errorUnderLabel(context, gThresholdError)
+                  else _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
                 ],
                 _rowLabelField(label: 'Expiry date', field: Field36(
                   width: 120,
