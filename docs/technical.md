@@ -54,6 +54,17 @@ UI Blueprint Adoption
 Dropdown alignment
 - Unit and quantity dropdowns are centered within a 120px-wide box with a 36px control height, matching the integer fields. Do not use manual pixel padding for alignment; rely on center alignment inside the fixed-width box instead.
 
+Surfaced validation in helper rows (with touched gating)
+- Default InputDecoration error line is hidden to preserve the 36px control height.
+- Validation messages are surfaced in the helper row beneath the field.
+- Errors are only shown AFTER a field has been interacted with (touched) or after an attempted form submit. This prevents red "Required" messages on initial load.
+- Implementation: per-field flags like _touchedName and a form-level _submitted gate the display of helper errors.
+
+Checkbox tone and long-label behavior
+- Checkbox labels use kCheckboxLabelStyle(context) (darker than support text but lighter than primary labels).
+- When a checkbox is disabled by another control (e.g., Refrigerate disabled when Freeze is ON), render its label with kMutedLabelStyle(context) to visually indicate it isn't available.
+- Long checkbox labels (e.g., "Enable alert when stock is low") must be wrapped with Expanded and allow softWrap to avoid overflow on small screens.
+
 Theme-only fonts (no inline sizes)
 - All text sizing is sourced from ThemeData and InputDecorationTheme; no inline copyWith(fontSize: …) on pages.
 - Key sizes (subject to design updates):

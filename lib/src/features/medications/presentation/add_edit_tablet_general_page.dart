@@ -46,6 +46,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   // Live validation state
   String? _stockError;
 
+  // Gating for helper-row validation (hide red until interaction)
+  bool _submitted = false;
+  bool _touchedName = false;
+  bool _touchedStrengthAmt = false;
+  bool _touchedStock = false;
+
   @override
   void initState() {
     super.initState();
@@ -364,6 +370,10 @@ return SizedBox(
         if (!quarters) stockError = 'Use .00, .25, .50, or .75';
       }
     }
+    // Gate errors until the field is touched or the form has been submitted
+    final String? gNameError = (_submitted || _touchedName) ? nameError : null;
+    final String? gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
+    final String? gStockError = (_submitted || _touchedStock) ? (stockError ?? _stockError) : null;
 
       return Scaffold(
       appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
@@ -386,13 +396,13 @@ return SizedBox(
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (_) => setState(() { _touchedName = true; }),
                     )),
                 ),
-if (nameError != null)
+                if (gNameError != null)
                 Padding(
                   padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                  child: Text(nameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                  child: Text(gNameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                 )
               else
                 _helperBelowLeft('Enter the medication name'),
@@ -474,7 +484,7 @@ style: Theme.of(context).textTheme.bodyMedium,
                             if (d <= 0) return 'Must be > 0';
                             return null;
                           },
-                          onChanged: (_) => setState(() {}),
+                          onChanged: (_) => setState(() { _touchedStrengthAmt = true; }),
                         )),
                       ),
                       const SizedBox(width: 6),
@@ -524,11 +534,11 @@ style: Theme.of(context).textTheme.bodyMedium,
                     ],
                   ),
                 ),
-if (strengthAmtError != null)
+                if (gStrengthAmtError != null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
                     child: Center(
-                      child: Text(strengthAmtError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                      child: Text(gStrengthAmtError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                     ),
                   )
                 else
@@ -573,6 +583,7 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                                   onChanged: (v) {
                                     final d = double.tryParse(v);
                                     setState(() {
+                                      _touchedStock = true;
                                       if (d == null || ((d * 100).round() % 25 == 0)) {
                                         _stockError = null;
                                       } else {
@@ -625,10 +636,10 @@ style: Theme.of(context).textTheme.bodyMedium,
                     ],
                   ),
                 ),
-if (stockError != null)
+                if (gStockError != null)
                 Padding(
                   padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                  child: Text(stockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                  child: Text(gStockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                 )
               else
                 _helperBelowLeft('Enter the amount of tablets in stock'),
@@ -642,7 +653,14 @@ field: Row(
                         value: _lowStockAlert,
                         onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
                       ),
-                      Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context)),
+                      Expanded(
+                        child: Text(
+                          'Enable alert when stock is low',
+                          style: kCheckboxLabelStyle(context),
+                          softWrap: true,
+                          maxLines: 2,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -725,7 +743,7 @@ _helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)'),
                         value: _keepRefrigerated,
                         onChanged: _keepFrozen ? null : (v) => setState(() => _keepRefrigerated = v ?? false),
                       ),
-                      Text('Refrigerate', style: kCheckboxLabelStyle(context))
+                      Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : kCheckboxLabelStyle(context))
                     ],
                   ),
                 ),
@@ -780,12 +798,15 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
       floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
-          onPressed: _nameCtrl.text.trim().isNotEmpty ? () async {
-            if (!(_formKey.currentState?.validate() ?? false)) return;
-            await _showConfirmDialog();
-          },
+          onPressed: _nameCtrl.text.trim().isNotEmpty
+              ? () async {
+                  setState(() => _submitted = true);
+                  if (!(_formKey.currentState?.validate() ?? false)) return;
+                  await _showConfirmDialog();
+                }
+              : null,
           child: const Text('Save'),
-        ) : null,
+        ),
       ),
     );
   }

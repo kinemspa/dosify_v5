@@ -24,6 +24,12 @@ class AddEditCapsulePage extends ConsumerStatefulWidget {
 }
 
 class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
+  // Gating for helper-row validation (hide red until interaction)
+  bool _submitted = false;
+  bool _touchedName = false;
+  bool _touchedStrengthAmt = false;
+  bool _touchedStock = false;
+  bool _touchedThreshold = false;
   double _labelWidth() {
     final width = MediaQuery.of(context).size.width;
     return width >= 400 ? 120.0 : 110.0;
@@ -627,6 +633,12 @@ style: theme.textTheme.bodyMedium?.copyWith(
       else if (d < 0) thresholdError = 'Must be ≥ 0';
     }
 
+    // Gate errors until touched or submitted
+    final String? gNameError = (_submitted || _touchedName) ? nameError : null;
+    final String? gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
+    final String? gStockError = (_submitted || _touchedStock) ? stockError : null;
+    final String? gThresholdError = (_submitted || _touchedThreshold) ? thresholdError : null;
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -638,7 +650,7 @@ style: theme.textTheme.bodyMedium?.copyWith(
       floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
-          onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
+          onPressed: _nameCtrl.text.trim().isNotEmpty ? () { setState(() => _submitted = true); _submit(); } : null,
           child: Text(widget.initial == null ? 'Save' : 'Update'),
         ),
       ),
@@ -658,12 +670,12 @@ textCapitalization: TextCapitalization.sentences,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500'),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (_) => setState(() { _touchedName = true; }),
                 ))),
-                if (nameError != null)
+                if (gNameError != null)
                   Padding(
                     padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                    child: Text(nameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                    child: Text(gNameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                   )
                 else
                   _helperBelowLeft(context, 'Enter the medication name'),
@@ -725,7 +737,7 @@ keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
                           decoration: _dec(label: 'Amount *', hint: '0'),
-                          onChanged: (_) => setState(() {}),
+                          onChanged: (_) => setState(() { _touchedStrengthAmt = true; }),
                         )),
                       ),
                       const SizedBox(width: 6),
@@ -765,12 +777,12 @@ alignment: AlignmentDirectional.center,
                     ),
                   ),
                 )),
-                if (strengthAmtError != null)
+                if (gStrengthAmtError != null)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
                     child: Center(
                       child: Text(
-                        strengthAmtError,
+                        gStrengthAmtError,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
                       ),
@@ -801,7 +813,7 @@ keyboardType: const TextInputType.numberWithOptions(decimal: false),
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
                           decoration: _dec(label: 'Stock amount *', hint: '0'),
-                          onChanged: (_) => setState(() {}),
+                          onChanged: (_) => setState(() { _touchedStock = true; }),
                         )),
                       ),
                       const SizedBox(width: 6),
@@ -834,16 +846,16 @@ alignment: AlignmentDirectional.center,
                     ),
                   ),
                 )),
-                if (stockError != null)
+                if (gStockError != null)
                   Padding(
                     padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                    child: Text(stockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                    child: Text(gStockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                   )
                 else
                   _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
                 _rowLabelField(label: 'Low stock alert', field: Row(children: [
                   Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
-                  Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context)),
+                  Expanded(child: Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context), softWrap: true, maxLines: 2)),
                 ])),
                 if (_lowStockEnabled) ...[
                   _rowLabelField(label: 'Threshold', field: _intStepper(
@@ -855,10 +867,10 @@ alignment: AlignmentDirectional.center,
                     label: 'Threshold',
                     hint: '0',
                   )),
-                  if (thresholdError != null)
+                  if (gThresholdError != null)
                     Padding(
                       padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
-                      child: Text(thresholdError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                      child: Text(gThresholdError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
                     )
                   else
                     _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
@@ -905,7 +917,7 @@ alignment: AlignmentDirectional.center,
                 _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
                 _rowLabelField(label: 'Keep refrigerated', field: Row(children: [
                   Checkbox(value: _requiresFridge, onChanged: _keepFrozen ? null : (v) => setState(() => _requiresFridge = v ?? false)),
-                  Text('Refrigerate', style: kCheckboxLabelStyle(context)),
+                  Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : kCheckboxLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be kept refrigerated'),
                 _rowLabelField(label: 'Keep frozen', field: Row(children: [
