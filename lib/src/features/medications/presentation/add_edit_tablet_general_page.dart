@@ -560,7 +560,7 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                             value: 'tablets',
                             isExpanded: false,
                             alignment: AlignmentDirectional.center,
-style: Theme.of(context).textTheme.bodyMedium
+style: Theme.of(context).textTheme.bodyMedium,
                             dropdownColor: Theme.of(context).colorScheme.surface,
                             menuMaxHeight: 320,
                             selectedItemBuilder: (ctx) => const ['tablets']
