@@ -179,7 +179,7 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
         side: BorderSide(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
