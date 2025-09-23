@@ -682,147 +682,145 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 const SizedBox(height: 6),
                 _DoseFormulaStrip(selectedMed: _selectedMed, valueCtrl: _doseValue, unitCtrl: _doseUnit),
               ],
-            )
+            ),
             ], trailing: Text(_doseSummaryShort(), overflow: TextOverflow.ellipsis)),
             const SizedBox(height: 10),
-            // Sc            Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<ScheduleMode>(
-                        value: _mode,
-                        isExpanded: true,
-                        decoration: const InputDecoration(labelText: 'Days mode'),
-                        items: ScheduleMode.values
-                            .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
-                            .toList(),
-                        onChanged: (m) {
-                          setState(() {
-                            _mode = m ?? ScheduleMode.daysOfWeek;
-                            if (_mode == ScheduleMode.everyDay) {
-                              _days..clear()..addAll([1,2,3,4,5,6,7]);
-                              _useCycle = false;
-                            } else if (_mode == ScheduleMode.daysOnOff) {
-                              _useCycle = true;
-                            } else {
-                              _useCycle = false;
-                            }
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                for (var i = 0; i < _times.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text('Time of day'),
-                            subtitle: Text(_times[i].format(context)),
-                            trailing: TextButton(onPressed: () => _pickTimeAt(i), child: const Text('Pick')),
-                          ),
-                        ),
-                        if (_times.length > 1)
-                          IconButton(
-                            tooltip: 'Remove',
-                            onPressed: () => setState(() => _times.removeAt(i)),
-                            icon: const Icon(Icons.remove_circle_outline),
-                          ),
-                      ],
-                    ),
-                  ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton.icon(
-                    onPressed: () => setState(() => _times.add(_times.last)),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add time'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (_mode == ScheduleMode.daysOfWeek) ...[
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: List.generate(7, (i) {
-                final dayIndex = i + 1; // 1..7
-                const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-                final selected = _days.contains(dayIndex);
-                return FilterChip(
-                  label: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text(labels[i]),
-                  ),
-                  selected: selected,
-                  onSelected: (sel) {
-                    setState(() {
-                      if (sel) {
-                        _days.add(dayIndex);
-                      } else {
-                        _days.remove(dayIndex);
-                      }
-                    });
-                  },
-                );
-              }),
-              ),
-            ],
-            if (_mode == ScheduleMode.daysOnOff) ...[
-              Row(
+            _section(context, 'Schedule', [
+              Column(
                 children: [
-                  SizedBox(
-                    width: 120,
-                    child: TextFormField(
-                      controller: _cycleN,
-                      decoration: const InputDecoration(labelText: 'Every N days'),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                      validator: (v) {
-                        if (!_useCycle) return null;
-                        final n = int.tryParse(v?.trim() ?? '');
-                        if (n == null || n < 1) return '>= 1';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Start date'),
-                      subtitle: Text('${_cycleAnchor.toLocal()}'.split(' ').first),
-                      trailing: TextButton(
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final picked = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(now.year - 1),
-                            lastDate: DateTime(now.year + 10),
-                            initialDate: _cycleAnchor,
-                          );
-                          if (picked != null) setState(() => _cycleAnchor = picked);
-                        },
-                        child: const Text('Pick'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<ScheduleMode>(
+                          value: _mode,
+                          isExpanded: true,
+                          decoration: const InputDecoration(labelText: 'Days mode'),
+                          items: ScheduleMode.values
+                              .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
+                              .toList(),
+                          onChanged: (m) {
+                            setState(() {
+                              _mode = m ?? ScheduleMode.daysOfWeek;
+                              if (_mode == ScheduleMode.everyDay) {
+                                _days..clear()..addAll([1,2,3,4,5,6,7]);
+                                _useCycle = false;
+                              } else if (_mode == ScheduleMode.daysOnOff) {
+                                _useCycle = true;
+                              } else {
+                                _useCycle = false;
+                              }
+                            });
+                          },
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  for (var i = 0; i < _times.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('Time of day'),
+                              subtitle: Text(_times[i].format(context)),
+                              trailing: TextButton(onPressed: () => _pickTimeAt(i), child: const Text('Pick')),
+                            ),
+                          ),
+                          if (_times.length > 1)
+                            IconButton(
+                              tooltip: 'Remove',
+                              onPressed: () => setState(() => _times.removeAt(i)),
+                              icon: const Icon(Icons.remove_circle_outline),
+                            ),
+                        ],
+                      ),
+                    ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => setState(() => _times.add(_times.last)),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add time'),
                     ),
                   ),
                 ],
               ),
-            ],
-            const SizedBox(height: 12),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Active'),
-              value: _active,
-              onChanged: (v) => setState(() => _active = v),
-            ),
+              const SizedBox(height: 8),
+              if (_mode == ScheduleMode.daysOfWeek)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List.generate(7, (i) {
+                    final dayIndex = i + 1; // 1..7
+                    const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                    final selected = _days.contains(dayIndex);
+                    return FilterChip(
+                      label: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Text(labels[i]),
+                      ),
+                      selected: selected,
+                      onSelected: (sel) {
+                        setState(() {
+                          if (sel) {
+                            _days.add(dayIndex);
+                          } else {
+                            _days.remove(dayIndex);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                ),
+              if (_mode == ScheduleMode.daysOnOff)
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: TextFormField(
+                        controller: _cycleN,
+                        decoration: const InputDecoration(labelText: 'Every N days'),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                        validator: (v) {
+                          final n = int.tryParse(v?.trim() ?? '');
+                          if (n == null || n < 1) return '>= 1';
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Start date'),
+                        subtitle: Text('${_cycleAnchor.toLocal()}'.split(' ').first),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            final now = DateTime.now();
+                            final picked = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(now.year - 1),
+                              lastDate: DateTime(now.year + 10),
+                              initialDate: _cycleAnchor,
+                            );
+                            if (picked != null) setState(() => _cycleAnchor = picked);
+                          },
+                          child: const Text('Pick'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Active'),
+                value: _active,
+                onChanged: (v) => setState(() => _active = v),
+              ),
             ], trailing: Text(_scheduleSummaryShort(), overflow: TextOverflow.ellipsis)),
           ],
         ),
