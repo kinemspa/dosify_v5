@@ -587,6 +587,14 @@ child: TextFormField(
     );
   }
 
+  Widget _generalOnlySummary() {
+    final name = _nameCtrl.text.trim();
+    final mfr = _manufacturerCtrl.text.trim();
+    if (name.isEmpty && mfr.isEmpty) return const SizedBox.shrink();
+    final s = name.isEmpty ? mfr : (mfr.isEmpty ? name : '$name – $mfr');
+    return Text(s, overflow: TextOverflow.ellipsis);
+  }
+
   String _strengthSummary() {
     // Hide until user changes the default (0) value
     if (!_touchedStrengthAmt) return '';
@@ -916,7 +924,7 @@ alignment: AlignmentDirectional.center,
                   ),
                 )),
                 _helperBelowLeft(context, 'Enter the expiry date'),
-              ]),
+              ], trailing: _generalOnlySummary()),
               const SizedBox(height: 10),
               _section('Storage', [
                 _rowLabelField(label: 'Batch No.', field: Field36(child: TextFormField(

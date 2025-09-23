@@ -599,6 +599,30 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     }
   }
 
+  Widget _rowLabelField(BuildContext context, {required String label, required Widget field}) {
+    final width = MediaQuery.of(context).size.width;
+    final labelWidth = width >= 400 ? 120.0 : 110.0;
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: labelWidth,
+            height: 36,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(label, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75))),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: field),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -646,32 +670,28 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
             _section(context, 'General', [
-              TextFormField(
+              _rowLabelField(context, label: 'Schedule name', field: Field36(child: TextFormField(
                 controller: _name,
+                textAlign: TextAlign.left,
+                textAlignVertical: TextAlignVertical.center,
                 decoration: const InputDecoration(labelText: 'Schedule name'),
-                textInputAction: TextInputAction.next,
                 onChanged: (_) => _nameAuto = false,
-                // Name not required until save/confirm
                 validator: (_) => null,
-              ),
-              const SizedBox(height: 12),
-              // Medication dropdown (from saved meds)
-              DropdownButtonFormField<Medication>(
+              ))),
+              _rowLabelField(context, label: 'Medication', field: Field36(child: DropdownButtonFormField<Medication>(
                 value: _selectedMed,
                 isExpanded: true,
                 alignment: AlignmentDirectional.center,
-                decoration: const InputDecoration(labelText: 'Medication'),
+                decoration: const InputDecoration(labelText: ''),
+                selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
+                    .map((m) => Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', textAlign: TextAlign.center)))
+                    .toList(),
                 items: Hive.box<Medication>('medications')
                     .values
                     .map((m) => DropdownMenuItem<Medication>(
                           value: m,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text(
-                              '${m.name} — ${_medStrengthLabel(m)}',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                          child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}')),
                         ))
                     .toList(),
                 onChanged: (m) {
@@ -679,7 +699,6 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     _selectedMed = m;
                     _medicationId = m?.id;
                     _medicationName.text = m?.name ?? '';
-                    // set sensible defaults based on form
                     if (m != null) {
                       switch (m.form) {
                         case MedicationForm.tablet:
@@ -700,11 +719,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                           break;
                         case MedicationForm.injectionMultiDoseVial:
                           final u = m.strengthUnit;
-                          if (u == Unit.unitsPerMl) {
-                            _doseUnit.text = 'IU';
-                          } else {
-                            _doseUnit.text = 'mg';
-                          }
+                          _doseUnit.text = (u == Unit.unitsPerMl) ? 'IU' : 'mg';
                           if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
                           break;
                       }
@@ -713,7 +728,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                   });
                 },
                 validator: (v) => v == null ? 'Required' : null,
-              ),
+              ))),
             ]),
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
@@ -988,6 +1003,21 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     Unit.gPerMl => 'g/mL',
     Unit.unitsPerMl => 'IU/mL',
   };
+
+  String _medStrengthAndStock(Medication m) {
+    final strength = _medStrengthLabel(m);
+    final stock = m.stockValue;
+    final stockLabel = switch (m.stockUnit) {
+      StockUnit.tablets => 'tablets',
+      StockUnit.capsules => 'capsules',
+      StockUnit.mg => 'mg',
+      StockUnit.mcg => 'mcg',
+      StockUnit.g => 'g',
+      _ => 'units',
+    };
+    final stockPart = stock > 0 ? ' • ${stock.toStringAsFixed(stock == stock.roundToDouble() ? 0 : 2)} $stockLabel left' : '';
+    return '$strength$stockPart';
+  }
 
   String _medStrengthLabel(Medication m) {
     final u = _unitShort(m.strengthUnit);

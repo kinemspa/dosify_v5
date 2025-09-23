@@ -874,8 +874,8 @@ if (!requiredOk) return; // show gated errors only
     final v = _stockCtrl.text.trim();
     if (v.isEmpty) return const SizedBox.shrink();
     final name = _nameCtrl.text.trim();
-    final med = name.isEmpty ? '' : ' $name Tablets';
-    return Text('$v$med');
+    final tail = name.isEmpty ? ' tablets' : ' $name tablets';
+    return Text('$v$tail');
   }
 
   Widget _storageSummary() {
