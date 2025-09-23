@@ -310,6 +310,7 @@ style: theme.textTheme.bodyMedium?.copyWith(
     String? label,
     String? hint,
     String? helper,
+    bool error = false,
   }) {
 return SizedBox(
       height: 36,
@@ -333,7 +334,7 @@ child: TextFormField(
                 style: Theme.of(context).textTheme.bodyMedium,
                 keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: _dec(label: label ?? '', hint: hint, helper: helper),
+                decoration: _dec(label: label ?? '', hint: hint, helper: helper).copyWith(errorText: error ? ' ' : null),
               ),
             ),
           ),
@@ -418,7 +419,8 @@ child: TextFormField(
 
       return Scaffold(
       appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
-        body: SingleChildScrollView(
+        body: Stack(children:[
+        SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
         child: Form(
           key: _formKey,
@@ -711,6 +713,7 @@ field: Row(
                       width: 120,
                       label: 'Threshold',
                       hint: '0',
+                      error: thresholdError != null,
                     ),
                   ),
                   if (thresholdError != null) _errorUnderLabel(thresholdError)
@@ -831,6 +834,23 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
           ),
         ),
       ),
+      Positioned(
+        right: 16,
+        bottom: 116,
+        child: OutlinedButton.icon(
+          onPressed: () async {
+            await showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx){
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16,16,16,24),
+                child: SingleChildScrollView(child: _buildConfirmContent(ctx)),
+              );
+            });
+          },
+          icon: const Icon(Icons.summarize, size: 18),
+          label: const Text('Summary'),
+        ),
+      ),
+        ],),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
         width: 120,

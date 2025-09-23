@@ -349,6 +349,7 @@ style: theme.textTheme.bodyMedium?.copyWith(
     String? label,
     String? hint,
     String? helper,
+    bool error = false,
   }) {
     return SizedBox(
       height: 36,
@@ -372,7 +373,7 @@ child: TextFormField(
                   style: Theme.of(context).textTheme.bodyMedium,
                   keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: _dec(label: label ?? '', hint: hint, helper: helper),
+                  decoration: _dec(label: label ?? '', hint: hint, helper: helper).copyWith(errorText: error ? ' ' : null),
                 ),
               ),
             ),
@@ -614,6 +615,40 @@ child: TextFormField(
     );
   }
 
+  Widget _buildSummarySheet(BuildContext context){
+    // reuse the confirm dialog content in a sheet-like layout
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('Summary', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 8),
+        _detailRow(context, 'Form', 'Capsule'),
+        _detailRow(context, 'Name', _nameCtrl.text.trim()),
+        if (_manufacturerCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Manufacturer', _manufacturerCtrl.text.trim()),
+        if (_descriptionCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Description', _descriptionCtrl.text.trim()),
+        if (_notesCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Notes', _notesCtrl.text.trim()),
+        if (_strengthValueCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Strength', '${(_strengthValueCtrl.text.trim())} ${_unitLabel(_strengthUnit)}'),
+        if (_stockValueCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Stock', '${_stockValueCtrl.text.trim()} ${_stockUnitLabel(_stockUnit)}'),
+        if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Low stock at', _lowStockCtrl.text.trim()),
+        _detailRow(context, 'Expiry', _expiry != null ? DateFormat('dd/MM/yy').format(_expiry!) : 'No expiry'),
+        if (_batchCtrl.text.trim().isNotEmpty) _detailRow(context, 'Batch #', _batchCtrl.text.trim()),
+        if (_storageCtrl.text.trim().isNotEmpty) _detailRow(context, 'Storage', _storageCtrl.text.trim()),
+        _detailRow(context, 'Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
+        if (_keepFrozen) _detailRow(context, 'Keep frozen', 'Yes'),
+        if (_lightSensitive) _detailRow(context, 'Protect from light', 'Yes'),
+        if (_storageNotesCtrl.text.trim().isNotEmpty)
+          _detailRow(context, 'Storage notes', _storageNotesCtrl.text.trim()),
+      ],
+    );
+  }
+
   Widget _detailRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -686,8 +721,14 @@ child: TextFormField(
         title: widget.initial == null ? 'Add Capsule' : 'Edit Capsule',
         forceBackButton: true,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: SizedBox(
+      body: Stack(children:[
+        SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
         width: 120,
         child: FilledButton(
           style: FilledButton.styleFrom(
@@ -905,6 +946,7 @@ alignment: AlignmentDirectional.center,
                     width: 120,
                     label: 'Threshold',
                     hint: '0',
+                    error: gThresholdError != null,
                   )),
                   if (gThresholdError != null) _errorUnderLabel(context, gThresholdError)
                   else _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
@@ -976,8 +1018,26 @@ alignment: AlignmentDirectional.center,
             ],
           ),
         ),
+      Positioned(
+        right: 16,
+        bottom: 116,
+        child: OutlinedButton.icon(
+          onPressed: () async {
+            await showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx){
+              // Build a simple summary using existing dialog sections
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16,16,16,24),
+                child: _buildSummarySheet(ctx),
+              );
+            });
+          },
+          icon: const Icon(Icons.summarize, size: 18),
+          label: const Text('Summary'),
+        ),
       ),
-    );
+      ],),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
   }
 }
 
