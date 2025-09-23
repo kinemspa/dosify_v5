@@ -287,9 +287,8 @@ height: 36,
               child: Text(
                 label,
                 textAlign: TextAlign.left,
-                style: theme.textTheme.bodyMedium?.copyWith(
+style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  fontSize: 12,
                   color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
                 ),
               ),
@@ -328,9 +327,10 @@ return SizedBox(
             width: width.toDouble(),
             child: SizedBox(
               height: kFieldHeight,
-              child: TextFormField(
+child: TextFormField(
                 controller: controller,
                 textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
                 keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: _dec(label: label ?? '', hint: hint, helper: helper),

@@ -366,9 +366,10 @@ style: theme.textTheme.bodyMedium?.copyWith(
               width: width.toDouble(),
               child: SizedBox(
                 height: kFieldHeight,
-                child: TextFormField(
+child: TextFormField(
                   controller: controller,
                   textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: _dec(label: label ?? '', hint: hint, helper: helper),
