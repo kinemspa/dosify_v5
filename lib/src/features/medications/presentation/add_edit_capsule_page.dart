@@ -568,7 +568,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Name *'),
+                  decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500'),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   onChanged: (_) => setState(() {}),
                 ))),
@@ -578,7 +578,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Manufacturer'),
+                  decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
                   onChanged: (_) => setState(() {}),
                 ))),
                 _helperBelowLeft(context, 'Enter the brand or company name'),
@@ -587,7 +587,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Description'),
+                  decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
                   onChanged: (_) => setState(() {}),
                 ))),
                 _helperBelowLeft(context, 'Optional short description'),
@@ -599,7 +599,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   minLines: 2,
                   maxLines: null,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Notes'),
+                  decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
                   onChanged: (_) => setState(() {}),
                 )),
                 _helperBelowLeft(context, 'Optional notes'),
@@ -652,6 +652,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       dropdownColor: Theme.of(context).colorScheme.surface,
                       menuMaxHeight: 320,
+                      selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                          .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                          .toList(),
                       items: const [Unit.mcg, Unit.mg, Unit.g]
                           .map((u) => DropdownMenuItem(
                                 value: u,
@@ -711,6 +714,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       dropdownColor: Theme.of(context).colorScheme.surface,
                       menuMaxHeight: 320,
+                      selectedItemBuilder: (ctx) => const ['capsules']
+                          .map((t) => Center(child: Text(t)))
+                          .toList(),
                       items: const [DropdownMenuItem(value: 'capsules', child: Center(child: Text('capsules')))],
                       onChanged: null,
                       decoration: _decDrop(label: '', hint: null, helper: null),
@@ -761,7 +767,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Batch No.'),
+                  decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
                 ))),
                 _helperBelowLeft(context, 'Enter the printed batch or lot number'),
                 _rowLabelField(label: 'Location', field: Field36(child: TextFormField(
@@ -769,22 +775,22 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Location'),
+                  decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
                 ))),
                 _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
                 _rowLabelField(label: 'Keep refrigerated', field: Row(children: [
                   Checkbox(value: _requiresFridge, onChanged: (v) => setState(() => _requiresFridge = v ?? false)),
-                  Text('Refrigerate', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('Refrigerate', style: kMutedLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be kept refrigerated'),
                 _rowLabelField(label: 'Keep frozen', field: Row(children: [
                   Checkbox(value: _keepFrozen, onChanged: (v) => setState(() => _keepFrozen = v ?? false)),
-                  Text('Freeze', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('Freeze', style: kMutedLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be kept frozen'),
                 _rowLabelField(label: 'Keep in dark', field: Row(children: [
                   Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
-                  Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  Text('Dark storage', style: kMutedLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be protected from light'),
                 _rowLabelField(label: 'Storage instructions', field: Field36(child: TextFormField(
@@ -792,7 +798,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Storage instructions'),
+                  decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
                 ))),
               ]),
             ],
