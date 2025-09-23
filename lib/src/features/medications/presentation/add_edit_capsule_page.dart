@@ -721,14 +721,304 @@ child: TextFormField(
         title: widget.initial == null ? 'Add Capsule' : 'Edit Capsule',
         forceBackButton: true,
       ),
-      body: Stack(children:[
-        SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _section('General', [
+                    _rowLabelField(label: 'Name *', field: Field36(child: TextFormField(
+                      controller: _nameCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500').copyWith(errorText: gNameError != null ? ' ' : null),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      onChanged: (_) => setState(() { _touchedName = true; }),
+                    ))),
+                    if (gNameError != null) _errorUnderLabel(context, gNameError)
+                    else _helperBelowLeft(context, 'Enter the medication name'),
+                    _rowLabelField(label: 'Manufacturer', field: Field36(child: TextFormField(
+                      controller: _manufacturerCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
+                      onChanged: (_) => setState(() {}),
+                    ))),
+                    _helperBelowLeft(context, 'Enter the brand or company name'),
+                    _rowLabelField(label: 'Description', field: Field36(child: TextFormField(
+                      controller: _descriptionCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
+                      onChanged: (_) => setState(() {}),
+                    ))),
+                    _helperBelowLeft(context, 'Optional short description'),
+                    _rowLabelField(label: 'Notes', field: TextFormField(
+                      controller: _notesCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      keyboardType: TextInputType.multiline,
+                      minLines: 2,
+                      maxLines: null,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
+                      onChanged: (_) => setState(() {}),
+                    )),
+                    _helperBelowLeft(context, 'Optional notes'),
+                  ], trailing: Text(_buildSummary(), overflow: TextOverflow.ellipsis)),
+                  const SizedBox(height: 10),
+                  _section('Strength', [
+                    _rowLabelField(label: 'Strength *', field: SizedBox(
+                      height: 36,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _incBtn('−', () {
+                            final d = double.tryParse(_strengthValueCtrl.text.trim());
+                            final base = d?.floor() ?? 0;
+                            final nv = (base - 1).clamp(0, 1000000000);
+                            setState(() {
+                              _strengthValueCtrl.text = nv.toString();
+                              _touchedStrengthAmt = true;
+                            });
+                          }),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 120,
+                            child: Field36(child: TextFormField(
+                              controller: _strengthValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: _dec(label: 'Amount *', hint: '0').copyWith(errorText: gStrengthAmtError != null ? ' ' : null),
+                              onChanged: (_) => setState(() { _touchedStrengthAmt = true; }),
+                            )),
+                          ),
+                          const SizedBox(width: 6),
+                          _incBtn('+', () {
+                            final d = double.tryParse(_strengthValueCtrl.text.trim());
+                            final base = d?.floor() ?? 0;
+                            final nv = (base + 1).clamp(0, 1000000000);
+                            setState(() {
+                              _strengthValueCtrl.text = nv.toString();
+                              _touchedStrengthAmt = true;
+                            });
+                          }),
+                        ],
+                      ),
+                    )),
+                    _rowLabelField(label: 'Unit *', field: Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height: kFieldHeight,
+                        width: 120,
+                        child: DropdownButtonFormField<Unit>(
+                          value: _strengthUnit,
+                          isExpanded: false,
+                          alignment: AlignmentDirectional.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
+                          selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                              .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
+                              .toList(),
+                          items: const [Unit.mcg, Unit.mg, Unit.g]
+                              .map((u) => DropdownMenuItem(
+                                    value: u,
+                                    alignment: AlignmentDirectional.center,
+                                    child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
+                                  ))
+                              .toList(),
+                          onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                          decoration: _decDrop(label: '', hint: null, helper: null),
+                        ),
+                      ),
+                    )),
+                    if (gStrengthAmtError != null) _errorUnderLabel(context, gStrengthAmtError)
+                    else _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
+                  ], trailing: Text(_strengthSummary(), overflow: TextOverflow.ellipsis)),
+                  const SizedBox(height: 10),
+                  _section('Inventory', [
+                    _rowLabelField(label: 'Stock quantity *', field: SizedBox(
+                      height: 36,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _incBtn('−', () {
+                            final d = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                            final nv = (d - 1).clamp(0, 1000000000).toStringAsFixed(0);
+                            setState(() {
+                              _stockValueCtrl.text = nv;
+                              _touchedStock = true;
+                            });
+                          }),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 120,
+                            child: Field36(child: TextFormField(
+                              controller: _stockValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: _dec(label: 'Stock amount *', hint: '0').copyWith(errorText: gStockError != null ? ' ' : null),
+                              onChanged: (_) => setState(() { _touchedStock = true; }),
+                            )),
+                          ),
+                          const SizedBox(width: 6),
+                          _incBtn('+', () {
+                            final d = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                            final nv = (d + 1).clamp(0, 1000000000).toStringAsFixed(0);
+                            setState(() {
+                              _stockValueCtrl.text = nv;
+                              _touchedStock = true;
+                            });
+                          }),
+                        ],
+                      ),
+                    )),
+                    _rowLabelField(label: 'Quantity unit', field: Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height: kFieldHeight,
+                        width: 120,
+                        child: DropdownButtonFormField<String>(
+                          value: 'capsules',
+                          isExpanded: false,
+                          alignment: AlignmentDirectional.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
+                          selectedItemBuilder: (ctx) => const ['capsules']
+                              .map((t) => Center(child: Text(t)))
+                              .toList(),
+                          items: const [DropdownMenuItem(value: 'capsules', child: Center(child: Text('capsules')))],
+                          onChanged: null,
+                          decoration: _decDrop(label: '', hint: null, helper: null),
+                        ),
+                      ),
+                    )),
+                    if (gStockError != null) _errorUnderLabel(context, gStockError)
+                    else _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
+                    _rowLabelField(label: 'Low stock alert', field: Row(children: [
+                      Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
+                      Expanded(child: Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context), softWrap: true, maxLines: 2)),
+                    ])),
+                    if (_lowStockEnabled) ...[
+                      _rowLabelField(label: 'Threshold', field: _intStepper(
+                        controller: _lowStockCtrl,
+                        step: 1,
+                        min: 0,
+                        max: 100000,
+                        width: 120,
+                        label: 'Threshold',
+                        hint: '0',
+                        error: gThresholdError != null,
+                      )),
+                      if (gThresholdError != null) _errorUnderLabel(context, gThresholdError)
+                      else _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
+                    ],
+                    _rowLabelField(label: 'Expiry date', field: Field36(
+                      width: 120,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(now.year - 1),
+                            lastDate: DateTime(now.year + 10),
+                            initialDate: _expiry ?? now,
+                          );
+                          if (picked != null) setState(() => _expiry = picked);
+                        },
+                        icon: const Icon(Icons.calendar_today, size: 18),
+                        label: Text(_expiry == null ? 'Select date' : DateFormat.yMd().format(_expiry!)),
+                        style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                      ),
+                    )),
+                    _helperBelowLeft(context, 'Enter the expiry date'),
+                  ], trailing: _generalOnlySummary()),
+                  const SizedBox(height: 10),
+                  _section('Storage', [
+                    _rowLabelField(label: 'Batch No.', field: Field36(child: TextFormField(
+                      controller: _batchCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
+                    ))),
+                    _helperBelowLeft(context, 'Enter the printed batch or lot number'),
+                    _rowLabelField(label: 'Location', field: Field36(child: TextFormField(
+                      controller: _storageCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
+                    ))),
+                    _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
+                    _rowLabelField(label: 'Keep refrigerated', field: Row(children: [
+                      Checkbox(value: _requiresFridge, onChanged: _keepFrozen ? null : (v) => setState(() => _requiresFridge = v ?? false)),
+                      Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : kCheckboxLabelStyle(context)),
+                    ])),
+                    _helperBelowLeftCompact(context, 'Enable if this medication must be kept refrigerated'),
+                    _rowLabelField(label: 'Keep frozen', field: Row(children: [
+                      Checkbox(value: _keepFrozen, onChanged: (v) => setState(() { _keepFrozen = v ?? false; if (_keepFrozen) _requiresFridge = false; })),
+                      Text('Freeze', style: kCheckboxLabelStyle(context)),
+                    ])),
+                    _helperBelowLeftCompact(context, 'Enable if this medication must be kept frozen'),
+                    _rowLabelField(label: 'Keep in dark', field: Row(children: [
+                      Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
+                      Text('Dark storage', style: kCheckboxLabelStyle(context)),
+                    ])),
+                    _helperBelowLeftCompact(context, 'Enable if this medication must be protected from light'),
+                    _rowLabelField(label: 'Storage instructions', field: Field36(child: TextFormField(
+                      controller: _storageNotesCtrl,
+                      textAlign: TextAlign.left,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
+                    ))),
+                  ]),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: 16,
+            bottom: 116,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                await showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx){
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16,16,16,24),
+                    child: _buildSummarySheet(ctx),
+                  );
+                });
+              },
+              icon: const Icon(Icons.summarize, size: 18),
+              label: const Text('Summary'),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
           style: FilledButton.styleFrom(
@@ -743,301 +1033,7 @@ child: TextFormField(
           child: Text(widget.initial == null ? 'Save' : 'Update'),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _section('General', [
-                _rowLabelField(label: 'Name *', field: Field36(child: TextFormField(
-                  controller: _nameCtrl,
-                  textAlign: TextAlign.left,
-textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500').copyWith(errorText: gNameError != null ? ' ' : null),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  onChanged: (_) => setState(() { _touchedName = true; }),
-                ))),
-                if (gNameError != null) _errorUnderLabel(context, gNameError)
-                else _helperBelowLeft(context, 'Enter the medication name'),
-                _rowLabelField(label: 'Manufacturer', field: Field36(child: TextFormField(
-                  controller: _manufacturerCtrl,
-                  textAlign: TextAlign.left,
-textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
-                  onChanged: (_) => setState(() {}),
-                ))),
-                _helperBelowLeft(context, 'Enter the brand or company name'),
-                _rowLabelField(label: 'Description', field: Field36(child: TextFormField(
-                  controller: _descriptionCtrl,
-                  textAlign: TextAlign.left,
-textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
-                  onChanged: (_) => setState(() {}),
-                ))),
-                _helperBelowLeft(context, 'Optional short description'),
-                _rowLabelField(label: 'Notes', field: TextFormField(
-                  controller: _notesCtrl,
-                  textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  keyboardType: TextInputType.multiline,
-                  minLines: 2,
-maxLines: null,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
-                  onChanged: (_) => setState(() {}),
-                )),
-                _helperBelowLeft(context, 'Optional notes'),
-              ], trailing: Text(_buildSummary(), overflow: TextOverflow.ellipsis)),
-              const SizedBox(height: 10),
-              _section('Strength', [
-                _rowLabelField(label: 'Strength *', field: SizedBox(
-                  height: 36,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _incBtn('−', () {
-                        final d = double.tryParse(_strengthValueCtrl.text.trim());
-                        final base = d?.floor() ?? 0;
-                        final nv = (base - 1).clamp(0, 1000000000);
-                        setState(() {
-                          _strengthValueCtrl.text = nv.toString();
-                          _touchedStrengthAmt = true;
-                        });
-                      }),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 120,
-                        child: Field36(child: TextFormField(
-                          controller: _strengthValueCtrl,
-                          textAlign: TextAlign.center,
-keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Amount *', hint: '0').copyWith(errorText: gStrengthAmtError != null ? ' ' : null),
-                          onChanged: (_) => setState(() { _touchedStrengthAmt = true; }),
-                        )),
-                      ),
-                      const SizedBox(width: 6),
-                      _incBtn('+', () {
-                        final d = double.tryParse(_strengthValueCtrl.text.trim());
-                        final base = d?.floor() ?? 0;
-                        final nv = (base + 1).clamp(0, 1000000000);
-                        setState(() {
-                          _strengthValueCtrl.text = nv.toString();
-                          _touchedStrengthAmt = true;
-                        });
-                      }),
-                    ],
-                  ),
-                )),
-                _rowLabelField(label: 'Unit *', field: Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: kFieldHeight,
-                    width: 120,
-                    child: DropdownButtonFormField<Unit>(
-                      value: _strengthUnit,
-                      isExpanded: false,
-alignment: AlignmentDirectional.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      dropdownColor: Theme.of(context).colorScheme.surface,
-                      menuMaxHeight: 320,
-                      selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
-                          .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                          .toList(),
-                      items: const [Unit.mcg, Unit.mg, Unit.g]
-                          .map((u) => DropdownMenuItem(
-                                value: u,
-                                alignment: AlignmentDirectional.center,
-                                child: Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))),
-                              ))
-                          .toList(),
-                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                      decoration: _decDrop(label: '', hint: null, helper: null),
-                    ),
-                  ),
-                )),
-                if (gStrengthAmtError != null) _errorUnderLabel(context, gStrengthAmtError)
-                else _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
-              ], trailing: Text(_strengthSummary(), overflow: TextOverflow.ellipsis)),
-              const SizedBox(height: 10),
-              _section('Inventory', [
-                _rowLabelField(label: 'Stock quantity *', field: SizedBox(
-                  height: 36,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _incBtn('−', () {
-                        final d = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                        final nv = (d - 1).clamp(0, 1000000000).toStringAsFixed(0);
-                        setState(() {
-                          _stockValueCtrl.text = nv;
-                          _touchedStock = true;
-                        });
-                      }),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 120,
-                        child: Field36(child: TextFormField(
-                          controller: _stockValueCtrl,
-                          textAlign: TextAlign.center,
-keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Stock amount *', hint: '0').copyWith(errorText: gStockError != null ? ' ' : null),
-                          onChanged: (_) => setState(() { _touchedStock = true; }),
-                        )),
-                      ),
-                      const SizedBox(width: 6),
-                      _incBtn('+', () {
-                        final d = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                        final nv = (d + 1).clamp(0, 1000000000).toStringAsFixed(0);
-                        setState(() {
-                          _stockValueCtrl.text = nv;
-                          _touchedStock = true;
-                        });
-                      }),
-                    ],
-                  ),
-                )),
-                _rowLabelField(label: 'Quantity unit', field: Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: kFieldHeight,
-                    width: 120,
-                    child: DropdownButtonFormField<String>(
-                      value: 'capsules',
-                      isExpanded: false,
-alignment: AlignmentDirectional.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      dropdownColor: Theme.of(context).colorScheme.surface,
-                      menuMaxHeight: 320,
-                      selectedItemBuilder: (ctx) => const ['capsules']
-                          .map((t) => Center(child: Text(t)))
-                          .toList(),
-                      items: const [DropdownMenuItem(value: 'capsules', child: Center(child: Text('capsules')))],
-                      onChanged: null,
-                      decoration: _decDrop(label: '', hint: null, helper: null),
-                    ),
-                  ),
-                )),
-                if (gStockError != null) _errorUnderLabel(context, gStockError)
-                else _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
-                _rowLabelField(label: 'Low stock alert', field: Row(children: [
-                  Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
-                  Expanded(child: Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context), softWrap: true, maxLines: 2)),
-                ])),
-                if (_lowStockEnabled) ...[
-                  _rowLabelField(label: 'Threshold', field: _intStepper(
-                    controller: _lowStockCtrl,
-                    step: 1,
-                    min: 0,
-                    max: 100000,
-                    width: 120,
-                    label: 'Threshold',
-                    hint: '0',
-                    error: gThresholdError != null,
-                  )),
-                  if (gThresholdError != null) _errorUnderLabel(context, gThresholdError)
-                  else _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
-                ],
-                _rowLabelField(label: 'Expiry date', field: Field36(
-                  width: 120,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final now = DateTime.now();
-                      final picked = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(now.year - 1),
-                        lastDate: DateTime(now.year + 10),
-                        initialDate: _expiry ?? now,
-                      );
-                      if (picked != null) setState(() => _expiry = picked);
-                    },
-                    icon: const Icon(Icons.calendar_today, size: 18),
-                    label: Text(_expiry == null ? 'Select date' : DateFormat.yMd().format(_expiry!)),
-                    style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
-                  ),
-                )),
-                _helperBelowLeft(context, 'Enter the expiry date'),
-              ], trailing: _generalOnlySummary()),
-              const SizedBox(height: 10),
-              _section('Storage', [
-                _rowLabelField(label: 'Batch No.', field: Field36(child: TextFormField(
-                  controller: _batchCtrl,
-                  textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
-                ))),
-                _helperBelowLeft(context, 'Enter the printed batch or lot number'),
-                _rowLabelField(label: 'Location', field: Field36(child: TextFormField(
-                  controller: _storageCtrl,
-                  textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
-                ))),
-                _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
-                _rowLabelField(label: 'Keep refrigerated', field: Row(children: [
-                  Checkbox(value: _requiresFridge, onChanged: _keepFrozen ? null : (v) => setState(() => _requiresFridge = v ?? false)),
-                  Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : kCheckboxLabelStyle(context)),
-                ])),
-                _helperBelowLeftCompact(context, 'Enable if this medication must be kept refrigerated'),
-                _rowLabelField(label: 'Keep frozen', field: Row(children: [
-                  Checkbox(value: _keepFrozen, onChanged: (v) => setState(() { _keepFrozen = v ?? false; if (_keepFrozen) _requiresFridge = false; })),
-                  Text('Freeze', style: kCheckboxLabelStyle(context)),
-                ])),
-                _helperBelowLeftCompact(context, 'Enable if this medication must be kept frozen'),
-                _rowLabelField(label: 'Keep in dark', field: Row(children: [
-                  Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
-                  Text('Dark storage', style: kCheckboxLabelStyle(context)),
-                ])),
-                _helperBelowLeftCompact(context, 'Enable if this medication must be protected from light'),
-                _rowLabelField(label: 'Storage instructions', field: Field36(child: TextFormField(
-                  controller: _storageNotesCtrl,
-                  textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
-                ))),
-              ]),
-            ],
-          ),
-        ),
-      Positioned(
-        right: 16,
-        bottom: 116,
-        child: OutlinedButton.icon(
-          onPressed: () async {
-            await showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx){
-              // Build a simple summary using existing dialog sections
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16,16,16,24),
-                child: _buildSummarySheet(ctx),
-              );
-            });
-          },
-          icon: const Icon(Icons.summarize, size: 18),
-          label: const Text('Summary'),
-        ),
-      ),
-      ],),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: SizedBox(
-  }
+    );
+}
 }
 
