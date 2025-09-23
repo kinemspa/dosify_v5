@@ -388,7 +388,8 @@ return SizedBox(
     final String? gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
     final String? gStockError = (_submitted || _touchedStock) ? (stockError ?? _stockError) : null;
 
-    bool get _requiredOk {
+    // Determine if required fields are valid (for Save button state)
+    final bool requiredOk = (() {
       final nameOk = _nameCtrl.text.trim().isNotEmpty;
       final aTxt = _strengthValueCtrl.text.trim();
       final a = double.tryParse(aTxt);
@@ -401,7 +402,7 @@ return SizedBox(
       }
       final stockOk = s2 != null && s2 >= 0 && quartersOk;
       return nameOk && amtOk && stockOk;
-    }
+    })();
 
       return Scaffold(
       appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
@@ -810,12 +811,12 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
         width: 120,
         child: FilledButton(
           style: FilledButton.styleFrom(
-            backgroundColor: _requiredOk ? null : Theme.of(context).colorScheme.surfaceVariant,
-            foregroundColor: _requiredOk ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+backgroundColor: requiredOk ? null : Theme.of(context).colorScheme.surfaceVariant,
+foregroundColor: requiredOk ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
           ),
           onPressed: () async {
             setState(() => _submitted = true);
-            if (!_requiredOk) return; // show gated errors only
+if (!requiredOk) return; // show gated errors only
             if (!(_formKey.currentState?.validate() ?? false)) return;
             await _showConfirmDialog();
           },
