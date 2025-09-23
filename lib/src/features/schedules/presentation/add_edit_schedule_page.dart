@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'select_medication_for_schedule_page.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
 
 class AddEditSchedulePage extends StatefulWidget {
   const AddEditSchedulePage({super.key, this.initial});
@@ -36,6 +37,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   DateTime _cycleAnchor = DateTime.now();
   bool _nameAuto = true;
   Medication? _selectedMed;
+  DateTime _startDate = DateTime.now();
 
   @override
   void initState() {
@@ -477,17 +479,123 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   String _scheduleSummaryShort() {
     if (_times.isEmpty) return '';
     final times = _times.map((t) => t.format(context)).join(', ');
+    final start = '${_startDate.toLocal()}'.split(' ').first;
     switch (_mode) {
       case ScheduleMode.everyDay:
-        return 'Every day · $times';
+        return 'Start $start · Every day · $times';
       case ScheduleMode.daysOfWeek:
         const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
         final ds = _days.toList()..sort();
         final dtext = ds.map((i) => labels[i-1]).join(', ');
-        return '$dtext · $times';
+        return 'Start $start · $dtext · $times';
       case ScheduleMode.daysOnOff:
         final n = int.tryParse(_cycleN.text.trim());
-        return n == null ? times : 'Every $n days · $times';
+        final cycle = n == null ? '' : 'Every $n days · ';
+        return 'Start $start · ${cycle}$times';
+    }
+  }
+
+  String _doseFormulaLine() {
+    final med = _selectedMed;
+    final v = double.tryParse(_doseValue.text.trim());
+    final unit = _doseUnit.text.trim().toLowerCase();
+    if (med == null || v == null || v <= 0 || unit.isEmpty) return '';
+    // Reuse logic from _DoseFormulaStrip
+    switch (med.form) {
+      case MedicationForm.tablet:
+        if (unit == 'tablets') {
+          final quarters = (v * 4).round();
+          final perTabMcg = switch (med.strengthUnit) {
+            Unit.mcg => med.strengthValue,
+            Unit.mg => med.strengthValue * 1000,
+            Unit.g => med.strengthValue * 1e6,
+            Unit.units => med.strengthValue,
+            Unit.mcgPerMl => med.strengthValue,
+            Unit.mgPerMl => med.strengthValue * 1000,
+            Unit.gPerMl => med.strengthValue * 1e6,
+            Unit.unitsPerMl => med.strengthValue,
+          };
+          final totalMcg = perTabMcg * quarters / 4.0;
+          final mg = totalMcg / 1000.0;
+          return '${v.toStringAsFixed(v == v.roundToDouble() ? 0 : 2)} tab × ${med.strengthValue} ${_unitShort(med.strengthUnit)} = ${totalMcg.toStringAsFixed(0)} mcg (${mg.toStringAsFixed(2)} mg)';
+        } else {
+          final desiredMcg = switch (unit) { 'mcg' => v, 'mg' => v * 1000, 'g' => v * 1e6, _ => v };
+          final perTabMcg = switch (med.strengthUnit) {
+            Unit.mcg => med.strengthValue,
+            Unit.mg => med.strengthValue * 1000,
+            Unit.g => med.strengthValue * 1e6,
+            Unit.units => med.strengthValue,
+            Unit.mcgPerMl => med.strengthValue,
+            Unit.mgPerMl => med.strengthValue * 1000,
+            Unit.gPerMl => med.strengthValue * 1e6,
+            Unit.unitsPerMl => med.strengthValue,
+          };
+          final tabs = desiredMcg / perTabMcg;
+          final quarters = (tabs * 4).round() / 4.0;
+          return '${desiredMcg.toStringAsFixed(0)} mcg ≈ ${quarters.toStringAsFixed(2)} tablets';
+        }
+      case MedicationForm.capsule:
+        if (unit == 'capsules') {
+          final perCapMcg = switch (med.strengthUnit) {
+            Unit.mcg => med.strengthValue,
+            Unit.mg => med.strengthValue * 1000,
+            Unit.g => med.strengthValue * 1e6,
+            Unit.units => med.strengthValue,
+            _ => med.strengthValue,
+          };
+          final totalMcg = perCapMcg * v;
+          final mg = totalMcg / 1000.0;
+          return '${v.toStringAsFixed(0)} cap × ${med.strengthValue} ${_unitShort(med.strengthUnit)} = ${totalMcg.toStringAsFixed(0)} mcg (${mg.toStringAsFixed(2)} mg)';
+        } else {
+          final desiredMcg = switch (unit) { 'mcg' => v, 'mg' => v * 1000, 'g' => v * 1e6, _ => v };
+          final perCapMcg = switch (med.strengthUnit) {
+            Unit.mcg => med.strengthValue,
+            Unit.mg => med.strengthValue * 1000,
+            Unit.g => med.strengthValue * 1e6,
+            Unit.units => med.strengthValue,
+            _ => med.strengthValue,
+          };
+          final caps = desiredMcg / perCapMcg;
+          return '${desiredMcg.toStringAsFixed(0)} mcg ≈ ${caps.toStringAsFixed(2)} capsules';
+        }
+      case MedicationForm.injectionPreFilledSyringe:
+        return '${v.toStringAsFixed(0)} syringe';
+      case MedicationForm.injectionSingleDoseVial:
+        return '${v.toStringAsFixed(0)} vial';
+      case MedicationForm.injectionMultiDoseVial:
+        double? mgPerMl;
+        double? iuPerMl;
+        switch (med.strengthUnit) {
+          case Unit.mgPerMl:
+            mgPerMl = med.perMlValue ?? med.strengthValue;
+            break;
+          case Unit.mcgPerMl:
+            mgPerMl = (med.perMlValue ?? med.strengthValue) / 1000.0;
+            break;
+          case Unit.gPerMl:
+            mgPerMl = (med.perMlValue ?? med.strengthValue) * 1000.0;
+            break;
+          case Unit.unitsPerMl:
+            iuPerMl = med.perMlValue ?? med.strengthValue;
+            break;
+          default:
+            break;
+        }
+        if (unit == 'ml') {
+          final ml = v;
+          if (mgPerMl != null) return '${ml.toStringAsFixed(2)} mL = ${(ml * mgPerMl).toStringAsFixed(2)} mg';
+          if (iuPerMl != null) return '${ml.toStringAsFixed(2)} mL = ${(ml * iuPerMl).toStringAsFixed(0)} IU';
+          return '${ml.toStringAsFixed(2)} mL';
+        } else if (unit == 'iu' || unit == 'units') {
+          if (iuPerMl == null) return '';
+          final ml = v / iuPerMl;
+          return '${v.toStringAsFixed(0)} IU = ${ml.toStringAsFixed(3)} mL';
+        } else {
+          if (mgPerMl == null) return '';
+          final desiredMg = switch (unit) { 'mg' => v, 'mcg' => v / 1000.0, 'g' => v * 1000.0, _ => v };
+          final ml = desiredMg / mgPerMl;
+          return '${desiredMg.toStringAsFixed(2)} mg = ${ml.toStringAsFixed(3)} mL';
+        }
     }
   }
 
@@ -694,11 +802,42 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             ),
             ], trailing: Text(_doseSummaryShort(), overflow: TextOverflow.ellipsis)),
             const SizedBox(height: 10),
+            _section(context, 'Dose Summary', [
+              Builder(builder: (context){
+                final short = _doseSummaryShort();
+                final line = _doseFormulaLine();
+                if (short.isEmpty && line.isEmpty) return const Text('Enter dose details to see summary');
+                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  if (short.isNotEmpty) Text(short, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  if (line.isNotEmpty) Padding(padding: const EdgeInsets.only(top:4), child: Text(line, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant))),
+                ]);
+              })
+            ]),
+            const SizedBox(height: 10),
             _section(context, 'Schedule', [
               Column(
                 children: [
                   Row(
                     children: [
+                      Field36(
+                        width: 140,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final now = DateTime.now();
+                            final picked = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(now.year - 1),
+                              lastDate: DateTime(now.year + 10),
+                              initialDate: _startDate,
+                            );
+                            if (picked != null) setState(() => _startDate = picked);
+                          },
+                          icon: const Icon(Icons.calendar_today, size: 18),
+                          label: Text('${_startDate.toLocal()}'.split(' ').first),
+                          style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<ScheduleMode>(
                           value: _mode,
