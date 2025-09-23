@@ -460,7 +460,9 @@ height: 36,
                         child: SizedBox(
                           height: kFieldHeight,
                           width: 120,
-                          child: DropdownButtonFormField<Unit>(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 54),
+                            child: DropdownButtonFormField<Unit>(
                             value: _strengthUnit,
                             isExpanded: false,
                             alignment: AlignmentDirectional.center,
@@ -559,7 +561,9 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                         child: SizedBox(
                           height: kFieldHeight,
                           width: 120,
-                          child: DropdownButtonFormField<String>(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 54),
+                            child: DropdownButtonFormField<String>(
                             value: 'tablets',
                             isExpanded: false,
                             alignment: AlignmentDirectional.center,
