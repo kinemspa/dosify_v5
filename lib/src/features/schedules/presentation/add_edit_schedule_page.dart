@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'select_medication_for_schedule_page.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 class AddEditSchedulePage extends StatefulWidget {
   const AddEditSchedulePage({super.key, this.initial});
@@ -18,6 +19,8 @@ class AddEditSchedulePage extends StatefulWidget {
 }
 
 class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
+  // Days selector mode
+  ScheduleMode _mode = ScheduleMode.daysOfWeek;
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _name;
@@ -425,6 +428,69 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     );
   }
 
+  Widget _section(BuildContext context, String title, List<Widget> children, {Widget? trailing}) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 2,
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 2, bottom: 4, right: 2),
+              child: Row(children: [
+                Expanded(
+                  child: Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 15, color: theme.colorScheme.primary)),
+                ),
+                if (trailing != null)
+                  Flexible(
+                    child: DefaultTextStyle(
+                      style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withOpacity(0.50), fontWeight: FontWeight.w600),
+                      child: Align(alignment: Alignment.centerRight, child: trailing),
+                    ),
+                  ),
+              ]),
+            ),
+            const SizedBox(height: 6),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _doseSummaryShort() {
+    final med = _medicationName.text.trim();
+    final val = double.tryParse(_doseValue.text.trim()) ?? 0;
+    final unit = _doseUnit.text.trim();
+    if (med.isEmpty || unit.isEmpty || val <= 0) return '';
+    final v = val == val.roundToDouble() ? val.toStringAsFixed(0) : val.toStringAsFixed(2);
+    return '$v $unit${med.isEmpty ? '' : ' · $med'}';
+  }
+
+  String _scheduleSummaryShort() {
+    if (_times.isEmpty) return '';
+    final times = _times.map((t) => t.format(context)).join(', ');
+    switch (_mode) {
+      case ScheduleMode.everyDay:
+        return 'Every day · $times';
+      case ScheduleMode.daysOfWeek:
+        const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        final ds = _days.toList()..sort();
+        final dtext = ds.map((i) => labels[i-1]).join(', ');
+        return '$dtext · $times';
+      case ScheduleMode.daysOnOff:
+        final n = int.tryParse(_cycleN.text.trim());
+        return n == null ? times : 'Every $n days · $times';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -469,28 +535,75 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
-            TextFormField(
-              controller: _name,
-              decoration: const InputDecoration(labelText: 'Schedule name'),
-              textInputAction: TextInputAction.next,
-              onChanged: (_) => _nameAuto = false,
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Medication'),
-              subtitle: Text(_medicationName.text.isEmpty ? 'Select a medication' : _medicationName.text),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _pickMedication,
-            ),
-            const SizedBox(height: 12),
-            // Dose controls (Typed)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            _section(context, 'General', [
+              TextFormField(
+                controller: _name,
+                decoration: const InputDecoration(labelText: 'Schedule name'),
+                textInputAction: TextInputAction.next,
+                onChanged: (_) => _nameAuto = false,
+                // Name not required until save/confirm
+                validator: (_) => null,
+              ),
+              const SizedBox(height: 12),
+              // Medication dropdown (from saved meds)
+              DropdownButtonFormField<Medication>(
+                value: _selectedMed,
+                isExpanded: true,
+                alignment: AlignmentDirectional.center,
+                decoration: const InputDecoration(labelText: 'Medication'),
+                items: Hive.box<Medication>('medications')
+                    .values
+                    .map((m) => DropdownMenuItem<Medication>(value: m, alignment: AlignmentDirectional.center, child: Center(child: Text(m.name, textAlign: TextAlign.center))))
+                    .toList(),
+                onChanged: (m) {
+                  setState(() {
+                    _selectedMed = m;
+                    _medicationId = m?.id;
+                    _medicationName.text = m?.name ?? '';
+                    // set sensible defaults based on form
+                    if (m != null) {
+                      switch (m.form) {
+                        case MedicationForm.tablet:
+                          _doseUnit.text = 'tablets';
+                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+                          break;
+                        case MedicationForm.capsule:
+                          _doseUnit.text = 'capsules';
+                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+                          break;
+                        case MedicationForm.injectionPreFilledSyringe:
+                          _doseUnit.text = 'syringes';
+                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+                          break;
+                        case MedicationForm.injectionSingleDoseVial:
+                          _doseUnit.text = 'vials';
+                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+                          break;
+                        case MedicationForm.injectionMultiDoseVial:
+                          final u = m.strengthUnit;
+                          if (u == Unit.unitsPerMl) {
+                            _doseUnit.text = 'IU';
+                          } else {
+                            _doseUnit.text = 'mg';
+                          }
+                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+                          break;
+                      }
+                    }
+                    _maybeAutoName();
+                  });
+                },
+                validator: (v) => v == null ? 'Required' : null,
+              ),
+            ]),
+            const SizedBox(height: 10),
+            // Dose controls (Typed) in a card with summary
+            _section(context, 'Dose', [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 Row(children: [
                   _pillBtn(context, '−', () {
                     final unit = _doseUnit.text.trim().toLowerCase();
@@ -569,12 +682,39 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 const SizedBox(height: 6),
                 _DoseFormulaStrip(selectedMed: _selectedMed, valueCtrl: _doseValue, unitCtrl: _doseUnit),
               ],
-            ),
-            const SizedBox(height: 16),
-            Text('Times', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Column(
+            )
+            ], trailing: Text(_doseSummaryShort(), overflow: TextOverflow.ellipsis)),
+            const SizedBox(height: 10),
+            // Sc            Column(
               children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<ScheduleMode>(
+                        value: _mode,
+                        isExpanded: true,
+                        decoration: const InputDecoration(labelText: 'Days mode'),
+                        items: ScheduleMode.values
+                            .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
+                            .toList(),
+                        onChanged: (m) {
+                          setState(() {
+                            _mode = m ?? ScheduleMode.daysOfWeek;
+                            if (_mode == ScheduleMode.everyDay) {
+                              _days..clear()..addAll([1,2,3,4,5,6,7]);
+                              _useCycle = false;
+                            } else if (_mode == ScheduleMode.daysOnOff) {
+                              _useCycle = true;
+                            } else {
+                              _useCycle = false;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 for (var i = 0; i < _times.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -608,12 +748,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               ],
             ),
             const SizedBox(height: 8),
-            Text('Days of week', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(7, (i) {
+            if (_mode == ScheduleMode.daysOfWeek) ...[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: List.generate(7, (i) {
                 final dayIndex = i + 1; // 1..7
                 const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
                 final selected = _days.contains(dayIndex);
@@ -634,16 +773,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                   },
                 );
               }),
-            ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Every N days (cycle)'),
-              subtitle: const Text('Use this instead of specific weekdays'),
-              value: _useCycle,
-              onChanged: (v) => setState(() => _useCycle = v),
-            ),
-            if (_useCycle) ...[
+              ),
+            ],
+            if (_mode == ScheduleMode.daysOnOff) ...[
               Row(
                 children: [
                   SizedBox(
@@ -691,6 +823,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               value: _active,
               onChanged: (v) => setState(() => _active = v),
             ),
+            ], trailing: Text(_scheduleSummaryShort(), overflow: TextOverflow.ellipsis)),
           ],
         ),
       ),
@@ -738,6 +871,14 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     _name.text = '$med — $dose $unit';
   }
 }
+
+enum ScheduleMode { everyDay, daysOfWeek, daysOnOff }
+
+String _modeLabel(ScheduleMode m) => switch (m) {
+  ScheduleMode.everyDay => 'Every day',
+  ScheduleMode.daysOfWeek => 'Days of the week',
+  ScheduleMode.daysOnOff => 'Days on / days off',
+};
 
 class _DoseFormulaStrip extends StatelessWidget {
   const _DoseFormulaStrip({required this.selectedMed, required this.valueCtrl, required this.unitCtrl});

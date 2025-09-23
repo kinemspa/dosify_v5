@@ -588,12 +588,15 @@ child: TextFormField(
   }
 
   String _strengthSummary() {
+    // Hide until user changes the default (0) value
+    if (!_touchedStrengthAmt) return '';
     final v = _strengthValueCtrl.text.trim();
-    if (v.isEmpty) return '';
+    final d = double.tryParse(v) ?? 0;
+    if (d <= 0) return '';
     final unit = _unitLabel(_strengthUnit);
     final name = _nameCtrl.text.trim();
     final med = name.isEmpty ? '' : ' per $name capsule';
-    return '$v$unit$med';
+    return '${d == d.roundToDouble() ? d.toStringAsFixed(0) : d.toString()}$unit$med';
   }
 
   Widget _detailRow(BuildContext context, String label, String value) {

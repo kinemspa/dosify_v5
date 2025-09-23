@@ -845,18 +845,23 @@ if (!requiredOk) return; // show gated errors only
   }
 
   Widget _strengthSummary() {
-    final v = _strengthValueCtrl.text.trim();
+    // Hide until user changes the default (0) value
+    if (!_touchedStrengthAmt) return const SizedBox.shrink();
+    final txt = _strengthValueCtrl.text.trim();
+    final d = double.tryParse(txt) ?? 0;
+    if (d <= 0) return const SizedBox.shrink();
     final name = _nameCtrl.text.trim();
-    if (v.isEmpty) return const SizedBox.shrink();
     final unit = _strengthUnit == Unit.mcg ? 'mcg' : _strengthUnit == Unit.mg ? 'mg' : 'g';
     final med = name.isEmpty ? '' : ' per $name tablet';
-    return Text('$v$unit$med');
+    return Text('${d.toStringAsFixed(d == d.roundToDouble() ? 0 : 2)}$unit$med');
   }
 
   Widget _inventorySummary() {
+    // Hide until user changes the default (0) value
+    if (!_touchedStock) return const SizedBox.shrink();
     final v = _stockCtrl.text.trim();
-    final name = _nameCtrl.text.trim();
     if (v.isEmpty) return const SizedBox.shrink();
+    final name = _nameCtrl.text.trim();
     final med = name.isEmpty ? '' : ' $name Tablets';
     return Text('$v$med');
   }
