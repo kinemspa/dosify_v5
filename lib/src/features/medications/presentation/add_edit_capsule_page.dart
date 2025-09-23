@@ -207,8 +207,11 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       isCollapsed: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
+      // Remove placeholder text per spec
+      hintText: null,
       helperText: helper,
+      // Render errors in helper area; suppress default error line to avoid squashing Field36
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
       filled: true,
       fillColor: cs.surfaceContainerLowest,
@@ -233,8 +236,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     return Card(
-      elevation: 0,
-      color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme.surfaceContainerHigh,
+      elevation: 2,
+      color: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -500,7 +503,49 @@ style: theme.textTheme.bodyMedium?.copyWith(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirm Medication'),
-        content: Text(_buildSummary()),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Summary header
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF09A8BD), Color(0xFF18537D)],
+                ),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Text(_buildSummary(), style: const TextStyle(color: Colors.white, height: 1.3)),
+            ),
+            const SizedBox(height: 12),
+            // Full details
+            _detailRow(context, 'Form', 'Capsule'),
+            _detailRow(context, 'Name', _nameCtrl.text.trim()),
+            if (_manufacturerCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Manufacturer', _manufacturerCtrl.text.trim()),
+            if (_descriptionCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Description', _descriptionCtrl.text.trim()),
+            if (_notesCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Notes', _notesCtrl.text.trim()),
+            if (_strengthValueCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Strength', '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)}'),
+            if (_stockValueCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Stock', '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}'),
+            if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Low stock at', '${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}'),
+            _detailRow(context, 'Expiry', _expiry != null ? DateFormat('dd/MM/yy').format(_expiry!) : 'No expiry'),
+            if (_batchCtrl.text.trim().isNotEmpty) _detailRow(context, 'Batch #', _batchCtrl.text.trim()),
+            if (_storageCtrl.text.trim().isNotEmpty) _detailRow(context, 'Storage', _storageCtrl.text.trim()),
+            _detailRow(context, 'Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
+            if (_keepFrozen) _detailRow(context, 'Keep frozen', 'Yes'),
+            if (_lightSensitive) _detailRow(context, 'Protect from light', 'Yes'),
+            if (_storageNotesCtrl.text.trim().isNotEmpty)
+              _detailRow(context, 'Storage notes', _storageNotesCtrl.text.trim()),
+          ],
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Confirm')),
@@ -538,6 +583,20 @@ style: theme.textTheme.bodyMedium?.copyWith(
     );
   }
 
+  Widget _detailRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 120, child: Text(label, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurfaceVariant))),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -547,7 +606,7 @@ style: theme.textTheme.bodyMedium?.copyWith(
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
-        width: 220,
+        width: 120,
         child: FilledButton(
           onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
           child: Text(widget.initial == null ? 'Save' : 'Update'),
@@ -566,7 +625,8 @@ style: theme.textTheme.bodyMedium?.copyWith(
                   textAlign: TextAlign.left,
 textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500'),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Name *', hint: null),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   onChanged: (_) => setState(() {}),
                 ))),
@@ -576,7 +636,8 @@ textCapitalization: TextCapitalization.sentences,
                   textAlign: TextAlign.left,
 textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Manufacturer', hint: null),
                   onChanged: (_) => setState(() {}),
                 ))),
                 _helperBelowLeft(context, 'Enter the brand or company name'),
@@ -585,7 +646,8 @@ textCapitalization: TextCapitalization.sentences,
                   textAlign: TextAlign.left,
 textCapitalization: TextCapitalization.sentences,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Description', hint: null),
                   onChanged: (_) => setState(() {}),
                 ))),
                 _helperBelowLeft(context, 'Optional short description'),
@@ -597,7 +659,8 @@ textCapitalization: TextCapitalization.sentences,
                   minLines: 2,
 maxLines: null,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Notes', hint: null),
                   onChanged: (_) => setState(() {}),
                 )),
                 _helperBelowLeft(context, 'Optional notes'),
@@ -624,7 +687,8 @@ maxLines: null,
                           textAlign: TextAlign.center,
 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(label: 'Amount *', hint: '0'),
+                          textAlignVertical: TextAlignVertical.center,
+                          decoration: _dec(label: 'Amount *', hint: null),
                           onChanged: (_) => setState(() {}),
                         )),
                       ),
@@ -687,7 +751,8 @@ alignment: AlignmentDirectional.center,
                           textAlign: TextAlign.center,
 keyboardType: const TextInputType.numberWithOptions(decimal: false),
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(label: 'Stock amount *', hint: '0'),
+                          textAlignVertical: TextAlignVertical.center,
+                          decoration: _dec(label: 'Stock amount *', hint: null),
                           onChanged: (_) => setState(() {}),
                         )),
                       ),
@@ -764,39 +829,42 @@ alignment: AlignmentDirectional.center,
                   controller: _batchCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Batch No.', hint: null),
                 ))),
                 _helperBelowLeft(context, 'Enter the printed batch or lot number'),
                 _rowLabelField(label: 'Location', field: Field36(child: TextFormField(
                   controller: _storageCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Location', hint: null),
                 ))),
                 _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
                 _rowLabelField(label: 'Keep refrigerated', field: Row(children: [
-                  Checkbox(value: _requiresFridge, onChanged: (v) => setState(() => _requiresFridge = v ?? false)),
-                  Text('Refrigerate', style: kMutedLabelStyle(context)),
+                  Checkbox(value: _requiresFridge, onChanged: _keepFrozen ? null : (v) => setState(() => _requiresFridge = v ?? false)),
+                  Text('Refrigerate', style: kCheckboxLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be kept refrigerated'),
                 _rowLabelField(label: 'Keep frozen', field: Row(children: [
-                  Checkbox(value: _keepFrozen, onChanged: (v) => setState(() => _keepFrozen = v ?? false)),
-                  Text('Freeze', style: kMutedLabelStyle(context)),
+                  Checkbox(value: _keepFrozen, onChanged: (v) => setState(() { _keepFrozen = v ?? false; if (_keepFrozen) _requiresFridge = false; })),
+                  Text('Freeze', style: kCheckboxLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be kept frozen'),
                 _rowLabelField(label: 'Keep in dark', field: Row(children: [
                   Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
-                  Text('Dark storage', style: kMutedLabelStyle(context)),
+                  Text('Dark storage', style: kCheckboxLabelStyle(context)),
                 ])),
                 _helperBelowLeftCompact(context, 'Enable if this medication must be protected from light'),
                 _rowLabelField(label: 'Storage instructions', field: Field36(child: TextFormField(
                   controller: _storageNotesCtrl,
                   textAlign: TextAlign.left,
                   textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  decoration: _dec(label: 'Storage instructions', hint: 'Enter storage instructions'),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: _dec(label: 'Storage instructions', hint: null),
                 ))),
               ]),
             ],

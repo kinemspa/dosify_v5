@@ -20,6 +20,12 @@ TextStyle kMutedLabelStyle(BuildContext context) =>
           color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.50),
         );
 
+// Checkbox label style: darker than support text but lighter than primary label
+TextStyle kCheckboxLabelStyle(BuildContext context) =>
+    Theme.of(context).textTheme.bodyMedium!.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
+        );
+
 // Layout tweaks
 const double kStrengthNudgeMinPx = 20.0;   // minimum extra right nudge for Strength row
 const double kStrengthNudgeFrac = 0.03;    // additional nudge as a fraction of available width

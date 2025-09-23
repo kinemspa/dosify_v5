@@ -33,8 +33,8 @@ class _Section extends StatelessWidget {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     return Card(
-      elevation: 0,
-      color: isLight ? theme.colorScheme.primary.withValues(alpha: 0.05) : theme.colorScheme.surfaceContainerHigh,
+      elevation: 2,
+      color: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: theme.colorScheme.outlineVariant)),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),

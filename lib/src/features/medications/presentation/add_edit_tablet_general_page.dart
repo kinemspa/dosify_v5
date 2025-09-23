@@ -100,6 +100,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       hintText: hint,
       helperText: helper,
+      // Render errors in helper area; suppress default error line to avoid squashing Field36
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
       filled: true,
       fillColor: cs.surfaceContainerLowest,
@@ -169,8 +171,8 @@ style: theme.textTheme.bodySmall?.copyWith(
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     return Card(
-      elevation: 0,
-color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme.surfaceContainerHigh,
+      elevation: 2,
+      color: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -346,11 +348,12 @@ return SizedBox(
                 _rowLabelField(
                   label: 'Name *',
                   field: Field36(
-                    child: TextFormField(
+                      child: TextFormField(
                       controller: _nameCtrl,
                       textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
                       textCapitalization: TextCapitalization.sentences,
-style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium,
                       decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       onChanged: (_) => setState(() {}),
@@ -363,6 +366,7 @@ _helperBelowLeft('Enter the medication name'),
                     child: TextFormField(
                       controller: _manufacturerCtrl,
                       textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
                       textCapitalization: TextCapitalization.sentences,
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
@@ -376,6 +380,7 @@ _helperBelowLeft('Enter the brand or company name'),
                     child: TextFormField(
                       controller: _descriptionCtrl,
                       textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
                       textCapitalization: TextCapitalization.sentences,
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
@@ -639,6 +644,7 @@ _helperBelowLeft('Enter the expiry date'),
                     child: TextFormField(
                       controller: _batchNumberCtrl,
                       textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
                       textCapitalization: TextCapitalization.sentences,
                       decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
                       onChanged: (_) => setState(() {}),
@@ -652,6 +658,7 @@ _helperBelowLeft('Enter the printed batch or lot number'),
                     child: TextFormField(
                       controller: _storageLocationCtrl,
                       textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.center,
                       textCapitalization: TextCapitalization.sentences,
                       decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
                       onChanged: (_) => setState(() {}),
@@ -666,9 +673,9 @@ _helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)'),
                     children: [
                       Checkbox(
                         value: _keepRefrigerated,
-                        onChanged: (v) => setState(() => _keepRefrigerated = v ?? false),
+                        onChanged: _keepFrozen ? null : (v) => setState(() => _keepRefrigerated = v ?? false),
                       ),
-Text('Refrigerate', style: kMutedLabelStyle(context))
+                      Text('Refrigerate', style: kCheckboxLabelStyle(context))
                     ],
                   ),
                 ),
@@ -679,9 +686,9 @@ _helperBelowLeftCompact('Enable if this medication must be kept refrigerated'),
                     children: [
                       Checkbox(
                         value: _keepFrozen,
-                        onChanged: (v) => setState(() => _keepFrozen = v ?? false),
+                        onChanged: (v) => setState(() { _keepFrozen = v ?? false; if (_keepFrozen) _keepRefrigerated = false; }),
                       ),
-Text('Freeze', style: kMutedLabelStyle(context))
+Text('Freeze', style: kCheckboxLabelStyle(context))
                     ],
                   ),
                 ),
@@ -721,7 +728,7 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
       ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
-        width: 220,
+        width: 120,
         child: FilledButton(
           onPressed: () async {
             if (!(_formKey.currentState?.validate() ?? false)) return;
