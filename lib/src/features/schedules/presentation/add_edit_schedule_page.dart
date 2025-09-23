@@ -828,65 +828,153 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
             const SizedBox(height: 10),
             _section(context, 'Instructions', [
               Builder(builder: (context){
-                final short = _doseSummaryShort();
-                final line = _doseFormulaLine();
-                if (short.isEmpty && line.isEmpty) return const Text('Enter dose details to see summary');
-                return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  if (short.isNotEmpty) Text(short, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                  if (line.isNotEmpty) Padding(padding: const EdgeInsets.only(top:4), child: Text(line, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant))),
-                ]);
+                final med = _selectedMed;
+                final name = _medicationName.text.trim();
+                final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
+                final unit = _doseUnit.text.trim();
+                if (med == null || name.isEmpty || doseVal <= 0 || unit.isEmpty) {
+                  return const Text('Enter dose details to see instructions');
+                }
+                // Line 1: Take {dose} {name} {unit}
+                final doseFixed = doseVal == doseVal.roundToDouble() ? doseVal.toStringAsFixed(0) : doseVal.toStringAsFixed(2);
+                final unitTxt = unit.toLowerCase();
+                final line1 = 'Take $doseFixed $name $unitTxt';
+
+                // Line 2: at {time(s)} everyday / on {days} / every N days
+                String times = _times.map((t) => t.format(context)).join(', ');
+                String line2;
+                switch (_mode) {
+                  case ScheduleMode.everyDay:
+                    line2 = 'at $times everyday';
+                    break;
+                  case ScheduleMode.daysOfWeek:
+                    const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                    final ds = _days.toList()..sort();
+                    final dtext = ds.map((i) => labels[i-1]).join(', ');
+                    line2 = 'at $times on $dtext';
+                    break;
+                  case ScheduleMode.daysOnOff:
+                    final n = int.tryParse(_cycleN.text.trim());
+                    final every = n == null ? 'every N days' : 'every ${n.toString()} days';
+                    line2 = 'at $times $every';
+                    break;
+                }
+
+                // Lines 3 & 4: dose @ strength = total per dose
+                // Compute per-unit mcg for tablet/capsule; fall back to _doseFormulaLine
+                double perUnitMcg;
+                bool canComputeCount = false;
+                switch (med.form) {
+                  case MedicationForm.tablet:
+                    if (unitTxt == 'tablets') {
+                      perUnitMcg = switch (med.strengthUnit) {
+                        Unit.mcg => med.strengthValue,
+                        Unit.mg => med.strengthValue * 1000,
+                        Unit.g => med.strengthValue * 1e6,
+                        _ => med.strengthValue,
+                      };
+                      canComputeCount = true;
+                    } else {
+                      perUnitMcg = 0;
+                    }
+                    break;
+                  case MedicationForm.capsule:
+                    if (unitTxt == 'capsules') {
+                      perUnitMcg = switch (med.strengthUnit) {
+                        Unit.mcg => med.strengthValue,
+                        Unit.mg => med.strengthValue * 1000,
+                        Unit.g => med.strengthValue * 1e6,
+                        _ => med.strengthValue,
+                      };
+                      canComputeCount = true;
+                    } else {
+                      perUnitMcg = 0;
+                    }
+                    break;
+                  default:
+                    perUnitMcg = 0;
+                    break;
+                }
+
+                String line3;
+                String line4;
+                if (canComputeCount) {
+                  final totalMcg = perUnitMcg * doseVal;
+                  final totalMg = totalMcg / 1000.0;
+                  final strengthShort = _medStrengthLabel(med);
+                  line3 = '$doseFixed $name ${unitTxt.substring(0, unitTxt.length)} @ $strengthShort =';
+                  line4 = '${totalMg == totalMg.roundToDouble() ? totalMg.toStringAsFixed(0) : totalMg.toStringAsFixed(2)}mg of $name per dose';
+                } else {
+                  final formula = _doseFormulaLine();
+                  line3 = formula.isEmpty ? '' : formula;
+                  line4 = '';
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(line1, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(line2, style: Theme.of(context).textTheme.bodyMedium),
+                    ),
+                    if (line3.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(line3, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ),
+                    if (line4.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(line4, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                      ),
+                  ],
+                );
               })
             ]),
             const SizedBox(height: 10),
             _section(context, 'Schedule', [
               Column(
                 children: [
-                  Row(
-                    children: [
-Field36(
-                        width: 120,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: context,
-                              firstDate: DateTime(now.year - 1),
-                              lastDate: DateTime(now.year + 10),
-                              initialDate: _startDate,
-                            );
-                            if (picked != null) setState(() => _startDate = picked);
-                          },
-                          icon: const Icon(Icons.calendar_today, size: 18),
-                          label: Text('${_startDate.toLocal()}'.split(' ').first),
-                          style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<ScheduleMode>(
-                          value: _mode,
-                          isExpanded: true,
-                          decoration: const InputDecoration(labelText: 'Days mode'),
-                          items: ScheduleMode.values
-                              .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
-                              .toList(),
-                          onChanged: (m) {
-                            setState(() {
-                              _mode = m ?? ScheduleMode.daysOfWeek;
-                              if (_mode == ScheduleMode.everyDay) {
-                                _days..clear()..addAll([1,2,3,4,5,6,7]);
-                                _useCycle = false;
-                              } else if (_mode == ScheduleMode.daysOnOff) {
-                                _useCycle = true;
-                              } else {
-                                _useCycle = false;
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                  _rowLabelField(context, label: 'Start date', field: Field36(
+                    width: 120,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(now.year - 1),
+                          lastDate: DateTime(now.year + 10),
+                          initialDate: _startDate,
+                        );
+                        if (picked != null) setState(() => _startDate = picked);
+                      },
+                      icon: const Icon(Icons.calendar_today, size: 18),
+                      label: Text('${_startDate.toLocal()}'.split(' ').first),
+                      style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                    ),
+                  )),
+                  _rowLabelField(context, label: 'Mode', field: DropdownButtonFormField<ScheduleMode>(
+                    value: _mode,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: ''),
+                    items: ScheduleMode.values
+                        .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
+                        .toList(),
+                    onChanged: (m) {
+                      setState(() {
+                        _mode = m ?? ScheduleMode.daysOfWeek;
+                        if (_mode == ScheduleMode.everyDay) {
+                          _days..clear()..addAll([1,2,3,4,5,6,7]);
+                          _useCycle = false;
+                        } else if (_mode == ScheduleMode.daysOnOff) {
+                          _useCycle = true;
+                        } else {
+                          _useCycle = false;
+                        }
+                      });
+                    },
+                  )),
                   const SizedBox(height: 8),
                   for (var i = 0; i < _times.length; i++)
                     Padding(
