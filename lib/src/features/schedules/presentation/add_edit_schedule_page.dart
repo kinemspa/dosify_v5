@@ -658,11 +658,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               },
               icon: const Icon(Icons.delete_outline),
             ),
-          TextButton(
-            onPressed: _save,
-            child: const Text('Save'),
-          )
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: 120,
+        child: FilledButton(
+          onPressed: _save,
+          child: const Text('Save'),
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -683,15 +687,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 isExpanded: true,
                 alignment: AlignmentDirectional.center,
                 decoration: const InputDecoration(labelText: ''),
-                selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
-                    .map((m) => Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', textAlign: TextAlign.center)))
+selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
+                    .map((m) => Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.bodyMedium)))
                     .toList(),
                 items: Hive.box<Medication>('medications')
                     .values
                     .map((m) => DropdownMenuItem<Medication>(
                           value: m,
                           alignment: AlignmentDirectional.center,
-                          child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}')),
+child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: Theme.of(context).textTheme.bodyMedium)),
                         ))
                     .toList(),
                 onChanged: (m) {
@@ -733,91 +737,96 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
             _section(context, 'Dose', [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                Row(children: [
-                  _pillBtn(context, '−', () {
-                    final unit = _doseUnit.text.trim().toLowerCase();
-                    final step = 1.0; // whole increments; decimals must be typed manually
-                    final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                    final nv = (v - step);
-                    setState(() {
-                      _doseValue.text = (unit == 'tablets') ? nv.clamp(0, 1e12).toStringAsFixed(2) : nv.clamp(0, 1e12).round().toString();
-                      _coerceDoseValueForUnit();
-                      _maybeAutoName();
-                    });
-                  }),
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    width: 96,
-                    child: TextFormField(
-                      controller: _doseValue,
-                      textAlign: TextAlign.center,
-                      decoration: const InputDecoration(labelText: 'Dose value'),
-                      keyboardType: (_doseUnit.text.trim().toLowerCase() == 'tablets')
-                          ? const TextInputType.numberWithOptions(decimal: true)
-                          : TextInputType.number,
-                      onChanged: (_) {
+              _rowLabelField(context, label: 'Dose value', field: SizedBox(
+                height: 36,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _pillBtn(context, '−', () {
+                      final unit = _doseUnit.text.trim().toLowerCase();
+                      final step = 1.0;
+                      final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                      final nv = (v - step);
+                      setState(() {
+                        _doseValue.text = (unit == 'tablets') ? nv.clamp(0, 1e12).toStringAsFixed(2) : nv.clamp(0, 1e12).round().toString();
                         _coerceDoseValueForUnit();
                         _maybeAutoName();
-                        setState(() {});
-                      },
-                      validator: (v) {
-                        final d = double.tryParse(v?.trim() ?? '');
-                        if (d == null || d <= 0) return 'Enter a positive number';
-                        final unit = _doseUnit.text.trim().toLowerCase();
-                        if (['capsules','syringes','vials'].contains(unit)) {
-                          if (d % 1 != 0) return 'Whole numbers only';
-                        }
-                        if (unit == 'tablets') {
-                          final q = (d * 4).roundToDouble();
-                          if ((q - d * 4).abs() > 1e-6 && d % 0.25 != 0) {
-                            return 'Use quarter-tablet steps (0.25)';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  _pillBtn(context, '+', () {
-                    final unit = _doseUnit.text.trim().toLowerCase();
-                    final step = 1.0; // whole increments; decimals must be typed manually
-                    final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                    final nv = (v + step);
-                    setState(() {
-                      _doseValue.text = (unit == 'tablets') ? nv.clamp(0, 1e12).toStringAsFixed(2) : nv.clamp(0, 1e12).round().toString();
-                      _coerceDoseValueForUnit();
-                      _maybeAutoName();
-                    });
-                  }),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _doseUnit.text.isEmpty ? null : _doseUnit.text,
-                      isExpanded: true,
-                      alignment: AlignmentDirectional.center,
-                      decoration: const InputDecoration(labelText: 'Unit'),
-                      items: _doseUnitOptions().map((e) => DropdownMenuItem(value: e, alignment: AlignmentDirectional.center, child: Center(child: Text(e, textAlign: TextAlign.center)))).toList(),
-                      onChanged: (v) {
-                        setState(() {
-                          _doseUnit.text = v ?? '';
+                      });
+                    }),
+                    const SizedBox(width: 6),
+                    SizedBox(
+                      width: 120,
+                      child: Field36(child: TextFormField(
+                        controller: _doseValue,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(labelText: ''),
+                        keyboardType: (_doseUnit.text.trim().toLowerCase() == 'tablets')
+                            ? const TextInputType.numberWithOptions(decimal: true)
+                            : TextInputType.number,
+                        onChanged: (_) {
                           _coerceDoseValueForUnit();
                           _maybeAutoName();
-                        });
-                      },
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          setState(() {});
+                        },
+                        validator: (v) {
+                          final d = double.tryParse(v?.trim() ?? '');
+                          if (d == null || d <= 0) return 'Enter a positive number';
+                          final unit = _doseUnit.text.trim().toLowerCase();
+                          if (['capsules','syringes','vials'].contains(unit)) {
+                            if (d % 1 != 0) return 'Whole numbers only';
+                          }
+                          if (unit == 'tablets') {
+                            final q = (d * 4).roundToDouble();
+                            if ((q - d * 4).abs() > 1e-6 && d % 0.25 != 0) {
+                              return 'Use quarter-tablet steps (0.25)';
+                            }
+                          }
+                          return null;
+                        },
+                      )),
                     ),
+                    const SizedBox(width: 6),
+                    _pillBtn(context, '+', () {
+                      final unit = _doseUnit.text.trim().toLowerCase();
+                      final step = 1.0;
+                      final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                      final nv = (v + step);
+                      setState(() {
+                        _doseValue.text = (unit == 'tablets') ? nv.clamp(0, 1e12).toStringAsFixed(2) : nv.clamp(0, 1e12).round().toString();
+                        _coerceDoseValueForUnit();
+                        _maybeAutoName();
+                      });
+                    }),
+                  ],
+                ),
+              )),
+              _rowLabelField(context, label: 'Unit', field: Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  height: kFieldHeight,
+                  width: 120,
+                  child: DropdownButtonFormField<String>(
+                    value: _doseUnit.text.isEmpty ? null : _doseUnit.text,
+                    isExpanded: false,
+                    alignment: AlignmentDirectional.center,
+                    decoration: const InputDecoration(labelText: ''),
+                    items: _doseUnitOptions().map((e) => DropdownMenuItem(value: e, alignment: AlignmentDirectional.center, child: Center(child: Text(e)))).toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        _doseUnit.text = v ?? '';
+                        _coerceDoseValueForUnit();
+                        _maybeAutoName();
+                      });
+                    },
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
-                ]),
-                const SizedBox(height: 6),
-                _DoseFormulaStrip(selectedMed: _selectedMed, valueCtrl: _doseValue, unitCtrl: _doseUnit),
-              ],
-            ),
-            ], trailing: Text(_doseSummaryShort(), overflow: TextOverflow.ellipsis)),
+                ),
+              )),
+              const SizedBox(height: 6),
+              _DoseFormulaStrip(selectedMed: _selectedMed, valueCtrl: _doseValue, unitCtrl: _doseUnit),
+            ]),
             const SizedBox(height: 10),
-            _section(context, 'Dose Summary', [
+            _section(context, 'Instructions', [
               Builder(builder: (context){
                 final short = _doseSummaryShort();
                 final line = _doseFormulaLine();
@@ -834,8 +843,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 children: [
                   Row(
                     children: [
-                      Field36(
-                        width: 140,
+Field36(
+                        width: 120,
                         child: OutlinedButton.icon(
                           onPressed: () async {
                             final now = DateTime.now();
@@ -922,11 +931,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     final dayIndex = i + 1; // 1..7
                     const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
                     final selected = _days.contains(dayIndex);
-                    return FilterChip(
-                      label: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Text(labels[i]),
-                      ),
+return FilterChip(
+                      label: Text(labels[i]),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       selected: selected,
                       onSelected: (sel) {
                         setState(() {
@@ -986,7 +995,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 value: _active,
                 onChanged: (v) => setState(() => _active = v),
               ),
-            ], trailing: Text(_scheduleSummaryShort(), overflow: TextOverflow.ellipsis)),
+            ],),
           ],
         ),
       ),
@@ -1015,7 +1024,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       StockUnit.g => 'g',
       _ => 'units',
     };
-    final stockPart = stock > 0 ? ' • ${stock.toStringAsFixed(stock == stock.roundToDouble() ? 0 : 2)} $stockLabel left' : '';
+final s = stock.toStringAsFixed(stock == stock.roundToDouble() ? 0 : 2);
+    final stockPart = stock > 0 ? ' • $s/$s' : '';
     return '$strength$stockPart';
   }
 
