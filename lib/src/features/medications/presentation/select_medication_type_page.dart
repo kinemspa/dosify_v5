@@ -8,16 +8,18 @@ class SelectMedicationTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Scaffold(
       appBar: const GradientAppBar(title: 'Select Medication Type', forceBackButton: true),
-body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-        children: [
-          _Section(title: 'General', children: [
-            _TypeTile(icon: Icons.medication, title: 'Tablet'),
-            _TypeTile(icon: Icons.medication_liquid, title: 'Capsule'),
-            _TypeTile(icon: Icons.vaccines, title: 'Injection'),
-          ]),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
+        children: const [
+          _TypeTile(icon: Icons.medication, title: 'Tablet'),
+          SizedBox(height: 12),
+          _TypeTile(icon: Icons.medication_liquid, title: 'Capsule'),
+          SizedBox(height: 12),
+          _TypeTile(icon: Icons.vaccines, title: 'Injection'),
         ],
       ),
     );
@@ -77,17 +79,20 @@ return Padding(
           }
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLowest,
+            color: Theme.of(context).colorScheme.primary,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
-          child: Row(children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 10),
-            Expanded(child: Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800))),
-          ]),
+          child: Center(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -370,6 +370,7 @@ child: TextFormField(
     // Stock rules: required, valid number, >= 0 and allow any .00/.25/.50/.75
     String? stockError;
     final stockTxt = _stockCtrl.text.trim();
+    double stockVal = 0;
     if (stockTxt.isEmpty) {
       stockError = 'Required';
     } else {
@@ -379,8 +380,19 @@ child: TextFormField(
       } else if (d < 0) {
         stockError = 'Must be ≥ 0';
       } else {
+        stockVal = d;
         final quarters = ((d * 100).round() % 25 == 0);
         if (!quarters) stockError = 'Use .00, .25, .50, or .75';
+      }
+    }
+    // Threshold should not exceed stock
+    String? thresholdError;
+    if (_lowStockAlert && _lowStockThresholdCtrl.text.trim().isNotEmpty) {
+      final t = int.tryParse(_lowStockThresholdCtrl.text.trim());
+      if (t == null || t < 0) {
+        thresholdError = 'Invalid number';
+      } else if (t > stockVal) {
+        thresholdError = 'Threshold cannot exceed stock';
       }
     }
     // Gate errors until the field is touched or the form has been submitted
@@ -701,7 +713,8 @@ field: Row(
                       hint: '0',
                     ),
                   ),
-_helperBelowLeftCompact('Set the stock level that triggers a low stock alert')
+                  if (thresholdError != null) _errorUnderLabel(thresholdError)
+                  else _helperBelowLeftCompact('Set the stock level that triggers a low stock alert')
                 ],
                 _rowLabelField(
                   label: 'Expiry date',

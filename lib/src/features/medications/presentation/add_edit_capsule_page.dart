@@ -655,6 +655,10 @@ child: TextFormField(
       final d = double.tryParse(_lowStockCtrl.text.trim());
       if (d == null) thresholdError = 'Invalid number';
       else if (d < 0) thresholdError = 'Must be ≥ 0';
+      else {
+        final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+        if (d > stock) thresholdError = 'Threshold cannot exceed stock';
+      }
     }
 
     // Gate errors until touched or submitted
