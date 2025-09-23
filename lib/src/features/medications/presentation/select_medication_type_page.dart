@@ -86,8 +86,7 @@ return Padding(
           child: Row(children: [
             Icon(icon, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 10),
-            Expanded(child: Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
-            const Icon(Icons.chevron_right),
+            Expanded(child: Text(title, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800))),
           ]),
         ),
       ),

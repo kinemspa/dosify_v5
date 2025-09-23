@@ -77,6 +77,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       _lightSensitive = (m.storageInstructions?.toLowerCase().contains('light') ?? false);
       _storageInstructionsCtrl.text = m.storageInstructions ?? '';
     }
+    // Defaults for integer fields when adding new entries
+    if (_strengthValueCtrl.text.isEmpty) _strengthValueCtrl.text = '0';
+    if (_stockCtrl.text.isEmpty) _stockCtrl.text = '0';
+    if (_lowStockThresholdCtrl.text.isEmpty) _lowStockThresholdCtrl.text = '0';
   }
 
   @override
@@ -135,10 +139,19 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       child: Text(
         text,
         textAlign: TextAlign.left,
-style: theme.textTheme.bodySmall?.copyWith(
+        style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
         ),
       ),
+    );
+  }
+
+  // Error under left label (keeps helper/support under field)
+  Widget _errorUnderLabel(String text) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(left: 2, top: 2, bottom: 4),
+      child: Text(text, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
     );
   }
 
@@ -375,6 +388,21 @@ return SizedBox(
     final String? gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
     final String? gStockError = (_submitted || _touchedStock) ? (stockError ?? _stockError) : null;
 
+    bool get _requiredOk {
+      final nameOk = _nameCtrl.text.trim().isNotEmpty;
+      final aTxt = _strengthValueCtrl.text.trim();
+      final a = double.tryParse(aTxt);
+      final amtOk = a != null && a > 0;
+      final sTxt2 = _stockCtrl.text.trim();
+      final s2 = double.tryParse(sTxt2);
+      bool quartersOk = true;
+      if (s2 != null) {
+        quartersOk = ((s2 * 100).round() % 25 == 0) && s2 >= 0;
+      }
+      final stockOk = s2 != null && s2 >= 0 && quartersOk;
+      return nameOk && amtOk && stockOk;
+    }
+
       return Scaffold(
       appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
         body: SingleChildScrollView(
@@ -394,17 +422,12 @@ return SizedBox(
                       textAlignVertical: TextAlignVertical.center,
                       textCapitalization: TextCapitalization.sentences,
                       style: Theme.of(context).textTheme.bodyMedium,
-                      decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500'),
+                      decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500').copyWith(errorText: gNameError != null ? ' ' : null),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       onChanged: (_) => setState(() { _touchedName = true; }),
                     )),
                 ),
-                if (gNameError != null)
-                Padding(
-                  padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                  child: Text(gNameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                )
-              else
+                if (gNameError != null) _errorUnderLabel(gNameError),
                 _helperBelowLeft('Enter the medication name'),
                 _rowLabelField(
                   label: 'Manufacturer',
@@ -475,7 +498,7 @@ height: 36,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
 style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(label: 'Amount *', hint: '0'),
+                          decoration: _dec(label: 'Amount *', hint: '0').copyWith(errorText: gStrengthAmtError != null ? ' ' : null),
                           validator: (v) {
                             final t = v?.trim() ?? '';
                             if (t.isEmpty) return 'Required';
@@ -534,15 +557,8 @@ style: Theme.of(context).textTheme.bodyMedium,
                     ],
                   ),
                 ),
-                if (gStrengthAmtError != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-                    child: Center(
-                      child: Text(gStrengthAmtError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                    ),
-                  )
-                else
-                  _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
+                if (gStrengthAmtError != null) _errorUnderLabel(gStrengthAmtError),
+                _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
               ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
@@ -572,7 +588,7 @@ style: Theme.of(context).textTheme.bodyMedium,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
                                   style: Theme.of(context).textTheme.bodyMedium,
-                                  decoration: _dec(label: 'Stock amount *', hint: '0.00'),
+                                  decoration: _dec(label: 'Stock amount *', hint: '0.00').copyWith(errorText: gStockError != null ? ' ' : null),
                                   validator: (v) {
                                     if (v == null || v.trim().isEmpty) return 'Required';
                                     final d = double.tryParse(v);
@@ -636,12 +652,7 @@ style: Theme.of(context).textTheme.bodyMedium,
                     ],
                   ),
                 ),
-                if (gStockError != null)
-                Padding(
-                  padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-                  child: Text(gStockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
-                )
-              else
+                if (gStockError != null) _errorUnderLabel(gStockError),
                 _helperBelowLeft('Enter the amount of tablets in stock'),
 
                 // Low stock alert toggle + threshold
@@ -798,13 +809,16 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
       floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
-          onPressed: _nameCtrl.text.trim().isNotEmpty
-              ? () async {
-                  setState(() => _submitted = true);
-                  if (!(_formKey.currentState?.validate() ?? false)) return;
-                  await _showConfirmDialog();
-                }
-              : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: _requiredOk ? null : Theme.of(context).colorScheme.surfaceVariant,
+            foregroundColor: _requiredOk ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+          ),
+          onPressed: () async {
+            setState(() => _submitted = true);
+            if (!_requiredOk) return; // show gated errors only
+            if (!(_formKey.currentState?.validate() ?? false)) return;
+            await _showConfirmDialog();
+          },
           child: const Text('Save'),
         ),
       ),

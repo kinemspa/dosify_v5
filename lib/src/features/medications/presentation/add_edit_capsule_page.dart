@@ -128,6 +128,10 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       _keepFrozen = si.toLowerCase().contains('frozen');
       _storageNotesCtrl.text = si;
     }
+    // Defaults for integer fields when adding new entries
+    if (_strengthValueCtrl.text.isEmpty) _strengthValueCtrl.text = '0';
+    if (_stockValueCtrl.text.isEmpty) _stockValueCtrl.text = '0';
+    if (_lowStockCtrl.text.isEmpty) _lowStockCtrl.text = '0';
   }
 
   @override
@@ -510,24 +514,16 @@ style: theme.textTheme.bodyMedium?.copyWith(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirm Medication'),
+        actionsAlignment: MainAxisAlignment.center,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Summary header
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF09A8BD), Color(0xFF18537D)],
-                ),
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Text(_buildSummary(), style: const TextStyle(color: Colors.white, height: 1.3)),
+            // Simple summary (no gradient card)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(_buildSummary(), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
             ),
-            const SizedBox(height: 12),
             // Full details
             _detailRow(context, 'Form', 'Capsule'),
             _detailRow(context, 'Name', _nameCtrl.text.trim()),
@@ -588,6 +584,15 @@ style: theme.textTheme.bodyMedium?.copyWith(
         ),
       ),
     );
+  }
+
+  String _strengthSummary() {
+    final v = _strengthValueCtrl.text.trim();
+    if (v.isEmpty) return '';
+    final unit = _unitLabel(_strengthUnit);
+    final name = _nameCtrl.text.trim();
+    final med = name.isEmpty ? '' : ' per $name capsule';
+    return '$v$unit$med';
   }
 
   Widget _detailRow(BuildContext context, String label, String value) {
@@ -790,7 +795,7 @@ alignment: AlignmentDirectional.center,
                   )
                 else
                   _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
-              ]),
+              ], trailing: Text(_strengthSummary(), overflow: TextOverflow.ellipsis)),
               const SizedBox(height: 10),
               _section('Inventory', [
                 _rowLabelField(label: 'Stock quantity *', field: SizedBox(
