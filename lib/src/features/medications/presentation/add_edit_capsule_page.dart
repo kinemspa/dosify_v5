@@ -640,22 +640,17 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   ),
                 )),
                 _rowLabelField(label: 'Unit *', field: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 54),
-                    child: SizedBox(
-                      height: kFieldHeight,
-                      width: 120,
-                      child: DropdownButtonFormField<Unit>(
-                        value: _strengthUnit,
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    height: kFieldHeight,
+                    width: 120,
+                    child: DropdownButtonFormField<Unit>(
+                      value: _strengthUnit,
                       isExpanded: false,
                       alignment: AlignmentDirectional.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       dropdownColor: Theme.of(context).colorScheme.surface,
                       menuMaxHeight: 320,
-                      selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
-                          .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
-                          .toList(),
                       items: const [Unit.mcg, Unit.mg, Unit.g]
                           .map((u) => DropdownMenuItem(
                                 value: u,
@@ -667,7 +662,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                       decoration: _decDrop(label: '', hint: null, helper: null),
                     ),
                   ),
-                ))),
+                )),
                 _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
               ]),
               const SizedBox(height: 10),
@@ -704,28 +699,23 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   ),
                 )),
                 _rowLabelField(label: 'Quantity unit', field: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 54),
-                    child: SizedBox(
-                      height: kFieldHeight,
-                      width: 120,
-                      child: DropdownButtonFormField<String>(
-                        value: 'capsules',
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    height: kFieldHeight,
+                    width: 120,
+                    child: DropdownButtonFormField<String>(
+                      value: 'capsules',
                       isExpanded: false,
                       alignment: AlignmentDirectional.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
                       dropdownColor: Theme.of(context).colorScheme.surface,
                       menuMaxHeight: 320,
-                      selectedItemBuilder: (ctx) => const ['capsules']
-                          .map((t) => Center(child: Text(t)))
-                          .toList(),
                       items: const [DropdownMenuItem(value: 'capsules', child: Center(child: Text('capsules')))],
                       onChanged: null,
                       decoration: _decDrop(label: '', hint: null, helper: null),
                     ),
                   ),
-                ))),
+                )),
                 _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
                 _rowLabelField(label: 'Low stock alert', field: Row(children: [
                   Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),

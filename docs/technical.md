@@ -50,3 +50,6 @@ UI Blueprint Adoption
   - Centered pill-style Save FAB
   - Storage toggles (Refrigerate/Freeze/Dark) with helpers
 - Apply the same pattern for all medication forms going forward.
+
+Dropdown alignment
+- Unit and quantity dropdowns are centered within a 120px-wide box with a 36px control height, matching the integer fields. Do not use manual pixel padding for alignment; rely on center alignment inside the fixed-width box instead.
