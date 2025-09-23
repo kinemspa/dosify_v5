@@ -487,7 +487,10 @@ height: 36,
                         final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
                         final nv = (base - 1).clamp(0, 1000000000);
-                        setState(() => _strengthValueCtrl.text = nv.toString());
+                        setState(() {
+                          _strengthValueCtrl.text = nv.toString();
+                          _touchedStrengthAmt = true;
+                        });
                       }),
                       const SizedBox(width: 6),
                       SizedBox(
@@ -516,7 +519,10 @@ style: Theme.of(context).textTheme.bodyMedium,
                         final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
                         final nv = (base + 1).clamp(0, 1000000000);
-                        setState(() => _strengthValueCtrl.text = nv.toString());
+                        setState(() {
+                          _strengthValueCtrl.text = nv.toString();
+                          _touchedStrengthAmt = true;
+                        });
                       }),
                       ],
                     ),
@@ -577,7 +583,10 @@ style: Theme.of(context).textTheme.bodyMedium,
                             _incBtn('−', () {
                               final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
                               final nv = (d - 1).clamp(0, 1000000000).toStringAsFixed(0);
-                              setState(() => _stockCtrl.text = nv);
+                              setState(() {
+                                _stockCtrl.text = nv;
+                                _touchedStock = true;
+                              });
                             }),
                             const SizedBox(width: 6),
                             SizedBox(
@@ -615,7 +624,10 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                             _incBtn('+', () {
                               final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
                               final nv = (d + 1).clamp(0, 1000000000).toStringAsFixed(0);
-                              setState(() => _stockCtrl.text = nv);
+                              setState(() {
+                                _stockCtrl.text = nv;
+                                _touchedStock = true;
+                              });
                             }),
                           ],
                         ),

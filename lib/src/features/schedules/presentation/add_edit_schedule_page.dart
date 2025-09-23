@@ -555,7 +555,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 decoration: const InputDecoration(labelText: 'Medication'),
                 items: Hive.box<Medication>('medications')
                     .values
-                    .map((m) => DropdownMenuItem<Medication>(value: m, alignment: AlignmentDirectional.center, child: Center(child: Text(m.name, textAlign: TextAlign.center))))
+                    .map((m) => DropdownMenuItem<Medication>(
+                          value: m,
+                          alignment: AlignmentDirectional.center,
+                          child: Center(
+                            child: Text(
+                              '${m.name} — ${_medStrengthLabel(m)}',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ))
                     .toList(),
                 onChanged: (m) {
                   setState(() {
@@ -607,7 +616,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 Row(children: [
                   _pillBtn(context, '−', () {
                     final unit = _doseUnit.text.trim().toLowerCase();
-                    final step = unit == 'tablets' ? 0.25 : 1.0;
+                    final step = 1.0; // whole increments; decimals must be typed manually
                     final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
                     final nv = (v - step);
                     setState(() {
@@ -651,7 +660,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                   const SizedBox(width: 6),
                   _pillBtn(context, '+', () {
                     final unit = _doseUnit.text.trim().toLowerCase();
-                    final step = unit == 'tablets' ? 0.25 : 1.0;
+                    final step = 1.0; // whole increments; decimals must be typed manually
                     final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
                     final nv = (v + step);
                     setState(() {
@@ -721,14 +730,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
                         children: [
-                          Expanded(
-                            child: ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('Time of day'),
-                              subtitle: Text(_times[i].format(context)),
-                              trailing: TextButton(onPressed: () => _pickTimeAt(i), child: const Text('Pick')),
+                          Field36(
+                            width: 140,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _pickTimeAt(i),
+                              icon: const Icon(Icons.schedule, size: 18),
+                              label: Text(_times[i].format(context)),
+                              style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           if (_times.length > 1)
                             IconButton(
                               tooltip: 'Remove',
@@ -826,6 +837,25 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         ),
       ),
     );
+  }
+
+  String _unitShort(Unit u) => switch (u) {
+    Unit.mcg => 'mcg',
+    Unit.mg => 'mg',
+    Unit.g => 'g',
+    Unit.units => 'units',
+    Unit.mcgPerMl => 'mcg/mL',
+    Unit.mgPerMl => 'mg/mL',
+    Unit.gPerMl => 'g/mL',
+    Unit.unitsPerMl => 'IU/mL',
+  };
+
+  String _medStrengthLabel(Medication m) {
+    final u = _unitShort(m.strengthUnit);
+    final v = (m.strengthValue == m.strengthValue.roundToDouble())
+        ? m.strengthValue.toStringAsFixed(0)
+        : m.strengthValue.toStringAsFixed(2);
+    return '$v $u';
   }
 
   List<String> _doseUnitOptions() {
