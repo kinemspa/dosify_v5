@@ -592,7 +592,7 @@ field: Row(
                         value: _lowStockAlert,
                         onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
                       ),
-                      Text('Enable alert when stock is low', style: kMutedLabelStyle(context)),
+                      Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context)),
                     ],
                   ),
                 ),
@@ -730,12 +730,12 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
       floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
-          onPressed: () async {
+          onPressed: _nameCtrl.text.trim().isNotEmpty ? () async {
             if (!(_formKey.currentState?.validate() ?? false)) return;
             await _showConfirmDialog();
           },
           child: const Text('Save'),
-        ),
+        ) : null,
       ),
     );
   }
