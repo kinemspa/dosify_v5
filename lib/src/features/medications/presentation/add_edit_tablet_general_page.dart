@@ -335,6 +335,36 @@ return SizedBox(
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     final mq = MediaQuery.of(context);
+
+    // Derive validation messages for helper rows
+    final theme = Theme.of(context);
+    String? nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
+    String? strengthAmtError;
+    final sTxt = _strengthValueCtrl.text.trim();
+    if (sTxt.isEmpty) {
+      strengthAmtError = 'Required';
+    } else {
+      final d = double.tryParse(sTxt);
+      if (d == null) strengthAmtError = 'Invalid number';
+      else if (d <= 0) strengthAmtError = 'Must be > 0';
+    }
+    // Stock rules: required, valid number, >= 0 and allow any .00/.25/.50/.75
+    String? stockError;
+    final stockTxt = _stockCtrl.text.trim();
+    if (stockTxt.isEmpty) {
+      stockError = 'Required';
+    } else {
+      final d = double.tryParse(stockTxt);
+      if (d == null) {
+        stockError = 'Invalid number';
+      } else if (d < 0) {
+        stockError = 'Must be ≥ 0';
+      } else {
+        final quarters = ((d * 100).round() % 25 == 0);
+        if (!quarters) stockError = 'Use .00, .25, .50, or .75';
+      }
+    }
+
       return Scaffold(
       appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
         body: SingleChildScrollView(
@@ -359,7 +389,13 @@ return SizedBox(
                       onChanged: (_) => setState(() {}),
                     )),
                 ),
-_helperBelowLeft('Enter the medication name'),
+if (nameError != null)
+                Padding(
+                  padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
+                  child: Text(nameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                )
+              else
+                _helperBelowLeft('Enter the medication name'),
                 _rowLabelField(
                   label: 'Manufacturer',
                   field: Field36(
@@ -488,7 +524,15 @@ style: Theme.of(context).textTheme.bodyMedium,
                     ],
                   ),
                 ),
-                _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
+if (strengthAmtError != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+                    child: Center(
+                      child: Text(strengthAmtError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                    ),
+                  )
+                else
+                  _helperBelowCenter('Specify the amount per tablet and its unit of measurement.'),
               ], trailing: _strengthSummary()),
 
               const SizedBox(height: 10),
@@ -581,7 +625,13 @@ style: Theme.of(context).textTheme.bodyMedium,
                     ],
                   ),
                 ),
-_helperBelowLeft('Enter the amount of tablets in stock'),
+if (stockError != null)
+                Padding(
+                  padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
+                  child: Text(stockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                )
+              else
+                _helperBelowLeft('Enter the amount of tablets in stock'),
 
                 // Low stock alert toggle + threshold
                 _rowLabelField(

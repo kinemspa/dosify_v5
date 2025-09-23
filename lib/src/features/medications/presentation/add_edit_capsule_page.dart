@@ -600,6 +600,35 @@ style: theme.textTheme.bodyMedium?.copyWith(
 
   @override
   Widget build(BuildContext context) {
+    // Derive validation messages to surface in helper rows
+    String? nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
+    String? strengthAmtError;
+    final strengthTxt = _strengthValueCtrl.text.trim();
+    if (strengthTxt.isEmpty) {
+      strengthAmtError = 'Required';
+    } else {
+      final d = double.tryParse(strengthTxt);
+      if (d == null) strengthAmtError = 'Invalid number';
+      else if (d <= 0) strengthAmtError = 'Must be > 0';
+    }
+    String? stockError;
+    final stockTxt = _stockValueCtrl.text.trim();
+    if (stockTxt.isEmpty) {
+      stockError = 'Required';
+    } else {
+      final d = double.tryParse(stockTxt);
+      if (d == null) stockError = 'Invalid number';
+      else if (d < 0) stockError = 'Must be ≥ 0';
+    }
+    String? thresholdError;
+    if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty) {
+      final d = double.tryParse(_lowStockCtrl.text.trim());
+      if (d == null) thresholdError = 'Invalid number';
+      else if (d < 0) thresholdError = 'Must be ≥ 0';
+    }
+
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: GradientAppBar(
         title: widget.initial == null ? 'Add Capsule' : 'Edit Capsule',
@@ -631,7 +660,13 @@ textCapitalization: TextCapitalization.sentences,
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   onChanged: (_) => setState(() {}),
                 ))),
-                _helperBelowLeft(context, 'Enter the medication name'),
+                if (nameError != null)
+                  Padding(
+                    padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
+                    child: Text(nameError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                  )
+                else
+                  _helperBelowLeft(context, 'Enter the medication name'),
                 _rowLabelField(label: 'Manufacturer', field: Field36(child: TextFormField(
                   controller: _manufacturerCtrl,
                   textAlign: TextAlign.left,
@@ -730,7 +765,19 @@ alignment: AlignmentDirectional.center,
                     ),
                   ),
                 )),
-                _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
+                if (strengthAmtError != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+                    child: Center(
+                      child: Text(
+                        strengthAmtError,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                      ),
+                    ),
+                  )
+                else
+                  _helperBelowCenter(context, 'Specify the amount per capsule and its unit of measurement.'),
               ]),
               const SizedBox(height: 10),
               _section('Inventory', [
@@ -787,7 +834,13 @@ alignment: AlignmentDirectional.center,
                     ),
                   ),
                 )),
-                _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
+                if (stockError != null)
+                  Padding(
+                    padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
+                    child: Text(stockError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                  )
+                else
+                  _helperBelowLeft(context, 'Enter the amount of capsules in stock'),
                 _rowLabelField(label: 'Low stock alert', field: Row(children: [
                   Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
                   Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context)),
@@ -802,7 +855,13 @@ alignment: AlignmentDirectional.center,
                     label: 'Threshold',
                     hint: '0',
                   )),
-                  _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
+                  if (thresholdError != null)
+                    Padding(
+                      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
+                      child: Text(thresholdError, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+                    )
+                  else
+                    _helperBelowLeftCompact(context, 'Set the stock level that triggers a low stock alert'),
                 ],
                 _rowLabelField(label: 'Expiry date', field: Field36(
                   width: 120,
