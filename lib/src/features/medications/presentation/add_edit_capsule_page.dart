@@ -776,7 +776,7 @@ child: TextFormField(
                       onChanged: (_) => setState(() {}),
                     )),
                     _helperBelowLeft(context, 'Optional notes'),
-                  ], trailing: Text(_buildSummary(), overflow: TextOverflow.ellipsis)),
+              ], trailing: _generalOnlySummary()),
                   const SizedBox(height: 10),
                   _section('Strength', [
                     _rowLabelField(label: 'Strength *', field: SizedBox(
@@ -999,23 +999,6 @@ child: TextFormField(
               ),
             ),
           ),
-          Positioned(
-            right: 16,
-            bottom: 116,
-            child: OutlinedButton.icon(
-              onPressed: () async {
-                await showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx){
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16,16,16,24),
-                    child: _buildSummarySheet(ctx),
-                  );
-                });
-              },
-              icon: const Icon(Icons.summarize, size: 18),
-              label: const Text('Summary'),
-            ),
-          ),
-        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(

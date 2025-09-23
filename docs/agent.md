@@ -46,6 +46,10 @@ How to request changes
 - "Mute the checkbox labels further" → Adjust kMutedLabelStyle(context) in ui_consts.dart to use a different onSurfaceVariant opacity.
 - "Change section title weight/size" → Update ThemeData.textTheme.titleSmall.
 
+Never do bottom pop-ups
+- Do not use bottom sheets, bottom-page pop-ups, or similar modal surfaces that slide up from the bottom.
+- If a summary or additional content is needed, prefer inline summaries within cards or dedicated pages.
+
 Notes
 - If a widget appears to override textStyle inline, refactor it to consume the theme or a shared constant.
 - For exact pixel parity between pages, prefer shared helpers (Field36, _dec/_decDrop, _rowLabelField, _section) over per-page ad hoc styles.

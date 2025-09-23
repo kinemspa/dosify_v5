@@ -809,7 +809,7 @@ Text('Freeze', style: kCheckboxLabelStyle(context))
                         value: _lightSensitive,
                         onChanged: (v) => setState(() => _lightSensitive = v ?? false),
                       ),
-Text('Dark storage', style: kMutedLabelStyle(context))
+Text('Dark storage', style: kCheckboxLabelStyle(context))
                     ],
                   ),
                 ),
@@ -832,22 +832,6 @@ _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
 
             ],
           ),
-        ),
-      ),
-      Positioned(
-        right: 16,
-        bottom: 116,
-        child: OutlinedButton.icon(
-          onPressed: () async {
-            await showModalBottomSheet(context: context, isScrollControlled: true, builder: (ctx){
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16,16,16,24),
-                child: SingleChildScrollView(child: _buildConfirmContent(ctx)),
-              );
-            });
-          },
-          icon: const Icon(Icons.summarize, size: 18),
-          label: const Text('Summary'),
         ),
       ),
         ],),
@@ -936,6 +920,7 @@ if (!requiredOk) return; // show gated errors only
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text('Confirm medication', style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        actionsAlignment: MainAxisAlignment.center,
         content: SingleChildScrollView(child: _buildConfirmContent(ctx)),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
