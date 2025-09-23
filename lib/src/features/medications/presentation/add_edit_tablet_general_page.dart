@@ -100,8 +100,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       hintText: hint,
       helperText: helper,
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
-      helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
+      // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -128,8 +127,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       child: Text(
         text,
         textAlign: TextAlign.left,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontSize: 11,
+style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
         ),
       ),
@@ -159,8 +157,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontSize: 11,
+style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
           ),
         ),
@@ -200,8 +197,8 @@ color: isLight ? theme.colorScheme.primary.withOpacity(0.04) : theme.colorScheme
                   if (trailing != null)
                     Flexible(
                       child: DefaultTextStyle(
-                        style: theme.textTheme.bodySmall!.copyWith(
-                          color: theme.colorScheme.primary.withOpacity(0.50),
+style: theme.textTheme.bodySmall!.copyWith(
+                        color: theme.colorScheme.primary.withOpacity(0.50),
                           fontWeight: FontWeight.w600,
                         ),
                         child: Align(
@@ -353,7 +350,7 @@ return SizedBox(
                       controller: _nameCtrl,
                       textAlign: TextAlign.left,
                       textCapitalization: TextCapitalization.sentences,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+style: Theme.of(context).textTheme.bodyMedium
                       decoration: _dec(label: 'Name *', hint: 'eg. AcmeTab-500'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       onChanged: (_) => setState(() {}),
@@ -426,7 +423,7 @@ height: 36,
                           textAlign: TextAlign.center,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'))],
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+style: Theme.of(context).textTheme.bodyMedium
                           decoration: _dec(label: 'Amount *', hint: '0'),
                           validator: (v) {
                             final t = v?.trim() ?? '';
@@ -464,7 +461,7 @@ height: 36,
                             value: _strengthUnit,
                             isExpanded: false,
                             alignment: AlignmentDirectional.center,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+style: Theme.of(context).textTheme.bodyMedium
                             dropdownColor: Theme.of(context).colorScheme.surface,
                             menuMaxHeight: 320,
                             selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
@@ -563,7 +560,7 @@ inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^$|^\d{0,7}(?:\.\d{
                             value: 'tablets',
                             isExpanded: false,
                             alignment: AlignmentDirectional.center,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+style: Theme.of(context).textTheme.bodyMedium
                             dropdownColor: Theme.of(context).colorScheme.surface,
                             menuMaxHeight: 320,
                             selectedItemBuilder: (ctx) => const ['tablets']

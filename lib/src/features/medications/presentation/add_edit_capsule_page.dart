@@ -45,30 +45,30 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   }
 
   Widget _helperBelowCenter(BuildContext context, String text) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
       child: Center(
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(fontSize: kHintFontSize, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75)),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+          ),
         ),
       ),
     );
   }
 
   Widget _helperBelowLeftCompact(BuildContext context, String text) {
+    final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
       child: Text(
         text,
         textAlign: TextAlign.left,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontSize: kHintFontSize,
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
         ),
       ),
     );
@@ -209,8 +209,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       hintText: hint,
       helperText: helper,
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
-      helperStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.60)),
+      // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -301,9 +300,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
               child: Text(
                 label,
                 textAlign: TextAlign.left,
-                style: theme.textTheme.bodyMedium?.copyWith(
+style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  fontSize: 12,
                   color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
                 ),
               ),
@@ -566,8 +564,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 _rowLabelField(label: 'Name *', field: Field36(child: TextFormField(
                   controller: _nameCtrl,
                   textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: _dec(label: 'Name *', hint: 'eg. AcmeCaps-500'),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   onChanged: (_) => setState(() {}),
@@ -576,8 +574,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 _rowLabelField(label: 'Manufacturer', field: Field36(child: TextFormField(
                   controller: _manufacturerCtrl,
                   textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: _dec(label: 'Manufacturer', hint: 'eg. Contoso Pharma'),
                   onChanged: (_) => setState(() {}),
                 ))),
@@ -585,8 +583,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 _rowLabelField(label: 'Description', field: Field36(child: TextFormField(
                   controller: _descriptionCtrl,
                   textAlign: TextAlign.left,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+textCapitalization: TextCapitalization.sentences,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
                   onChanged: (_) => setState(() {}),
                 ))),
@@ -597,8 +595,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                   textCapitalization: TextCapitalization.sentences,
                   keyboardType: TextInputType.multiline,
                   minLines: 2,
-                  maxLines: null,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+maxLines: null,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: _dec(label: 'Notes', hint: 'eg. Take with food'),
                   onChanged: (_) => setState(() {}),
                 )),
@@ -624,8 +622,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                         child: Field36(child: TextFormField(
                           controller: _strengthValueCtrl,
                           textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: Theme.of(context).textTheme.bodyMedium,
                           decoration: _dec(label: 'Amount *', hint: '0'),
                           onChanged: (_) => setState(() {}),
                         )),
@@ -648,8 +646,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     child: DropdownButtonFormField<Unit>(
                       value: _strengthUnit,
                       isExpanded: false,
-                      alignment: AlignmentDirectional.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+alignment: AlignmentDirectional.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
                       dropdownColor: Theme.of(context).colorScheme.surface,
                       menuMaxHeight: 320,
                       selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
@@ -687,8 +685,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                         child: Field36(child: TextFormField(
                           controller: _stockValueCtrl,
                           textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                          style: Theme.of(context).textTheme.bodyMedium,
                           decoration: _dec(label: 'Stock amount *', hint: '0'),
                           onChanged: (_) => setState(() {}),
                         )),
@@ -710,8 +708,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     child: DropdownButtonFormField<String>(
                       value: 'capsules',
                       isExpanded: false,
-                      alignment: AlignmentDirectional.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+alignment: AlignmentDirectional.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
                       dropdownColor: Theme.of(context).colorScheme.surface,
                       menuMaxHeight: 320,
                       selectedItemBuilder: (ctx) => const ['capsules']

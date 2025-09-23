@@ -21,7 +21,14 @@ class DosifiApp extends ConsumerWidget {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
+    final lightTextTheme = baseLight.textTheme.copyWith(
+      bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 12),
+      bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
+      titleSmall: baseLight.textTheme.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w700),
+      labelLarge: baseLight.textTheme.labelLarge?.copyWith(fontSize: 12),
+    );
     final light = baseLight.copyWith(
+      textTheme: lightTextTheme,
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         toolbarHeight: 48,
@@ -59,6 +66,8 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
         ),
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
+        hintStyle: lightTextTheme.bodySmall?.copyWith(color: baseLight.colorScheme.onSurfaceVariant),
+        helperStyle: lightTextTheme.bodySmall?.copyWith(color: baseLight.colorScheme.onSurfaceVariant.withOpacity(0.60)),
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: baseLight.colorScheme.primary,
@@ -120,7 +129,14 @@ selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
+    final darkTextTheme = baseDark.textTheme.copyWith(
+      bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 12),
+      bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
+      titleSmall: baseDark.textTheme.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w700),
+      labelLarge: baseDark.textTheme.labelLarge?.copyWith(fontSize: 12),
+    );
     final dark = baseDark.copyWith(
+      textTheme: darkTextTheme,
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         toolbarHeight: 48,
@@ -158,6 +174,8 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
         ),
         filled: true,
         fillColor: baseDark.colorScheme.surfaceContainerHigh,
+        hintStyle: darkTextTheme.bodySmall?.copyWith(color: baseDark.colorScheme.onSurfaceVariant),
+        helperStyle: darkTextTheme.bodySmall?.copyWith(color: baseDark.colorScheme.onSurfaceVariant.withOpacity(0.60)),
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: baseDark.colorScheme.primary,

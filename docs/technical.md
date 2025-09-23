@@ -53,3 +53,16 @@ UI Blueprint Adoption
 
 Dropdown alignment
 - Unit and quantity dropdowns are centered within a 120px-wide box with a 36px control height, matching the integer fields. Do not use manual pixel padding for alignment; rely on center alignment inside the fixed-width box instead.
+
+Theme-only fonts (no inline sizes)
+- All text sizing is sourced from ThemeData and InputDecorationTheme; no inline copyWith(fontSize: …) on pages.
+- Key sizes (subject to design updates):
+  - textTheme.bodyMedium = 12sp (input text, dropdown text, regular labels)
+  - textTheme.bodySmall = 11sp (helper texts, compact secondary text)
+  - textTheme.titleSmall = 15sp (section titles)
+  - textTheme.labelLarge = 12sp (button labels)
+- Hint and helper colors derive from the theme:
+  - hintStyle: from textTheme.bodyMedium with onSurfaceVariant tint
+  - helperStyle: from textTheme.bodySmall with onSurfaceVariant tint
+- Checkbox “muted” labels derive from textTheme.bodyMedium with onSurfaceVariant color via kMutedLabelStyle(context).
+- If a visual adjustment is needed, update the shared theme in lib/src/app/app.dart rather than setting sizes locally.
