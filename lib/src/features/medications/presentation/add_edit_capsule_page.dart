@@ -999,6 +999,7 @@ child: TextFormField(
               ),
             ),
           ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
