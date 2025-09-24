@@ -22,8 +22,6 @@ class AddEditSchedulePage extends StatefulWidget {
 class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   DateTime? _endDate;
   bool _noEnd = true;
-  // Days selector mode
-  ScheduleMode _mode = ScheduleMode.daysOfWeek;
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _name;
@@ -32,7 +30,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   late final TextEditingController _doseUnit;
   String? _medicationId;
   final List<TimeOfDay> _times = [const TimeOfDay(hour: 9, minute: 0)];
-  final Set<int> _days = {1,2,3,4,5};
+  final Set<int> _days = {1,2,3,4,5,6,7};
   bool _active = true;
   bool _useCycle = false;
   final TextEditingController _cycleN = TextEditingController(text: '2');
@@ -482,19 +480,10 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
     if (_times.isEmpty) return '';
     final times = _times.map((t) => t.format(context)).join(', ');
     final start = '${_startDate.toLocal()}'.split(' ').first;
-    switch (_mode) {
-      case ScheduleMode.everyDay:
-        return 'Start $start · Every day · $times';
-      case ScheduleMode.daysOfWeek:
-        const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-        final ds = _days.toList()..sort();
-        final dtext = ds.map((i) => labels[i-1]).join(', ');
-        return 'Start $start · $dtext · $times';
-      case ScheduleMode.daysOnOff:
-        final n = int.tryParse(_cycleN.text.trim());
-        final cycle = n == null ? '' : 'Every $n days · ';
-        return 'Start $start · ${cycle}$times';
-    }
+    final end = _noEnd || _endDate == null
+        ? 'No end'
+        : 'Ends ${'${_endDate!.toLocal()}'.split(' ').first}';
+    return 'Start $start · $times · $end';
   }
 
   String _doseFormulaLine() {
@@ -931,144 +920,10 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
               )),
             ]),
             _helperBelowLeft('Enter dose amount and unit (tablets allow 0.25 steps)'),
-const SizedBox(height: 10),
-            
-                final med = _selectedMed;
-                final name = _medicationName.text.trim();
-                final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
-                final unit = _doseUnit.text.trim();
-                if (med == null || name.isEmpty || doseVal <= 0 || unit.isEmpty) {
-                  return const Text('Enter dose details to see instructions');
-                }
-                // Line 1: Take {dose} {name} {unit}
-                final doseFixed = doseVal == doseVal.roundToDouble() ? doseVal.toStringAsFixed(0) : doseVal.toStringAsFixed(2);
-                final unitTxt = unit.toLowerCase();
-                final line1 = 'Take $doseFixed $name $unitTxt';
-
-                // Line 2: at {time(s)} everyday / on {days} / every N days
-                String times = _times.map((t) => t.format(context)).join(', ');
-                String line2;
-                switch (_mode) {
-                  case ScheduleMode.everyDay:
-                    line2 = 'at $times everyday';
-                    break;
-                  case ScheduleMode.daysOfWeek:
-                    const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-                    final ds = _days.toList()..sort();
-                    final dtext = ds.map((i) => labels[i-1]).join(', ');
-                    line2 = 'at $times on $dtext';
-                    break;
-                  case ScheduleMode.daysOnOff:
-                    final n = int.tryParse(_cycleN.text.trim());
-                    final every = n == null ? 'every N days' : 'every ${n.toString()} days';
-                    line2 = 'at $times $every';
-                    break;
-                }
-
-                // Lines 3 & 4: dose @ strength = total per dose
-                // Compute per-unit mcg for tablet/capsule; fall back to _doseFormulaLine
-                double perUnitMcg;
-                bool canComputeCount = false;
-                switch (med.form) {
-                  case MedicationForm.tablet:
-                    if (unitTxt == 'tablets') {
-                      perUnitMcg = switch (med.strengthUnit) {
-                        Unit.mcg => med.strengthValue,
-                        Unit.mg => med.strengthValue * 1000,
-                        Unit.g => med.strengthValue * 1e6,
-                        _ => med.strengthValue,
-                      };
-                      canComputeCount = true;
-                    } else {
-                      perUnitMcg = 0;
-                    }
-                    break;
-                  case MedicationForm.capsule:
-                    if (unitTxt == 'capsules') {
-                      perUnitMcg = switch (med.strengthUnit) {
-                        Unit.mcg => med.strengthValue,
-                        Unit.mg => med.strengthValue * 1000,
-                        Unit.g => med.strengthValue * 1e6,
-                        _ => med.strengthValue,
-                      };
-                      canComputeCount = true;
-                    } else {
-                      perUnitMcg = 0;
-                    }
-                    break;
-                  default:
-                    perUnitMcg = 0;
-                    break;
-                }
-
-                String line3;
-                String line4;
-                final startStr = '${_startDate.toLocal()}'.split(' ').first;
-                final endStr = _noEnd || _endDate == null ? 'No end' : '${_endDate!.toLocal()}'.split(' ').first;
-                if (canComputeCount) {
-                  final totalMcg = perUnitMcg * doseVal;
-                  final totalMg = totalMcg / 1000.0;
-                  final strengthShort = _medStrengthLabel(med);
-                  line3 = '$doseFixed $name ${unitTxt.substring(0, unitTxt.length)} @ $strengthShort =';
-                  line4 = '${totalMg == totalMg.roundToDouble() ? totalMg.toStringAsFixed(0) : totalMg.toStringAsFixed(2)}mg of $name per dose';
-                } else {
-                  final formula = _doseFormulaLine();
-                  line3 = formula.isEmpty ? '' : formula;
-                  line4 = '';
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(line1, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(line2, style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text('Start $startStr · ${endStr == 'No end' ? endStr : 'Ends $endStr'}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                    ),
-                    if (line3.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(line3, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                      ),
-                    if (line4.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(line4, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                      ),
-                  ],
-                );
-              })
-            ]),
             const SizedBox(height: 10),
             _section(context, 'Schedule', [
-              Column(
+Column(
                 children: [
-                  _rowLabelField(context, label: 'Mode', field: DropdownButtonFormField<ScheduleMode>(
-                    value: _mode,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: ''),
-                    items: ScheduleMode.values
-                        .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
-                        .toList(),
-                    onChanged: (m) {
-                      setState(() {
-                        _mode = m ?? ScheduleMode.daysOfWeek;
-                        if (_mode == ScheduleMode.everyDay) {
-                          _days..clear()..addAll([1,2,3,4,5,6,7]);
-                          _useCycle = false;
-                        } else if (_mode == ScheduleMode.daysOnOff) {
-                          _useCycle = true;
-                        } else {
-                          _useCycle = false;
-                        }
-                      });
-                    },
-                  )),
-                  _helperBelowLeft('Choose the scheduling mode'),
                   _rowLabelField(context, label: 'Start date', field: Field36(
                     width: 120,
                     child: FilledButton.icon(
@@ -1115,29 +970,6 @@ const SizedBox(height: 10),
                     const Text('No end'),
                   ])),
                   _helperBelowLeft('Optional end date (or leave as No end)'),
-                  _rowLabelField(context, label: 'Time 1', field: Column(
-                  )),
-                  _rowLabelField(context, label: 'Mode', field: DropdownButtonFormField<ScheduleMode>(
-                    value: _mode,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: ''),
-                    items: ScheduleMode.values
-                        .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
-                        .toList(),
-                    onChanged: (m) {
-                      setState(() {
-                        _mode = m ?? ScheduleMode.daysOfWeek;
-                        if (_mode == ScheduleMode.everyDay) {
-                          _days..clear()..addAll([1,2,3,4,5,6,7]);
-                          _useCycle = false;
-                        } else if (_mode == ScheduleMode.daysOnOff) {
-                          _useCycle = true;
-                        } else {
-                          _useCycle = false;
-                        }
-                      });
-                    },
-                  )),
                   const SizedBox(height: 8),
                   _rowLabelField(context, label: 'Time 1', field: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1155,7 +987,7 @@ const SizedBox(height: 10),
                                   onPressed: () => _pickTimeAt(i),
                                   icon: const Icon(Icons.schedule, size: 18),
                                   label: Text(_times[i].format(context)),
-                                  style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                                  style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -1182,73 +1014,6 @@ const SizedBox(height: 10),
                 ],
               ),
               const SizedBox(height: 8),
-              if (_mode == ScheduleMode.daysOfWeek)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: List.generate(7, (i) {
-                    final dayIndex = i + 1; // 1..7
-                    const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-                    final selected = _days.contains(dayIndex);
-                    return FilterChip(
-                      label: Text(labels[i], style: TextStyle(color: selected ? theme.colorScheme.onPrimary : null)),
-                      showCheckmark: false,
-                      selectedColor: theme.colorScheme.primary,
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      selected: selected,
-                      onSelected: (sel) {
-                        setState(() {
-                          if (sel) {
-                            _days.add(dayIndex);
-                          } else {
-                            _days.remove(dayIndex);
-                          }
-                        });
-                      },
-                    );
-                  }),
-                ),
-              if (_mode == ScheduleMode.daysOnOff)
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 120,
-                      child: TextFormField(
-                        controller: _cycleN,
-                        decoration: const InputDecoration(labelText: 'Every N days'),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                        validator: (v) {
-                          final n = int.tryParse(v?.trim() ?? '');
-                          if (n == null || n < 1) return '>= 1';
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Start date'),
-                        subtitle: Text('${_cycleAnchor.toLocal()}'.split(' ').first),
-                        trailing: TextButton(
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: context,
-                              firstDate: DateTime(now.year - 1),
-                              lastDate: DateTime(now.year + 10),
-                              initialDate: _cycleAnchor,
-                            );
-                            if (picked != null) setState(() => _cycleAnchor = picked);
-                          },
-                          child: const Text('Pick'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               const SizedBox(height: 12),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
@@ -1342,13 +1107,6 @@ return '$strength${stock > 0 ? ' • $s remaining' : ''}';
   }
 }
 
-enum ScheduleMode { everyDay, daysOfWeek, daysOnOff }
-
-String _modeLabel(ScheduleMode m) => switch (m) {
-  ScheduleMode.everyDay => 'Every day',
-  ScheduleMode.daysOfWeek => 'Days of the week',
-  ScheduleMode.daysOnOff => 'Days on / days off',
-};
 
 class _DoseFormulaStrip extends StatelessWidget {
   const _DoseFormulaStrip({required this.selectedMed, required this.valueCtrl, required this.unitCtrl});

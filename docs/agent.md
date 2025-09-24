@@ -54,3 +54,10 @@ Never do bottom pop-ups
 Notes
 - If a widget appears to override textStyle inline, refactor it to consume the theme or a shared constant.
 - For exact pixel parity between pages, prefer shared helpers (Field36, _dec/_decDrop, _rowLabelField, _section) over per-page ad hoc styles.
+
+Schedule editor policy (simplified)
+- No scheduling modes or day-of-week chips. Scheduling is simplified to everyday with one or more times per day.
+- Start and End dates are provided (End date supports "No end").
+- Time and date buttons are primary FilledButtons (consistent width = kFieldHeight and 120px where applicable).
+- Instructions are shown inline in the card (under General), mirroring Add Med style and using theme text styles.
+- Validation and left-label Field36 rows match Add Med UX (red outline + under-label errors; gated when appropriate).
