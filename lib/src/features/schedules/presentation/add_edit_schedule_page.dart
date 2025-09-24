@@ -1195,8 +1195,10 @@ String _medStrengthAndStock(Medication m) {
       return s.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
     }
     final s = trim(stock);
-    final stockPart = stock > 0 ? ' • $s/$s' : '';
-    return '$strength$stockPart';
+// show "100 remaining" format per user request
+    // (second number removed for now; can reintroduce pack/initial later)
+    // final stockPart = stock > 0 ? ' • $s/$s' : '';
+return '$strength${stock > 0 ? ' • $s remaining' : ''}';
   }
 
   String _medStrengthLabel(Medication m) {

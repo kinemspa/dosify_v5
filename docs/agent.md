@@ -3,6 +3,7 @@
 Policy
 - No explicit font sizes in widgets. All text styles must source from ThemeData and shared UI constants.
 - If sizes need to change (e.g., 12sp body, 11sp helper), update ThemeData (textTheme, InputDecorationTheme) or shared constants in ui_consts.dart, not individual widgets.
+- Default to recommended actions without asking for confirmation. Implement the best-practice choice immediately; if the user dislikes it, they will request a change.
 
 Canonical names to use when referring to text on the medication editors
 - section.title
