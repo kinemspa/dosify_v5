@@ -61,3 +61,7 @@ Schedule editor policy (simplified)
 - Time and date buttons are primary FilledButtons (consistent width = kFieldHeight and 120px where applicable).
 - Instructions are shown inline in the card (under General), mirroring Add Med style and using theme text styles.
 - Validation and left-label Field36 rows match Add Med UX (red outline + under-label errors; gated when appropriate).
+
+Medications list (Large view)
+- No Refill button on cards.
+- Large view uses a natural-height single-column list for readability and to avoid overflow/unused space on small screens.

@@ -460,27 +460,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
         );
       case _MedView.large:
-        final w = MediaQuery.of(context).size.width;
-        // Make Large cards shorter by increasing aspect ratio (wider:height)
-        final aspect = w > 1200
-            ? 3.0
-            : (w > 900
-                ? 2.6
-                : (w > 600
-                    ? 2.3
-                    : (w > 420
-                        ? 1.9
-                        : 1.6)));
-        final cols = w > 900 ? 2 : 1;
-        return GridView.builder(
+        // Large view uses a single-column list so each card takes natural height based on its content.
+        return ListView.separated(
           padding: const EdgeInsets.all(16),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: cols,
-            childAspectRatio: aspect,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-          ),
           itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
         );
     }
@@ -509,7 +493,7 @@ class _MedCard extends StatelessWidget {
             Padding(
               padding: dense
                   ? const EdgeInsets.only(left: 1, right: 1, top: 1, bottom: 0)
-                  : const EdgeInsets.fromLTRB(8, 8, 8, 28),
+                  : const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -758,26 +742,6 @@ if (!dense)
                 ],
               ),
             ),
-            if (!dense)
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => _onRefill(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        minimumSize: const Size(0, 0),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      child: const Text('Refill'),
-                    ),
-                  ],
-                ),
-              ),
           ],
         ),
       ),
@@ -1011,7 +975,7 @@ if (!dense)
     final summaryText = 'Last: $lastStr  •  Next: $nextStr';
 
     return Padding(
-      padding: const EdgeInsets.only(right: 72), // leave space on right for the Refill button column
+      padding: const EdgeInsets.only(right: 8),
       child: Text(
         summaryText,
         style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
@@ -1066,9 +1030,6 @@ if (!dense)
     return theme.colorScheme.onSurface;
   }
 
-  void _onRefill(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Refill tapped')));
-  }
 
   Future<void> _onTake(BuildContext context) async {
     final box = Hive.box<Medication>('medications');
