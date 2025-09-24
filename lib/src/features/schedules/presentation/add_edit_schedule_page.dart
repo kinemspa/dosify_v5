@@ -976,38 +976,45 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                     },
                   )),
                   const SizedBox(height: 8),
-                  for (var i = 0; i < _times.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Field36(
-                            width: 140,
-                            child: OutlinedButton.icon(
-                              onPressed: () => _pickTimeAt(i),
-                              icon: const Icon(Icons.schedule, size: 18),
-                              label: Text(_times[i].format(context)),
-                              style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          if (_times.length > 1)
-                            IconButton(
-                              tooltip: 'Remove',
-                              onPressed: () => setState(() => _times.removeAt(i)),
-                              icon: const Icon(Icons.remove_circle_outline),
-                            ),
-                        ],
+                  _rowLabelField(context, label: 'Times', field: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: List.generate(_times.length, (i) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Field36(
+                                width: 120,
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _pickTimeAt(i),
+                                  icon: const Icon(Icons.schedule, size: 18),
+                                  label: Text(_times[i].format(context)),
+                                  style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              if (_times.length > 1)
+                                IconButton(
+                                  tooltip: 'Remove',
+                                  onPressed: () => setState(() => _times.removeAt(i)),
+                                  visualDensity: VisualDensity.compact,
+                                  icon: const Icon(Icons.remove_circle_outline, size: 18),
+                                ),
+                            ],
+                          );
+                        }),
                       ),
-                    ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: OutlinedButton.icon(
-                      onPressed: () => setState(() => _times.add(_times.last)),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add time'),
-                    ),
-                  ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () => setState(() => _times.add(_times.last)),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add time'),
+                      ),
+                    ],
+                  )),
                 ],
               ),
               const SizedBox(height: 8),
