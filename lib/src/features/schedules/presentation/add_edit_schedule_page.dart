@@ -20,6 +20,8 @@ class AddEditSchedulePage extends StatefulWidget {
 }
 
 class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
+  DateTime? _endDate;
+  bool _noEnd = true;
   // Days selector mode
   ScheduleMode _mode = ScheduleMode.daysOfWeek;
   final _formKey = GlobalKey<FormState>();
@@ -623,6 +625,27 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
     );
   }
 
+  Widget _helperBelowLeft(String text) {
+    final width = MediaQuery.of(context).size.width;
+    final labelWidth = width >= 400 ? 120.0 : 110.0;
+    return Padding(
+      padding: EdgeInsets.only(left: labelWidth + 8, top: 4, bottom: 12),
+      child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75))),
+    );
+  }
+
+  Widget _incBtn(String symbol, VoidCallback onTap) {
+    return SizedBox(
+      height: 30,
+      width: 30,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, minimumSize: const Size(30, 30)),
+        onPressed: onTap,
+        child: Text(symbol),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -674,20 +697,12 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
             _section(context, 'General', [
-              _rowLabelField(context, label: 'Schedule name', field: Field36(child: TextFormField(
-                controller: _name,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: const InputDecoration(labelText: 'Schedule name'),
-                onChanged: (_) => _nameAuto = false,
-                validator: (_) => null,
-              ))),
               _rowLabelField(context, label: 'Medication', field: Field36(child: DropdownButtonFormField<Medication>(
                 value: _selectedMed,
                 isExpanded: true,
                 alignment: AlignmentDirectional.center,
                 decoration: const InputDecoration(labelText: ''),
-selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
+                selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
                     .map((m) => Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.bodyMedium)))
                     .toList(),
                 items: Hive.box<Medication>('medications')
@@ -695,7 +710,7 @@ selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
                     .map((m) => DropdownMenuItem<Medication>(
                           value: m,
                           alignment: AlignmentDirectional.center,
-child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: Theme.of(context).textTheme.bodyMedium)),
+                          child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: Theme.of(context).textTheme.bodyMedium)),
                         ))
                     .toList(),
                 onChanged: (m) {
@@ -734,6 +749,9 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                 validator: (v) => v == null ? 'Required' : null,
               ))),
             ]),
+            // Helper under Medication
+            _helperBelowLeft('Select a medication from your saved list'),
+            
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
             _section(context, 'Dose', [
@@ -742,7 +760,7 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _pillBtn(context, '−', () {
+                    _incBtn('−', () {
                       final unit = _doseUnit.text.trim().toLowerCase();
                       final step = 1.0;
                       final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
@@ -786,7 +804,7 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                       )),
                     ),
                     const SizedBox(width: 6),
-                    _pillBtn(context, '+', () {
+                    _incBtn('+', () {
                       final unit = _doseUnit.text.trim().toLowerCase();
                       final step = 1.0;
                       final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
@@ -810,7 +828,7 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                     isExpanded: false,
                     alignment: AlignmentDirectional.center,
                     decoration: const InputDecoration(labelText: ''),
-                    items: _doseUnitOptions().map((e) => DropdownMenuItem(value: e, alignment: AlignmentDirectional.center, child: Center(child: Text(e)))).toList(),
+                    items: _doseUnitOptions().map((e) => DropdownMenuItem(value: e, alignment: AlignmentDirectional.center, child: Center(child: Text(e, style: Theme.of(context).textTheme.bodyMedium)))).toList(),
                     onChanged: (v) {
                       setState(() {
                         _doseUnit.text = v ?? '';
@@ -822,9 +840,8 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                   ),
                 ),
               )),
-              const SizedBox(height: 6),
-              _DoseFormulaStrip(selectedMed: _selectedMed, valueCtrl: _doseValue, unitCtrl: _doseUnit),
             ]),
+            _helperBelowLeft('Enter dose amount and unit (tablets allow 0.25 steps)'),
             const SizedBox(height: 10),
             _section(context, 'Instructions', [
               Builder(builder: (context){
@@ -898,6 +915,8 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
 
                 String line3;
                 String line4;
+                final startStr = '${_startDate.toLocal()}'.split(' ').first;
+                final endStr = _noEnd || _endDate == null ? 'No end' : '${_endDate!.toLocal()}'.split(' ').first;
                 if (canComputeCount) {
                   final totalMcg = perUnitMcg * doseVal;
                   final totalMg = totalMcg / 1000.0;
@@ -918,6 +937,10 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(line2, style: Theme.of(context).textTheme.bodyMedium),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text('Start $startStr · ${endStr == 'No end' ? endStr : 'Ends $endStr'}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    ),
                     if (line3.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
@@ -936,9 +959,31 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
             _section(context, 'Schedule', [
               Column(
                 children: [
+                  _rowLabelField(context, label: 'Mode', field: DropdownButtonFormField<ScheduleMode>(
+                    value: _mode,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: ''),
+                    items: ScheduleMode.values
+                        .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
+                        .toList(),
+                    onChanged: (m) {
+                      setState(() {
+                        _mode = m ?? ScheduleMode.daysOfWeek;
+                        if (_mode == ScheduleMode.everyDay) {
+                          _days..clear()..addAll([1,2,3,4,5,6,7]);
+                          _useCycle = false;
+                        } else if (_mode == ScheduleMode.daysOnOff) {
+                          _useCycle = true;
+                        } else {
+                          _useCycle = false;
+                        }
+                      });
+                    },
+                  )),
+                  _helperBelowLeft('Choose the scheduling mode'),
                   _rowLabelField(context, label: 'Start date', field: Field36(
                     width: 120,
-                    child: OutlinedButton.icon(
+                    child: FilledButton.icon(
                       onPressed: () async {
                         final now = DateTime.now();
                         final picked = await showDatePicker(
@@ -951,8 +996,38 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                       },
                       icon: const Icon(Icons.calendar_today, size: 18),
                       label: Text('${_startDate.toLocal()}'.split(' ').first),
-                      style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                      style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
                     ),
+                  )),
+                  _helperBelowLeft('Select when this schedule should start'),
+                  _rowLabelField(context, label: 'End date', field: Row(children: [
+                    Field36(
+                      width: 120,
+                      child: FilledButton.icon(
+                        onPressed: _noEnd ? null : () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(now.year - 1),
+                            lastDate: DateTime(now.year + 10),
+                            initialDate: _endDate ?? _startDate,
+                          );
+                          if (picked != null) setState(() { _endDate = picked; _noEnd = false; });
+                        },
+                        icon: const Icon(Icons.event, size: 18),
+                        label: Text(_noEnd || _endDate == null ? 'No end' : '${_endDate!.toLocal()}'.split(' ').first),
+                        style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Checkbox(
+                      value: _noEnd,
+                      onChanged: (v) => setState(() { _noEnd = v ?? true; if (_noEnd) _endDate = null; }),
+                    ),
+                    const Text('No end'),
+                  ])),
+                  _helperBelowLeft('Optional end date (or leave as No end)'),
+                  _rowLabelField(context, label: 'Time 1', field: Column(
                   )),
                   _rowLabelField(context, label: 'Mode', field: DropdownButtonFormField<ScheduleMode>(
                     value: _mode,
@@ -976,7 +1051,7 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                     },
                   )),
                   const SizedBox(height: 8),
-                  _rowLabelField(context, label: 'Times', field: Column(
+                  _rowLabelField(context, label: 'Time 1', field: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Wrap(
@@ -988,7 +1063,7 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                             children: [
                               Field36(
                                 width: 120,
-                                child: OutlinedButton.icon(
+                                child: FilledButton.icon(
                                   onPressed: () => _pickTimeAt(i),
                                   icon: const Icon(Icons.schedule, size: 18),
                                   label: Text(_times[i].format(context)),
@@ -1015,6 +1090,7 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                       ),
                     ],
                   )),
+                  _helperBelowLeft('Add one or more dosing times'),
                 ],
               ),
               const SizedBox(height: 8),
@@ -1026,8 +1102,10 @@ child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: The
                     final dayIndex = i + 1; // 1..7
                     const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
                     final selected = _days.contains(dayIndex);
-return FilterChip(
-                      label: Text(labels[i]),
+                    return FilterChip(
+                      label: Text(labels[i], style: TextStyle(color: selected ? theme.colorScheme.onPrimary : null)),
+                      showCheckmark: false,
+                      selectedColor: theme.colorScheme.primary,
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -1108,27 +1186,27 @@ return FilterChip(
     Unit.unitsPerMl => 'IU/mL',
   };
 
-  String _medStrengthAndStock(Medication m) {
+String _medStrengthAndStock(Medication m) {
     final strength = _medStrengthLabel(m);
     final stock = m.stockValue;
-    final stockLabel = switch (m.stockUnit) {
-      StockUnit.tablets => 'tablets',
-      StockUnit.capsules => 'capsules',
-      StockUnit.mg => 'mg',
-      StockUnit.mcg => 'mcg',
-      StockUnit.g => 'g',
-      _ => 'units',
-    };
-final s = stock.toStringAsFixed(stock == stock.roundToDouble() ? 0 : 2);
+    String trim(num n) {
+      final s = n.toStringAsFixed(n == n.roundToDouble() ? 0 : 2);
+      if (!s.contains('.')) return s;
+      return s.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
+    }
+    final s = trim(stock);
     final stockPart = stock > 0 ? ' • $s/$s' : '';
     return '$strength$stockPart';
   }
 
   String _medStrengthLabel(Medication m) {
     final u = _unitShort(m.strengthUnit);
-    final v = (m.strengthValue == m.strengthValue.roundToDouble())
-        ? m.strengthValue.toStringAsFixed(0)
-        : m.strengthValue.toStringAsFixed(2);
+    String trim(num n) {
+      final s = n.toStringAsFixed(n == n.roundToDouble() ? 0 : 2);
+      if (!s.contains('.')) return s;
+      return s.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
+    }
+    final v = trim(m.strengthValue);
     return '$v $u';
   }
 
