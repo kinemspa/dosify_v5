@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../core/utils/format.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 
-import '../../medications/domain/enums.dart';
-import '../../medications/domain/medication.dart';
-import '../presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 
 class AddEditCapsulePage extends ConsumerStatefulWidget {
   const AddEditCapsulePage({super.key, this.initial});
@@ -44,7 +44,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         textAlign: TextAlign.left,
         style: theme.textTheme.bodySmall?.copyWith(
           fontSize: kHintFontSize,
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75)
         ),
       ),
     );
@@ -59,7 +59,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
           text,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75)
           ),
         ),
       ),
@@ -74,7 +74,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         text,
         textAlign: TextAlign.left,
         style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75)
         ),
       ),
     );
@@ -1007,7 +1007,7 @@ child: TextFormField(
         child: FilledButton(
           style: FilledButton.styleFrom(
             backgroundColor: requiredOk ? null : Theme.of(context).colorScheme.surfaceVariant,
-            foregroundColor: requiredOk ? null : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+foregroundColor: requiredOk ? null : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)
           ),
           onPressed: () {
             setState(() => _submitted = true);

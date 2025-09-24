@@ -453,7 +453,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 if (trailing != null)
                   Flexible(
                     child: DefaultTextStyle(
-                      style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withOpacity(0.50), fontWeight: FontWeight.w600),
+style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withValues(alpha: 0.50), fontWeight: FontWeight.w600),
                       child: Align(alignment: Alignment.centerRight, child: trailing),
                     ),
                   ),
