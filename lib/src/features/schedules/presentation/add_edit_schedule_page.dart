@@ -356,12 +356,46 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     );
     final box = Hive.box<Schedule>('schedules');
     // Ensure notifications permission for Android 13+
+    // Also preflight-check exact alarm capability and general notification enablement
+    // so users see actionable guidance instead of silent drops.
     final granted = await NotificationService.ensurePermissionGranted();
     if (!granted && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Enable notifications to receive schedule alerts.')),
       );
     }
+
+    // Proactive checks: exact alarms and notifications enabled
+    final canExact = await NotificationService.canScheduleExactAlarms();
+    final enabled = await NotificationService.areNotificationsEnabled();
+    if (mounted && (!enabled || !canExact)) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Allow reminders'),
+          content: Text(!enabled
+              ? 'Notifications are disabled for Dosifi. Enable notifications to receive reminders.'
+              : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver reminders at the exact time.'),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Later')),
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                if (!enabled) {
+                  await NotificationService.openChannelSettings('upcoming_dose');
+                }
+                if (!canExact) {
+                  await NotificationService.openExactAlarmsSettings();
+                }
+              },
+              child: const Text('Open settings'),
+            ),
+          ],
+        ),
+      );
+    }
+
     // Cancel existing notifications for this schedule id (handles edits)
     await ScheduleScheduler.cancelFor(id);
     await box.put(id, s);

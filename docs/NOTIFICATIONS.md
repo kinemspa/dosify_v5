@@ -44,6 +44,12 @@ What works
 What doesn’t (current)
 - Delivery of scheduled notifications (exact/inexact/AlarmClock) in tested environments
 
+Preflight checks (implemented)
+- Before scheduling, the app now proactively checks:
+  - Android exact alarms capability (via platform AlarmManager.canScheduleExactAlarms)
+  - Whether notifications are enabled for the app/channel
+- If either check fails, a centered dialog offers to open the relevant Settings pages (Channel/Notifications and Alarms & reminders) so the user can enable them.
+
 Next steps (when resuming)
 1) Validate in alternate environments (different emulator image/vendor; a stock Google device on Android 13/14).
 2) Native AlarmManager probe: minimal BroadcastReceiver with setExactAndAllowWhileIdle and setAlarmClock. If delivery still fails, it indicates environment-level suppression.

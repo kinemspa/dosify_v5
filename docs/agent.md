@@ -65,3 +65,4 @@ Schedule editor policy (simplified)
 Medications list (Large view)
 - No Refill button on cards.
 - Large view uses a natural-height single-column list for readability and to avoid overflow/unused space on small screens.
+- Status: Approved — “cards are perfect” per user; treat as the baseline going forward.

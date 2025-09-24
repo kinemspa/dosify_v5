@@ -69,6 +69,29 @@ class NotificationService {
     return result.isGranted;
   }
 
+  static Future<bool> canScheduleExactAlarms() async {
+    try {
+      final res = await _platform.invokeMethod<bool>('canScheduleExactAlarms');
+      return res == true;
+    } catch (e) {
+      _log('Error canScheduleExactAlarms: ' + e.toString());
+      return false;
+    }
+  }
+
+  static Future<bool> areNotificationsEnabled() async {
+    try {
+      final android = _fln.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      if (android != null) {
+        return await android.areNotificationsEnabled() ?? false;
+      }
+      return false;
+    } catch (e) {
+      _log('Error areNotificationsEnabled: ' + e.toString());
+      return false;
+    }
+  }
+
   static Future<void> openExactAlarmsSettings() async {
     if (!Platform.isAndroid) return;
 
