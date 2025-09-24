@@ -461,7 +461,16 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         );
       case _MedView.large:
         final w = MediaQuery.of(context).size.width;
-        final aspect = w > 900 ? 2.35 : (w > 600 ? 2.1 : (w > 420 ? 1.8 : 1.35));
+        // Make Large cards shorter by increasing aspect ratio (wider:height)
+        final aspect = w > 1200
+            ? 3.0
+            : (w > 900
+                ? 2.6
+                : (w > 600
+                    ? 2.3
+                    : (w > 420
+                        ? 1.9
+                        : 1.6)));
         final cols = w > 900 ? 2 : 1;
         return GridView.builder(
           padding: const EdgeInsets.all(16),
