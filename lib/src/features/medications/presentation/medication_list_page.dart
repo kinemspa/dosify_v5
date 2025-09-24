@@ -460,11 +460,14 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
         );
       case _MedView.large:
+        final w = MediaQuery.of(context).size.width;
+        final aspect = w > 900 ? 2.35 : (w > 600 ? 2.1 : (w > 420 ? 1.8 : 1.35));
+        final cols = w > 900 ? 2 : 1;
         return GridView.builder(
           padding: const EdgeInsets.all(16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 900 ? 2 : 1,
-            childAspectRatio: 2.35,
+            crossAxisCount: cols,
+            childAspectRatio: aspect,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
           ),

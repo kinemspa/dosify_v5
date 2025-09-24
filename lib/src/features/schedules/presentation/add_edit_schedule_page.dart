@@ -751,6 +751,95 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
             ]),
             // Helper under Medication
             _helperBelowLeft('Select a medication from your saved list'),
+            const SizedBox(height: 10),
+            _section(context, 'Instructions', [
+              Builder(builder: (context){
+                final med = _selectedMed;
+                final name = _medicationName.text.trim();
+                final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
+                final unit = _doseUnit.text.trim();
+                if (med == null || name.isEmpty || doseVal <= 0 || unit.isEmpty) {
+                  return const Text('Enter dose details to see instructions');
+                }
+                final doseFixed = doseVal == doseVal.roundToDouble() ? doseVal.toStringAsFixed(0) : doseVal.toStringAsFixed(2);
+                final unitTxt = unit.toLowerCase();
+                final line1 = 'Take $doseFixed $name $unitTxt';
+                String times = _times.map((t) => t.format(context)).join(', ');
+                final line2 = 'at $times everyday';
+                double perUnitMcg;
+                bool canComputeCount = false;
+                switch (med.form) {
+                  case MedicationForm.tablet:
+                    if (unitTxt == 'tablets') {
+                      perUnitMcg = switch (med.strengthUnit) {
+                        Unit.mcg => med.strengthValue,
+                        Unit.mg => med.strengthValue * 1000,
+                        Unit.g => med.strengthValue * 1e6,
+                        _ => med.strengthValue,
+                      };
+                      canComputeCount = true;
+                    } else {
+                      perUnitMcg = 0;
+                    }
+                    break;
+                  case MedicationForm.capsule:
+                    if (unitTxt == 'capsules') {
+                      perUnitMcg = switch (med.strengthUnit) {
+                        Unit.mcg => med.strengthValue,
+                        Unit.mg => med.strengthValue * 1000,
+                        Unit.g => med.strengthValue * 1e6,
+                        _ => med.strengthValue,
+                      };
+                      canComputeCount = true;
+                    } else {
+                      perUnitMcg = 0;
+                    }
+                    break;
+                  default:
+                    perUnitMcg = 0;
+                    break;
+                }
+                String line3;
+                String line4;
+                final startStr = '${_startDate.toLocal()}'.split(' ').first;
+                final endStr = _noEnd || _endDate == null ? 'No end' : '${_endDate!.toLocal()}'.split(' ').first;
+                if (canComputeCount) {
+                  final totalMcg = perUnitMcg * doseVal;
+                  final totalMg = totalMcg / 1000.0;
+                  final strengthShort = _medStrengthLabel(med);
+                  line3 = '$doseFixed $name ${unitTxt.substring(0, unitTxt.length)} @ $strengthShort =';
+                  line4 = '${totalMg == totalMg.roundToDouble() ? totalMg.toStringAsFixed(0) : totalMg.toStringAsFixed(2)}mg of $name per dose';
+                } else {
+                  line3 = '';
+                  line4 = '';
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(line1, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(line2, style: Theme.of(context).textTheme.bodyMedium),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text('Start $startStr · ${endStr == 'No end' ? endStr : 'Ends $endStr'}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    ),
+                    if (line3.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(line3, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ),
+                    if (line4.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(line4, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                      ),
+                  ],
+                );
+              })
+            ]),
+            const SizedBox(height: 10),
             
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
@@ -842,9 +931,8 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
               )),
             ]),
             _helperBelowLeft('Enter dose amount and unit (tablets allow 0.25 steps)'),
-            const SizedBox(height: 10),
-            _section(context, 'Instructions', [
-              Builder(builder: (context){
+const SizedBox(height: 10),
+            
                 final med = _selectedMed;
                 final name = _medicationName.text.trim();
                 final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
