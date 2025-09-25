@@ -32,7 +32,7 @@ Diagnostics (highlights)
 
 Changes in app code (summary)
 - Robust timezone setup and logging around permission status, intents, tz offsets, scheduling success/failure.
-- Weekly schedules use exactAllowWhileIdle with inexact fallback on exception.
+- Weekly schedules now schedule one-shot notifications for the next 60 days (per day/time), avoiding repeating weeklies which some devices suppress. They use exactAllowWhileIdle and fall back to inexact on exception.
 - One-shot schedules use exactAllowWhileIdle with fallback.
 - AlarmClock test path exists but system UI remains unaware (no icon/next alarm).
 - Native helpers via platform channel: canScheduleExactAlarms, getChannelImportance, isIgnoringBatteryOptimizations, requestIgnoreBatteryOptimizations.
