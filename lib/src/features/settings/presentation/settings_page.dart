@@ -176,6 +176,10 @@ class SettingsPage extends ConsumerWidget {
             onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
               await NotificationService.scheduleInSecondsExact(id, 5, title: 'Dosifi test', body: 'This should appear in ~5 seconds');
+              // Backup banner in case OEM suppresses scheduled delivery
+              // (only for this diagnostics button)
+              // ignore: unawaited_futures
+              NotificationService.showDelayed(7, title: 'Dosifi test (backup)', body: 'Backup banner after 7s');
               if (!context.mounted) return;
               final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~5s, exactAllowWhileIdle)')));
@@ -189,6 +193,9 @@ class SettingsPage extends ConsumerWidget {
             onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
               await NotificationService.scheduleInSecondsAlarmClock(id, 5, title: 'Dosifi test (alarm clock)', body: '5s via AlarmClock');
+              // Backup banner in case OEM suppresses scheduled delivery
+              // ignore: unawaited_futures
+              NotificationService.showDelayed(7, title: 'Dosifi test (backup)', body: 'Backup banner after 7s');
               if (context.mounted) {
                 final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
                 ScaffoldMessenger.of(context).showSnackBar(

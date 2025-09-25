@@ -221,6 +221,24 @@ class NotificationService {
     _log('showTest() completed');
   }
 
+  static Future<void> showDelayed(int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+    // Best-effort backup banner after a short delay (useful for emulator/OEM diagnostics)
+    final id = DateTime.now().millisecondsSinceEpoch % 100000000;
+    _log('showDelayed in ' + seconds.toString() + 's, id=' + id.toString());
+    await Future.delayed(Duration(seconds: seconds));
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelId,
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    await _fln.show(id, title, body, details);
+  }
+
   // Schedule using a local DateTime (interpreted in the device's current timezone)
   static Future<void> scheduleAt(int id, DateTime when, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
     _log('scheduleAt(id=' + id.toString() + ', when=' + when.toIso8601String() + ', title=' + title + ')');
