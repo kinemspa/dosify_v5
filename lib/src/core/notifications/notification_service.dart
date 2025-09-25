@@ -454,6 +454,7 @@ class NotificationService {
         priority: Priority.high,
       ),
     );
+    _log('Computed tzTime(UTC source)->local=' + tzTime.toString() + ', now=' + now.toString() + ', offset=' + tzTime.timeZoneOffset.toString());
     try {
       _log('Attempting exact zonedSchedule (UTC source)');
       await _fln.zonedSchedule(

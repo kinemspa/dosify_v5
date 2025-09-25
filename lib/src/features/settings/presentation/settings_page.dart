@@ -155,6 +155,8 @@ class SettingsPage extends ConsumerWidget {
               if (!context.mounted) return;
               final t = TimeOfDay.fromDateTime(whenUtc.toLocal());
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s)')));
+              // Dump state to console right after scheduling for diagnostics
+              await NotificationService.debugDumpStatus();
             },
             icon: const Icon(Icons.timer_outlined),
             label: const Text('Schedule test in 30s'),
@@ -200,6 +202,8 @@ class SettingsPage extends ConsumerWidget {
                   const SnackBar(content: Text('Scheduled 30s test via AlarmClock (UTC source)')),
                 );
               }
+              // Dump state to console right after scheduling for diagnostics
+              await NotificationService.debugDumpStatus();
             },
             icon: const Icon(Icons.alarm_on),
             label: const Text('Schedule test in 30s (AlarmClock)'),
