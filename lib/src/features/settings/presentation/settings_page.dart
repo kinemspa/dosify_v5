@@ -174,15 +174,17 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
-              final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
-              await NotificationService.scheduleInSecondsExact(id, 5, title: 'Dosifi test', body: 'This should appear in ~5 seconds');
+              // Ladder: T+5 exact, T+6 alarmClock, T+7 backup banner — all on test_alarm channel
+              final base = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
+              await NotificationService.scheduleInSecondsExact(base, 5, title: 'Dosifi test (exact)', body: 'Exact in ~5s', channelId: 'test_alarm');
+              await NotificationService.scheduleInSecondsAlarmClock(base + 1, 6, title: 'Dosifi test (alarm)', body: 'AlarmClock in ~6s', channelId: 'test_alarm');
               // Backup banner in case OEM suppresses scheduled delivery
-              // (only for this diagnostics button)
               // ignore: unawaited_futures
-              NotificationService.showDelayed(7, title: 'Dosifi test (backup)', body: 'Backup banner after 7s');
+              NotificationService.showDelayed(7, title: 'Dosifi test (backup)', body: 'Backup banner after 7s', channelId: 'test_alarm');
               if (!context.mounted) return;
-              final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~5s, exactAllowWhileIdle)')));
+              final t5 = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
+              final t6 = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 6)));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled: exact @ ${t5.format(context)}, alarm @ ${t6.format(context)}, backup @ +7s')));
               await NotificationService.debugDumpStatus();
             },
             icon: const Icon(Icons.timer_outlined),
@@ -191,15 +193,18 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
-              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleInSecondsAlarmClock(id, 5, title: 'Dosifi test (alarm clock)', body: '5s via AlarmClock');
+              // Ladder: T+5 alarmClock, T+6 exact, T+7 backup banner — all on test_alarm channel
+              final base = DateTime.now().millisecondsSinceEpoch % 100000000;
+              await NotificationService.scheduleInSecondsAlarmClock(base, 5, title: 'Dosifi test (alarm)', body: 'AlarmClock in ~5s', channelId: 'test_alarm');
+              await NotificationService.scheduleInSecondsExact(base + 1, 6, title: 'Dosifi test (exact)', body: 'Exact in ~6s', channelId: 'test_alarm');
               // Backup banner in case OEM suppresses scheduled delivery
               // ignore: unawaited_futures
-              NotificationService.showDelayed(7, title: 'Dosifi test (backup)', body: 'Backup banner after 7s');
+              NotificationService.showDelayed(7, title: 'Dosifi test (backup)', body: 'Backup banner after 7s', channelId: 'test_alarm');
               if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
+                final t5 = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
+                final t6 = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 6)));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Scheduled 5s test via AlarmClock for ${t.format(context)}')),
+                  SnackBar(content: Text('Scheduled: alarm @ ${t5.format(context)}, exact @ ${t6.format(context)}, backup @ +7s')),
                 );
               }
               await NotificationService.debugDumpStatus();

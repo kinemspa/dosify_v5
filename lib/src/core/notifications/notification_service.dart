@@ -26,6 +26,10 @@ class NotificationService {
     'expiry', 'Expiry',
     description: 'Alerts for medication expiry', importance: Importance.defaultImportance,
   );
+  static const AndroidNotificationChannel _testAlarm = AndroidNotificationChannel(
+    'test_alarm', 'Test Alarm (Diagnostics)',
+    description: 'Diagnostics channel for short-delay notification tests', importance: Importance.max,
+  );
 
   static Future<void> init() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -53,6 +57,7 @@ class NotificationService {
       await android.createNotificationChannel(_upcomingDose);
       await android.createNotificationChannel(_lowStock);
       await android.createNotificationChannel(_expiry);
+      await android.createNotificationChannel(_testAlarm);
     } else {
       _log('Android-specific FLN implementation not available');
     }
