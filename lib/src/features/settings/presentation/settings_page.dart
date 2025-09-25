@@ -215,6 +215,22 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
+              // Direct, no-schedule 5s test on test_alarm channel (diagnostics only)
+              // ignore: unawaited_futures
+              NotificationService.showDelayed(5, title: 'Dosifi test (direct)', body: 'Direct show after 5s', channelId: 'test_alarm');
+              if (context.mounted) {
+                final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Direct (no schedule) test will show at ${t.format(context)}')),
+                );
+              }
+            },
+            icon: const Icon(Icons.timer),
+            label: const Text('Direct test in 5s (no scheduling)'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
               await NotificationService.scheduleInSecondsAlarmClock(id, 30, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
               if (context.mounted) {
