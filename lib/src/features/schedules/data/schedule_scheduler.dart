@@ -64,7 +64,7 @@ class ScheduleScheduler {
         for (final minutes in times) {
           final dt = DateTime(day.year, day.month, day.day, minutes ~/ 60, minutes % 60);
           final id = _slotId(s.id, weekday: dt.weekday, minutes: minutes, occurrence: i);
-          await NotificationService.scheduleAt(
+          await NotificationService.scheduleAtAlarmClock(
             id,
             dt,
             title: title,
@@ -98,7 +98,7 @@ class ScheduleScheduler {
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now)) {
               final id = _slotId(s.id, weekday: date.weekday, minutes: mUtc, occurrence: dayOffset);
-              await NotificationService.scheduleAt(
+              await NotificationService.scheduleAtAlarmClock(
                 id,
                 dtLocal,
                 title: title,
@@ -114,7 +114,7 @@ class ScheduleScheduler {
             final dt = DateTime(date.year, date.month, date.day, mLocal ~/ 60, mLocal % 60);
             if (dt.isAfter(now)) {
               final id = _slotId(s.id, weekday: date.weekday, minutes: mLocal, occurrence: dayOffset);
-              await NotificationService.scheduleAt(
+              await NotificationService.scheduleAtAlarmClock(
                 id,
                 dt,
                 title: title,

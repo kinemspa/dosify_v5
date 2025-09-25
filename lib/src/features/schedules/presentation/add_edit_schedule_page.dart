@@ -20,6 +20,7 @@ class AddEditSchedulePage extends StatefulWidget {
 }
 
 class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
+  late ScheduleMode _mode;
   DateTime? _endDate;
   bool _noEnd = true;
   final _formKey = GlobalKey<FormState>();
@@ -64,6 +65,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       }
       _nameAuto = false; // existing schedule name considered manual
     }
+    // Initialize mode based on current fields
+    _mode = _useCycle
+        ? ScheduleMode.daysOnOff
+        : (_days.length == 7 ? ScheduleMode.everyDay : ScheduleMode.daysOfWeek);
+
     _name.addListener(() {
       // If user edits name manually, stop auto-updating
       if (_nameAuto && _name.text.isNotEmpty) {
@@ -788,7 +794,19 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
                 final unitTxt = unit.toLowerCase();
                 final line1 = 'Take $doseFixed $name $unitTxt';
                 String times = _times.map((t) => t.format(context)).join(', ');
-                final line2 = 'at $times everyday';
+                String line2;
+                if (_mode == ScheduleMode.everyDay) {
+                  line2 = 'at $times everyday';
+                } else if (_mode == ScheduleMode.daysOfWeek) {
+                  const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                  final ds = _days.toList()..sort();
+                  final dtext = ds.map((i) => labels[i-1]).join(', ');
+                  line2 = 'at $times on $dtext';
+                } else {
+                  final n = int.tryParse(_cycleN.text.trim());
+                  final every = n == null ? 'every N days' : 'every ${n.toString()} days';
+                  line2 = 'at $times $every';
+                }
                 double perUnitMcg;
                 bool canComputeCount = false;
                 switch (med.form) {
@@ -958,6 +976,34 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
             _section(context, 'Schedule', [
 Column(
                 children: [
+                  _rowLabelField(context, label: 'Schedule type', field: DropdownButtonFormField<ScheduleMode>(
+                    value: _mode,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: ''),
+                    items: ScheduleMode.values
+                        .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
+                        .toList(),
+                    onChanged: (m) {
+                      if (m == null) return;
+                      setState(() {
+                        _mode = m;
+                        if (_mode == ScheduleMode.everyDay) {
+                          _days
+                            ..clear()
+                            ..addAll([1,2,3,4,5,6,7]);
+                          _useCycle = false;
+                        } else if (_mode == ScheduleMode.daysOfWeek) {
+                          _useCycle = false;
+                          if (_days.isEmpty) {
+                            _days.addAll([1,2,3,4,5]);
+                          }
+                        } else if (_mode == ScheduleMode.daysOnOff) {
+                          _useCycle = true;
+                        }
+                      });
+                    },
+                  )),
+                  _helperBelowLeft('Choose how this schedule repeats'),
                   _rowLabelField(context, label: 'Start date', field: Field36(
                     width: 120,
                     child: FilledButton.icon(
@@ -1004,6 +1050,81 @@ Column(
                     const Text('No end'),
                   ])),
                   _helperBelowLeft('Optional end date (or leave as No end)'),
+                  if (_mode == ScheduleMode.daysOfWeek) ...[
+                    _helperBelowLeft('Select days of the week'),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: List.generate(7, (i) {
+                          final dayIndex = i + 1; // 1..7
+                          const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                          final selected = _days.contains(dayIndex);
+                          return FilterChip(
+                            label: Text(labels[i], style: TextStyle(color: selected ? theme.colorScheme.onPrimary : null)),
+                            showCheckmark: false,
+                            selectedColor: theme.colorScheme.primary,
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            selected: selected,
+                            onSelected: (sel) {
+                              setState(() {
+                                if (sel) {
+                                  _days.add(dayIndex);
+                                } else {
+                                  _days.remove(dayIndex);
+                                }
+                              });
+                            },
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                  if (_mode == ScheduleMode.daysOnOff) ...[
+                    _rowLabelField(
+                      context,
+                      label: 'Every N days',
+                      field: SizedBox(
+                        width: 120,
+                        height: kFieldHeight,
+                        child: Field36(
+                          child: TextFormField(
+                            controller: _cycleN,
+                            textAlign: TextAlign.center,
+                            decoration: const InputDecoration(labelText: ''),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                            validator: (v) {
+                              final n = int.tryParse(v?.trim() ?? '');
+                              if (_mode == ScheduleMode.daysOnOff && (n == null || n < 1)) return '>= 1';
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    _helperBelowLeft('Choose the cycle length and anchor date'),
+                    _rowLabelField(context, label: 'Anchor date', field: Field36(
+                      width: 120,
+                      child: FilledButton.icon(
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(now.year - 1),
+                            lastDate: DateTime(now.year + 10),
+                            initialDate: _cycleAnchor,
+                          );
+                          if (picked != null) setState(() => _cycleAnchor = picked);
+                        },
+                        icon: const Icon(Icons.event, size: 18),
+                        label: Text('${_cycleAnchor.toLocal()}'.split(' ').first),
+                        style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                      ),
+                    )),
+                  ],
                   const SizedBox(height: 8),
                   _rowLabelField(context, label: 'Time 1', field: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1141,6 +1262,13 @@ return '$strength${stock > 0 ? ' • $s remaining' : ''}';
   }
 }
 
+enum ScheduleMode { everyDay, daysOfWeek, daysOnOff }
+
+String _modeLabel(ScheduleMode m) => switch (m) {
+  ScheduleMode.everyDay => 'Every day',
+  ScheduleMode.daysOfWeek => 'Days of the week',
+  ScheduleMode.daysOnOff => 'Days on / days off',
+};
 
 class _DoseFormulaStrip extends StatelessWidget {
   const _DoseFormulaStrip({required this.selectedMed, required this.valueCtrl, required this.unitCtrl});
