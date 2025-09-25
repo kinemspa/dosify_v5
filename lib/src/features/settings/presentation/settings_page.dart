@@ -181,7 +181,7 @@ class SettingsPage extends ConsumerWidget {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~5s, exactAllowWhileIdle)')));
               await NotificationService.debugDumpStatus();
             },
-            icon: const Icon(Icons.timer_5_outlined),
+            icon: const Icon(Icons.timer_outlined),
             label: const Text('Schedule test in 5s (exact)'),
           ),
           const SizedBox(height: 12),
