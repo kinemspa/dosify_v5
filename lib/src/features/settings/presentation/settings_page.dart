@@ -149,9 +149,9 @@ class SettingsPage extends ConsumerWidget {
               }
 
               // Use a unique id to avoid overwriting or colliding with pending requests from earlier tests
-              final when = DateTime.now().add(const Duration(seconds: 30));
+              final whenUtc = DateTime.now().toUtc().add(const Duration(seconds: 30));
               final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
-              await NotificationService.scheduleAt(id, when, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
+              await NotificationService.scheduleAtUtc(id, whenUtc, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
               if (!context.mounted) return;
               final t = TimeOfDay.fromDateTime(when);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s)')));
@@ -191,11 +191,13 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
-              final when = DateTime.now().add(const Duration(seconds: 30));
-              await NotificationService.scheduleAtAlarmClock(999003, when, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
+              // Use UTC source time to avoid timezone/DST edge cases
+              final whenUtc = DateTime.now().toUtc().add(const Duration(seconds: 30));
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
+              await NotificationService.scheduleAtAlarmClockUtc(id, whenUtc, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Scheduled 30s test via AlarmClock')),
+                  const SnackBar(content: Text('Scheduled 30s test via AlarmClock (UTC source)')),
                 );
               }
             },

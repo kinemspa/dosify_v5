@@ -221,6 +221,7 @@ class NotificationService {
     _log('showTest() completed');
   }
 
+  // Schedule using a local DateTime (interpreted in the device's current timezone)
   static Future<void> scheduleAt(int id, DateTime when, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
     _log('scheduleAt(id=' + id.toString() + ', when=' + when.toIso8601String() + ', title=' + title + ')');
     var tzTime = tz.TZDateTime.from(when, tz.local);
@@ -243,7 +244,7 @@ class NotificationService {
       ),
     );
     try {
-      _log('Attempting exact zonedSchedule');
+      _log('Attempting exact zonedSchedule (local source)');
       await _fln.zonedSchedule(
         id,
         title,
@@ -255,7 +256,7 @@ class NotificationService {
       );
       _log('Exact zonedSchedule call returned successfully');
     } catch (e) {
-      _log('Exact schedule failed: ' + e.toString() + ' — falling back to inexact');
+      _log('Exact schedule (local source) failed: ' + e.toString() + ' — falling back to inexact');
       // Fallback to inexact scheduling if exact is not permitted
       final fallbackDetails = NotificationDetails(
         android: AndroidNotificationDetails(
@@ -434,6 +435,59 @@ class NotificationService {
       _log('Failed to launch battery optimization settings: ' + e.toString());
     }
   }
+  // Schedule using a UTC DateTime; converts to local tz for the trigger
+  static Future<void> scheduleAtUtc(int id, DateTime whenUtc, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+    _log('scheduleAtUtc(id=' + id.toString() + ', whenUtc=' + whenUtc.toIso8601String() + ', title=' + title + ')');
+    var tzTime = tz.TZDateTime.from(whenUtc.toUtc(), tz.local);
+    final now = tz.TZDateTime.now(tz.local);
+    if (!tzTime.isAfter(now)) {
+      tzTime = now.add(const Duration(seconds: 5));
+      _log('Adjusted scheduleAtUtc time to future: ' + tzTime.toString());
+    }
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelId,
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    try {
+      _log('Attempting exact zonedSchedule (UTC source)');
+      await _fln.zonedSchedule(
+        id,
+        title,
+        body,
+        tzTime,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      _log('Exact zonedSchedule (UTC source) returned successfully');
+    } catch (e) {
+      _log('Exact schedule (UTC source) failed: ' + e.toString() + ' — falling back to inexact');
+      final fb = NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelId,
+          icon: '@mipmap/ic_launcher',
+          category: AndroidNotificationCategory.alarm,
+        ),
+      );
+      await _fln.zonedSchedule(
+        id,
+        title,
+        body,
+        tzTime,
+        fb,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      _log('Inexact zonedSchedule (UTC source) returned successfully');
+    }
+  }
+
   static Future<void> scheduleAtAlarmClock(int id, DateTime when, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
     _log('scheduleAtAlarmClock(id=' + id.toString() + ', when=' + when.toIso8601String() + ', title=' + title + ')');
     var tzTime = tz.TZDateTime.from(when, tz.local);
@@ -453,7 +507,7 @@ class NotificationService {
       ),
     );
     try {
-      _log('Attempting zonedSchedule with AndroidScheduleMode.alarmClock');
+      _log('Attempting zonedSchedule with AndroidScheduleMode.alarmClock (local source)');
       await _fln.zonedSchedule(
         id,
         title,
@@ -465,7 +519,43 @@ class NotificationService {
       );
       _log('AlarmClock zonedSchedule call returned successfully');
     } catch (e) {
-      _log('AlarmClock schedule failed: ' + e.toString());
+      _log('AlarmClock schedule (local source) failed: ' + e.toString());
+    }
+  }
+
+  // AlarmClock scheduling using a UTC DateTime; converts to local tz for the trigger
+  static Future<void> scheduleAtAlarmClockUtc(int id, DateTime whenUtc, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+    _log('scheduleAtAlarmClockUtc(id=' + id.toString() + ', whenUtc=' + whenUtc.toIso8601String() + ', title=' + title + ')');
+    var tzTime = tz.TZDateTime.from(whenUtc.toUtc(), tz.local);
+    final now = tz.TZDateTime.now(tz.local);
+    if (!tzTime.isAfter(now)) {
+      tzTime = now.add(const Duration(seconds: 5));
+      _log('Adjusted (alarm clock UTC) time to future: ' + tzTime.toString());
+    }
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelId,
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    try {
+      _log('Attempting zonedSchedule with AndroidScheduleMode.alarmClock (UTC source)');
+      await _fln.zonedSchedule(
+        id,
+        title,
+        body,
+        tzTime,
+        details,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      _log('AlarmClock zonedSchedule (UTC source) returned successfully');
+    } catch (e) {
+      _log('AlarmClock schedule (UTC source) failed: ' + e.toString());
     }
   }
 }

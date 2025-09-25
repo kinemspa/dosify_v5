@@ -4,7 +4,10 @@ Last updated: 2025-09-17
 
 Summary
 - Immediate notifications work reliably.
-- Scheduled notifications (one-shot ~30s and weekly), including AlarmClock mode, previously appeared created but often were not delivered due to OS restrictions. The Settings 30s test now performs permission and exact-alarm preflight checks and uses unique IDs to avoid collisions.
+- Scheduled notifications (one-shot ~30s and weekly), including AlarmClock mode, previously appeared created but often were not delivered due to OS restrictions and timezone edge cases. The Settings 30s tests now:
+  - perform permission and exact-alarm preflight checks,
+  - use unique IDs to avoid collisions,
+  - schedule from a UTC source time and convert to local tz for the trigger to avoid DST/offset bugs.
 - The feature is de‑prioritized until core UX modules are complete.
 
 Environment (reference)
