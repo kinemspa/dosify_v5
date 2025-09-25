@@ -559,5 +559,63 @@ class NotificationService {
       _log('AlarmClock schedule (UTC source) failed: ' + e.toString());
     }
   }
+  }
+
+  // Simpler exact scheduling using local DateTime without tz (for emulator/vendor quirks)
+  static Future<void> scheduleInSecondsExact(int id, int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+    final when = DateTime.now().add(Duration(seconds: seconds));
+    _log('scheduleInSecondsExact(id=' + id.toString() + ', whenLocal=' + when.toIso8601String() + ')');
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelId,
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    try {
+      await _fln.schedule(
+        id,
+        title,
+        body,
+        when,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+      _log('scheduleInSecondsExact scheduled successfully');
+    } catch (e) {
+      _log('scheduleInSecondsExact failed: ' + e.toString());
+    }
+  }
+
+  static Future<void> scheduleInSecondsAlarmClock(int id, int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+    final when = DateTime.now().add(Duration(seconds: seconds));
+    _log('scheduleInSecondsAlarmClock(id=' + id.toString() + ', whenLocal=' + when.toIso8601String() + ')');
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelId,
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    try {
+      await _fln.schedule(
+        id,
+        title,
+        body,
+        when,
+        details,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+      );
+      _log('scheduleInSecondsAlarmClock scheduled successfully');
+    } catch (e) {
+      _log('scheduleInSecondsAlarmClock failed: ' + e.toString());
+    }
+  }
 }
 

@@ -149,12 +149,11 @@ class SettingsPage extends ConsumerWidget {
               }
 
               // Use a unique id to avoid overwriting or colliding with pending requests from earlier tests
-              final whenUtc = DateTime.now().toUtc().add(const Duration(seconds: 30));
               final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
-              await NotificationService.scheduleAtUtc(id, whenUtc, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
+              await NotificationService.scheduleInSecondsExact(id, 30, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
               if (!context.mounted) return;
-              final t = TimeOfDay.fromDateTime(whenUtc.toLocal());
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s)')));
+              final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 30)));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s, exactAllowWhileIdle)')));
               // Dump state to console right after scheduling for diagnostics
               await NotificationService.debugDumpStatus();
             },
@@ -193,13 +192,11 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
-              // Use UTC source time to avoid timezone/DST edge cases
-              final whenUtc = DateTime.now().toUtc().add(const Duration(seconds: 30));
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleAtAlarmClockUtc(id, whenUtc, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
+              await NotificationService.scheduleInSecondsAlarmClock(id, 30, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Scheduled 30s test via AlarmClock (UTC source)')),
+                  const SnackBar(content: Text('Scheduled 30s test via AlarmClock (local, non-tz)')),
                 );
               }
               // Dump state to console right after scheduling for diagnostics
