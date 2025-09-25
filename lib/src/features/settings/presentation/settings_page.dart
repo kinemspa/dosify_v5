@@ -153,7 +153,7 @@ class SettingsPage extends ConsumerWidget {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
               await NotificationService.scheduleAtUtc(id, whenUtc, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
               if (!context.mounted) return;
-              final t = TimeOfDay.fromDateTime(when);
+              final t = TimeOfDay.fromDateTime(whenUtc.toLocal());
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s)')));
             },
             icon: const Icon(Icons.timer_outlined),
