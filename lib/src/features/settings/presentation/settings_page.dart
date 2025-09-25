@@ -109,6 +109,17 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () async {
+              await NotificationService.cancelAll();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cancelled all scheduled notifications')));
+              }
+            },
+            icon: const Icon(Icons.cancel_schedule_send_outlined),
+            label: const Text('Cancel all scheduled notifications'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
               final ok = await NotificationService.ensurePermissionGranted();
               if (!ok && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Notification permission denied')));
@@ -159,6 +170,51 @@ class SettingsPage extends ConsumerWidget {
             },
             icon: const Icon(Icons.timer_outlined),
             label: const Text('Schedule test in 30s'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
+              await NotificationService.scheduleInSecondsExact(id, 5, title: 'Dosifi test', body: 'This should appear in ~5 seconds');
+              if (!context.mounted) return;
+              final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~5s, exactAllowWhileIdle)')));
+              await NotificationService.debugDumpStatus();
+            },
+            icon: const Icon(Icons.timer_5_outlined),
+            label: const Text('Schedule test in 5s (exact)'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
+              await NotificationService.scheduleInSecondsAlarmClock(id, 5, title: 'Dosifi test (alarm clock)', body: '5s via AlarmClock');
+              if (context.mounted) {
+                final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(seconds: 5)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Scheduled 5s test via AlarmClock for ${t.format(context)}')),
+                );
+              }
+              await NotificationService.debugDumpStatus();
+            },
+            icon: const Icon(Icons.alarm_on),
+            label: const Text('Schedule test in 5s (AlarmClock)'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
+              await NotificationService.scheduleInSecondsAlarmClock(id, 30, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Scheduled 30s test via AlarmClock (local, non-tz)')),
+                );
+              }
+              // Dump state to console right after scheduling for diagnostics
+              await NotificationService.debugDumpStatus();
+            },
+            icon: const Icon(Icons.alarm_on),
+            label: const Text('Schedule test in 30s (AlarmClock)'),
           ),
           const SizedBox(height: 12),
           FilledButton.icon(

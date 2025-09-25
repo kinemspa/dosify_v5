@@ -358,6 +358,11 @@ class NotificationService {
     await _fln.cancel(id);
   }
 
+  static Future<void> cancelAll() async {
+    _log('cancelAll()');
+    await _fln.cancelAll();
+  }
+
   static Future<void> debugDumpStatus() async {
     _log('--- Notification Debug Dump START ---');
     try {
