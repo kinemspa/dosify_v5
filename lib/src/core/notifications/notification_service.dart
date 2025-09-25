@@ -559,8 +559,7 @@ class NotificationService {
       _log('AlarmClock schedule (UTC source) failed: ' + e.toString());
     }
   }
-  }
-
+  
   // Simpler exact scheduling using local DateTime without tz (for emulator/vendor quirks)
   static Future<void> scheduleInSecondsExact(int id, int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
     final when = DateTime.now().add(Duration(seconds: seconds));
