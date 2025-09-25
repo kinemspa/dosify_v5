@@ -114,20 +114,47 @@ class SettingsPage extends ConsumerWidget {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Notification permission denied')));
                 return;
               }
-              try {
-                final when = DateTime.now().add(const Duration(seconds: 30));
-                await NotificationService.scheduleAt(999001, when, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
-                if (context.mounted) {
-                  final t = TimeOfDay.fromDateTime(when);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s)')));
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Exact alarms not permitted. Open Alarms & reminders settings.')),
-                  );
-                }
+
+              // Preflight checks to avoid silent drops
+              final enabled = await NotificationService.areNotificationsEnabled();
+              final canExact = await NotificationService.canScheduleExactAlarms();
+              if (!enabled || !canExact) {
+                if (!context.mounted) return;
+                await showDialog<void>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Allow reminders'),
+                    content: Text(!enabled
+                        ? 'Notifications are disabled for Dosifi. Enable notifications to receive the test reminder.'
+                        : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver the test at the exact time.'),
+                    actionsAlignment: MainAxisAlignment.center,
+                    actions: [
+                      TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Later')),
+                      FilledButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          if (!enabled) {
+                            await NotificationService.openChannelSettings('upcoming_dose');
+                          }
+                          if (!canExact) {
+                            await NotificationService.openExactAlarmsSettings();
+                          }
+                        },
+                        child: const Text('Open settings'),
+                      ),
+                    ],
+                  ),
+                );
+                return;
               }
+
+              // Use a unique id to avoid overwriting or colliding with pending requests from earlier tests
+              final when = DateTime.now().add(const Duration(seconds: 30));
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000; // <= 8 digits
+              await NotificationService.scheduleAt(id, when, title: 'Dosifi test', body: 'This should appear in ~30 seconds');
+              if (!context.mounted) return;
+              final t = TimeOfDay.fromDateTime(when);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Scheduled test for ${t.format(context)} (~30s)')));
             },
             icon: const Icon(Icons.timer_outlined),
             label: const Text('Schedule test in 30s'),
