@@ -312,29 +312,46 @@ child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Name *', hint: 'Enter the Medication Name', helper: ''),
-                validator: (v) => (v==null||v.trim().isEmpty)?'Required':null,
-                onChanged: (_) => setState(() {}),
-              ),
-              TextFormField(
-                controller: _manufacturerCtrl,
-                decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Manufacturer', hint: 'Enter the Medication Manufacturer Brand Name', helper: ''),
-                onChanged: (_) => setState(() {}),
-              ),
-              TextFormField(
-                controller: _descriptionCtrl,
-                decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Description', hint: 'Enter the Medication Description', helper: ''),
-                onChanged: (_) => setState(() {}),
-              ),
-              TextFormField(
-                controller: _notesCtrl,
-                decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Notes', hint: 'Enter Notes about the Medication', helper: ''),
-                onChanged: (_) => setState(() {}),
+              // General card
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _nameCtrl,
+                      decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Name *', hint: 'Enter the Medication Name', helper: ''),
+                      validator: (v) => (v==null||v.trim().isEmpty)?'Required':null,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _manufacturerCtrl,
+                      decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Manufacturer', hint: 'Enter the Medication Manufacturer Brand Name', helper: ''),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _descriptionCtrl,
+                      decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Description', hint: 'Enter the Medication Description', helper: ''),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _notesCtrl,
+                      decoration: FormFieldStyler.decoration(context: context, styleIndex: _formStyleIndex, label: 'Notes', hint: 'Enter Notes about the Medication', helper: ''),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 16),
