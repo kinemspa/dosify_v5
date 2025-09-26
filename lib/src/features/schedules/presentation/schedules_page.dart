@@ -86,7 +86,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
 
   Widget _buildToolbar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         children: [
           if (_searchExpanded)

@@ -129,7 +129,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildToolbar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         children: [
           // Search section - expands to layout button when activated
