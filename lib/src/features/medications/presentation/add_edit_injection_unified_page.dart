@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'providers.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 enum InjectionKind { pfs, single, multi }
 
