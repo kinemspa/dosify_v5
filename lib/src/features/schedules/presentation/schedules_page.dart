@@ -296,9 +296,18 @@ class _ScheduleCard extends StatelessWidget {
       elevation: dense ? 1 : 2,
       child: InkWell(
         onTap: () => context.push('/schedules/edit/${s.id}'),
-        child: Padding(
-          padding: dense ? const EdgeInsets.all(6) : const EdgeInsets.fromLTRB(8, 8, 8, 8),
-          child: Column(
+        child: Stack(
+          children: [
+            // Left accent stripe to differentiate Schedules
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(width: 3, color: theme.colorScheme.secondary),
+            ),
+            Padding(
+              padding: dense ? const EdgeInsets.all(6) : const EdgeInsets.fromLTRB(8, 8, 8, 8),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -378,6 +387,8 @@ class _ScheduleCard extends StatelessWidget {
                 ),
             ],
           ),
+            ),
+          ],
         ),
       ),
     );

@@ -146,7 +146,7 @@ class _SuppliesPageState extends State<SuppliesPage> {
 
   Widget _buildToolbar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         children: [
           if (_searchExpanded)
@@ -361,6 +361,13 @@ class _SupplyCard extends StatelessWidget {
         },
         child: Stack(
           children: [
+            // Left accent stripe to differentiate Supplies
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(width: 3, color: theme.colorScheme.tertiary),
+            ),
             Padding(
               padding: dense ? const EdgeInsets.fromLTRB(6, 6, 6, 6) : const EdgeInsets.fromLTRB(8, 8, 8, 28),
               child: Column(
