@@ -71,7 +71,7 @@ class MedicationDetailPage extends StatelessWidget {
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Delete medication?'),
-                      content: Text('Delete "${med.name}"? This will cancel and disable any future schedules for this medication. Past dose history (if any) remains.'),
+                      content: Text('Delete "${med.name}"? This will cancel and DELETE any schedules linked to this medication.'),
                       actions: [
                         TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
                         FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
@@ -81,50 +81,21 @@ class MedicationDetailPage extends StatelessWidget {
                   false;
               if (!ok) return;
 
-              // Cancel notifications and disable (not delete) related schedules so past records remain available
+              // Cancel notifications and DELETE related schedules (fundamental rule)
               final schedulesBox = Hive.box<Schedule>('schedules');
               final related = schedulesBox.values.where((s) => s.medicationId == med.id).toList(growable: false);
-              int disabled = 0;
+              int removed = 0;
               for (final s in related) {
                 await ScheduleScheduler.cancelFor(s.id);
-                // Re-save schedule with active=false to prevent future scheduling but keep for reporting
-                final updated = Schedule(
-                  id: s.id,
-                  name: s.name,
-                  medicationName: s.medicationName,
-                  doseValue: s.doseValue,
-                  doseUnit: s.doseUnit,
-                  minutesOfDay: s.minutesOfDay,
-                  daysOfWeek: s.daysOfWeek,
-                  minutesOfDayUtc: s.minutesOfDayUtc,
-                  daysOfWeekUtc: s.daysOfWeekUtc,
-                  medicationId: s.medicationId,
-                  active: false,
-                  timesOfDay: s.timesOfDay,
-                  timesOfDayUtc: s.timesOfDayUtc,
-                  cycleEveryNDays: s.cycleEveryNDays,
-                  cycleAnchorDate: s.cycleAnchorDate,
-                  doseUnitCode: s.doseUnitCode,
-                  doseMassMcg: s.doseMassMcg,
-                  doseVolumeMicroliter: s.doseVolumeMicroliter,
-                  doseTabletQuarters: s.doseTabletQuarters,
-                  doseCapsules: s.doseCapsules,
-                  doseSyringes: s.doseSyringes,
-                  doseVials: s.doseVials,
-                  doseIU: s.doseIU,
-                  displayUnitCode: s.displayUnitCode,
-                  inputModeCode: s.inputModeCode,
-                  createdAt: s.createdAt,
-                );
-                await schedulesBox.put(updated.id, updated);
-                disabled++;
+                await schedulesBox.delete(s.id);
+                removed++;
               }
 
               await box.delete(med.id);
               if (context.mounted) {
                 context.go('/medications');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Deleted "${med.name}" — disabled $disabled schedule(s)')),
+                  SnackBar(content: Text('Deleted "${med.name}" — removed $removed linked schedule(s)')),
                 );
               }
             },
