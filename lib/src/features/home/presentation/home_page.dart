@@ -8,6 +8,20 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/logo/dosifi-high-resolution-logo-transparent.png',
+              height: 28,
+            ),
+            const SizedBox(width: 8),
+            const Text('Dosifi'),
+          ],
+        ),
+        centerTitle: true,
+      ),
       appBar: const GradientAppBar(title: 'Dosifi v5'),
       body: Padding(
         padding: const EdgeInsets.all(16),

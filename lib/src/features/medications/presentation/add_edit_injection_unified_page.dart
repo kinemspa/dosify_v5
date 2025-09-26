@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
@@ -390,6 +391,7 @@ class _AddEditInjectionUnifiedPageState
                       onChanged: (v) =>
                           setState(() => _strengthUnit = v ?? Unit.mg),
                       decoration: _decDrop(context),
+                      width: 60,
                     ),
                   ),
                   if (_isPerMl)
@@ -789,58 +791,10 @@ class _AddEditInjectionUnifiedPageState
                                                       'Syringe: ${_syringeInline.label} • Fill: ${fmt2(_selectedUnitsInline)} / ${fmt2(totalIU)} IU',
                                                     ),
                                                     const SizedBox(height: 6),
-                                                    LayoutBuilder(
-                                                      builder: (ctx, cons) {
-                                                        final ratio =
-                                                            totalIU <= 0
-                                                            ? 0.0
-                                                            : (_selectedUnitsInline /
-                                                                      totalIU)
-                                                                  .clamp(
-                                                                    0.0,
-                                                                    1.0,
-                                                                  );
-                                                        return Container(
-                                                          height: 16,
-                                                          width:
-                                                              double.infinity,
-                                                          decoration: BoxDecoration(
-                                                            color: Theme.of(context)
-                                                                .colorScheme
-                                                                .surfaceContainerHighest,
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  8,
-                                                                ),
-                                                            border: Border.all(
-                                                              color: Theme.of(context)
-                                                                  .colorScheme
-                                                                  .outlineVariant,
-                                                            ),
-                                                          ),
-                                                          child: Align(
-                                                            alignment: Alignment
-                                                                .centerLeft,
-                                                            child: FractionallySizedBox(
-                                                              widthFactor:
-                                                                  ratio.isNaN
-                                                                  ? 0.0
-                                                                  : ratio,
-                                                              child: Container(
-                                                                decoration: BoxDecoration(
-                                                                  color: Theme.of(
-                                                                    context,
-                                                                  ).colorScheme.primary,
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                        8,
-                                                                      ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
+                                                    SyringeGauge(
+                                                      totalIU: totalIU,
+                                                      fillIU:
+                                                          _selectedUnitsInline,
                                                     ),
                                                   ],
                                                 ),
@@ -935,6 +889,7 @@ class _AddEditInjectionUnifiedPageState
                       onChanged: (v) =>
                           setState(() => _stockUnit = v ?? _stockUnit),
                       decoration: _decDrop(context),
+                      width: 60,
                     ),
                   ),
                   Padding(

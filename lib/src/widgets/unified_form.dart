@@ -143,19 +143,21 @@ class SmallDropdown36<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.decoration,
+    this.width,
   });
 
   final T? value;
   final List<DropdownMenuItem<T>> items;
   final ValueChanged<T?> onChanged;
   final InputDecoration? decoration;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SizedBox(
       height: kFieldHeight,
-      width: kSmallControlWidth,
+      width: width ?? kSmallControlWidth,
       child: DropdownButtonFormField<T>(
         value: value,
         isExpanded: false,
@@ -171,6 +173,109 @@ class SmallDropdown36<T> extends StatelessWidget {
         menuMaxHeight: 320,
       ),
     );
+  }
+}
+
+/// Primary-styled choice chip (selected = primary bg + white text)
+class PrimaryChoiceChip extends StatelessWidget {
+  const PrimaryChoiceChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+  final String label;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedColor = theme.colorScheme.primary;
+    final unselectedColor = theme.colorScheme.surfaceContainerHighest;
+    return ChoiceChip(
+      label: Text(
+        label,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: selected ? Colors.white : theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      selected: selected,
+      onSelected: onSelected,
+      selectedColor: selectedColor,
+      backgroundColor: unselectedColor,
+      showCheckmark: false,
+      side: BorderSide(color: theme.colorScheme.outlineVariant),
+    );
+  }
+}
+
+/// Visual insulin syringe gauge with tick markers
+class SyringeGauge extends StatelessWidget {
+  const SyringeGauge({super.key, required this.totalIU, required this.fillIU});
+  final double totalIU;
+  final double fillIU;
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(double.infinity as double, 26),
+      painter: _SyringePainter(totalIU: totalIU, fillIU: fillIU),
+    );
+  }
+}
+
+class _SyringePainter extends CustomPainter {
+  _SyringePainter({required this.totalIU, required this.fillIU});
+  final double totalIU;
+  final double fillIU;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = Rect.fromLTWH(0, 6, size.width, 14);
+    final radius = const Radius.circular(7);
+    final bg = Paint()
+      ..color = const Color(0xFFEAEAEA)
+      ..style = PaintingStyle.fill;
+    final outline = Paint()
+      ..color = const Color(0xFFB0B0B0)
+      ..style = PaintingStyle.stroke;
+    canvas.drawRRect(RRect.fromRectAndRadius(r, radius), bg);
+    canvas.drawRRect(RRect.fromRectAndRadius(r, radius), outline);
+    // Fill
+    final ratio = totalIU <= 0 ? 0.0 : (fillIU / totalIU).clamp(0.0, 1.0);
+    final fillRect = Rect.fromLTWH(
+      0,
+      6,
+      size.width * (ratio.isNaN ? 0 : ratio),
+      14,
+    );
+    final fillPaint = Paint()..color = Colors.blueAccent;
+    canvas.drawRRect(RRect.fromRectAndRadius(fillRect, radius), fillPaint);
+    // Tick marks every 10 IU, major every 50 IU
+    final tickPaint = Paint()
+      ..color = const Color(0xFF6B6B6B)
+      ..strokeWidth = 1;
+    for (double iu = 0; iu <= totalIU; iu += 10) {
+      final x = (iu / totalIU) * size.width;
+      final isMajor = iu % 50 == 0;
+      final tickTop = isMajor ? 2.0 : 4.0;
+      final tickBottom = isMajor ? 24.0 : 20.0;
+      canvas.drawLine(Offset(x, tickTop), Offset(x, tickBottom), tickPaint);
+      if (isMajor) {
+        final tp = TextPainter(
+          text: TextSpan(
+            text: iu.toStringAsFixed(0),
+            style: const TextStyle(fontSize: 10, color: Color(0xFF6B6B6B)),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        tp.paint(canvas, Offset(x - tp.width / 2, 0));
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SyringePainter oldDelegate) {
+    return oldDelegate.totalIU != totalIU || oldDelegate.fillIU != fillIU;
   }
 }
 
