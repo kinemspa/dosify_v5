@@ -57,16 +57,22 @@ class _StrengthInputState extends State<StrengthInput> {
     final theme = Theme.of(context);
     return Padding(
       padding: padding ?? EdgeInsets.zero,
-child: SizedBox(
+      child: SizedBox(
         height: 36,
         child: DropdownButtonFormField<Unit>(
           value: _unit,
           isExpanded: false,
           alignment: AlignmentDirectional.center,
           menuMaxHeight: 320,
-          selectedItemBuilder: (ctx) => const [
-            Unit.mcg, Unit.mg, Unit.g
-          ].map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')))).toList(),
+          selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+              .map(
+                (u) => Center(
+                  child: Text(
+                    u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'),
+                  ),
+                ),
+              )
+              .toList(),
           items: const [
             DropdownMenuItem(
               value: Unit.mcg,
@@ -89,13 +95,19 @@ child: SizedBox(
             setState(() => _unit = nv);
             widget.onUnitChanged(nv);
           },
-          icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
           style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             labelText: widget.labelUnit,
             isDense: false,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-constraints: const BoxConstraints(minHeight: 36),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            constraints: const BoxConstraints(minHeight: 36),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -103,7 +115,10 @@ constraints: const BoxConstraints(minHeight: 36),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              ),
             ),
             filled: true,
           ),
@@ -121,7 +136,10 @@ constraints: const BoxConstraints(minHeight: 36),
       decoration: InputDecoration(
         labelText: widget.labelAmount,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -139,94 +157,177 @@ constraints: const BoxConstraints(minHeight: 36),
   }
 
   // Variant builders
-  Widget _variant1() { // Compact row: small −/＋ chips, value field, unit dropdown
-    return Row(children: [
-      IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
-      const SizedBox(width: 8),
-      _amountField(width: 100),
-      const SizedBox(width: 8),
-      IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
-      const SizedBox(width: 12),
-      Expanded(child: _unitDropdown()),
-    ]);
+  Widget _variant1() {
+    // Compact row: small −/＋ chips, value field, unit dropdown
+    return Row(
+      children: [
+        IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
+        const SizedBox(width: 8),
+        _amountField(width: 100),
+        const SizedBox(width: 8),
+        IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
+        const SizedBox(width: 12),
+        Expanded(child: _unitDropdown()),
+      ],
+    );
   }
 
-  Widget _variant2() { // Elevated card: big centered value, floating +/-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Stack(alignment: Alignment.center, children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 4, offset: const Offset(0,2))],
-          ),
-          child: Text('$_value', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+  Widget _variant2() {
+    // Elevated card: big centered value, floating +/-
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                '$_value',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            Positioned(
+              left: 8,
+              child: IconButton.filledTonal(
+                onPressed: _dec,
+                icon: const Icon(Icons.remove),
+              ),
+            ),
+            Positioned(
+              right: 8,
+              child: IconButton.filledTonal(
+                onPressed: _inc,
+                icon: const Icon(Icons.add),
+              ),
+            ),
+          ],
         ),
-        Positioned(left: 8, child: IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove))),
-        Positioned(right: 8, child: IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add))),
-      ]),
-      const SizedBox(height: 8),
-      _unitDropdown(),
-    ]);
+        const SizedBox(height: 8),
+        _unitDropdown(),
+      ],
+    );
   }
 
-  Widget _variant3() { // Left rail vertical +/- and value inline, dropdown right
-    return Row(children: [
-      Column(children: [
-        IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.keyboard_arrow_up)),
-        IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.keyboard_arrow_down)),
-      ]),
-      const SizedBox(width: 8),
-      _amountField(width: 90),
-      const SizedBox(width: 12),
-      Expanded(child: _unitDropdown()),
-    ]);
+  Widget _variant3() {
+    // Left rail vertical +/- and value inline, dropdown right
+    return Row(
+      children: [
+        Column(
+          children: [
+            IconButton.filledTonal(
+              onPressed: _inc,
+              icon: const Icon(Icons.keyboard_arrow_up),
+            ),
+            IconButton.filledTonal(
+              onPressed: _dec,
+              icon: const Icon(Icons.keyboard_arrow_down),
+            ),
+          ],
+        ),
+        const SizedBox(width: 8),
+        _amountField(width: 90),
+        const SizedBox(width: 12),
+        Expanded(child: _unitDropdown()),
+      ],
+    );
   }
 
-  Widget _variant4() { // Right rail vertical +/-
-    return Row(children: [
-      _amountField(width: 90),
-      const SizedBox(width: 8),
-      Column(children: [
-        IconButton.filled(onPressed: _inc, icon: const Icon(Icons.add)),
-        const SizedBox(height: 4),
-        IconButton.filled(onPressed: _dec, icon: const Icon(Icons.remove)),
-      ]),
-      const SizedBox(width: 12),
-      Expanded(child: _unitDropdown()),
-    ]);
+  Widget _variant4() {
+    // Right rail vertical +/-
+    return Row(
+      children: [
+        _amountField(width: 90),
+        const SizedBox(width: 8),
+        Column(
+          children: [
+            IconButton.filled(onPressed: _inc, icon: const Icon(Icons.add)),
+            const SizedBox(height: 4),
+            IconButton.filled(onPressed: _dec, icon: const Icon(Icons.remove)),
+          ],
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: _unitDropdown()),
+      ],
+    );
   }
 
-  Widget _variant5() { // Delta grid: −1/＋1/−5/＋5
+  Widget _variant5() {
+    // Delta grid: −1/＋1/−5/＋5
     Widget chip(String label, void Function() onTap) => Padding(
       padding: const EdgeInsets.all(2),
       child: ActionChip(label: Text(label), onPressed: onTap),
     );
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Wrap(children: [
-        chip('−1', () => _dec(1)), chip('+1', () => _inc(1)), chip('−5', () => _dec(5)), chip('+5', () => _inc(5)),
-      ]),
-      const SizedBox(height: 8),
-      Row(children: [ _amountField(width: 100), const SizedBox(width: 12), Expanded(child: _unitDropdown()) ]),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          children: [
+            chip('−1', () => _dec(1)),
+            chip('+1', () => _inc(1)),
+            chip('−5', () => _dec(5)),
+            chip('+5', () => _inc(5)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _amountField(width: 100),
+            const SizedBox(width: 12),
+            Expanded(child: _unitDropdown()),
+          ],
+        ),
+      ],
+    );
   }
 
-  Widget _variant6() { // Quick picks + stepper
+  Widget _variant6() {
+    // Quick picks + stepper
     Widget quick(int v) => Padding(
       padding: const EdgeInsets.only(right: 6),
-      child: FilterChip(label: Text('$v'), selected: _value == v, onSelected: (_) => _applyValue(v)),
+      child: FilterChip(
+        label: Text('$v'),
+        selected: _value == v,
+        onSelected: (_) => _applyValue(v),
+      ),
     );
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [quick(0), quick(5), quick(10), quick(20)]),
-      const SizedBox(height: 8),
-      Row(children: [
-        IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
-        const SizedBox(width: 8), _amountField(width: 100), const SizedBox(width: 8),
-        IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
-        const SizedBox(width: 12), Expanded(child: _unitDropdown()),
-      ]),
-    ]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [quick(0), quick(5), quick(10), quick(20)]),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            IconButton.filledTonal(
+              onPressed: _dec,
+              icon: const Icon(Icons.remove),
+            ),
+            const SizedBox(width: 8),
+            _amountField(width: 100),
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              onPressed: _inc,
+              icon: const Icon(Icons.add),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: _unitDropdown()),
+          ],
+        ),
+      ],
+    );
   }
 
   Widget _pillBtn(String label, VoidCallback onTap) {
@@ -242,7 +343,9 @@ constraints: const BoxConstraints(minHeight: 36),
         ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
+          overlayColor: WidgetStatePropertyAll(
+            theme.colorScheme.primary.withValues(alpha: 0.12),
+          ),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -253,59 +356,94 @@ constraints: const BoxConstraints(minHeight: 36),
     );
   }
 
-  Widget _variant7() { // Pill group (outlined amount field + compact +/- chips)
-    return Row(children: [
-      _pillBtn('−', () => _dec()),
-      const SizedBox(width: 6),
-      SizedBox(width: 96, child: _amountField()),
-      const SizedBox(width: 6),
-      _pillBtn('+', () => _inc()),
-      const SizedBox(width: 12),
-      Expanded(child: _unitDropdown()),
-    ]);
+  Widget _variant7() {
+    // Pill group (outlined amount field + compact +/- chips)
+    return Row(
+      children: [
+        _pillBtn('−', () => _dec()),
+        const SizedBox(width: 6),
+        SizedBox(width: 96, child: _amountField()),
+        const SizedBox(width: 6),
+        _pillBtn('+', () => _inc()),
+        const SizedBox(width: 12),
+        Expanded(child: _unitDropdown()),
+      ],
+    );
   }
 
-  Widget _variant8() { // Two-row layout
-    return Column(children: [
-      Row(children: [
-        IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
-        const SizedBox(width: 8),
-        IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
-      ]),
-      const SizedBox(height: 8),
-      Row(children: [ Expanded(child: _amountField()), const SizedBox(width: 12), Expanded(child: _unitDropdown()) ]),
-    ]);
-  }
-
-  Widget _variant9() { // Minimal inline
-    return Row(children: [
-      IconButton(onPressed: _dec, icon: const Icon(Icons.remove)),
-      _amountField(width: 80),
-      IconButton(onPressed: _inc, icon: const Icon(Icons.add)),
-      const SizedBox(width: 12),
-      Expanded(child: _unitDropdown()),
-    ]);
-  }
-
-  Widget _variant10() { // Card with top-right unit dropdown
-    return Stack(children: [
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(12),
+  Widget _variant8() {
+    // Two-row layout
+    return Column(
+      children: [
+        Row(
+          children: [
+            IconButton.filledTonal(
+              onPressed: _dec,
+              icon: const Icon(Icons.remove),
+            ),
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              onPressed: _inc,
+              icon: const Icon(Icons.add),
+            ),
+          ],
         ),
-        child: Row(children: [
-          IconButton.filled(onPressed: _dec, icon: const Icon(Icons.remove)),
-          const SizedBox(width: 8),
-          _amountField(width: 100),
-          const SizedBox(width: 8),
-          IconButton.filled(onPressed: _inc, icon: const Icon(Icons.add)),
-        ]),
-      ),
-      Positioned(right: 8, top: 8, child: SizedBox(width: 120, child: _unitDropdown())),
-    ]);
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(child: _amountField()),
+            const SizedBox(width: 12),
+            Expanded(child: _unitDropdown()),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _variant9() {
+    // Minimal inline
+    return Row(
+      children: [
+        IconButton(onPressed: _dec, icon: const Icon(Icons.remove)),
+        _amountField(width: 80),
+        IconButton(onPressed: _inc, icon: const Icon(Icons.add)),
+        const SizedBox(width: 12),
+        Expanded(child: _unitDropdown()),
+      ],
+    );
+  }
+
+  Widget _variant10() {
+    // Card with top-right unit dropdown
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              IconButton.filled(
+                onPressed: _dec,
+                icon: const Icon(Icons.remove),
+              ),
+              const SizedBox(width: 8),
+              _amountField(width: 100),
+              const SizedBox(width: 8),
+              IconButton.filled(onPressed: _inc, icon: const Icon(Icons.add)),
+            ],
+          ),
+        ),
+        Positioned(
+          right: 8,
+          top: 8,
+          child: SizedBox(width: 120, child: _unitDropdown()),
+        ),
+      ],
+    );
   }
 
   @override

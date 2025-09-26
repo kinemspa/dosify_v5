@@ -13,6 +13,7 @@ import '../features/medications/presentation/add_edit_tablet_page.dart';
 import '../features/medications/presentation/add_tablet_debug_page.dart';
 import '../features/medications/presentation/add_edit_tablet_general_page.dart';
 import '../features/medications/presentation/add_edit_injection_pfs_page.dart';
+import '../features/medications/presentation/add_edit_injection_unified_page.dart';
 import '../features/medications/presentation/add_edit_injection_single_vial_page.dart';
 import '../features/medications/presentation/add_edit_injection_multi_vial_page.dart';
 import '../features/medications/presentation/reconstitution_calculator_page.dart';
@@ -137,11 +138,13 @@ final router = GoRouter(
           name: 'addTablet',
           // TEMP: route to minimal page with ONLY General card to isolate render
           builder: (context, state) {
-            debugPrint('[ROUTER] /medications/add/tablet -> AddEditTabletGeneralPage');
+            debugPrint(
+              '[ROUTER] /medications/add/tablet -> AddEditTabletGeneralPage',
+            );
             return const AddEditTabletGeneralPage();
           },
         ),
-// removed details-style add route
+        // removed details-style add route
         GoRoute(
           path: '/medications/add/tablet/hybrid',
           name: 'addTabletHybrid',
@@ -151,24 +154,29 @@ final router = GoRouter(
           path: '/medications/add/capsule',
           name: 'addCapsule',
           builder: (context, state) {
-            debugPrint('[ROUTER] /medications/add/capsule -> AddEditCapsulePage');
+            debugPrint(
+              '[ROUTER] /medications/add/capsule -> AddEditCapsulePage',
+            );
             return const AddEditCapsulePage();
           },
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) => const AddEditInjectionPfsPage(),
+          builder: (context, state) =>
+              const AddEditInjectionUnifiedPage(kind: InjectionKind.pfs),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) => const AddEditInjectionSingleVialPage(),
+          builder: (context, state) =>
+              const AddEditInjectionUnifiedPage(kind: InjectionKind.single),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
-          builder: (context, state) => const AddEditInjectionMultiVialPage(),
+          builder: (context, state) =>
+              const AddEditInjectionUnifiedPage(kind: InjectionKind.multi),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
         GoRoute(
@@ -181,7 +189,7 @@ final router = GoRouter(
             return AddEditTabletGeneralPage(initial: med);
           },
         ),
-// removed details-style edit route
+        // removed details-style edit route
         GoRoute(
           path: '/medications/edit/tablet/hybrid/:id',
           name: 'editTabletHybrid',
@@ -269,4 +277,3 @@ final router = GoRouter(
     ),
   ],
 );
-

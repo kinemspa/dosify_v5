@@ -37,7 +37,10 @@ class _FormFieldStylesPageState extends State<FormFieldStylesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Form Field Styles', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Form Field Styles',
+        forceBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: GridView.builder(
@@ -60,7 +63,11 @@ class _FormFieldStylesPageState extends State<FormFieldStylesPage> {
 }
 
 class _StyleCard extends StatelessWidget {
-  const _StyleCard({required this.index, required this.selected, required this.onSelect});
+  const _StyleCard({
+    required this.index,
+    required this.selected,
+    required this.onSelect,
+  });
   final int index;
   final bool selected;
   final VoidCallback onSelect;
@@ -72,7 +79,9 @@ class _StyleCard extends StatelessWidget {
       elevation: selected ? 3 : 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: selected ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2) : BorderSide.none,
+        side: selected
+            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+            : BorderSide.none,
       ),
       child: InkWell(
         onTap: onSelect,
@@ -84,10 +93,19 @@ class _StyleCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text('Style #${index + 1}', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(
+                    'Style #${index + 1}',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const Spacer(),
                   if (selected)
-                    Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary, size: 18),
+                    Icon(
+                      Icons.check_circle,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 18,
+                    ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -97,12 +115,22 @@ class _StyleCard extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-TextFormField(
-                        decoration: FormFieldStyler.decoration(context: context, styleIndex: index, label: 'Name', hint: 'eg. Panadol'),
+                      TextFormField(
+                        decoration: FormFieldStyler.decoration(
+                          context: context,
+                          styleIndex: index,
+                          label: 'Name',
+                          hint: 'eg. Panadol',
+                        ),
                       ),
                       const SizedBox(height: 8),
-TextFormField(
-                        decoration: FormFieldStyler.decoration(context: context, styleIndex: index, label: 'Manufacturer', hint: 'eg. GSK'),
+                      TextFormField(
+                        decoration: FormFieldStyler.decoration(
+                          context: context,
+                          styleIndex: index,
+                          label: 'Manufacturer',
+                          hint: 'eg. GSK',
+                        ),
                       ),
                     ],
                   ),
@@ -111,7 +139,10 @@ TextFormField(
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
-                child: FilledButton.tonal(onPressed: onSelect, child: const Text('Select')),
+                child: FilledButton.tonal(
+                  onPressed: onSelect,
+                  child: const Text('Select'),
+                ),
               ),
             ],
           ),

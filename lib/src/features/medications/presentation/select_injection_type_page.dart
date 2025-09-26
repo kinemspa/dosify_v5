@@ -9,17 +9,39 @@ class SelectInjectionTypePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Select Injection Type', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Select Injection Type',
+        forceBackButton: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: const [
-          _ScreenHeader(icon: Icons.vaccines, title: 'Select injection type', subtitle: 'We’ll tailor fields for the syringe or vial you use'),
+          _ScreenHeader(
+            icon: Icons.vaccines,
+            title: 'Select injection type',
+            subtitle: 'We’ll tailor fields for the syringe or vial you use',
+          ),
           SizedBox(height: 16),
-          _Tile(icon: Icons.vaccines, title: 'Pre-Filled Syringe', subtitle: 'Ready to use single dose syringe', route: '/medications/add/injection/pfs'),
+          _Tile(
+            icon: Icons.vaccines,
+            title: 'Pre-Filled Syringe',
+            subtitle: 'Ready to use single dose syringe',
+            route: '/medications/add/injection/pfs',
+          ),
           SizedBox(height: 16),
-          _Tile(icon: Icons.science, title: 'Single Dose Vial', subtitle: 'One time use vial', route: '/medications/add/injection/single'),
+          _Tile(
+            icon: Icons.science,
+            title: 'Single Dose Vial',
+            subtitle: 'One time use vial',
+            route: '/medications/add/injection/single',
+          ),
           SizedBox(height: 16),
-          _Tile(icon: Icons.science, title: 'Multi Dose Vial', subtitle: 'Liquid vial for multiple doses', route: '/medications/add/injection/multi'),
+          _Tile(
+            icon: Icons.science,
+            title: 'Multi Dose Vial',
+            subtitle: 'Liquid vial for multiple doses',
+            route: '/medications/add/injection/multi',
+          ),
         ],
       ),
     );
@@ -27,7 +49,13 @@ class SelectInjectionTypePage extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  const _Tile({required this.icon, required this.title, required this.subtitle, required this.route, this.primary = false});
+  const _Tile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.route,
+    this.primary = false,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -43,7 +71,9 @@ class _Tile extends StatelessWidget {
     final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
     final titleColor = isPrimary ? cs.onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
-    final badgeBg = isPrimary ? cs.onPrimary.withOpacity(0.15) : cs.primary.withOpacity(0.12);
+    final badgeBg = isPrimary
+        ? cs.onPrimary.withOpacity(0.15)
+        : cs.primary.withOpacity(0.12);
     final badgeIconColor = isPrimary ? cs.onPrimary : cs.primary;
     final chevronColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
 
@@ -77,12 +107,17 @@ class _Tile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800, color: titleColor),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: titleColor,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(color: subtitleColor),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: subtitleColor,
+                      ),
                     ),
                   ],
                 ),
@@ -97,7 +132,11 @@ class _Tile extends StatelessWidget {
 }
 
 class _ScreenHeader extends StatelessWidget {
-  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
+  const _ScreenHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -129,15 +168,25 @@ class _ScreenHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: cs.onPrimary)),
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onPrimary,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onPrimary,
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
-

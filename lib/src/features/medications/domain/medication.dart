@@ -30,8 +30,8 @@ class Medication {
     this.lowStockVialVolumeThresholdMl,
     this.lowStockVialsThresholdCount,
     this.initialStockValue,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   @HiveField(0)
   final String id; // uuid
@@ -153,7 +153,8 @@ class Medication {
       expiry: expiry ?? this.expiry,
       batchNumber: batchNumber ?? this.batchNumber,
       storageLocation: storageLocation ?? this.storageLocation,
-      requiresRefrigeration: requiresRefrigeration ?? this.requiresRefrigeration,
+      requiresRefrigeration:
+          requiresRefrigeration ?? this.requiresRefrigeration,
       storageInstructions: storageInstructions ?? this.storageInstructions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
@@ -166,4 +167,3 @@ class Medication {
     );
   }
 }
-

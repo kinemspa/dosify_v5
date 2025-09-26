@@ -10,26 +10,38 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _fln = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin _fln =
+      FlutterLocalNotificationsPlugin();
   static const MethodChannel _platform = MethodChannel('dosifi/notifications');
   static void _log(String msg) => debugPrint('[NotificationService] ' + msg);
 
-  static const AndroidNotificationChannel _upcomingDose = AndroidNotificationChannel(
-    'upcoming_dose', 'Upcoming Dose',
-    description: 'Reminders for upcoming doses', importance: Importance.high,
-  );
-  static const AndroidNotificationChannel _lowStock = AndroidNotificationChannel(
-    'low_stock', 'Low Stock',
-    description: 'Alerts for low medication stock', importance: Importance.defaultImportance,
-  );
+  static const AndroidNotificationChannel _upcomingDose =
+      AndroidNotificationChannel(
+        'upcoming_dose',
+        'Upcoming Dose',
+        description: 'Reminders for upcoming doses',
+        importance: Importance.high,
+      );
+  static const AndroidNotificationChannel _lowStock =
+      AndroidNotificationChannel(
+        'low_stock',
+        'Low Stock',
+        description: 'Alerts for low medication stock',
+        importance: Importance.defaultImportance,
+      );
   static const AndroidNotificationChannel _expiry = AndroidNotificationChannel(
-    'expiry', 'Expiry',
-    description: 'Alerts for medication expiry', importance: Importance.defaultImportance,
+    'expiry',
+    'Expiry',
+    description: 'Alerts for medication expiry',
+    importance: Importance.defaultImportance,
   );
-  static const AndroidNotificationChannel _testAlarm = AndroidNotificationChannel(
-    'test_alarm', 'Test Alarm (Diagnostics)',
-    description: 'Diagnostics channel for short-delay notification tests', importance: Importance.max,
-  );
+  static const AndroidNotificationChannel _testAlarm =
+      AndroidNotificationChannel(
+        'test_alarm',
+        'Test Alarm (Diagnostics)',
+        description: 'Diagnostics channel for short-delay notification tests',
+        importance: Importance.max,
+      );
 
   static Future<void> init() async {
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -45,13 +57,26 @@ class NotificationService {
     } catch (e) {
       // Fallback to system default if plugin fails
       localTz = 'UTC';
-      _log('Failed to resolve timezone via plugin, defaulting to UTC. Error: ' + e.toString());
+      _log(
+        'Failed to resolve timezone via plugin, defaulting to UTC. Error: ' +
+            e.toString(),
+      );
     }
     tz.setLocalLocation(tz.getLocation(localTz));
     final now = tz.TZDateTime.now(tz.local);
-    _log('tz.local set to ' + tz.local.name + ', now=' + now.toString() + ', offset=' + now.timeZoneOffset.toString());
+    _log(
+      'tz.local set to ' +
+          tz.local.name +
+          ', now=' +
+          now.toString() +
+          ', offset=' +
+          now.timeZoneOffset.toString(),
+    );
 
-    final android = _fln.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final android = _fln
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android != null) {
       _log('Creating Android notification channels');
       await android.createNotificationChannel(_upcomingDose);
@@ -86,7 +111,10 @@ class NotificationService {
 
   static Future<bool> areNotificationsEnabled() async {
     try {
-      final android = _fln.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final android = _fln
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       if (android != null) {
         return await android.areNotificationsEnabled() ?? false;
       }
@@ -158,7 +186,14 @@ class NotificationService {
     for (var i = 0; i < intents.length; i++) {
       final intent = intents[i];
       try {
-        _log('Launching settings intent #' + i.toString() + ': ' + (intent.action ?? '') + ' ' + (intent.data ?? ''));
+        _log(
+          'Launching settings intent #' +
+              i.toString() +
+              ': ' +
+              (intent.action ?? '') +
+              ' ' +
+              (intent.data ?? ''),
+        );
         await intent.launch();
         _log('Settings intent #' + i.toString() + ' launched successfully');
         return;
@@ -170,7 +205,6 @@ class NotificationService {
     }
     _log('All settings intents failed to launch');
   }
-
 
   static Future<void> openChannelSettings(String channelId) async {
     if (!Platform.isAndroid) return;
@@ -205,7 +239,12 @@ class NotificationService {
         await intents[i].launch();
         return;
       } catch (e) {
-        _log('Channel settings intent #' + i.toString() + ' failed: ' + e.toString());
+        _log(
+          'Channel settings intent #' +
+              i.toString() +
+              ' failed: ' +
+              e.toString(),
+        );
       }
     }
   }
@@ -226,7 +265,12 @@ class NotificationService {
     _log('showTest() completed');
   }
 
-  static Future<void> showDelayed(int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+  static Future<void> showDelayed(
+    int seconds, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
     // Best-effort backup banner after a short delay (useful for emulator/OEM diagnostics)
     final id = DateTime.now().millisecondsSinceEpoch % 100000000;
     _log('showDelayed in ' + seconds.toString() + 's, id=' + id.toString());
@@ -245,8 +289,22 @@ class NotificationService {
   }
 
   // Schedule using a local DateTime (interpreted in the device's current timezone)
-  static Future<void> scheduleAt(int id, DateTime when, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
-    _log('scheduleAt(id=' + id.toString() + ', when=' + when.toIso8601String() + ', title=' + title + ')');
+  static Future<void> scheduleAt(
+    int id,
+    DateTime when, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
+    _log(
+      'scheduleAt(id=' +
+          id.toString() +
+          ', when=' +
+          when.toIso8601String() +
+          ', title=' +
+          title +
+          ')',
+    );
     var tzTime = tz.TZDateTime.from(when, tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
@@ -254,7 +312,14 @@ class NotificationService {
       tzTime = now.add(const Duration(seconds: 5));
       _log('Adjusted schedule time to future: ' + tzTime.toString());
     }
-    _log('Computed tzTime=' + tzTime.toString() + ', now=' + now.toString() + ', offset=' + tzTime.timeZoneOffset.toString());
+    _log(
+      'Computed tzTime=' +
+          tzTime.toString() +
+          ', now=' +
+          now.toString() +
+          ', offset=' +
+          tzTime.timeZoneOffset.toString(),
+    );
 
     final exactDetails = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -275,11 +340,16 @@ class NotificationService {
         tzTime,
         exactDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('Exact zonedSchedule call returned successfully');
     } catch (e) {
-      _log('Exact schedule (local source) failed: ' + e.toString() + ' — falling back to inexact');
+      _log(
+        'Exact schedule (local source) failed: ' +
+            e.toString() +
+            ' — falling back to inexact',
+      );
       // Fallback to inexact scheduling if exact is not permitted
       final fallbackDetails = NotificationDetails(
         android: AndroidNotificationDetails(
@@ -295,18 +365,29 @@ class NotificationService {
         body,
         tzTime,
         fallbackDetails,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('Inexact zonedSchedule call returned successfully');
     }
   }
 
-  static tz.TZDateTime _nextForWeekdayAndMinutes(int weekday, int minutesOfDay) {
+  static tz.TZDateTime _nextForWeekdayAndMinutes(
+    int weekday,
+    int minutesOfDay,
+  ) {
     final now = tz.TZDateTime.now(tz.local);
     final hour = minutesOfDay ~/ 60;
     final minute = minutesOfDay % 60;
     // Start from today
-    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     // tz weekday: Monday=1..Sunday=7 same as our mapping
     final daysUntil = (weekday - scheduled.weekday) % 7;
     scheduled = scheduled.add(Duration(days: daysUntil));
@@ -324,9 +405,22 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
-    _log('scheduleWeeklyAt(id=' + id.toString() + ', weekday=' + weekday.toString() + ', minutesOfDay=' + minutesOfDay.toString() + ')');
+    _log(
+      'scheduleWeeklyAt(id=' +
+          id.toString() +
+          ', weekday=' +
+          weekday.toString() +
+          ', minutesOfDay=' +
+          minutesOfDay.toString() +
+          ')',
+    );
     final tzTime = _nextForWeekdayAndMinutes(weekday, minutesOfDay);
-    _log('Computed next weekly tzTime=' + tzTime.toString() + ', offset=' + tzTime.timeZoneOffset.toString());
+    _log(
+      'Computed next weekly tzTime=' +
+          tzTime.toString() +
+          ', offset=' +
+          tzTime.timeZoneOffset.toString(),
+    );
 
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -348,12 +442,17 @@ class NotificationService {
         tzTime,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       );
       _log('Exact weekly zonedSchedule call returned successfully');
     } catch (e) {
-      _log('Exact weekly schedule failed: ' + e.toString() + ' — falling back to inexact');
+      _log(
+        'Exact weekly schedule failed: ' +
+            e.toString() +
+            ' — falling back to inexact',
+      );
       // Fallback to inexact weekly scheduling
       final fbDetails = NotificationDetails(
         android: AndroidNotificationDetails(
@@ -369,7 +468,8 @@ class NotificationService {
         body,
         tzTime,
         fbDetails,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       );
       _log('Inexact weekly zonedSchedule call returned successfully');
@@ -389,19 +489,33 @@ class NotificationService {
   static Future<void> debugDumpStatus() async {
     _log('--- Notification Debug Dump START ---');
     try {
-      final canExact = await _platform.invokeMethod<bool>('canScheduleExactAlarms');
-      _log('canScheduleExactAlarms (platform): ' + (canExact?.toString() ?? 'null'));
+      final canExact = await _platform.invokeMethod<bool>(
+        'canScheduleExactAlarms',
+      );
+      _log(
+        'canScheduleExactAlarms (platform): ' +
+            (canExact?.toString() ?? 'null'),
+      );
     } catch (e) {
       _log('Error querying canScheduleExactAlarms: ' + e.toString());
     }
     try {
-      final importance = await _platform.invokeMethod<int>('getChannelImportance', {'channelId': 'upcoming_dose'});
-      _log('Channel "upcoming_dose" importance: ' + (importance?.toString() ?? 'null'));
+      final importance = await _platform.invokeMethod<int>(
+        'getChannelImportance',
+        {'channelId': 'upcoming_dose'},
+      );
+      _log(
+        'Channel "upcoming_dose" importance: ' +
+            (importance?.toString() ?? 'null'),
+      );
     } catch (e) {
       _log('Error querying channel importance: ' + e.toString());
     }
     try {
-      final android = _fln.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final android = _fln
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       if (android != null) {
         final enabled = await android.areNotificationsEnabled();
         _log('areNotificationsEnabled: ' + enabled.toString());
@@ -415,25 +529,49 @@ class NotificationService {
       final pending = await _fln.pendingNotificationRequests();
       _log('pendingNotificationRequests: ' + pending.length.toString());
       for (final p in pending) {
-        _log('  pending -> id=' + p.id.toString() + ', title=' + (p.title ?? '') + ', body=' + (p.body ?? ''));
+        _log(
+          '  pending -> id=' +
+              p.id.toString() +
+              ', title=' +
+              (p.title ?? '') +
+              ', body=' +
+              (p.body ?? ''),
+        );
       }
     } catch (e) {
       _log('Error fetching pending notifications: ' + e.toString());
     }
     try {
       final now = tz.TZDateTime.now(tz.local);
-      _log('tz.local=' + tz.local.name + ', now=' + now.toString() + ', offset=' + now.timeZoneOffset.toString());
+      _log(
+        'tz.local=' +
+            tz.local.name +
+            ', now=' +
+            now.toString() +
+            ', offset=' +
+            now.timeZoneOffset.toString(),
+      );
     } catch (e) {
       _log('Error reading timezone data: ' + e.toString());
     }
     try {
-      _log('Platform=' + Platform.operatingSystem + ', version=' + Platform.version + ', osVersion=' + Platform.operatingSystemVersion);
+      _log(
+        'Platform=' +
+            Platform.operatingSystem +
+            ', version=' +
+            Platform.version +
+            ', osVersion=' +
+            Platform.operatingSystemVersion,
+      );
     } catch (_) {}
     _log('--- Notification Debug Dump END ---');
   }
+
   static Future<bool> isIgnoringBatteryOptimizations() async {
     try {
-      final res = await _platform.invokeMethod<bool>('isIgnoringBatteryOptimizations');
+      final res = await _platform.invokeMethod<bool>(
+        'isIgnoringBatteryOptimizations',
+      );
       return res == true;
     } catch (e) {
       _log('Error isIgnoringBatteryOptimizations: ' + e.toString());
@@ -463,9 +601,24 @@ class NotificationService {
       _log('Failed to launch battery optimization settings: ' + e.toString());
     }
   }
+
   // Schedule using a UTC DateTime; converts to local tz for the trigger
-  static Future<void> scheduleAtUtc(int id, DateTime whenUtc, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
-    _log('scheduleAtUtc(id=' + id.toString() + ', whenUtc=' + whenUtc.toIso8601String() + ', title=' + title + ')');
+  static Future<void> scheduleAtUtc(
+    int id,
+    DateTime whenUtc, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
+    _log(
+      'scheduleAtUtc(id=' +
+          id.toString() +
+          ', whenUtc=' +
+          whenUtc.toIso8601String() +
+          ', title=' +
+          title +
+          ')',
+    );
     var tzTime = tz.TZDateTime.from(whenUtc.toUtc(), tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
@@ -482,7 +635,14 @@ class NotificationService {
         priority: Priority.high,
       ),
     );
-    _log('Computed tzTime(UTC source)->local=' + tzTime.toString() + ', now=' + now.toString() + ', offset=' + tzTime.timeZoneOffset.toString());
+    _log(
+      'Computed tzTime(UTC source)->local=' +
+          tzTime.toString() +
+          ', now=' +
+          now.toString() +
+          ', offset=' +
+          tzTime.timeZoneOffset.toString(),
+    );
     try {
       _log('Attempting exact zonedSchedule (UTC source)');
       await _fln.zonedSchedule(
@@ -492,11 +652,16 @@ class NotificationService {
         tzTime,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('Exact zonedSchedule (UTC source) returned successfully');
     } catch (e) {
-      _log('Exact schedule (UTC source) failed: ' + e.toString() + ' — falling back to inexact');
+      _log(
+        'Exact schedule (UTC source) failed: ' +
+            e.toString() +
+            ' — falling back to inexact',
+      );
       final fb = NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
@@ -511,14 +676,29 @@ class NotificationService {
         body,
         tzTime,
         fb,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('Inexact zonedSchedule (UTC source) returned successfully');
     }
   }
 
-  static Future<void> scheduleAtAlarmClock(int id, DateTime when, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
-    _log('scheduleAtAlarmClock(id=' + id.toString() + ', when=' + when.toIso8601String() + ', title=' + title + ')');
+  static Future<void> scheduleAtAlarmClock(
+    int id,
+    DateTime when, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
+    _log(
+      'scheduleAtAlarmClock(id=' +
+          id.toString() +
+          ', when=' +
+          when.toIso8601String() +
+          ', title=' +
+          title +
+          ')',
+    );
     var tzTime = tz.TZDateTime.from(when, tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
@@ -536,7 +716,9 @@ class NotificationService {
       ),
     );
     try {
-      _log('Attempting zonedSchedule with AndroidScheduleMode.alarmClock (local source)');
+      _log(
+        'Attempting zonedSchedule with AndroidScheduleMode.alarmClock (local source)',
+      );
       await _fln.zonedSchedule(
         id,
         title,
@@ -544,7 +726,8 @@ class NotificationService {
         tzTime,
         details,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('AlarmClock zonedSchedule call returned successfully');
     } catch (e) {
@@ -553,8 +736,22 @@ class NotificationService {
   }
 
   // AlarmClock scheduling using a UTC DateTime; converts to local tz for the trigger
-  static Future<void> scheduleAtAlarmClockUtc(int id, DateTime whenUtc, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
-    _log('scheduleAtAlarmClockUtc(id=' + id.toString() + ', whenUtc=' + whenUtc.toIso8601String() + ', title=' + title + ')');
+  static Future<void> scheduleAtAlarmClockUtc(
+    int id,
+    DateTime whenUtc, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
+    _log(
+      'scheduleAtAlarmClockUtc(id=' +
+          id.toString() +
+          ', whenUtc=' +
+          whenUtc.toIso8601String() +
+          ', title=' +
+          title +
+          ')',
+    );
     var tzTime = tz.TZDateTime.from(whenUtc.toUtc(), tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
@@ -572,7 +769,9 @@ class NotificationService {
       ),
     );
     try {
-      _log('Attempting zonedSchedule with AndroidScheduleMode.alarmClock (UTC source)');
+      _log(
+        'Attempting zonedSchedule with AndroidScheduleMode.alarmClock (UTC source)',
+      );
       await _fln.zonedSchedule(
         id,
         title,
@@ -580,19 +779,34 @@ class NotificationService {
         tzTime,
         details,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('AlarmClock zonedSchedule (UTC source) returned successfully');
     } catch (e) {
       _log('AlarmClock schedule (UTC source) failed: ' + e.toString());
     }
   }
-  
+
   // Simpler exact scheduling using local DateTime without tz (for emulator/vendor quirks)
-  static Future<void> scheduleInSecondsExact(int id, int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+  static Future<void> scheduleInSecondsExact(
+    int id,
+    int seconds, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
     final nowTz = tz.TZDateTime.now(tz.local);
     final tzWhen = nowTz.add(Duration(seconds: seconds));
-    _log('scheduleInSecondsExact(id=' + id.toString() + ', tzWhen=' + tzWhen.toString() + ', offset=' + tzWhen.timeZoneOffset.toString() + ')');
+    _log(
+      'scheduleInSecondsExact(id=' +
+          id.toString() +
+          ', tzWhen=' +
+          tzWhen.toString() +
+          ', offset=' +
+          tzWhen.timeZoneOffset.toString() +
+          ')',
+    );
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
@@ -611,7 +825,8 @@ class NotificationService {
         tzWhen,
         details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('scheduleInSecondsExact scheduled successfully');
     } catch (e) {
@@ -619,10 +834,24 @@ class NotificationService {
     }
   }
 
-  static Future<void> scheduleInSecondsAlarmClock(int id, int seconds, {required String title, required String body, String channelId = 'upcoming_dose'}) async {
+  static Future<void> scheduleInSecondsAlarmClock(
+    int id,
+    int seconds, {
+    required String title,
+    required String body,
+    String channelId = 'upcoming_dose',
+  }) async {
     final nowTz = tz.TZDateTime.now(tz.local);
     final tzWhen = nowTz.add(Duration(seconds: seconds));
-    _log('scheduleInSecondsAlarmClock(id=' + id.toString() + ', tzWhen=' + tzWhen.toString() + ', offset=' + tzWhen.timeZoneOffset.toString() + ')');
+    _log(
+      'scheduleInSecondsAlarmClock(id=' +
+          id.toString() +
+          ', tzWhen=' +
+          tzWhen.toString() +
+          ', offset=' +
+          tzWhen.timeZoneOffset.toString() +
+          ')',
+    );
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
@@ -641,7 +870,8 @@ class NotificationService {
         tzWhen,
         details,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       _log('scheduleInSecondsAlarmClock scheduled successfully');
     } catch (e) {
@@ -649,4 +879,3 @@ class NotificationService {
     }
   }
 }
-

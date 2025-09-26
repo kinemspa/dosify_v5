@@ -115,4 +115,3 @@ enum MovementReason {
   @HiveField(3)
   other,
 }
-

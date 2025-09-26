@@ -24,10 +24,12 @@ class ReconstitutionCalculatorPage extends StatefulWidget {
   final double? initialVialSize;
 
   @override
-  State<ReconstitutionCalculatorPage> createState() => _ReconstitutionCalculatorPageState();
+  State<ReconstitutionCalculatorPage> createState() =>
+      _ReconstitutionCalculatorPageState();
 }
 
-class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorPage> {
+class _ReconstitutionCalculatorPageState
+    extends State<ReconstitutionCalculatorPage> {
   late final TextEditingController _strengthCtrl;
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
@@ -38,11 +40,17 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
   @override
   void initState() {
     super.initState();
-    _strengthCtrl = TextEditingController(text: widget.initialStrengthValue.toStringAsFixed(2));
-    _doseCtrl = TextEditingController(text: (widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05)).toStringAsFixed(2));
+    _strengthCtrl = TextEditingController(
+      text: widget.initialStrengthValue.toStringAsFixed(2),
+    );
+    _doseCtrl = TextEditingController(
+      text: (widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05))
+          .toStringAsFixed(2),
+    );
     _doseUnit = widget.initialDoseUnit ?? widget.unitLabel;
     _syringe = widget.initialSyringeSize ?? _syringe;
-    if (widget.initialVialSize != null) _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
+    if (widget.initialVialSize != null)
+      _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
     _selectedUnits = _syringe.totalUnits * 0.5;
   }
 
@@ -62,7 +70,11 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
     return value; // units pass-through
   }
 
-  ({double cPerMl, double vialVolume}) _compute({required double S, required double D, required double U}) {
+  ({double cPerMl, double vialVolume}) _compute({
+    required double S,
+    required double D,
+    required double U,
+  }) {
     final c = (100 * D) / max(U, 0.01);
     final v = S / max(c, 0.000001);
     return (cPerMl: c, vialVolume: v);
@@ -136,7 +148,7 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
                   }
                 : null,
             child: const Text('Apply'),
-          )
+          ),
         ],
       ),
       body: ListView(
@@ -152,45 +164,61 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 8),
-          Row(children: [
-            Expanded(
-              child: TextField(
-                controller: _doseCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Desired Dose',
-                  helperText: 'Amount per dose',
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _doseCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Desired Dose',
+                    helperText: 'Amount per dose',
+                  ),
+                  onChanged: (_) => setState(() {}),
                 ),
-                onChanged: (_) => setState(() {}),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: _doseUnit,
-                items: [
-                  if (widget.unitLabel == 'units') const DropdownMenuItem(value: 'units', child: Text('units')),
-                  if (widget.unitLabel != 'units') ...const [
-                    DropdownMenuItem(value: 'mcg', child: Text('mcg')),
-                    DropdownMenuItem(value: 'mg', child: Text('mg')),
-                    DropdownMenuItem(value: 'g', child: Text('g')),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _doseUnit,
+                  items: [
+                    if (widget.unitLabel == 'units')
+                      const DropdownMenuItem(
+                        value: 'units',
+                        child: Text('units'),
+                      ),
+                    if (widget.unitLabel != 'units') ...const [
+                      DropdownMenuItem(value: 'mcg', child: Text('mcg')),
+                      DropdownMenuItem(value: 'mg', child: Text('mg')),
+                      DropdownMenuItem(value: 'g', child: Text('g')),
+                    ],
                   ],
-                ],
-                onChanged: (v) => setState(() => _doseUnit = v!),
-                decoration: const InputDecoration(labelText: 'Dose Unit'),
+                  onChanged: (v) => setState(() => _doseUnit = v!),
+                  decoration: const InputDecoration(labelText: 'Dose Unit'),
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
           const SizedBox(height: 8),
           DropdownButtonFormField<SyringeSizeMl>(
             value: _syringe,
             items: SyringeSizeMl.values
-                .map((s) => DropdownMenuItem(value: s, child: Text('${s.label} • ${s.totalUnits} IU')))
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text('${s.label} • ${s.totalUnits} IU'),
+                  ),
+                )
                 .toList(),
             onChanged: (v) => setState(() {
               _syringe = v!;
               final total = _syringe.totalUnits.toDouble();
-              _selectedUnits = max(_selectedUnits, max(5, (0.05 * total).ceil()).toDouble());
+              _selectedUnits = max(
+                _selectedUnits,
+                max(5, (0.05 * total).ceil()).toDouble(),
+              );
             }),
             decoration: const InputDecoration(labelText: 'Syringe Size'),
           ),
@@ -207,31 +235,40 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
           const SizedBox(height: 16),
           Text('Presets (IU)'),
           const SizedBox(height: 8),
-          Wrap(spacing: 8, runSpacing: 8, children: [
-            _PresetChip(
-              label: 'Concentrated',
-              selected: (_selectedUnits - u1).abs() < 0.01,
-              onTap: () => setState(() => _selectedUnits = u1),
-              subtitle:
-                  '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLow volume; less injection volume',
-            ),
-            _PresetChip(
-              label: 'Standard',
-              selected: (_selectedUnits - u2).abs() < 0.01,
-              onTap: () => setState(() => _selectedUnits = u2),
-              subtitle:
-                  '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nBalanced midpoint',
-            ),
-            _PresetChip(
-              label: 'Diluted',
-              selected: (_selectedUnits - u3).abs() < 0.01,
-              onTap: () => setState(() => _selectedUnits = u3),
-              subtitle:
-                  '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHighest volume within limit',
-            ),
-            if (sliderMax <= 0 || sliderMax.isNaN)
-              _PresetChip(label: 'No valid options', selected: false, onTap: () {}, subtitle: 'Check strength, dose, or syringe size'),
-          ]),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _PresetChip(
+                label: 'Concentrated',
+                selected: (_selectedUnits - u1).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = u1),
+                subtitle:
+                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLow volume; less injection volume',
+              ),
+              _PresetChip(
+                label: 'Standard',
+                selected: (_selectedUnits - u2).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = u2),
+                subtitle:
+                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nBalanced midpoint',
+              ),
+              _PresetChip(
+                label: 'Diluted',
+                selected: (_selectedUnits - u3).abs() < 0.01,
+                onTap: () => setState(() => _selectedUnits = u3),
+                subtitle:
+                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHighest volume within limit',
+              ),
+              if (sliderMax <= 0 || sliderMax.isNaN)
+                _PresetChip(
+                  label: 'No valid options',
+                  selected: false,
+                  onTap: () {},
+                  subtitle: 'Check strength, dose, or syringe size',
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
           Text('Adjust fill (${_syringe.totalUnits} IU max)'),
           Slider(
@@ -255,9 +292,14 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
             children: [
               Text('Summary', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
-              Text('Syringe: ${_syringe.label} • Fill: ${fmt2(_selectedUnits)} IU'),
+              Text(
+                'Syringe: ${_syringe.label} • Fill: ${fmt2(_selectedUnits)} IU',
+              ),
               Text('Concentration: ${fmt2(curC)} ${widget.unitLabel}/mL'),
-              Text('Vial volume: ${fmt2(curV)} mL' + (vialMax != null ? ' (limit ${fmt2(vialMax) } mL)' : '')),
+              Text(
+                'Vial volume: ${fmt2(curV)} mL' +
+                    (vialMax != null ? ' (limit ${fmt2(vialMax)} mL)' : ''),
+              ),
               const SizedBox(height: 8),
               FilledButton(
                 onPressed: (S > 0 && D > 0 && fits)
@@ -300,11 +342,13 @@ class _PresetChip extends StatelessWidget {
       label: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [Text(label), Text(subtitle, style: Theme.of(context).textTheme.bodySmall)],
+        children: [
+          Text(label),
+          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+        ],
       ),
       selected: selected,
       onSelected: (_) => onTap(),
     );
   }
 }
-

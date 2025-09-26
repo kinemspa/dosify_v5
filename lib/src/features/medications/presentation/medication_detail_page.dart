@@ -16,11 +16,15 @@ class MedicationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<Medication>('medications');
-    final med = initial ?? (medicationId != null ? box.get(medicationId!) : null);
+    final med =
+        initial ?? (medicationId != null ? box.get(medicationId!) : null);
 
     if (med == null) {
       return Scaffold(
-        appBar: const GradientAppBar(title: 'Medication', forceBackButton: true),
+        appBar: const GradientAppBar(
+          title: 'Medication',
+          forceBackButton: true,
+        ),
         body: const Center(child: Text('Medication not found')),
       );
     }
@@ -30,21 +34,21 @@ class MedicationDetailPage extends StatelessWidget {
       fontWeight: FontWeight.w700,
       color: cs.onSurfaceVariant,
     );
-    final valueStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: cs.onSurface,
-    );
+    final valueStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(color: cs.onSurface);
 
     Widget row(String label, String? value) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(width: 160, child: Text(label, style: labelStyle)),
-              const SizedBox(width: 8),
-              Expanded(child: Text(value ?? '-', style: valueStyle)),
-            ],
-          ),
-        );
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 160, child: Text(label, style: labelStyle)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value ?? '-', style: valueStyle)),
+        ],
+      ),
+    );
 
     return Scaffold(
       appBar: GradientAppBar(
@@ -56,9 +60,12 @@ class MedicationDetailPage extends StatelessWidget {
               final route = switch (med.form) {
                 MedicationForm.tablet => '/medications/edit/tablet/${med.id}',
                 MedicationForm.capsule => '/medications/edit/capsule/${med.id}',
-                MedicationForm.injectionPreFilledSyringe => '/medications/edit/injection/pfs/${med.id}',
-                MedicationForm.injectionSingleDoseVial => '/medications/edit/injection/single/${med.id}',
-                MedicationForm.injectionMultiDoseVial => '/medications/edit/injection/multi/${med.id}',
+                MedicationForm.injectionPreFilledSyringe =>
+                  '/medications/edit/injection/pfs/${med.id}',
+                MedicationForm.injectionSingleDoseVial =>
+                  '/medications/edit/injection/single/${med.id}',
+                MedicationForm.injectionMultiDoseVial =>
+                  '/medications/edit/injection/multi/${med.id}',
               };
               context.push(route);
             },
@@ -67,14 +74,23 @@ class MedicationDetailPage extends StatelessWidget {
           IconButton(
             tooltip: 'Delete',
             onPressed: () async {
-              final ok = await showDialog<bool>(
+              final ok =
+                  await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Delete medication?'),
-                      content: Text('Delete "${med.name}"? This will cancel and DELETE any schedules linked to this medication.'),
+                      content: Text(
+                        'Delete "${med.name}"? This will cancel and DELETE any schedules linked to this medication.',
+                      ),
                       actions: [
-                        TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-                        FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Delete'),
+                        ),
                       ],
                     ),
                   ) ??
@@ -83,7 +99,9 @@ class MedicationDetailPage extends StatelessWidget {
 
               // Cancel notifications and DELETE related schedules (fundamental rule)
               final schedulesBox = Hive.box<Schedule>('schedules');
-              final related = schedulesBox.values.where((s) => s.medicationId == med.id).toList(growable: false);
+              final related = schedulesBox.values
+                  .where((s) => s.medicationId == med.id)
+                  .toList(growable: false);
               int removed = 0;
               for (final s in related) {
                 await ScheduleScheduler.cancelFor(s.id);
@@ -95,7 +113,11 @@ class MedicationDetailPage extends StatelessWidget {
               if (context.mounted) {
                 context.go('/medications');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Deleted "${med.name}" — removed $removed linked schedule(s)')),
+                  SnackBar(
+                    content: Text(
+                      'Deleted "${med.name}" — removed $removed linked schedule(s)',
+                    ),
+                  ),
                 );
               }
             },
@@ -121,19 +143,36 @@ class MedicationDetailPage extends StatelessWidget {
           const SizedBox(height: 12),
           _section(context, 'Strength & Composition', [
             row('Strength', '${med.strengthValue} ${med.strengthUnit.name}'),
-            if (med.perMlValue != null) row('Per mL', '${med.perMlValue} ${switch (med.strengthUnit) { Unit.mg => 'mg/mL', Unit.mcg => 'mcg/mL', Unit.g => 'g/mL', Unit.units => 'units/mL', Unit.mgPerMl => 'mg/mL', Unit.mcgPerMl => 'mcg/mL', Unit.gPerMl => 'g/mL', Unit.unitsPerMl => 'units/mL' }}'),
+            if (med.perMlValue != null)
+              row(
+                'Per mL',
+                '${med.perMlValue} ${switch (med.strengthUnit) {
+                  Unit.mg => 'mg/mL',
+                  Unit.mcg => 'mcg/mL',
+                  Unit.g => 'g/mL',
+                  Unit.units => 'units/mL',
+                  Unit.mgPerMl => 'mg/mL',
+                  Unit.mcgPerMl => 'mcg/mL',
+                  Unit.gPerMl => 'g/mL',
+                  Unit.unitsPerMl => 'units/mL',
+                }}',
+              ),
           ]),
           const SizedBox(height: 12),
           _section(context, 'Inventory', [
             row('Stock', '${med.stockValue} ${med.stockUnit.name}'),
             row('Low stock enabled', med.lowStockEnabled ? 'Yes' : 'No'),
-            if (med.lowStockThreshold != null) row('Low stock threshold', '${med.lowStockThreshold}'),
+            if (med.lowStockThreshold != null)
+              row('Low stock threshold', '${med.lowStockThreshold}'),
           ]),
           const SizedBox(height: 12),
           _section(context, 'Storage', [
             row('Expiry', med.expiry != null ? _fmtDate(med.expiry!) : null),
             row('Storage location', med.storageLocation),
-            row('Requires refrigeration', med.requiresRefrigeration ? 'Yes' : 'No'),
+            row(
+              'Requires refrigeration',
+              med.requiresRefrigeration ? 'Yes' : 'No',
+            ),
             row('Storage instructions', med.storageInstructions),
           ]),
           const SizedBox(height: 12),
@@ -148,14 +187,18 @@ class MedicationDetailPage extends StatelessWidget {
 }
 
 String _twoDigits(int n) => n.toString().padLeft(2, '0');
-String _fmtDate(DateTime d) => '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
+String _fmtDate(DateTime d) =>
+    '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
 
 Widget _section(BuildContext context, String title, List<Widget> children) {
   final theme = Theme.of(context);
   return Card(
     elevation: 0,
     color: theme.colorScheme.surfaceContainerLowest,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: theme.colorScheme.outlineVariant)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: BorderSide(color: theme.colorScheme.outlineVariant),
+    ),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       child: Column(
@@ -166,10 +209,19 @@ Widget _section(BuildContext context, String title, List<Widget> children) {
               Container(
                 width: 4,
                 height: 18,
-                decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(width: 8),
-              Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: theme.colorScheme.primary)),
+              Text(
+                title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 6),

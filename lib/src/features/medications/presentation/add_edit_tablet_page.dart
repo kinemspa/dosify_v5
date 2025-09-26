@@ -17,14 +17,15 @@ import '../presentation/providers.dart';
 
 class AddEditTabletPage extends ConsumerStatefulWidget {
   const AddEditTabletPage({super.key, this.initial});
-  
+
   final Medication? initial;
 
   @override
   ConsumerState<AddEditTabletPage> createState() => _AddEditTabletPageState();
 }
 
-class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with TickerProviderStateMixin {
+class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
+    with TickerProviderStateMixin {
   // Dynamically size the gradient header to match summary content
   final GlobalKey _summaryAreaKey = GlobalKey();
   double _headerHeight = kToolbarHeight + 84;
@@ -41,6 +42,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
       }
     });
   }
+
   final _formKey = GlobalKey<FormState>();
 
   final _nameCtrl = TextEditingController();
@@ -64,14 +66,17 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
   bool _requiresFridge = false;
   final _storageNotesCtrl = TextEditingController();
 
-
   int _strengthStyleIndex = 0;
   int _formStyleIndex = 0;
 
   Future<void> _loadStylePrefs() async {
     final s = await UserPrefs.getStrengthInputStyle();
     final f = await UserPrefs.getFormFieldStyle();
-    if (mounted) setState(() { _strengthStyleIndex = s; _formStyleIndex = f; });
+    if (mounted)
+      setState(() {
+        _strengthStyleIndex = s;
+        _formStyleIndex = f;
+      });
   }
 
   @override
@@ -120,10 +125,14 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
     final parts = <String>['Tablets'];
     if (_nameCtrl.text.isNotEmpty) parts.add(_nameCtrl.text);
     if (_strengthValueCtrl.text.isNotEmpty) {
-      parts.add('${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unitLabel per tablet');
+      parts.add(
+        '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unitLabel per tablet',
+      );
     }
     if (_stockValueCtrl.text.isNotEmpty) {
-      parts.add('${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} $stockLabel in stock');
+      parts.add(
+        '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} $stockLabel in stock',
+      );
     }
     if (_manufacturerCtrl.text.isNotEmpty) parts.add(_manufacturerCtrl.text);
     if (_requiresFridge) parts.add('Keep refrigerated');
@@ -147,7 +156,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
         ),
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,14 +171,22 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                   // Name and manufacturer
                   RichText(
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                       children: [
                         TextSpan(
                           text: _nameCtrl.text,
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                         if (_manufacturerCtrl.text.isNotEmpty)
-                          TextSpan(text: ' from ${_manufacturerCtrl.text}', style: const TextStyle(color: Colors.white)),
+                          TextSpan(
+                            text: ' from ${_manufacturerCtrl.text}',
+                            style: const TextStyle(color: Colors.white),
+                          ),
                       ],
                     ),
                   ),
@@ -179,9 +196,9 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)} per tablet',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
                       ),
                     ),
                   // Description
@@ -190,7 +207,9 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                       padding: const EdgeInsets.only(top: 1),
                       child: Text(
                         'For ${_descriptionCtrl.text.toLowerCase()}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
                       ),
                     ),
                 ],
@@ -202,7 +221,10 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
               children: [
                 if (_stockValueCtrl.text.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(12),
@@ -240,10 +262,11 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                         if (_expiry != null)
                           Text(
                             DateFormat('MMM yy').format(_expiry!),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                       ],
                     ),
@@ -269,11 +292,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
             padding: const EdgeInsets.only(top: 4),
             child: Row(
               children: [
-                Icon(
-                  Icons.warning_amber,
-                  size: 14,
-                  color: Colors.amber,
-                ),
+                Icon(Icons.warning_amber, size: 14, color: Colors.amber),
                 const SizedBox(width: 4),
                 Text(
                   'Low stock alert at ${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
@@ -307,9 +326,19 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 120, child: Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700))),
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
+            ),
+          ),
           const SizedBox(width: 8),
-          Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ),
         ],
       ),
     );
@@ -355,20 +384,23 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
     return daysUntilExpiry <= 30;
   }
 
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     final repo = ref.read(medicationRepositoryProvider);
 
-    final id = widget.initial?.id ?? (DateTime.now().microsecondsSinceEpoch.toString() +
-        Random().nextInt(9999).toString().padLeft(4, '0'));
+    final id =
+        widget.initial?.id ??
+        (DateTime.now().microsecondsSinceEpoch.toString() +
+            Random().nextInt(9999).toString().padLeft(4, '0'));
 
     final previous = widget.initial;
     final stock = double.parse(_stockValueCtrl.text);
     final initialStock = previous == null
         ? stock
-        : (stock > previous.stockValue ? stock : (previous.initialStockValue ?? previous.stockValue));
+        : (stock > previous.stockValue
+              ? stock
+              : (previous.initialStockValue ?? previous.stockValue));
     final med = Medication(
       id: id,
       form: MedicationForm.tablet,
@@ -389,10 +421,12 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
           ? double.parse(_lowStockCtrl.text)
           : null,
       expiry: _expiry,
-      batchNumber:
-          _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
-      storageLocation:
-          _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty
+          ? null
+          : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty
+          ? null
+          : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _storageNotesCtrl.text.trim().isEmpty
           ? null
@@ -404,9 +438,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text(
           'Confirm Medication',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -438,17 +470,43 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
             // Full details list
             _detailRow('Form', 'Tablet'),
             _detailRow('Name', _nameCtrl.text.trim()),
-            if (_manufacturerCtrl.text.trim().isNotEmpty) _detailRow('Manufacturer', _manufacturerCtrl.text.trim()),
-            _detailRow('Strength', '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)}'),
-            _detailRow('Stock', '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}'),
-            if (_lowStockEnabled && _lowStockCtrl.text.isNotEmpty) _detailRow('Low stock at', '${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}'),
-            _detailRow('Expiry', _expiry != null ? DateTime.now().isAfter(_expiry!) ? 'Expired' : '${_expiry!.day}/${_expiry!.month}/${_expiry!.year}' : 'No expiry'),
-            if (_batchCtrl.text.trim().isNotEmpty) _detailRow('Batch #', _batchCtrl.text.trim()),
-            if (_storageCtrl.text.trim().isNotEmpty) _detailRow('Storage', _storageCtrl.text.trim()),
-            _detailRow('Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
-            if (_storageNotesCtrl.text.trim().isNotEmpty) _detailRow('Storage notes', _storageNotesCtrl.text.trim()),
-            if (_descriptionCtrl.text.trim().isNotEmpty) _detailRow('Description', _descriptionCtrl.text.trim()),
-            if (_notesCtrl.text.trim().isNotEmpty) _detailRow('Notes', _notesCtrl.text.trim()),
+            if (_manufacturerCtrl.text.trim().isNotEmpty)
+              _detailRow('Manufacturer', _manufacturerCtrl.text.trim()),
+            _detailRow(
+              'Strength',
+              '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)}',
+            ),
+            _detailRow(
+              'Stock',
+              '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
+            ),
+            if (_lowStockEnabled && _lowStockCtrl.text.isNotEmpty)
+              _detailRow(
+                'Low stock at',
+                '${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
+              ),
+            _detailRow(
+              'Expiry',
+              _expiry != null
+                  ? DateTime.now().isAfter(_expiry!)
+                        ? 'Expired'
+                        : '${_expiry!.day}/${_expiry!.month}/${_expiry!.year}'
+                  : 'No expiry',
+            ),
+            if (_batchCtrl.text.trim().isNotEmpty)
+              _detailRow('Batch #', _batchCtrl.text.trim()),
+            if (_storageCtrl.text.trim().isNotEmpty)
+              _detailRow('Storage', _storageCtrl.text.trim()),
+            _detailRow(
+              'Requires refrigeration',
+              _requiresFridge ? 'Yes' : 'No',
+            ),
+            if (_storageNotesCtrl.text.trim().isNotEmpty)
+              _detailRow('Storage notes', _storageNotesCtrl.text.trim()),
+            if (_descriptionCtrl.text.trim().isNotEmpty)
+              _detailRow('Description', _descriptionCtrl.text.trim()),
+            if (_notesCtrl.text.trim().isNotEmpty)
+              _detailRow('Notes', _notesCtrl.text.trim()),
           ],
         ),
         actions: [
@@ -504,7 +562,9 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
         ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
+          overlayColor: WidgetStatePropertyAll(
+            theme.colorScheme.primary.withValues(alpha: 0.12),
+          ),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -526,7 +586,10 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       constraints: const BoxConstraints(minHeight: 40),
       floatingLabelBehavior: FloatingLabelBehavior.never,
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(
+        fontSize: 11,
+        color: cs.onSurfaceVariant,
+      ),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -541,10 +604,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
     );
   }
 
-  Widget _rowLabelField({
-    required String label,
-    required Widget field,
-  }) {
+  Widget _rowLabelField({required String label, required Widget field}) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -574,7 +634,9 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
     final isLight = Theme.of(context).brightness == Brightness.light;
     return Card(
       elevation: 0,
-      color: isLight ? theme.colorScheme.primary.withValues(alpha: 0.05) : theme.colorScheme.surfaceContainerHigh,
+      color: isLight
+          ? theme.colorScheme.primary.withValues(alpha: 0.05)
+          : theme.colorScheme.surfaceContainerHigh,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: theme.colorScheme.outlineVariant),
@@ -622,7 +684,10 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
           minimumSize: const Size(30, 30),
         ),
         onPressed: onTap,
-        child: Text(symbol, style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14)),
+        child: Text(
+          symbol,
+          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+        ),
       ),
     );
   }
@@ -634,7 +699,9 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Scaffold(
         appBar: GradientAppBar(
-          title: widget.initial == null ? 'Add Medication - Tablet [HYBRID]' : 'Edit Medication - Tablet [HYBRID]',
+          title: widget.initial == null
+              ? 'Add Medication - Tablet [HYBRID]'
+              : 'Edit Medication - Tablet [HYBRID]',
           forceBackButton: true,
         ),
         body: Container(
@@ -642,7 +709,11 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
           alignment: Alignment.center,
           child: const Text(
             'DEBUG: BODY AREA VISIBLE',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.red),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Colors.red,
+            ),
           ),
         ),
         bottomNavigationBar: SafeArea(
@@ -655,7 +726,10 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
                   onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
                   icon: const Icon(Icons.save),
                   label: Text(widget.initial == null ? 'Save' : 'Update'),
-                  style: FilledButton.styleFrom(minimumSize: const Size(0, 40), padding: const EdgeInsets.symmetric(horizontal: 24)),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 40),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                  ),
                 ),
               ),
             ),
@@ -665,4 +739,3 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage> with Tick
     );
   }
 }
-

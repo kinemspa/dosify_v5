@@ -12,7 +12,9 @@ import '../domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 enum _MedView { list, compact, large }
+
 enum _SortBy { name, stock, strength, expiry }
+
 enum _FilterBy { all, lowStock, expiringSoon, refrigerated }
 
 const double _kLargeCardHeight = 140.0;
@@ -30,13 +32,13 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   _FilterBy _filterBy = _FilterBy.all;
   String _query = '';
   bool _searchExpanded = false;
-  
+
   @override
   void initState() {
     super.initState();
     _loadSavedView();
   }
-  
+
   Future<void> _loadSavedView() async {
     final prefs = await SharedPreferences.getInstance();
     final savedView = prefs.getString('medication_list_view') ?? 'large';
@@ -47,7 +49,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       );
     });
   }
-  
+
   Future<void> _saveView(_MedView view) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('medication_list_view', view.name);
@@ -60,7 +62,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   void _ensureInitialStockValues(List<Medication> items) {
     final box = Hive.box<Medication>('medications');
     for (final m in items) {
-      final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes ||
+      final isCountUnit =
+          m.stockUnit == StockUnit.preFilledSyringes ||
           m.stockUnit == StockUnit.singleDoseVials ||
           m.stockUnit == StockUnit.multiDoseVials ||
           m.stockUnit == StockUnit.tablets ||
@@ -80,6 +83,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<Medication>('medications');
@@ -89,8 +93,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Medication> b, _) {
-          var items = _getFilteredAndSortedMedications(b.values.toList(growable: false));
-          
+          var items = _getFilteredAndSortedMedications(
+            b.values.toList(growable: false),
+          );
+
           // Show initial state if no medications at all, or filtered state if search has no results
           if (items.isEmpty) {
             if (_query.isEmpty && b.values.isEmpty) {
@@ -142,9 +148,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           return Column(
             children: [
               _buildToolbar(context),
-              Expanded(
-                child: _buildMedList(context, items),
-              ),
+              Expanded(child: _buildMedList(context, items)),
             ],
           );
         },
@@ -187,47 +191,58 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search medications',
             ),
-          
+
           // When search is expanded, only show layout button
-          if (_searchExpanded)
-            const SizedBox(width: 8),
+          if (_searchExpanded) const SizedBox(width: 8),
           if (_searchExpanded)
             IconButton(
               icon: Icon(_getViewIcon(_view), color: Colors.grey.shade400),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
-          if (!_searchExpanded)
-            const Spacer(),
-            
-            // Layout toggle as popup menu
+          if (!_searchExpanded) const Spacer(),
+
+          // Layout toggle as popup menu
           if (!_searchExpanded)
             IconButton(
               icon: Icon(_getViewIcon(_view), color: Colors.grey.shade400),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
-            
-          if (!_searchExpanded)
-            const SizedBox(width: 8),
-            
+
+          if (!_searchExpanded) const SizedBox(width: 8),
+
           // Filter button
           if (!_searchExpanded)
             PopupMenuButton<_FilterBy>(
               icon: Icon(
                 Icons.filter_list,
-                color: _filterBy != _FilterBy.all ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
+                color: _filterBy != _FilterBy.all
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey.shade400,
               ),
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
               itemBuilder: (context) => [
-                const PopupMenuItem(value: _FilterBy.all, child: Text('All medications')),
-                const PopupMenuItem(value: _FilterBy.lowStock, child: Text('Low stock')),
-                const PopupMenuItem(value: _FilterBy.expiringSoon, child: Text('Expiring soon')),
-                const PopupMenuItem(value: _FilterBy.refrigerated, child: Text('Refrigerated')),
+                const PopupMenuItem(
+                  value: _FilterBy.all,
+                  child: Text('All medications'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.lowStock,
+                  child: Text('Low stock'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.expiringSoon,
+                  child: Text('Expiring soon'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.refrigerated,
+                  child: Text('Refrigerated'),
+                ),
               ],
             ),
-            
+
           // Sort button
           if (!_searchExpanded)
             PopupMenuButton<_SortBy>(
@@ -235,10 +250,22 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               tooltip: 'Sort medications',
               onSelected: (sort) => setState(() => _sortBy = sort),
               itemBuilder: (context) => [
-                const PopupMenuItem(value: _SortBy.name, child: Text('Sort by name')),
-                const PopupMenuItem(value: _SortBy.stock, child: Text('Sort by stock')),
-                const PopupMenuItem(value: _SortBy.strength, child: Text('Sort by strength')),
-                const PopupMenuItem(value: _SortBy.expiry, child: Text('Sort by expiry')),
+                const PopupMenuItem(
+                  value: _SortBy.name,
+                  child: Text('Sort by name'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.stock,
+                  child: Text('Sort by stock'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.strength,
+                  child: Text('Sort by strength'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.expiry,
+                  child: Text('Sort by expiry'),
+                ),
               ],
             ),
         ],
@@ -246,31 +273,43 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
-  List<Medication> _getFilteredAndSortedMedications(List<Medication> medications) {
+  List<Medication> _getFilteredAndSortedMedications(
+    List<Medication> medications,
+  ) {
     var items = List<Medication>.from(medications);
-    
+
     // Apply search filter
     if (_query.isNotEmpty) {
-      items = items.where((m) => m.name.toLowerCase().contains(_query.toLowerCase())).toList();
+      items = items
+          .where((m) => m.name.toLowerCase().contains(_query.toLowerCase()))
+          .toList();
     }
-    
+
     // Apply category filter
     switch (_filterBy) {
       case _FilterBy.all:
         break;
       case _FilterBy.lowStock:
-        items = items.where((m) => m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)).toList();
+        items = items
+            .where(
+              (m) =>
+                  m.lowStockEnabled &&
+                  m.stockValue <= (m.lowStockThreshold ?? 0),
+            )
+            .toList();
         break;
       case _FilterBy.expiringSoon:
         final now = DateTime.now();
         final soon = now.add(const Duration(days: 30));
-        items = items.where((m) => m.expiry != null && m.expiry!.isBefore(soon)).toList();
+        items = items
+            .where((m) => m.expiry != null && m.expiry!.isBefore(soon))
+            .toList();
         break;
       case _FilterBy.refrigerated:
         items = items.where((m) => m.requiresRefrigeration == true).toList();
         break;
     }
-    
+
     // Apply sorting
     switch (_sortBy) {
       case _SortBy.name:
@@ -291,7 +330,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         });
         break;
     }
-    
+
     return items;
   }
 
@@ -352,7 +391,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   String _stockStatusShortTextFor(Medication m) {
     final baseline = m.lowStockThreshold;
-    bool isCountUnit = m.stockUnit == StockUnit.preFilledSyringes ||
+    bool isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
         m.stockUnit == StockUnit.singleDoseVials ||
         m.stockUnit == StockUnit.multiDoseVials ||
         m.stockUnit == StockUnit.tablets ||
@@ -414,18 +454,25 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, index) {
             final m = items[index];
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
               title: RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   text: m.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                   children: [
                     if (m.manufacturer?.isNotEmpty == true)
                       TextSpan(
                         text: '  •  ${m.manufacturer!}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                   ],
                 ),
@@ -437,9 +484,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   Text(
                     '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} ${_formLabelPlural(m.form)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -448,7 +495,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       Expanded(
                         child: Text(
                           _stockStatusShortTextFor(m),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: _stockStatusColorFor(context, m),
                               ),
@@ -461,10 +509,18 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
                             _formatDateDdMm(m.expiry!),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: (m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30))))
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color:
+                                      (m.expiry!.isBefore(
+                                        DateTime.now().add(
+                                          const Duration(days: 30),
+                                        ),
+                                      ))
                                       ? Theme.of(context).colorScheme.error
-                                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ),
@@ -480,8 +536,13 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         return GridView.builder(
           padding: const EdgeInsets.all(16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 900 ? 4 : MediaQuery.of(context).size.width > 600 ? 3 : 2,
-            childAspectRatio: 2.1, // shorter tiles to reduce bottom empty space while avoiding overflow
+            crossAxisCount: MediaQuery.of(context).size.width > 900
+                ? 4
+                : MediaQuery.of(context).size.width > 600
+                ? 3
+                : 2,
+            childAspectRatio:
+                2.1, // shorter tiles to reduce bottom empty space while avoiding overflow
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
@@ -507,15 +568,16 @@ class _MedCard extends StatelessWidget {
   const _MedCard({required this.m, required this.dense});
   final Medication m;
   final bool dense;
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLowStock = m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
-    final isExpiringSoon = m.expiry != null && 
+    final isLowStock =
+        m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
+    final isExpiringSoon =
+        m.expiry != null &&
         m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
-    
-    
+
     return Card(
       elevation: dense ? 1 : 2,
       child: InkWell(
@@ -531,115 +593,129 @@ class _MedCard extends StatelessWidget {
                 children: [
                   // Header: Name, Type, Status (hidden for dense)
                   if (!dense)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left: gradient logo/avatar (moved from body to header)
-                      Container(
-                        width: dense ? 24 : 36,
-                        height: dense ? 24 : 36,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              theme.colorScheme.primaryContainer,
-                              theme.colorScheme.primary,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(dense ? 8 : 12),
-                        ),
-                        child: Icon(_getFormIcon(m.form), color: Colors.white),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (!dense)
-                            // Name
-                            Text(
-                              m.name,
-                              style: dense
-                                  ? theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)
-                                  : theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left: gradient logo/avatar (moved from body to header)
+                        Container(
+                          width: dense ? 24 : 36,
+                          height: dense ? 24 : 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.colorScheme.primaryContainer,
+                                theme.colorScheme.primary,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            // Manufacturer under name
-                            if (!dense && m.manufacturer?.isNotEmpty == true) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                m.manufacturer!,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                            borderRadius: BorderRadius.circular(dense ? 8 : 12),
+                          ),
+                          child: Icon(
+                            _getFormIcon(m.form),
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (!dense)
+                                // Name
+                                Text(
+                                  m.name,
+                                  style: dense
+                                      ? theme.textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        )
+                                      : theme.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              // Manufacturer under name
+                              if (!dense &&
+                                  m.manufacturer?.isNotEmpty == true) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  m.manufacturer!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              if (!dense) const SizedBox(height: 2),
                             ],
-                            if (!dense) const SizedBox(height: 2),
+                          ),
+                        ),
+                        // Status indicators
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            // Icons + Chip row on the right
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (m.requiresRefrigeration)
+                                  Icon(
+                                    Icons.ac_unit,
+                                    size: dense ? 12 : 14,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                if (isLowStock)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Icon(
+                                      Icons.warning,
+                                      size: dense ? 12 : 14,
+                                      color: theme.colorScheme.error,
+                                    ),
+                                  ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    _getFormLabel(m.form),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color:
+                                          theme.colorScheme.onPrimaryContainer,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (!dense && m.expiry != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  'Expires: ${_formatDateDdMmYy(m.expiry!)}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: isExpiringSoon
+                                        ? theme.colorScheme.error
+                                        : theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
-                      ),
-                      // Status indicators
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Icons + Chip row on the right
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (m.requiresRefrigeration)
-                                Icon(
-                                  Icons.ac_unit,
-                                  size: dense ? 12 : 14,
-                                  color: Colors.blue.shade700,
-                                ),
-                              if (isLowStock)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 4),
-                                  child: Icon(
-                                    Icons.warning,
-                                    size: dense ? 12 : 14,
-                                    color: theme.colorScheme.error,
-                                  ),
-                                ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  _getFormLabel(m.form),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimaryContainer,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (!dense && m.expiry != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Text(
-                                'Expires: ${_formatDateDdMmYy(m.expiry!)}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isExpiringSoon ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  
+                      ],
+                    ),
+
                   const SizedBox(height: 4),
-                  
+
                   // Information grid - simplified for dense cards
                   if (dense)
                     // Ultra-compact dense layout: name + single summary line
@@ -652,7 +728,11 @@ class _MedCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 8),
                           child: Text(
                             m.name,
-                            style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700, height: 1.0, fontSize: 13),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              height: 1.0,
+                              fontSize: 13,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -666,34 +746,46 @@ class _MedCard extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: theme.colorScheme.primaryContainer,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       _getFormAbbr(m.form),
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onPrimaryContainer,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.0,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onPrimaryContainer,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.0,
+                                          ),
                                     ),
                                   ),
                                   if (m.expiry != null)
                                     Padding(
                                       padding: const EdgeInsets.only(right: 8),
                                       child: Text(
-_formatDateDayMonth(m.expiry!),
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: isExpiringSoon ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
-                                          height: 1.0,
-                                          fontSize: 9,
-                                        ),
+                                        _formatDateDayMonth(m.expiry!),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: isExpiringSoon
+                                                  ? theme.colorScheme.error
+                                                  : theme
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                              height: 1.0,
+                                              fontSize: 9,
+                                            ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -733,7 +825,7 @@ _formatDateDayMonth(m.expiry!),
                         ),
                       ],
                     ),
-if (!dense)
+                  if (!dense)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Column(
@@ -779,7 +871,7 @@ if (!dense)
       ),
     );
   }
-  
+
   String _getFormLabel(MedicationForm form) {
     switch (form) {
       case MedicationForm.tablet:
@@ -794,7 +886,7 @@ if (!dense)
         return 'Multi Dose Vial';
     }
   }
-  
+
   // Plural label for strength line
   String _getFormLabelPlural(MedicationForm form) {
     switch (form) {
@@ -842,7 +934,7 @@ if (!dense)
         return Icons.science;
     }
   }
-  
+
   String _getUnitLabel(Unit unit) {
     switch (unit) {
       case Unit.mcg:
@@ -863,7 +955,7 @@ if (!dense)
         return 'units/mL';
     }
   }
-  
+
   String _getStockUnitLabel(StockUnit unit) {
     switch (unit) {
       case StockUnit.tablets:
@@ -884,8 +976,7 @@ if (!dense)
         return 'g';
     }
   }
-  
-  
+
   String _formatExpiryDate(DateTime expiry) {
     final now = DateTime.now();
     final difference = expiry.difference(now).inDays;
@@ -899,7 +990,9 @@ if (!dense)
   Widget _buildScheduleLine(BuildContext context) {
     final theme = Theme.of(context);
     final box = Hive.box<Schedule>('schedules');
-    final linked = box.values.where((s) => s.active && s.medicationId == m.id).toList(growable: false);
+    final linked = box.values
+        .where((s) => s.active && s.medicationId == m.id)
+        .toList(growable: false);
 
     DateTime? next;
     DateTime? last;
@@ -911,7 +1004,11 @@ if (!dense)
     for (final s in linked) {
       final times = s.timesOfDay ?? [s.minutesOfDay];
       for (int d = 0; d < 60; d++) {
-        final date = DateTime(now.year, now.month, now.day).add(Duration(days: d));
+        final date = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).add(Duration(days: d));
         final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
             ? (() {
                 final anchor = s.cycleAnchorDate ?? now;
@@ -923,8 +1020,15 @@ if (!dense)
             : s.daysOfWeek.contains(date.weekday);
         if (onDay) {
           for (final minutes in times) {
-            final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
-            if (dt.isAfter(now) && (next == null || dt.isBefore(next!))) next = dt;
+            final dt = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              minutes ~/ 60,
+              minutes % 60,
+            );
+            if (dt.isAfter(now) && (next == null || dt.isBefore(next!)))
+              next = dt;
           }
         }
       }
@@ -933,7 +1037,11 @@ if (!dense)
     for (final s in linked) {
       final times = s.timesOfDay ?? [s.minutesOfDay];
       for (int d = 0; d < 60; d++) {
-        final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: d));
+        final date = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(Duration(days: d));
         final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
             ? (() {
                 final anchor = s.cycleAnchorDate ?? now;
@@ -945,8 +1053,15 @@ if (!dense)
             : s.daysOfWeek.contains(date.weekday);
         if (onDay) {
           for (final minutes in times) {
-            final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
-            if (dt.isBefore(now) && (last == null || dt.isAfter(last!))) last = dt;
+            final dt = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              minutes ~/ 60,
+              minutes % 60,
+            );
+            if (dt.isBefore(now) && (last == null || dt.isAfter(last!)))
+              last = dt;
           }
         }
       }
@@ -956,7 +1071,9 @@ if (!dense)
     if (linked.isNotEmpty) {
       double occPerWeek = 0;
       for (final s in linked) {
-        final times = (s.timesOfDay?.isNotEmpty == true) ? s.timesOfDay!.length : 1;
+        final times = (s.timesOfDay?.isNotEmpty == true)
+            ? s.timesOfDay!.length
+            : 1;
         if (s.cycleEveryNDays != null && s.cycleEveryNDays! > 0) {
           occPerWeek += (7 / s.cycleEveryNDays!) * times;
         } else {
@@ -970,7 +1087,8 @@ if (!dense)
           daysLeft = (m.stockValue / dailyUse).floor();
           if (daysLeft < 1) daysLeft = 1;
           // For count-based units, estimate doses left ~ current stock
-          final isCountUnit = m.stockUnit == StockUnit.tablets ||
+          final isCountUnit =
+              m.stockUnit == StockUnit.tablets ||
               m.stockUnit == StockUnit.capsules ||
               m.stockUnit == StockUnit.preFilledSyringes ||
               m.stockUnit == StockUnit.singleDoseVials ||
@@ -983,11 +1101,15 @@ if (!dense)
     }
 
     String fmtWhen(DateTime dt) {
-      final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+      final isToday =
+          dt.year == now.year && dt.month == now.month && dt.day == now.day;
       final time = DateFormat('HH:mm').format(dt);
       if (isToday) return 'Today $time';
       final tomorrow = now.add(const Duration(days: 1));
-      final isTomorrow = dt.year == tomorrow.year && dt.month == tomorrow.month && dt.day == tomorrow.day;
+      final isTomorrow =
+          dt.year == tomorrow.year &&
+          dt.month == tomorrow.month &&
+          dt.day == tomorrow.day;
       if (isTomorrow) return 'Tomorrow $time';
       return DateFormat('dd MMM, HH:mm').format(dt);
     }
@@ -1002,7 +1124,9 @@ if (!dense)
     final nextStr = next != null ? fmtWhen(next!) : '—';
     final lastsStr = daysLeft != null ? fmtDur(daysLeft!) : '—';
 
-    final runOutDate = daysLeft != null ? DateFormat('dd MMM').format(now.add(Duration(days: daysLeft!))) : '—';
+    final runOutDate = daysLeft != null
+        ? DateFormat('dd MMM').format(now.add(Duration(days: daysLeft!)))
+        : '—';
     final dosesStr = dosesLeft != null ? '~$dosesLeft left' : '~$lastsStr left';
     final summaryText = 'Last: $lastStr  •  Next: $nextStr';
 
@@ -1010,7 +1134,9 @@ if (!dense)
       padding: const EdgeInsets.only(right: 8),
       child: Text(
         summaryText,
-        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -1025,10 +1151,17 @@ if (!dense)
   String _stockStatusText() {
     // For count-based units, express as X out of Y remaining; Y = originally entered amount when available
     String baseUnit = _getStockUnitLabel(m.stockUnit);
-    final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes || m.stockUnit == StockUnit.singleDoseVials || m.stockUnit == StockUnit.multiDoseVials || m.stockUnit == StockUnit.tablets || m.stockUnit == StockUnit.capsules;
+    final isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
+        m.stockUnit == StockUnit.singleDoseVials ||
+        m.stockUnit == StockUnit.multiDoseVials ||
+        m.stockUnit == StockUnit.tablets ||
+        m.stockUnit == StockUnit.capsules;
     if (isCountUnit) {
       final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0) ? m.initialStockValue!.ceil() : current; // fallback to current if unknown
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceil()
+          : current; // fallback to current if unknown
       return '$current/$total $baseUnit remaining';
     }
     return '${fmt2(m.stockValue)} $baseUnit remaining';
@@ -1036,10 +1169,17 @@ if (!dense)
 
   String _stockStatusShortText() {
     // Shorter form for dense tiles; Y = originally entered amount when available
-    final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes || m.stockUnit == StockUnit.singleDoseVials || m.stockUnit == StockUnit.multiDoseVials || m.stockUnit == StockUnit.tablets || m.stockUnit == StockUnit.capsules;
+    final isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
+        m.stockUnit == StockUnit.singleDoseVials ||
+        m.stockUnit == StockUnit.multiDoseVials ||
+        m.stockUnit == StockUnit.tablets ||
+        m.stockUnit == StockUnit.capsules;
     if (isCountUnit) {
       final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0) ? m.initialStockValue!.ceil() : current;
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceil()
+          : current;
       return '$current/$total ${_getStockUnitLabel(m.stockUnit)}';
     }
     return '${fmt2(m.stockValue)} ${_getStockUnitLabel(m.stockUnit)}';
@@ -1061,11 +1201,11 @@ if (!dense)
     return theme.colorScheme.onSurface;
   }
 
-
   Future<void> _onTake(BuildContext context) async {
     final box = Hive.box<Medication>('medications');
     // Decrement by 1 for count-based units; otherwise decrement by 1.0 generically
-    final isCountUnit = m.stockUnit == StockUnit.tablets ||
+    final isCountUnit =
+        m.stockUnit == StockUnit.tablets ||
         m.stockUnit == StockUnit.capsules ||
         m.stockUnit == StockUnit.preFilledSyringes ||
         m.stockUnit == StockUnit.singleDoseVials ||
@@ -1075,15 +1215,26 @@ if (!dense)
     final updated = m.copyWith(stockValue: newValue < 0 ? 0 : newValue);
     await box.put(updated.id, updated);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Recorded dose. Stock: ${newValue < 0 ? 0 : newValue} ${_getStockUnitLabel(m.stockUnit)}')),
+      SnackBar(
+        content: Text(
+          'Recorded dose. Stock: ${newValue < 0 ? 0 : newValue} ${_getStockUnitLabel(m.stockUnit)}',
+        ),
+      ),
     );
   }
 
-  void _onDoseAction(BuildContext context, String action, DateTime scheduledAt) {
+  void _onDoseAction(
+    BuildContext context,
+    String action,
+    DateTime scheduledAt,
+  ) {
     // Placeholder: integrate with schedules/logging later
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${action[0].toUpperCase()}${action.substring(1)} dose @ ${DateFormat('dd MMM, HH:mm').format(scheduledAt)}')),
+      SnackBar(
+        content: Text(
+          '${action[0].toUpperCase()}${action.substring(1)} dose @ ${DateFormat('dd MMM, HH:mm').format(scheduledAt)}',
+        ),
+      ),
     );
   }
 }
-

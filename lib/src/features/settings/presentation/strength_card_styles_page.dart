@@ -10,7 +10,10 @@ class StrengthCardStylesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Strength Card Styles', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Strength Card Styles',
+        forceBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -18,9 +21,9 @@ class StrengthCardStylesPage extends StatelessWidget {
           children: [
             Text(
               'Choose Your Preferred Strength Card Style',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
@@ -34,8 +37,16 @@ class StrengthCardStylesPage extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final width = constraints.maxWidth;
-                  final columns = width > 900 ? 3 : width > 600 ? 2 : 1;
-                  final aspect = columns == 1 ? 2.2 : columns == 2 ? 1.3 : 1.2;
+                  final columns = width > 900
+                      ? 3
+                      : width > 600
+                      ? 2
+                      : 1;
+                  final aspect = columns == 1
+                      ? 2.2
+                      : columns == 2
+                      ? 1.3
+                      : 1.2;
                   return GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: columns,
@@ -47,7 +58,10 @@ class StrengthCardStylesPage extends StatelessWidget {
                     itemBuilder: (context, index) => _StyleCard(
                       style: StrengthCardStyle.values[index],
                       isSelected: false, // TODO: Add persistence
-                      onTap: () => _selectStyle(context, StrengthCardStyle.values[index]),
+                      onTap: () => _selectStyle(
+                        context,
+                        StrengthCardStyle.values[index],
+                      ),
                     ),
                   );
                 },
@@ -124,7 +138,7 @@ class _StyleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: isSelected ? 4 : 1,
       child: InkWell(
@@ -133,7 +147,7 @@ class _StyleCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: isSelected 
+            border: isSelected
                 ? Border.all(color: theme.colorScheme.primary, width: 2)
                 : null,
           ),
@@ -162,11 +176,9 @@ class _StyleCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Preview of the style
-              Expanded(
-                child: _buildStylePreview(context, style),
-              ),
+              Expanded(child: _buildStylePreview(context, style)),
             ],
           ),
         ),
@@ -176,11 +188,11 @@ class _StyleCard extends StatelessWidget {
 
   Widget _buildStylePreview(BuildContext context, StrengthCardStyle style) {
     final theme = Theme.of(context);
-    
+
     // Mock data for preview
     const strengthValue = 250.0;
     const strengthUnit = Unit.mg;
-    
+
     switch (style) {
       case StrengthCardStyle.classic:
         return Container(
@@ -210,7 +222,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.modern:
         return Container(
           decoration: BoxDecoration(
@@ -223,7 +235,11 @@ class _StyleCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.medication, size: 12, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.medication,
+                    size: 12,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'Strength',
@@ -246,7 +262,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.minimal:
         return Container(
           padding: const EdgeInsets.all(6),
@@ -272,7 +288,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.outlined:
         return Container(
           decoration: BoxDecoration(
@@ -302,7 +318,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.elevated:
         return Container(
           decoration: BoxDecoration(
@@ -346,7 +362,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.gradient:
         return Container(
           decoration: BoxDecoration(
@@ -382,7 +398,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.compact:
         return Container(
           decoration: BoxDecoration(
@@ -394,9 +410,7 @@ class _StyleCard extends StatelessWidget {
             children: [
               Text(
                 'Strength: ',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
               ),
               Text(
                 '${fmt2(strengthValue)} mg',
@@ -408,7 +422,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.detailed:
         return Container(
           decoration: BoxDecoration(
@@ -447,7 +461,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.rounded:
         return Container(
           decoration: BoxDecoration(
@@ -484,7 +498,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case StrengthCardStyle.squared:
         return Container(
           decoration: BoxDecoration(
@@ -495,11 +509,7 @@ class _StyleCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                color: theme.colorScheme.primary,
-                height: 2,
-                width: 20,
-              ),
+              Container(color: theme.colorScheme.primary, height: 2, width: 20),
               const SizedBox(height: 4),
               Text(
                 'STRENGTH',

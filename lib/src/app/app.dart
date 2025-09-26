@@ -11,20 +11,27 @@ class DosifiApp extends ConsumerWidget {
     const primarySeed = Color(0xFF09A8BD);
     // const secondary = Color(0xFFEC873F);
 
-    final schemeLight = ColorScheme.fromSeed(seedColor: primarySeed, brightness: Brightness.light).copyWith(
-      // Pin the primary color exactly to the brand seed to avoid tonal shifts
-      primary: primarySeed,
-    );
+    final schemeLight =
+        ColorScheme.fromSeed(
+          seedColor: primarySeed,
+          brightness: Brightness.light,
+        ).copyWith(
+          // Pin the primary color exactly to the brand seed to avoid tonal shifts
+          primary: primarySeed,
+        );
     final baseLight = ThemeData(
       colorScheme: schemeLight,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-final lightTextTheme = baseLight.textTheme.copyWith(
+    final lightTextTheme = baseLight.textTheme.copyWith(
       bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
       bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
-      titleSmall: baseLight.textTheme.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w700),
+      titleSmall: baseLight.textTheme.titleSmall?.copyWith(
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+      ),
       labelLarge: baseLight.textTheme.labelLarge?.copyWith(fontSize: 12),
     );
     final light = baseLight.copyWith(
@@ -38,11 +45,25 @@ final lightTextTheme = baseLight.textTheme.copyWith(
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F3D5B),
         indicatorColor: Colors.transparent,
-        indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-iconTheme: WidgetStateProperty.resolveWith((states) =>
-            IconThemeData(color: states.contains(WidgetState.selected) ? schemeLight.primary : Colors.white70, size: 22)),
-labelTextStyle: WidgetStateProperty.resolveWith((states) =>
-            TextStyle(color: states.contains(WidgetState.selected) ? schemeLight.primary : Colors.white70, fontSize: 10)),
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? schemeLight.primary
+                : Colors.white70,
+            size: 22,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.selected)
+                ? schemeLight.primary
+                : Colors.white70,
+            fontSize: 10,
+          ),
+        ),
       ),
       listTileTheme: const ListTileThemeData(
         dense: true,
@@ -62,16 +83,23 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: baseLight.colorScheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: baseLight.colorScheme.primary,
+            width: 2,
+          ),
         ),
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
-hintStyle: lightTextTheme.bodyMedium?.copyWith(color: baseLight.colorScheme.onSurfaceVariant),
-        helperStyle: lightTextTheme.bodySmall?.copyWith(color: baseLight.colorScheme.onSurfaceVariant.withOpacity(0.60)),
+        hintStyle: lightTextTheme.bodyMedium?.copyWith(
+          color: baseLight.colorScheme.onSurfaceVariant,
+        ),
+        helperStyle: lightTextTheme.bodySmall?.copyWith(
+          color: baseLight.colorScheme.onSurfaceVariant.withOpacity(0.60),
+        ),
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: baseLight.colorScheme.primary,
-selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
+        selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
         selectionHandleColor: baseLight.colorScheme.primary,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -104,15 +132,20 @@ selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
       checkboxTheme: CheckboxThemeData(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return baseLight.colorScheme.primary;
+          if (states.contains(WidgetState.selected))
+            return baseLight.colorScheme.primary;
           return Colors.transparent; // no fill when unchecked
         }),
         checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
+          final color = baseLight.colorScheme.onSurfaceVariant.withValues(
+            alpha: 0.50,
+          );
           return BorderSide(color: color, width: 1.5);
         }),
-        overlayColor: WidgetStatePropertyAll(baseLight.colorScheme.primary.withValues(alpha: 0.08)),
+        overlayColor: WidgetStatePropertyAll(
+          baseLight.colorScheme.primary.withValues(alpha: 0.08),
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseLight.colorScheme.primary,
@@ -120,19 +153,23 @@ selectionColor: baseLight.colorScheme.primary.withValues(alpha: 0.3),
       ),
     );
 
-    final schemeDark = ColorScheme.fromSeed(seedColor: primarySeed, brightness: Brightness.dark).copyWith(
-      primary: primarySeed,
-    );
+    final schemeDark = ColorScheme.fromSeed(
+      seedColor: primarySeed,
+      brightness: Brightness.dark,
+    ).copyWith(primary: primarySeed);
     final baseDark = ThemeData(
       colorScheme: schemeDark,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-final darkTextTheme = baseDark.textTheme.copyWith(
+    final darkTextTheme = baseDark.textTheme.copyWith(
       bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 13),
       bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
-      titleSmall: baseDark.textTheme.titleSmall?.copyWith(fontSize: 15, fontWeight: FontWeight.w700),
+      titleSmall: baseDark.textTheme.titleSmall?.copyWith(
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+      ),
       labelLarge: baseDark.textTheme.labelLarge?.copyWith(fontSize: 12),
     );
     final dark = baseDark.copyWith(
@@ -146,11 +183,25 @@ final darkTextTheme = baseDark.textTheme.copyWith(
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F3D5B),
         indicatorColor: Colors.transparent,
-        indicatorShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
-iconTheme: WidgetStateProperty.resolveWith((states) =>
-            IconThemeData(color: states.contains(WidgetState.selected) ? schemeDark.primary : Colors.white70, size: 22)),
-labelTextStyle: WidgetStateProperty.resolveWith((states) =>
-            TextStyle(color: states.contains(WidgetState.selected) ? schemeDark.primary : Colors.white70, fontSize: 10)),
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? schemeDark.primary
+                : Colors.white70,
+            size: 22,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.selected)
+                ? schemeDark.primary
+                : Colors.white70,
+            fontSize: 10,
+          ),
+        ),
       ),
       listTileTheme: const ListTileThemeData(
         dense: true,
@@ -174,12 +225,16 @@ labelTextStyle: WidgetStateProperty.resolveWith((states) =>
         ),
         filled: true,
         fillColor: baseDark.colorScheme.surfaceContainerHigh,
-hintStyle: darkTextTheme.bodyMedium?.copyWith(color: baseDark.colorScheme.onSurfaceVariant),
-        helperStyle: darkTextTheme.bodySmall?.copyWith(color: baseDark.colorScheme.onSurfaceVariant.withOpacity(0.60)),
+        hintStyle: darkTextTheme.bodyMedium?.copyWith(
+          color: baseDark.colorScheme.onSurfaceVariant,
+        ),
+        helperStyle: darkTextTheme.bodySmall?.copyWith(
+          color: baseDark.colorScheme.onSurfaceVariant.withOpacity(0.60),
+        ),
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: baseDark.colorScheme.primary,
-selectionColor: baseDark.colorScheme.primary.withValues(alpha: 0.3),
+        selectionColor: baseDark.colorScheme.primary.withValues(alpha: 0.3),
         selectionHandleColor: baseDark.colorScheme.primary,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -212,15 +267,20 @@ selectionColor: baseDark.colorScheme.primary.withValues(alpha: 0.3),
       checkboxTheme: CheckboxThemeData(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return baseDark.colorScheme.primary;
+          if (states.contains(WidgetState.selected))
+            return baseDark.colorScheme.primary;
           return Colors.transparent;
         }),
         checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
+          final color = baseDark.colorScheme.onSurfaceVariant.withValues(
+            alpha: 0.50,
+          );
           return BorderSide(color: color, width: 1.5);
         }),
-        overlayColor: WidgetStatePropertyAll(baseDark.colorScheme.primary.withValues(alpha: 0.12)),
+        overlayColor: WidgetStatePropertyAll(
+          baseDark.colorScheme.primary.withValues(alpha: 0.12),
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseDark.colorScheme.primary,
@@ -238,4 +298,3 @@ selectionColor: baseDark.colorScheme.primary.withValues(alpha: 0.3),
     );
   }
 }
-

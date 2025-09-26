@@ -31,7 +31,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   late final TextEditingController _doseUnit;
   String? _medicationId;
   final List<TimeOfDay> _times = [const TimeOfDay(hour: 9, minute: 0)];
-  final Set<int> _days = {1,2,3,4,5,6,7};
+  final Set<int> _days = {1, 2, 3, 4, 5, 6, 7};
   bool _active = true;
   bool _useCycle = false;
   final TextEditingController _cycleN = TextEditingController(text: '2');
@@ -88,13 +88,18 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   }
 
   Future<void> _pickTimeAt(int index) async {
-    final picked = await showTimePicker(context: context, initialTime: _times[index]);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _times[index],
+    );
     if (picked != null) setState(() => _times[index] = picked);
   }
 
   Future<void> _pickMedication() async {
     if (!mounted) return;
-    final selected = await context.push<Medication>('/schedules/select-medication');
+    final selected = await context.push<Medication>(
+      '/schedules/select-medication',
+    );
     if (selected != null) {
       setState(() {
         _selectedMed = selected;
@@ -139,14 +144,21 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
 
     // If name was auto-generated, ask user if they want to edit before saving
     if (_nameAuto) {
-      final proceed = await showDialog<bool>(
+      final proceed =
+          await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
               title: const Text('Use this schedule name?'),
               content: Text(_name.text.isEmpty ? '(empty)' : _name.text),
               actions: [
-                TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Edit')),
-                FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Looks good')),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Edit'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Looks good'),
+                ),
               ],
             ),
           ) ??
@@ -156,13 +168,20 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       }
     }
 
-    final id = widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
+    final id =
+        widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
     final minutesList = _times.map((t) => t.hour * 60 + t.minute).toList();
 
     // Compute UTC fields from the first time and days as legacy, plus per-time UTC list
     final now = DateTime.now();
     int computeUtcMinutes(int localMinutes) {
-      final localToday = DateTime(now.year, now.month, now.day, localMinutes ~/ 60, localMinutes % 60);
+      final localToday = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        localMinutes ~/ 60,
+        localMinutes % 60,
+      );
       final utc = localToday.toUtc();
       return utc.hour * 60 + utc.minute;
     }
@@ -171,7 +190,13 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       final List<int> utcDays = [];
       for (final d in localDays) {
         final delta = (d - now.weekday) % 7;
-        final candidate = DateTime(now.year, now.month, now.day + delta, localMinutes ~/ 60, localMinutes % 60);
+        final candidate = DateTime(
+          now.year,
+          now.month,
+          now.day + delta,
+          localMinutes ~/ 60,
+          localMinutes % 60,
+        );
         final utc = candidate.toUtc();
         utcDays.add(utc.weekday);
       }
@@ -220,7 +245,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             inputModeCode = DoseInputMode.tablets.index;
           } else {
             // mass → compute tablets equivalence
-            final desiredMcg = switch (unitStr) { 'mcg' => doseVal, 'mg' => doseVal * 1000, 'g' => doseVal * 1e6, _ => doseVal };
+            final desiredMcg = switch (unitStr) {
+              'mcg' => doseVal,
+              'mg' => doseVal * 1000,
+              'g' => doseVal * 1e6,
+              _ => doseVal,
+            };
             doseMassMcg = desiredMcg.round();
             final perTabMcg = switch (med.strengthUnit) {
               Unit.mcg => med.strengthValue,
@@ -233,7 +263,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               Unit.unitsPerMl => med.strengthValue,
             };
             doseTabletQuarters = ((desiredMcg / perTabMcg) * 4).round();
-            doseUnitCode = switch (unitStr) { 'mcg' => DoseUnit.mcg.index, 'mg' => DoseUnit.mg.index, 'g' => DoseUnit.g.index, _ => DoseUnit.mg.index };
+            doseUnitCode = switch (unitStr) {
+              'mcg' => DoseUnit.mcg.index,
+              'mg' => DoseUnit.mg.index,
+              'g' => DoseUnit.g.index,
+              _ => DoseUnit.mg.index,
+            };
             displayUnitCode = doseUnitCode;
             inputModeCode = DoseInputMode.mass.index;
           }
@@ -253,7 +288,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             displayUnitCode = DoseUnit.capsules.index;
             inputModeCode = DoseInputMode.capsules.index;
           } else {
-            final desiredMcg = switch (unitStr) { 'mcg' => doseVal, 'mg' => doseVal * 1000, 'g' => doseVal * 1e6, _ => doseVal };
+            final desiredMcg = switch (unitStr) {
+              'mcg' => doseVal,
+              'mg' => doseVal * 1000,
+              'g' => doseVal * 1e6,
+              _ => doseVal,
+            };
             doseMassMcg = desiredMcg.round();
             final perCapMcg = switch (med.strengthUnit) {
               Unit.mcg => med.strengthValue,
@@ -263,7 +303,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               _ => med.strengthValue,
             };
             doseCapsules = (desiredMcg / perCapMcg).round();
-            doseUnitCode = switch (unitStr) { 'mcg' => DoseUnit.mcg.index, 'mg' => DoseUnit.mg.index, 'g' => DoseUnit.g.index, _ => DoseUnit.mg.index };
+            doseUnitCode = switch (unitStr) {
+              'mcg' => DoseUnit.mcg.index,
+              'mg' => DoseUnit.mg.index,
+              'g' => DoseUnit.g.index,
+              _ => DoseUnit.mg.index,
+            };
             displayUnitCode = doseUnitCode;
             inputModeCode = DoseInputMode.mass.index;
           }
@@ -320,11 +365,21 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           } else {
             // mg/mcg/g
             if (mgPerMl != null) {
-              final desiredMg = switch (unitStr) { 'mg' => doseVal, 'mcg' => doseVal / 1000.0, 'g' => doseVal * 1000.0, _ => doseVal };
+              final desiredMg = switch (unitStr) {
+                'mg' => doseVal,
+                'mcg' => doseVal / 1000.0,
+                'g' => doseVal * 1000.0,
+                _ => doseVal,
+              };
               final ml = desiredMg / mgPerMl;
               doseMassMcg = (desiredMg * 1000).round();
               doseVolumeMicroliter = (ml * 1000).round();
-              doseUnitCode = switch (unitStr) { 'mcg' => DoseUnit.mcg.index, 'mg' => DoseUnit.mg.index, 'g' => DoseUnit.g.index, _ => DoseUnit.mg.index };
+              doseUnitCode = switch (unitStr) {
+                'mcg' => DoseUnit.mcg.index,
+                'mg' => DoseUnit.mg.index,
+                'g' => DoseUnit.g.index,
+                _ => DoseUnit.mg.index,
+              };
               displayUnitCode = doseUnitCode;
               inputModeCode = DoseInputMode.mass.index;
             }
@@ -348,7 +403,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       timesOfDay: minutesList,
       timesOfDayUtc: timesUtc,
       cycleEveryNDays: _useCycle ? int.tryParse(_cycleN.text.trim()) : null,
-      cycleAnchorDate: _useCycle ? DateTime(_cycleAnchor.year, _cycleAnchor.month, _cycleAnchor.day) : null,
+      cycleAnchorDate: _useCycle
+          ? DateTime(_cycleAnchor.year, _cycleAnchor.month, _cycleAnchor.day)
+          : null,
       doseUnitCode: doseUnitCode,
       doseMassMcg: doseMassMcg,
       doseVolumeMicroliter: doseVolumeMicroliter,
@@ -367,7 +424,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     final granted = await NotificationService.ensurePermissionGranted();
     if (!granted && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enable notifications to receive schedule alerts.')),
+        const SnackBar(
+          content: Text('Enable notifications to receive schedule alerts.'),
+        ),
       );
     }
 
@@ -379,17 +438,24 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Allow reminders'),
-          content: Text(!enabled
-              ? 'Notifications are disabled for Dosifi. Enable notifications to receive reminders.'
-              : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver reminders at the exact time.'),
+          content: Text(
+            !enabled
+                ? 'Notifications are disabled for Dosifi. Enable notifications to receive reminders.'
+                : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver reminders at the exact time.',
+          ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Later')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Later'),
+            ),
             FilledButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 if (!enabled) {
-                  await NotificationService.openChannelSettings('upcoming_dose');
+                  await NotificationService.openChannelSettings(
+                    'upcoming_dose',
+                  );
                 }
                 if (!canExact) {
                   await NotificationService.openExactAlarmsSettings();
@@ -414,9 +480,14 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Exact alarms required'),
-            content: const Text('To schedule exact reminders, enable Alarms & reminders permission for Dosifi.'),
+            content: const Text(
+              'To schedule exact reminders, enable Alarms & reminders permission for Dosifi.',
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
               FilledButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
@@ -436,7 +507,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         title: const Text('Schedule saved'),
         content: const Text('Your reminder has been saved.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
@@ -459,7 +533,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
+          overlayColor: WidgetStatePropertyAll(
+            theme.colorScheme.primary.withValues(alpha: 0.12),
+          ),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -470,7 +546,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     );
   }
 
-  Widget _section(BuildContext context, String title, List<Widget> children, {Widget? trailing}) {
+  Widget _section(
+    BuildContext context,
+    String title,
+    List<Widget> children, {
+    Widget? trailing,
+  }) {
     final theme = Theme.of(context);
     return Card(
       elevation: 2,
@@ -486,18 +567,35 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 2, bottom: 4, right: 2),
-              child: Row(children: [
-                Expanded(
-                  child: Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 15, color: theme.colorScheme.primary)),
-                ),
-                if (trailing != null)
-                  Flexible(
-                    child: DefaultTextStyle(
-style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.withValues(alpha: 0.50), fontWeight: FontWeight.w600),
-                      child: Align(alignment: Alignment.centerRight, child: trailing),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
-              ]),
+                  if (trailing != null)
+                    Flexible(
+                      child: DefaultTextStyle(
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.50,
+                          ),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: trailing,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             const SizedBox(height: 6),
             ...children,
@@ -512,7 +610,9 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
     final val = double.tryParse(_doseValue.text.trim()) ?? 0;
     final unit = _doseUnit.text.trim();
     if (med.isEmpty || unit.isEmpty || val <= 0) return '';
-    final v = val == val.roundToDouble() ? val.toStringAsFixed(0) : val.toStringAsFixed(2);
+    final v = val == val.roundToDouble()
+        ? val.toStringAsFixed(0)
+        : val.toStringAsFixed(2);
     return '$v $unit${med.isEmpty ? '' : ' · $med'}';
   }
 
@@ -550,7 +650,12 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
           final mg = totalMcg / 1000.0;
           return '${v.toStringAsFixed(v == v.roundToDouble() ? 0 : 2)} tab × ${med.strengthValue} ${_unitShort(med.strengthUnit)} = ${totalMcg.toStringAsFixed(0)} mcg (${mg.toStringAsFixed(2)} mg)';
         } else {
-          final desiredMcg = switch (unit) { 'mcg' => v, 'mg' => v * 1000, 'g' => v * 1e6, _ => v };
+          final desiredMcg = switch (unit) {
+            'mcg' => v,
+            'mg' => v * 1000,
+            'g' => v * 1e6,
+            _ => v,
+          };
           final perTabMcg = switch (med.strengthUnit) {
             Unit.mcg => med.strengthValue,
             Unit.mg => med.strengthValue * 1000,
@@ -578,7 +683,12 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
           final mg = totalMcg / 1000.0;
           return '${v.toStringAsFixed(0)} cap × ${med.strengthValue} ${_unitShort(med.strengthUnit)} = ${totalMcg.toStringAsFixed(0)} mcg (${mg.toStringAsFixed(2)} mg)';
         } else {
-          final desiredMcg = switch (unit) { 'mcg' => v, 'mg' => v * 1000, 'g' => v * 1e6, _ => v };
+          final desiredMcg = switch (unit) {
+            'mcg' => v,
+            'mg' => v * 1000,
+            'g' => v * 1e6,
+            _ => v,
+          };
           final perCapMcg = switch (med.strengthUnit) {
             Unit.mcg => med.strengthValue,
             Unit.mg => med.strengthValue * 1000,
@@ -614,8 +724,10 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
         }
         if (unit == 'ml') {
           final ml = v;
-          if (mgPerMl != null) return '${ml.toStringAsFixed(2)} mL = ${(ml * mgPerMl).toStringAsFixed(2)} mg';
-          if (iuPerMl != null) return '${ml.toStringAsFixed(2)} mL = ${(ml * iuPerMl).toStringAsFixed(0)} IU';
+          if (mgPerMl != null)
+            return '${ml.toStringAsFixed(2)} mL = ${(ml * mgPerMl).toStringAsFixed(2)} mg';
+          if (iuPerMl != null)
+            return '${ml.toStringAsFixed(2)} mL = ${(ml * iuPerMl).toStringAsFixed(0)} IU';
           return '${ml.toStringAsFixed(2)} mL';
         } else if (unit == 'iu' || unit == 'units') {
           if (iuPerMl == null) return '';
@@ -623,14 +735,23 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
           return '${v.toStringAsFixed(0)} IU = ${ml.toStringAsFixed(3)} mL';
         } else {
           if (mgPerMl == null) return '';
-          final desiredMg = switch (unit) { 'mg' => v, 'mcg' => v / 1000.0, 'g' => v * 1000.0, _ => v };
+          final desiredMg = switch (unit) {
+            'mg' => v,
+            'mcg' => v / 1000.0,
+            'g' => v * 1000.0,
+            _ => v,
+          };
           final ml = desiredMg / mgPerMl;
           return '${desiredMg.toStringAsFixed(2)} mg = ${ml.toStringAsFixed(3)} mL';
         }
     }
   }
 
-  Widget _rowLabelField(BuildContext context, {required String label, required Widget field}) {
+  Widget _rowLabelField(
+    BuildContext context, {
+    required String label,
+    required Widget field,
+  }) {
     final width = MediaQuery.of(context).size.width;
     final labelWidth = width >= 400 ? 120.0 : 110.0;
     final theme = Theme.of(context);
@@ -644,7 +765,13 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
             height: 36,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(label, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75))),
+              child: Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -659,7 +786,14 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
     final labelWidth = width >= 400 ? 120.0 : 110.0;
     return Padding(
       padding: EdgeInsets.only(left: labelWidth + 8, top: 4, bottom: 12),
-      child: Text(text, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75))),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+        ),
+      ),
     );
   }
 
@@ -668,7 +802,11 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
       height: 30,
       width: 30,
       child: OutlinedButton(
-        style: OutlinedButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact, minimumSize: const Size(30, 30)),
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          minimumSize: const Size(30, 30),
+        ),
         onPressed: onTap,
         child: Text(symbol),
       ),
@@ -686,14 +824,23 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
             IconButton(
               tooltip: 'Delete',
               onPressed: () async {
-                final ok = await showDialog<bool>(
+                final ok =
+                    await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Delete schedule?'),
-                        content: Text('Delete "${widget.initial!.name}"? This will cancel its notifications.'),
+                        content: Text(
+                          'Delete "${widget.initial!.name}"? This will cancel its notifications.',
+                        ),
                         actions: [
-                          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-                          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Delete')),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Delete'),
+                          ),
                         ],
                       ),
                     ) ??
@@ -715,10 +862,7 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
         width: 120,
-        child: FilledButton(
-          onPressed: _save,
-          child: const Text('Save'),
-        ),
+        child: FilledButton(onPressed: _save, child: const Text('Save')),
       ),
       body: Form(
         key: _formKey,
@@ -726,329 +870,486 @@ style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.primary.with
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
             _section(context, 'General', [
-              _rowLabelField(context, label: 'Medication', field: Field36(child: DropdownButtonFormField<Medication>(
-                value: _selectedMed,
-                isExpanded: true,
-                alignment: AlignmentDirectional.center,
-                decoration: const InputDecoration(labelText: ''),
-                selectedItemBuilder: (ctx) => Hive.box<Medication>('medications').values
-                    .map((m) => Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.bodyMedium)))
-                    .toList(),
-                items: Hive.box<Medication>('medications')
-                    .values
-                    .map((m) => DropdownMenuItem<Medication>(
-                          value: m,
-                          alignment: AlignmentDirectional.center,
-                          child: Center(child: Text('${m.name} — ${_medStrengthAndStock(m)}', style: Theme.of(context).textTheme.bodyMedium)),
-                        ))
-                    .toList(),
-                onChanged: (m) {
-                  setState(() {
-                    _selectedMed = m;
-                    _medicationId = m?.id;
-                    _medicationName.text = m?.name ?? '';
-                    if (m != null) {
-                      switch (m.form) {
-                        case MedicationForm.tablet:
-                          _doseUnit.text = 'tablets';
-                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-                          break;
-                        case MedicationForm.capsule:
-                          _doseUnit.text = 'capsules';
-                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-                          break;
-                        case MedicationForm.injectionPreFilledSyringe:
-                          _doseUnit.text = 'syringes';
-                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-                          break;
-                        case MedicationForm.injectionSingleDoseVial:
-                          _doseUnit.text = 'vials';
-                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-                          break;
-                        case MedicationForm.injectionMultiDoseVial:
-                          final u = m.strengthUnit;
-                          _doseUnit.text = (u == Unit.unitsPerMl) ? 'IU' : 'mg';
-                          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-                          break;
-                      }
-                    }
-                    _maybeAutoName();
-                  });
-                },
-                validator: (v) => v == null ? 'Required' : null,
-              ))),
+              _rowLabelField(
+                context,
+                label: 'Medication',
+                field: Field36(
+                  child: DropdownButtonFormField<Medication>(
+                    value: _selectedMed,
+                    isExpanded: true,
+                    alignment: AlignmentDirectional.center,
+                    decoration: const InputDecoration(labelText: ''),
+                    selectedItemBuilder: (ctx) =>
+                        Hive.box<Medication>('medications').values
+                            .map(
+                              (m) => Center(
+                                child: Text(
+                                  '${m.name} — ${_medStrengthAndStock(m)}',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(ctx).textTheme.bodyMedium,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                    items: Hive.box<Medication>('medications').values
+                        .map(
+                          (m) => DropdownMenuItem<Medication>(
+                            value: m,
+                            alignment: AlignmentDirectional.center,
+                            child: Center(
+                              child: Text(
+                                '${m.name} — ${_medStrengthAndStock(m)}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (m) {
+                      setState(() {
+                        _selectedMed = m;
+                        _medicationId = m?.id;
+                        _medicationName.text = m?.name ?? '';
+                        if (m != null) {
+                          switch (m.form) {
+                            case MedicationForm.tablet:
+                              _doseUnit.text = 'tablets';
+                              if ((_doseValue.text).trim().isEmpty)
+                                _doseValue.text = '1';
+                              break;
+                            case MedicationForm.capsule:
+                              _doseUnit.text = 'capsules';
+                              if ((_doseValue.text).trim().isEmpty)
+                                _doseValue.text = '1';
+                              break;
+                            case MedicationForm.injectionPreFilledSyringe:
+                              _doseUnit.text = 'syringes';
+                              if ((_doseValue.text).trim().isEmpty)
+                                _doseValue.text = '1';
+                              break;
+                            case MedicationForm.injectionSingleDoseVial:
+                              _doseUnit.text = 'vials';
+                              if ((_doseValue.text).trim().isEmpty)
+                                _doseValue.text = '1';
+                              break;
+                            case MedicationForm.injectionMultiDoseVial:
+                              final u = m.strengthUnit;
+                              _doseUnit.text = (u == Unit.unitsPerMl)
+                                  ? 'IU'
+                                  : 'mg';
+                              if ((_doseValue.text).trim().isEmpty)
+                                _doseValue.text = '1';
+                              break;
+                          }
+                        }
+                        _maybeAutoName();
+                      });
+                    },
+                    validator: (v) => v == null ? 'Required' : null,
+                  ),
+                ),
+              ),
             ]),
             // Helper under Medication
             _helperBelowLeft('Select a medication from your saved list'),
             const SizedBox(height: 10),
             _section(context, 'Instructions', [
-              Builder(builder: (context){
-                final med = _selectedMed;
-                final name = _medicationName.text.trim();
-                final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
-                final unit = _doseUnit.text.trim();
-                if (med == null || name.isEmpty || doseVal <= 0 || unit.isEmpty) {
-                  return const Text('Enter dose details to see instructions');
-                }
-                final doseFixed = doseVal == doseVal.roundToDouble() ? doseVal.toStringAsFixed(0) : doseVal.toStringAsFixed(2);
-                final unitTxt = unit.toLowerCase();
-                final line1 = 'Take $doseFixed $name $unitTxt';
-                String times = _times.map((t) => t.format(context)).join(', ');
-                String line2;
-                if (_mode == ScheduleMode.everyDay) {
-                  line2 = 'at $times everyday';
-                } else if (_mode == ScheduleMode.daysOfWeek) {
-                  const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-                  final ds = _days.toList()..sort();
-                  final dtext = ds.map((i) => labels[i-1]).join(', ');
-                  line2 = 'at $times on $dtext';
-                } else {
-                  final n = int.tryParse(_cycleN.text.trim());
-                  final every = n == null ? 'every N days' : 'every ${n.toString()} days';
-                  line2 = 'at $times $every';
-                }
-                double perUnitMcg;
-                bool canComputeCount = false;
-                switch (med.form) {
-                  case MedicationForm.tablet:
-                    if (unitTxt == 'tablets') {
-                      perUnitMcg = switch (med.strengthUnit) {
-                        Unit.mcg => med.strengthValue,
-                        Unit.mg => med.strengthValue * 1000,
-                        Unit.g => med.strengthValue * 1e6,
-                        _ => med.strengthValue,
-                      };
-                      canComputeCount = true;
-                    } else {
+              Builder(
+                builder: (context) {
+                  final med = _selectedMed;
+                  final name = _medicationName.text.trim();
+                  final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
+                  final unit = _doseUnit.text.trim();
+                  if (med == null ||
+                      name.isEmpty ||
+                      doseVal <= 0 ||
+                      unit.isEmpty) {
+                    return const Text('Enter dose details to see instructions');
+                  }
+                  final doseFixed = doseVal == doseVal.roundToDouble()
+                      ? doseVal.toStringAsFixed(0)
+                      : doseVal.toStringAsFixed(2);
+                  final unitTxt = unit.toLowerCase();
+                  final line1 = 'Take $doseFixed $name $unitTxt';
+                  String times = _times
+                      .map((t) => t.format(context))
+                      .join(', ');
+                  String line2;
+                  if (_mode == ScheduleMode.everyDay) {
+                    line2 = 'at $times everyday';
+                  } else if (_mode == ScheduleMode.daysOfWeek) {
+                    const labels = [
+                      'Mon',
+                      'Tue',
+                      'Wed',
+                      'Thu',
+                      'Fri',
+                      'Sat',
+                      'Sun',
+                    ];
+                    final ds = _days.toList()..sort();
+                    final dtext = ds.map((i) => labels[i - 1]).join(', ');
+                    line2 = 'at $times on $dtext';
+                  } else {
+                    final n = int.tryParse(_cycleN.text.trim());
+                    final every = n == null
+                        ? 'every N days'
+                        : 'every ${n.toString()} days';
+                    line2 = 'at $times $every';
+                  }
+                  double perUnitMcg;
+                  bool canComputeCount = false;
+                  switch (med.form) {
+                    case MedicationForm.tablet:
+                      if (unitTxt == 'tablets') {
+                        perUnitMcg = switch (med.strengthUnit) {
+                          Unit.mcg => med.strengthValue,
+                          Unit.mg => med.strengthValue * 1000,
+                          Unit.g => med.strengthValue * 1e6,
+                          _ => med.strengthValue,
+                        };
+                        canComputeCount = true;
+                      } else {
+                        perUnitMcg = 0;
+                      }
+                      break;
+                    case MedicationForm.capsule:
+                      if (unitTxt == 'capsules') {
+                        perUnitMcg = switch (med.strengthUnit) {
+                          Unit.mcg => med.strengthValue,
+                          Unit.mg => med.strengthValue * 1000,
+                          Unit.g => med.strengthValue * 1e6,
+                          _ => med.strengthValue,
+                        };
+                        canComputeCount = true;
+                      } else {
+                        perUnitMcg = 0;
+                      }
+                      break;
+                    default:
                       perUnitMcg = 0;
-                    }
-                    break;
-                  case MedicationForm.capsule:
-                    if (unitTxt == 'capsules') {
-                      perUnitMcg = switch (med.strengthUnit) {
-                        Unit.mcg => med.strengthValue,
-                        Unit.mg => med.strengthValue * 1000,
-                        Unit.g => med.strengthValue * 1e6,
-                        _ => med.strengthValue,
-                      };
-                      canComputeCount = true;
-                    } else {
-                      perUnitMcg = 0;
-                    }
-                    break;
-                  default:
-                    perUnitMcg = 0;
-                    break;
-                }
-                String line3;
-                String line4;
-                final startStr = '${_startDate.toLocal()}'.split(' ').first;
-                final endStr = _noEnd || _endDate == null ? 'No end' : '${_endDate!.toLocal()}'.split(' ').first;
-                if (canComputeCount) {
-                  final totalMcg = perUnitMcg * doseVal;
-                  final totalMg = totalMcg / 1000.0;
-                  final strengthShort = _medStrengthLabel(med);
-                  line3 = '$doseFixed $name ${unitTxt.substring(0, unitTxt.length)} @ $strengthShort =';
-                  line4 = '${totalMg == totalMg.roundToDouble() ? totalMg.toStringAsFixed(0) : totalMg.toStringAsFixed(2)}mg of $name per dose';
-                } else {
-                  line3 = '';
-                  line4 = '';
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(line1, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(line2, style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text('Start $startStr · ${endStr == 'No end' ? endStr : 'Ends $endStr'}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                    ),
-                    if (line3.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(line3, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      break;
+                  }
+                  String line3;
+                  String line4;
+                  final startStr = '${_startDate.toLocal()}'.split(' ').first;
+                  final endStr = _noEnd || _endDate == null
+                      ? 'No end'
+                      : '${_endDate!.toLocal()}'.split(' ').first;
+                  if (canComputeCount) {
+                    final totalMcg = perUnitMcg * doseVal;
+                    final totalMg = totalMcg / 1000.0;
+                    final strengthShort = _medStrengthLabel(med);
+                    line3 =
+                        '$doseFixed $name ${unitTxt.substring(0, unitTxt.length)} @ $strengthShort =';
+                    line4 =
+                        '${totalMg == totalMg.roundToDouble() ? totalMg.toStringAsFixed(0) : totalMg.toStringAsFixed(2)}mg of $name per dose';
+                  } else {
+                    line3 = '';
+                    line4 = '';
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        line1,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    if (line4.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
-                        child: Text(line4, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+                        child: Text(
+                          line2,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                       ),
-                  ],
-                );
-              })
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          'Start $startStr · ${endStr == 'No end' ? endStr : 'Ends $endStr'}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                      if (line3.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            line3,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                      if (line4.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            line4,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
             ]),
             const SizedBox(height: 10),
-            
+
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
             _section(context, 'Dose', [
-              _rowLabelField(context, label: 'Dose value', field: SizedBox(
-                height: 36,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _incBtn('−', () {
-                      final unit = _doseUnit.text.trim().toLowerCase();
-                      final step = 1.0;
-                      final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                      final nv = (v - step);
-                      setState(() {
-                        _doseValue.text = (unit == 'tablets') ? nv.clamp(0, 1e12).toStringAsFixed(2) : nv.clamp(0, 1e12).round().toString();
-                        _coerceDoseValueForUnit();
-                        _maybeAutoName();
-                      });
-                    }),
-                    const SizedBox(width: 6),
-                    SizedBox(
-                      width: 120,
-                      child: Field36(child: TextFormField(
-                        controller: _doseValue,
-                        textAlign: TextAlign.center,
-                        decoration: const InputDecoration(labelText: ''),
-                        keyboardType: (_doseUnit.text.trim().toLowerCase() == 'tablets')
-                            ? const TextInputType.numberWithOptions(decimal: true)
-                            : TextInputType.number,
-                        onChanged: (_) {
+              _rowLabelField(
+                context,
+                label: 'Dose value',
+                field: SizedBox(
+                  height: 36,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _incBtn('−', () {
+                        final unit = _doseUnit.text.trim().toLowerCase();
+                        final step = 1.0;
+                        final v =
+                            double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                        final nv = (v - step);
+                        setState(() {
+                          _doseValue.text = (unit == 'tablets')
+                              ? nv.clamp(0, 1e12).toStringAsFixed(2)
+                              : nv.clamp(0, 1e12).round().toString();
                           _coerceDoseValueForUnit();
                           _maybeAutoName();
-                          setState(() {});
-                        },
-                        validator: (v) {
-                          final d = double.tryParse(v?.trim() ?? '');
-                          if (d == null || d <= 0) return 'Enter a positive number';
-                          final unit = _doseUnit.text.trim().toLowerCase();
-                          if (['capsules','syringes','vials'].contains(unit)) {
-                            if (d % 1 != 0) return 'Whole numbers only';
-                          }
-                          if (unit == 'tablets') {
-                            final q = (d * 4).roundToDouble();
-                            if ((q - d * 4).abs() > 1e-6 && d % 0.25 != 0) {
-                              return 'Use quarter-tablet steps (0.25)';
-                            }
-                          }
-                          return null;
-                        },
-                      )),
-                    ),
-                    const SizedBox(width: 6),
-                    _incBtn('+', () {
-                      final unit = _doseUnit.text.trim().toLowerCase();
-                      final step = 1.0;
-                      final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                      final nv = (v + step);
-                      setState(() {
-                        _doseValue.text = (unit == 'tablets') ? nv.clamp(0, 1e12).toStringAsFixed(2) : nv.clamp(0, 1e12).round().toString();
-                        _coerceDoseValueForUnit();
-                        _maybeAutoName();
-                      });
-                    }),
-                  ],
-                ),
-              )),
-              _rowLabelField(context, label: 'Unit', field: Align(
-                alignment: Alignment.center,
-                child: SizedBox(
-                  height: kFieldHeight,
-                  width: 120,
-                  child: DropdownButtonFormField<String>(
-                    value: _doseUnit.text.isEmpty ? null : _doseUnit.text,
-                    isExpanded: false,
-                    alignment: AlignmentDirectional.center,
-                    decoration: const InputDecoration(labelText: ''),
-                    items: _doseUnitOptions().map((e) => DropdownMenuItem(value: e, alignment: AlignmentDirectional.center, child: Center(child: Text(e, style: Theme.of(context).textTheme.bodyMedium)))).toList(),
-                    onChanged: (v) {
-                      setState(() {
-                        _doseUnit.text = v ?? '';
-                        _coerceDoseValueForUnit();
-                        _maybeAutoName();
-                      });
-                    },
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                        });
+                      }),
+                      const SizedBox(width: 6),
+                      SizedBox(
+                        width: 120,
+                        child: Field36(
+                          child: TextFormField(
+                            controller: _doseValue,
+                            textAlign: TextAlign.center,
+                            decoration: const InputDecoration(labelText: ''),
+                            keyboardType:
+                                (_doseUnit.text.trim().toLowerCase() ==
+                                    'tablets')
+                                ? const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  )
+                                : TextInputType.number,
+                            onChanged: (_) {
+                              _coerceDoseValueForUnit();
+                              _maybeAutoName();
+                              setState(() {});
+                            },
+                            validator: (v) {
+                              final d = double.tryParse(v?.trim() ?? '');
+                              if (d == null || d <= 0)
+                                return 'Enter a positive number';
+                              final unit = _doseUnit.text.trim().toLowerCase();
+                              if ([
+                                'capsules',
+                                'syringes',
+                                'vials',
+                              ].contains(unit)) {
+                                if (d % 1 != 0) return 'Whole numbers only';
+                              }
+                              if (unit == 'tablets') {
+                                final q = (d * 4).roundToDouble();
+                                if ((q - d * 4).abs() > 1e-6 && d % 0.25 != 0) {
+                                  return 'Use quarter-tablet steps (0.25)';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      _incBtn('+', () {
+                        final unit = _doseUnit.text.trim().toLowerCase();
+                        final step = 1.0;
+                        final v =
+                            double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                        final nv = (v + step);
+                        setState(() {
+                          _doseValue.text = (unit == 'tablets')
+                              ? nv.clamp(0, 1e12).toStringAsFixed(2)
+                              : nv.clamp(0, 1e12).round().toString();
+                          _coerceDoseValueForUnit();
+                          _maybeAutoName();
+                        });
+                      }),
+                    ],
                   ),
                 ),
-              )),
+              ),
+              _rowLabelField(
+                context,
+                label: 'Unit',
+                field: Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    height: kFieldHeight,
+                    width: 120,
+                    child: DropdownButtonFormField<String>(
+                      value: _doseUnit.text.isEmpty ? null : _doseUnit.text,
+                      isExpanded: false,
+                      alignment: AlignmentDirectional.center,
+                      decoration: const InputDecoration(labelText: ''),
+                      items: _doseUnitOptions()
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              alignment: AlignmentDirectional.center,
+                              child: Center(
+                                child: Text(
+                                  e,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) {
+                        setState(() {
+                          _doseUnit.text = v ?? '';
+                          _coerceDoseValueForUnit();
+                          _maybeAutoName();
+                        });
+                      },
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    ),
+                  ),
+                ),
+              ),
             ]),
-            _helperBelowLeft('Enter dose amount and unit (tablets allow 0.25 steps)'),
+            _helperBelowLeft(
+              'Enter dose amount and unit (tablets allow 0.25 steps)',
+            ),
             const SizedBox(height: 10),
             _section(context, 'Schedule', [
-Column(
+              Column(
                 children: [
-                  _rowLabelField(context, label: 'Schedule type', field: DropdownButtonFormField<ScheduleMode>(
-                    value: _mode,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: ''),
-                    items: ScheduleMode.values
-                        .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
-                        .toList(),
-                    onChanged: (m) {
-                      if (m == null) return;
-                      setState(() {
-                        _mode = m;
-                        if (_mode == ScheduleMode.everyDay) {
-                          _days
-                            ..clear()
-                            ..addAll([1,2,3,4,5,6,7]);
-                          _useCycle = false;
-                        } else if (_mode == ScheduleMode.daysOfWeek) {
-                          _useCycle = false;
-                          if (_days.isEmpty) {
-                            _days.addAll([1,2,3,4,5]);
+                  _rowLabelField(
+                    context,
+                    label: 'Schedule type',
+                    field: DropdownButtonFormField<ScheduleMode>(
+                      value: _mode,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: ''),
+                      items: ScheduleMode.values
+                          .map(
+                            (m) => DropdownMenuItem(
+                              value: m,
+                              child: Text(_modeLabel(m)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (m) {
+                        if (m == null) return;
+                        setState(() {
+                          _mode = m;
+                          if (_mode == ScheduleMode.everyDay) {
+                            _days
+                              ..clear()
+                              ..addAll([1, 2, 3, 4, 5, 6, 7]);
+                            _useCycle = false;
+                          } else if (_mode == ScheduleMode.daysOfWeek) {
+                            _useCycle = false;
+                            if (_days.isEmpty) {
+                              _days.addAll([1, 2, 3, 4, 5]);
+                            }
+                          } else if (_mode == ScheduleMode.daysOnOff) {
+                            _useCycle = true;
                           }
-                        } else if (_mode == ScheduleMode.daysOnOff) {
-                          _useCycle = true;
-                        }
-                      });
-                    },
-                  )),
-                  _helperBelowLeft('Choose how this schedule repeats'),
-                  _rowLabelField(context, label: 'Start date', field: Field36(
-                    width: 120,
-                    child: FilledButton.icon(
-                      onPressed: () async {
-                        final now = DateTime.now();
-                        final picked = await showDatePicker(
-                          context: context,
-                          firstDate: DateTime(now.year - 1),
-                          lastDate: DateTime(now.year + 10),
-                          initialDate: _startDate,
-                        );
-                        if (picked != null) setState(() => _startDate = picked);
+                        });
                       },
-                      icon: const Icon(Icons.calendar_today, size: 18),
-                      label: Text('${_startDate.toLocal()}'.split(' ').first),
-                      style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
                     ),
-                  )),
-                  _helperBelowLeft('Select when this schedule should start'),
-                  _rowLabelField(context, label: 'End date', field: Row(children: [
-                    Field36(
+                  ),
+                  _helperBelowLeft('Choose how this schedule repeats'),
+                  _rowLabelField(
+                    context,
+                    label: 'Start date',
+                    field: Field36(
                       width: 120,
                       child: FilledButton.icon(
-                        onPressed: _noEnd ? null : () async {
+                        onPressed: () async {
                           final now = DateTime.now();
                           final picked = await showDatePicker(
                             context: context,
                             firstDate: DateTime(now.year - 1),
                             lastDate: DateTime(now.year + 10),
-                            initialDate: _endDate ?? _startDate,
+                            initialDate: _startDate,
                           );
-                          if (picked != null) setState(() { _endDate = picked; _noEnd = false; });
+                          if (picked != null)
+                            setState(() => _startDate = picked);
                         },
-                        icon: const Icon(Icons.event, size: 18),
-                        label: Text(_noEnd || _endDate == null ? 'No end' : '${_endDate!.toLocal()}'.split(' ').first),
-                        style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                        icon: const Icon(Icons.calendar_today, size: 18),
+                        label: Text('${_startDate.toLocal()}'.split(' ').first),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(120, kFieldHeight),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Checkbox(
-                      value: _noEnd,
-                      onChanged: (v) => setState(() { _noEnd = v ?? true; if (_noEnd) _endDate = null; }),
+                  ),
+                  _helperBelowLeft('Select when this schedule should start'),
+                  _rowLabelField(
+                    context,
+                    label: 'End date',
+                    field: Row(
+                      children: [
+                        Field36(
+                          width: 120,
+                          child: FilledButton.icon(
+                            onPressed: _noEnd
+                                ? null
+                                : () async {
+                                    final now = DateTime.now();
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      firstDate: DateTime(now.year - 1),
+                                      lastDate: DateTime(now.year + 10),
+                                      initialDate: _endDate ?? _startDate,
+                                    );
+                                    if (picked != null)
+                                      setState(() {
+                                        _endDate = picked;
+                                        _noEnd = false;
+                                      });
+                                  },
+                            icon: const Icon(Icons.event, size: 18),
+                            label: Text(
+                              _noEnd || _endDate == null
+                                  ? 'No end'
+                                  : '${_endDate!.toLocal()}'.split(' ').first,
+                            ),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(120, kFieldHeight),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Checkbox(
+                          value: _noEnd,
+                          onChanged: (v) => setState(() {
+                            _noEnd = v ?? true;
+                            if (_noEnd) _endDate = null;
+                          }),
+                        ),
+                        const Text('No end'),
+                      ],
                     ),
-                    const Text('No end'),
-                  ])),
+                  ),
                   _helperBelowLeft('Optional end date (or leave as No end)'),
                   if (_mode == ScheduleMode.daysOfWeek) ...[
                     _helperBelowLeft('Select days of the week'),
@@ -1059,15 +1360,34 @@ Column(
                         runSpacing: 8,
                         children: List.generate(7, (i) {
                           final dayIndex = i + 1; // 1..7
-                          const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                          const labels = [
+                            'Mon',
+                            'Tue',
+                            'Wed',
+                            'Thu',
+                            'Fri',
+                            'Sat',
+                            'Sun',
+                          ];
                           final selected = _days.contains(dayIndex);
                           return FilterChip(
-                            label: Text(labels[i], style: TextStyle(color: selected ? theme.colorScheme.onPrimary : null)),
+                            label: Text(
+                              labels[i],
+                              style: TextStyle(
+                                color: selected
+                                    ? theme.colorScheme.onPrimary
+                                    : null,
+                              ),
+                            ),
                             showCheckmark: false,
                             selectedColor: theme.colorScheme.primary,
                             visualDensity: VisualDensity.compact,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             selected: selected,
                             onSelected: (sel) {
                               setState(() {
@@ -1095,10 +1415,14 @@ Column(
                             controller: _cycleN,
                             textAlign: TextAlign.center,
                             decoration: const InputDecoration(labelText: ''),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: false,
+                            ),
                             validator: (v) {
                               final n = int.tryParse(v?.trim() ?? '');
-                              if (_mode == ScheduleMode.daysOnOff && (n == null || n < 1)) return '>= 1';
+                              if (_mode == ScheduleMode.daysOnOff &&
+                                  (n == null || n < 1))
+                                return '>= 1';
                               return null;
                             },
                           ),
@@ -1106,65 +1430,88 @@ Column(
                       ),
                     ),
                     _helperBelowLeft('Choose the cycle length and anchor date'),
-                    _rowLabelField(context, label: 'Anchor date', field: Field36(
-                      width: 120,
-                      child: FilledButton.icon(
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final picked = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(now.year - 1),
-                            lastDate: DateTime(now.year + 10),
-                            initialDate: _cycleAnchor,
-                          );
-                          if (picked != null) setState(() => _cycleAnchor = picked);
-                        },
-                        icon: const Icon(Icons.event, size: 18),
-                        label: Text('${_cycleAnchor.toLocal()}'.split(' ').first),
-                        style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                    _rowLabelField(
+                      context,
+                      label: 'Anchor date',
+                      field: Field36(
+                        width: 120,
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            final now = DateTime.now();
+                            final picked = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(now.year - 1),
+                              lastDate: DateTime(now.year + 10),
+                              initialDate: _cycleAnchor,
+                            );
+                            if (picked != null)
+                              setState(() => _cycleAnchor = picked);
+                          },
+                          icon: const Icon(Icons.event, size: 18),
+                          label: Text(
+                            '${_cycleAnchor.toLocal()}'.split(' ').first,
+                          ),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(120, kFieldHeight),
+                          ),
+                        ),
                       ),
-                    )),
+                    ),
                   ],
                   const SizedBox(height: 8),
-                  _rowLabelField(context, label: 'Time 1', field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: List.generate(_times.length, (i) {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Field36(
-                                width: 120,
-                                child: FilledButton.icon(
-                                  onPressed: () => _pickTimeAt(i),
-                                  icon: const Icon(Icons.schedule, size: 18),
-                                  label: Text(_times[i].format(context)),
-                                  style: FilledButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                  _rowLabelField(
+                    context,
+                    label: 'Time 1',
+                    field: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: List.generate(_times.length, (i) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Field36(
+                                  width: 120,
+                                  child: FilledButton.icon(
+                                    onPressed: () => _pickTimeAt(i),
+                                    icon: const Icon(Icons.schedule, size: 18),
+                                    label: Text(_times[i].format(context)),
+                                    style: FilledButton.styleFrom(
+                                      minimumSize: const Size(
+                                        120,
+                                        kFieldHeight,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 4),
-                              if (_times.length > 1)
-                                IconButton(
-                                  tooltip: 'Remove',
-                                  onPressed: () => setState(() => _times.removeAt(i)),
-                                  visualDensity: VisualDensity.compact,
-                                  icon: const Icon(Icons.remove_circle_outline, size: 18),
-                                ),
-                            ],
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: () => setState(() => _times.add(_times.last)),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add time'),
-                      ),
-                    ],
-                  )),
+                                const SizedBox(width: 4),
+                                if (_times.length > 1)
+                                  IconButton(
+                                    tooltip: 'Remove',
+                                    onPressed: () =>
+                                        setState(() => _times.removeAt(i)),
+                                    visualDensity: VisualDensity.compact,
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      size: 18,
+                                    ),
+                                  ),
+                              ],
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          onPressed: () =>
+                              setState(() => _times.add(_times.last)),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add time'),
+                        ),
+                      ],
+                    ),
+                  ),
                   _helperBelowLeft('Add one or more dosing times'),
                 ],
               ),
@@ -1176,7 +1523,7 @@ Column(
                 value: _active,
                 onChanged: (v) => setState(() => _active = v),
               ),
-            ],),
+            ]),
           ],
         ),
       ),
@@ -1194,19 +1541,22 @@ Column(
     Unit.unitsPerMl => 'IU/mL',
   };
 
-String _medStrengthAndStock(Medication m) {
+  String _medStrengthAndStock(Medication m) {
     final strength = _medStrengthLabel(m);
     final stock = m.stockValue;
     String trim(num n) {
       final s = n.toStringAsFixed(n == n.roundToDouble() ? 0 : 2);
       if (!s.contains('.')) return s;
-      return s.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
+      return s
+          .replaceFirst(RegExp(r'\.0+$'), '')
+          .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
     }
+
     final s = trim(stock);
-// show "100 remaining" format per user request
+    // show "100 remaining" format per user request
     // (second number removed for now; can reintroduce pack/initial later)
     // final stockPart = stock > 0 ? ' • $s/$s' : '';
-return '$strength${stock > 0 ? ' • $s remaining' : ''}';
+    return '$strength${stock > 0 ? ' • $s remaining' : ''}';
   }
 
   String _medStrengthLabel(Medication m) {
@@ -1214,8 +1564,11 @@ return '$strength${stock > 0 ? ' • $s remaining' : ''}';
     String trim(num n) {
       final s = n.toStringAsFixed(n == n.roundToDouble() ? 0 : 2);
       if (!s.contains('.')) return s;
-      return s.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
+      return s
+          .replaceFirst(RegExp(r'\.0+$'), '')
+          .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
     }
+
     final v = trim(m.strengthValue);
     return '$v $u';
   }
@@ -1223,19 +1576,28 @@ return '$strength${stock > 0 ? ' • $s remaining' : ''}';
   List<String> _doseUnitOptions() {
     final med = _selectedMed;
     if (med == null) {
-      return const ['mg','mcg','g','tablets','capsules','syringes','vials','IU'];
+      return const [
+        'mg',
+        'mcg',
+        'g',
+        'tablets',
+        'capsules',
+        'syringes',
+        'vials',
+        'IU',
+      ];
     }
     switch (med.form) {
       case MedicationForm.tablet:
-        return const ['tablets','mg'];
+        return const ['tablets', 'mg'];
       case MedicationForm.capsule:
-        return const ['capsules','mg'];
+        return const ['capsules', 'mg'];
       case MedicationForm.injectionPreFilledSyringe:
         return const ['syringes'];
       case MedicationForm.injectionSingleDoseVial:
         return const ['vials'];
       case MedicationForm.injectionMultiDoseVial:
-        return const ['mg','mcg','g','IU'];
+        return const ['mg', 'mcg', 'g', 'IU'];
     }
   }
 
@@ -1246,8 +1608,10 @@ return '$strength${stock > 0 ? ' • $s remaining' : ''}';
     if (unit == 'tablets') {
       // Round to nearest quarter tablet
       final q = (val * 4).round() / 4.0;
-      _doseValue.text = q.toStringAsFixed(q % 1 == 0 ? 0 : (q * 4 % 1 == 0 ? 2 : 2));
-    } else if (['capsules','syringes','vials'].contains(unit)) {
+      _doseValue.text = q.toStringAsFixed(
+        q % 1 == 0 ? 0 : (q * 4 % 1 == 0 ? 2 : 2),
+      );
+    } else if (['capsules', 'syringes', 'vials'].contains(unit)) {
       _doseValue.text = val.round().toString();
     }
   }
@@ -1271,7 +1635,11 @@ String _modeLabel(ScheduleMode m) => switch (m) {
 };
 
 class _DoseFormulaStrip extends StatelessWidget {
-  const _DoseFormulaStrip({required this.selectedMed, required this.valueCtrl, required this.unitCtrl});
+  const _DoseFormulaStrip({
+    required this.selectedMed,
+    required this.valueCtrl,
+    required this.unitCtrl,
+  });
   final Medication? selectedMed;
   final TextEditingController valueCtrl;
   final TextEditingController unitCtrl;
@@ -1301,14 +1669,16 @@ class _DoseFormulaStrip extends StatelessWidget {
             Unit.mg => med.strengthValue * 1000,
             Unit.g => med.strengthValue * 1e6,
             Unit.units => med.strengthValue, // unusual but support
-            Unit.mcgPerMl => med.strengthValue, // treat as mcg/tab if mis-entered
+            Unit.mcgPerMl =>
+              med.strengthValue, // treat as mcg/tab if mis-entered
             Unit.mgPerMl => med.strengthValue * 1000,
             Unit.gPerMl => med.strengthValue * 1e6,
             Unit.unitsPerMl => med.strengthValue,
           };
           final totalMcg = perTabMcg * quarters / 4.0;
           final mg = totalMcg / 1000.0;
-          line = '${_fmt(v)} tab × ${_fmt(med.strengthValue)} ${med.strengthUnit.name} = ${_fmt(totalMcg)} mcg (${_fmt(mg)} mg)';
+          line =
+              '${_fmt(v)} tab × ${_fmt(med.strengthValue)} ${med.strengthUnit.name} = ${_fmt(totalMcg)} mcg (${_fmt(mg)} mg)';
         } else {
           // mass entry; compute tablets eq
           final desiredMcg = switch (unit) {
@@ -1343,7 +1713,8 @@ class _DoseFormulaStrip extends StatelessWidget {
           };
           final totalMcg = perCapMcg * v;
           final mg = totalMcg / 1000.0;
-          line = '${_fmt(v)} cap × ${_fmt(med.strengthValue)} ${med.strengthUnit.name} = ${_fmt(totalMcg)} mcg (${_fmt(mg)} mg)';
+          line =
+              '${_fmt(v)} cap × ${_fmt(med.strengthValue)} ${med.strengthUnit.name} = ${_fmt(totalMcg)} mcg (${_fmt(mg)} mg)';
         } else {
           final desiredMcg = switch (unit) {
             'mcg' => v,
@@ -1401,13 +1772,20 @@ class _DoseFormulaStrip extends StatelessWidget {
         } else if (unit == 'iu' || unit == 'units') {
           if (iuPerMl == null) return const SizedBox.shrink();
           final ml = v / iuPerMl;
-          line = '${_fmt(v)} IU ÷ ${_fmt(iuPerMl)} IU/mL = ${_fmt(ml, decimals: 3)} mL';
+          line =
+              '${_fmt(v)} IU ÷ ${_fmt(iuPerMl)} IU/mL = ${_fmt(ml, decimals: 3)} mL';
         } else {
           // mg/mcg/g
           if (mgPerMl == null) return const SizedBox.shrink();
-          final desiredMg = switch (unit) { 'mg' => v, 'mcg' => v / 1000.0, 'g' => v * 1000.0, _ => v };
+          final desiredMg = switch (unit) {
+            'mg' => v,
+            'mcg' => v / 1000.0,
+            'g' => v * 1000.0,
+            _ => v,
+          };
           final ml = desiredMg / mgPerMl;
-          line = '${_fmt(desiredMg)} mg ÷ ${_fmt(mgPerMl)} mg/mL = ${_fmt(ml, decimals: 3)} mL';
+          line =
+              '${_fmt(desiredMg)} mg ÷ ${_fmt(mgPerMl)} mg/mL = ${_fmt(ml, decimals: 3)} mL';
         }
         break;
     }
@@ -1420,8 +1798,12 @@ class _DoseFormulaStrip extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Text(line, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+      child: Text(
+        line,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
     );
   }
 }
-

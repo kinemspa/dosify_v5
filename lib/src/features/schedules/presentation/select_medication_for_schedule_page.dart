@@ -30,4 +30,3 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
     );
   }
 }
-

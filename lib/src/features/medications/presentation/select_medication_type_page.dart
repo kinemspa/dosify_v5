@@ -11,7 +11,10 @@ class SelectMedicationTypePage extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Select Medication Type', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Select Medication Type',
+        forceBackButton: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: [
@@ -21,11 +24,23 @@ class SelectMedicationTypePage extends StatelessWidget {
             subtitle: 'Choose the type so we can tailor the fields for you',
           ),
           const SizedBox(height: 16),
-          const _TypeTile(icon: Icons.medication, title: 'Tablet', subtitle: 'Solid pill dosage form'),
+          const _TypeTile(
+            icon: Icons.medication,
+            title: 'Tablet',
+            subtitle: 'Solid pill dosage form',
+          ),
           const SizedBox(height: 16),
-          const _TypeTile(icon: Icons.medication_liquid, title: 'Capsule', subtitle: 'Powder or pellets in a gelatin shell'),
+          const _TypeTile(
+            icon: Icons.medication_liquid,
+            title: 'Capsule',
+            subtitle: 'Powder or pellets in a gelatin shell',
+          ),
           const SizedBox(height: 16),
-          const _TypeTile(icon: Icons.vaccines, title: 'Injection', subtitle: 'Pre-filled syringes or vials'),
+          const _TypeTile(
+            icon: Icons.vaccines,
+            title: 'Injection',
+            subtitle: 'Pre-filled syringes or vials',
+          ),
         ],
       ),
     );
@@ -43,28 +58,48 @@ class _Section extends StatelessWidget {
     return Card(
       elevation: 2,
       color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: theme.colorScheme.outlineVariant)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 2, bottom: 4),
-                child: Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, fontSize: 15, color: theme.colorScheme.primary)),
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 2, bottom: 4),
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-          const SizedBox(height: 6),
-          ...children,
-        ]),
+            const SizedBox(height: 6),
+            ...children,
+          ],
+        ),
       ),
     );
   }
 }
 
 class _TypeTile extends StatelessWidget {
-  const _TypeTile({required this.icon, required this.title, required this.subtitle, this.primary = false});
+  const _TypeTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.primary = false,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -81,7 +116,9 @@ class _TypeTile extends StatelessWidget {
     final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
     final titleColor = isPrimary ? onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
-    final badgeBg = isPrimary ? onPrimary.withOpacity(0.15) : primaryBg.withOpacity(0.12);
+    final badgeBg = isPrimary
+        ? onPrimary.withOpacity(0.15)
+        : primaryBg.withOpacity(0.12);
     final badgeIconColor = isPrimary ? onPrimary : primaryBg;
     final chevronColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
 
@@ -149,7 +186,11 @@ class _TypeTile extends StatelessWidget {
 }
 
 class _ScreenHeader extends StatelessWidget {
-  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
+  const _ScreenHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -181,15 +222,25 @@ class _ScreenHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: cs.onPrimary)),
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onPrimary,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onPrimary,
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
-

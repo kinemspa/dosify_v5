@@ -55,4 +55,3 @@ enum MedicationForm {
   @HiveField(4)
   injectionMultiDoseVial,
 }
-

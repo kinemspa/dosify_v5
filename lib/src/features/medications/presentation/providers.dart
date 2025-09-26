@@ -19,4 +19,3 @@ final medicationsListProvider = Provider<List<Medication>>((ref) {
   // ValueListenable and watch it. For now, the list is fetched on build.
   return box.values.toList(growable: false);
 });
-

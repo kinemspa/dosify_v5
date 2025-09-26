@@ -7,4 +7,3 @@ class ScheduleUtils {
     return '$h:$m';
   }
 }
-

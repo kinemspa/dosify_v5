@@ -11,7 +11,10 @@ class LargeCardStylesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Large Card Styles', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Large Card Styles',
+        forceBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -19,9 +22,9 @@ class LargeCardStylesPage extends StatelessWidget {
           children: [
             Text(
               'Choose Your Preferred Large Card Style',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
@@ -36,7 +39,11 @@ class LargeCardStylesPage extends StatelessWidget {
                 builder: (context, constraints) {
                   final width = constraints.maxWidth;
                   // Single column; adjust aspect ratio based on width to avoid overflows on phones
-                  final aspect = width > 900 ? 3.0 : width > 600 ? 2.6 : 2.15;
+                  final aspect = width > 900
+                      ? 3.0
+                      : width > 600
+                      ? 2.6
+                      : 2.15;
                   return GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 1,
@@ -47,7 +54,8 @@ class LargeCardStylesPage extends StatelessWidget {
                     itemBuilder: (context, index) => _StyleCard(
                       style: LargeCardStyle.values[index],
                       isSelected: false, // TODO: Add persistence
-                      onTap: () => _selectStyle(context, LargeCardStyle.values[index]),
+                      onTap: () =>
+                          _selectStyle(context, LargeCardStyle.values[index]),
                     ),
                   );
                 },
@@ -124,7 +132,7 @@ class _StyleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: isSelected ? 4 : 1,
       child: InkWell(
@@ -133,7 +141,7 @@ class _StyleCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: isSelected 
+            border: isSelected
                 ? Border.all(color: theme.colorScheme.primary, width: 2)
                 : null,
           ),
@@ -162,11 +170,9 @@ class _StyleCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Preview of the style
-              Expanded(
-                child: _buildStylePreview(context, style),
-              ),
+              Expanded(child: _buildStylePreview(context, style)),
             ],
           ),
         ),
@@ -176,7 +182,7 @@ class _StyleCard extends StatelessWidget {
 
   Widget _buildStylePreview(BuildContext context, LargeCardStyle style) {
     final theme = Theme.of(context);
-    
+
     // Mock medication data
     const medicationName = 'Panadol Extra';
     const manufacturer = 'GlaxoSmithKline';
@@ -186,14 +192,16 @@ class _StyleCard extends StatelessWidget {
     final expiry = DateTime.now().add(const Duration(days: 180));
     const requiresFridge = false;
     const storageLocation = 'Medicine Cabinet';
-    
+
     switch (style) {
       case LargeCardStyle.classic:
         return Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+            border: Border.all(
+              color: theme.colorScheme.outline.withOpacity(0.3),
+            ),
           ),
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -231,7 +239,10 @@ class _StyleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(4),
@@ -257,7 +268,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.modern:
         return Container(
           decoration: BoxDecoration(
@@ -282,7 +293,11 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.medication, size: 16, color: theme.colorScheme.primary),
+                        Icon(
+                          Icons.medication,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           medicationName,
@@ -320,7 +335,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.minimal:
         return Container(
           padding: const EdgeInsets.all(12),
@@ -365,7 +380,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.detailed:
         return Container(
           decoration: BoxDecoration(
@@ -398,7 +413,10 @@ class _StyleCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
@@ -437,7 +455,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.outlined:
         return Container(
           decoration: BoxDecoration(
@@ -498,7 +516,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.elevated:
         return Container(
           decoration: BoxDecoration(
@@ -564,7 +582,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.gradient:
         return Container(
           decoration: BoxDecoration(
@@ -599,7 +617,10 @@ class _StyleCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -618,7 +639,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.compact:
         return Container(
           decoration: BoxDecoration(
@@ -651,7 +672,7 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.rounded:
         return Container(
           decoration: BoxDecoration(
@@ -711,15 +732,12 @@ class _StyleCard extends StatelessWidget {
             ],
           ),
         );
-        
+
       case LargeCardStyle.colorful:
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.blue.shade100,
-                Colors.purple.shade100,
-              ],
+              colors: [Colors.blue.shade100, Colors.purple.shade100],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -760,7 +778,10 @@ class _StyleCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.8),
                         borderRadius: BorderRadius.circular(8),
@@ -789,11 +810,11 @@ class _InfoChip extends StatelessWidget {
     required this.label,
     required this.theme,
   });
-  
+
   final IconData icon;
   final String label;
   final ThemeData theme;
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -805,11 +826,7 @@ class _InfoChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 12,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
+          Icon(icon, size: 12, color: theme.colorScheme.onPrimaryContainer),
           const SizedBox(width: 2),
           Text(
             label,
@@ -832,21 +849,17 @@ class _DetailItem extends StatelessWidget {
     required this.value,
     required this.theme,
   });
-  
+
   final IconData icon;
   final String label;
   final String value;
   final ThemeData theme;
-  
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(icon, size: 14, color: theme.colorScheme.primary),
         const SizedBox(width: 4),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

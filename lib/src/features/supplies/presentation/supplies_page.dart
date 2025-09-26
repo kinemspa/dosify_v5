@@ -17,7 +17,9 @@ class SuppliesPage extends StatefulWidget {
 }
 
 enum _SuppliesView { list, compact, large }
+
 enum _SuppliesSortBy { name, stock, expiry }
+
 enum _SuppliesFilterBy { all, lowStock, expiringSoon }
 
 class _SuppliesPageState extends State<SuppliesPage> {
@@ -37,7 +39,10 @@ class _SuppliesPageState extends State<SuppliesPage> {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString('supplies_list_view') ?? 'large';
     setState(() {
-      _view = _SuppliesView.values.firstWhere((v) => v.name == saved, orElse: () => _SuppliesView.large);
+      _view = _SuppliesView.values.firstWhere(
+        (v) => v.name == saved,
+        orElse: () => _SuppliesView.large,
+      );
     });
   }
 
@@ -48,7 +53,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
   }
 
   void _cycleView() {
-    final order = [_SuppliesView.large, _SuppliesView.compact, _SuppliesView.list];
+    final order = [
+      _SuppliesView.large,
+      _SuppliesView.compact,
+      _SuppliesView.list,
+    ];
     final idx = order.indexOf(_view);
     final next = order[(idx + 1) % order.length];
     _saveView(next);
@@ -57,7 +66,9 @@ class _SuppliesPageState extends State<SuppliesPage> {
   @override
   Widget build(BuildContext context) {
     final suppliesBox = Hive.box<Supply>(SupplyRepository.suppliesBoxName);
-    final movementsBox = Hive.box<StockMovement>(SupplyRepository.movementsBoxName);
+    final movementsBox = Hive.box<StockMovement>(
+      SupplyRepository.movementsBoxName,
+    );
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Supplies', forceBackButton: true),
@@ -72,7 +83,12 @@ class _SuppliesPageState extends State<SuppliesPage> {
 
               // Search
               if (_query.isNotEmpty) {
-                items = items.where((s) => s.name.toLowerCase().contains(_query.toLowerCase())).toList();
+                items = items
+                    .where(
+                      (s) =>
+                          s.name.toLowerCase().contains(_query.toLowerCase()),
+                    )
+                    .toList();
               }
               // Filter
               switch (_filterBy) {
@@ -83,7 +99,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
                   break;
                 case _SuppliesFilterBy.expiringSoon:
                   final soon = DateTime.now().add(const Duration(days: 30));
-                  items = items.where((s) => s.expiry != null && s.expiry!.isBefore(soon)).toList();
+                  items = items
+                      .where(
+                        (s) => s.expiry != null && s.expiry!.isBefore(soon),
+                      )
+                      .toList();
                   break;
               }
               // Sort
@@ -113,12 +133,14 @@ class _SuppliesPageState extends State<SuppliesPage> {
                           children: [
                             const Icon(Icons.inventory_2, size: 48),
                             const SizedBox(height: 12),
-                            const Text('Add your first supply to begin tracking'),
+                            const Text(
+                              'Add your first supply to begin tracking',
+                            ),
                             const SizedBox(height: 12),
                             FilledButton(
                               onPressed: () => context.push('/supplies/add'),
                               child: const Text('Add Supply'),
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -196,14 +218,25 @@ class _SuppliesPageState extends State<SuppliesPage> {
             PopupMenuButton<_SuppliesFilterBy>(
               icon: Icon(
                 Icons.filter_list,
-                color: _filterBy != _SuppliesFilterBy.all ? Theme.of(context).colorScheme.primary : Colors.grey.shade400,
+                color: _filterBy != _SuppliesFilterBy.all
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey.shade400,
               ),
               tooltip: 'Filter supplies',
               onSelected: (f) => setState(() => _filterBy = f),
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _SuppliesFilterBy.all, child: Text('All supplies')),
-                PopupMenuItem(value: _SuppliesFilterBy.lowStock, child: Text('Low stock')),
-                PopupMenuItem(value: _SuppliesFilterBy.expiringSoon, child: Text('Expiring soon')),
+                PopupMenuItem(
+                  value: _SuppliesFilterBy.all,
+                  child: Text('All supplies'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesFilterBy.lowStock,
+                  child: Text('Low stock'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesFilterBy.expiringSoon,
+                  child: Text('Expiring soon'),
+                ),
               ],
             ),
 
@@ -213,9 +246,18 @@ class _SuppliesPageState extends State<SuppliesPage> {
               tooltip: 'Sort supplies',
               onSelected: (s) => setState(() => _sortBy = s),
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _SuppliesSortBy.name, child: Text('Sort by name')),
-                PopupMenuItem(value: _SuppliesSortBy.stock, child: Text('Sort by stock')),
-                PopupMenuItem(value: _SuppliesSortBy.expiry, child: Text('Sort by expiry')),
+                PopupMenuItem(
+                  value: _SuppliesSortBy.name,
+                  child: Text('Sort by name'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesSortBy.stock,
+                  child: Text('Sort by stock'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesSortBy.expiry,
+                  child: Text('Sort by expiry'),
+                ),
               ],
             ),
         ],
@@ -234,7 +276,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
     }
   }
 
-  Widget _buildSupplyList(BuildContext context, List<Supply> items, SupplyRepository repo) {
+  Widget _buildSupplyList(
+    BuildContext context,
+    List<Supply> items,
+    SupplyRepository repo,
+  ) {
     switch (_view) {
       case _SuppliesView.list:
         return ListView.separated(
@@ -246,16 +292,21 @@ class _SuppliesPageState extends State<SuppliesPage> {
             final cur = repo.currentStock(s.id);
             final low = repo.isLowStock(s);
             return ListTile(
-              title: Text(s.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              title: Text(
+                s.name,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
               subtitle: Row(
                 children: [
                   Expanded(
                     child: Text(
                       _stockLine(s, cur),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: _stockColor(context, s, cur),
-                          ),
+                        fontWeight: FontWeight.w600,
+                        color: _stockColor(context, s, cur),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -263,11 +314,21 @@ class _SuppliesPageState extends State<SuppliesPage> {
                   if (s.expiry != null)
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: Text(_formatDdMm(s.expiry!), style: Theme.of(context).textTheme.bodySmall?.copyWith(color: low ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurfaceVariant)),
+                      child: Text(
+                        _formatDdMm(s.expiry!),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: low
+                              ? Theme.of(context).colorScheme.error
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                 ],
               ),
-              leading: Icon(low ? Icons.warning_amber_rounded : Icons.inventory_2, color: low ? Colors.orange : null),
+              leading: Icon(
+                low ? Icons.warning_amber_rounded : Icons.inventory_2,
+                color: low ? Colors.orange : null,
+              ),
               onTap: () async {
                 await showModalBottomSheet(
                   context: context,
@@ -283,13 +344,18 @@ class _SuppliesPageState extends State<SuppliesPage> {
         return GridView.builder(
           padding: const EdgeInsets.all(16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 900 ? 4 : MediaQuery.of(context).size.width > 600 ? 3 : 2,
+            crossAxisCount: MediaQuery.of(context).size.width > 900
+                ? 4
+                : MediaQuery.of(context).size.width > 600
+                ? 3
+                : 2,
             childAspectRatio: 2.1,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
           itemCount: items.length,
-          itemBuilder: (context, i) => _SupplyCard(s: items[i], repo: repo, dense: true),
+          itemBuilder: (context, i) =>
+              _SupplyCard(s: items[i], repo: repo, dense: true),
         );
       case _SuppliesView.large:
         return GridView.builder(
@@ -301,7 +367,8 @@ class _SuppliesPageState extends State<SuppliesPage> {
             mainAxisSpacing: 12,
           ),
           itemCount: items.length,
-          itemBuilder: (context, i) => _SupplyCard(s: items[i], repo: repo, dense: false),
+          itemBuilder: (context, i) =>
+              _SupplyCard(s: items[i], repo: repo, dense: false),
         );
     }
   }
@@ -330,10 +397,10 @@ class _SuppliesPageState extends State<SuppliesPage> {
   }
 
   String _unitLabel(SupplyUnit u) => switch (u) {
-        SupplyUnit.pcs => 'pcs',
-        SupplyUnit.ml => 'mL',
-        SupplyUnit.l => 'L',
-      };
+    SupplyUnit.pcs => 'pcs',
+    SupplyUnit.ml => 'mL',
+    SupplyUnit.l => 'L',
+  };
 }
 
 class _SupplyCard extends StatelessWidget {
@@ -362,7 +429,9 @@ class _SupplyCard extends StatelessWidget {
         child: Stack(
           children: [
             Padding(
-              padding: dense ? const EdgeInsets.fromLTRB(6, 6, 6, 6) : const EdgeInsets.fromLTRB(8, 8, 8, 28),
+              padding: dense
+                  ? const EdgeInsets.fromLTRB(6, 6, 6, 6)
+                  : const EdgeInsets.fromLTRB(8, 8, 8, 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -375,23 +444,48 @@ class _SupplyCard extends StatelessWidget {
                           height: dense ? 24 : 36,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [theme.colorScheme.tertiaryContainer, theme.colorScheme.tertiary],
+                              colors: [
+                                theme.colorScheme.tertiaryContainer,
+                                theme.colorScheme.tertiary,
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(dense ? 8 : 12),
                           ),
-                          child: const Icon(Icons.inventory_2, color: Colors.white),
+                          child: const Icon(
+                            Icons.inventory_2,
+                            color: Colors.white,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(s.name, style: dense ? theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600) : theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              if (!dense && (s.category?.isNotEmpty ?? false)) ...[
+                              Text(
+                                s.name,
+                                style: dense
+                                    ? theme.textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      )
+                                    : theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (!dense &&
+                                  (s.category?.isNotEmpty ?? false)) ...[
                                 const SizedBox(height: 2),
-                                Text(s.category!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                Text(
+                                  s.category!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ],
                             ],
                           ),
@@ -400,13 +494,21 @@ class _SupplyCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             if (low)
-                              Icon(Icons.warning, size: dense ? 12 : 14, color: theme.colorScheme.error),
+                              Icon(
+                                Icons.warning,
+                                size: dense ? 12 : 14,
+                                color: theme.colorScheme.error,
+                              ),
                             if (!dense && s.expiry != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Text(
                                   DateFormat('dd/MM/yy').format(s.expiry!),
-                                  style: theme.textTheme.bodySmall?.copyWith(color: low ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: low
+                                        ? theme.colorScheme.error
+                                        : theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                           ],
@@ -420,20 +522,40 @@ class _SupplyCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(s.name, style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700, height: 1.0, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            s.name,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              height: 1.0,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const SizedBox(height: 3),
                           Row(
                             children: [
                               Expanded(
                                 child: Text(
                                   _stockLine(s, cur),
-                                  style: theme.textTheme.bodySmall?.copyWith(color: _stockColor(context, s, cur), height: 1.0, fontSize: 11),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: _stockColor(context, s, cur),
+                                    height: 1.0,
+                                    fontSize: 11,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               if (s.expiry != null)
-                                Text(DateFormat('d/M').format(s.expiry!), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.0, fontSize: 10)),
+                                Text(
+                                  DateFormat('d/M').format(s.expiry!),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    height: 1.0,
+                                    fontSize: 10,
+                                  ),
+                                ),
                             ],
                           ),
                         ],
@@ -442,7 +564,10 @@ class _SupplyCard extends StatelessWidget {
                   else ...[
                     Text(
                       _stockLine(s, cur),
-                      style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: _stockColor(context, s, cur)),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: _stockColor(context, s, cur),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -463,7 +588,14 @@ class _SupplyCard extends StatelessWidget {
                       builder: (_) => StockAdjustSheet(supply: s),
                     );
                   },
-                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), minimumSize: const Size(0, 0), visualDensity: VisualDensity.compact),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    minimumSize: const Size(0, 0),
+                    visualDensity: VisualDensity.compact,
+                  ),
                   child: const Text('Adjust'),
                 ),
               ),
@@ -474,7 +606,11 @@ class _SupplyCard extends StatelessWidget {
   }
 
   String _stockLine(Supply s, double cur) {
-    final unit = switch (s.unit) { SupplyUnit.pcs => 'pcs', SupplyUnit.ml => 'mL', SupplyUnit.l => 'L' };
+    final unit = switch (s.unit) {
+      SupplyUnit.pcs => 'pcs',
+      SupplyUnit.ml => 'mL',
+      SupplyUnit.l => 'L',
+    };
     if (s.reorderThreshold != null && s.reorderThreshold! > 0) {
       final total = s.reorderThreshold!;
       return '${cur.toStringAsFixed(0)}/${total.toStringAsFixed(0)} $unit';
@@ -511,7 +647,10 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
       color: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: radius),
       child: Ink(
-        decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: radius),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: radius,
+        ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
           onTap: onTap,
@@ -523,6 +662,7 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
       ),
     );
   }
+
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   SupplyType _type = SupplyType.item;
@@ -574,16 +714,23 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    final id = widget.initial?.id ?? (DateTime.now().microsecondsSinceEpoch.toString() + Random().nextInt(9999).toString().padLeft(4, '0'));
+    final id =
+        widget.initial?.id ??
+        (DateTime.now().microsecondsSinceEpoch.toString() +
+            Random().nextInt(9999).toString().padLeft(4, '0'));
     final s = Supply(
       id: id,
       name: _name.text.trim(),
       type: _type,
       category: _category.text.trim().isEmpty ? null : _category.text.trim(),
       unit: _unit,
-      reorderThreshold: _threshold.text.trim().isEmpty ? null : double.parse(_threshold.text.trim()),
+      reorderThreshold: _threshold.text.trim().isEmpty
+          ? null
+          : double.parse(_threshold.text.trim()),
       expiry: _expiry,
-      storageLocation: _storage.text.trim().isEmpty ? null : _storage.text.trim(),
+      storageLocation: _storage.text.trim().isEmpty
+          ? null
+          : _storage.text.trim(),
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
     );
     final repo = SupplyRepository();
@@ -615,7 +762,10 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
         title: widget.initial == null ? 'Add Supply' : 'Edit Supply',
         forceBackButton: true,
         actions: [
-          TextButton(onPressed: _save, child: const Text('Save', style: TextStyle(color: Colors.white))),
+          TextButton(
+            onPressed: _save,
+            child: const Text('Save', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
       body: Form(
@@ -626,28 +776,52 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
             // General card
             Container(
               decoration: BoxDecoration(
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
-border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.06),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    'General',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _name,
                     decoration: const InputDecoration(labelText: 'Name *'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<SupplyType>(
                     value: _type,
                     items: const [
-                      DropdownMenuItem(value: SupplyType.item, child: Text('Item')),
-                      DropdownMenuItem(value: SupplyType.fluid, child: Text('Fluid')),
+                      DropdownMenuItem(
+                        value: SupplyType.item,
+                        child: Text('Item'),
+                      ),
+                      DropdownMenuItem(
+                        value: SupplyType.fluid,
+                        child: Text('Fluid'),
+                      ),
                     ],
                     onChanged: (v) => setState(() => _type = v!),
                     decoration: const InputDecoration(labelText: 'Type *'),
@@ -655,7 +829,9 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _category,
-                    decoration: const InputDecoration(labelText: 'Category (optional)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Category (optional)',
+                    ),
                   ),
                 ],
               ),
@@ -664,16 +840,33 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
             // Inventory card
             Container(
               decoration: BoxDecoration(
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
-border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.06),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Inventory', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    'Inventory',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -681,12 +874,23 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                         child: DropdownButtonFormField<SupplyUnit>(
                           value: _unit,
                           items: const [
-                            DropdownMenuItem(value: SupplyUnit.pcs, child: Text('pcs')),
-                            DropdownMenuItem(value: SupplyUnit.ml, child: Text('mL')),
-                            DropdownMenuItem(value: SupplyUnit.l, child: Text('L')),
+                            DropdownMenuItem(
+                              value: SupplyUnit.pcs,
+                              child: Text('pcs'),
+                            ),
+                            DropdownMenuItem(
+                              value: SupplyUnit.ml,
+                              child: Text('mL'),
+                            ),
+                            DropdownMenuItem(
+                              value: SupplyUnit.l,
+                              child: Text('L'),
+                            ),
                           ],
                           onChanged: (v) => setState(() => _unit = v!),
-                          decoration: const InputDecoration(labelText: 'Unit *'),
+                          decoration: const InputDecoration(
+                            labelText: 'Unit *',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -696,7 +900,9 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                             _qtyBtn(context, '−', () {
                               final v = double.tryParse(_initialQty.text) ?? 0;
                               final nv = (v - 1).clamp(0, 1e12);
-                              setState(() => _initialQty.text = nv.toStringAsFixed(0));
+                              setState(
+                                () => _initialQty.text = nv.toStringAsFixed(0),
+                              );
                             }),
                             const SizedBox(width: 6),
                             SizedBox(
@@ -704,15 +910,22 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                               child: TextFormField(
                                 controller: _initialQty,
                                 textAlign: TextAlign.center,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                decoration: const InputDecoration(labelText: 'Initial qty'),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Initial qty',
+                                ),
                               ),
                             ),
                             const SizedBox(width: 6),
                             _qtyBtn(context, '+', () {
                               final v = double.tryParse(_initialQty.text) ?? 0;
                               final nv = (v + 1);
-                              setState(() => _initialQty.text = nv.toStringAsFixed(0));
+                              setState(
+                                () => _initialQty.text = nv.toStringAsFixed(0),
+                              );
                             }),
                           ],
                         ),
@@ -721,8 +934,12 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _threshold,
-                    decoration: const InputDecoration(labelText: 'Low stock threshold (optional)'),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Low stock threshold (optional)',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),
@@ -731,30 +948,58 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
             // Storage/Notes card
             Container(
               decoration: BoxDecoration(
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
-border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.06),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Storage / Notes', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    'Storage / Notes',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Expiry'),
-                    subtitle: Text(_expiry == null ? 'No expiry' : _expiry!.toLocal().toString()),
-                    trailing: TextButton(onPressed: _pickExpiry, child: const Text('Pick')),
+                    subtitle: Text(
+                      _expiry == null
+                          ? 'No expiry'
+                          : _expiry!.toLocal().toString(),
+                    ),
+                    trailing: TextButton(
+                      onPressed: _pickExpiry,
+                      child: const Text('Pick'),
+                    ),
                   ),
                   TextFormField(
                     controller: _storage,
-                    decoration: const InputDecoration(labelText: 'Storage / Lot (optional)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Storage / Lot (optional)',
+                    ),
                   ),
                   TextFormField(
                     controller: _notes,
-                    decoration: const InputDecoration(labelText: 'Notes (optional)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Notes (optional)',
+                    ),
                     maxLines: 3,
                   ),
                 ],
@@ -840,64 +1085,90 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Adjust stock: ${widget.supply.name}', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Adjust stock: ${widget.supply.name}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
-          Row(children: [
-            _qtyBtn(context, '−', () {
-              final v = double.tryParse(_amount.text) ?? 0;
-              final nv = (v - 1).clamp(0, 1e12);
-              setState(() => _amount.text = nv.toStringAsFixed(0));
-            }),
-            const SizedBox(width: 6),
-            SizedBox(
-width: 96,
-              child: TextFormField(
-                controller: _amount,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(labelText: 'Amount'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          Row(
+            children: [
+              _qtyBtn(context, '−', () {
+                final v = double.tryParse(_amount.text) ?? 0;
+                final nv = (v - 1).clamp(0, 1e12);
+                setState(() => _amount.text = nv.toStringAsFixed(0));
+              }),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 96,
+                child: TextFormField(
+                  controller: _amount,
+                  textAlign: TextAlign.center,
+                  decoration: const InputDecoration(labelText: 'Amount'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 6),
-            _qtyBtn(context, '+', () {
-              final v = double.tryParse(_amount.text) ?? 0;
-              final nv = (v + 1);
-              setState(() => _amount.text = nv.toStringAsFixed(0));
-            }),
-            const SizedBox(width: 12),
-            Expanded(
-child: DropdownButtonFormField<MovementReason>(
-                isExpanded: true,
-                alignment: AlignmentDirectional.center,
-                value: _reason,
-style: Theme.of(context).textTheme.bodyMedium,
-                icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                items: const [
-                  DropdownMenuItem(value: MovementReason.used, child: Text('Used')),
-                  DropdownMenuItem(value: MovementReason.purchase, child: Text('Purchase/Add')),
-                  DropdownMenuItem(value: MovementReason.correction, child: Text('Correction')),
-                  DropdownMenuItem(value: MovementReason.other, child: Text('Other')),
-                ],
-                onChanged: (v) => setState(() => _reason = v!),
-                decoration: const InputDecoration(labelText: 'Reason'),
+              const SizedBox(width: 6),
+              _qtyBtn(context, '+', () {
+                final v = double.tryParse(_amount.text) ?? 0;
+                final nv = (v + 1);
+                setState(() => _amount.text = nv.toStringAsFixed(0));
+              }),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<MovementReason>(
+                  isExpanded: true,
+                  alignment: AlignmentDirectional.center,
+                  value: _reason,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  icon: Icon(
+                    Icons.arrow_drop_down,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: MovementReason.used,
+                      child: Text('Used'),
+                    ),
+                    DropdownMenuItem(
+                      value: MovementReason.purchase,
+                      child: Text('Purchase/Add'),
+                    ),
+                    DropdownMenuItem(
+                      value: MovementReason.correction,
+                      child: Text('Correction'),
+                    ),
+                    DropdownMenuItem(
+                      value: MovementReason.other,
+                      child: Text('Other'),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _reason = v!),
+                  decoration: const InputDecoration(labelText: 'Reason'),
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _note,
             decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
           const SizedBox(height: 12),
-          Row(children: [
-            Expanded(
-              child: FilledButton(onPressed: _apply, child: const Text('Apply')),
-            ),
-          ]),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: _apply,
+                  child: const Text('Apply'),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
         ],
       ),
     );
   }
 }
-

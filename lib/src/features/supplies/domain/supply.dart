@@ -150,8 +150,8 @@ class Supply {
     this.notes,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   @HiveField(0)
   final String id; // uuid
@@ -204,4 +204,3 @@ class Supply {
     );
   }
 }
-

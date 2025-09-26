@@ -8,4 +8,3 @@ class CalendarEvent {
   final String title;
   final DateTime when; // local time
 }
-

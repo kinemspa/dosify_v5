@@ -30,7 +30,9 @@ class SectionFormCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.06)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.06),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -49,7 +51,10 @@ class SectionFormCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -105,11 +110,7 @@ class LabelFieldRow extends StatelessWidget {
 
 /// A 120x36 OutlinedButton with a calendar icon, matching Tablet/Capsule date picker button.
 class DateButton36 extends StatelessWidget {
-  const DateButton36({
-    super.key,
-    required this.label,
-    required this.onPressed,
-  });
+  const DateButton36({super.key, required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback onPressed;
@@ -123,7 +124,9 @@ class DateButton36 extends StatelessWidget {
         onPressed: onPressed,
         icon: const Icon(Icons.calendar_today, size: 18),
         label: Text(label),
-        style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(120, kFieldHeight),
+        ),
       ),
     );
   }
@@ -157,7 +160,10 @@ class SmallDropdown36<T> extends StatelessWidget {
         style: theme.textTheme.bodyMedium,
         items: items,
         onChanged: onChanged,
-        icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
         decoration: decoration ?? const InputDecoration(isDense: true),
         menuMaxHeight: 320,
       ),
@@ -214,7 +220,10 @@ class StepperRow36 extends StatelessWidget {
           minimumSize: const Size(30, 30),
         ),
         onPressed: onTap,
-        child: Text(symbol, style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14)),
+        child: Text(
+          symbol,
+          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+        ),
       ),
     );
   }

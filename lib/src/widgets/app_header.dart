@@ -82,7 +82,10 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
             PopupMenuItem(value: 'supplies', child: Text('Supplies')),
             PopupMenuItem(value: 'schedules', child: Text('Schedules')),
             PopupMenuItem(value: 'calendar', child: Text('Calendar')),
-            PopupMenuItem(value: 'reconstitution', child: Text('Reconstitution Calculator')),
+            PopupMenuItem(
+              value: 'reconstitution',
+              child: Text('Reconstitution Calculator'),
+            ),
             PopupMenuItem(value: 'analytics', child: Text('Analytics')),
             PopupMenuItem(value: 'settings', child: Text('Settings')),
           ],

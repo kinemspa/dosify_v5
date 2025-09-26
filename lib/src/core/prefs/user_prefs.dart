@@ -12,7 +12,7 @@ class UserPrefs {
   static Future<int> getStrengthInputStyle() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(strengthInputStyleKey) ?? defaultStrengthInputStyle;
-    }
+  }
 
   static Future<void> setStrengthInputStyle(int index) async {
     final prefs = await SharedPreferences.getInstance();

@@ -4,7 +4,10 @@ import '../../schedules/domain/schedule.dart';
 import 'calendar_event.dart';
 
 class CalendarUtils {
-  static List<CalendarEvent> eventsForMonth(DateTime monthLocal, Box<Schedule> box) {
+  static List<CalendarEvent> eventsForMonth(
+    DateTime monthLocal,
+    Box<Schedule> box,
+  ) {
     // monthLocal is any date in the month (local)
     final year = monthLocal.year;
     final month = monthLocal.month;
@@ -13,23 +16,41 @@ class CalendarUtils {
     return _eventsForRange(firstLocal, lastLocal, box);
   }
 
-  static List<CalendarEvent> eventsForWeek(DateTime weekStartLocal, Box<Schedule> box) {
-    final start = DateTime(weekStartLocal.year, weekStartLocal.month, weekStartLocal.day);
+  static List<CalendarEvent> eventsForWeek(
+    DateTime weekStartLocal,
+    Box<Schedule> box,
+  ) {
+    final start = DateTime(
+      weekStartLocal.year,
+      weekStartLocal.month,
+      weekStartLocal.day,
+    );
     final end = start.add(const Duration(days: 6));
     return _eventsForRange(start, end, box);
   }
 
-  static List<CalendarEvent> eventsForDay(DateTime dayLocal, Box<Schedule> box) {
+  static List<CalendarEvent> eventsForDay(
+    DateTime dayLocal,
+    Box<Schedule> box,
+  ) {
     final start = DateTime(dayLocal.year, dayLocal.month, dayLocal.day);
     final end = start;
     return _eventsForRange(start, end, box);
   }
 
-  static List<CalendarEvent> _eventsForRange(DateTime startLocal, DateTime endLocal, Box<Schedule> box) {
+  static List<CalendarEvent> _eventsForRange(
+    DateTime startLocal,
+    DateTime endLocal,
+    Box<Schedule> box,
+  ) {
     final List<CalendarEvent> out = [];
     final schedules = box.values.where((s) => s.active).toList(growable: false);
 
-    for (DateTime d = startLocal; !d.isAfter(endLocal); d = d.add(const Duration(days: 1))) {
+    for (
+      DateTime d = startLocal;
+      !d.isAfter(endLocal);
+      d = d.add(const Duration(days: 1))
+    ) {
       final dUtcMidnight = DateTime(d.year, d.month, d.day).toUtc();
       final utcWeekday = dUtcMidnight.weekday; // 1..7 UTC weekday
       for (final s in schedules) {
@@ -47,9 +68,21 @@ class CalendarUtils {
         if (daysUtc.contains(utcWeekday)) {
           final hUtc = minutesUtc ~/ 60;
           final mUtc = minutesUtc % 60;
-          final eventUtc = DateTime.utc(dUtcMidnight.year, dUtcMidnight.month, dUtcMidnight.day, hUtc, mUtc);
+          final eventUtc = DateTime.utc(
+            dUtcMidnight.year,
+            dUtcMidnight.month,
+            dUtcMidnight.day,
+            hUtc,
+            mUtc,
+          );
           final whenLocal = eventUtc.toLocal();
-          out.add(CalendarEvent(scheduleId: s.id, title: _titleFor(s), when: whenLocal));
+          out.add(
+            CalendarEvent(
+              scheduleId: s.id,
+              title: _titleFor(s),
+              when: whenLocal,
+            ),
+          );
         }
       }
     }
@@ -64,7 +97,13 @@ class CalendarUtils {
   }
 
   static int _toUtcMinutesForLocalDay(int localMinutes, DateTime localDay) {
-    final local = DateTime(localDay.year, localDay.month, localDay.day, localMinutes ~/ 60, localMinutes % 60);
+    final local = DateTime(
+      localDay.year,
+      localDay.month,
+      localDay.day,
+      localMinutes ~/ 60,
+      localMinutes % 60,
+    );
     final utc = local.toUtc();
     return utc.hour * 60 + utc.minute;
   }
@@ -72,8 +111,13 @@ class CalendarUtils {
   static int _localWeekdayToUtcWeekday(int localWeekday, int localMinutes) {
     // Determine UTC weekday for an event that occurs at localMinutes on a day with localWeekday
     final now = DateTime.now();
-    final sampleLocal = DateTime(now.year, now.month, now.day + ((localWeekday - now.weekday) % 7), localMinutes ~/ 60, localMinutes % 60);
+    final sampleLocal = DateTime(
+      now.year,
+      now.month,
+      now.day + ((localWeekday - now.weekday) % 7),
+      localMinutes ~/ 60,
+      localMinutes % 60,
+    );
     return sampleLocal.toUtc().weekday;
   }
 }
-

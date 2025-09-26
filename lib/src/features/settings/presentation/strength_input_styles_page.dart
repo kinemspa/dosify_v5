@@ -11,13 +11,17 @@ class StrengthInputStylesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Strength Input Styles', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Strength Input Styles',
+        forceBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView.separated(
           itemCount: StrengthInputStyle.values.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _StrengthInputCard(style: StrengthInputStyle.values[i]),
+          itemBuilder: (context, i) =>
+              _StrengthInputCard(style: StrengthInputStyle.values[i]),
         ),
       ),
     );
@@ -48,7 +52,8 @@ extension StrengthInputStyleX on StrengthInputStyle {
     StrengthInputStyle.chipPillsGroup => 'Pill group',
     StrengthInputStyle.chipTwoRow => 'Two-row controls',
     StrengthInputStyle.chipMinimalInline => 'Minimal inline',
-    StrengthInputStyle.chipCardTopRightDropdown => 'Card with top-right dropdown',
+    StrengthInputStyle.chipCardTopRightDropdown =>
+      'Card with top-right dropdown',
   };
 }
 
@@ -73,19 +78,22 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
   }
 
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     // load selected from SharedPreferences to show a check (best-effort preview; not blocking)
     // We keep it simple: compare index by enum order, updated on tap from parent.
     final theme = Theme.of(context);
 
-// default content (used by chipRowCompact)
+    // default content (used by chipRowCompact)
     Widget content = Row(
       children: [
         // Integer input with +/- steppers
         Expanded(
           child: TextFormField(
             controller: _ctrl,
-            keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+            keyboardType: const TextInputType.numberWithOptions(
+              signed: false,
+              decimal: false,
+            ),
             decoration: InputDecoration(
               labelText: 'Amount',
               prefixIcon: IconButton(
@@ -104,7 +112,8 @@ Widget build(BuildContext context) {
                 }),
               ),
             ),
-            onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+            onChanged: (v) =>
+                setState(() => _value = int.tryParse(v) ?? _value),
           ),
         ),
         const SizedBox(width: 12),
@@ -128,7 +137,7 @@ Widget build(BuildContext context) {
     EdgeInsets padding = const EdgeInsets.all(12);
 
     switch (widget.style) {
-case StrengthInputStyle.chipRowCompact:
+      case StrengthInputStyle.chipRowCompact:
         deco = BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -136,7 +145,7 @@ case StrengthInputStyle.chipRowCompact:
         );
         break;
 
-case StrengthInputStyle.chipRailLeft:
+      case StrengthInputStyle.chipRailLeft:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
@@ -158,15 +167,20 @@ case StrengthInputStyle.chipRailLeft:
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_up),
                     onPressed: () => setState(() {
-                      _value += 1; _ctrl.text = _value.toString();
+                      _value += 1;
+                      _ctrl.text = _value.toString();
                     }),
                     visualDensity: VisualDensity.compact,
                   ),
-                  Text('$_value', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$_value',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
                     onPressed: () => setState(() {
-                      _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString();
+                      _value = (_value - 1).clamp(0, 1000000);
+                      _ctrl.text = _value.toString();
                     }),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -190,7 +204,7 @@ case StrengthInputStyle.chipRailLeft:
         );
         break;
 
-case StrengthInputStyle.chipRailRight:
+      case StrengthInputStyle.chipRailRight:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
@@ -225,15 +239,20 @@ case StrengthInputStyle.chipRailRight:
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_up),
                     onPressed: () => setState(() {
-                      _value += 1; _ctrl.text = _value.toString();
+                      _value += 1;
+                      _ctrl.text = _value.toString();
                     }),
                     visualDensity: VisualDensity.compact,
                   ),
-                  Text('$_value', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$_value',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
                     onPressed: () => setState(() {
-                      _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString();
+                      _value = (_value - 1).clamp(0, 1000000);
+                      _ctrl.text = _value.toString();
                     }),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -244,7 +263,7 @@ case StrengthInputStyle.chipRailRight:
         );
         break;
 
-case StrengthInputStyle.chipDeltaGrid:
+      case StrengthInputStyle.chipDeltaGrid:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
@@ -258,16 +277,52 @@ case StrengthInputStyle.chipDeltaGrid:
           children: [
             Wrap(
               children: [
-                deltaChip('−1', () => setState(() { _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString(); })),
-                deltaChip('+1', () => setState(() { _value += 1; _ctrl.text = _value.toString(); })),
-                deltaChip('−5', () => setState(() { _value = (_value - 5).clamp(0, 1000000); _ctrl.text = _value.toString(); })),
-                deltaChip('+5', () => setState(() { _value += 5; _ctrl.text = _value.toString(); })),
+                deltaChip(
+                  '−1',
+                  () => setState(() {
+                    _value = (_value - 1).clamp(0, 1000000);
+                    _ctrl.text = _value.toString();
+                  }),
+                ),
+                deltaChip(
+                  '+1',
+                  () => setState(() {
+                    _value += 1;
+                    _ctrl.text = _value.toString();
+                  }),
+                ),
+                deltaChip(
+                  '−5',
+                  () => setState(() {
+                    _value = (_value - 5).clamp(0, 1000000);
+                    _ctrl.text = _value.toString();
+                  }),
+                ),
+                deltaChip(
+                  '+5',
+                  () => setState(() {
+                    _value += 5;
+                    _ctrl.text = _value.toString();
+                  }),
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                SizedBox(width: 100, child: TextFormField(controller: _ctrl, textAlign: TextAlign.center, keyboardType: const TextInputType.numberWithOptions(decimal: false), onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value), decoration: const InputDecoration(labelText: 'Amount'))),
+                SizedBox(
+                  width: 100,
+                  child: TextFormField(
+                    controller: _ctrl,
+                    textAlign: TextAlign.center,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                    ),
+                    onChanged: (v) =>
+                        setState(() => _value = int.tryParse(v) ?? _value),
+                    decoration: const InputDecoration(labelText: 'Amount'),
+                  ),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<Unit>(
@@ -287,12 +342,16 @@ case StrengthInputStyle.chipDeltaGrid:
         );
         break;
 
-case StrengthInputStyle.chipRowStrong:
+      case StrengthInputStyle.chipRowStrong:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 4, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
           ],
         );
         content = Row(
@@ -300,7 +359,9 @@ case StrengthInputStyle.chipRowStrong:
             Expanded(
               child: TextFormField(
                 controller: _ctrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: false,
+                ),
                 decoration: InputDecoration(
                   labelText: 'Amount',
                   suffixIcon: Row(
@@ -308,16 +369,23 @@ case StrengthInputStyle.chipRowStrong:
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => setState(() { _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString(); }),
+                        onPressed: () => setState(() {
+                          _value = (_value - 1).clamp(0, 1000000);
+                          _ctrl.text = _value.toString();
+                        }),
                       ),
                       IconButton(
                         icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () => setState(() { _value += 1; _ctrl.text = _value.toString(); }),
+                        onPressed: () => setState(() {
+                          _value += 1;
+                          _ctrl.text = _value.toString();
+                        }),
                       ),
                     ],
                   ),
                 ),
-                onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                onChanged: (v) =>
+                    setState(() => _value = int.tryParse(v) ?? _value),
               ),
             ),
             const SizedBox(width: 12),
@@ -338,7 +406,7 @@ case StrengthInputStyle.chipRowStrong:
         );
         break;
 
-case StrengthInputStyle.chipQuickPicks:
+      case StrengthInputStyle.chipQuickPicks:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(12),
@@ -349,7 +417,10 @@ case StrengthInputStyle.chipQuickPicks:
             Row(
               children: [
                 IconButton.filledTonal(
-                  onPressed: () => setState(() { _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString(); }),
+                  onPressed: () => setState(() {
+                    _value = (_value - 1).clamp(0, 1000000);
+                    _ctrl.text = _value.toString();
+                  }),
                   icon: const Icon(Icons.remove),
                 ),
                 const SizedBox(width: 8),
@@ -358,14 +429,20 @@ case StrengthInputStyle.chipQuickPicks:
                   child: TextFormField(
                     controller: _ctrl,
                     textAlign: TextAlign.center,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                    ),
                     decoration: const InputDecoration(labelText: 'Amount'),
-                    onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                    onChanged: (v) =>
+                        setState(() => _value = int.tryParse(v) ?? _value),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
-                  onPressed: () => setState(() { _value += 1; _ctrl.text = _value.toString(); }),
+                  onPressed: () => setState(() {
+                    _value += 1;
+                    _ctrl.text = _value.toString();
+                  }),
                   icon: const Icon(Icons.add),
                 ),
               ],
@@ -388,7 +465,7 @@ case StrengthInputStyle.chipQuickPicks:
         );
         break;
 
-case StrengthInputStyle.chipTwoRow:
+      case StrengthInputStyle.chipTwoRow:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
@@ -405,7 +482,10 @@ case StrengthInputStyle.chipTwoRow:
                     max: 1000,
                     divisions: 1000,
                     label: '$_value',
-                    onChanged: (v) => setState(() { _value = v.round(); _ctrl.text = _value.toString(); }),
+                    onChanged: (v) => setState(() {
+                      _value = v.round();
+                      _ctrl.text = _value.toString();
+                    }),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -426,7 +506,7 @@ case StrengthInputStyle.chipTwoRow:
         );
         break;
 
-case StrengthInputStyle.chipCardTopRightDropdown:
+      case StrengthInputStyle.chipCardTopRightDropdown:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(12),
@@ -438,11 +518,34 @@ case StrengthInputStyle.chipCardTopRightDropdown:
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  IconButton.filledTonal(onPressed: () => setState(() { _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString(); }), icon: const Icon(Icons.remove)),
+                  IconButton.filledTonal(
+                    onPressed: () => setState(() {
+                      _value = (_value - 1).clamp(0, 1000000);
+                      _ctrl.text = _value.toString();
+                    }),
+                    icon: const Icon(Icons.remove),
+                  ),
                   const SizedBox(width: 8),
-                  SizedBox(width: 90, child: TextFormField(controller: _ctrl, textAlign: TextAlign.center, keyboardType: const TextInputType.numberWithOptions(decimal: false), onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value))),
+                  SizedBox(
+                    width: 90,
+                    child: TextFormField(
+                      controller: _ctrl,
+                      textAlign: TextAlign.center,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: false,
+                      ),
+                      onChanged: (v) =>
+                          setState(() => _value = int.tryParse(v) ?? _value),
+                    ),
+                  ),
                   const SizedBox(width: 8),
-                  IconButton.filledTonal(onPressed: () => setState(() { _value += 1; _ctrl.text = _value.toString(); }), icon: const Icon(Icons.add)),
+                  IconButton.filledTonal(
+                    onPressed: () => setState(() {
+                      _value += 1;
+                      _ctrl.text = _value.toString();
+                    }),
+                    icon: const Icon(Icons.add),
+                  ),
                 ],
               ),
             ),
@@ -467,7 +570,7 @@ case StrengthInputStyle.chipCardTopRightDropdown:
         );
         break;
 
-case StrengthInputStyle.chipPillsGroup:
+      case StrengthInputStyle.chipPillsGroup:
         // Use a subtle primary-tinted background with no outline
         deco = BoxDecoration(
           color: Colors.transparent,
@@ -486,10 +589,15 @@ case StrengthInputStyle.chipPillsGroup:
               ),
               child: InkWell(
                 customBorder: const StadiumBorder(),
-                overlayColor: MaterialStatePropertyAll(theme.colorScheme.primary.withOpacity(0.12)),
+                overlayColor: MaterialStatePropertyAll(
+                  theme.colorScheme.primary.withOpacity(0.12),
+                ),
                 onTap: onTap,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Text(label, style: theme.textTheme.labelLarge),
                 ),
               ),
@@ -498,26 +606,45 @@ case StrengthInputStyle.chipPillsGroup:
         }
         content = Row(
           children: [
-            pillBtn('−', () => setState(() { _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString(); })),
+            pillBtn(
+              '−',
+              () => setState(() {
+                _value = (_value - 1).clamp(0, 1000000);
+                _ctrl.text = _value.toString();
+              }),
+            ),
             const SizedBox(width: 6),
             SizedBox(
               width: 96,
               child: TextFormField(
                 controller: _ctrl,
                 textAlign: TextAlign.center,
-                keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: false,
+                ),
+                onChanged: (v) =>
+                    setState(() => _value = int.tryParse(v) ?? _value),
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surface,
@@ -525,7 +652,13 @@ case StrengthInputStyle.chipPillsGroup:
               ),
             ),
             const SizedBox(width: 6),
-            pillBtn('+', () => setState(() { _value += 1; _ctrl.text = _value.toString(); })),
+            pillBtn(
+              '+',
+              () => setState(() {
+                _value += 1;
+                _ctrl.text = _value.toString();
+              }),
+            ),
             const SizedBox(width: 12),
             // Use Expanded to avoid RenderFlex overflow and center-align text
             Expanded(
@@ -534,24 +667,55 @@ case StrengthInputStyle.chipPillsGroup:
                 isExpanded: true,
                 alignment: AlignmentDirectional.center,
                 items: const [
-                  DropdownMenuItem(value: Unit.mcg, alignment: AlignmentDirectional.center, child: Center(child: Text('mcg', textAlign: TextAlign.center))),
-                  DropdownMenuItem(value: Unit.mg, alignment: AlignmentDirectional.center, child: Center(child: Text('mg', textAlign: TextAlign.center))),
-                  DropdownMenuItem(value: Unit.g, alignment: AlignmentDirectional.center, child: Center(child: Text('g', textAlign: TextAlign.center))),
+                  DropdownMenuItem(
+                    value: Unit.mcg,
+                    alignment: AlignmentDirectional.center,
+                    child: Center(
+                      child: Text('mcg', textAlign: TextAlign.center),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: Unit.mg,
+                    alignment: AlignmentDirectional.center,
+                    child: Center(
+                      child: Text('mg', textAlign: TextAlign.center),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: Unit.g,
+                    alignment: AlignmentDirectional.center,
+                    child: Center(
+                      child: Text('g', textAlign: TextAlign.center),
+                    ),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _unit = v ?? _unit),
-                icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surface,
@@ -564,19 +728,42 @@ case StrengthInputStyle.chipPillsGroup:
         );
         break;
 
-case StrengthInputStyle.chipMinimalInline:
+      case StrengthInputStyle.chipMinimalInline:
         deco = BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Theme.of(context).dividerColor),
         );
-content = Row(
+        content = Row(
           children: [
-            IconButton(onPressed: () => setState(() { _value = (_value - 1).clamp(0, 1000000); _ctrl.text = _value.toString(); }), icon: const Icon(Icons.remove)),
+            IconButton(
+              onPressed: () => setState(() {
+                _value = (_value - 1).clamp(0, 1000000);
+                _ctrl.text = _value.toString();
+              }),
+              icon: const Icon(Icons.remove),
+            ),
             const SizedBox(width: 6),
-            SizedBox(width: 80, child: TextFormField(controller: _ctrl, textAlign: TextAlign.center, keyboardType: const TextInputType.numberWithOptions(decimal: false), onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value))),
+            SizedBox(
+              width: 80,
+              child: TextFormField(
+                controller: _ctrl,
+                textAlign: TextAlign.center,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: false,
+                ),
+                onChanged: (v) =>
+                    setState(() => _value = int.tryParse(v) ?? _value),
+              ),
+            ),
             const SizedBox(width: 6),
-            IconButton(onPressed: () => setState(() { _value += 1; _ctrl.text = _value.toString(); }), icon: const Icon(Icons.add)),
+            IconButton(
+              onPressed: () => setState(() {
+                _value += 1;
+                _ctrl.text = _value.toString();
+              }),
+              icon: const Icon(Icons.add),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<Unit>(
@@ -604,15 +791,24 @@ content = Row(
           children: [
             Row(
               children: [
-                Text(widget.style.displayName, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                Text(
+                  widget.style.displayName,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const Spacer(),
-FilledButton.tonal(
+                FilledButton.tonal(
                   onPressed: () async {
                     final idx = StrengthInputStyle.values.indexOf(widget.style);
                     await UserPrefs.setStrengthInputStyle(idx);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Selected: ${widget.style.displayName}')),
+                        SnackBar(
+                          content: Text(
+                            'Selected: ${widget.style.displayName}',
+                          ),
+                        ),
                       );
                     }
                   },
@@ -621,15 +817,10 @@ FilledButton.tonal(
               ],
             ),
             const SizedBox(height: 8),
-            Container(
-              decoration: deco,
-              padding: padding,
-              child: content,
-            ),
+            Container(decoration: deco, padding: padding, child: content),
           ],
         ),
       ),
     );
   }
 }
-

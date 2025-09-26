@@ -44,19 +44,32 @@ class _CalendarPageState extends State<CalendarPage> {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Center(
                       child: SegmentedButton<_CalView>(
                         segments: const [
-                          ButtonSegment(value: _CalView.month, label: Text('Month')),
-                          ButtonSegment(value: _CalView.week, label: Text('Week')),
-                          ButtonSegment(value: _CalView.day, label: Text('Day')),
+                          ButtonSegment(
+                            value: _CalView.month,
+                            label: Text('Month'),
+                          ),
+                          ButtonSegment(
+                            value: _CalView.week,
+                            label: Text('Week'),
+                          ),
+                          ButtonSegment(
+                            value: _CalView.day,
+                            label: Text('Day'),
+                          ),
                         ],
                         selected: {_view},
-                        onSelectionChanged: (s) => setState(() => _view = s.first),
+                        onSelectionChanged: (s) =>
+                            setState(() => _view = s.first),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -105,7 +118,8 @@ class _CalendarPageState extends State<CalendarPage> {
           month: DateTime(_anchor.year, _anchor.month, 1),
           schedules: b,
           selectedDay: _selectedDay,
-          onSelectDay: (d) => setState(() => _selectedDay = _selectedDay == d ? null : d),
+          onSelectDay: (d) =>
+              setState(() => _selectedDay = _selectedDay == d ? null : d),
         );
       case _CalView.week:
         final start = _weekStart(_anchor);
@@ -118,20 +132,26 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   static DateTime _prev(_CalView v, DateTime a) => switch (v) {
-        _CalView.month => DateTime(a.year, a.month - 1, 1),
-        _CalView.week => a.subtract(const Duration(days: 7)),
-        _CalView.day => a.subtract(const Duration(days: 1)),
-      };
+    _CalView.month => DateTime(a.year, a.month - 1, 1),
+    _CalView.week => a.subtract(const Duration(days: 7)),
+    _CalView.day => a.subtract(const Duration(days: 1)),
+  };
   static DateTime _next(_CalView v, DateTime a) => switch (v) {
-        _CalView.month => DateTime(a.year, a.month + 1, 1),
-        _CalView.week => a.add(const Duration(days: 7)),
-        _CalView.day => a.add(const Duration(days: 1)),
-      };
-  static DateTime _weekStart(DateTime a) => a.subtract(Duration(days: a.weekday - 1));
+    _CalView.month => DateTime(a.year, a.month + 1, 1),
+    _CalView.week => a.add(const Duration(days: 7)),
+    _CalView.day => a.add(const Duration(days: 1)),
+  };
+  static DateTime _weekStart(DateTime a) =>
+      a.subtract(Duration(days: a.weekday - 1));
 }
 
 class _MonthView extends StatelessWidget {
-  const _MonthView({required this.month, required this.schedules, required this.selectedDay, required this.onSelectDay});
+  const _MonthView({
+    required this.month,
+    required this.schedules,
+    required this.selectedDay,
+    required this.onSelectDay,
+  });
   final DateTime month; // first day of month
   final Box<Schedule> schedules;
   final DateTime? selectedDay;
@@ -161,23 +181,35 @@ class _MonthView extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: weekdayLabels
-                .map((w) => Expanded(
-                      child: Center(child: Text(w, style: Theme.of(context).textTheme.labelLarge)),
-                    ))
+                .map(
+                  (w) => Expanded(
+                    child: Center(
+                      child: Text(
+                        w,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, mainAxisSpacing: 4, crossAxisSpacing: 4),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
             itemCount: leadingBlanks + totalDays,
             itemBuilder: (context, index) {
               if (index < leadingBlanks) return const SizedBox.shrink();
               final day = index - leadingBlanks + 1;
               final date = DateTime(month.year, month.month, day);
               final list = map[day] ?? const <CalendarEvent>[];
-              final isSelected = selectedDay != null &&
+              final isSelected =
+                  selectedDay != null &&
                   selectedDay!.year == date.year &&
                   selectedDay!.month == date.month &&
                   selectedDay!.day == date.day;
@@ -186,18 +218,28 @@ class _MonthView extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor),
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).dividerColor,
+                    ),
                   ),
                   padding: const EdgeInsets.all(6),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('$day', style: Theme.of(context).textTheme.labelLarge),
+                      Text(
+                        '$day',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
                       const SizedBox(height: 4),
                       Wrap(
                         spacing: 2,
                         runSpacing: 2,
-                        children: list.take(3).map((e) => _dot(context)).toList(),
+                        children: list
+                            .take(3)
+                            .map((e) => _dot(context))
+                            .toList(),
                       ),
                     ],
                   ),
@@ -210,16 +252,28 @@ class _MonthView extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
+              border: Border(
+                top: BorderSide(color: Theme.of(context).dividerColor),
+              ),
             ),
             height: 220,
-            child: _DayView(day: selectedDay!, events: CalendarUtils.eventsForDay(selectedDay!, schedules)),
+            child: _DayView(
+              day: selectedDay!,
+              events: CalendarUtils.eventsForDay(selectedDay!, schedules),
+            ),
           ),
       ],
     );
   }
 
-  Widget _dot(BuildContext context) => Container(width: 6, height: 6, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle));
+  Widget _dot(BuildContext context) => Container(
+    width: 6,
+    height: 6,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primary,
+      shape: BoxShape.circle,
+    ),
+  );
 }
 
 class _WeekView extends StatelessWidget {
@@ -231,12 +285,16 @@ class _WeekView extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = List.generate(7, (i) {
       final d = weekStart.add(Duration(days: i));
-      return '${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]} ${d.day}';
+      return '${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]} ${d.day}';
     });
     final events = CalendarUtils.eventsForWeek(weekStart, schedules);
     final map = <int, List<CalendarEvent>>{};
     for (final e in events) {
-      final key = DateTime(e.when.year, e.when.month, e.when.day).difference(weekStart).inDays;
+      final key = DateTime(
+        e.when.year,
+        e.when.month,
+        e.when.day,
+      ).difference(weekStart).inDays;
       (map[key] ??= []).add(e);
     }
 
@@ -245,14 +303,17 @@ class _WeekView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
-            children: labels.map((l) => Expanded(child: Center(child: Text(l)))).toList(),
+            children: labels
+                .map((l) => Expanded(child: Center(child: Text(l))))
+                .toList(),
           ),
         ),
         const Divider(height: 1),
         Expanded(
           child: Row(
             children: List.generate(7, (i) {
-              final dayEvents = (map[i] ?? [])..sort((a, b) => a.when.compareTo(b.when));
+              final dayEvents = (map[i] ?? [])
+                ..sort((a, b) => a.when.compareTo(b.when));
               return Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(8),
@@ -294,8 +355,8 @@ class _DayView extends StatelessWidget {
         final e = list[i];
         final t = TimeOfDay.fromDateTime(e.when).format(context);
         return ListTile(
-          leading: const Icon(Icons.medication)
-,          title: Text(e.title),
+          leading: const Icon(Icons.medication),
+          title: Text(e.title),
           subtitle: Text(t),
         );
       },

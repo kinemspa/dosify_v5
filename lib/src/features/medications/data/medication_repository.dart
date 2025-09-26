@@ -16,4 +16,3 @@ class MedicationRepository {
     await _box.delete(id);
   }
 }
-

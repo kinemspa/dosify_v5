@@ -9,4 +9,3 @@ String fmt2(num value) {
   }
   return s;
 }
-

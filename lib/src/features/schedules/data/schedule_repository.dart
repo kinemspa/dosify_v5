@@ -9,4 +9,3 @@ class ScheduleRepository {
   Future<void> upsert(Schedule s) => _box.put(s.id, s);
   Future<void> delete(String id) => _box.delete(id);
 }
-

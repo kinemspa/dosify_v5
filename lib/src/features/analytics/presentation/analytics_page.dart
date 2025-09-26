@@ -8,9 +8,7 @@ class AnalyticsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Analytics', forceBackButton: true),
-      body: const Center(
-        child: Text('Analytics coming soon'),
-      ),
+      body: const Center(child: Text('Analytics coming soon')),
     );
   }
 }

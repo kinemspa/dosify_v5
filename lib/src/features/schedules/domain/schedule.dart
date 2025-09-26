@@ -103,9 +103,12 @@ class Schedule {
   bool get hasCycle => cycleEveryNDays != null && cycleEveryNDays! > 0;
 
   // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
-  DoseUnit? get doseUnitEnum => doseUnitCode != null ? DoseUnit.values[doseUnitCode!] : null;
-  DoseUnit? get displayUnitEnum => displayUnitCode != null ? DoseUnit.values[displayUnitCode!] : null;
-  DoseInputMode? get inputModeEnum => inputModeCode != null ? DoseInputMode.values[inputModeCode!] : null;
+  DoseUnit? get doseUnitEnum =>
+      doseUnitCode != null ? DoseUnit.values[doseUnitCode!] : null;
+  DoseUnit? get displayUnitEnum =>
+      displayUnitCode != null ? DoseUnit.values[displayUnitCode!] : null;
+  DoseInputMode? get inputModeEnum =>
+      inputModeCode != null ? DoseInputMode.values[inputModeCode!] : null;
 }
 
 // Typed units and input modes (not Hive-annotated; persisted as int codes)
@@ -122,12 +125,4 @@ enum DoseUnit {
   vials,
 }
 
-enum DoseInputMode {
-  tablets,
-  capsules,
-  mass,
-  volume,
-  iuUnits,
-  count,
-}
-
+enum DoseInputMode { tablets, capsules, mass, volume, iuUnits, count }
