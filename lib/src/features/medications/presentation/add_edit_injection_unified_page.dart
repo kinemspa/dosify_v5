@@ -412,20 +412,23 @@ class _AddEditInjectionUnifiedPageState
                   if (widget.kind == InjectionKind.multi)
                     LabelFieldRow(
                       label: 'Method',
-                      field: SegmentedButton<CalcMode>(
-                        segments: const [
-                          ButtonSegment(
-                            value: CalcMode.known,
-                            label: Text('Enter volume'),
+                      field: Wrap(
+                        spacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Enter volume'),
+                            selected: _calcMode == CalcMode.known,
+                            onSelected: (_) =>
+                                setState(() => _calcMode = CalcMode.known),
                           ),
-                          ButtonSegment(
-                            value: CalcMode.reconstitute,
-                            label: Text('Reconstitute'),
+                          ChoiceChip(
+                            label: const Text('Reconstitute'),
+                            selected: _calcMode == CalcMode.reconstitute,
+                            onSelected: (_) => setState(
+                              () => _calcMode = CalcMode.reconstitute,
+                            ),
                           ),
                         ],
-                        selected: {_calcMode},
-                        onSelectionChanged: (s) =>
-                            setState(() => _calcMode = s.first),
                       ),
                     ),
                   if (widget.kind == InjectionKind.multi &&
@@ -433,7 +436,7 @@ class _AddEditInjectionUnifiedPageState
                     LabelFieldRow(
                       label: 'Vial volume (mL)',
                       field: SizedBox(
-                        width: 160,
+                        width: kSmallControlWidth,
                         child: Field36(
                           child: TextFormField(
                             controller: _vialVolume,
@@ -454,7 +457,8 @@ class _AddEditInjectionUnifiedPageState
                       _calcMode == CalcMode.reconstitute)
                     Padding(
                       padding: const EdgeInsets.only(
-                        left: kLabelColWidth + 8,
+                        left: 0,
+                        right: 0,
                         top: 6,
                         bottom: 6,
                       ),
@@ -491,7 +495,7 @@ class _AddEditInjectionUnifiedPageState
                                   ),
                                   const SizedBox(width: 12),
                                   SizedBox(
-                                    width: 160,
+                                    width: kSmallControlWidth,
                                     child: DropdownButtonFormField<String>(
                                       value:
                                           _doseUnitInline ??
@@ -569,7 +573,7 @@ class _AddEditInjectionUnifiedPageState
                                   ),
                                   const SizedBox(width: 12),
                                   SizedBox(
-                                    width: 160,
+                                    width: kSmallControlWidth,
                                     child: TextFormField(
                                       controller: _vialMaxInline,
                                       keyboardType:
@@ -701,6 +705,150 @@ class _AddEditInjectionUnifiedPageState
                                         ],
                                       ),
                                       const SizedBox(height: 12),
+                                      // Adjust fill slider + syringe indicator (full width)
+                                      Builder(
+                                        builder: (context) {
+                                          final unitLabel = _baseUnit(
+                                            _strengthUnit,
+                                          );
+                                          final sTxt = _strength.text.trim();
+                                          final dTxt = _doseInline.text.trim();
+                                          final Sraw =
+                                              double.tryParse(sTxt) ?? 0;
+                                          final Draw =
+                                              double.tryParse(dTxt) ?? 0;
+                                          double S = Sraw, D = Draw;
+                                          if (unitLabel != 'units') {
+                                            S = _toBaseMass(Sraw, unitLabel);
+                                            D = _toBaseMass(
+                                              Draw,
+                                              _doseUnitInline ?? unitLabel,
+                                            );
+                                          }
+                                          final vKnown = double.tryParse(
+                                            _vialMaxInline.text,
+                                          );
+                                          final (minURaw, _, __) =
+                                              _presetUnitsRaw(_syringeInline);
+                                          final totalIU = _syringeInline
+                                              .totalUnits
+                                              .toDouble();
+                                          double iuMax = totalIU;
+                                          if (vKnown != null &&
+                                              S > 0 &&
+                                              D > 0) {
+                                            final uMaxAllowed =
+                                                (100 * D * vKnown) / S;
+                                            iuMax = uMaxAllowed > totalIU
+                                                ? totalIU
+                                                : (uMaxAllowed < 0
+                                                      ? 0
+                                                      : uMaxAllowed);
+                                          }
+                                          double sliderMin = minURaw;
+                                          if (sliderMin < 0) sliderMin = 0;
+                                          if (sliderMin > iuMax)
+                                            sliderMin = iuMax;
+                                          _selectedUnitsInline =
+                                              _selectedUnitsInline.clamp(
+                                                sliderMin,
+                                                iuMax,
+                                              );
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Adjust fill (${fmt2(iuMax)} IU max)',
+                                              ),
+                                              Slider(
+                                                value: _selectedUnitsInline,
+                                                min: sliderMin,
+                                                max: iuMax > 0 ? iuMax : 1,
+                                                divisions:
+                                                    ((totalIU - sliderMin)
+                                                            .toInt())
+                                                        .clamp(1, 200),
+                                                label:
+                                                    '${fmt2(_selectedUnitsInline)} IU',
+                                                onChanged: (v) => setState(
+                                                  () =>
+                                                      _selectedUnitsInline = v,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4,
+                                                  bottom: 8,
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Syringe: ${_syringeInline.label} • Fill: ${fmt2(_selectedUnitsInline)} / ${fmt2(totalIU)} IU',
+                                                    ),
+                                                    const SizedBox(height: 6),
+                                                    LayoutBuilder(
+                                                      builder: (ctx, cons) {
+                                                        final ratio =
+                                                            totalIU <= 0
+                                                            ? 0.0
+                                                            : (_selectedUnitsInline /
+                                                                      totalIU)
+                                                                  .clamp(
+                                                                    0.0,
+                                                                    1.0,
+                                                                  );
+                                                        return Container(
+                                                          height: 16,
+                                                          width:
+                                                              double.infinity,
+                                                          decoration: BoxDecoration(
+                                                            color: Theme.of(context)
+                                                                .colorScheme
+                                                                .surfaceContainerHighest,
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  8,
+                                                                ),
+                                                            border: Border.all(
+                                                              color: Theme.of(context)
+                                                                  .colorScheme
+                                                                  .outlineVariant,
+                                                            ),
+                                                          ),
+                                                          child: Align(
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child: FractionallySizedBox(
+                                                              widthFactor:
+                                                                  ratio.isNaN
+                                                                  ? 0.0
+                                                                  : ratio,
+                                                              child: Container(
+                                                                decoration: BoxDecoration(
+                                                                  color: Theme.of(
+                                                                    context,
+                                                                  ).colorScheme.primary,
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        8,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
                                       FilledButton.icon(
                                         onPressed: (S > 0 && D > 0 && iuMax > 0)
                                             ? () {
