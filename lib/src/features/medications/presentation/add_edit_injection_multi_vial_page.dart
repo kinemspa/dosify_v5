@@ -210,6 +210,11 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
     final id = widget.initial?.id ?? (DateTime.now().microsecondsSinceEpoch.toString() +
         Random().nextInt(9999).toString().padLeft(4, '0'));
 
+    final previous = widget.initial;
+    final stock = double.parse(_stockValueCtrl.text);
+    final initialStock = previous == null
+        ? stock
+        : (stock > previous.stockValue ? stock : (previous.initialStockValue ?? previous.stockValue));
     final med = Medication(
       id: id,
       form: MedicationForm.injectionMultiDoseVial,
@@ -220,7 +225,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       strengthValue: double.parse(_strengthValueCtrl.text),
       strengthUnit: _strengthUnit,
       perMlValue: _isPerMl && _perMlCtrl.text.isNotEmpty ? double.parse(_perMlCtrl.text) : null,
-      stockValue: double.parse(_stockValueCtrl.text),
+      stockValue: stock,
       stockUnit: StockUnit.multiDoseVials,
       containerVolumeMl: double.tryParse(_vialVolumeCtrl.text),
       lowStockEnabled: _lowStockEnabled,
@@ -232,6 +237,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _storageNotesCtrl.text.trim().isEmpty ? null : _storageNotesCtrl.text.trim(),
+      initialStockValue: initialStock,
     );
 
     if (!mounted) return;
@@ -240,6 +246,7 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       builder: (ctx) => AlertDialog(
         title: const Text('Confirm Medication'),
         content: Text(_buildSummary()),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Confirm')),
@@ -285,12 +292,13 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
         forceBackButton: true,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
-        backgroundColor: _nameCtrl.text.trim().isNotEmpty ? const Color(0xFF09A8BD) : Colors.grey,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.save),
-        label: Text(widget.initial == null ? 'Save' : 'Update'),
+      floatingActionButton: SizedBox(
+        width: 140,
+        child: FilledButton.icon(
+          onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
+          icon: const Icon(Icons.save),
+          label: Text(widget.initial == null ? 'Save' : 'Update'),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
