@@ -14,12 +14,18 @@ class SelectMedicationTypePage extends StatelessWidget {
       appBar: const GradientAppBar(title: 'Select Medication Type', forceBackButton: true),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
-        children: const [
-          _TypeTile(title: 'Tablet', subtitle: 'Solid pill dosage form'),
-          SizedBox(height: 16),
-          _TypeTile(title: 'Capsule', subtitle: 'Powder or pellets in a gelatin shell'),
-          SizedBox(height: 16),
-          _TypeTile(title: 'Injection', subtitle: 'Pre-filled syringes or vials'),
+        children: [
+          const _ScreenHeader(
+            icon: Icons.add_circle_outline,
+            title: 'Add a medication',
+            subtitle: 'Choose the type so we can tailor the fields for you',
+          ),
+          const SizedBox(height: 16),
+          const _TypeTile(icon: Icons.medication, title: 'Tablet', subtitle: 'Solid pill dosage form'),
+          const SizedBox(height: 16),
+          const _TypeTile(icon: Icons.medication_liquid, title: 'Capsule', subtitle: 'Powder or pellets in a gelatin shell'),
+          const SizedBox(height: 16),
+          const _TypeTile(icon: Icons.vaccines, title: 'Injection', subtitle: 'Pre-filled syringes or vials'),
         ],
       ),
     );
@@ -58,13 +64,15 @@ class _Section extends StatelessWidget {
 }
 
 class _TypeTile extends StatelessWidget {
-  const _TypeTile({required this.title, required this.subtitle});
+  const _TypeTile({required this.icon, required this.title, required this.subtitle});
+  final IconData icon;
   final String title;
   final String subtitle;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onPrimary = theme.colorScheme.onPrimary;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
@@ -86,6 +94,17 @@ class _TypeTile extends StatelessWidget {
           ),
           child: Row(
             children: [
+              // Leading icon badge
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: onPrimary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: onPrimary, size: 20),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,22 +113,68 @@ class _TypeTile extends StatelessWidget {
                       title,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: theme.colorScheme.onPrimary,
+                        color: onPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onPrimary,
+                        color: onPrimary,
                       ),
                     ),
                   ],
                 ),
               ),
+              Icon(Icons.chevron_right, color: onPrimary),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ScreenHeader extends StatelessWidget {
+  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: theme.colorScheme.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
