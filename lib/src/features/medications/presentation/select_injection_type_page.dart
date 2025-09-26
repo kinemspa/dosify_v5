@@ -129,9 +129,4 @@ class _ScreenHeader extends StatelessWidget {
     );
   }
 }
-        ),
-      ),
-    );
-  }
-}
 
