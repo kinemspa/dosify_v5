@@ -15,7 +15,7 @@ class SelectInjectionTypePage extends StatelessWidget {
         children: const [
           _ScreenHeader(icon: Icons.vaccines, title: 'Select injection type', subtitle: 'We’ll tailor fields for the syringe or vial you use'),
           SizedBox(height: 16),
-          _Tile(icon: Icons.vaccines, title: 'Pre-Filled Syringe', subtitle: 'Ready to use single dose syringe', route: '/medications/add/injection/pfs', primary: true),
+          _Tile(icon: Icons.vaccines, title: 'Pre-Filled Syringe', subtitle: 'Ready to use single dose syringe', route: '/medications/add/injection/pfs'),
           SizedBox(height: 16),
           _Tile(icon: Icons.science, title: 'Single Dose Vial', subtitle: 'One time use vial', route: '/medications/add/injection/single'),
           SizedBox(height: 16),
@@ -105,8 +105,13 @@ class _ScreenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+    final cs = theme.colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -114,19 +119,19 @@ class _ScreenHeader extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.12),
+              color: cs.onPrimary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: theme.colorScheme.primary),
+            child: Icon(icon, color: cs.onPrimary),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: cs.onPrimary)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
               ],
             ),
           )
