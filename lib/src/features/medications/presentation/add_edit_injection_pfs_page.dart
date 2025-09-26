@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/form_field_styler.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import '../../../core/prefs/user_prefs.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -255,6 +257,31 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
     );
   }
 
+  Widget _rowLabelField({required String label, required Widget field}) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: field),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -266,7 +293,16 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
       floatingActionButton: SizedBox(
         width: 140,
         child: FilledButton.icon(
-          onPressed: _nameCtrl.text.trim().isNotEmpty ? _submit : null,
+          onPressed: (() {
+            final nameOk = _nameCtrl.text.trim().isNotEmpty;
+            final a = double.tryParse(_strengthValueCtrl.text.trim());
+            final amtOk = a != null && a > 0;
+            final s = double.tryParse(_stockValueCtrl.text.trim());
+            final stockOk = s != null && s >= 0;
+            return nameOk && amtOk && stockOk;
+          })()
+              ? _submit
+              : null,
           icon: const Icon(Icons.save),
           label: Text(widget.initial == null ? 'Save' : 'Update'),
         ),
@@ -300,57 +336,77 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                   children: [
                     Text('General', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _nameCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Name *',
-                        hint: 'Enter the Medication Name',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Name *',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _nameCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Name *',
+                            hint: 'Enter the Medication Name',
+                            helper: '',
+                          ),
+                          validator: (v) => (v==null||v.trim().isEmpty)?'Required':null,
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
-                      validator: (v) => (v==null||v.trim().isEmpty)?'Required':null,
-                      onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _manufacturerCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Manufacturer',
-                        hint: 'Enter the Medication Manufacturer Brand Name',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Manufacturer',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _manufacturerCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Manufacturer',
+                            hint: 'Enter the Medication Manufacturer Brand Name',
+                            helper: '',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
-                      onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _descriptionCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Description',
-                        hint: 'Enter the Medication Description',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Description',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _descriptionCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Description',
+                            hint: 'Enter the Medication Description',
+                            helper: '',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
-                      onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _notesCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Notes',
-                        hint: 'Enter Notes about the Medication',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Notes',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _notesCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Notes',
+                            hint: 'Enter Notes about the Medication',
+                            helper: '',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
-                      onChanged: (_) => setState(() {}),
                     ),
                   ],
                 ),
@@ -371,91 +427,96 @@ border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha
                   children: [
                     Text('Strength', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    Row(children: [
-                      _pillBtn(context, '−', () {
-                        final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
-                        final nv = (v - 1).clamp(0, 1000000);
-                        setState(() => _strengthValueCtrl.text = nv.toString());
-                      }),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 96,
-                        child: TextFormField(
-                          controller: _strengthValueCtrl,
-                          textAlign: TextAlign.center,
-keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Strength *',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    _rowLabelField(
+                      label: 'Strength amount *',
+                      field: Row(
+                        children: [
+                          _pillBtn(context, '−', () {
+                            final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
+                            final nv = (v - 1).clamp(0, 1000000);
+                            setState(() => _strengthValueCtrl.text = nv.toString());
+                          }),
+                          const SizedBox(width: 6),
+                          SizedBox(
+                            width: 120,
+                            child: Field36(
+                              child: TextFormField(
+                                controller: _strengthValueCtrl,
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                decoration: FormFieldStyler.decoration(
+                                  context: context,
+                                  styleIndex: _formStyleIndex,
+                                  label: 'Strength amount *',
+                                  hint: '0',
+                                  helper: '',
+                                ),
+                                onChanged: (_) => setState(() {}),
+                              ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                            ),
-                            filled: true,
                           ),
-                          onChanged: (_) => setState(() {}),
-                        ),
+                          const SizedBox(width: 6),
+                          _pillBtn(context, '+', () {
+                            final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
+                            final nv = (v + 1).clamp(0, 1000000);
+                            setState(() => _strengthValueCtrl.text = nv.toString());
+                          }),
+                        ],
                       ),
-                      const SizedBox(width: 6),
-                      _pillBtn(context, '+', () {
-                        final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
-                        final nv = (v + 1).clamp(0, 1000000);
-                        setState(() => _strengthValueCtrl.text = nv.toString());
-                      }),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<Unit>(
-                          value: _strengthUnit,
-                          isExpanded: true,
-                          alignment: AlignmentDirectional.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          items: const [
-                            DropdownMenuItem(value: Unit.mcg, alignment: AlignmentDirectional.center, child: Center(child: Text('mcg', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.mg, alignment: AlignmentDirectional.center, child: Center(child: Text('mg', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.g, alignment: AlignmentDirectional.center, child: Center(child: Text('g', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.units, alignment: AlignmentDirectional.center, child: Center(child: Text('units', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.mcgPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('mcg/mL', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.mgPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('mg/mL', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.gPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('g/mL', textAlign: TextAlign.center))),
-                            DropdownMenuItem(value: Unit.unitsPerMl, alignment: AlignmentDirectional.center, child: Center(child: Text('units/mL', textAlign: TextAlign.center))),
-                          ],
-                          onChanged: (v){ setState(()=>_strengthUnit=v!);},
-                          icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          decoration: InputDecoration(
-                            labelText: 'Unit *',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                            ),
-                            filled: true,
-                          ),
-                          menuMaxHeight: 320,
-                        ),
-                      ),
-                    ]),
-                    if (_isPerMl)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                    ),
+                    _rowLabelField(
+                      label: 'Unit *',
+                      field: Align(
+                        alignment: Alignment.centerLeft,
                         child: SizedBox(
+                          height: kFieldHeight,
+                          width: 120,
+                          child: DropdownButtonFormField<Unit>(
+                            value: _strengthUnit,
+                            isExpanded: false,
+                            alignment: AlignmentDirectional.center,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            items: const [
+                              DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
+                              DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
+                              DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
+                              DropdownMenuItem(value: Unit.units, child: Center(child: Text('units'))),
+                              DropdownMenuItem(value: Unit.mcgPerMl, child: Center(child: Text('mcg/mL'))),
+                              DropdownMenuItem(value: Unit.mgPerMl, child: Center(child: Text('mg/mL'))),
+                              DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
+                              DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
+                            ],
+                            onChanged: (v){ setState(()=>_strengthUnit=v!);},
+                            icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                              ),
+                              filled: true,
+                            ),
+                            menuMaxHeight: 320,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_isPerMl)
+                      _rowLabelField(
+                        label: 'Per mL',
+                        field: SizedBox(
                           width: 160,
                           child: TextFormField(
                             controller: _perMlCtrl,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             decoration: const InputDecoration(labelText: 'Per mL'),
-                          ), 
+                          ),
                         ),
                       ),
                   ],
@@ -477,78 +538,77 @@ keyboardType: TextInputType.number,
                   children: [
                     Text('Inventory', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    Row(children: [
-                      _pillBtn(context, '−', () {
-                        final v = int.tryParse(_stockValueCtrl.text) ?? 0;
-                        final nv = (v - 1).clamp(0, 1000000);
-                        setState(() => _stockValueCtrl.text = nv.toString());
-                      }),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 96,
-                        child: TextFormField(
-                          controller: _stockValueCtrl,
-                          textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                          decoration: InputDecoration(
-                            labelText: 'Stock *',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    _rowLabelField(
+                      label: 'Stock amount *',
+                      field: Row(children: [
+                        _pillBtn(context, '−', () {
+                          final v = int.tryParse(_stockValueCtrl.text) ?? 0;
+                          final nv = (v - 1).clamp(0, 1000000);
+                          setState(() => _stockValueCtrl.text = nv.toString());
+                        }),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 120,
+                          child: Field36(
+                            child: TextFormField(
+                              controller: _stockValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                              decoration: FormFieldStyler.decoration(
+                                context: context,
+                                styleIndex: _formStyleIndex,
+                                label: 'Stock amount *',
+                                hint: '0',
+                                helper: '',
+                              ),
+                              onChanged: (_) => setState(() {}),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                            ),
-                            filled: true,
                           ),
-                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(width: 6),
+                        _pillBtn(context, '+', () {
+                          final v = int.tryParse(_stockValueCtrl.text) ?? 0;
+                          final nv = (v + 1).clamp(0, 1000000);
+                          setState(() => _stockValueCtrl.text = nv.toString());
+                        }),
+                      ]),
+                    ),
+                    _rowLabelField(
+                      label: 'Quantity unit',
+                      field: Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          height: kFieldHeight,
+                          width: 120,
+                          child: DropdownButtonFormField<StockUnit>(
+                            value: _stockUnit,
+                            isExpanded: false,
+                            alignment: AlignmentDirectional.center,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            items: const [
+                              DropdownMenuItem(value: StockUnit.preFilledSyringes, child: Center(child: Text('pre filled syringes'))),
+                            ],
+                            onChanged: (v) => setState(() => _stockUnit = v!),
+                            icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                              ),
+                              filled: true,
+                            ),
+                            menuMaxHeight: 320,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      _pillBtn(context, '+', () {
-                        final v = int.tryParse(_stockValueCtrl.text) ?? 0;
-                        final nv = (v + 1).clamp(0, 1000000);
-                        setState(() => _stockValueCtrl.text = nv.toString());
-                      }),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<StockUnit>(
-                          value: _stockUnit,
-                          isExpanded: true,
-                          alignment: AlignmentDirectional.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          items: const [
-                            DropdownMenuItem(
-                              value: StockUnit.preFilledSyringes,
-                              alignment: AlignmentDirectional.center,
-                              child: Center(child: Text('pre filled syringes', textAlign: TextAlign.center)),
-                            ),
-                          ],
-                          onChanged: (v) => setState(() => _stockUnit = v!),
-                          icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          decoration: InputDecoration(
-                            labelText: 'Unit *',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                            ),
-                            filled: true,
-                          ),
-                          menuMaxHeight: 320,
-                        ),
-                      ),
-                    ]),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -589,13 +649,21 @@ keyboardType: TextInputType.number,
                       ],
                     ),
                     const SizedBox(height: 8),
-                    ListTile(
-                      leading: const Icon(Icons.calendar_month),
-                      title: Text(_expiry==null? 'No Expiry' : 'Expiry: ${DateFormat.yMd().format(_expiry!)}'),
-                      trailing: const Icon(Icons.edit_calendar_outlined),
-                      onTap: _pickExpiry,
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    _rowLabelField(
+                      label: 'Expiry date',
+                      field: Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          height: kFieldHeight,
+                          width: 120,
+                          child: OutlinedButton.icon(
+                            onPressed: () async { await _pickExpiry(); },
+                            icon: const Icon(Icons.calendar_today, size: 18),
+                            label: Text(_expiry == null ? 'Select date' : DateFormat.yMd().format(_expiry!)),
+                            style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -616,46 +684,63 @@ keyboardType: TextInputType.number,
                   children: [
                     Text('Storage Information', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _batchCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Batch No.',
-                        hint: 'Enter the Medication Batch Number',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Batch No.',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _batchCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Batch No.',
+                            hint: 'Enter the Medication Batch Number',
+                            helper: '',
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _storageCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Lot / Storage Location',
-                        hint: 'Enter the Storage Location',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Location',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _storageCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Location',
+                            hint: 'Enter the Storage Location',
+                            helper: '',
+                          ),
+                        ),
                       ),
                     ),
-                    CheckboxListTile(
-                      title: const Text('Requires Refrigeration'),
-                      subtitle: const Text('Must be stored in refrigerator'),
-                      value: _requiresFridge,
-                      onChanged: (v) => setState(() => _requiresFridge = v ?? false),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      contentPadding: EdgeInsets.zero,
+                    _rowLabelField(
+                      label: 'Keep refrigerated',
+                      field: Row(children: [
+                        Checkbox(
+                          value: _requiresFridge,
+                          onChanged: (v) => setState(() => _requiresFridge = v ?? false),
+                        ),
+                        const Text('Refrigerate'),
+                      ]),
                     ),
-                    TextFormField(
-                      controller: _storageNotesCtrl,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: FormFieldStyler.decoration(
-                        context: context,
-                        styleIndex: _formStyleIndex,
-                        label: 'Storage Instructions',
-                        hint: 'Enter storage instructions',
-                        helper: '',
+                    _rowLabelField(
+                      label: 'Storage instructions',
+                      field: Field36(
+                        child: TextFormField(
+                          controller: _storageNotesCtrl,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: FormFieldStyler.decoration(
+                            context: context,
+                            styleIndex: _formStyleIndex,
+                            label: 'Storage instructions',
+                            hint: 'Enter storage instructions',
+                            helper: '',
+                          ),
+                        ),
                       ),
                     ),
                   ],
