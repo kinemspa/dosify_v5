@@ -14,6 +14,8 @@ import 'package:dosifi_v5/src/core/utils/format.dart';
 
 enum InjectionKind { pfs, single, multi }
 
+enum CalcMode { known, reconstitute }
+
 class AddEditInjectionUnifiedPage extends ConsumerStatefulWidget {
   const AddEditInjectionUnifiedPage({
     super.key,
@@ -45,6 +47,14 @@ class _AddEditInjectionUnifiedPageState
   String? _lastCalcDoseUnit;
   SyringeSizeMl? _lastCalcSyringe;
   double? _lastCalcVialSize;
+
+  // Inline calculator state (Multi only)
+  CalcMode _calcMode = CalcMode.known;
+  final _doseInline = TextEditingController();
+  String? _doseUnitInline; // defaults set at build based on strength unit
+  SyringeSizeMl _syringeInline = SyringeSizeMl.ml1;
+  final _vialMaxInline = TextEditingController();
+  double _selectedUnitsInline = 50;
 
   final _stock = TextEditingController(text: '0');
   StockUnit _stockUnit = StockUnit.preFilledSyringes;
@@ -197,6 +207,32 @@ class _AddEditInjectionUnifiedPageState
     }
   }
 
+  double _round2(double v) => (v * 100).round() / 100.0;
+  double _toBaseMass(double value, String from) {
+    if (from == 'g') return value * 1000.0; // g->mg
+    if (from == 'mg') return value; // mg base
+    if (from == 'mcg') return value / 1000.0; // mcg->mg
+    return value; // units pass-through
+  }
+
+  ({double cPerMl, double vialVolume}) _compute({
+    required double S,
+    required double D,
+    required double U,
+  }) {
+    final c = (100 * D) / (U <= 0 ? 0.01 : U);
+    final v = S / (c <= 0 ? 0.000001 : c);
+    return (cPerMl: c, vialVolume: v);
+  }
+
+  (double, double, double) _presetUnitsRaw(SyringeSizeMl syringe) {
+    final total = syringe.totalUnits.toDouble();
+    final minU = (total * 0.05).ceil().toDouble().clamp(1, total);
+    final midU = _round2(total * 0.33);
+    final highU = _round2(total * 0.80);
+    return (minU, midU, highU);
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = switch (widget.kind) {
@@ -293,13 +329,6 @@ class _AddEditInjectionUnifiedPageState
 
               SectionFormCard(
                 title: 'Strength',
-                trailing: widget.kind == InjectionKind.multi
-                    ? TextButton.icon(
-                        onPressed: _openReconstitutionDialog,
-                        icon: const Icon(Icons.science),
-                        label: const Text('Reconstitution'),
-                      )
-                    : null,
                 children: [
                   LabelFieldRow(
                     label: 'Strength *',
@@ -380,6 +409,26 @@ class _AddEditInjectionUnifiedPageState
                     ),
                   if (widget.kind == InjectionKind.multi)
                     LabelFieldRow(
+                      label: 'Method',
+                      field: SegmentedButton<CalcMode>(
+                        segments: const [
+                          ButtonSegment(
+                            value: CalcMode.known,
+                            label: Text('Enter volume'),
+                          ),
+                          ButtonSegment(
+                            value: CalcMode.reconstitute,
+                            label: Text('Reconstitute'),
+                          ),
+                        ],
+                        selected: {_calcMode},
+                        onSelectionChanged: (s) =>
+                            setState(() => _calcMode = s.first),
+                      ),
+                    ),
+                  if (widget.kind == InjectionKind.multi &&
+                      _calcMode == CalcMode.known)
+                    LabelFieldRow(
                       label: 'Vial volume (mL)',
                       field: SizedBox(
                         width: 160,
@@ -395,6 +444,289 @@ class _AddEditInjectionUnifiedPageState
                               'Vial volume (mL)',
                               '0.0',
                             ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (widget.kind == InjectionKind.multi &&
+                      _calcMode == CalcMode.reconstitute)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: kLabelColWidth + 8,
+                        top: 6,
+                        bottom: 6,
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _doseInline,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                      decoration: const InputDecoration(
+                                        labelText: 'Desired dose',
+                                        hintText: '0.00',
+                                      ),
+                                      onChanged: (_) => setState(() {}),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  SizedBox(
+                                    width: 160,
+                                    child: DropdownButtonFormField<String>(
+                                      value:
+                                          _doseUnitInline ??
+                                          _baseUnit(_strengthUnit),
+                                      items: () {
+                                        final base = _baseUnit(_strengthUnit);
+                                        if (base == 'units') {
+                                          return const [
+                                            DropdownMenuItem(
+                                              value: 'units',
+                                              child: Text('units'),
+                                            ),
+                                          ];
+                                        }
+                                        return const [
+                                          DropdownMenuItem(
+                                            value: 'mcg',
+                                            child: Text('mcg'),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 'mg',
+                                            child: Text('mg'),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 'g',
+                                            child: Text('g'),
+                                          ),
+                                        ];
+                                      }(),
+                                      onChanged: (v) =>
+                                          setState(() => _doseUnitInline = v),
+                                      decoration: const InputDecoration(
+                                        labelText: 'Dose unit',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: DropdownButtonFormField<SyringeSizeMl>(
+                                      value: _syringeInline,
+                                      items: SyringeSizeMl.values
+                                          .map(
+                                            (s) => DropdownMenuItem(
+                                              value: s,
+                                              child: Text(
+                                                '${s.label} • ${s.totalUnits} IU',
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (v) {
+                                        if (v == null) return;
+                                        setState(() {
+                                          _syringeInline = v;
+                                          final total = _syringeInline
+                                              .totalUnits
+                                              .toDouble();
+                                          _selectedUnitsInline =
+                                              _selectedUnitsInline.clamp(
+                                                (0.05 * total)
+                                                    .ceil()
+                                                    .toDouble(),
+                                                total,
+                                              );
+                                        });
+                                      },
+                                      decoration: const InputDecoration(
+                                        labelText: 'Syringe size',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  SizedBox(
+                                    width: 160,
+                                    child: TextFormField(
+                                      controller: _vialMaxInline,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                      decoration: const InputDecoration(
+                                        labelText: 'Max vial size (mL)',
+                                        hintText: 'optional',
+                                      ),
+                                      onChanged: (_) => setState(() {}),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Builder(
+                                builder: (context) {
+                                  final unitLabel = _baseUnit(_strengthUnit);
+                                  final sTxt = _strength.text.trim();
+                                  final dTxt = _doseInline.text.trim();
+                                  final Sraw = double.tryParse(sTxt) ?? 0;
+                                  final Draw = double.tryParse(dTxt) ?? 0;
+                                  double S = Sraw, D = Draw;
+                                  if (unitLabel != 'units') {
+                                    S = _toBaseMass(Sraw, unitLabel);
+                                    D = _toBaseMass(
+                                      Draw,
+                                      _doseUnitInline ?? unitLabel,
+                                    );
+                                  }
+                                  // If strength is per mL, and known vial volume entered, use that; otherwise assume 1mL until user applies result
+                                  final vKnown = double.tryParse(
+                                    _vialMaxInline.text,
+                                  );
+                                  final (minURaw, midURaw, highURaw) =
+                                      _presetUnitsRaw(_syringeInline);
+                                  double totalIU = _syringeInline.totalUnits
+                                      .toDouble();
+                                  // Limit by max vial size if provided
+                                  double iuMax = totalIU;
+                                  if (vKnown != null && S > 0 && D > 0) {
+                                    final uMaxAllowed = (100 * D * vKnown) / S;
+                                    iuMax = uMaxAllowed.clamp(0, totalIU);
+                                  }
+                                  final double u1 = minURaw.clamp(0, iuMax);
+                                  final double u2 = (minURaw + iuMax) / 2.0;
+                                  final double u3 = iuMax;
+                                  final conc = _compute(S: S, D: D, U: u1);
+                                  final std = _compute(S: S, D: D, U: u2);
+                                  final dil = _compute(S: S, D: D, U: u3);
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: [
+                                          ChoiceChip(
+                                            label: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Text('Concentrated'),
+                                                Text(
+                                                  '${fmt2(conc.cPerMl)} $unitLabel/mL • ${fmt2(conc.vialVolume)} mL • ${fmt2(u1)} IU',
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodySmall,
+                                                ),
+                                              ],
+                                            ),
+                                            selected:
+                                                (_selectedUnitsInline - u1)
+                                                    .abs() <
+                                                0.01,
+                                            onSelected: (_) => setState(
+                                              () => _selectedUnitsInline = u1,
+                                            ),
+                                          ),
+                                          ChoiceChip(
+                                            label: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Text('Standard'),
+                                                Text(
+                                                  '${fmt2(std.cPerMl)} $unitLabel/mL • ${fmt2(std.vialVolume)} mL • ${fmt2(u2)} IU',
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodySmall,
+                                                ),
+                                              ],
+                                            ),
+                                            selected:
+                                                (_selectedUnitsInline - u2)
+                                                    .abs() <
+                                                0.01,
+                                            onSelected: (_) => setState(
+                                              () => _selectedUnitsInline = u2,
+                                            ),
+                                          ),
+                                          ChoiceChip(
+                                            label: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Text('Diluted'),
+                                                Text(
+                                                  '${fmt2(dil.cPerMl)} $unitLabel/mL • ${fmt2(dil.vialVolume)} mL • ${fmt2(u3)} IU',
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodySmall,
+                                                ),
+                                              ],
+                                            ),
+                                            selected:
+                                                (_selectedUnitsInline - u3)
+                                                    .abs() <
+                                                0.01,
+                                            onSelected: (_) => setState(
+                                              () => _selectedUnitsInline = u3,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      FilledButton.icon(
+                                        onPressed: (S > 0 && D > 0 && iuMax > 0)
+                                            ? () {
+                                                final cur = _compute(
+                                                  S: S,
+                                                  D: D,
+                                                  U: _selectedUnitsInline,
+                                                );
+                                                setState(() {
+                                                  _perMl.text = fmt2(
+                                                    _round2(cur.cPerMl),
+                                                  );
+                                                  _vialVolume.text = fmt2(
+                                                    _round2(cur.vialVolume),
+                                                  );
+                                                  _calcMode = CalcMode
+                                                      .known; // collapse after apply
+                                                });
+                                              }
+                                            : null,
+                                        icon: const Icon(Icons.check),
+                                        label: const Text('Apply to vial'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),
