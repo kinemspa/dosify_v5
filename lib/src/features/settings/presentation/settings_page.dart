@@ -232,6 +232,39 @@ class SettingsPage extends ConsumerWidget {
           FilledButton.icon(
             onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
+              await NotificationService.scheduleInSecondsAlarmClock(id, 120, title: 'Dosifi test (alarm clock)', body: '2m via AlarmClock', channelId: 'test_alarm');
+              if (context.mounted) {
+                final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(minutes: 2)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Scheduled 2m AlarmClock test for ${t.format(context)} (test_alarm channel)')),
+                );
+              }
+              // Dump state to console right after scheduling for diagnostics
+              await NotificationService.debugDumpStatus();
+            },
+            icon: const Icon(Icons.schedule_send),
+            label: const Text('Schedule test in 2m (AlarmClock)'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
+              await NotificationService.scheduleInSecondsExact(id, 120, title: 'Dosifi test (exact)', body: '2m exact', channelId: 'test_alarm');
+              if (context.mounted) {
+                final t = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(minutes: 2)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Scheduled 2m exact test for ${t.format(context)} (test_alarm channel)')),
+                );
+              }
+              await NotificationService.debugDumpStatus();
+            },
+            icon: const Icon(Icons.timer_10),
+            label: const Text('Schedule test in 2m (exact)'),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () async {
+              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
               await NotificationService.scheduleInSecondsAlarmClock(id, 30, title: 'Dosifi test (alarm clock)', body: '30s via AlarmClock');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
