@@ -182,6 +182,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _name,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(context, 'Name *', 'eg. AcmeTab-500'),
                       ),
                     ),
@@ -191,6 +192,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _manufacturer,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           context,
                           'Manufacturer',
@@ -204,6 +206,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _description,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           context,
                           'Description',
@@ -217,6 +220,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _notes,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           context,
                           'Notes',
@@ -303,6 +307,7 @@ class _AddEditInjectionUnifiedPageState
                         child: Field36(
                           child: TextFormField(
                             controller: _perMl,
+                            style: Theme.of(context).textTheme.bodyMedium,
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -407,6 +412,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _batch,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           context,
                           'Batch No.',
@@ -435,6 +441,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _location,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           context,
                           'Location',
@@ -556,6 +563,7 @@ class _AddEditInjectionUnifiedPageState
                     field: Field36(
                       child: TextFormField(
                         controller: _storageNotes,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           context,
                           'Storage instructions',

@@ -10,6 +10,9 @@ import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 /// Default label column width used in left-label layouts (matches Tablet/Capsule)
 const double kLabelColWidth = 120.0;
 
+/// Default width for compact controls (dropdowns, numeric fields, date button)
+const double kSmallControlWidth = 120.0;
+
 /// A section card with identical decoration to the Tablet/Capsule screens.
 class SectionFormCard extends StatelessWidget {
   const SectionFormCard({
@@ -119,7 +122,7 @@ class DateButton36 extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: kFieldHeight,
-      width: 120,
+      width: kSmallControlWidth,
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: const Icon(Icons.calendar_today, size: 18),
@@ -152,7 +155,7 @@ class SmallDropdown36<T> extends StatelessWidget {
     final theme = Theme.of(context);
     return SizedBox(
       height: kFieldHeight,
-      width: 120,
+      width: kSmallControlWidth,
       child: DropdownButtonFormField<T>(
         value: value,
         isExpanded: false,
@@ -193,12 +196,18 @@ class StepperRow36 extends StatelessWidget {
         _pillBtn(context, '−', onDec),
         const SizedBox(width: 6),
         SizedBox(
-          width: 120,
+          width: kSmallControlWidth,
           child: Field36(
-            child: TextFormField(
-              controller: controller,
-              textAlign: TextAlign.center,
-              decoration: decoration,
+            child: Builder(
+              builder: (context) {
+                final theme = Theme.of(context);
+                return TextFormField(
+                  controller: controller,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium,
+                  decoration: decoration,
+                );
+              },
             ),
           ),
         ),
