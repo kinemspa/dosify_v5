@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/form_field_styler.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import '../../../core/prefs/user_prefs.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -208,6 +210,31 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
             child: Text(label, style: theme.textTheme.labelLarge),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _rowLabelField({required String label, required Widget field}) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: field),
+        ],
       ),
     );
   }
@@ -532,13 +559,23 @@ Text(
                           ],
                         ),
                         const SizedBox(height: 8),
-                        ListTile(
-                          leading: const Icon(Icons.calendar_month),
-                          title: Text(_expiry==null? 'No Expiry' : 'Expiry: ${DateFormat.yMd().format(_expiry!)}'),
-                          trailing: const Icon(Icons.edit_calendar_outlined),
-                          onTap: _pickExpiry,
-                          dense: true,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                        _rowLabelField(
+                          label: 'Expiry date',
+                          field: Align(
+                            alignment: Alignment.centerLeft,
+                            child: SizedBox(
+                              height: kFieldHeight,
+                              width: 120,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  await _pickExpiry();
+                                },
+                                icon: const Icon(Icons.calendar_today, size: 18),
+                                label: Text(_expiry == null ? 'Select date' : DateFormat.yMd().format(_expiry!)),
+                                style: OutlinedButton.styleFrom(minimumSize: const Size(120, kFieldHeight)),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -559,46 +596,63 @@ Text(
                       children: [
                         Text('Storage Information', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _batchCtrl,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: FormFieldStyler.decoration(
-                            context: context,
-                            styleIndex: _formStyleIndex,
-                            label: 'Batch No.',
-                            hint: 'Enter the Medication Batch Number',
-                            helper: '',
+                        _rowLabelField(
+                          label: 'Batch No.',
+                          field: Field36(
+                            child: TextFormField(
+                              controller: _batchCtrl,
+                              textCapitalization: TextCapitalization.sentences,
+                              decoration: FormFieldStyler.decoration(
+                                context: context,
+                                styleIndex: _formStyleIndex,
+                                label: 'Batch No.',
+                                hint: 'Enter the Medication Batch Number',
+                                helper: '',
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _storageCtrl,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: FormFieldStyler.decoration(
-                            context: context,
-                            styleIndex: _formStyleIndex,
-                            label: 'Lot / Storage Location',
-                            hint: 'Enter the Storage Location',
-                            helper: '',
+                        _rowLabelField(
+                          label: 'Location',
+                          field: Field36(
+                            child: TextFormField(
+                              controller: _storageCtrl,
+                              textCapitalization: TextCapitalization.sentences,
+                              decoration: FormFieldStyler.decoration(
+                                context: context,
+                                styleIndex: _formStyleIndex,
+                                label: 'Location',
+                                hint: 'Enter the Storage Location',
+                                helper: '',
+                              ),
+                            ),
                           ),
                         ),
-                        CheckboxListTile(
-                          title: const Text('Requires Refrigeration'),
-                          subtitle: const Text('Must be stored in refrigerator'),
-                          value: _requiresFridge,
-                          onChanged: (v) => setState(() => _requiresFridge = v ?? false),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
+                        _rowLabelField(
+                          label: 'Keep refrigerated',
+                          field: Row(children: [
+                            Checkbox(
+                              value: _requiresFridge,
+                              onChanged: (v) => setState(() => _requiresFridge = v ?? false),
+                            ),
+                            const Text('Refrigerate'),
+                          ]),
                         ),
-                        TextFormField(
-                          controller: _storageNotesCtrl,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: FormFieldStyler.decoration(
-                            context: context,
-                            styleIndex: _formStyleIndex,
-                            label: 'Storage Instructions',
-                            hint: 'Enter storage instructions',
-                            helper: '',
+                        _rowLabelField(
+                          label: 'Storage instructions',
+                          field: Field36(
+                            child: TextFormField(
+                              controller: _storageNotesCtrl,
+                              textCapitalization: TextCapitalization.sentences,
+                              decoration: FormFieldStyler.decoration(
+                                context: context,
+                                styleIndex: _formStyleIndex,
+                                label: 'Storage instructions',
+                                hint: 'Enter storage instructions',
+                                helper: '',
+                              ),
+                            ),
                           ),
                         ),
                       ],
