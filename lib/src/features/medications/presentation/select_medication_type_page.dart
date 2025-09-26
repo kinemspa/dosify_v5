@@ -21,7 +21,7 @@ class SelectMedicationTypePage extends StatelessWidget {
             subtitle: 'Choose the type so we can tailor the fields for you',
           ),
           const SizedBox(height: 16),
-          const _TypeTile(icon: Icons.medication, title: 'Tablet', subtitle: 'Solid pill dosage form', primary: true),
+          const _TypeTile(icon: Icons.medication, title: 'Tablet', subtitle: 'Solid pill dosage form'),
           const SizedBox(height: 16),
           const _TypeTile(icon: Icons.medication_liquid, title: 'Capsule', subtitle: 'Powder or pellets in a gelatin shell'),
           const SizedBox(height: 16),
@@ -157,8 +157,13 @@ class _ScreenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+    final cs = theme.colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -166,19 +171,19 @@ class _ScreenHeader extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.12),
+              color: cs.onPrimary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: theme.colorScheme.primary),
+            child: Icon(icon, color: cs.onPrimary),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                Text(title, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: cs.onPrimary)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
               ],
             ),
           )
