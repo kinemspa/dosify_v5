@@ -53,6 +53,33 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     await prefs.setString('medication_list_view', view.name);
     setState(() => _view = view);
   }
+
+  // Ensure we have an original stock value for count-based units so that we can
+  // display Remaining / Original correctly. This sets it lazily to the first
+  // observed value and updates it when the current stock increases (restock).
+  void _ensureInitialStockValues(List<Medication> items) {
+    final box = Hive.box<Medication>('medications');
+    for (final m in items) {
+      final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes ||
+          m.stockUnit == StockUnit.singleDoseVials ||
+          m.stockUnit == StockUnit.multiDoseVials ||
+          m.stockUnit == StockUnit.tablets ||
+          m.stockUnit == StockUnit.capsules;
+      if (!isCountUnit) continue;
+      final cur = m.stockValue;
+      final init = m.initialStockValue;
+      double? nextInit = init;
+      if (init == null || init <= 0) {
+        nextInit = cur;
+      } else if (cur > init) {
+        nextInit = cur; // treat as restock
+      }
+      if (nextInit != init) {
+        final updated = m.copyWith(initialStockValue: nextInit);
+        box.put(updated.id, updated);
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<Medication>('medications');
@@ -1059,26 +1086,6 @@ if (!dense)
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${action[0].toUpperCase()}${action.substring(1)} dose @ ${DateFormat('dd MMM, HH:mm').format(scheduledAt)}')),
     );
-  }
-  void _ensureInitialStockValues(List<Medication> items) {
-    final box = Hive.box<Medication>('medications');
-    for (final m in items) {
-      final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes || m.stockUnit == StockUnit.singleDoseVials || m.stockUnit == StockUnit.multiDoseVials || m.stockUnit == StockUnit.tablets || m.stockUnit == StockUnit.capsules;
-      if (!isCountUnit) continue;
-      final cur = m.stockValue;
-      final init = m.initialStockValue;
-      double? nextInit = init;
-      if (init == null || init <= 0) {
-        nextInit = cur;
-      } else if (cur > init) {
-        // Treat increases as restocks; update the original to the new level
-        nextInit = cur;
-      }
-      if (nextInit != init) {
-        final updated = m.copyWith(initialStockValue: nextInit);
-        box.put(updated.id, updated);
-      }
-    }
   }
 }
 
