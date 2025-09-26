@@ -9,6 +9,8 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'providers.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 
 enum InjectionKind { pfs, single, multi }
 
@@ -38,6 +40,11 @@ class _AddEditInjectionUnifiedPageState
   final _strength = TextEditingController(text: '0');
   Unit _strengthUnit = Unit.mg;
   final _perMl = TextEditingController();
+  final _vialVolume = TextEditingController();
+  double? _lastCalcDose;
+  String? _lastCalcDoseUnit;
+  SyringeSizeMl? _lastCalcSyringe;
+  double? _lastCalcVialSize;
 
   final _stock = TextEditingController(text: '0');
   StockUnit _stockUnit = StockUnit.preFilledSyringes;
@@ -62,6 +69,7 @@ class _AddEditInjectionUnifiedPageState
       _strength.text = m.strengthValue.toString();
       _strengthUnit = m.strengthUnit;
       _perMl.text = m.perMlValue?.toString() ?? '';
+      _vialVolume.text = m.containerVolumeMl?.toString() ?? '';
       _stock.text = m.stockValue.toString();
       _stockUnit = m.stockUnit;
       _expiry = m.expiry;
@@ -137,6 +145,56 @@ class _AddEditInjectionUnifiedPageState
         borderSide: BorderSide(color: cs.primary, width: 2),
       ),
     );
+  }
+
+  String _baseUnit(Unit u) {
+    if (u == Unit.mcg || u == Unit.mcgPerMl) return 'mcg';
+    if (u == Unit.mg || u == Unit.mgPerMl) return 'mg';
+    if (u == Unit.g || u == Unit.gPerMl) return 'g';
+    return 'units';
+  }
+
+  bool get _isPerMl =>
+      _strengthUnit == Unit.mcgPerMl ||
+      _strengthUnit == Unit.mgPerMl ||
+      _strengthUnit == Unit.gPerMl ||
+      _strengthUnit == Unit.unitsPerMl;
+
+  double? _strengthForCalculator() {
+    final s = double.tryParse(_strength.text);
+    if (s == null || s <= 0) return null;
+    if (_isPerMl) {
+      final v = double.tryParse(_vialVolume.text);
+      if (v == null || v <= 0) return null;
+      return s * v; // total quantity in vial
+    }
+    return s;
+  }
+
+  Future<void> _openReconstitutionDialog() async {
+    final unitLabel = _baseUnit(_strengthUnit);
+    final strengthForCalc = _strengthForCalculator() ?? 0;
+    final result = await showDialog<ReconstitutionResult>(
+      context: context,
+      builder: (ctx) => ReconstitutionCalculatorDialog(
+        initialStrengthValue: strengthForCalc,
+        unitLabel: unitLabel,
+        initialDoseValue: _lastCalcDose,
+        initialDoseUnit: _lastCalcDoseUnit,
+        initialSyringeSize: _lastCalcSyringe,
+        initialVialSize: _lastCalcVialSize ?? double.tryParse(_vialVolume.text),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _perMl.text = fmt2(result.perMlConcentration);
+        _vialVolume.text = fmt2(result.solventVolumeMl);
+        _lastCalcDose = _lastCalcDose ?? double.tryParse(_strength.text);
+        _lastCalcDoseUnit = unitLabel;
+        _lastCalcSyringe = _lastCalcSyringe ?? SyringeSizeMl.ml1;
+        _lastCalcVialSize = result.solventVolumeMl;
+      });
+    }
   }
 
   @override
@@ -235,6 +293,13 @@ class _AddEditInjectionUnifiedPageState
 
               SectionFormCard(
                 title: 'Strength',
+                trailing: widget.kind == InjectionKind.multi
+                    ? TextButton.icon(
+                        onPressed: _openReconstitutionDialog,
+                        icon: const Icon(Icons.science),
+                        label: const Text('Reconstitution'),
+                      )
+                    : null,
                 children: [
                   LabelFieldRow(
                     label: 'Strength *',
@@ -296,10 +361,7 @@ class _AddEditInjectionUnifiedPageState
                       decoration: _decDrop(context),
                     ),
                   ),
-                  if (_strengthUnit == Unit.mcgPerMl ||
-                      _strengthUnit == Unit.mgPerMl ||
-                      _strengthUnit == Unit.gPerMl ||
-                      _strengthUnit == Unit.unitsPerMl)
+                  if (_isPerMl)
                     LabelFieldRow(
                       label: 'Per mL',
                       field: SizedBox(
@@ -312,6 +374,27 @@ class _AddEditInjectionUnifiedPageState
                               decimal: true,
                             ),
                             decoration: _dec(context, 'Per mL', '0.0'),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (widget.kind == InjectionKind.multi)
+                    LabelFieldRow(
+                      label: 'Vial volume (mL)',
+                      field: SizedBox(
+                        width: 160,
+                        child: Field36(
+                          child: TextFormField(
+                            controller: _vialVolume,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Vial volume (mL)',
+                              '0.0',
+                            ),
                           ),
                         ),
                       ),
@@ -619,6 +702,9 @@ class _AddEditInjectionUnifiedPageState
       stockUnit: _stockUnit,
       expiry: _expiry,
       batchNumber: _batch.text.trim().isEmpty ? null : _batch.text.trim(),
+      containerVolumeMl: _vialVolume.text.trim().isEmpty
+          ? null
+          : double.tryParse(_vialVolume.text.trim()),
       storageLocation: _location.text.trim().isEmpty
           ? null
           : _location.text.trim(),
