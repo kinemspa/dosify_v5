@@ -227,9 +227,11 @@ class _AddEditInjectionUnifiedPageState
 
   (double, double, double) _presetUnitsRaw(SyringeSizeMl syringe) {
     final total = syringe.totalUnits.toDouble();
-    final minU = (total * 0.05).ceil().toDouble().clamp(1, total);
-    final midU = _round2(total * 0.33);
-    final highU = _round2(total * 0.80);
+    double minU = (total * 0.05).ceil().toDouble();
+    if (minU < 1.0) minU = 1.0;
+    if (minU > total) minU = total;
+    final double midU = _round2(total * 0.33);
+    final double highU = _round2(total * 0.80);
     return (minU, midU, highU);
   }
 
