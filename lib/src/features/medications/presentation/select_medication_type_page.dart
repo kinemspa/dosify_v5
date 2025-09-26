@@ -21,7 +21,7 @@ class SelectMedicationTypePage extends StatelessWidget {
             subtitle: 'Choose the type so we can tailor the fields for you',
           ),
           const SizedBox(height: 16),
-          const _TypeTile(icon: Icons.medication, title: 'Tablet', subtitle: 'Solid pill dosage form'),
+          const _TypeTile(icon: Icons.medication, title: 'Tablet', subtitle: 'Solid pill dosage form', primary: true),
           const SizedBox(height: 16),
           const _TypeTile(icon: Icons.medication_liquid, title: 'Capsule', subtitle: 'Powder or pellets in a gelatin shell'),
           const SizedBox(height: 16),
@@ -64,15 +64,27 @@ class _Section extends StatelessWidget {
 }
 
 class _TypeTile extends StatelessWidget {
-  const _TypeTile({required this.icon, required this.title, required this.subtitle});
+  const _TypeTile({required this.icon, required this.title, required this.subtitle, this.primary = false});
   final IconData icon;
   final String title;
   final String subtitle;
+  final bool primary;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onPrimary = theme.colorScheme.onPrimary;
+    final cs = theme.colorScheme;
+    final onPrimary = cs.onPrimary;
+    final primaryBg = cs.primary;
+    final isPrimary = primary;
+    final tileBg = isPrimary ? primaryBg : cs.surfaceContainerLowest;
+    final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
+    final titleColor = isPrimary ? onPrimary : cs.onSurface;
+    final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
+    final badgeBg = isPrimary ? onPrimary.withOpacity(0.15) : primaryBg.withOpacity(0.12);
+    final badgeIconColor = isPrimary ? onPrimary : primaryBg;
+    final chevronColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
@@ -89,8 +101,9 @@ class _TypeTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary,
+            color: tileBg,
             borderRadius: BorderRadius.circular(12),
+            border: tileBorder,
           ),
           child: Row(
             children: [
@@ -99,10 +112,10 @@ class _TypeTile extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: onPrimary.withOpacity(0.15),
+                  color: badgeBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: onPrimary, size: 20),
+                child: Icon(icon, color: badgeIconColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -113,20 +126,20 @@ class _TypeTile extends StatelessWidget {
                       title,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: onPrimary,
+                        color: titleColor,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: onPrimary,
+                        color: subtitleColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: onPrimary),
+              Icon(Icons.chevron_right, color: chevronColor),
             ],
           ),
         ),
