@@ -361,13 +361,6 @@ class _SupplyCard extends StatelessWidget {
         },
         child: Stack(
           children: [
-            // Left accent stripe to differentiate Supplies
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(width: 3, color: theme.colorScheme.tertiary),
-            ),
             Padding(
               padding: dense ? const EdgeInsets.fromLTRB(6, 6, 6, 6) : const EdgeInsets.fromLTRB(8, 8, 8, 28),
               child: Column(
@@ -382,7 +375,7 @@ class _SupplyCard extends StatelessWidget {
                           height: dense ? 24 : 36,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [theme.colorScheme.primaryContainer, theme.colorScheme.primary],
+                              colors: [theme.colorScheme.tertiaryContainer, theme.colorScheme.tertiary],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),

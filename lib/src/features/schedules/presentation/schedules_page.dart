@@ -298,13 +298,6 @@ class _ScheduleCard extends StatelessWidget {
         onTap: () => context.push('/schedules/edit/${s.id}'),
         child: Stack(
           children: [
-            // Left accent stripe to differentiate Schedules
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(width: 3, color: theme.colorScheme.secondary),
-            ),
             Padding(
               padding: dense ? const EdgeInsets.all(6) : const EdgeInsets.fromLTRB(8, 8, 8, 8),
               child: Column(
@@ -317,7 +310,7 @@ class _ScheduleCard extends StatelessWidget {
                     width: dense ? 24 : 36,
                     height: dense ? 24 : 36,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [theme.colorScheme.primaryContainer, theme.colorScheme.primary]),
+                      gradient: LinearGradient(colors: [theme.colorScheme.secondaryContainer, theme.colorScheme.secondary]),
                       borderRadius: BorderRadius.circular(dense ? 8 : 12),
                     ),
                     child: const Icon(Icons.alarm, color: Colors.white, size: 18),

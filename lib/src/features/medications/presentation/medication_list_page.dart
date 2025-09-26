@@ -490,13 +490,6 @@ class _MedCard extends StatelessWidget {
         onTap: () => context.push('/medications/${m.id}'),
         child: Stack(
           children: [
-            // Left accent stripe to differentiate Medications
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(width: 3, color: theme.colorScheme.primary),
-            ),
             Padding(
               padding: dense
                   ? const EdgeInsets.only(left: 1, right: 1, top: 1, bottom: 0)
