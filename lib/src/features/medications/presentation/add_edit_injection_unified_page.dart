@@ -47,6 +47,8 @@ class _AddEditInjectionUnifiedPageState
   final _location = TextEditingController();
   bool _refrigerate = false;
   final _storageNotes = TextEditingController();
+  bool _keepFrozen = false;
+  bool _lightSensitive = false;
 
   @override
   void initState() {
@@ -67,6 +69,9 @@ class _AddEditInjectionUnifiedPageState
       _location.text = m.storageLocation ?? '';
       _refrigerate = m.requiresRefrigeration;
       _storageNotes.text = m.storageInstructions ?? '';
+      final notesLc = (m.storageInstructions ?? '').toLowerCase();
+      _keepFrozen = notesLc.contains('frozen');
+      _lightSensitive = notesLc.contains('light');
     } else {
       // Default units per kind
       switch (widget.kind) {
@@ -111,12 +116,35 @@ class _AddEditInjectionUnifiedPageState
     );
   }
 
+  InputDecoration _decDrop(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return InputDecoration(
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      filled: true,
+      fillColor: cs.surfaceContainerLowest,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.outlineVariant),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = switch (widget.kind) {
-      InjectionKind.pfs => 'Add Medication - Pre-Filled Syringe',
-      InjectionKind.single => 'Add Medication - Single Dose Vial',
-      InjectionKind.multi => 'Add Medication - Multi Dose Vial',
+      InjectionKind.pfs => 'Add Pre filled syringe',
+      InjectionKind.single => 'Add Single dose vial',
+      InjectionKind.multi => 'Add Multi dose vial',
     };
 
     final saveEnabled = (() {
@@ -261,7 +289,7 @@ class _AddEditInjectionUnifiedPageState
                       ],
                       onChanged: (v) =>
                           setState(() => _strengthUnit = v ?? Unit.mg),
-                      decoration: _dec(context, 'Unit *', null),
+                      decoration: _decDrop(context),
                     ),
                   ),
                   if (_strengthUnit == Unit.mcgPerMl ||
@@ -336,7 +364,7 @@ class _AddEditInjectionUnifiedPageState
                       ],
                       onChanged: (v) =>
                           setState(() => _stockUnit = v ?? _stockUnit),
-                      decoration: _dec(context, 'Quantity unit', null),
+                      decoration: _decDrop(context),
                     ),
                   ),
                   Padding(
@@ -372,7 +400,7 @@ class _AddEditInjectionUnifiedPageState
               const SizedBox(height: 12),
 
               SectionFormCard(
-                title: 'Storage Information',
+                title: 'Storage',
                 children: [
                   LabelFieldRow(
                     label: 'Batch No.',
@@ -384,6 +412,21 @@ class _AddEditInjectionUnifiedPageState
                           'Batch No.',
                           'Enter batch number',
                         ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: kLabelColWidth + 8,
+                      top: 2,
+                      bottom: 6,
+                    ),
+                    child: Text(
+                      'Enter the printed batch or lot number',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
                     ),
                   ),
@@ -400,6 +443,21 @@ class _AddEditInjectionUnifiedPageState
                       ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: kLabelColWidth + 8,
+                      top: 2,
+                      bottom: 6,
+                    ),
+                    child: Text(
+                      'Where it’s stored (e.g., Bathroom cabinet)',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
                   LabelFieldRow(
                     label: 'Keep refrigerated',
                     field: Row(
@@ -409,8 +467,88 @@ class _AddEditInjectionUnifiedPageState
                           onChanged: (v) =>
                               setState(() => _refrigerate = v ?? false),
                         ),
-                        const Text('Refrigerate'),
+                        Text(
+                          'Refrigerate',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                       ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: kLabelColWidth + 8,
+                      top: 0,
+                      bottom: 6,
+                    ),
+                    child: Text(
+                      'Enable if this medication must be kept refrigerated',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
+                  LabelFieldRow(
+                    label: 'Keep frozen',
+                    field: Row(
+                      children: [
+                        Checkbox(
+                          value: _keepFrozen,
+                          onChanged: (v) =>
+                              setState(() => _keepFrozen = v ?? false),
+                        ),
+                        Text(
+                          'Freeze',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: kLabelColWidth + 8,
+                      top: 0,
+                      bottom: 6,
+                    ),
+                    child: Text(
+                      'Enable if this medication must be kept frozen',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
+                  LabelFieldRow(
+                    label: 'Keep in dark',
+                    field: Row(
+                      children: [
+                        Checkbox(
+                          value: _lightSensitive,
+                          onChanged: (v) =>
+                              setState(() => _lightSensitive = v ?? false),
+                        ),
+                        Text(
+                          'Dark storage',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: kLabelColWidth + 8,
+                      top: 0,
+                      bottom: 6,
+                    ),
+                    child: Text(
+                      'Enable if this medication must be protected from light',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
                     ),
                   ),
                   LabelFieldRow(
@@ -477,9 +615,18 @@ class _AddEditInjectionUnifiedPageState
           ? null
           : _location.text.trim(),
       requiresRefrigeration: _refrigerate,
-      storageInstructions: _storageNotes.text.trim().isEmpty
-          ? null
-          : _storageNotes.text.trim(),
+      storageInstructions: (() {
+        final parts = <String>[];
+        final s = _storageNotes.text.trim();
+        if (s.isNotEmpty) parts.add(s);
+        if (_keepFrozen &&
+            !parts.any((p) => p.toLowerCase().contains('frozen')))
+          parts.add('Keep frozen');
+        if (_lightSensitive &&
+            !parts.any((p) => p.toLowerCase().contains('light')))
+          parts.add('Protect from light');
+        return parts.isEmpty ? null : parts.join('. ');
+      })(),
       initialStockValue: initialStock,
     );
 
