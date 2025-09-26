@@ -11,10 +11,12 @@ class SelectInjectionTypePage extends StatelessWidget {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Select Injection Type', forceBackButton: true),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: const [
           _Tile(title: 'Pre-Filled Syringe', subtitle: 'Ready to use single dose syringe', route: '/medications/add/injection/pfs'),
+          SizedBox(height: 16),
           _Tile(title: 'Single Dose Vial', subtitle: 'One time use vial', route: '/medications/add/injection/single'),
+          SizedBox(height: 16),
           _Tile(title: 'Multi Dose Vial', subtitle: 'Liquid vial for multiple doses', route: '/medications/add/injection/multi'),
         ],
       ),
@@ -32,12 +34,12 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.push(route),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),

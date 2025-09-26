@@ -13,13 +13,13 @@ class SelectMedicationTypePage extends StatelessWidget {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Select Medication Type', forceBackButton: true),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
+        padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: const [
-          _TypeTile(icon: Icons.medication, title: 'Tablet'),
-          SizedBox(height: 12),
-          _TypeTile(icon: Icons.medication_liquid, title: 'Capsule'),
-          SizedBox(height: 12),
-          _TypeTile(icon: Icons.vaccines, title: 'Injection'),
+          _TypeTile(title: 'Tablet', subtitle: 'Solid pill dosage form'),
+          SizedBox(height: 16),
+          _TypeTile(title: 'Capsule', subtitle: 'Powder or pellets in a gelatin shell'),
+          SizedBox(height: 16),
+          _TypeTile(title: 'Injection', subtitle: 'Pre-filled syringes or vials'),
         ],
       ),
     );
@@ -58,19 +58,19 @@ class _Section extends StatelessWidget {
 }
 
 class _TypeTile extends StatelessWidget {
-  const _TypeTile({required this.icon, required this.title});
-  final IconData icon;
+  const _TypeTile({required this.title, required this.subtitle});
   final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           if (title == 'Tablet') {
-            // Navigate to Add Tablet screen using go_router
             context.push('/medications/add/tablet');
           } else if (title == 'Capsule') {
             context.push('/medications/add/capsule');
@@ -79,19 +79,25 @@ return Padding(
           }
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
+            color: theme.colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
-          child: Center(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.onPrimary,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: theme.textTheme.bodySmall),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
