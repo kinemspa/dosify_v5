@@ -29,6 +29,7 @@ class Medication {
     this.containerVolumeMl,
     this.lowStockVialVolumeThresholdMl,
     this.lowStockVialsThresholdCount,
+    this.initialStockValue,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -105,6 +106,10 @@ class Medication {
   @HiveField(22)
   final double? lowStockVialsThresholdCount;
 
+  // The originally entered stock amount when the medication was created or last restocked
+  @HiveField(23)
+  final double? initialStockValue;
+
   Medication copyWith({
     String? id,
     MedicationForm? form,
@@ -129,6 +134,7 @@ class Medication {
     double? containerVolumeMl,
     double? lowStockVialVolumeThresholdMl,
     double? lowStockVialsThresholdCount,
+    double? initialStockValue,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -156,6 +162,7 @@ class Medication {
           lowStockVialVolumeThresholdMl ?? this.lowStockVialVolumeThresholdMl,
       lowStockVialsThresholdCount:
           lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
+      initialStockValue: initialStockValue ?? this.initialStockValue,
     );
   }
 }

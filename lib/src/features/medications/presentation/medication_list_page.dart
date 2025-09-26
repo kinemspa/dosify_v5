@@ -15,6 +15,8 @@ enum _MedView { list, compact, large }
 enum _SortBy { name, stock, strength, expiry }
 enum _FilterBy { all, lowStock, expiringSoon, refrigerated }
 
+const double _kLargeCardHeight = 140.0;
+
 class MedicationListPage extends ConsumerStatefulWidget {
   const MedicationListPage({super.key});
 
@@ -110,6 +112,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               );
             }
           }
+          // Initialize initialStockValue for display correctness (remaining / original)
+          _ensureInitialStockValues(items);
           return Column(
             children: [
               _buildToolbar(context),
@@ -460,12 +464,15 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
         );
       case _MedView.large:
-        // Large view uses a single-column list so each card takes natural height based on its content.
+        // Large view uses fixed-height cards for consistent visual rhythm.
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
+          itemBuilder: (context, i) => SizedBox(
+            height: _kLargeCardHeight,
+            child: _MedCard(m: items[i], dense: false),
+          ),
         );
     }
   }
@@ -991,25 +998,24 @@ if (!dense)
 
   // Stock status helpers
   String _stockStatusText() {
-    // For count-based units, express as X out of Y remaining; baseline from lowStockThreshold or current value as fallback
+    // For count-based units, express as X out of Y remaining; Y = originally entered amount when available
     String baseUnit = _getStockUnitLabel(m.stockUnit);
     final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes || m.stockUnit == StockUnit.singleDoseVials || m.stockUnit == StockUnit.multiDoseVials || m.stockUnit == StockUnit.tablets || m.stockUnit == StockUnit.capsules;
-    double? baseline = m.lowStockThreshold;
     if (isCountUnit) {
       final current = m.stockValue.floor();
-      final total = (baseline != null && baseline > 0) ? baseline.ceil() : current; // fallback to current as total if unknown
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0) ? m.initialStockValue!.ceil() : current; // fallback to current if unknown
       return '$current/$total $baseUnit remaining';
     }
     return '${fmt2(m.stockValue)} $baseUnit remaining';
   }
 
   String _stockStatusShortText() {
-    // Shorter form for dense tiles; fallback total to current when baseline is unknown
+    // Shorter form for dense tiles; Y = originally entered amount when available
     final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes || m.stockUnit == StockUnit.singleDoseVials || m.stockUnit == StockUnit.multiDoseVials || m.stockUnit == StockUnit.tablets || m.stockUnit == StockUnit.capsules;
     if (isCountUnit) {
-      final baseline = (m.lowStockThreshold != null && m.lowStockThreshold! > 0) ? m.lowStockThreshold!.ceil() : m.stockValue.floor();
       final current = m.stockValue.floor();
-      return '$current/$baseline ${_getStockUnitLabel(m.stockUnit)}';
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0) ? m.initialStockValue!.ceil() : current;
+      return '$current/$total ${_getStockUnitLabel(m.stockUnit)}';
     }
     return '${fmt2(m.stockValue)} ${_getStockUnitLabel(m.stockUnit)}';
   }
@@ -1053,6 +1059,26 @@ if (!dense)
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${action[0].toUpperCase()}${action.substring(1)} dose @ ${DateFormat('dd MMM, HH:mm').format(scheduledAt)}')),
     );
+  }
+  void _ensureInitialStockValues(List<Medication> items) {
+    final box = Hive.box<Medication>('medications');
+    for (final m in items) {
+      final isCountUnit = m.stockUnit == StockUnit.preFilledSyringes || m.stockUnit == StockUnit.singleDoseVials || m.stockUnit == StockUnit.multiDoseVials || m.stockUnit == StockUnit.tablets || m.stockUnit == StockUnit.capsules;
+      if (!isCountUnit) continue;
+      final cur = m.stockValue;
+      final init = m.initialStockValue;
+      double? nextInit = init;
+      if (init == null || init <= 0) {
+        nextInit = cur;
+      } else if (cur > init) {
+        // Treat increases as restocks; update the original to the new level
+        nextInit = cur;
+      }
+      if (nextInit != init) {
+        final updated = m.copyWith(initialStockValue: nextInit);
+        box.put(updated.id, updated);
+      }
+    }
   }
 }
 

@@ -11,6 +11,8 @@ enum _SchedView { list, compact, large }
 enum _SchedSort { next, name, med, created }
 enum _SchedFilter { all, activeOnly, linkedOnly }
 
+const double _kLargeCardHeight = 140.0;
+
 class SchedulesPage extends StatefulWidget {
   const SchedulesPage({super.key});
   @override
@@ -198,7 +200,10 @@ class _SchedulesPageState extends State<SchedulesPage> {
           padding: const EdgeInsets.all(16),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _ScheduleCard(s: items[i], dense: false),
+          itemBuilder: (context, i) => SizedBox(
+            height: _kLargeCardHeight,
+            child: _ScheduleCard(s: items[i], dense: false),
+          ),
         );
     }
   }
