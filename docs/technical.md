@@ -38,6 +38,29 @@ Android specifics
 - namespace: com.dosifi.dosifi_v5
 - compileSdk/targetSdk as in android/app/build.gradle.kts
 
+Notifications (architecture and delivery)
+- Library: flutter_local_notifications ^17.x with timezone support
+- Storage model: we save schedule times as UTC minutes (and UTC weekdays) and convert to local tz when scheduling; this avoids DST and timezone drift.
+- Scheduling strategy:
+  - Cycle (every N days): schedule one-shot occurrences for the next ~30 cycle days (UTC-safe), AlarmClock mode for delivery.
+  - Weekly: schedule one-shot occurrences for the next 60 days (UTC-safe), AlarmClock mode for delivery (preferred for OEM reliability).
+  - Cancel logic removes those one-shot IDs for both cycle and weekly.
+- AndroidManifest receivers (Android 12+/OEM reliability):
+  - com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver (exported=true)
+  - com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver (exported=true) with intent-filter for BOOT_COMPLETED and MY_PACKAGE_REPLACED
+  - com.dexterous.flutterlocalnotifications.ScheduledNotificationTimeZoneChangeReceiver (exported=true) with TIME_CHANGED, TIME_SET, TIMEZONE_CHANGED
+  - Permissions include POST_NOTIFICATIONS, SCHEDULE_EXACT_ALARM, RECEIVE_BOOT_COMPLETED, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+- In-app preflight checks at save time: ensure POST_NOTIFICATIONS granted; check areNotificationsEnabled and canScheduleExactAlarms; offer settings intents for remediation.
+- Diagnostics (Settings > Diagnostics):
+  - 5s ladder test (T+5 exact, T+6 AlarmClock, T+7 backup show) on high-importance test_alarm channel
+  - Direct 5s (no scheduling) on test_alarm channel to validate UX/timing in foreground
+  - 2-minute tests (AlarmClock and exact) on test_alarm channel
+  - Debug dump prints tz.local, offsets, pendingNotificationRequests, areNotificationsEnabled, canScheduleExactAlarms
+- Channels:
+  - upcoming_dose (High) for production reminders
+  - low_stock, expiry (Default)
+  - test_alarm (Max) for diagnostics with short delays
+
 Notes & next steps
 - Many analyzer infos/warnings are style/order issues; plan a cleanup pass after UI layout is stabilized.
 - Ensure every file ends with a newline (eol_at_end_of_file) and prefer package imports.
