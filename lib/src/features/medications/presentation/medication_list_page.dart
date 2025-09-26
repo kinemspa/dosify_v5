@@ -139,8 +139,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               );
             }
           }
-          // Initialize initialStockValue for display correctness (remaining / original)
-          _ensureInitialStockValues(items);
           return Column(
             children: [
               _buildToolbar(context),

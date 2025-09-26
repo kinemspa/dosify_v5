@@ -476,6 +476,11 @@ child: TextFormField(
     final id = widget.initial?.id ?? (DateTime.now().microsecondsSinceEpoch.toString() +
         Random().nextInt(9999).toString().padLeft(4, '0'));
 
+    final previous = widget.initial;
+    final stock = double.parse(_stockValueCtrl.text);
+    final initialStock = previous == null
+        ? stock
+        : (stock > previous.stockValue ? stock : (previous.initialStockValue ?? previous.stockValue));
     final med = Medication(
       id: id,
       form: MedicationForm.capsule,
@@ -489,7 +494,7 @@ child: TextFormField(
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: double.parse(_strengthValueCtrl.text),
       strengthUnit: _strengthUnit,
-      stockValue: double.parse(_stockValueCtrl.text),
+      stockValue: stock,
       stockUnit: _stockUnit,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty
@@ -509,6 +514,7 @@ child: TextFormField(
         if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) parts.add('Protect from light');
         return parts.isEmpty ? null : parts.join('. ');
       })(),
+      initialStockValue: initialStock,
     );
 
     if (!mounted) return;

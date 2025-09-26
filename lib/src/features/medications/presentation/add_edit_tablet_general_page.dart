@@ -944,6 +944,10 @@ if (!requiredOk) return; // show gated errors only
       final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
       final stock = double.tryParse(_stockCtrl.text.trim()) ?? 0;
       final lowThresh = double.tryParse(_lowStockThresholdCtrl.text.trim());
+      final previous = widget.initial;
+      final initialStock = previous == null
+          ? stock
+          : (stock > previous.stockValue ? stock : (previous.initialStockValue ?? previous.stockValue));
       final med = Medication(
         id: id,
         form: MedicationForm.tablet,
@@ -964,6 +968,7 @@ if (!requiredOk) return; // show gated errors only
         storageInstructions: _storageInstructionsCtrl.text.trim().isNotEmpty
             ? _storageInstructionsCtrl.text.trim()
             : (_lightSensitive ? 'Protect from light' : null),
+        initialStockValue: initialStock,
       );
       await repo.upsert(med);
       if (mounted) {
