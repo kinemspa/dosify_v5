@@ -972,6 +972,7 @@ field: FractionallySizedBox(
                         decoration: _decDrop(context),
                       ),
                     ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(left: kLabelColWidth + 8),
                     child: Text(
