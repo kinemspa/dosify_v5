@@ -20,29 +20,46 @@ class SectionFormCard extends StatelessWidget {
     required this.title,
     required this.children,
     this.trailing,
+    this.neutral = false,
   });
 
   final String title;
   final List<Widget> children;
   final Widget? trailing;
+  final bool neutral;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withValues(alpha: 0.03),
+        color: neutral
+            ? theme.colorScheme.surface
+            : theme.colorScheme.primary.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.06),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: neutral
+            ? Border.all(
+                color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                width: 0.75,
+              )
+            : Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.06),
+              ),
+        boxShadow: neutral
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       padding: const EdgeInsets.all(12),
       child: Column(

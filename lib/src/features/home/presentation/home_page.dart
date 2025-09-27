@@ -15,18 +15,9 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Image.asset(
-                  'assets/logo/dosifi-high-resolution-logo-transparent.png',
-                  height: 28,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Welcome to Dosifi v5',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ],
+            Text(
+              'Welcome to Dosifi v5',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(

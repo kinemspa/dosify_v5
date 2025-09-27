@@ -140,7 +140,19 @@ class _TypeTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: tileBg,
             borderRadius: BorderRadius.circular(12),
-            border: tileBorder,
+            border: isPrimary
+                ? null
+                : Border.all(
+                    color: cs.outlineVariant.withOpacity(0.5),
+                    width: 0.75,
+                  ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Row(
             children: [

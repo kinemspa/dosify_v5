@@ -273,6 +273,7 @@ class _AddEditInjectionUnifiedPageState
             children: [
               SectionFormCard(
                 title: 'General',
+                neutral: widget.kind == InjectionKind.multi,
                 children: [
                   LabelFieldRow(
                     label: 'Name *',
