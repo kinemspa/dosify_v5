@@ -207,7 +207,7 @@ class PrimaryChoiceChip extends StatelessWidget {
     required this.selected,
     required this.onSelected,
   });
-  final String label;
+  final Widget label;
   final bool selected;
   final ValueChanged<bool> onSelected;
   @override
@@ -215,13 +215,15 @@ class PrimaryChoiceChip extends StatelessWidget {
     final theme = Theme.of(context);
     final selectedColor = theme.colorScheme.primary;
     final unselectedColor = theme.colorScheme.surfaceContainerHighest;
+    final labelColor = selected ? Colors.white : theme.colorScheme.onSurface;
     return ChoiceChip(
-      label: Text(
-        label,
+      label: DefaultTextStyle(
         style: theme.textTheme.labelLarge?.copyWith(
-          color: selected ? Colors.white : theme.colorScheme.onSurface,
-          fontWeight: FontWeight.w600,
-        ),
+              color: labelColor,
+              fontWeight: FontWeight.w600,
+            ) ??
+            TextStyle(color: labelColor),
+        child: label,
       ),
       selected: selected,
       onSelected: onSelected,

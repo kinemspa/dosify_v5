@@ -320,19 +320,10 @@ class _AddEditInjectionUnifiedPageState
                           'eg. Pain relief',
                         ),
                       ),
-),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
-                                child: Text('Pick the syringe capacity for dosing', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                              ),
-                              LabelFieldRow(
-                                label: 'Max vial size (mL)',
-g: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
-                                child: Text('Amount per dose for calculations', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                              ),
-                              LabelFieldRow(
-                                label: 'Dose unit',
+                    ),
+                  ),
+                  LabelFieldRow(
+                    label: 'Notes',
                     field: Field36(
                       child: TextFormField(
                         controller: _notes,
@@ -440,13 +431,13 @@ LabelFieldRow(
                         spacing: 8,
                         children: [
 PrimaryChoiceChip(
-                            label: 'Enter volume',
+                            label: Text('Enter volume'),
                             selected: _calcMode == CalcMode.known,
                             onSelected: (_) =>
                                 setState(() => _calcMode = CalcMode.known),
                           ),
 PrimaryChoiceChip(
-                            label: 'Reconstitute',
+                            label: Text('Reconstitute'),
                             selected: _calcMode == CalcMode.reconstitute,
                             onSelected: (_) => setState(
                               () => _calcMode = CalcMode.reconstitute,
@@ -867,30 +858,51 @@ child: Column(
                                           );
                                         },
                                       ),
-Center(
-                                        child: FilledButton.icon(
-                                          onPressed: (S > 0 && D > 0 && iuMax > 0)
-                                              ? () {
-                                                final cur = _compute(
-                                                  S: S,
-                                                  D: D,
-                                                  U: _selectedUnitsInline,
-                                                );
-                                                setState(() {
-                                                  _perMl.text = fmt2(
-                                                    _round2(cur.cPerMl),
-                                                  );
-                                                  _vialVolume.text = fmt2(
-                                                    _round2(cur.vialVolume),
-                                                  );
-                                                  _calcMode = CalcMode
-                                                      .known; // collapse after apply
-                                                });
-                                              }
-                                            : null,
-                                        icon: const Icon(Icons.check),
-                                        label: const Text('Apply to vial'),
-                                      ),
+Builder(
+                                        builder: (context) {
+                                          final unitLabel = _baseUnit(_strengthUnit);
+                                          final sTxt = _strength.text.trim();
+                                          final dTxt = _doseInline.text.trim();
+                                          final Sraw = double.tryParse(sTxt) ?? 0;
+                                          final Draw = double.tryParse(dTxt) ?? 0;
+                                          double S = Sraw, D = Draw;
+                                          if (unitLabel != 'units') {
+                                            S = _toBaseMass(Sraw, unitLabel);
+                                            D = _toBaseMass(
+                                              Draw,
+                                              _doseUnitInline ?? unitLabel,
+                                            );
+                                          }
+                                          final vKnown = double.tryParse(_vialMaxInline.text);
+                                          final totalIU = _syringeInline.totalUnits.toDouble();
+                                          double iuMax = totalIU;
+                                          if (vKnown != null && S > 0 && D > 0) {
+                                            final uMaxAllowed = (100 * D * vKnown) / S;
+                                            iuMax = uMaxAllowed > totalIU
+                                                ? totalIU
+                                                : (uMaxAllowed < 0 ? 0 : uMaxAllowed);
+                                          }
+                                          return Center(
+                                            child: FilledButton.icon(
+                                              onPressed: (S > 0 && D > 0 && iuMax > 0)
+                                                  ? () {
+                                                      final cur = _compute(
+                                                        S: S,
+                                                        D: D,
+                                                        U: _selectedUnitsInline,
+                                                      );
+                                                      setState(() {
+                                                        _perMl.text = fmt2(_round2(cur.cPerMl));
+                                                        _vialVolume.text = fmt2(_round2(cur.vialVolume));
+                                                        _calcMode = CalcMode.known; // collapse after apply
+                                                      });
+                                                    }
+                                                  : null,
+                                              icon: const Icon(Icons.check),
+                                              label: const Text('Apply to vial'),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   );
@@ -1084,25 +1096,17 @@ field: FractionallySizedBox(
                           context,
                         ).colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
-),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
-                                child: Text('Units the dose is measured in', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                              ),
-                              LabelFieldRow(
-                                label: 'Syringe size',
+                    ),
+                  ),
+                  LabelFieldRow(
+                    label: 'Keep frozen',
                     field: Row(
                       children: [
                         Checkbox(
                           value: _keepFrozen,
-                          onChanged: (v) =>
-                              setState(() => _keepFrozen = v ?? false),
+                          onChanged: (v) => setState(() => _keepFrozen = v ?? false),
                         ),
-                        Text(
-                          'Freeze',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+                        Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
                       ],
                     ),
                   ),
