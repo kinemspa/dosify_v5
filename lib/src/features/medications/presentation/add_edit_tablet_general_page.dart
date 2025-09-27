@@ -336,6 +336,79 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  Widget _floatingSummaryCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final name = _nameCtrl.text.trim();
+    final manufacturer = _manufacturerCtrl.text.trim();
+    final strengthTxt = _strengthValueCtrl.text.trim();
+    final double? strengthVal = double.tryParse(strengthTxt);
+    final stockTxt = _stockCtrl.text.trim();
+    final double? stockVal = double.tryParse(stockTxt);
+    final unit = _unitLabel(_strengthUnit);
+    final stockUnit = 'tablets';
+    final headerTitle = name.isEmpty ? 'Add Tablet' : name;
+    final headerSubtitleParts = <String>[];
+    if (manufacturer.isNotEmpty) headerSubtitleParts.add(manufacturer);
+    if (strengthVal != null && strengthVal > 0) {
+      headerSubtitleParts.add('${fmt2(strengthVal)} $unit per tablet');
+    }
+    if (stockVal != null) {
+      headerSubtitleParts.add('${fmt2(stockVal)} $stockUnit in stock');
+    }
+    if (_expiryDate != null) {
+      headerSubtitleParts.add('Expires ${_fmtDate(_expiryDate!)}');
+    }
+    if (_keepRefrigerated) headerSubtitleParts.add('Refrigerate');
+    final subtitle = headerSubtitleParts.join(' • ');
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: cs.onPrimary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.medication, color: cs.onPrimary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  headerTitle,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle.isEmpty ? 'Fill fields to see summary' : subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('[GENERAL] build() called');
@@ -415,6 +488,13 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
       body: Stack(
         children: [
+          // Floating summary card hugging the bottom of the app bar
+          Positioned(
+            left: 10,
+            right: 10,
+            top: 8,
+            child: _floatingSummaryCard(context),
+          ),
           SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
             child: Form(
@@ -422,6 +502,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 72),
                   _section('General', [
                     _rowLabelField(
                       label: 'Name *',
@@ -504,7 +585,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       ),
                     ),
                     _helperBelowLeft('Optional notes'),
-                  ], trailing: _generalSummary()),
+                  ]),
                   const SizedBox(height: 10),
                   _section('Strength', [
                     _rowLabelField(
@@ -644,7 +725,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     _helperBelowCenter(
                       'Specify the amount per tablet and its unit of measurement.',
                     ),
-                  ], trailing: _strengthSummary()),
+                  ]),
 
                   const SizedBox(height: 10),
                   _section('Inventory', [
@@ -866,7 +947,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       ),
                     ),
                     _helperBelowLeft('Enter the expiry date'),
-                  ], trailing: _inventorySummary()),
+                  ]),
 
                   // Storage
                   const SizedBox(height: 10),
@@ -988,7 +1069,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     _helperBelowLeft(
                       'Special handling notes (e.g., Keep upright)',
                     ),
-                  ], trailing: _storageSummary()),
+                  ]),
                 ],
               ),
             ),
