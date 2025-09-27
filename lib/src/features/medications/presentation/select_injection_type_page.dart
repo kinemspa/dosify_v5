@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class SelectInjectionTypePage extends StatelessWidget {
   const SelectInjectionTypePage({super.key});
@@ -82,12 +83,20 @@ class _Tile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.push(route),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          decoration: BoxDecoration(
-            color: tileBg,
-            borderRadius: BorderRadius.circular(12),
-            border: tileBorder,
+        child: AnimatedScale(
+          scale: 1.0,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: isPrimary
+                ? BoxDecoration(
+                    color: tileBg,
+                    borderRadius: BorderRadius.circular(12),
+                  )
+                : softWhiteCardDecoration(context),
           ),
           child: Row(
             children: [

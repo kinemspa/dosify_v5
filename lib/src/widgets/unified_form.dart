@@ -130,22 +130,28 @@ class LabelFieldRow extends StatelessWidget {
 
 /// A 120x36 OutlinedButton with a calendar icon, matching Tablet/Capsule date picker button.
 class DateButton36 extends StatelessWidget {
-  const DateButton36({super.key, required this.label, required this.onPressed});
+  const DateButton36({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.width,
+  });
 
   final String label;
   final VoidCallback onPressed;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: kFieldHeight,
-      width: kSmallControlWidth,
+      width: width ?? kSmallControlWidth,
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: const Icon(Icons.calendar_today, size: 18),
         label: Text(label),
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(120, kFieldHeight),
+          minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
         ),
       ),
     );
@@ -256,15 +262,30 @@ class SyringeGauge extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       size: const Size(double.infinity as double, 26),
-      painter: _SyringePainter(totalIU: totalIU, fillIU: fillIU),
+      painter: _SyringePainter(
+        totalIU: totalIU,
+        fillIU: fillIU,
+        fillColor: Theme.of(context).colorScheme.primary,
+        tickColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        labelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }
 
 class _SyringePainter extends CustomPainter {
-  _SyringePainter({required this.totalIU, required this.fillIU});
+  _SyringePainter({
+    required this.totalIU,
+    required this.fillIU,
+    required this.fillColor,
+    required this.tickColor,
+    required this.labelColor,
+  });
   final double totalIU;
   final double fillIU;
+  final Color fillColor;
+  final Color tickColor;
+  final Color labelColor;
   @override
   void paint(Canvas canvas, Size size) {
     final r = Rect.fromLTWH(0, 6, size.width, 14);
@@ -285,23 +306,25 @@ class _SyringePainter extends CustomPainter {
       size.width * (ratio.isNaN ? 0 : ratio),
       14,
     );
-    final fillPaint = Paint()..color = Colors.blueAccent;
+    final fillPaint = Paint()..color = fillColor;
     canvas.drawRRect(RRect.fromRectAndRadius(fillRect, radius), fillPaint);
     // Tick marks every 10 IU, major every 50 IU
     final tickPaint = Paint()
-      ..color = const Color(0xFF6B6B6B)
+      ..color = tickColor
       ..strokeWidth = 1;
-    for (double iu = 0; iu <= totalIU; iu += 10) {
+    // Draw minor half ticks every 5 IU, full minor every 10 IU, major every 50 IU
+    for (double iu = 0; iu <= totalIU; iu += 5) {
       final x = (iu / totalIU) * size.width;
       final isMajor = iu % 50 == 0;
-      final tickTop = isMajor ? 2.0 : 4.0;
-      final tickBottom = isMajor ? 24.0 : 20.0;
+      final isMinor = iu % 10 == 0 && !isMajor;
+      final tickTop = isMajor ? 1.0 : (isMinor ? 3.0 : 6.0);
+      final tickBottom = isMajor ? 25.0 : (isMinor ? 22.0 : 18.0);
       canvas.drawLine(Offset(x, tickTop), Offset(x, tickBottom), tickPaint);
       if (isMajor) {
         final tp = TextPainter(
           text: TextSpan(
             text: iu.toStringAsFixed(0),
-            style: const TextStyle(fontSize: 10, color: Color(0xFF6B6B6B)),
+            style: TextStyle(fontSize: 9, color: labelColor),
           ),
           textDirection: TextDirection.ltr,
         )..layout();

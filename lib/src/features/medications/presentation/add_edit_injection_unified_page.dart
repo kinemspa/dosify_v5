@@ -351,10 +351,12 @@ class _AddEditInjectionUnifiedPageState
                       decoration: _dec(context, 'Strength *', '0'),
                     ),
                   ),
-                  LabelFieldRow(
+LabelFieldRow(
                     label: 'Unit *',
-                    field: SmallDropdown36<Unit>(
-                      value: _strengthUnit,
+                    field: FractionallySizedBox(
+                      widthFactor: 0.2,
+                      child: SmallDropdown36<Unit>(
+                        value: _strengthUnit,
                       items: const [
                         DropdownMenuItem(
                           value: Unit.mcg,
@@ -391,8 +393,8 @@ class _AddEditInjectionUnifiedPageState
                       ],
                       onChanged: (v) =>
                           setState(() => _strengthUnit = v ?? Unit.mg),
-                      decoration: _decDrop(context),
-                      width: 60,
+                        decoration: _decDrop(context),
+                      ),
                     ),
                   ),
                   if (_isPerMl)
@@ -418,14 +420,14 @@ class _AddEditInjectionUnifiedPageState
                       field: Wrap(
                         spacing: 8,
                         children: [
-                          ChoiceChip(
-                            label: const Text('Enter volume'),
+PrimaryChoiceChip(
+                            label: 'Enter volume',
                             selected: _calcMode == CalcMode.known,
                             onSelected: (_) =>
                                 setState(() => _calcMode = CalcMode.known),
                           ),
-                          ChoiceChip(
-                            label: const Text('Reconstitute'),
+PrimaryChoiceChip(
+                            label: 'Reconstitute',
                             selected: _calcMode == CalcMode.reconstitute,
                             onSelected: (_) => setState(
                               () => _calcMode = CalcMode.reconstitute,
@@ -434,26 +436,21 @@ class _AddEditInjectionUnifiedPageState
                         ],
                       ),
                     ),
-                  if (widget.kind == InjectionKind.multi &&
+if (widget.kind == InjectionKind.multi &&
                       _calcMode == CalcMode.known)
                     LabelFieldRow(
                       label: 'Vial volume (mL)',
-                      field: SizedBox(
-                        width: kSmallControlWidth,
-                        child: Field36(
-                          child: TextFormField(
-                            controller: _vialVolume,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Vial volume (mL)',
-                              '0.0',
-                            ),
-                          ),
-                        ),
+                      field: StepperRow36(
+                        controller: _vialVolume,
+                        onDec: () {
+                          final v = int.tryParse(_vialVolume.text.trim()) ?? 0;
+                          setState(() => _vialVolume.text = (v - 1).clamp(0, 1000000).toString());
+                        },
+                        onInc: () {
+                          final v = int.tryParse(_vialVolume.text.trim()) ?? 0;
+                          setState(() => _vialVolume.text = (v + 1).clamp(0, 1000000).toString());
+                        },
+                        decoration: _dec(context, 'Vial volume (mL)', '0'),
                       ),
                     ),
                   if (widget.kind == InjectionKind.multi &&
@@ -871,8 +868,10 @@ class _AddEditInjectionUnifiedPageState
                   ),
                   LabelFieldRow(
                     label: 'Quantity unit',
-                    field: SmallDropdown36<StockUnit>(
-                      value: _stockUnit,
+field: FractionallySizedBox(
+                      widthFactor: 0.2,
+                      child: SmallDropdown36<StockUnit>(
+                        value: _stockUnit,
                       items: [
                         DropdownMenuItem(
                           value: StockUnit.preFilledSyringes,
@@ -889,10 +888,9 @@ class _AddEditInjectionUnifiedPageState
                       ],
                       onChanged: (v) =>
                           setState(() => _stockUnit = v ?? _stockUnit),
-                      decoration: _decDrop(context),
-                      width: 60,
+                        decoration: _decDrop(context),
+                      ),
                     ),
-                  ),
                   Padding(
                     padding: const EdgeInsets.only(left: kLabelColWidth + 8),
                     child: Text(
@@ -905,7 +903,8 @@ class _AddEditInjectionUnifiedPageState
                   const SizedBox(height: 8),
                   LabelFieldRow(
                     label: 'Expiry date',
-                    field: DateButton36(
+field: DateButton36(
+                      width: 80,
                       label: _expiry == null
                           ? 'Select date'
                           : DateFormat.yMd().format(_expiry!),
