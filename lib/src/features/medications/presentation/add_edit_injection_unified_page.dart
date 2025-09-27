@@ -985,21 +985,23 @@ field: FractionallySizedBox(
                   const SizedBox(height: 8),
                   LabelFieldRow(
                     label: 'Expiry date',
-                    field: DateButton36(
-                      width: 80,
-                      label: _expiry == null
-                          ? 'Select date'
-                          : DateFormat.yMd().format(_expiry!),
-                      onPressed: () async {
-                        final now = DateTime.now();
-                        final picked = await showDatePicker(
-                          context: context,
-                          firstDate: DateTime(now.year - 1),
-                          lastDate: DateTime(now.year + 10),
-                          initialDate: _expiry ?? now,
-                        );
-                        if (picked != null) setState(() => _expiry = picked);
-                      },
+                    field: FractionallySizedBox(
+                      widthFactor: 0.2,
+                      child: DateButton36(
+                        label: _expiry == null
+                            ? 'Select date'
+                            : DateFormat.yMd().format(_expiry!),
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(now.year - 1),
+                            lastDate: DateTime(now.year + 10),
+                            initialDate: _expiry ?? now,
+                          );
+                          if (picked != null) setState(() => _expiry = picked);
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -1087,8 +1089,8 @@ field: FractionallySizedBox(
                   Padding(
                     padding: const EdgeInsets.only(
                       left: kLabelColWidth + 8,
-                      top: 0,
-                      bottom: 6,
+                      top: 2,
+                      bottom: 4,
                     ),
                     child: Text(
                       'Enable if this medication must be kept refrigerated',
@@ -1114,8 +1116,8 @@ field: FractionallySizedBox(
                   Padding(
                     padding: const EdgeInsets.only(
                       left: kLabelColWidth + 8,
-                      top: 0,
-                      bottom: 6,
+                      top: 2,
+                      bottom: 4,
                     ),
                     child: Text(
                       'Enable if this medication must be kept frozen',
