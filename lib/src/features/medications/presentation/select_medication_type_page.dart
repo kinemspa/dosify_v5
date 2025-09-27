@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class SelectMedicationTypePage extends StatelessWidget {
   const SelectMedicationTypePage({super.key});
@@ -93,7 +94,7 @@ class _Section extends StatelessWidget {
   }
 }
 
-class _TypeTile extends StatelessWidget {
+class _TypeTile extends StatefulWidget {
   const _TypeTile({
     required this.icon,
     required this.title,
@@ -106,12 +107,18 @@ class _TypeTile extends StatelessWidget {
   final bool primary;
 
   @override
+  State<_TypeTile> createState() => _TypeTileState();
+}
+
+class _TypeTileState extends State<_TypeTile> {
+  bool _pressed = false;
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final onPrimary = cs.onPrimary;
     final primaryBg = cs.primary;
-    final isPrimary = primary;
+    final isPrimary = widget.primary;
     final tileBg = isPrimary ? primaryBg : cs.surfaceContainerLowest;
     final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
     final titleColor = isPrimary ? onPrimary : cs.onSurface;
@@ -127,69 +134,66 @@ class _TypeTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          if (title == 'Tablet') {
+          if (widget.title == 'Tablet') {
             context.push('/medications/add/tablet');
-          } else if (title == 'Capsule') {
+          } else if (widget.title == 'Capsule') {
             context.push('/medications/add/capsule');
-          } else if (title == 'Injection') {
+          } else if (widget.title == 'Injection') {
             context.push('/medications/select-injection-type');
           }
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          decoration: BoxDecoration(
-            color: tileBg,
-            borderRadius: BorderRadius.circular(12),
-            border: isPrimary
-                ? null
-                : Border.all(
-                    color: cs.outlineVariant.withOpacity(0.5),
-                    width: 0.75,
+        onHighlightChanged: (v) => setState(() => _pressed = v),
+        child: AnimatedScale(
+          scale: _pressed ? 0.98 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOutCubic,
+            decoration: isPrimary
+                ? BoxDecoration(
+                    color: tileBg,
+                    borderRadius: BorderRadius.circular(12),
+                  )
+                : softWhiteCardDecoration(context),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            child: Row(
+              children: [
+                // Leading icon badge
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: badgeBg,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Leading icon badge
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: badgeBg,
-                  borderRadius: BorderRadius.circular(8),
+                  child: Icon(widget.icon, color: badgeIconColor, size: 20),
                 ),
-                child: Icon(icon, color: badgeIconColor, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: titleColor,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: titleColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: subtitleColor,
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: subtitleColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(Icons.chevron_right, color: chevronColor),
-            ],
+                Icon(Icons.chevron_right, color: chevronColor),
+              ],
+            ),
           ),
         ),
       ),

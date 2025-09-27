@@ -34,7 +34,7 @@ class SectionFormCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: neutral
-            ? theme.colorScheme.surface
+            ? theme.colorScheme.surfaceContainerLowest
             : theme.colorScheme.primary.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
         border: neutral
@@ -228,6 +228,26 @@ class PrimaryChoiceChip extends StatelessWidget {
 }
 
 /// Visual insulin syringe gauge with tick markers
+/// Reusable soft white card decoration used across selection tiles and neutral form sections
+BoxDecoration softWhiteCardDecoration(BuildContext context) {
+  final theme = Theme.of(context);
+  return BoxDecoration(
+    color: theme.colorScheme.surfaceContainerLowest,
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(
+      color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+      width: 0.75,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.02),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
+}
+
 class SyringeGauge extends StatelessWidget {
   const SyringeGauge({super.key, required this.totalIU, required this.fillIU});
   final double totalIU;
