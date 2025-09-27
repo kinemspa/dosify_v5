@@ -170,7 +170,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Widget _helperBelowLeftCompact(String text) {
     final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 2, bottom: 6),
+      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 1, bottom: 4),
       child: Text(
         text,
         textAlign: TextAlign.left,
@@ -829,30 +829,40 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     ],
                     _rowLabelField(
                       label: 'Expiry date',
-                      field: Field36(
-                        width: 120,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: context,
-                              firstDate: DateTime(now.year - 1),
-                              lastDate: DateTime(now.year + 10),
-                              initialDate: _expiryDate ?? now,
-                            );
-                            if (picked != null)
-                              setState(() => _expiryDate = picked);
-                          },
-                          icon: const Icon(Icons.calendar_today, size: 18),
-                          label: Text(
-                            _expiryDate == null
-                                ? 'Select date'
-                                : _fmtDate(_expiryDate!),
+                      field: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Align(
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              height: kFieldHeight,
+                              width: 120,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  final now = DateTime.now();
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    firstDate: DateTime(now.year - 1),
+                                    lastDate: DateTime(now.year + 10),
+                                    initialDate: _expiryDate ?? now,
+                                  );
+                                  if (picked != null)
+                                    setState(() => _expiryDate = picked);
+                                },
+                                icon: const Icon(Icons.calendar_today, size: 18),
+                                label: Text(
+                                  _expiryDate == null
+                                      ? 'Select date'
+                                      : _fmtDate(_expiryDate!),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size(120, kFieldHeight),
+                                ),
+                              ),
+                            ),
                           ),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(120, kFieldHeight),
-                          ),
-                        ),
+                          const SizedBox(height: 2),
+                        ],
                       ),
                     ),
                     _helperBelowLeft('Enter the expiry date'),
