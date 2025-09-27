@@ -126,7 +126,7 @@ class _AddEditInjectionUnifiedPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -149,7 +149,7 @@ class _AddEditInjectionUnifiedPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -275,6 +275,15 @@ class _AddEditInjectionUnifiedPageState
                 title: 'General',
                 neutral: widget.kind == InjectionKind.multi,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6),
+                    child: Text(
+                      'Provide general details for this medication.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
                   LabelFieldRow(
                     label: 'Name *',
                     field: Field36(
@@ -311,10 +320,19 @@ class _AddEditInjectionUnifiedPageState
                           'eg. Pain relief',
                         ),
                       ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Notes',
+),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
+                                child: Text('Pick the syringe capacity for dosing', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                              ),
+                              LabelFieldRow(
+                                label: 'Max vial size (mL)',
+g: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
+                                child: Text('Amount per dose for calculations', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                              ),
+                              LabelFieldRow(
+                                label: 'Dose unit',
                     field: Field36(
                       child: TextFormField(
                         controller: _notes,
@@ -333,6 +351,7 @@ class _AddEditInjectionUnifiedPageState
 
               SectionFormCard(
                 title: 'Strength',
+                neutral: widget.kind == InjectionKind.multi,
                 children: [
                   LabelFieldRow(
                     label: 'Strength *',
@@ -474,9 +493,56 @@ if (widget.kind == InjectionKind.multi &&
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
-                          child: Column(
+child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Summary card
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Gauge on white strip for contrast
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                      child: SyringeGauge(
+                                        totalIU: _syringeInline.totalUnits.toDouble(),
+                                        fillIU: _selectedUnitsInline,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Summary',
+                                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Builder(builder: (ctx) {
+                                      // Lightweight live summary
+                                      final unitLabel = _baseUnit(_strengthUnit);
+                                      final sTxt = _strength.text.trim();
+                                      final vTxt = _vialVolume.text.trim();
+                                      return Text(
+                                        'Strength: ${sTxt.isEmpty ? '—' : sTxt} ${unitLabel}${_isPerMl ? '' : ''} • Vial: ${vTxt.isEmpty ? '—' : vTxt} mL',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                              color: Theme.of(context).colorScheme.onPrimary,
+                                            ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
                               Row(
                                 children: [
                                   Expanded(
@@ -629,11 +695,11 @@ if (widget.kind == InjectionKind.multi &&
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: [
-                                          ChoiceChip(
+                                          Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        PrimaryChoiceChip(
                                             label: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -647,16 +713,16 @@ if (widget.kind == InjectionKind.multi &&
                                                   ).textTheme.bodySmall,
                                                 ),
                                               ],
-                                            ),
+),
                                             selected:
                                                 (_selectedUnitsInline - u1)
                                                     .abs() <
                                                 0.01,
-                                            onSelected: (_) => setState(
+                                            onSelected: (sel) => setState(
                                               () => _selectedUnitsInline = u1,
                                             ),
                                           ),
-                                          ChoiceChip(
+                                          PrimaryChoiceChip(
                                             label: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -670,16 +736,16 @@ if (widget.kind == InjectionKind.multi &&
                                                   ).textTheme.bodySmall,
                                                 ),
                                               ],
-                                            ),
+),
                                             selected:
                                                 (_selectedUnitsInline - u2)
                                                     .abs() <
                                                 0.01,
-                                            onSelected: (_) => setState(
+                                            onSelected: (sel) => setState(
                                               () => _selectedUnitsInline = u2,
                                             ),
                                           ),
-                                          ChoiceChip(
+                                          PrimaryChoiceChip(
                                             label: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -693,12 +759,12 @@ if (widget.kind == InjectionKind.multi &&
                                                   ).textTheme.bodySmall,
                                                 ),
                                               ],
-                                            ),
+),
                                             selected:
                                                 (_selectedUnitsInline - u3)
                                                     .abs() <
                                                 0.01,
-                                            onSelected: (_) => setState(
+                                            onSelected: (sel) => setState(
                                               () => _selectedUnitsInline = u3,
                                             ),
                                           ),
@@ -801,9 +867,10 @@ if (widget.kind == InjectionKind.multi &&
                                           );
                                         },
                                       ),
-                                      FilledButton.icon(
-                                        onPressed: (S > 0 && D > 0 && iuMax > 0)
-                                            ? () {
+Center(
+                                        child: FilledButton.icon(
+                                          onPressed: (S > 0 && D > 0 && iuMax > 0)
+                                              ? () {
                                                 final cur = _compute(
                                                   S: S,
                                                   D: D,
@@ -823,6 +890,7 @@ if (widget.kind == InjectionKind.multi &&
                                             : null,
                                         icon: const Icon(Icons.check),
                                         label: const Text('Apply to vial'),
+                                      ),
                                       ),
                                     ],
                                   );
@@ -848,6 +916,7 @@ if (widget.kind == InjectionKind.multi &&
 
               SectionFormCard(
                 title: 'Inventory',
+                neutral: widget.kind == InjectionKind.multi,
                 children: [
                   LabelFieldRow(
                     label: 'Stock quantity *',
@@ -903,7 +972,7 @@ field: FractionallySizedBox(
                   const SizedBox(height: 8),
                   LabelFieldRow(
                     label: 'Expiry date',
-field: DateButton36(
+                    field: DateButton36(
                       width: 80,
                       label: _expiry == null
                           ? 'Select date'
@@ -926,6 +995,7 @@ field: DateButton36(
 
               SectionFormCard(
                 title: 'Storage',
+                neutral: widget.kind == InjectionKind.multi,
                 children: [
                   LabelFieldRow(
                     label: 'Batch No.',
@@ -1014,10 +1084,14 @@ field: DateButton36(
                           context,
                         ).colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Keep frozen',
+),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
+                                child: Text('Units the dose is measured in', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                              ),
+                              LabelFieldRow(
+                                label: 'Syringe size',
                     field: Row(
                       children: [
                         Checkbox(
