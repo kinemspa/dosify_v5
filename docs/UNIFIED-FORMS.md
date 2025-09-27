@@ -74,3 +74,7 @@ Rules
 - Always commit changes to local git
 - Avoid bottom-sheet popups; prefer inline content or dialogs
 - Keep docs updated when UI patterns change
+
+Adoptions
+
+- Tablet Add screen (AddEditTabletGeneralPage) now uses SectionFormCard with neutral: true, which applies the softWhiteCardDecoration (thin, subtle outline and soft surface background). This ensures consistent card styling across Tablet, Capsule, and Injection flows.
