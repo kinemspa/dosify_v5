@@ -1162,7 +1162,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
 
   Widget _expirySummary() {
     if (_expiryDate == null) return const SizedBox.shrink();
-    return Text(_fmtDate(_expiryDate!));
+    return Text(_fmtDateLocal(context, _expiryDate!));
   }
 
   String _fmtDateLocal(BuildContext ctx, DateTime d) {
@@ -1326,7 +1326,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               ? 'On at ${_lowStockThresholdCtrl.text.trim()}'
               : 'Off',
         ),
-        row('Expiry', _expiryDate == null ? '' : _fmtDate(_expiryDate!)),
+        row('Expiry', _expiryDate == null ? '' : MaterialLocalizations.of(ctx).formatCompactDate(_expiryDate!)),
         row('Batch', _batchNumberCtrl.text.trim()),
         row('Storage location', _storageLocationCtrl.text.trim()),
         row('Requires refrigeration', _keepRefrigerated ? 'Yes' : 'No'),
@@ -1384,7 +1384,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           (_storageInstructionsCtrl.text.trim().isEmpty
               ? '(empty)'
               : _storageInstructionsCtrl.text.trim()),
-      'Expiry: ' + (_expiryDate == null ? '(none)' : _fmtDate(_expiryDate!)),
+'Expiry: ' + (_expiryDate == null ? '(none)' : _fmtDateLocal(context, _expiryDate!)),
     ].join('\n');
   }
 }
