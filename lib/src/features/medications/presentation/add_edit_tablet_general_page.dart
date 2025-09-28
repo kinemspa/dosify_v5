@@ -364,22 +364,28 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final double? strengthVal = double.tryParse(strengthTxt);
     final stockTxt = _stockCtrl.text.trim();
     final double? stockVal = double.tryParse(stockTxt);
+    final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
     final unit = _unitLabel(_strengthUnit);
     final stockUnit = 'tablets';
     final headerTitle = name.isEmpty ? 'Add Tablet' : name;
-    final headerSubtitleParts = <String>[];
-    if (manufacturer.isNotEmpty) headerSubtitleParts.add(manufacturer);
-    if (strengthVal != null && strengthVal > 0) {
-      headerSubtitleParts.add('${fmt2(strengthVal)} $unit per tablet');
+
+    final thresholdTxt = _lowStockThresholdCtrl.text.trim();
+    final double? threshold = double.tryParse(thresholdTxt);
+    final bool lowStockActive = _lowStockAlert && stockVal != null && threshold != null && stockVal <= threshold;
+
+    Widget _pill(String text) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: cs.onPrimary.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          text,
+          style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+        ),
+      );
     }
-    if (stockVal != null) {
-      headerSubtitleParts.add('${fmt2(stockVal)} $stockUnit in stock');
-    }
-    if (_expiryDate != null) {
-      headerSubtitleParts.add('Expires ${_fmtDate(_expiryDate!)}');
-    }
-    if (_keepRefrigerated) headerSubtitleParts.add('Refrigerate');
-    final subtitle = headerSubtitleParts.join(' • ');
 
     return Container(
       decoration: BoxDecoration(
@@ -388,8 +394,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Left badge icon
           Container(
             width: 36,
             height: 36,
@@ -400,26 +407,112 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             child: Icon(Icons.medication, color: cs.onPrimary),
           ),
           const SizedBox(width: 12),
+          // Title + lines
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  headerTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: cs.onPrimary,
-                  ),
+                // Title row with right-side status icons/pills
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        headerTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: cs.onPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Right status cluster
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (_expiryDate != null) _pill(_fmtDate(_expiryDate!)),
+                        if (_keepRefrigerated)
+                          Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
+                        if (_keepFrozen)
+                          Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
+                        if (_lightSensitive)
+                          Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle.isEmpty ? 'Fill fields to see summary' : subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onPrimary,
+                const SizedBox(height: 4),
+                if (manufacturer.isNotEmpty)
+                  Text(
+                    manufacturer,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onPrimary.withOpacity(0.9),
+                    ),
                   ),
-                ),
+                if (strengthVal != null && strengthVal > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onPrimary,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: fmt2(strengthVal),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                          TextSpan(text: ' $unit '),
+                          const TextSpan(text: 'per tablet'),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (stockVal != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: cs.onPrimary,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: fmt2(stockVal),
+                                style: const TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                              const TextSpan(text: '/'),
+                              TextSpan(
+                                text: fmt2(initialStock),
+                                style: const TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                              TextSpan(text: ' $stockUnit remain'),
+                            ],
+                          ),
+                        ),
+                        if (lowStockActive) ...[
+                          const SizedBox(width: 8),
+                          Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
+                          const SizedBox(width: 2),
+                          Text(
+                            'Low stock',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.amber.shade200,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
