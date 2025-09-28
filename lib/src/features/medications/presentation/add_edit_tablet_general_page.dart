@@ -26,9 +26,9 @@ class AddEditTabletGeneralPage extends StatefulWidget {
 class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Fixed spacer to avoid layout shifts while typing.
-  // Increased to ensure the first section can sit fully below the pinned summary on small screens.
-  static const double _summarySpacer = 120;
+  // Dynamic spacer height measured from the floating summary card
+  final GlobalKey _summaryKey = GlobalKey();
+  double _summaryHeight = 0;
 
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();
@@ -360,6 +360,20 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  void _updateSummaryHeight() {
+    // Measure the summary card height and update spacer
+    final ctx = _summaryKey.currentContext;
+    if (ctx != null) {
+      final rb = ctx.findRenderObject();
+      if (rb is RenderBox) {
+        final h = rb.size.height;
+        if (h != _summaryHeight && h > 0) {
+          setState(() => _summaryHeight = h);
+        }
+      }
+    }
+  }
+
   Widget _floatingSummary(BuildContext context) {
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
@@ -370,7 +384,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final headerTitle = name.isEmpty ? 'Add Tablet' : name;
     final double? threshold = double.tryParse(_lowStockThresholdCtrl.text.trim());
 
-    return SummaryHeaderCard(
+    final card = SummaryHeaderCard(
+      key: _summaryKey,
       title: headerTitle,
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
@@ -378,13 +393,18 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       stockCurrent: stockVal,
       stockInitial: initialStock,
       stockUnitLabel: 'tablets',
-      expiryText: _expiryDate != null ? _fmtDate(_expiryDate!) : null,
+      expiryDate: _expiryDate,
       showRefrigerate: _keepRefrigerated,
       showFrozen: _keepFrozen,
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockAlert,
       lowStockThreshold: threshold,
     );
+
+    // Schedule measurement after the frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
+
+    return card;
   }
 
   @override
@@ -474,7 +494,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: _summarySpacer),
+                  SizedBox(height: _summaryHeight + 10),
                   _section('General', [
                     _rowLabelField(
                       label: 'Name *',
@@ -906,7 +926,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                                 label: Text(
                                   _expiryDate == null
                                       ? 'Select date'
-                                      : _fmtDate(_expiryDate!),
+                                      : _fmtDateLocal(context, _expiryDate!),
                                 ),
                                 style: OutlinedButton.styleFrom(
                                   minimumSize: const Size(120, kFieldHeight),
@@ -1145,10 +1165,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     return Text(_fmtDate(_expiryDate!));
   }
 
-  String _fmtDate(DateTime d) {
-    final mm = d.month.toString().padLeft(2, '0');
-    final dd = d.day.toString().padLeft(2, '0');
-    return '${d.year}-$mm-$dd';
+  String _fmtDateLocal(BuildContext ctx, DateTime d) {
+    // Use platform/material localization for date formatting (locale-aware)
+    final loc = MaterialLocalizations.of(ctx);
+    return loc.formatCompactDate(d);
   }
 
   Future<void> _showConfirmDialog() async {

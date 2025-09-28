@@ -11,6 +11,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.stockInitial,
     this.stockUnitLabel,
     this.expiryText,
+    this.expiryDate,
     this.showRefrigerate = false,
     this.showFrozen = false,
     this.showDark = false,
@@ -26,6 +27,7 @@ class SummaryHeaderCard extends StatelessWidget {
   final double? stockInitial;
   final String? stockUnitLabel;
   final String? expiryText;
+  final DateTime? expiryDate;
   final bool showRefrigerate;
   final bool showFrozen;
   final bool showDark;
@@ -42,6 +44,14 @@ class SummaryHeaderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final bool lowStockActive = lowStockEnabled && stockCurrent != null && lowStockThreshold != null && stockCurrent! <= lowStockThreshold!;
+
+    // Resolve localized expiry text if a DateTime was provided
+    String? expDisplay;
+    if (expiryDate != null) {
+      expDisplay = MaterialLocalizations.of(context).formatCompactDate(expiryDate!);
+    } else {
+      expDisplay = expiryText;
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -82,9 +92,9 @@ class SummaryHeaderCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     // Top-right cluster: Expiry text only
-                    if (expiryText != null && expiryText!.isNotEmpty)
+                    if (expDisplay != null && expDisplay.isNotEmpty)
                       Text(
-                        'Exp: $expiryText',
+                        'Exp: $expDisplay',
                         style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
                       ),
                   ],
@@ -116,52 +126,93 @@ class SummaryHeaderCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (stockCurrent != null && stockInitial != null && (stockUnitLabel ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  // Use Wrap so the low-stock banner can flow onto a new line on small screens.
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 8,
-                    runSpacing: 2,
-                    children: [
-                      RichText(
-                        text: TextSpan(
-                          style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
-                          children: [
-                            TextSpan(
-                              text: _fmt2(stockCurrent),
-                              style: const TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                            const TextSpan(text: '/'),
-                            TextSpan(
-                              text: _fmt2(stockInitial),
-                              style: const TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                            TextSpan(text: ' $stockUnitLabel remain'),
-                          ],
-                        ),
-                      ),
-                      if (lowStockActive) ...[
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
-                            const SizedBox(width: 2),
-                            Text(
-                              lowStockThreshold != null
-                                  ? 'Low stock (≤ ${_fmt2(lowStockThreshold)})'
-                                  : 'Low stock',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.amber.shade200,
-                                fontWeight: FontWeight.w700,
+                // Bottom row: left side (strength + stock + low-stock), right side (storage icons)
+                const SizedBox(height: 2),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left cluster uses Wrap for responsive flow
+                    Expanded(
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 2,
+                        children: [
+                          if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty)
+                            RichText(
+                              text: TextSpan(
+                                style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                                children: [
+                                  TextSpan(
+                                    text: _fmt2(strengthValue),
+                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                  ),
+                                  TextSpan(text: ' $strengthUnitLabel '),
+                                  const TextSpan(text: 'per tablet'),
+                                ],
                               ),
                             ),
+                          if (stockCurrent != null && (stockUnitLabel ?? '').isNotEmpty)
+                            RichText(
+                              text: TextSpan(
+                                style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                                children: [
+                                  TextSpan(
+                                    text: _fmt2(stockCurrent),
+                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                  ),
+                                  if (stockInitial != null) ...[
+                                    const TextSpan(text: '/'),
+                                    TextSpan(
+                                      text: _fmt2(stockInitial),
+                                      style: const TextStyle(fontWeight: FontWeight.w800),
+                                    ),
+                                  ],
+                                  TextSpan(text: ' $stockUnitLabel remain'),
+                                ],
+                              ),
+                            ),
+                          if (lowStockActive)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
+                                const SizedBox(width: 2),
+                                Text(
+                                  lowStockThreshold != null
+                                      ? 'Low stock (≤ ${_fmt2(lowStockThreshold)})'
+                                      : 'Low stock',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: Colors.amber.shade200,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                    // Right cluster: storage icons inline on the same bottom row
+                    if (showRefrigerate || showFrozen || showDark) ...[
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (showRefrigerate)
+                            Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
+                          if (showFrozen) ...[
+                            if (showRefrigerate) const SizedBox(width: 6),
+                            Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
                           ],
-                        )
-                      ],
+                          if (showDark) ...[
+                            if (showRefrigerate || showFrozen) const SizedBox(width: 6),
+                            Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
+                          ],
+                        ],
+                      ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
                 // Bottom-right storage icons
                 if (showRefrigerate || showFrozen || showDark) ...[
                   const SizedBox(height: 4),
