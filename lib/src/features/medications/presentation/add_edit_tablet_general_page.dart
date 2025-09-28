@@ -25,6 +25,10 @@ class AddEditTabletGeneralPage extends StatefulWidget {
 class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _formKey = GlobalKey<FormState>();
 
+  // Floating summary measurement
+  final GlobalKey _summaryKey = GlobalKey();
+  double _summaryHeight = 0;
+
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
@@ -387,7 +391,42 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       );
     }
 
+    Widget _expiryPill(String dateText) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: cs.onPrimary.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              decoration: BoxDecoration(
+                color: cs.onPrimary.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'EXP',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              dateText,
+              style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
+      key: _summaryKey,
       decoration: BoxDecoration(
         color: cs.primary,
         borderRadius: BorderRadius.circular(12),
@@ -434,7 +473,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       spacing: 8,
                       runSpacing: 4,
                       children: [
-                        if (_expiryDate != null) _pill(_fmtDate(_expiryDate!)),
+                        if (_expiryDate != null) _expiryPill(_fmtDate(_expiryDate!)),
                         if (_keepRefrigerated)
                           Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
                         if (_keepFrozen)
@@ -503,7 +542,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
                           const SizedBox(width: 2),
                           Text(
-                            'Low stock',
+                            threshold != null
+                                ? 'Low stock (≤ ${fmt2(threshold)})'
+                                : 'Low stock',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: Colors.amber.shade200,
                               fontWeight: FontWeight.w700,
@@ -526,6 +567,18 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     final mq = MediaQuery.of(context);
+
+    // Measure floating summary height to offset scroll content
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _summaryKey.currentContext;
+      if (ctx != null) {
+        final box = ctx.findRenderObject() as RenderBox?;
+        final h = box?.size.height ?? 0;
+        if (h > 0 && (h - _summaryHeight).abs() > 1) {
+          if (mounted) setState(() => _summaryHeight = h);
+        }
+      }
+    });
 
     // Derive validation messages for helper rows
     final theme = Theme.of(context);
@@ -608,7 +661,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 72),
+                  SizedBox(height: (_summaryHeight > 0 ? _summaryHeight : 60) + 8),
                   _section('General', [
                     _rowLabelField(
                       label: 'Name *',
