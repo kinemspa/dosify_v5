@@ -198,6 +198,25 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  // Local helpers used by the floating summary card
+  String _unitLabel(Unit u) {
+    switch (u) {
+      case Unit.mcg:
+        return 'mcg';
+      case Unit.mg:
+        return 'mg';
+      case Unit.g:
+        return 'g';
+      default:
+        return u.name;
+    }
+  }
+
+  String fmt2(double? v) {
+    if (v == null) return '-';
+    return v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+  }
+
   Widget _section(String title, List<Widget> children, {Widget? trailing}) {
     // Use unified soft white card style for visual consistency with injection and selection screens
     return SectionFormCard(
