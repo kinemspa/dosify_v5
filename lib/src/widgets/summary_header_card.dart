@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 class SummaryHeaderCard extends StatelessWidget {
   const SummaryHeaderCard({
