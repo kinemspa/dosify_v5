@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/medications/data/medication_repository.da
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 /// Minimal Tablet editor that renders ONLY the General section.
 /// This is used to isolate rendering issues step-by-step.
@@ -25,9 +26,8 @@ class AddEditTabletGeneralPage extends StatefulWidget {
 class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Floating summary measurement
-  final GlobalKey _summaryKey = GlobalKey();
-  double _summaryHeight = 0;
+  // Fixed spacer to avoid layout shifts while typing
+  static const double _summarySpacer = 84;
 
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();
@@ -202,7 +202,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
-  // Local helpers used by the floating summary card
+  // Local helpers
   String _unitLabel(Unit u) {
     switch (u) {
       case Unit.mcg:
@@ -359,7 +359,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
-  Widget _floatingSummaryCard(BuildContext context) {
+  Widget _floatingSummary(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final name = _nameCtrl.text.trim();
@@ -425,16 +425,21 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       );
     }
 
-    return Container(
-      key: _summaryKey,
-      decoration: BoxDecoration(
-        color: cs.primary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return SummaryHeaderCard(
+      title: headerTitle,
+      manufacturer: manufacturer.isEmpty ? null : manufacturer,
+      strengthValue: strengthVal,
+      strengthUnitLabel: unit,
+      stockCurrent: stockVal,
+      stockInitial: initialStock,
+      stockUnitLabel: 'tablets',
+      expiryText: _expiryDate != null ? _fmtDate(_expiryDate!) : null,
+      showRefrigerate: _keepRefrigerated,
+      showFrozen: _keepFrozen,
+      showDark: _lightSensitive,
+      lowStockEnabled: _lowStockAlert,
+      lowStockThreshold: threshold,
+    );
           // Left badge icon
           Container(
             width: 36,
@@ -568,18 +573,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
     final mq = MediaQuery.of(context);
 
-    // Measure floating summary height to offset scroll content
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _summaryKey.currentContext;
-      if (ctx != null) {
-        final box = ctx.findRenderObject() as RenderBox?;
-        final h = box?.size.height ?? 0;
-        if (h > 0 && (h - _summaryHeight).abs() > 1) {
-          if (mounted) setState(() => _summaryHeight = h);
-        }
-      }
-    });
-
     // Derive validation messages for helper rows
     final theme = Theme.of(context);
     String? nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
@@ -653,7 +646,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
       body: Stack(
         children: [
-          // Floating summary card hugging the bottom of the app bar
+          // Scrollable content first
           SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
             child: Form(
@@ -661,7 +654,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: (_summaryHeight > 0 ? _summaryHeight : 60) + 8),
+                  const SizedBox(height: _summarySpacer),
                   _section('General', [
                     _rowLabelField(
                       label: 'Name *',
@@ -1233,11 +1226,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               ),
             ),
           ),
+          // Floating summary card pinned below app bar; overlays content without shifting it
           Positioned(
             left: 10,
             right: 10,
             top: 8,
-            child: IgnorePointer(child: _floatingSummaryCard(context)),
+            child: IgnorePointer(child: _floatingSummary(context)),
           ),
         ],
       ),
