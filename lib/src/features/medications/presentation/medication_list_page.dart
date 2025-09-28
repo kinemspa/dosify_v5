@@ -165,7 +165,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildToolbar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
           // Search section - expands to layout button when activated
@@ -554,8 +554,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         );
       case _MedView.large:
         // Large view uses summary-style neutral cards.
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
+return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),

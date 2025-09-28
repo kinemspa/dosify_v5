@@ -284,14 +284,13 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 36),
+          SizedBox(
+            width: labelWidth,
+            height: 36,
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 label,
-                softWrap: true,
-                maxLines: 2,
                 textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,

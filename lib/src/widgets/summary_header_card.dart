@@ -234,9 +234,9 @@ class SummaryHeaderCard extends StatelessWidget {
                                     Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
                                     const SizedBox(width: 4),
                                   ],
-                                  RichText(
-                                    text: TextSpan(
-                                      style: theme.textTheme.bodySmall?.copyWith(
+                      RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(color: neutral ? cs.onSurface : fg),
                                     color: lowStockActive
                                             ? Colors.amber.shade200
                                             : fg.withOpacity(0.9),
@@ -264,14 +264,14 @@ class SummaryHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (showRefrigerate)
-                            Icon(Icons.kitchen, size: 18, color: fg),
+                            Icon(Icons.kitchen, size: 18, color: neutral ? cs.onSurfaceVariant : fg),
                           if (showFrozen) ...[
                             if (showRefrigerate) const SizedBox(width: 6),
-                            Icon(Icons.ac_unit, size: 18, color: fg),
+                            Icon(Icons.ac_unit, size: 18, color: neutral ? cs.onSurfaceVariant : fg),
                           ],
                           if (showDark) ...[
                             if (showRefrigerate || showFrozen) const SizedBox(width: 6),
-                            Icon(Icons.dark_mode, size: 18, color: fg),
+                            Icon(Icons.dark_mode, size: 18, color: neutral ? cs.onSurfaceVariant : fg),
                           ],
                         ],
                       ),
