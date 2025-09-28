@@ -1462,16 +1462,14 @@ children: [
               ),
             ),
           ),
+          // Floating summary pinned beneath app bar
+          Positioned(
+            left: 10,
+            right: 10,
+            top: 8,
+            child: IgnorePointer(child: _floatingSummaryCard()),
+          ),
         ],
-      ),
-      // Floating summary pinned beneath app bar
-      Positioned(
-        left: 10,
-        right: 10,
-        top: 8,
-        child: IgnorePointer(child: _floatingSummaryCard()),
-      ),
-      ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
