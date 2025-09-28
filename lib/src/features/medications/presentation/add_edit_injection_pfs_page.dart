@@ -457,10 +457,6 @@ class _AddEditInjectionPfsPageState
             crossAxisAlignment: CrossAxisAlignment.start,
 children: [
               SizedBox(height: _summaryHeight + 10),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
               const SizedBox(height: 8),
               SectionFormCard(
                 title: 'General',
@@ -978,6 +974,8 @@ children: [
               ),
             ],
           ),
+        ),
+        ),
           // Floating summary pinned below app bar
           Positioned(
             left: 16,
