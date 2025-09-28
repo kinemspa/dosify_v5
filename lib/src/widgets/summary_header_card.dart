@@ -174,7 +174,6 @@ class SummaryHeaderCard extends StatelessWidget {
                                         color: lowStockActive
                                             ? Colors.amber.shade200
                                             : cs.onPrimary.withOpacity(0.9),
-                                        fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                       children: [
                                         TextSpan(text: lowStockActive ? 'Low stock: ' : 'Alert at '),
