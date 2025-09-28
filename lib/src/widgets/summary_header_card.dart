@@ -110,17 +110,16 @@ class SummaryHeaderCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                // Bottom row: left side (strength + stock + low-stock), right side (storage icons)
+                // Bottom area: left side (multi-line details), right side (storage icons)
                 const SizedBox(height: 2),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // Left cluster uses Wrap for responsive flow
+                    // Left cluster: each item on its own line for clarity
                     Expanded(
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 8,
-                        runSpacing: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty)
                             RichText(
@@ -137,51 +136,56 @@ class SummaryHeaderCard extends StatelessWidget {
                               ),
                             ),
                           if (stockCurrent != null && (stockUnitLabel ?? '').isNotEmpty)
-                            RichText(
-                              text: TextSpan(
-                                style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
-                                children: [
-                                  TextSpan(
-                                    text: _fmt2(stockCurrent),
-                                    style: const TextStyle(fontWeight: FontWeight.w800),
-                                  ),
-                                  if (stockInitial != null) ...[
-                                    const TextSpan(text: '/'),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: RichText(
+                                text: TextSpan(
+                                  style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                                  children: [
                                     TextSpan(
-                                      text: _fmt2(stockInitial),
+                                      text: _fmt2(stockCurrent),
                                       style: const TextStyle(fontWeight: FontWeight.w800),
                                     ),
+                                    if (stockInitial != null) ...[
+                                      const TextSpan(text: '/'),
+                                      TextSpan(
+                                        text: _fmt2(stockInitial),
+                                        style: const TextStyle(fontWeight: FontWeight.w800),
+                                      ),
+                                    ],
+                                    TextSpan(text: ' $stockUnitLabel remain'),
                                   ],
-                                  TextSpan(text: ' $stockUnitLabel remain'),
-                                ],
+                                ),
                               ),
                             ),
                           if (lowStockEnabled && lowStockThreshold != null)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (lowStockActive)
-                                  ...[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (lowStockActive) ...[
                                     Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
-                                    const SizedBox(width: 2),
+                                    const SizedBox(width: 4),
                                   ],
-                                Text(
-                                  lowStockActive
-                                      ? 'Low stock (≤ ${_fmt2(lowStockThreshold)})'
-                                      : 'Alert at ≤ ${_fmt2(lowStockThreshold)}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: lowStockActive
-                                        ? Colors.amber.shade200
-                                        : cs.onPrimary.withOpacity(0.9),
-                                    fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
+                                  Text(
+                                    lowStockActive
+                                        ? 'Low stock: ${_fmt2(lowStockThreshold)} or fewer remain'
+                                        : 'Alert when ${_fmt2(lowStockThreshold)} or fewer remain',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: lowStockActive
+                                          ? Colors.amber.shade200
+                                          : cs.onPrimary.withOpacity(0.9),
+                                      fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                         ],
                       ),
                     ),
-                    // Right cluster: storage icons inline on the same bottom row
+                    // Right cluster: storage icons inline on the same bottom row, aligned bottom-right
                     if (showRefrigerate || showFrozen || showDark) ...[
                       const SizedBox(width: 8),
                       Row(
@@ -202,28 +206,6 @@ class SummaryHeaderCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                // Bottom-right storage icons
-                if (showRefrigerate || showFrozen || showDark) ...[
-                  const SizedBox(height: 4),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (showRefrigerate)
-                          Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
-                        if (showFrozen) ...[
-                          if (showRefrigerate) const SizedBox(width: 6),
-                          Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
-                        ],
-                        if (showDark) ...[
-                          if (showRefrigerate || showFrozen) const SizedBox(width: 6),
-                          Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
