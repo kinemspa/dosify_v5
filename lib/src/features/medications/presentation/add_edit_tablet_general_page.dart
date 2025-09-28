@@ -25,6 +25,7 @@ class AddEditTabletGeneralPage extends StatefulWidget {
 
 class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollCtrl = ScrollController();
 
   // Dynamic spacer height measured from the floating summary card
   final GlobalKey _summaryKey = GlobalKey();
@@ -94,6 +95,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
 
   @override
   void dispose() {
+    _scrollCtrl.dispose();
     _nameCtrl.dispose();
     _manufacturerCtrl.dispose();
     _descriptionCtrl.dispose();
@@ -488,6 +490,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         children: [
           // Scrollable content first
           SingleChildScrollView(
+            controller: _scrollCtrl,
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
             child: Form(
               key: _formKey,
@@ -1176,11 +1179,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(
-          'Confirm medication',
-          style: Theme.of(
-            ctx,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        title: Center(
+          child: Text(
+            'Confirm medication',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              ctx,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
         ),
         actionsAlignment: MainAxisAlignment.center,
         content: SingleChildScrollView(child: _buildConfirmContent(ctx)),

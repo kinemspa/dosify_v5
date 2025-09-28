@@ -19,6 +19,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.showDark = false,
     this.lowStockEnabled = false,
     this.lowStockThreshold,
+    this.neutral = false,
   });
 
   final String title;
@@ -35,6 +36,8 @@ class SummaryHeaderCard extends StatelessWidget {
   final bool showDark;
   final bool lowStockEnabled;
   final double? lowStockThreshold;
+  // When true, renders with soft surface background and onSurface text colors (for medication list cards).
+  final bool neutral;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -89,6 +92,9 @@ class SummaryHeaderCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final bool lowStockActive = lowStockEnabled && stockCurrent != null && lowStockThreshold != null && stockCurrent! <= lowStockThreshold!;
 
+    final Color bg = neutral ? cs.surface : cs.primary;
+    final Color fg = neutral ? cs.onSurface : cs.onPrimary;
+
     // Resolve localized expiry text if a DateTime was provided
     String? expDisplay;
     if (expiryDate != null) {
@@ -99,7 +105,7 @@ class SummaryHeaderCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.primary,
+        color: bg,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -110,10 +116,10 @@ class SummaryHeaderCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: cs.onPrimary.withOpacity(0.15),
+              color: (neutral ? cs.primary : cs.onPrimary).withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.medication, color: cs.onPrimary),
+            child: Icon(Icons.medication, color: neutral ? cs.primary : fg),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -130,7 +136,7 @@ class SummaryHeaderCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: cs.onPrimary,
+                          color: fg,
                         ),
                       ),
                     ),
@@ -139,7 +145,7 @@ class SummaryHeaderCard extends StatelessWidget {
                     if (expDisplay != null && expDisplay.isNotEmpty)
                       Text(
                         'Exp: $expDisplay',
-                        style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                        style: theme.textTheme.bodySmall?.copyWith(color: fg),
                       ),
                   ],
                 ),
@@ -150,7 +156,7 @@ class SummaryHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: cs.onPrimary.withOpacity(0.9),
+                      color: fg.withOpacity(0.9),
                     ),
                   ),
                 ],
@@ -168,7 +174,7 @@ class SummaryHeaderCard extends StatelessWidget {
                           if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty)
                             RichText(
                               text: TextSpan(
-                                style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                                style: theme.textTheme.bodySmall?.copyWith(color: fg),
                                 children: [
                                   TextSpan(
                                     text: _fmt2(strengthValue),
@@ -215,9 +221,9 @@ class SummaryHeaderCard extends StatelessWidget {
                                   RichText(
                                     text: TextSpan(
                                       style: theme.textTheme.bodySmall?.copyWith(
-                                        color: lowStockActive
+                                    color: lowStockActive
                                             ? Colors.amber.shade200
-                                            : cs.onPrimary.withOpacity(0.9),
+                                            : fg.withOpacity(0.9),
                                       ),
                                       children: [
                                         TextSpan(text: lowStockActive ? 'Low stock: ' : 'Alert at '),
@@ -242,14 +248,14 @@ class SummaryHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (showRefrigerate)
-                            Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
+                            Icon(Icons.kitchen, size: 18, color: fg),
                           if (showFrozen) ...[
                             if (showRefrigerate) const SizedBox(width: 6),
-                            Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
+                            Icon(Icons.ac_unit, size: 18, color: fg),
                           ],
                           if (showDark) ...[
                             if (showRefrigerate || showFrozen) const SizedBox(width: 6),
-                            Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
+                            Icon(Icons.dark_mode, size: 18, color: fg),
                           ],
                         ],
                       ),
