@@ -1311,6 +1311,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       children: [
         row('Name', _nameCtrl.text.trim()),
         row('Manufacturer', _manufacturerCtrl.text.trim()),
+        row('Description', _descriptionCtrl.text.trim()),
+        row('Notes', _notesCtrl.text.trim()),
         row('Strength', strengthText),
         row(
           'Stock',
@@ -1320,6 +1322,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     : _stockCtrl.text.trim() + ' tablets')
               : inventoryText,
         ),
+        row('Quantity unit', 'tablets'),
         row(
           'Low stock alerts',
           _lowStockAlert
@@ -1330,6 +1333,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         row('Batch', _batchNumberCtrl.text.trim()),
         row('Storage location', _storageLocationCtrl.text.trim()),
         row('Requires refrigeration', _keepRefrigerated ? 'Yes' : 'No'),
+        row('Keep frozen', _keepFrozen ? 'Yes' : 'No'),
+        row('Dark storage', _lightSensitive ? 'Yes' : 'No'),
         row('Storage instructions', _storageInstructionsCtrl.text.trim()),
       ],
     );

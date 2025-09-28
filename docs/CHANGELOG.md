@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file. Dates in UT
 - Add Tablet: Summary UX refinements
   - Increase top spacer to 120 so the General card can fully sit below the pinned summary at top-of-scroll.
   - Keep expiry at top-right with locale-aware formatting (MaterialLocalizations). Move storage icons (refrigerate/frozen/dark) to the bottom row, aligned to the right, sharing the same row as strength/stock/low-stock text.
+- Widgets: SummaryHeaderCard is a reusable widget with a factory constructor fromMedication for easy reuse across screens.
+- Dialog: Confirmation dialog now lists every option from the Add Tablet screen, including Description, Notes, Quantity unit, Keep frozen, Dark storage.
 - Tablet editor: General, Strength, Inventory, Storage sections implemented with hybrid layout (40px controls)
 - UI polish: label vertical centering, fake vendor hints, dropdown styling, reduced save bar height
 - Save flow: pre-save confirmation dialog and Hive persistence for Tablet via MedicationRepository

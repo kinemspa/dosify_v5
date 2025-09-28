@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
 class SummaryHeaderCard extends StatelessWidget {
   const SummaryHeaderCard({
@@ -37,7 +38,49 @@ class SummaryHeaderCard extends StatelessWidget {
   String _fmt2(double? v) {
     if (v == null) return '-';
     return v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+  }
+
+  // Convenience: build a header card directly from a Medication model
+  factory SummaryHeaderCard.fromMedication(Medication m) {
+    String unitLabel;
+    switch (m.strengthUnit) {
+      case Unit.mcg:
+        unitLabel = 'mcg';
+        break;
+      case Unit.mg:
+        unitLabel = 'mg';
+        break;
+      case Unit.g:
+        unitLabel = 'g';
+        break;
+      default:
+        unitLabel = m.strengthUnit.name;
     }
+    String stockUnitLabel;
+    switch (m.stockUnit) {
+      case StockUnit.tablets:
+        stockUnitLabel = 'tablets';
+        break;
+      default:
+        stockUnitLabel = m.stockUnit.name;
+    }
+    final showDark = (m.storageInstructions?.toLowerCase().contains('light') ?? false);
+    return SummaryHeaderCard(
+      title: m.name,
+      manufacturer: m.manufacturer,
+      strengthValue: m.strengthValue,
+      strengthUnitLabel: unitLabel,
+      stockCurrent: m.stockValue,
+      stockInitial: m.initialStockValue ?? m.stockValue,
+      stockUnitLabel: stockUnitLabel,
+      expiryDate: m.expiry,
+      showRefrigerate: m.requiresRefrigeration,
+      showFrozen: false, // not persisted in model currently
+      showDark: showDark,
+      lowStockEnabled: m.lowStockEnabled,
+      lowStockThreshold: m.lowStockThreshold,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
