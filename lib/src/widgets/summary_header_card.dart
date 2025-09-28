@@ -96,7 +96,7 @@ class SummaryHeaderCard extends StatelessWidget {
     final cs = theme.colorScheme;
     final bool lowStockActive = lowStockEnabled && stockCurrent != null && lowStockThreshold != null && stockCurrent! <= lowStockThreshold!;
 
-    final Color bg = neutral ? cs.surface : cs.primary;
+    final Color bg = neutral ? cs.surfaceContainerLowest : cs.primary;
     final Color fg = neutral ? cs.onSurface : cs.onPrimary;
 
     // Resolve localized expiry text if a DateTime was provided
@@ -112,7 +112,16 @@ class SummaryHeaderCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(12),
         border: (neutral && outlined)
-            ? Border.all(color: cs.outlineVariant)
+            ? Border.all(color: cs.outlineVariant.withOpacity(0.5), width: 0.75)
+            : null,
+        boxShadow: neutral
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ]
             : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),

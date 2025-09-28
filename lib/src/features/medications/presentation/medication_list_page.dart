@@ -97,6 +97,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           var items = _getFilteredAndSortedMedications(
             b.values.toList(growable: false),
           );
+          // Ensure initial stock values so large cards can show current/initial remain
+          _ensureInitialStockValues(items);
 
           // Show initial state if no medications at all, or filtered state if search has no results
           if (items.isEmpty) {
