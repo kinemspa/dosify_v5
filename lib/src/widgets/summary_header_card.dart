@@ -110,22 +110,6 @@ class SummaryHeaderCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  RichText(
-                    text: TextSpan(
-                      style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
-                      children: [
-                        TextSpan(
-                          text: _fmt2(strengthValue),
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        TextSpan(text: ' $strengthUnitLabel '),
-                        const TextSpan(text: 'per tablet'),
-                      ],
-                    ),
-                  ),
-                ],
                 // Bottom row: left side (strength + stock + low-stock), right side (storage icons)
                 const SizedBox(height: 2),
                 Row(
@@ -172,19 +156,24 @@ class SummaryHeaderCard extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          if (lowStockActive)
+                          if (lowStockEnabled && lowStockThreshold != null)
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
-                                const SizedBox(width: 2),
+                                if (lowStockActive)
+                                  ...[
+                                    Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
+                                    const SizedBox(width: 2),
+                                  ],
                                 Text(
-                                  lowStockThreshold != null
+                                  lowStockActive
                                       ? 'Low stock (≤ ${_fmt2(lowStockThreshold)})'
-                                      : 'Low stock',
+                                      : 'Alert at ≤ ${_fmt2(lowStockThreshold)}',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.amber.shade200,
-                                    fontWeight: FontWeight.w700,
+                                    color: lowStockActive
+                                        ? Colors.amber.shade200
+                                        : cs.onPrimary.withOpacity(0.9),
+                                    fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
                                   ),
                                 ),
                               ],
