@@ -360,70 +360,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   }
 
   Widget _floatingSummary(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
-    final strengthTxt = _strengthValueCtrl.text.trim();
-    final double? strengthVal = double.tryParse(strengthTxt);
-    final stockTxt = _stockCtrl.text.trim();
-    final double? stockVal = double.tryParse(stockTxt);
+    final double? strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
+    final double? stockVal = double.tryParse(_stockCtrl.text.trim());
     final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
     final unit = _unitLabel(_strengthUnit);
-    final stockUnit = 'tablets';
     final headerTitle = name.isEmpty ? 'Add Tablet' : name;
-
-    final thresholdTxt = _lowStockThresholdCtrl.text.trim();
-    final double? threshold = double.tryParse(thresholdTxt);
-    final bool lowStockActive = _lowStockAlert && stockVal != null && threshold != null && stockVal <= threshold;
-
-    Widget _pill(String text) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: cs.onPrimary.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          text,
-          style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
-        ),
-      );
-    }
-
-    Widget _expiryPill(String dateText) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: cs.onPrimary.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-              decoration: BoxDecoration(
-                color: cs.onPrimary.withOpacity(0.25),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                'EXP',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: cs.onPrimary,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              dateText,
-              style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
-            ),
-          ],
-        ),
-      );
-    }
+    final double? threshold = double.tryParse(_lowStockThresholdCtrl.text.trim());
 
     return SummaryHeaderCard(
       title: headerTitle,
@@ -439,131 +383,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockAlert,
       lowStockThreshold: threshold,
-    );
-          // Left badge icon
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: cs.onPrimary.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.medication, color: cs.onPrimary),
-          ),
-          const SizedBox(width: 12),
-          // Title + lines
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title row with right-side status icons/pills
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        headerTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: cs.onPrimary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Right status cluster
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        if (_expiryDate != null) _expiryPill(_fmtDate(_expiryDate!)),
-                        if (_keepRefrigerated)
-                          Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
-                        if (_keepFrozen)
-                          Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
-                        if (_lightSensitive)
-                          Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                if (manufacturer.isNotEmpty)
-                  Text(
-                    manufacturer,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: cs.onPrimary.withOpacity(0.9),
-                    ),
-                  ),
-                if (strengthVal != null && strengthVal > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: RichText(
-                      text: TextSpan(
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onPrimary,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: fmt2(strengthVal),
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                          TextSpan(text: ' $unit '),
-                          const TextSpan(text: 'per tablet'),
-                        ],
-                      ),
-                    ),
-                  ),
-                if (stockVal != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Row(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cs.onPrimary,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: fmt2(stockVal),
-                                style: const TextStyle(fontWeight: FontWeight.w800),
-                              ),
-                              const TextSpan(text: '/'),
-                              TextSpan(
-                                text: fmt2(initialStock),
-                                style: const TextStyle(fontWeight: FontWeight.w800),
-                              ),
-                              TextSpan(text: ' $stockUnit remain'),
-                            ],
-                          ),
-                        ),
-                        if (lowStockActive) ...[
-                          const SizedBox(width: 8),
-                          Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
-                          const SizedBox(width: 2),
-                          Text(
-                            threshold != null
-                                ? 'Low stock (≤ ${fmt2(threshold)})'
-                                : 'Low stock',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.amber.shade200,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

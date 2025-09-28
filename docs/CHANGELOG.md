@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- Add Tablet: Floating SummaryHeaderCard cleaned up and fully adopted.
+  - Removed legacy/unreachable UI from _floatingSummary; now uses reusable SummaryHeaderCard exclusively.
+  - Expiry shown as plain text ("Exp: yyyy-mm-dd") in the status cluster (no pill).
+  - Low stock banner reliably appears when enabled and stock ≤ threshold, showing the threshold value.
+  - Overlay remains pinned under the app bar and does not shift layout while typing (fixed spacer retained).
 - Tablet editor: General, Strength, Inventory, Storage sections implemented with hybrid layout (40px controls)
 - UI polish: label vertical centering, fake vendor hints, dropdown styling, reduced save bar height
 - Save flow: pre-save confirmation dialog and Hive persistence for Tablet via MedicationRepository
