@@ -393,16 +393,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   String _stockStatusShortTextFor(Medication m) {
-    final baseline = m.lowStockThreshold;
-    bool isCountUnit =
+    final isCountUnit =
         m.stockUnit == StockUnit.preFilledSyringes ||
         m.stockUnit == StockUnit.singleDoseVials ||
         m.stockUnit == StockUnit.multiDoseVials ||
         m.stockUnit == StockUnit.tablets ||
         m.stockUnit == StockUnit.capsules;
-    if (baseline != null && baseline > 0 && isCountUnit) {
+    if (isCountUnit) {
       final current = m.stockValue.floor();
-      final total = baseline.ceil();
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceil()
+          : current;
       return '$current/$total ${_stockUnitLabel(m.stockUnit)}';
     }
     return '${fmt2(m.stockValue)} ${_stockUnitLabel(m.stockUnit)}';

@@ -1252,9 +1252,16 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             ? null
             : _storageLocationCtrl.text.trim(),
         requiresRefrigeration: _keepRefrigerated,
-        storageInstructions: _storageInstructionsCtrl.text.trim().isNotEmpty
-            ? _storageInstructionsCtrl.text.trim()
-            : (_lightSensitive ? 'Protect from light' : null),
+        storageInstructions: (() {
+          final parts = <String>[];
+          final s = _storageInstructionsCtrl.text.trim();
+          if (s.isNotEmpty) parts.add(s);
+          if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen')))
+            parts.add('Keep frozen');
+          if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light')))
+            parts.add('Protect from light');
+          return parts.isEmpty ? null : parts.join('. ');
+        })(),
         initialStockValue: initialStock,
       );
       await repo.upsert(med);

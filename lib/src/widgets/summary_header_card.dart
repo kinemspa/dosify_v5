@@ -21,6 +21,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.lowStockThreshold,
     this.neutral = false,
     this.outlined = false,
+    this.leadingIcon,
   });
 
   final String title;
@@ -40,6 +41,7 @@ class SummaryHeaderCard extends StatelessWidget {
   // When true, renders with soft surface background and onSurface text colors (for medication list cards).
   final bool neutral;
   final bool outlined;
+  final IconData? leadingIcon;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -72,6 +74,17 @@ class SummaryHeaderCard extends StatelessWidget {
     }
     final showDark = (m.storageInstructions?.toLowerCase().contains('light') ?? false);
     return SummaryHeaderCard(
+   case MedicationForm.tablet:
+          return Icons.medication;
+        case MedicationForm.capsule:
+          return Icons.bubble_chart;
+        case MedicationForm.injectionPreFilledSyringe:
+        case MedicationForm.injectionSingleDoseVial:
+        case MedicationForm.injectionMultiDoseVial:
+          return Icons.vaccines;
+      }
+    }();
+    return SummaryHeaderCard(
       title: m.name,
       manufacturer: m.manufacturer,
       strengthValue: m.strengthValue,
@@ -87,6 +100,7 @@ class SummaryHeaderCard extends StatelessWidget {
       lowStockThreshold: m.lowStockThreshold,
       neutral: neutral,
       outlined: outlined,
+      leadingIcon: icon,
     );
   }
 
@@ -135,7 +149,7 @@ class SummaryHeaderCard extends StatelessWidget {
               color: (neutral ? cs.primary : cs.onPrimary).withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.medication, color: neutral ? cs.primary : fg),
+            child: Icon(leadingIcon ?? Icons.medication, color: neutral ? cs.primary : fg),
           ),
           const SizedBox(width: 12),
           Expanded(
