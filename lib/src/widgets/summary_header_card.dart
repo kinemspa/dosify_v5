@@ -168,15 +168,22 @@ class SummaryHeaderCard extends StatelessWidget {
                                     Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
                                     const SizedBox(width: 4),
                                   ],
-                                  Text(
-                                    lowStockActive
-                                        ? 'Low stock: ${_fmt2(lowStockThreshold)} or fewer remain'
-                                        : 'Alert when ${_fmt2(lowStockThreshold)} or fewer remain',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: lowStockActive
-                                          ? Colors.amber.shade200
-                                          : cs.onPrimary.withOpacity(0.9),
-                                      fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
+                                  RichText(
+                                    text: TextSpan(
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: lowStockActive
+                                            ? Colors.amber.shade200
+                                            : cs.onPrimary.withOpacity(0.9),
+                                        fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
+                                      ),
+                                      children: [
+                                        TextSpan(text: lowStockActive ? 'Low stock: ' : 'Alert at '),
+                                        TextSpan(
+                                          text: _fmt2(lowStockThreshold),
+                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                        ),
+                                        const TextSpan(text: ' left'),
+                                      ],
                                     ),
                                   ),
                                 ],
