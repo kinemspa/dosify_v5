@@ -508,12 +508,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       body: Stack(
         children: [
           // Floating summary card hugging the bottom of the app bar
-          Positioned(
-            left: 10,
-            right: 10,
-            top: 8,
-            child: _floatingSummaryCard(context),
-          ),
           SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
             child: Form(
@@ -1092,6 +1086,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 ],
               ),
             ),
+          ),
+          Positioned(
+            left: 10,
+            right: 10,
+            top: 8,
+            child: IgnorePointer(child: _floatingSummaryCard(context)),
           ),
         ],
       ),
