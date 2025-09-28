@@ -959,6 +959,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             label: 'Batch No.',
                             hint: 'Enter batch number',
                           ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -975,6 +978,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           decoration: _dec(
                             label: 'Location',
                             hint: 'eg. Bathroom cabinet',
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           onChanged: (_) => setState(() {}),
                         ),

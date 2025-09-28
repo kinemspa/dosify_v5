@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -24,6 +25,10 @@ class AddEditCapsulePage extends ConsumerStatefulWidget {
 }
 
 class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
+  // Dynamic floating summary spacer
+  final GlobalKey _summaryKey = GlobalKey();
+  double _summaryHeight = 0;
+  final ScrollController _scrollCtrl = ScrollController();
   // Gating for helper-row validation (hide red until interaction)
   bool _submitted = false;
   bool _touchedName = false;
@@ -134,8 +139,50 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     if (_lowStockCtrl.text.isEmpty) _lowStockCtrl.text = '0';
   }
 
+  void _updateSummaryHeight() {
+    final ctx = _summaryKey.currentContext;
+    if (ctx != null) {
+      final rb = ctx.findRenderObject();
+      if (rb is RenderBox) {
+        final h = rb.size.height;
+        if (h != _summaryHeight && h > 0) setState(() => _summaryHeight = h);
+      }
+    }
+  }
+
+  SummaryHeaderCard _floatingSummaryCard() {
+    final name = _nameCtrl.text.trim();
+    final manufacturer = _manufacturerCtrl.text.trim();
+    final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
+    final stockVal = double.tryParse(_stockValueCtrl.text.trim());
+    final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
+    String unitLabel = _unitLabel(_strengthUnit);
+    final threshold = double.tryParse(_lowStockCtrl.text.trim());
+    final headerTitle = name.isEmpty ? 'Add Capsule' : name;
+
+    final card = SummaryHeaderCard(
+      key: _summaryKey,
+      title: headerTitle,
+      manufacturer: manufacturer.isEmpty ? null : manufacturer,
+      strengthValue: strengthVal,
+      strengthUnitLabel: unitLabel,
+      stockCurrent: stockVal,
+      stockInitial: initialStock,
+      stockUnitLabel: 'capsules',
+      expiryDate: _expiry,
+      showRefrigerate: _requiresFridge,
+      showFrozen: _keepFrozen,
+      showDark: _lightSensitive,
+      lowStockEnabled: _lowStockEnabled,
+      lowStockThreshold: threshold,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
+    return card;
+  }
+
   @override
   void dispose() {
+    _scrollCtrl.dispose();
     _nameCtrl.dispose();
     _manufacturerCtrl.dispose();
     _descriptionCtrl.dispose();
@@ -560,7 +607,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Medication'),
+        title: Center(
+          child: Text('Confirm Medication', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        ),
         actionsAlignment: MainAxisAlignment.center,
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -868,12 +917,14 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       body: Stack(
         children: [
           SingleChildScrollView(
+            controller: _scrollCtrl,
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+children: [
+                  SizedBox(height: _summaryHeight + 10),
                   _section('General', [
                     _rowLabelField(
                       label: 'Name *',
@@ -1274,7 +1325,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           label: Text(
                             _expiry == null
                                 ? 'Select date'
-                                : DateFormat.yMd().format(_expiry!),
+                                : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
                           ),
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(120, kFieldHeight),
@@ -1412,6 +1463,15 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
             ),
           ),
         ],
+      ),
+      // Floating summary pinned beneath app bar
+      Positioned(
+        left: 10,
+        right: 10,
+        top: 8,
+        child: IgnorePointer(child: _floatingSummaryCard()),
+      ),
+      ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(

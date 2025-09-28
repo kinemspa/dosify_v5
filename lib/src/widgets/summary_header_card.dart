@@ -45,7 +45,7 @@ class SummaryHeaderCard extends StatelessWidget {
   }
 
   // Convenience: build a header card directly from a Medication model
-  factory SummaryHeaderCard.fromMedication(Medication m) {
+  factory SummaryHeaderCard.fromMedication(Medication m, {bool neutral = false}) {
     String unitLabel;
     switch (m.strengthUnit) {
       case Unit.mcg:
@@ -83,6 +83,7 @@ class SummaryHeaderCard extends StatelessWidget {
       showDark: showDark,
       lowStockEnabled: m.lowStockEnabled,
       lowStockThreshold: m.lowStockThreshold,
+      neutral: neutral,
     );
   }
 

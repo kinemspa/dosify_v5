@@ -9,6 +9,7 @@ import '../../../core/utils/format.dart';
 import '../../../widgets/app_header.dart';
 import '../domain/medication.dart';
 import '../domain/enums.dart';
+import '../../../widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 enum _MedView { list, compact, large }
@@ -550,15 +551,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
         );
       case _MedView.large:
-        // Large view uses fixed-height cards for consistent visual rhythm.
+        // Large view uses summary-style neutral cards.
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => SizedBox(
-            height: _kLargeCardHeight,
-            child: _MedCard(m: items[i], dense: false),
-          ),
+          itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
         );
     }
   }
@@ -571,6 +569,20 @@ class _MedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!dense) {
+      return Card(
+        elevation: 2,
+        child: InkWell(
+          onTap: () => context.push('/medications/${m.id}'),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+child: SummaryHeaderCard.fromMedication(m, neutral: true),
+          ),
+        ),
+      );
+    }
+
+    // Fallback: keep existing dense implementation
     final theme = Theme.of(context);
     final isLowStock =
         m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
@@ -591,91 +603,37 @@ class _MedCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header: Name, Type, Status (hidden for dense)
-                  if (!dense)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left: gradient logo/avatar (moved from body to header)
-                        Container(
-                          width: dense ? 24 : 36,
-                          height: dense ? 24 : 36,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                theme.colorScheme.primaryContainer,
-                                theme.colorScheme.primary,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(dense ? 8 : 12),
+                  // Information grid - simplified for dense cards
+                  // Ultra-compact dense layout: name + single summary line
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Line 1: Name
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 6, right: 8),
+                        child: Text(
+                          m.name,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            height: 1.0,
+                            fontSize: 13,
                           ),
-                          child: Icon(
-                            _getFormIcon(m.form),
-                            color: Colors.white,
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (!dense)
-                                // Name
-                                Text(
-                                  m.name,
-                                  style: dense
-                                      ? theme.textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        )
-                                      : theme.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              // Manufacturer under name
-                              if (!dense &&
-                                  m.manufacturer?.isNotEmpty == true) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  m.manufacturer!,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                              if (!dense) const SizedBox(height: 2),
-                            ],
-                          ),
-                        ),
-                        // Status indicators
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            // Icons + Chip row on the right
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
+                      ),
+                      const SizedBox(height: 3),
+                      // Line 2-4: Chip row, then strength, then remaining stock
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                if (m.requiresRefrigeration)
-                                  Icon(
-                                    Icons.ac_unit,
-                                    size: dense ? 12 : 14,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                if (isLowStock)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 4),
-                                    child: Icon(
-                                      Icons.warning,
-                                      size: dense ? 12 : 14,
-                                      color: theme.colorScheme.error,
-                                    ),
-                                  ),
-                                const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -686,183 +644,66 @@ class _MedCard extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    _getFormLabel(m.form),
+                                    _getFormAbbr(m.form),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color:
-                                          theme.colorScheme.onPrimaryContainer,
-                                      fontSize: 10,
+                                      color: theme.colorScheme.onPrimaryContainer,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
+                                      height: 1.0,
                                     ),
                                   ),
                                 ),
+                                if (m.expiry != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: Text(
+                                      _formatDateDayMonth(m.expiry!),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: isExpiringSoon
+                                            ? theme.colorScheme.error
+                                            : theme.colorScheme.onSurfaceVariant,
+                                        height: 1.0,
+                                        fontSize: 9,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
                               ],
                             ),
-                            if (!dense && m.expiry != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Text(
-                                  'Expires: ${_formatDateDdMmYy(m.expiry!)}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: isExpiringSoon
-                                        ? theme.colorScheme.error
-                                        : theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                  const SizedBox(height: 4),
-
-                  // Information grid - simplified for dense cards
-                  if (dense)
-                    // Ultra-compact dense layout: name + single summary line
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Line 1: Name
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Text(
-                            m.name,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              height: 1.0,
-                              fontSize: 13,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        // Line 2-4: Chip row, then strength, then remaining stock
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primaryContainer,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      _getFormAbbr(m.form),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onPrimaryContainer,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            height: 1.0,
-                                          ),
-                                    ),
-                                  ),
-                                  if (m.expiry != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: Text(
-                                        _formatDateDayMonth(m.expiry!),
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                              color: isExpiringSoon
-                                                  ? theme.colorScheme.error
-                                                  : theme
-                                                        .colorScheme
-                                                        .onSurfaceVariant,
-                                              height: 1.0,
-                                              fontSize: 9,
-                                            ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Text(
-                                '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
-                                  height: 1.0,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Text(
-                                _stockStatusShortText(),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: _stockStatusColor(theme),
-                                  height: 1.0,
-                                  fontSize: 9,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  if (!dense)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Primary metric line
-                          Text(
-                            '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)} ${_getFormLabelPlural(m.form)}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: theme.colorScheme.primary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
-                          // Secondary line: stock and expiry
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  _stockStatusText(),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: _stockStatusColor(theme),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                                height: 1.0,
                               ),
-                            ],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const SizedBox(height: 2),
-                          _buildScheduleLine(context),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              _stockStatusShortText(),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: _stockStatusColor(theme),
+                                height: 1.0,
+                                fontSize: 9,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
-                    ),
+                    ],
+                  ),
                 ],
               ),
             ),
