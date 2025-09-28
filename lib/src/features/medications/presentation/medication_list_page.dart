@@ -570,14 +570,11 @@ class _MedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!dense) {
-      return Card(
-        elevation: 2,
-        child: InkWell(
-          onTap: () => context.push('/medications/${m.id}'),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-child: SummaryHeaderCard.fromMedication(m, neutral: true),
-          ),
+      return GestureDetector(
+        onTap: () => context.push('/medications/${m.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
         ),
       );
     }

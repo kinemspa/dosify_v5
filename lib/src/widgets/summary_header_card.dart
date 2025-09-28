@@ -20,6 +20,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.lowStockEnabled = false,
     this.lowStockThreshold,
     this.neutral = false,
+    this.outlined = false,
   });
 
   final String title;
@@ -38,6 +39,7 @@ class SummaryHeaderCard extends StatelessWidget {
   final double? lowStockThreshold;
   // When true, renders with soft surface background and onSurface text colors (for medication list cards).
   final bool neutral;
+  final bool outlined;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -45,7 +47,7 @@ class SummaryHeaderCard extends StatelessWidget {
   }
 
   // Convenience: build a header card directly from a Medication model
-  factory SummaryHeaderCard.fromMedication(Medication m, {bool neutral = false}) {
+  factory SummaryHeaderCard.fromMedication(Medication m, {bool neutral = false, bool outlined = false}) {
     String unitLabel;
     switch (m.strengthUnit) {
       case Unit.mcg:
@@ -84,6 +86,7 @@ class SummaryHeaderCard extends StatelessWidget {
       lowStockEnabled: m.lowStockEnabled,
       lowStockThreshold: m.lowStockThreshold,
       neutral: neutral,
+      outlined: outlined,
     );
   }
 
@@ -108,6 +111,9 @@ class SummaryHeaderCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(12),
+        border: (neutral && outlined)
+            ? Border.all(color: cs.outlineVariant)
+            : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(

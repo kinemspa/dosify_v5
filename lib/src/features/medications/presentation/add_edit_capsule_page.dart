@@ -10,6 +10,7 @@ import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -299,61 +300,11 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   }
 
   Widget _section(String title, List<Widget> children, {Widget? trailing}) {
-    final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
-    return Card(
-      elevation: 2,
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 2, bottom: 4, right: 2),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  if (trailing != null)
-                    Flexible(
-                      child: DefaultTextStyle(
-                        style: theme.textTheme.bodySmall!.copyWith(
-                          color: theme.colorScheme.primary.withOpacity(0.50),
-                          fontWeight: FontWeight.w600,
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: (trailing is Text)
-                              ? Text(
-                                  (trailing as Text).data ?? '',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                )
-                              : trailing,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 6),
-            ...children,
-          ],
-        ),
-      ),
+    return SectionFormCard(
+      title: title,
+      neutral: true,
+      trailing: trailing,
+      children: children,
     );
   }
 
