@@ -190,7 +190,9 @@ class SummaryHeaderCard extends StatelessWidget {
                           if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty)
                             RichText(
                               text: TextSpan(
-                                style: theme.textTheme.bodySmall?.copyWith(color: neutral ? cs.primary : fg),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: neutral ? cs.onSurfaceVariant : fg,
+                                ),
                                 children: [
                                   TextSpan(
                                     text: _fmt2(strengthValue),
@@ -212,7 +214,17 @@ class SummaryHeaderCard extends StatelessWidget {
                                   children: [
                                     TextSpan(
                                       text: _fmt2(stockCurrent),
-                                      style: const TextStyle(fontWeight: FontWeight.w800),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        color: () {
+                                          final total = stockInitial ?? 0;
+                                          if (total <= 0) return cs.primary;
+                                          final pct = (stockCurrent! / total).clamp(0.0, 1.0);
+                                          if (pct <= 0.2) return cs.error;
+                                          if (pct <= 0.5) return Colors.orange;
+                                          return cs.primary;
+                                        }(),
+                                      ),
                                     ),
                                     if (stockInitial != null) ...[
                                       const TextSpan(text: '/'),

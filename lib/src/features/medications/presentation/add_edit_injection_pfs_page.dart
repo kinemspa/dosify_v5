@@ -9,6 +9,7 @@ import '../../../widgets/form_field_styler.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import '../../../core/prefs/user_prefs.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -28,6 +29,10 @@ class AddEditInjectionPfsPage extends ConsumerStatefulWidget {
 
 class _AddEditInjectionPfsPageState
     extends ConsumerState<AddEditInjectionPfsPage> {
+  // Floating summary like Tablet/Capsule
+  final GlobalKey _summaryKey = GlobalKey();
+  double _summaryHeight = 0;
+  final ScrollController _scrollCtrl = ScrollController();
   final _formKey = GlobalKey<FormState>();
 
   final _nameCtrl = TextEditingController();
@@ -91,6 +96,46 @@ class _AddEditInjectionPfsPageState
     _loadStylePrefs();
   }
 
+  void _updateSummaryHeight() {
+    final ctx = _summaryKey.currentContext;
+    if (ctx != null) {
+      final rb = ctx.findRenderObject();
+      if (rb is RenderBox) {
+        final h = rb.size.height;
+        if (h != _summaryHeight && h > 0) setState(() => _summaryHeight = h);
+      }
+    }
+  }
+
+  SummaryHeaderCard _floatingSummaryCard() {
+    final name = _nameCtrl.text.trim();
+    final manufacturer = _manufacturerCtrl.text.trim();
+    final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
+    final stockVal = double.tryParse(_stockValueCtrl.text.trim());
+    final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
+    final unitLabel = _unitLabel(_strengthUnit);
+    final threshold = double.tryParse(_lowStockCtrl.text.trim());
+    final headerTitle = name.isEmpty ? 'Add Pre-Filled Syringe' : name;
+
+    final card = SummaryHeaderCard(
+      key: _summaryKey,
+      title: headerTitle,
+      manufacturer: manufacturer.isEmpty ? null : manufacturer,
+      strengthValue: strengthVal,
+      strengthUnitLabel: unitLabel,
+      stockCurrent: stockVal,
+      stockInitial: initialStock,
+      stockUnitLabel: 'syringes',
+      expiryDate: _expiry,
+      showRefrigerate: _requiresFridge,
+      showDark: (_storageNotesCtrl.text.toLowerCase().contains('light')),
+      lowStockEnabled: _lowStockEnabled,
+      lowStockThreshold: threshold,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
+    return card;
+  }
+
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -104,6 +149,7 @@ class _AddEditInjectionPfsPageState
     _batchCtrl.dispose();
     _storageCtrl.dispose();
     _storageNotesCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -265,8 +311,8 @@ class _AddEditInjectionPfsPageState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Medication'),
-        content: Text(_buildSummary()),
+        title: Center(child: Text('Confirm Medication', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700))),
+        content: SingleChildScrollView(child: Text(_buildSummary())),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
@@ -400,18 +446,17 @@ class _AddEditInjectionPfsPageState
           label: Text(widget.initial == null ? 'Save' : 'Update'),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        child: Form(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            controller: _scrollCtrl,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                _buildSummary().isEmpty
-                    ? 'Summary will update as you type'
-                    : _buildSummary(),
+children: [
+              SizedBox(height: _summaryHeight + 10),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -827,23 +872,12 @@ class _AddEditInjectionPfsPageState
                       label: 'Expiry date',
                       field: Align(
                         alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          height: kFieldHeight,
-                          width: 120,
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              await _pickExpiry();
-                            },
-                            icon: const Icon(Icons.calendar_today, size: 18),
-                            label: Text(
-                              _expiry == null
-                                  ? 'Select date'
-                                  : DateFormat.yMd().format(_expiry!),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(120, kFieldHeight),
-                            ),
-                          ),
+                        child: DateButton36(
+                          label: _expiry == null
+                              ? 'Select date'
+                              : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
+                          onPressed: () async { await _pickExpiry(); },
+                          width: kSmallControlWidth,
                         ),
                       ),
                     ),
@@ -944,7 +978,14 @@ class _AddEditInjectionPfsPageState
               ),
             ],
           ),
-        ),
+          // Floating summary pinned below app bar
+          Positioned(
+            left: 16,
+            right: 16,
+            top: 8,
+            child: IgnorePointer(child: _floatingSummaryCard()),
+          ),
+        ],
       ),
     );
   }
