@@ -26,8 +26,9 @@ class AddEditTabletGeneralPage extends StatefulWidget {
 class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Fixed spacer to avoid layout shifts while typing
-  static const double _summarySpacer = 84;
+  // Fixed spacer to avoid layout shifts while typing.
+  // Increased to ensure the first section can sit fully below the pinned summary on small screens.
+  static const double _summarySpacer = 120;
 
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();

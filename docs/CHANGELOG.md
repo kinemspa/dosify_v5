@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file. Dates in UT
   - Expiry shown as plain text ("Exp: yyyy-mm-dd") in the status cluster (no pill).
   - Low stock banner reliably appears when enabled and stock ≤ threshold, showing the threshold value.
   - Overlay remains pinned under the app bar and does not shift layout while typing (fixed spacer retained).
+- Add Tablet: Summary UX refinements
+  - Increase top spacer to 120 so the General card can fully sit below the pinned summary at top-of-scroll.
+  - Keep expiry at top-right. Move storage icons (refrigerate/frozen/dark) to bottom-right of the summary card.
+  - Make the stock row wrap so the Low stock banner always shows on small screens.
 - Tablet editor: General, Strength, Inventory, Storage sections implemented with hybrid layout (40px controls)
 - UI polish: label vertical centering, fake vendor hints, dropdown styling, reduced save bar height
 - Save flow: pre-save confirmation dialog and Hive persistence for Tablet via MedicationRepository

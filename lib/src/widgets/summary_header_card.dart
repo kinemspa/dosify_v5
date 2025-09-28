@@ -81,24 +81,12 @@ class SummaryHeaderCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        if (expiryText != null && expiryText!.isNotEmpty)
-                          Text(
-                            'Exp: $expiryText',
-                            style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
-                          ),
-                        if (showRefrigerate)
-                          Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
-                        if (showFrozen)
-                          Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
-                        if (showDark)
-                          Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
-                      ],
-                    ),
+                    // Top-right cluster: Expiry text only
+                    if (expiryText != null && expiryText!.isNotEmpty)
+                      Text(
+                        'Exp: $expiryText',
+                        style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                      ),
                   ],
                 ),
                 if ((manufacturer ?? '').isNotEmpty) ...[
@@ -130,7 +118,11 @@ class SummaryHeaderCard extends StatelessWidget {
                 ],
                 if (stockCurrent != null && stockInitial != null && (stockUnitLabel ?? '').isNotEmpty) ...[
                   const SizedBox(height: 2),
-                  Row(
+                  // Use Wrap so the low-stock banner can flow onto a new line on small screens.
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 2,
                     children: [
                       RichText(
                         text: TextSpan(
@@ -150,20 +142,46 @@ class SummaryHeaderCard extends StatelessWidget {
                         ),
                       ),
                       if (lowStockActive) ...[
-                        const SizedBox(width: 8),
-                        Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
-                        const SizedBox(width: 2),
-                        Text(
-                          lowStockThreshold != null
-                              ? 'Low stock (≤ ${_fmt2(lowStockThreshold)})'
-                              : 'Low stock',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.amber.shade200,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
+                            const SizedBox(width: 2),
+                            Text(
+                              lowStockThreshold != null
+                                  ? 'Low stock (≤ ${_fmt2(lowStockThreshold)})'
+                                  : 'Low stock',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.amber.shade200,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ],
+                  ),
+                ],
+                // Bottom-right storage icons
+                if (showRefrigerate || showFrozen || showDark) ...[
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (showRefrigerate)
+                          Icon(Icons.kitchen, size: 18, color: cs.onPrimary),
+                        if (showFrozen) ...[
+                          if (showRefrigerate) const SizedBox(width: 6),
+                          Icon(Icons.ac_unit, size: 18, color: cs.onPrimary),
+                        ],
+                        if (showDark) ...[
+                          if (showRefrigerate || showFrozen) const SizedBox(width: 6),
+                          Icon(Icons.dark_mode, size: 18, color: cs.onPrimary),
+                        ],
+                      ],
+                    ),
                   ),
                 ],
               ],
