@@ -206,7 +206,9 @@ class SummaryHeaderCard extends StatelessWidget {
                               padding: const EdgeInsets.only(top: 2),
                               child: RichText(
                                 text: TextSpan(
-                                  style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: neutral ? cs.onSurface : cs.onPrimary,
+                                  ),
                                   children: [
                                     TextSpan(
                                       text: _fmt2(stockCurrent),
@@ -234,12 +236,13 @@ class SummaryHeaderCard extends StatelessWidget {
                                     Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
                                     const SizedBox(width: 4),
                                   ],
-                      RichText(
-                        text: TextSpan(
-                          style: theme.textTheme.bodySmall?.copyWith(color: neutral ? cs.onSurface : fg),
-                                    color: lowStockActive
+                                  RichText(
+                                    text: TextSpan(
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: lowStockActive
                                             ? Colors.amber.shade200
-                                            : fg.withOpacity(0.9),
+                                            : (neutral ? cs.onSurface : fg).withOpacity(0.9),
+                                        fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                       children: [
                                         TextSpan(text: lowStockActive ? 'Low stock: ' : 'Alert at '),
