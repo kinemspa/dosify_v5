@@ -318,13 +318,14 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            width: _labelWidth(),
-            height: 36,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 36),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 label,
+                softWrap: true,
+                maxLines: 2,
                 textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
@@ -565,10 +566,11 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
           child: Text('Confirm Medication', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
         ),
         actionsAlignment: MainAxisAlignment.center,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Simple summary (no gradient card)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -635,7 +637,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 'Storage notes',
                 _storageNotesCtrl.text.trim(),
               ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -967,7 +970,7 @@ children: [
                       ),
                     ),
                     _helperBelowLeft(context, 'Optional notes'),
-                  ], trailing: _generalOnlySummary()),
+                  ]),
                   const SizedBox(height: 10),
                   _section(
                     'Strength',
@@ -1100,10 +1103,6 @@ children: [
                           'Specify the amount per capsule and its unit of measurement.',
                         ),
                     ],
-                    trailing: Text(
-                      _strengthSummary(),
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ),
                   const SizedBox(height: 10),
                   _section('Inventory', [
@@ -1263,7 +1262,10 @@ children: [
                       label: 'Expiry date',
                       field: Field36(
                         width: 120,
-                        child: OutlinedButton.icon(
+                        child: DateButton36(
+                          label: _expiry == null
+                              ? 'Select date'
+                              : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
                           onPressed: () async {
                             final now = DateTime.now();
                             final picked = await showDatePicker(
@@ -1272,18 +1274,9 @@ children: [
                               lastDate: DateTime(now.year + 10),
                               initialDate: _expiry ?? now,
                             );
-                            if (picked != null)
-                              setState(() => _expiry = picked);
+                            if (picked != null) setState(() => _expiry = picked);
                           },
-                          icon: const Icon(Icons.calendar_today, size: 18),
-                          label: Text(
-                            _expiry == null
-                                ? 'Select date'
-                                : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(120, kFieldHeight),
-                          ),
+                          width: kSmallControlWidth,
                         ),
                       ),
                     ),

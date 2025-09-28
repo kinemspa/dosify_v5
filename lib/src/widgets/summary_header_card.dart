@@ -152,7 +152,7 @@ class SummaryHeaderCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: fg,
+                          color: neutral ? cs.primary : fg,
                         ),
                       ),
                     ),
@@ -190,7 +190,7 @@ class SummaryHeaderCard extends StatelessWidget {
                           if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty)
                             RichText(
                               text: TextSpan(
-                                style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                                style: theme.textTheme.bodySmall?.copyWith(color: neutral ? cs.primary : fg),
                                 children: [
                                   TextSpan(
                                     text: _fmt2(strengthValue),
