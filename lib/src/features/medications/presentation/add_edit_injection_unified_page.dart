@@ -1002,7 +1002,6 @@ LabelFieldRow(
                         selected: _expiry != null,
                       ),
                     ),
-                  ),
                 ],
               ),
               const SizedBox(height: 12),
