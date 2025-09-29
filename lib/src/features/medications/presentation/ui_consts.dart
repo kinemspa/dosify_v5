@@ -20,6 +20,16 @@ const double kDropdownFontSize =
     13.0; // selected item and menu item font size (compact)
 const double kHintFontSize = 10.5; // hint/help text (compact)
 
+// Standardized text colors
+Color kTextPrimary(BuildContext c) => Theme.of(c).colorScheme.primary;
+Color kTextDark(BuildContext c) => Theme.of(c).colorScheme.onSurface;
+Color kTextGrey(BuildContext c) => Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.85);
+Color kTextLightGrey(BuildContext c) => Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.75);
+Color kTextLighterGrey(BuildContext c) => Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.60);
+Color kTextLightestGrey(BuildContext c) => Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.45);
+Color kTextError(BuildContext c) => Theme.of(c).colorScheme.error;
+Color kTextWarning(BuildContext c) => Colors.orange;
+
 // Shared muted label style
 TextStyle kMutedLabelStyle(BuildContext context) =>
     Theme.of(context).textTheme.bodyMedium!.copyWith(

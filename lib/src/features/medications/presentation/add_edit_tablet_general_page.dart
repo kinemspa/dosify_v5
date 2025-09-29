@@ -144,7 +144,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
     );
   }
@@ -310,7 +310,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
       labelText: label,
     );

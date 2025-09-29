@@ -613,7 +613,7 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
     );
   }
