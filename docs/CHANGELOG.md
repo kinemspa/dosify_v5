@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file. Dates in UT
 ## Unreleased
 - Select Medication Type: App bar title changed to "Medication Type".
 - Add Capsule: Removed trailing summary from the Inventory card (top-right) to match design.
-- Error styling (Tablet/Capsule): Added red error outlines (errorBorder/focusedErrorBorder) to local input decorations and suppressed default error line to keep field height stable.
-- Add Capsule & Tablet: SummaryHeaderCard init state confirms desired wording (Capsules/Tablets title; "0 mg capsules/tablets"; "0/0 ... remain").
+- Error styling: Centralized outline widths via constants (kOutlineWidth=0.75, kFocusedOutlineWidth=2.0) and applied across Tablet/Capsule/Tablet (alt)/PFS inputs. Suppress default error line everywhere so validation does not change field height.
+- Medication List toolbar: Search input now has no background fill or border; layout/search controls appear floating.
+- Summary headers: Init state shows strength at 0 and current/initial stock with proper contrast even when total=0 ("0/0 ... remain").
+- Add Capsule & Tablet: SummaryHeaderCard init state confirms desired wording (Capsules/Tablets title; "0 mg ..."; "0/0 ... remain").
 - Theming: Lighter hint text and subtle filled field backgrounds moved to ThemeData.inputDecorationTheme (light: surfaceContainerLowest, dark: surfaceContainerHigh). Helper/hint colors use withValues(alpha: ...).
 - Date button: 120x36 DateButton36 now supports a selected state and switches to Filled style when a date is picked.
 - Medication List

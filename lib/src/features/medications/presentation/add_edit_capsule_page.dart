@@ -285,20 +285,20 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
+          width: kOutlineWidth,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 0.75),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 2),
+        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
       ),
       // No in-field label text
       labelText: null,

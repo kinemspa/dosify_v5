@@ -131,20 +131,20 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
+          width: kOutlineWidth,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 0.75),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 2),
+        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
       ),
     );
   }
@@ -274,20 +274,20 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
+          width: kOutlineWidth,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 0.75),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 2),
+        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
       ),
       labelText: label,
     );

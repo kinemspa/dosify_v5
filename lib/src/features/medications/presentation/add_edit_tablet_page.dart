@@ -586,6 +586,8 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       constraints: const BoxConstraints(minHeight: 40),
       floatingLabelBehavior: FloatingLabelBehavior.never,
+      // keep error line from affecting height
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       hintStyle: theme.textTheme.bodySmall?.copyWith(
         fontSize: 11,
         color: cs.onSurfaceVariant,
@@ -597,12 +599,20 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
+          width: kOutlineWidth,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
       ),
     );
   }

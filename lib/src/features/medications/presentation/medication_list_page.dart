@@ -176,10 +176,16 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             Expanded(
               child: TextField(
                 autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
                   hintText: 'Search medications',
                   isDense: true,
+                  // No background fill or borders in toolbar
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ).copyWith(
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => setState(() {

@@ -289,6 +289,8 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
       hintText: hint,
       // Use global InputDecorationTheme for density/collapsed/height
       floatingLabelBehavior: FloatingLabelBehavior.never,
+      // keep error line from affecting height
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       hintStyle: theme.textTheme.bodySmall?.copyWith(
         fontSize: kHintFontSize,
         color: cs.onSurfaceVariant,
@@ -298,11 +300,19 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant),
+        borderSide: BorderSide(color: cs.outlineVariant, width: kOutlineWidth),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
       ),
     );
   }

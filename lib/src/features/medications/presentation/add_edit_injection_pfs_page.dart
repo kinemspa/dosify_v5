@@ -407,11 +407,14 @@ class _AddEditInjectionPfsPageState
     final cs = theme.colorScheme;
     return InputDecoration(
       hintText: hint,
+      helperText: helper,
       isDense: false,
       isCollapsed: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       constraints: const BoxConstraints(minHeight: 40),
       floatingLabelBehavior: FloatingLabelBehavior.never,
+      // keep error line from affecting height
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       hintStyle: theme.textTheme.bodySmall?.copyWith(
         fontSize: 11,
         color: cs.onSurfaceVariant,
@@ -421,11 +424,19 @@ class _AddEditInjectionPfsPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant),
+        borderSide: BorderSide(color: cs.outlineVariant, width: kOutlineWidth),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
       ),
     );
   }

@@ -10,6 +10,10 @@ const double kFieldHeight =
     36.0; // unified height for text fields and dropdowns (global standard)
 const double kBtnSize = 30.0; // +/- buttons size
 
+// Outline widths for inputs (keep these consistent to avoid layout shifts)
+const double kOutlineWidth = 0.75; // enabled/normal/error
+const double kFocusedOutlineWidth = 2.0; // focused/focusedError
+
 // Typography
 const double kInputFontSize = 13.0; // typed text size in fields (compact)
 const double kDropdownFontSize =
