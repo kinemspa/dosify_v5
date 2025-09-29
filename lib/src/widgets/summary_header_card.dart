@@ -25,6 +25,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.leadingIcon,
     this.includeNameInStrengthLine = false,
     this.formLabelPlural,
+    this.perTabletLabel = true,
   });
 
   final String title;
@@ -47,6 +48,7 @@ class SummaryHeaderCard extends StatelessWidget {
   final IconData? leadingIcon;
   final bool includeNameInStrengthLine;
   final String? formLabelPlural;
+  final bool perTabletLabel;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -225,14 +227,25 @@ class SummaryHeaderCard extends StatelessWidget {
                                         TextSpan(text: '$title '),
                                         TextSpan(text: formLabelPlural ?? ''),
                                       ]
-                                    : [
-                                        TextSpan(
-                                          text: _fmt2(strengthValue ?? 0),
-                                          style: const TextStyle(fontWeight: FontWeight.w800),
-                                        ),
-                                        TextSpan(text: ' $strengthUnitLabel '),
-                                        const TextSpan(text: 'per tablet'),
-                                      ],
+                                    : (
+                                        perTabletLabel
+                                            ? [
+                                                TextSpan(
+                                                  text: _fmt2(strengthValue ?? 0),
+                                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                                ),
+                                                TextSpan(text: ' $strengthUnitLabel '),
+                                                const TextSpan(text: 'per tablet'),
+                                              ]
+                                            : [
+                                                TextSpan(
+                                                  text: _fmt2(strengthValue ?? 0),
+                                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                                ),
+                                                TextSpan(text: ' $strengthUnitLabel '),
+                                                TextSpan(text: formLabelPlural ?? ''),
+                                              ]
+                                      ),
                               ),
                             ),
                           if (stockCurrent != null && (stockUnitLabel ?? '').isNotEmpty)
@@ -293,12 +306,12 @@ class SummaryHeaderCard extends StatelessWidget {
                                         fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                       children: [
-                                        TextSpan(text: lowStockActive ? 'Low stock: ' : 'Alert at '),
+                                        const TextSpan(text: 'Alert at '),
                                         TextSpan(
                                           text: _fmt2(lowStockThreshold),
                                           style: const TextStyle(fontWeight: FontWeight.w800),
                                         ),
-                                        const TextSpan(text: ' left'),
+                                        TextSpan(text: ' ${stockUnitLabel ?? 'left'} remaining'),
                                       ],
                                     ),
                                   ),

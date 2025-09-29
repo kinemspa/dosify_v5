@@ -383,7 +383,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final double? stockVal = double.tryParse(_stockCtrl.text.trim());
     final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
     final unit = _unitLabel(_strengthUnit);
-    final headerTitle = name.isEmpty ? 'MED NAME' : name;
+    final headerTitle = name.isEmpty ? 'Tablets' : name;
     final double? threshold = double.tryParse(_lowStockThresholdCtrl.text.trim());
 
     final card = SummaryHeaderCard(
@@ -395,14 +395,15 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       stockCurrent: stockVal ?? 0,
       stockInitial: initialStock,
       stockUnitLabel: 'tablets',
-      includeNameInStrengthLine: true,
-      formLabelPlural: 'tablets',
       expiryDate: _expiryDate,
       showRefrigerate: _keepRefrigerated,
       showFrozen: _keepFrozen,
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockAlert,
       lowStockThreshold: threshold,
+      includeNameInStrengthLine: false,
+      perTabletLabel: name.isNotEmpty,
+      formLabelPlural: 'tablets',
     );
 
     // Schedule measurement after the frame

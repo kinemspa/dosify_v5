@@ -88,6 +88,7 @@ class DosifiApp extends ConsumerWidget {
             width: 2,
           ),
         ),
+        errorStyle: const TextStyle(fontSize: 0, height: 0),
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
         hintStyle: lightTextTheme.bodyMedium?.copyWith(
@@ -223,6 +224,7 @@ class DosifiApp extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: baseDark.colorScheme.primary, width: 2),
         ),
+        errorStyle: const TextStyle(fontSize: 0, height: 0),
         filled: true,
         fillColor: baseDark.colorScheme.surfaceContainerHigh,
         hintStyle: darkTextTheme.bodyMedium?.copyWith(
