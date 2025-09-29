@@ -943,7 +943,7 @@ hint: 'eg. Dosifi Labs'
                           textAlignVertical: TextAlignVertical.center,
                           decoration: _dec(
                             label: 'Description',
-hint: 'Pain Relief'
+hint: 'eg. Pain relief'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),

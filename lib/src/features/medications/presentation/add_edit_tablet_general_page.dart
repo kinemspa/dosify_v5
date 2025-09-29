@@ -392,9 +392,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: unit,
-      stockCurrent: stockVal,
+      stockCurrent: stockVal ?? 0,
       stockInitial: initialStock,
       stockUnitLabel: 'tablets',
+      includeNameInStrengthLine: true,
+      formLabelPlural: 'tablets',
       expiryDate: _expiryDate,
       showRefrigerate: _keepRefrigerated,
       showFrozen: _keepFrozen,
@@ -555,7 +557,7 @@ hint: 'eg. Dosifi Labs'
                           style: Theme.of(context).textTheme.bodyMedium,
                           decoration: _dec(
                             label: 'Description',
-hint: 'Pain Relief'
+hint: 'eg. Pain relief'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),

@@ -530,8 +530,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   Widget _buildMedList(BuildContext context, List<Medication> items) {
     switch (_view) {
 case _MedView.list:
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
@@ -612,8 +613,9 @@ style: Theme.of(context).textTheme.titleMedium?.copyWith(
           },
         );
       case _MedView.compact:
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
+return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          physics: const AlwaysScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: MediaQuery.of(context).size.width > 900
                 ? 4
@@ -631,7 +633,8 @@ style: Theme.of(context).textTheme.titleMedium?.copyWith(
       case _MedView.large:
         // Large view uses summary-style neutral cards.
 return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
@@ -714,12 +717,12 @@ child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
         m.expiry != null &&
         m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
-    return Card(
-      elevation: 1,
+    return Container(
+      decoration: softWhiteCardDecoration(context),
       child: InkWell(
         onTap: () => context.push('/medications/${m.id}'),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

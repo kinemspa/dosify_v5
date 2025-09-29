@@ -23,6 +23,8 @@ class SummaryHeaderCard extends StatelessWidget {
     this.neutral = false,
     this.outlined = false,
     this.leadingIcon,
+    this.includeNameInStrengthLine = false,
+    this.formLabelPlural,
   });
 
   final String title;
@@ -43,6 +45,8 @@ class SummaryHeaderCard extends StatelessWidget {
   final bool neutral;
   final bool outlined;
   final IconData? leadingIcon;
+  final bool includeNameInStrengthLine;
+  final String? formLabelPlural;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -209,14 +213,24 @@ class SummaryHeaderCard extends StatelessWidget {
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: neutral ? cs.onSurfaceVariant : fg,
                                 ),
-                                children: [
-                                  TextSpan(
-                                    text: _fmt2(strengthValue),
-                                    style: const TextStyle(fontWeight: FontWeight.w800),
-                                  ),
-                                  TextSpan(text: ' $strengthUnitLabel '),
-                                  const TextSpan(text: 'per tablet'),
-                                ],
+                                children: includeNameInStrengthLine
+                                    ? [
+                                        TextSpan(
+                                          text: _fmt2(strengthValue),
+                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                        ),
+                                        TextSpan(text: ' $strengthUnitLabel '),
+                                        TextSpan(text: '$title '),
+                                        TextSpan(text: formLabelPlural ?? ''),
+                                      ]
+                                    : [
+                                        TextSpan(
+                                          text: _fmt2(strengthValue),
+                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                        ),
+                                        TextSpan(text: ' $strengthUnitLabel '),
+                                        const TextSpan(text: 'per tablet'),
+                                      ],
                               ),
                             ),
                           if (stockCurrent != null && (stockUnitLabel ?? '').isNotEmpty)
