@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- Select Medication Type: App bar title changed to "Medication Type".
+- Add Capsule: Removed trailing summary from the Inventory card (top-right) to match design.
+- Error styling (Tablet/Capsule): Added red error outlines (errorBorder/focusedErrorBorder) to local input decorations and suppressed default error line to keep field height stable.
+- Add Capsule & Tablet: SummaryHeaderCard init state confirms desired wording (Capsules/Tablets title; "0 mg capsules/tablets"; "0/0 ... remain").
 - Theming: Lighter hint text and subtle filled field backgrounds moved to ThemeData.inputDecorationTheme (light: surfaceContainerLowest, dark: surfaceContainerHigh). Helper/hint colors use withValues(alpha: ...).
 - Date button: 120x36 DateButton36 now supports a selected state and switches to Filled style when a date is picked.
 - Medication List

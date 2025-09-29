@@ -14,7 +14,7 @@ class SelectMedicationTypePage extends StatelessWidget {
     final cs = theme.colorScheme;
     return Scaffold(
       appBar: const GradientAppBar(
-        title: 'Select Medication Type',
+        title: 'Medication Type',
         forceBackButton: true,
       ),
       body: ListView(

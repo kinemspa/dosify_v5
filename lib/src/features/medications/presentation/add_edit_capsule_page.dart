@@ -292,6 +292,14 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: cs.primary, width: 2),
       ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: 2),
+      ),
       // No in-field label text
       labelText: null,
     );
@@ -1283,8 +1291,8 @@ child: DateButton36(
                         ),
                       ),
                     ),
-                    _helperBelowLeft(context, 'Enter the expiry date'),
-                  ], trailing: _generalOnlySummary()),
+                  _helperBelowLeft(context, 'Enter the expiry date'),
+                  ]),
                   const SizedBox(height: 10),
                   _section('Storage', [
                     _rowLabelField(
