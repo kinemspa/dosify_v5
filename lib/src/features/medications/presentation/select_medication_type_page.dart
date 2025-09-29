@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class SelectMedicationTypePage extends StatelessWidget {
   const SelectMedicationTypePage({super.key});
@@ -113,27 +114,10 @@ class _TypeTile extends StatefulWidget {
 class _TypeTileState extends State<_TypeTile> {
   bool _pressed = false;
   IconData _effectiveIcon() {
-    if (widget.title == 'Capsule') return MdiIcons.capsule;
+    if (widget.title == 'Capsule') return MdiIcons.pill;
     if (widget.title == 'Tablet') return Icons.medication;
     return Icons.vaccines;
   }
-  const _TypeTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.primary = false,
-  });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool primary;
-
-  @override
-  State<_TypeTile> createState() => _TypeTileState();
-}
-
-class _TypeTileState extends State<_TypeTile> {
-  bool _pressed = false;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

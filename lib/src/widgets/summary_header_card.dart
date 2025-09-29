@@ -79,7 +79,7 @@ class SummaryHeaderCard extends StatelessWidget {
         case MedicationForm.tablet:
           return Icons.medication;
         case MedicationForm.capsule:
-          return MdiIcons.capsule;
+          return MdiIcons.pill;
         case MedicationForm.injectionPreFilledSyringe:
         case MedicationForm.injectionSingleDoseVial:
         case MedicationForm.injectionMultiDoseVial:

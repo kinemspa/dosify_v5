@@ -1008,6 +1008,7 @@ _rowLabelField(
                         ],
                       ),
                     ),
+                  ),
                     _helperBelowLeftCompact(
                       'Enable if this medication must be kept refrigerated',
                     ),
