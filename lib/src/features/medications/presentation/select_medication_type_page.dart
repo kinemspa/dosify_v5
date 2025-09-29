@@ -43,6 +43,12 @@ const _TypeTile(
             title: 'Injection',
             subtitle: 'Pre-filled syringes or vials',
           ),
+          const SizedBox(height: 16),
+          const _TypeTile(
+            icon: Icons.description,
+            title: 'Editor Template (Preview)',
+            subtitle: 'Open the template-based editor',
+          ),
         ],
       ),
     );
