@@ -403,11 +403,26 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                     decimal: false,
                   ),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: _dec(
-                    label: label ?? '',
-                    hint: hint,
-                    helper: helper,
-                  ).copyWith(errorText: error ? ' ' : null),
+                  decoration: (() {
+                    final base = _dec(
+                      label: label ?? '',
+                      hint: hint,
+                      helper: helper,
+                    );
+                    if (!error) return base;
+                    final cs = Theme.of(context).colorScheme;
+                    return base.copyWith(
+                      errorText: null,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+                      ),
+                    );
+                  })(),
                 ),
               ),
             ),
@@ -907,7 +922,20 @@ children: [
                                 label: 'Name *',
 hint: 'eg. DosifiCaps-500'
                               ).copyWith(
-                                errorText: gNameError != null ? ' ' : null,
+                                // keep decorator out of error mode; we color border ourselves
+                                errorText: null,
+                                enabledBorder: gNameError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                      ),
+                                focusedBorder: gNameError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                      ),
                               ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Required'
@@ -1024,9 +1052,19 @@ hint: 'eg. Take with water'
                                           label: 'Amount *',
                                           hint: '0',
                                         ).copyWith(
-                                          errorText: gStrengthAmtError != null
-                                              ? ' '
-                                              : null,
+                                          errorText: null,
+                                          enabledBorder: gStrengthAmtError == null
+                                              ? null
+                                              : OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                                ),
+                                          focusedBorder: gStrengthAmtError == null
+                                              ? null
+                                              : OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                                ),
                                         ),
                                     onChanged: (_) => setState(() {
                                       _touchedStrengthAmt = true;
@@ -1155,9 +1193,19 @@ hint: 'eg. Take with water'
                                         label: 'Stock amount *',
                                         hint: '0',
                                       ).copyWith(
-                                        errorText: gStockError != null
-                                            ? ' '
-                                            : null,
+                                        errorText: null,
+                                        enabledBorder: gStockError == null
+                                            ? null
+                                            : OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                              ),
+                                        focusedBorder: gStockError == null
+                                            ? null
+                                            : OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                              ),
                                       ),
                                   onChanged: (_) => setState(() {
                                     _touchedStock = true;

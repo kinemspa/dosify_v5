@@ -573,7 +573,19 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                                 label: 'Name *',
 hint: 'eg. DosifiTab-500'
                               ).copyWith(
-                                errorText: gNameError != null ? ' ' : null,
+                                errorText: null,
+                                enabledBorder: gNameError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                      ),
+                                focusedBorder: gNameError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                      ),
                               ),
                           validator: (v) => (v == null || v.trim().isEmpty)
                               ? 'Required'
@@ -680,9 +692,19 @@ hint: 'eg. Take with water'
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   decoration: _dec(label: 'Amount *', hint: '0')
                                       .copyWith(
-                                        errorText: gStrengthAmtError != null
-                                            ? ' '
-                                            : null,
+                                        errorText: null,
+                                        enabledBorder: gStrengthAmtError == null
+                                            ? null
+                                            : OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                              ),
+                                        focusedBorder: gStrengthAmtError == null
+                                            ? null
+                                            : OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                              ),
                                       ),
                                   validator: (v) {
                                     final t = v?.trim() ?? '';
@@ -830,9 +852,19 @@ hint: 'eg. Take with water'
                                             label: 'Stock amount *',
                                             hint: '0.00',
                                           ).copyWith(
-                                            errorText: gStockError != null
-                                                ? ' '
-                                                : null,
+                                            errorText: null,
+                                            enabledBorder: gStockError == null
+                                                ? null
+                                                : OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                                  ),
+                                            focusedBorder: gStockError == null
+                                                ? null
+                                                : OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
+                                                  ),
                                           ),
                                       validator: (v) {
                                         if (v == null || v.trim().isEmpty)
