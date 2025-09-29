@@ -11,6 +11,7 @@ import '../../../widgets/app_header.dart';
 import '../domain/medication.dart';
 import '../domain/enums.dart';
 import '../../../widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 enum _MedView { list, compact, large }
