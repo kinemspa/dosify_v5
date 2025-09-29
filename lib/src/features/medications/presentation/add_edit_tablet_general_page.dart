@@ -257,6 +257,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       hintText: hint,
       helperText: helper,
+      // Keep height stable when error by suppressing the default error line
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       hintStyle: theme.textTheme.bodySmall?.copyWith(
         fontSize: 12,
         color: cs.onSurfaceVariant,
@@ -278,6 +280,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: 2),
       ),
       labelText: label,
     );

@@ -210,7 +210,7 @@ class SummaryHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if ((strengthUnitLabel ?? '').isNotEmpty && (
-                                includeNameInStrengthLine || (strengthValue != null && strengthValue! > 0)
+                                includeNameInStrengthLine || (strengthValue != null)
                               ))
                             RichText(
                               text: TextSpan(
