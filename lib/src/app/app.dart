@@ -88,6 +88,17 @@ class DosifiApp extends ConsumerWidget {
             width: 2,
           ),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: baseLight.colorScheme.outlineVariant),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: baseLight.colorScheme.primary,
+            width: 2,
+          ),
+        ),
         errorStyle: const TextStyle(fontSize: 0, height: 0),
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
@@ -221,6 +232,14 @@ class DosifiApp extends ConsumerWidget {
           borderSide: BorderSide(color: baseDark.colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: baseDark.colorScheme.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: baseDark.colorScheme.outlineVariant),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: baseDark.colorScheme.primary, width: 2),
         ),

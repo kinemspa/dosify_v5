@@ -159,7 +159,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
     String unitLabel = _unitLabel(_strengthUnit);
     final threshold = double.tryParse(_lowStockCtrl.text.trim());
-    final headerTitle = name.isEmpty ? 'Add Capsule' : name;
+    final headerTitle = name.isEmpty ? 'Capsules' : name;
 
     final card = SummaryHeaderCard(
       key: _summaryKey,
@@ -167,7 +167,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: unitLabel,
-      stockCurrent: stockVal,
+      stockCurrent: stockVal ?? 0,
       stockInitial: initialStock,
       stockUnitLabel: 'capsules',
       expiryDate: _expiry,
@@ -176,6 +176,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: threshold,
+      includeNameInStrengthLine: false,
+      perTabletLabel: name.isNotEmpty,
+      formLabelPlural: 'capsules',
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
     return card;
