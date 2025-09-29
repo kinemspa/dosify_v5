@@ -210,7 +210,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           if (_searchExpanded)
             IconButton(
               icon: Icon(_getViewIcon(_view), color: kTextLightGrey(context)),
-),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
