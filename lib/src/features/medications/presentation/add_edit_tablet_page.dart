@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/widgets/app_header.dart';
 import '../../medications/domain/enums.dart';
 import '../../medications/domain/medication.dart';
 import '../presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 class AddEditTabletPage extends ConsumerStatefulWidget {
   const AddEditTabletPage({super.key, this.initial});
