@@ -305,7 +305,9 @@ class SummaryHeaderCard extends StatelessWidget {
                                       style: theme.textTheme.bodySmall?.copyWith(
                                         color: lowStockActive
                                             ? Colors.amber.shade200
-                                            : (neutral ? cs.onSurface : fg).withValues(alpha: 0.9),
+                                            : (neutral
+                                                ? cs.onSurfaceVariant.withValues(alpha: 0.75)
+                                                : fg.withValues(alpha: 0.85)),
                                         fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                       children: [
