@@ -12,6 +12,7 @@ import 'providers.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 enum InjectionKind { pfs, single, multi }
 
@@ -437,6 +438,7 @@ class _AddEditInjectionUnifiedPageState
                 ],
               ),
               const SizedBox(height: 12),
+              SectionFormCard(
                 title: 'Strength',
                 neutral: true,
                 children: [
