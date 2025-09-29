@@ -13,6 +13,7 @@ import '../domain/enums.dart';
 import '../../../widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 enum _MedView { list, compact, large }
 
@@ -199,7 +200,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             )
           else
             IconButton(
-              icon: Icon(Icons.search, color: Colors.grey.shade400),
+              icon: Icon(Icons.search, color: kTextLightGrey(context)),
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search medications',
             ),
@@ -208,7 +209,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           if (_searchExpanded) const SizedBox(width: 8),
           if (_searchExpanded)
             IconButton(
-              icon: Icon(_getViewIcon(_view), color: Colors.grey.shade400),
+              icon: Icon(_getViewIcon(_view), color: kTextLightGrey(context)),
+),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
@@ -231,7 +233,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 Icons.filter_list,
                 color: _filterBy != _FilterBy.all
                     ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.shade400,
+                    : kTextLightGrey(context),
               ),
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
@@ -258,7 +260,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           // Sort button
           if (!_searchExpanded)
             PopupMenuButton<Object>(
-              icon: Icon(Icons.sort, color: Colors.grey.shade400),
+              icon: Icon(Icons.sort, color: kTextLightGrey(context)),
               tooltip: 'Sort medications',
               onSelected: (value) => setState(() {
                 if (value is _SortBy) {
@@ -577,7 +579,7 @@ style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} ${_formLabelPlural(m.form)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: kTextLightGrey(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -605,9 +607,7 @@ style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                         ),
                                       ))
                                       ? Theme.of(context).colorScheme.error
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
+                                  : kTextLightGrey(context),
                                 ),
                           ),
                         ),
@@ -1069,10 +1069,10 @@ case MedicationForm.capsule:
       padding: const EdgeInsets.only(right: 8),
       child: Text(
         summaryText,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-        maxLines: 1,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: kTextLightGrey(context),
+                  height: 1.0,
+                ),
         overflow: TextOverflow.ellipsis,
       ),
     );
