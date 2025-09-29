@@ -6,6 +6,7 @@ import '../features/home/presentation/home_page.dart';
 import '../features/medications/presentation/medication_list_page.dart';
 import '../features/medications/presentation/medication_detail_page.dart';
 import '../features/medications/presentation/select_medication_type_page.dart';
+import '../features/medications/presentation/editor_template_preview_page.dart';
 import '../features/medications/presentation/select_injection_type_page.dart';
 import '../features/medications/presentation/add_edit_capsule_page.dart';
 import '../features/medications/presentation/add_edit_tablet_hybrid_page.dart';
@@ -127,6 +128,11 @@ final router = GoRouter(
           path: '/medications/select-type',
           name: 'selectMedicationType',
           builder: (context, state) => const SelectMedicationTypePage(),
+        ),
+        GoRoute(
+          path: '/medications/add/template',
+          name: 'addTemplatePreview',
+          builder: (context, state) => const EditorTemplatePreviewPage(),
         ),
         GoRoute(
           path: '/medications/select-injection-type',

@@ -88,6 +88,14 @@ class _Section extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             ...children,
+            const SizedBox(height: 16),
+            // Template preview entry to verify layout parity on-device
+            _TypeTile(
+              icon: Icons.description,
+              title: 'Editor Template (Preview)'.toString(),
+              subtitle: 'Open the template-based editor to verify exact layout',
+              primary: false,
+            ),
           ],
         ),
       ),
@@ -146,6 +154,8 @@ if (widget.title == 'Capsule') return MdiIcons.pill;
             context.push('/medications/add/capsule');
           } else if (widget.title == 'Injection') {
             context.push('/medications/select-injection-type');
+          } else if (widget.title == 'Editor Template (Preview)') {
+            context.push('/medications/add/template');
           }
         },
         onHighlightChanged: (v) => setState(() => _pressed = v),
