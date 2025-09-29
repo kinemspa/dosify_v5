@@ -19,10 +19,10 @@ class SelectMedicationTypePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: [
-          const _ScreenHeader(
+const _ScreenHeader(
             icon: Icons.add_circle_outline,
-            title: 'Add a medication',
-            subtitle: 'Choose the type so we can tailor the fields for you',
+            title: 'Choose medication type',
+            subtitle: 'We’ll tailor the fields for your choice',
           ),
           const SizedBox(height: 16),
           const _TypeTile(
@@ -31,8 +31,8 @@ class SelectMedicationTypePage extends StatelessWidget {
             subtitle: 'Solid pill dosage form',
           ),
           const SizedBox(height: 16),
-          const _TypeTile(
-            icon: Icons.bubble_chart,
+const _TypeTile(
+            icon: Icons.medication, // placeholder, overridden in widget with MDI when available
             title: 'Capsule',
             subtitle: 'Powder or pellets in a gelatin shell',
           ),
@@ -112,6 +112,28 @@ class _TypeTile extends StatefulWidget {
 
 class _TypeTileState extends State<_TypeTile> {
   bool _pressed = false;
+  IconData _effectiveIcon() {
+    if (widget.title == 'Capsule') return MdiIcons.capsule;
+    if (widget.title == 'Tablet') return Icons.medication;
+    return Icons.vaccines;
+  }
+  const _TypeTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.primary = false,
+  });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool primary;
+
+  @override
+  State<_TypeTile> createState() => _TypeTileState();
+}
+
+class _TypeTileState extends State<_TypeTile> {
+  bool _pressed = false;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -167,7 +189,7 @@ class _TypeTileState extends State<_TypeTile> {
                     color: badgeBg,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(widget.icon, color: badgeIconColor, size: 20),
+child: Icon(_effectiveIcon(), color: badgeIconColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

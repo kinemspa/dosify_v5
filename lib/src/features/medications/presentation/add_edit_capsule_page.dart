@@ -943,7 +943,7 @@ hint: 'eg. Dosifi Labs'
                           textAlignVertical: TextAlignVertical.center,
                           decoration: _dec(
                             label: 'Description',
-hint: 'eg. Dosifi Relief'
+hint: 'Pain Relief'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -1324,12 +1324,14 @@ child: DateButton36(
                       context,
                       'Where it’s stored (e.g., Bathroom cabinet)',
                     ),
-                    _rowLabelField(
+_rowLabelField(
                       label: 'Keep refrigerated',
-                      field: Row(
-                        children: [
-                          Checkbox(
-                            value: _requiresFridge,
+                      field: Opacity(
+                        opacity: _keepFrozen ? 0.5 : 1.0,
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _requiresFridge,
                             onChanged: _keepFrozen
                                 ? null
                                 : (v) => setState(
@@ -1345,6 +1347,7 @@ child: DateButton36(
                         ],
                       ),
                     ),
+                  ),
                     _helperBelowLeftCompact(
                       context,
                       'Enable if this medication must be kept refrigerated',

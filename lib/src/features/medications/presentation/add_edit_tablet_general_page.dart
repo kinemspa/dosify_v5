@@ -555,7 +555,7 @@ hint: 'eg. Dosifi Labs'
                           style: Theme.of(context).textTheme.bodyMedium,
                           decoration: _dec(
                             label: 'Description',
-hint: 'eg. Dosifi Relief'
+hint: 'Pain Relief'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -910,10 +910,13 @@ hint: 'eg. Take with water'
                         children: [
                           Align(
                             alignment: Alignment.center,
-                            child: SizedBox(
+child: SizedBox(
                               height: kFieldHeight,
                               width: 120,
-                              child: OutlinedButton.icon(
+                              child: DateButton36(
+                                label: _expiryDate == null
+                                    ? 'Select date'
+                                    : _fmtDateLocal(context, _expiryDate!),
                                 onPressed: () async {
                                   final now = DateTime.now();
                                   final picked = await showDatePicker(
@@ -922,18 +925,10 @@ hint: 'eg. Take with water'
                                     lastDate: DateTime(now.year + 10),
                                     initialDate: _expiryDate ?? now,
                                   );
-                                  if (picked != null)
-                                    setState(() => _expiryDate = picked);
+                                  if (picked != null) setState(() => _expiryDate = picked);
                                 },
-                                icon: const Icon(Icons.calendar_today, size: 18),
-                                label: Text(
-                                  _expiryDate == null
-                                      ? 'Select date'
-                                      : _fmtDateLocal(context, _expiryDate!),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size(120, kFieldHeight),
-                                ),
+                                width: 120,
+                                selected: _expiryDate != null,
                               ),
                             ),
                           ),
@@ -990,12 +985,14 @@ hint: 'eg. Take with water'
                       'Where it’s stored (e.g., Bathroom cabinet)',
                     ),
                     // Removed 'Store below (°C)' per requirements
-                    _rowLabelField(
+_rowLabelField(
                       label: 'Keep refrigerated',
-                      field: Row(
-                        children: [
-                          Checkbox(
-                            value: _keepRefrigerated,
+                      field: Opacity(
+                        opacity: _keepFrozen ? 0.5 : 1.0,
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _keepRefrigerated,
                             onChanged: _keepFrozen
                                 ? null
                                 : (v) => setState(

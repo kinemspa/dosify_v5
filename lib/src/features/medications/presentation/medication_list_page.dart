@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -528,23 +529,14 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildMedList(BuildContext context, List<Medication> items) {
     switch (_view) {
-      case _MedView.list:
+case _MedView.list:
         return ListView.separated(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           itemCount: items.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final m = items[index];
-            return ListTile(
-              leading: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-child: Icon(_iconForForm(m.form), color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
-              ),
+return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8,
                 vertical: 4,
@@ -554,8 +546,9 @@ child: Icon(_iconForForm(m.form), color: Theme.of(context).colorScheme.onSurface
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   text: m.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   children: [
                     if (m.manufacturer?.isNotEmpty == true)
@@ -856,8 +849,8 @@ child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
     switch (form) {
       case MedicationForm.tablet:
         return Icons.medication;
-      case MedicationForm.capsule:
-        return Icons.bubble_chart;
+case MedicationForm.capsule:
+        return MdiIcons.capsule;
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:

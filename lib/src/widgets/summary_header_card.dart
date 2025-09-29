@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 class SummaryHeaderCard extends StatelessWidget {
@@ -78,7 +79,7 @@ class SummaryHeaderCard extends StatelessWidget {
         case MedicationForm.tablet:
           return Icons.medication;
         case MedicationForm.capsule:
-          return Icons.bubble_chart;
+          return MdiIcons.capsule;
         case MedicationForm.injectionPreFilledSyringe:
         case MedicationForm.injectionSingleDoseVial:
         case MedicationForm.injectionMultiDoseVial:
@@ -235,6 +236,7 @@ class SummaryHeaderCard extends StatelessWidget {
                                           final total = stockInitial ?? 0;
                                           if (total <= 0) return cs.primary;
                                           final pct = (stockCurrent! / total).clamp(0.0, 1.0);
+                                          if (!neutral) return cs.onPrimary;
                                           if (pct <= 0.2) return cs.error;
                                           if (pct <= 0.5) return Colors.orange;
                                           return cs.primary;
@@ -245,7 +247,10 @@ class SummaryHeaderCard extends StatelessWidget {
                                       const TextSpan(text: '/'),
                                       TextSpan(
                                         text: _fmt2(stockInitial),
-                                        style: const TextStyle(fontWeight: FontWeight.w800),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          color: neutral ? cs.primary : cs.onPrimary,
+                                        ),
                                       ),
                                     ],
                                     TextSpan(text: ' $stockUnitLabel remain'),
