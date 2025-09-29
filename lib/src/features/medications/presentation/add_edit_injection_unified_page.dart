@@ -371,6 +371,7 @@ LabelFieldRow(
                     label: 'Unit *',
                     field: SmallDropdown36<Unit>(
                         value: _strengthUnit,
+                        width: kSmallControlWidth,
                       items: const [
                         DropdownMenuItem(
                           value: Unit.mcg,
@@ -950,23 +951,36 @@ Builder(
                       decoration: _dec(context, 'Stock quantity *', '0'),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                    child: Text(
+                      'Enter the amount currently in stock',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
 LabelFieldRow(
                     label: 'Quantity unit',
                     field: SmallDropdown36<StockUnit>(
                         value: _stockUnit,
+                        width: kSmallControlWidth,
                       items: [
-                        DropdownMenuItem(
-                          value: StockUnit.preFilledSyringes,
-                          child: Center(child: Text('pre filled syringes')),
-                        ),
-                        DropdownMenuItem(
-                          value: StockUnit.singleDoseVials,
-                          child: Center(child: Text('single dose vials')),
-                        ),
-                        DropdownMenuItem(
-                          value: StockUnit.multiDoseVials,
-                          child: Center(child: Text('multi dose vials')),
-                        ),
+                        if (widget.kind == InjectionKind.pfs)
+                          const DropdownMenuItem(
+                            value: StockUnit.preFilledSyringes,
+                            child: Center(child: Text('pre filled syringes')),
+                          ),
+                        if (widget.kind == InjectionKind.single)
+                          const DropdownMenuItem(
+                            value: StockUnit.singleDoseVials,
+                            child: Center(child: Text('single dose vials')),
+                          ),
+                        if (widget.kind == InjectionKind.multi)
+                          const DropdownMenuItem(
+                            value: StockUnit.multiDoseVials,
+                            child: Center(child: Text('multi dose vials')),
+                          ),
                       ],
                       onChanged: (v) =>
                           setState(() => _stockUnit = v ?? _stockUnit),
@@ -999,7 +1013,17 @@ LabelFieldRow(
                           );
                           if (picked != null) setState(() => _expiry = picked);
                         },
+                        width: kSmallControlWidth,
                         selected: _expiry != null,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                      child: Text(
+                        'Enter the expiry date',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                        ),
                       ),
                     ),
                 ],
@@ -1068,20 +1092,24 @@ LabelFieldRow(
                       ),
                     ),
                   ),
-                  LabelFieldRow(
+LabelFieldRow(
                     label: 'Keep refrigerated',
-                    field: Row(
-                      children: [
-                        Checkbox(
-                          value: _refrigerate,
-                          onChanged: (v) =>
-                              setState(() => _refrigerate = v ?? false),
-                        ),
-                        Text(
-                          'Refrigerate',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
+                    field: Opacity(
+                      opacity: _keepFrozen ? 0.5 : 1.0,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: _refrigerate,
+                            onChanged: _keepFrozen
+                                ? null
+                                : (v) => setState(() => _refrigerate = v ?? false),
+                          ),
+                          Text(
+                            'Refrigerate',
+                            style: _keepFrozen ? kMutedLabelStyle(context) : Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
@@ -1099,13 +1127,16 @@ LabelFieldRow(
                       ),
                     ),
                   ),
-                  LabelFieldRow(
+LabelFieldRow(
                     label: 'Keep frozen',
                     field: Row(
                       children: [
                         Checkbox(
                           value: _keepFrozen,
-                          onChanged: (v) => setState(() => _keepFrozen = v ?? false),
+                          onChanged: (v) => setState(() {
+                            _keepFrozen = v ?? false;
+                            if (_keepFrozen) _refrigerate = false;
+                          }),
                         ),
                         Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
                       ],
