@@ -4,6 +4,7 @@ import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
 
 class EditorTemplatePreviewPage extends StatefulWidget {
@@ -48,7 +49,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Editor Template (Preview)', forceBackButton: true),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: const SizedBox(width: 140, child: FilledButton.icon(onPressed: null, icon: Icon(Icons.save), label: Text('Save'))),
+      floatingActionButton: SizedBox(width: 140, child: FilledButton.icon(onPressed: null, icon: const Icon(Icons.save), label: const Text('Save'))),
       body: MedEditorTemplate(
         appBarTitle: 'Editor Template (Preview)',
         summaryBuilder: (key) {
