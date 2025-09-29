@@ -550,490 +550,294 @@ children: [
               ),
 
               const SizedBox(height: 12),
-              // Strength card
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.06),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Strength',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _rowLabelField(
-                      label: 'Strength *',
-                      field: Row(
-                        children: [
-                          _pillBtn(context, '−', () {
-                            final v =
-                                int.tryParse(_strengthValueCtrl.text) ?? 0;
-                            final nv = (v - 1).clamp(0, 1000000);
-                            setState(
-                              () => _strengthValueCtrl.text = nv.toString(),
-                            );
-                          }),
-                          const SizedBox(width: 6),
-                          SizedBox(
-                            width: 120,
-                            child: Field36(
-                              child: TextFormField(
-                                controller: _strengthValueCtrl,
-                                textAlign: TextAlign.center,
-                                keyboardType: TextInputType.number,
-                                decoration: _dec(
-                                  context: context,
-                                  label: 'Strength amount *',
-                                  hint: '0',
-                                ),
-                                onChanged: (_) => setState(() {}),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          _pillBtn(context, '+', () {
-                            final v =
-                                int.tryParse(_strengthValueCtrl.text) ?? 0;
-                            final nv = (v + 1).clamp(0, 1000000);
-                            setState(
-                              () => _strengthValueCtrl.text = nv.toString(),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                    _rowLabelField(
-                      label: 'Unit *',
-                      field: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          height: kFieldHeight,
+              // Strength card (Tablet-style)
+              SectionFormCard(
+                title: 'Strength',
+                neutral: true,
+                children: [
+                  _rowLabelField(
+                    label: 'Strength *',
+                    field: Row(
+                      children: [
+                        _pillBtn(context, '−', () {
+                          final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
+                          final nv = (v - 1).clamp(0, 1000000);
+                          setState(() => _strengthValueCtrl.text = nv.toString());
+                        }),
+                        const SizedBox(width: 6),
+                        SizedBox(
                           width: 120,
-                          child: DropdownButtonFormField<Unit>(
-                            value: _strengthUnit,
-                            isExpanded: false,
-                            alignment: AlignmentDirectional.center,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            items: const [
-                              DropdownMenuItem(
-                                value: Unit.mcg,
-                                child: Center(child: Text('mcg')),
+                          child: Field36(
+                            child: TextFormField(
+                              controller: _strengthValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              decoration: _dec(
+                                context: context,
+                                label: 'Strength amount *',
+                                hint: '0',
                               ),
-                              DropdownMenuItem(
-                                value: Unit.mg,
-                                child: Center(child: Text('mg')),
-                              ),
-                              DropdownMenuItem(
-                                value: Unit.g,
-                                child: Center(child: Text('g')),
-                              ),
-                              DropdownMenuItem(
-                                value: Unit.units,
-                                child: Center(child: Text('units')),
-                              ),
-                              DropdownMenuItem(
-                                value: Unit.mcgPerMl,
-                                child: Center(child: Text('mcg/mL')),
-                              ),
-                              DropdownMenuItem(
-                                value: Unit.mgPerMl,
-                                child: Center(child: Text('mg/mL')),
-                              ),
-                              DropdownMenuItem(
-                                value: Unit.gPerMl,
-                                child: Center(child: Text('g/mL')),
-                              ),
-                              DropdownMenuItem(
-                                value: Unit.unitsPerMl,
-                                child: Center(child: Text('units/mL')),
-                              ),
-                            ],
-                            onChanged: (v) {
-                              setState(() => _strengthUnit = v!);
-                            },
-                            icon: Icon(
-                              Icons.arrow_drop_down,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  width: 2,
-                                ),
-                              ),
-                              filled: true,
-                            ),
-                            menuMaxHeight: 320,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (_isPerMl)
-                      _rowLabelField(
-                        label: 'Per mL',
-                        field: SizedBox(
-                          width: 160,
-                          child: TextFormField(
-                            controller: _perMlCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: const InputDecoration(
-                              labelText: 'Per mL',
+                              onChanged: (_) => setState(() {}),
                             ),
                           ),
                         ),
-                      ),
-                    const SizedBox(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 120 + 8),
-                      child: Text(
-                        'Specify the amount per dose and its unit of measurement.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        const SizedBox(width: 6),
+                        _pillBtn(context, '+', () {
+                          final v = int.tryParse(_strengthValueCtrl.text) ?? 0;
+                          final nv = (v + 1).clamp(0, 1000000);
+                          setState(() => _strengthValueCtrl.text = nv.toString());
+                        }),
+                      ],
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Unit *',
+                    field: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        height: kFieldHeight,
+                        width: 120,
+                        child: DropdownButtonFormField<Unit>(
+                          value: _strengthUnit,
+                          isExpanded: false,
+                          alignment: AlignmentDirectional.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          items: const [
+                            DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
+                            DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
+                            DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
+                            DropdownMenuItem(value: Unit.units, child: Center(child: Text('units'))),
+                            DropdownMenuItem(value: Unit.mcgPerMl, child: Center(child: Text('mcg/mL'))),
+                            DropdownMenuItem(value: Unit.mgPerMl, child: Center(child: Text('mg/mL'))),
+                            DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
+                            DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
+                          ],
+                          onChanged: (v) => setState(() => _strengthUnit = v!),
+                          decoration: _dec(context: context, label: '', hint: null, helper: null),
+                          menuMaxHeight: 320,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  if (_isPerMl)
+                    _rowLabelField(
+                      label: 'Per mL',
+                      field: SizedBox(
+                        width: 160,
+                        child: TextFormField(
+                          controller: _perMlCtrl,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: _dec(context: context, label: 'Per mL', hint: '0'),
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 120 + 8, top: 4),
+                    child: Text(
+                      'Specify the amount per dose and its unit of measurement.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 12),
-              // Inventory card (with Expiry + Low Stock inside)
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.06),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Inventory',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _rowLabelField(
-                      label: 'Stock quantity *',
-                      field: Row(
-                        children: [
-                          _pillBtn(context, '−', () {
-                            final v = int.tryParse(_stockValueCtrl.text) ?? 0;
-                            final nv = (v - 1).clamp(0, 1000000);
-                            setState(
-                              () => _stockValueCtrl.text = nv.toString(),
-                            );
-                          }),
-                          const SizedBox(width: 6),
-                          SizedBox(
-                            width: 120,
-                            child: Field36(
-                              child: TextFormField(
-                                controller: _stockValueCtrl,
-                                textAlign: TextAlign.center,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: false,
-                                    ),
-                                decoration: _dec(
-                                  context: context,
-                                  label: 'Stock amount *',
-                                  hint: '0',
-                                ),
-                                onChanged: (_) => setState(() {}),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          _pillBtn(context, '+', () {
-                            final v = int.tryParse(_stockValueCtrl.text) ?? 0;
-                            final nv = (v + 1).clamp(0, 1000000);
-                            setState(
-                              () => _stockValueCtrl.text = nv.toString(),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                    _rowLabelField(
-                      label: 'Quantity unit',
-                      field: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SmallDropdown36<StockUnit>(
-                          value: _stockUnit,
-                          items: const [
-                            DropdownMenuItem(
-                              value: StockUnit.preFilledSyringes,
-                              child: Center(child: Text('pre filled syringes')),
-                            ),
-                          ],
-                          onChanged: (v) => setState(() => _stockUnit = v!),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 120 + 8),
-                      child: Text(
-                        'Get notified when stock is low',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
+              // Inventory card (Tablet-style)
+              SectionFormCard(
+                title: 'Inventory',
+                neutral: true,
+                children: [
+                  _rowLabelField(
+                    label: 'Stock quantity *',
+                    field: Row(
                       children: [
-                        Expanded(
-                          child: CheckboxListTile(
-                            title: Text(
-                              'Low Stock Alerts',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w500),
+                        _pillBtn(context, '−', () {
+                          final v = int.tryParse(_stockValueCtrl.text) ?? 0;
+                          final nv = (v - 1).clamp(0, 1000000);
+                          setState(() => _stockValueCtrl.text = nv.toString());
+                        }),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 120,
+                          child: Field36(
+                            child: TextFormField(
+                              controller: _stockValueCtrl,
+                              textAlign: TextAlign.center,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                              decoration: _dec(
+                                context: context,
+                                label: 'Stock amount *',
+                                hint: '0',
+                              ),
+                              onChanged: (_) => setState(() {}),
                             ),
-                            subtitle: Text(
-                              'Get notified when stock is low',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: Colors.grey.shade600),
-                            ),
-                            value: _lowStockEnabled,
-                            onChanged: (v) =>
-                                setState(() => _lowStockEnabled = v ?? false),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.zero,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 150),
-                          child: _lowStockEnabled
-                              ? SizedBox(
-                                  width: 120,
-                                  child: TextFormField(
-                                    key: const ValueKey('lowStockField'),
-                                    controller: _lowStockCtrl,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    decoration: const InputDecoration(
-                                      labelText: 'Threshold',
-                                      hintText: '0',
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox(
-                                  key: ValueKey('lowStockPlaceholder'),
-                                  width: 120,
-                                ),
+                        const SizedBox(width: 6),
+                        _pillBtn(context, '+', () {
+                          final v = int.tryParse(_stockValueCtrl.text) ?? 0;
+                          final nv = (v + 1).clamp(0, 1000000);
+                          setState(() => _stockValueCtrl.text = nv.toString());
+                        }),
+                      ],
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Quantity unit',
+                    field: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SmallDropdown36<StockUnit>(
+                        value: _stockUnit,
+                        items: const [
+                          DropdownMenuItem(
+                            value: StockUnit.preFilledSyringes,
+                            child: Center(child: Text('pre filled syringes')),
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => _stockUnit = v!),
+                      ),
+                    ),
+                  ),
+                  _rowLabelField(
+                    label: 'Low stock alert',
+                    field: Row(
+                      children: [
+                        Checkbox(
+                          value: _lowStockEnabled,
+                          onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
+                        ),
+                        Expanded(
+                          child: Text('Enable alert when stock is low', style: kCheckboxLabelStyle(context), maxLines: 2, softWrap: true),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                  ),
+                  if (_lowStockEnabled)
                     _rowLabelField(
-                      label: 'Expiry date',
-                      field: Align(
-                        alignment: Alignment.centerLeft,
-child: DateButton36(
-                          label: _expiry == null
-                              ? 'Select date'
-                              : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
-                          onPressed: () async { await _pickExpiry(); },
-                          width: kSmallControlWidth,
-                          selected: _expiry != null,
+                      label: 'Threshold',
+                      field: SizedBox(
+                        width: 120,
+                        child: Field36(
+                          child: TextFormField(
+                            controller: _lowStockCtrl,
+                            textAlign: TextAlign.center,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: _dec(context: context, label: 'Threshold', hint: '0'),
+                            onChanged: (_) => setState(() {}),
+                          ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  _rowLabelField(
+                    label: 'Expiry date',
+                    field: Align(
+                      alignment: Alignment.centerLeft,
+                      child: DateButton36(
+                        label: _expiry == null
+                            ? 'Select date'
+                            : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
+                        onPressed: () async { await _pickExpiry(); },
+                        width: kSmallControlWidth,
+                        selected: _expiry != null,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 12),
-              // Storage card
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.06),
+              // Storage card (Tablet-style)
+              SectionFormCard(
+                title: 'Storage',
+                neutral: true,
+                children: [
+                  _rowLabelField(
+                    label: 'Batch No.',
+                    field: Field36(
+                      child: TextFormField(
+                        controller: _batchCtrl,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: _dec(
+                          context: context,
+                          label: 'Batch No.',
+                          hint: 'Enter batch number',
+                        ),
+                      ),
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Storage Information',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _rowLabelField(
-                      label: 'Batch No.',
-                      field: Field36(
-                        child: TextFormField(
-                          controller: _batchCtrl,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(
-                            context: context,
-                            label: 'Batch No.',
-                            hint: 'Enter batch number',
-                          ),
+                  _rowLabelField(
+                    label: 'Location',
+                    field: Field36(
+                      child: TextFormField(
+                        controller: _storageCtrl,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: _dec(
+                          context: context,
+                          label: 'Location',
+                          hint: 'eg. Bathroom cabinet',
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    _rowLabelField(
-                      label: 'Location',
-                      field: Field36(
-                        child: TextFormField(
-                          controller: _storageCtrl,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(
-                            context: context,
-                            label: 'Location',
-                            hint: 'eg. Bathroom cabinet',
+                  ),
+                  _rowLabelField(
+                    label: 'Keep refrigerated',
+                    field: Opacity(
+                      opacity: _keepFrozen ? 0.5 : 1.0,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: _requiresFridge,
+                            onChanged: _keepFrozen ? null : (v) => setState(() => _requiresFridge = v ?? false),
                           ),
-                        ),
-                      ),
-                    ),
-_rowLabelField(
-                      label: 'Keep refrigerated',
-                      field: Opacity(
-                        opacity: _keepFrozen ? 0.5 : 1.0,
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: _requiresFridge,
-                            onChanged: _keepFrozen
-                                ? null
-                                : (v) => setState(() => _requiresFridge = v ?? false),
-                          ),
-                          Text(
-                            'Refrigerate',
-                            style: _keepFrozen
-                                ? Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)
-                                : Theme.of(context).textTheme.bodyMedium,
-                          ),
+                          Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : Theme.of(context).textTheme.bodyMedium),
                         ],
                       ),
                     ),
                   ),
-                    _rowLabelField(
-                      label: 'Keep frozen',
-                      field: Row(
-                        children: [
-                          Checkbox(
-                            value: _keepFrozen,
-                            onChanged: (v) => setState(() {
-                              _keepFrozen = v ?? false;
-                              if (_keepFrozen) _requiresFridge = false;
-                            }),
-                          ),
-                          Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
+                  _rowLabelField(
+                    label: 'Keep frozen',
+                    field: Row(
+                      children: [
+                        Checkbox(
+                          value: _keepFrozen,
+                          onChanged: (v) => setState(() {
+                            _keepFrozen = v ?? false;
+                            if (_keepFrozen) _requiresFridge = false;
+                          }),
+                        ),
+                        Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
+                      ],
                     ),
-                    _rowLabelField(
-                      label: 'Keep in dark',
-                      field: Row(
-                        children: [
-                          Checkbox(
-                            value: _lightSensitive,
-                            onChanged: (v) => setState(() => _lightSensitive = v ?? false),
-                          ),
-                          Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
+                  ),
+                  _rowLabelField(
+                    label: 'Keep in dark',
+                    field: Row(
+                      children: [
+                        Checkbox(
+                          value: _lightSensitive,
+                          onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+                        ),
+                        Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
+                      ],
                     ),
-                    _rowLabelField(
-                      label: 'Storage instructions',
-                      field: Field36(
-                        child: TextFormField(
-                          controller: _storageNotesCtrl,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(
-                            context: context,
-                            label: 'Storage instructions',
-                            hint: 'Enter storage instructions',
-                          ),
+                  ),
+                  _rowLabelField(
+                    label: 'Storage instructions',
+                    field: Field36(
+                      child: TextFormField(
+                        controller: _storageNotesCtrl,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: _dec(
+                          context: context,
+                          label: 'Storage instructions',
+                          hint: 'Enter storage instructions',
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- PFS Add: Refactored Strength, Inventory, and Storage sections to match Add Tablet styling using SectionFormCard (neutral). Standardized input decorations (no errorText; constant outline widths; fixed-height support rows) to eliminate error height nudge. Unified small control widths (SmallDropdown36, DateButton36) and aligned label/value layout via LabelFieldRow. Replaced ad-hoc containers with SectionFormCard. Low stock UI mirrors Tablet pattern; Expiry uses DateButton36.
 - Select Medication Type: App bar title changed to "Medication Type".
 - Add Capsule: Removed trailing summary from the Inventory card (top-right) to match design.
 - Error styling: Centralized outline widths via constants (kOutlineWidth=0.75, kFocusedOutlineWidth=2.0) and applied across Tablet/Capsule/Tablet (alt)/PFS inputs. Suppress default error line everywhere so validation does not change field height.
