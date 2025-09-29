@@ -300,6 +300,15 @@ class _AddEditInjectionUnifiedPageState
                       ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                    child: Text(
+                      'Enter the medication name',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
                   LabelFieldRow(
                     label: 'Manufacturer',
                     field: Field36(
@@ -311,6 +320,15 @@ class _AddEditInjectionUnifiedPageState
                           'Manufacturer',
                           'eg. Contoso Pharma',
                         ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                    child: Text(
+                      'Enter the brand or company name',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
                     ),
                   ),
@@ -328,6 +346,15 @@ class _AddEditInjectionUnifiedPageState
                       ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                    child: Text(
+                      'Optional short description',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                      ),
+                    ),
+                  ),
                   LabelFieldRow(
                     label: 'Notes',
                     field: Field36(
@@ -339,6 +366,15 @@ class _AddEditInjectionUnifiedPageState
                           'Notes',
                           'eg. Take with food',
                         ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                    child: Text(
+                      'Optional notes',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
                     ),
                   ),
@@ -414,20 +450,31 @@ LabelFieldRow(
                   if (_isPerMl)
                     LabelFieldRow(
                       label: 'Per mL',
-                      field: SizedBox(
-                        width: 160,
-                        child: Field36(
-                          child: TextFormField(
-                            controller: _perMl,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: _dec(context, 'Per mL', '0.0'),
+                      field: StepperRow36(
+                        controller: _perMl,
+                        onDec: () {
+                          final v = double.tryParse(_perMl.text.trim()) ?? 0;
+                          _perMl.text = (v - 1).clamp(0, 1000000).toStringAsFixed(0);
+                          setState(() {});
+                        },
+                        onInc: () {
+                          final v = double.tryParse(_perMl.text.trim()) ?? 0;
+                          _perMl.text = (v + 1).clamp(0, 1000000).toStringAsFixed(0);
+                          setState(() {});
+                        },
+                        decoration: _dec(context, 'Per mL', '0'),
+                      ),
+                    ),
+                    if (_isPerMl)
+                      Padding(
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                        child: Text(
+                          'Enter the volume per mL',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
                           ),
                         ),
                       ),
-                    ),
                   if (widget.kind == InjectionKind.multi)
                     LabelFieldRow(
                       label: 'Method',
