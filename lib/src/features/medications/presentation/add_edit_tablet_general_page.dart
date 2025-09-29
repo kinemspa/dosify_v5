@@ -383,11 +383,27 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                     decimal: false,
                   ),
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: _dec(
-                    label: label ?? '',
-                    hint: hint,
-                    helper: helper,
-                  ).copyWith(errorText: error ? ' ' : null),
+                  decoration: (() {
+                    final base = _dec(
+                      label: label ?? '',
+                      hint: hint,
+                      helper: helper,
+                    );
+                    if (!error) return base;
+                    final cs = Theme.of(context).colorScheme;
+                    return base.copyWith(
+                      // Do not set errorText so InputDecorator doesn't alter layout
+                      errorText: null,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+                      ),
+                    );
+                  })(),
                 ),
               ),
             ),
