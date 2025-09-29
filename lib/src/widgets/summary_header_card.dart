@@ -263,7 +263,10 @@ class SummaryHeaderCard extends StatelessWidget {
                                         fontWeight: FontWeight.w800,
                                         color: () {
                                           final total = stockInitial ?? 0;
-                                          if (total <= 0) return cs.primary;
+                                          if (total <= 0) {
+                                            // When no initial stock is set, ensure contrast on primary background
+                                            return neutral ? cs.primary : cs.onPrimary;
+                                          }
                                           final pct = (stockCurrent! / total).clamp(0.0, 1.0);
                                           if (!neutral) return cs.onPrimary;
                                           if (pct <= 0.2) return cs.error;
