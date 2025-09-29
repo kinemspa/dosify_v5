@@ -111,26 +111,32 @@ class _AddEditInjectionUnifiedPageState
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return InputDecoration(
-      hintText: hint,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
       isDense: false,
       isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      constraints: const BoxConstraints(minHeight: 40),
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      hintStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: 11,
-        color: cs.onSurfaceVariant,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      hintText: hint,
+      // Keep height stable when error by suppressing the default error line
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
     );
   }
@@ -273,7 +279,7 @@ class _AddEditInjectionUnifiedPageState
             children: [
               SectionFormCard(
                 title: 'General',
-                neutral: widget.kind == InjectionKind.multi,
+                neutral: true,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6),
@@ -342,7 +348,7 @@ class _AddEditInjectionUnifiedPageState
 
               SectionFormCard(
                 title: 'Strength',
-                neutral: widget.kind == InjectionKind.multi,
+                neutral: true,
                 children: [
                   LabelFieldRow(
                     label: 'Strength *',
@@ -363,9 +369,7 @@ class _AddEditInjectionUnifiedPageState
                   ),
 LabelFieldRow(
                     label: 'Unit *',
-                    field: FractionallySizedBox(
-                      widthFactor: 0.2,
-                      child: SmallDropdown36<Unit>(
+                    field: SmallDropdown36<Unit>(
                         value: _strengthUnit,
                       items: const [
                         DropdownMenuItem(
@@ -405,7 +409,6 @@ LabelFieldRow(
                           setState(() => _strengthUnit = v ?? Unit.mg),
                         decoration: _decDrop(context),
                       ),
-                    ),
                   ),
                   if (_isPerMl)
                     LabelFieldRow(
@@ -928,7 +931,7 @@ Builder(
 
               SectionFormCard(
                 title: 'Inventory',
-                neutral: widget.kind == InjectionKind.multi,
+                neutral: true,
                 children: [
                   LabelFieldRow(
                     label: 'Stock quantity *',
@@ -947,11 +950,9 @@ Builder(
                       decoration: _dec(context, 'Stock quantity *', '0'),
                     ),
                   ),
-                  LabelFieldRow(
+LabelFieldRow(
                     label: 'Quantity unit',
-field: FractionallySizedBox(
-                      widthFactor: 0.2,
-                      child: SmallDropdown36<StockUnit>(
+                    field: SmallDropdown36<StockUnit>(
                         value: _stockUnit,
                       items: [
                         DropdownMenuItem(
@@ -971,7 +972,6 @@ field: FractionallySizedBox(
                           setState(() => _stockUnit = v ?? _stockUnit),
                         decoration: _decDrop(context),
                       ),
-                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: kLabelColWidth + 8),
@@ -983,11 +983,9 @@ field: FractionallySizedBox(
                     ),
                   ),
                   const SizedBox(height: 8),
-                  LabelFieldRow(
+LabelFieldRow(
                     label: 'Expiry date',
-                    field: FractionallySizedBox(
-                      widthFactor: 0.2,
-child: DateButton36(
+                    field: DateButton36(
                         label: _expiry == null
                             ? 'Select date'
                             : DateFormat.yMd().format(_expiry!),
@@ -1011,7 +1009,7 @@ child: DateButton36(
 
               SectionFormCard(
                 title: 'Storage',
-                neutral: widget.kind == InjectionKind.multi,
+                neutral: true,
                 children: [
                   LabelFieldRow(
                     label: 'Batch No.',
