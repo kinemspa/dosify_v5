@@ -213,6 +213,29 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
+  // Unified support line (error/help) under a field with fixed height and alignment
+  Widget _supportBelowLeftFixed({String? error, String? help, bool compact = false}) {
+    final theme = Theme.of(context);
+    final left = _labelWidth() + 8;
+    final text = error ?? help ?? '';
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: error != null
+          ? theme.colorScheme.error
+          : theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+      fontSize: compact ? 11 : null,
+    );
+    return Padding(
+      padding: EdgeInsets.only(left: left, top: 2, bottom: 8),
+      child: SizedBox(
+        height: 18,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(text, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ),
+    );
+  }
+
   // Local helpers
   String _unitLabel(Unit u) {
     switch (u) {
@@ -879,8 +902,10 @@ hint: 'eg. Take with water'
                         ],
                       ),
                     ),
-                    if (gStockError != null) _errorUnderLabel(gStockError),
-                    _helperBelowLeft('Enter the amount of tablets in stock'),
+                    _supportBelowLeftFixed(
+                      error: gStockError,
+                      help: 'Enter the amount of tablets in stock',
+                    ),
 
                     // Low stock alert toggle + threshold
                     _rowLabelField(
@@ -917,12 +942,11 @@ hint: 'eg. Take with water'
                           error: thresholdError != null,
                         ),
                       ),
-                      if (thresholdError != null)
-                        _errorUnderLabel(thresholdError)
-                      else
-                        _helperBelowLeftCompact(
-                          'Set the stock level that triggers a low stock alert',
-                        ),
+                      _supportBelowLeftFixed(
+                        error: thresholdError,
+                        help: 'Set the stock level that triggers a low stock alert',
+                        compact: true,
+                      ),
                     ],
                     _rowLabelField(
                       label: 'Expiry date',
