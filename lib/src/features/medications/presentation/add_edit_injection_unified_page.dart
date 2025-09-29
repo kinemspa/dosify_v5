@@ -33,6 +33,9 @@ class AddEditInjectionUnifiedPage extends ConsumerStatefulWidget {
 
 class _AddEditInjectionUnifiedPageState
     extends ConsumerState<AddEditInjectionUnifiedPage> {
+  // Floating summary like Tablet/Capsule
+  final GlobalKey _summaryKey = GlobalKey();
+  double _summaryHeight = 0;
   final _formKey = GlobalKey<FormState>();
 
   final _name = TextEditingController();
@@ -67,6 +70,56 @@ class _AddEditInjectionUnifiedPageState
   final _storageNotes = TextEditingController();
   bool _keepFrozen = false;
   bool _lightSensitive = false;
+
+  void _updateSummaryHeight() {
+    final ctx = _summaryKey.currentContext;
+    if (ctx != null) {
+      final rb = ctx.findRenderObject();
+      if (rb is RenderBox) {
+        final h = rb.size.height;
+        if (h != _summaryHeight && h > 0) setState(() => _summaryHeight = h);
+      }
+    }
+  }
+
+  SummaryHeaderCard _floatingSummaryCard() {
+    final name = _name.text.trim();
+    final manufacturer = _manufacturer.text.trim();
+    final strengthVal = double.tryParse(_strength.text.trim());
+    final stockVal = double.tryParse(_stock.text.trim());
+    final unitLabel = _baseUnit(_strengthUnit);
+    final headerTitle = switch (widget.kind) {
+      InjectionKind.pfs => name.isEmpty ? 'Pre‑Filled Syringes' : name,
+      InjectionKind.single => name.isEmpty ? 'Single Dose Vials' : name,
+      InjectionKind.multi => name.isEmpty ? 'Multi Dose Vials' : name,
+    };
+    final stockUnitLabel = switch (widget.kind) {
+      InjectionKind.pfs => 'pre filled syringes',
+      InjectionKind.single => 'single dose vials',
+      InjectionKind.multi => 'multi dose vials',
+    };
+
+    final card = SummaryHeaderCard(
+      key: _summaryKey,
+      title: headerTitle,
+      manufacturer: manufacturer.isEmpty ? null : manufacturer,
+      strengthValue: strengthVal,
+      strengthUnitLabel: _isPerMl ? '$unitLabel/mL' : unitLabel,
+      stockCurrent: stockVal ?? 0,
+      stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
+      stockUnitLabel: stockUnitLabel,
+      expiryDate: _expiry,
+      showRefrigerate: _refrigerate,
+      showFrozen: _keepFrozen,
+      showDark: _lightSensitive,
+      lowStockEnabled: false,
+      includeNameInStrengthLine: false,
+      perTabletLabel: name.isNotEmpty,
+      formLabelPlural: stockUnitLabel,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
+    return card;
+  }
 
   @override
   void initState() {
@@ -270,13 +323,16 @@ class _AddEditInjectionUnifiedPageState
           label: Text(widget.initial == null ? 'Save' : 'Update'),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: _summaryHeight + 10),
               SectionFormCard(
                 title: 'General',
                 neutral: true,
@@ -381,8 +437,6 @@ class _AddEditInjectionUnifiedPageState
                 ],
               ),
               const SizedBox(height: 12),
-
-              SectionFormCard(
                 title: 'Strength',
                 neutral: true,
                 children: [
@@ -1253,7 +1307,14 @@ LabelFieldRow(
               ),
             ],
           ),
-        ),
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            top: 8,
+            child: IgnorePointer(child: _floatingSummaryCard()),
+          ),
+        ],
       ),
     );
   }

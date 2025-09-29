@@ -162,7 +162,6 @@ class DateButton36 extends StatelessWidget {
     // Keep fixed width even when placed inside Expanded by removing horizontal constraints
     return UnconstrainedBox(
       alignment: Alignment.centerLeft,
-      constrainedAxis: Axis.horizontal,
       child: SizedBox(
         height: kFieldHeight,
         width: width ?? kSmallControlWidth,
@@ -195,7 +194,6 @@ class SmallDropdown36<T> extends StatelessWidget {
     // Keep fixed width even when placed inside Expanded by removing horizontal constraints
     return UnconstrainedBox(
       alignment: Alignment.centerLeft,
-      constrainedAxis: Axis.horizontal,
       child: SizedBox(
         height: kFieldHeight,
         width: width ?? kSmallControlWidth,
