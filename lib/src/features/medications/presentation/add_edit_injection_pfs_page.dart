@@ -396,7 +396,7 @@ class _AddEditInjectionPfsPageState
     );
   }
 
-  // Match Capsule/Tablet input decoration (fill, borders, padding, fonts)
+  // Match Tablet _dec exactly: padding, height, fill, borders, and suppressed error line
   InputDecoration _dec({
     required BuildContext context,
     required String label,
@@ -406,25 +406,25 @@ class _AddEditInjectionPfsPageState
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return InputDecoration(
-      hintText: hint,
-      helperText: helper,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
       isDense: false,
       isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      constraints: const BoxConstraints(minHeight: 40),
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      // keep error line from affecting height
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      hintText: hint,
+      helperText: helper,
+      // Render errors in helper area; suppress default error line to avoid height changes
       errorStyle: const TextStyle(fontSize: 0, height: 0),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: 11,
-        color: cs.onSurfaceVariant,
-      ),
+      // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant, width: kOutlineWidth),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: kOutlineWidth,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -438,6 +438,58 @@ class _AddEditInjectionPfsPageState
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
+    );
+  }
+
+  // Dropdown decoration matching Tablet’s _decDrop
+  InputDecoration _decDrop({
+    required BuildContext context,
+    required String label,
+    String? hint,
+    String? helper,
+  }) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return InputDecoration(
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      hintText: hint,
+      helperText: helper,
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(
+        fontSize: 12,
+        color: cs.onSurfaceVariant,
+      ),
+      helperStyle: theme.textTheme.bodySmall?.copyWith(
+        fontSize: 11,
+        color: cs.onSurfaceVariant.withOpacity(0.60),
+      ),
+      filled: true,
+      fillColor: cs.surfaceContainerLowest,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: kOutlineWidth,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      labelText: label,
     );
   }
 
@@ -483,6 +535,7 @@ children: [
               const SizedBox(height: 8),
               SectionFormCard(
                 title: 'General',
+                neutral: true,
                 children: [
                   LabelFieldRow(
                     label: 'Name *',
@@ -602,6 +655,8 @@ children: [
                           isExpanded: false,
                           alignment: AlignmentDirectional.center,
                           style: Theme.of(context).textTheme.bodyMedium,
+                          dropdownColor: Theme.of(context).colorScheme.surface,
+                          menuMaxHeight: 320,
                           items: const [
                             DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
                             DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
@@ -613,8 +668,7 @@ children: [
                             DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
                           ],
                           onChanged: (v) => setState(() => _strengthUnit = v!),
-                          decoration: _dec(context: context, label: '', hint: null, helper: null),
-                          menuMaxHeight: 320,
+                          decoration: _decDrop(context: context, label: '', hint: null, helper: null),
                         ),
                       ),
                     ),
@@ -690,6 +744,7 @@ children: [
                       alignment: Alignment.centerLeft,
                       child: SmallDropdown36<StockUnit>(
                         value: _stockUnit,
+                        decoration: _decDrop(context: context, label: '', hint: null, helper: null),
                         items: const [
                           DropdownMenuItem(
                             value: StockUnit.preFilledSyringes,

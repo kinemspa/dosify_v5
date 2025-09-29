@@ -116,7 +116,7 @@ class LabelFieldRow extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
               ),
             ),
           ),
