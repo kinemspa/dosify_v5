@@ -83,7 +83,7 @@ class SummaryHeaderCard extends StatelessWidget {
         case MedicationForm.tablet:
           return Icons.medication;
         case MedicationForm.capsule:
-          return MdiIcons.pill;
+          return MdiIcons.capsule;
         case MedicationForm.injectionPreFilledSyringe:
         case MedicationForm.injectionSingleDoseVial:
         case MedicationForm.injectionMultiDoseVial:
@@ -207,7 +207,9 @@ class SummaryHeaderCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (strengthValue != null && strengthValue! > 0 && (strengthUnitLabel ?? '').isNotEmpty)
+                          if ((strengthUnitLabel ?? '').isNotEmpty && (
+                                includeNameInStrengthLine || (strengthValue != null && strengthValue! > 0)
+                              ))
                             RichText(
                               text: TextSpan(
                                 style: theme.textTheme.bodySmall?.copyWith(
@@ -216,7 +218,7 @@ class SummaryHeaderCard extends StatelessWidget {
                                 children: includeNameInStrengthLine
                                     ? [
                                         TextSpan(
-                                          text: _fmt2(strengthValue),
+                                          text: _fmt2(strengthValue ?? 0),
                                           style: const TextStyle(fontWeight: FontWeight.w800),
                                         ),
                                         TextSpan(text: ' $strengthUnitLabel '),
@@ -225,7 +227,7 @@ class SummaryHeaderCard extends StatelessWidget {
                                       ]
                                     : [
                                         TextSpan(
-                                          text: _fmt2(strengthValue),
+                                          text: _fmt2(strengthValue ?? 0),
                                           style: const TextStyle(fontWeight: FontWeight.w800),
                                         ),
                                         TextSpan(text: ' $strengthUnitLabel '),

@@ -114,7 +114,7 @@ class _TypeTile extends StatefulWidget {
 class _TypeTileState extends State<_TypeTile> {
   bool _pressed = false;
   IconData _effectiveIcon() {
-    if (widget.title == 'Capsule') return MdiIcons.pill;
+if (widget.title == 'Capsule') return MdiIcons.capsule;
     if (widget.title == 'Tablet') return Icons.medication;
     return Icons.vaccines;
   }
