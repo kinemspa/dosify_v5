@@ -383,7 +383,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     final double? stockVal = double.tryParse(_stockCtrl.text.trim());
     final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
     final unit = _unitLabel(_strengthUnit);
-    final headerTitle = name.isEmpty ? 'Add Tablet' : name;
+    final headerTitle = name.isEmpty ? 'MED NAME' : name;
     final double? threshold = double.tryParse(_lowStockThresholdCtrl.text.trim());
 
     final card = SummaryHeaderCard(

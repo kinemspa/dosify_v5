@@ -854,7 +854,7 @@ child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
       case MedicationForm.tablet:
         return Icons.medication;
 case MedicationForm.capsule:
-        return MdiIcons.capsule;
+        return MdiIcons.pill;
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:
