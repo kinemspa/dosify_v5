@@ -159,10 +159,15 @@ class DateButton36 extends StatelessWidget {
               minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
             ),
           );
-    return SizedBox(
-      height: kFieldHeight,
-      width: width ?? kSmallControlWidth,
-      child: btn,
+    // Keep fixed width even when placed inside Expanded by removing horizontal constraints
+    return UnconstrainedBox(
+      alignment: Alignment.centerLeft,
+      constrainedAxis: Axis.horizontal,
+      child: SizedBox(
+        height: kFieldHeight,
+        width: width ?? kSmallControlWidth,
+        child: btn,
+      ),
     );
   }
 }
@@ -187,22 +192,27 @@ class SmallDropdown36<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SizedBox(
-      height: kFieldHeight,
-      width: width ?? kSmallControlWidth,
-      child: DropdownButtonFormField<T>(
-        value: value,
-        isExpanded: false,
-        alignment: AlignmentDirectional.center,
-        style: theme.textTheme.bodyMedium,
-        items: items,
-        onChanged: onChanged,
-        icon: Icon(
-          Icons.arrow_drop_down,
-          color: theme.colorScheme.onSurfaceVariant,
+    // Keep fixed width even when placed inside Expanded by removing horizontal constraints
+    return UnconstrainedBox(
+      alignment: Alignment.centerLeft,
+      constrainedAxis: Axis.horizontal,
+      child: SizedBox(
+        height: kFieldHeight,
+        width: width ?? kSmallControlWidth,
+        child: DropdownButtonFormField<T>(
+          value: value,
+          isExpanded: false,
+          alignment: AlignmentDirectional.center,
+          style: theme.textTheme.bodyMedium,
+          items: items,
+          onChanged: onChanged,
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          decoration: decoration ?? const InputDecoration(isDense: true),
+          menuMaxHeight: 320,
         ),
-        decoration: decoration ?? const InputDecoration(isDense: true),
-        menuMaxHeight: 320,
       ),
     );
   }
