@@ -894,7 +894,7 @@ children: [
                           decoration:
                               _dec(
                                 label: 'Name *',
-                                hint: 'eg. AcmeCaps-500',
+hint: 'eg. DosifiCaps-500'
                               ).copyWith(
                                 errorText: gNameError != null ? ' ' : null,
                               ),
@@ -922,7 +922,7 @@ children: [
                           textAlignVertical: TextAlignVertical.center,
                           decoration: _dec(
                             label: 'Manufacturer',
-                            hint: 'eg. Contoso Pharma',
+hint: 'eg. Dosifi Labs'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -943,7 +943,7 @@ children: [
                           textAlignVertical: TextAlignVertical.center,
                           decoration: _dec(
                             label: 'Description',
-                            hint: 'eg. Pain relief',
+hint: 'eg. Dosifi Relief'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -963,7 +963,7 @@ children: [
                         textAlignVertical: TextAlignVertical.center,
                         decoration: _dec(
                           label: 'Notes',
-                          hint: 'eg. Take with food',
+hint: 'eg. Take with water'
                         ),
                         onChanged: (_) => setState(() {}),
                       ),
@@ -1259,9 +1259,9 @@ children: [
                     ],
                     _rowLabelField(
                       label: 'Expiry date',
-                      field: Field36(
+                      field: SizedBox(
                         width: 120,
-                        child: DateButton36(
+child: DateButton36(
                           label: _expiry == null
                               ? 'Select date'
                               : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
@@ -1275,7 +1275,8 @@ children: [
                             );
                             if (picked != null) setState(() => _expiry = picked);
                           },
-                          width: kSmallControlWidth,
+                          width: 120,
+                          selected: _expiry != null,
                         ),
                       ),
                     ),

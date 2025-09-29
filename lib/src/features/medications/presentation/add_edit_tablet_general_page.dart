@@ -511,7 +511,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           decoration:
                               _dec(
                                 label: 'Name *',
-                                hint: 'eg. AcmeTab-500',
+hint: 'eg. DosifiTab-500'
                               ).copyWith(
                                 errorText: gNameError != null ? ' ' : null,
                               ),
@@ -537,7 +537,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           style: Theme.of(context).textTheme.bodyMedium,
                           decoration: _dec(
                             label: 'Manufacturer',
-                            hint: 'eg. Contoso Pharma',
+hint: 'eg. Dosifi Labs'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -555,7 +555,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           style: Theme.of(context).textTheme.bodyMedium,
                           decoration: _dec(
                             label: 'Description',
-                            hint: 'eg. Pain relief',
+hint: 'eg. Dosifi Relief'
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -574,7 +574,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         style: Theme.of(context).textTheme.bodyMedium,
                         decoration: _dec(
                           label: 'Notes',
-                          hint: 'eg. Take with food',
+hint: 'eg. Take with water'
                         ),
                         onChanged: (_) => setState(() {}),
                       ),

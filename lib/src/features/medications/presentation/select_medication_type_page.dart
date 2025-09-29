@@ -32,7 +32,7 @@ class SelectMedicationTypePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const _TypeTile(
-            icon: Icons.medication_liquid,
+            icon: Icons.bubble_chart,
             title: 'Capsule',
             subtitle: 'Powder or pellets in a gelatin shell',
           ),
@@ -124,8 +124,8 @@ class _TypeTileState extends State<_TypeTile> {
     final titleColor = isPrimary ? onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
     final badgeBg = isPrimary
-        ? onPrimary.withOpacity(0.15)
-        : primaryBg.withOpacity(0.12);
+        ? onPrimary.withValues(alpha: 0.15)
+        : primaryBg.withValues(alpha: 0.12);
     final badgeIconColor = isPrimary ? onPrimary : primaryBg;
     final chevronColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
 
@@ -228,7 +228,7 @@ class _ScreenHeader extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: cs.onPrimary.withOpacity(0.15),
+              color: cs.onPrimary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: cs.onPrimary),

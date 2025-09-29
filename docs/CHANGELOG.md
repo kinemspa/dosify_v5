@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- Theming: Lighter hint text and subtle filled field backgrounds moved to ThemeData.inputDecorationTheme (light: surfaceContainerLowest, dark: surfaceContainerHigh). Helper/hint colors use withValues(alpha: ...).
+- Date button: 120x36 DateButton36 now supports a selected state and switches to Filled style when a date is picked.
+- Medication List
+  - Large view: reduced top padding and inter-card spacing for tighter layout.
+  - List view: added per-form leading icons; strength line uses onSurfaceVariant; stock line colors only the current number; expiry uses compact date.
+  - Compact view: strength toned down to onSurfaceVariant; stock renders with only the current number color-coded by percentage.
+  - Sorting: added Ascending/Descending toggle; existing sort-by field options preserved.
+- Icon consistency: Capsule uses bubble_chart across Select Type, list, and summary cards; Tablet uses medication; Injection uses vaccines.
+- Deprecations: Replaced withOpacity(...) with withValues(alpha: ...) in updated files.
 - Add Tablet: Floating SummaryHeaderCard cleaned up and fully adopted.
   - Restored dynamic spacer measured from header height so the first section is always positioned just below the summary.
   - Removed legacy/unreachable UI from _floatingSummary; now uses reusable SummaryHeaderCard exclusively.

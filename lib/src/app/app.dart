@@ -91,10 +91,10 @@ class DosifiApp extends ConsumerWidget {
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
         hintStyle: lightTextTheme.bodyMedium?.copyWith(
-          color: baseLight.colorScheme.onSurfaceVariant,
+          color: baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
         ),
         helperStyle: lightTextTheme.bodySmall?.copyWith(
-          color: baseLight.colorScheme.onSurfaceVariant.withOpacity(0.60),
+          color: baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.60),
         ),
       ),
       textSelectionTheme: TextSelectionThemeData(
@@ -226,10 +226,10 @@ class DosifiApp extends ConsumerWidget {
         filled: true,
         fillColor: baseDark.colorScheme.surfaceContainerHigh,
         hintStyle: darkTextTheme.bodyMedium?.copyWith(
-          color: baseDark.colorScheme.onSurfaceVariant,
+          color: baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
         ),
         helperStyle: darkTextTheme.bodySmall?.copyWith(
-          color: baseDark.colorScheme.onSurfaceVariant.withOpacity(0.60),
+          color: baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.60),
         ),
       ),
       textSelectionTheme: TextSelectionThemeData(

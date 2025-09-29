@@ -73,8 +73,9 @@ class SummaryHeaderCard extends StatelessWidget {
         stockUnitLabel = m.stockUnit.name;
     }
     final showDark = (m.storageInstructions?.toLowerCase().contains('light') ?? false);
-    return SummaryHeaderCard(
-   case MedicationForm.tablet:
+    final icon = () {
+      switch (m.form) {
+        case MedicationForm.tablet:
           return Icons.medication;
         case MedicationForm.capsule:
           return Icons.bubble_chart;
@@ -126,12 +127,12 @@ class SummaryHeaderCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(12),
         border: (neutral && outlined)
-            ? Border.all(color: cs.outlineVariant.withOpacity(0.5), width: 0.75)
+            ? Border.all(color: cs.outlineVariant.withValues(alpha: 0.5), width: 0.75)
             : null,
         boxShadow: neutral
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -146,7 +147,7 @@ class SummaryHeaderCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: (neutral ? cs.primary : cs.onPrimary).withOpacity(0.15),
+              color: (neutral ? cs.primary : cs.onPrimary).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(leadingIcon ?? Icons.medication, color: neutral ? cs.primary : fg),
@@ -186,7 +187,7 @@ class SummaryHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: fg.withOpacity(0.9),
+                      color: fg.withValues(alpha: 0.9),
                     ),
                   ),
                 ],
@@ -267,7 +268,7 @@ class SummaryHeaderCard extends StatelessWidget {
                                       style: theme.textTheme.bodySmall?.copyWith(
                                         color: lowStockActive
                                             ? Colors.amber.shade200
-                                            : (neutral ? cs.onSurface : fg).withOpacity(0.9),
+                                            : (neutral ? cs.onSurface : fg).withValues(alpha: 0.9),
                                         fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                       children: [

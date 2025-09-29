@@ -135,25 +135,34 @@ class DateButton36 extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.width,
+    this.selected = false,
   });
 
   final String label;
   final VoidCallback onPressed;
   final double? width;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
+    final btn = selected
+        ? FilledButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.calendar_today, size: 18),
+            label: Text(label),
+          )
+        : OutlinedButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.calendar_today, size: 18),
+            label: Text(label),
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
+            ),
+          );
     return SizedBox(
       height: kFieldHeight,
       width: width ?? kSmallControlWidth,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: const Icon(Icons.calendar_today, size: 18),
-        label: Text(label),
-        style: OutlinedButton.styleFrom(
-          minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
-        ),
-      ),
+      child: btn,
     );
   }
 }

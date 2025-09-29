@@ -55,6 +55,8 @@ class _AddEditInjectionPfsPageState
   final _storageCtrl = TextEditingController();
   bool _requiresFridge = false;
   final _storageNotesCtrl = TextEditingController();
+  bool _keepFrozen = false;
+  bool _lightSensitive = false;
 
   bool _summaryExpanded = true;
 
@@ -92,6 +94,9 @@ class _AddEditInjectionPfsPageState
       _storageCtrl.text = med.storageLocation ?? '';
       _requiresFridge = med.requiresRefrigeration;
       _storageNotesCtrl.text = med.storageInstructions ?? '';
+      final si = med.storageInstructions ?? '';
+      _lightSensitive = si.toLowerCase().contains('light');
+      _keepFrozen = si.toLowerCase().contains('frozen');
     }
     _loadStylePrefs();
   }
@@ -301,9 +306,16 @@ class _AddEditInjectionPfsPageState
           ? null
           : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
-      storageInstructions: _storageNotesCtrl.text.trim().isEmpty
-          ? null
-          : _storageNotesCtrl.text.trim(),
+      storageInstructions: (() {
+        final parts = <String>[];
+        final s = _storageNotesCtrl.text.trim();
+        if (s.isNotEmpty) parts.add(s);
+        if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen')))
+          parts.add('Keep frozen');
+        if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light')))
+          parts.add('Protect from light');
+        return parts.isEmpty ? null : parts.join('. ');
+      })(),
       initialStockValue: initialStock,
     );
 
@@ -868,12 +880,13 @@ children: [
                       label: 'Expiry date',
                       field: Align(
                         alignment: Alignment.centerLeft,
-                        child: DateButton36(
+child: DateButton36(
                           label: _expiry == null
                               ? 'Select date'
                               : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
                           onPressed: () async { await _pickExpiry(); },
                           width: kSmallControlWidth,
+                          selected: _expiry != null,
                         ),
                       ),
                     ),
@@ -948,10 +961,46 @@ children: [
                         children: [
                           Checkbox(
                             value: _requiresFridge,
-                            onChanged: (v) =>
-                                setState(() => _requiresFridge = v ?? false),
+                            onChanged: _keepFrozen
+                                ? null
+                                : (v) => setState(() => _requiresFridge = v ?? false),
                           ),
-                          const Text('Refrigerate'),
+                          Text(
+                            'Refrigerate',
+                            style: _keepFrozen
+                                ? Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)
+                                : Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    _rowLabelField(
+                      label: 'Keep frozen',
+                      field: Row(
+                        children: [
+                          Checkbox(
+                            value: _keepFrozen,
+                            onChanged: (v) => setState(() {
+                              _keepFrozen = v ?? false;
+                              if (_keepFrozen) _requiresFridge = false;
+                            }),
+                          ),
+                          Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                    _rowLabelField(
+                      label: 'Keep in dark',
+                      field: Row(
+                        children: [
+                          Checkbox(
+                            value: _lightSensitive,
+                            onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+                          ),
+                          Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
                         ],
                       ),
                     ),

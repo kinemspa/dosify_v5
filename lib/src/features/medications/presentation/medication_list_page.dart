@@ -30,6 +30,7 @@ class MedicationListPage extends ConsumerStatefulWidget {
 class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   _MedView _view = _MedView.large; // Default to large cards
   _SortBy _sortBy = _SortBy.name;
+  bool _sortAsc = true;
   _FilterBy _filterBy = _FilterBy.all;
   String _query = '';
   bool _searchExpanded = false;
@@ -248,10 +249,16 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
           // Sort button
           if (!_searchExpanded)
-            PopupMenuButton<_SortBy>(
+            PopupMenuButton<Object>(
               icon: Icon(Icons.sort, color: Colors.grey.shade400),
               tooltip: 'Sort medications',
-              onSelected: (sort) => setState(() => _sortBy = sort),
+              onSelected: (value) => setState(() {
+                if (value is _SortBy) {
+                  _sortBy = value;
+                } else if (value == 'toggle_dir') {
+                  _sortAsc = !_sortAsc;
+                }
+              }),
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: _SortBy.name,
@@ -268,6 +275,16 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 const PopupMenuItem(
                   value: _SortBy.expiry,
                   child: Text('Sort by expiry'),
+                ),
+                PopupMenuItem(
+                  value: 'toggle_dir',
+                  child: Row(
+                    children: [
+                      Icon(_sortAsc ? Icons.arrow_upward : Icons.arrow_downward, size: 18),
+                      const SizedBox(width: 8),
+                      Text(_sortAsc ? 'Ascending' : 'Descending'),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -314,22 +331,23 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     }
 
     // Apply sorting
+    int dir(int v) => _sortAsc ? v : -v;
     switch (_sortBy) {
       case _SortBy.name:
-        items.sort((a, b) => a.name.compareTo(b.name));
+        items.sort((a, b) => dir(a.name.compareTo(b.name)));
         break;
       case _SortBy.stock:
-        items.sort((a, b) => a.stockValue.compareTo(b.stockValue));
+        items.sort((a, b) => dir(a.stockValue.compareTo(b.stockValue)));
         break;
       case _SortBy.strength:
-        items.sort((a, b) => a.strengthValue.compareTo(b.strengthValue));
+        items.sort((a, b) => dir(a.strengthValue.compareTo(b.strengthValue)));
         break;
       case _SortBy.expiry:
         items.sort((a, b) {
           if (a.expiry == null && b.expiry == null) return 0;
-          if (a.expiry == null) return 1;
-          if (b.expiry == null) return -1;
-          return a.expiry!.compareTo(b.expiry!);
+          if (a.expiry == null) return dir(1);
+          if (b.expiry == null) return dir(-1);
+          return dir(a.expiry!.compareTo(b.expiry!));
         });
         break;
     }
@@ -345,6 +363,22 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         return Icons.view_comfy_alt;
       case _MedView.large:
         return Icons.view_comfortable;
+    }
+  }
+
+  // Icon per medication form for list tiles
+  IconData _iconForForm(MedicationForm form) {
+    switch (form) {
+      case MedicationForm.tablet:
+        return Icons.medication;
+      case MedicationForm.capsule:
+        return Icons.bubble_chart;
+      case MedicationForm.injectionPreFilledSyringe:
+        return Icons.vaccines;
+      case MedicationForm.injectionSingleDoseVial:
+        return Icons.biotech;
+      case MedicationForm.injectionMultiDoseVial:
+        return Icons.science;
     }
   }
 
@@ -448,6 +482,50 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     return theme.colorScheme.onSurface;
   }
 
+  TextSpan _stockStatusTextSpanFor(BuildContext context, Medication m) {
+    final theme = Theme.of(context);
+    final baseStyle = theme.textTheme.bodySmall?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurface,
+    );
+    final isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
+        m.stockUnit == StockUnit.singleDoseVials ||
+        m.stockUnit == StockUnit.multiDoseVials ||
+        m.stockUnit == StockUnit.tablets ||
+        m.stockUnit == StockUnit.capsules;
+    if (isCountUnit) {
+      final current = m.stockValue.floor();
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceil()
+          : current;
+      final colored = _stockStatusColorFor(context, m);
+      return TextSpan(
+        style: baseStyle,
+        children: [
+          TextSpan(
+            text: '$current',
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(text: '/$total ${_stockUnitLabel(m.stockUnit)}'),
+        ],
+      );
+    }
+    return TextSpan(
+      style: baseStyle,
+      children: [
+        TextSpan(
+          text: fmt2(m.stockValue),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: _stockStatusColorFor(context, m),
+          ),
+        ),
+        TextSpan(text: ' ${_stockUnitLabel(m.stockUnit)}'),
+      ],
+    );
+  }
+
   Widget _buildMedList(BuildContext context, List<Medication> items) {
     switch (_view) {
       case _MedView.list:
@@ -458,6 +536,15 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, index) {
             final m = items[index];
             return ListTile(
+              leading: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+child: Icon(_iconForForm(m.form), color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
+              ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8,
                 vertical: 4,
@@ -489,7 +576,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} ${_formLabelPlural(m.form)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -497,13 +584,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          _stockStatusShortTextFor(m),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: _stockStatusColorFor(context, m),
-                              ),
+                        child: RichText(
+                          text: _stockStatusTextSpanFor(context, m),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -556,9 +638,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       case _MedView.large:
         // Large view uses summary-style neutral cards.
 return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
         );
     }
@@ -569,6 +651,55 @@ class _MedCard extends StatelessWidget {
   const _MedCard({required this.m, required this.dense});
   final Medication m;
   final bool dense;
+
+  TextSpan _stockSpan(BuildContext context) {
+    final theme = Theme.of(context);
+    // Count-based units show current/total unit
+    final isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
+        m.stockUnit == StockUnit.singleDoseVials ||
+        m.stockUnit == StockUnit.multiDoseVials ||
+        m.stockUnit == StockUnit.tablets ||
+        m.stockUnit == StockUnit.capsules;
+    if (isCountUnit) {
+      final current = m.stockValue.floor();
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceil()
+          : current;
+      final colored = _stockStatusColor(Theme.of(context));
+      return TextSpan(
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              height: 1.0,
+              fontSize: 9,
+            ),
+        children: [
+          TextSpan(
+            text: '$current',
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(text: '/$total ${_getStockUnitLabel(m.stockUnit)}'),
+        ],
+      );
+    }
+    return TextSpan(
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            height: 1.0,
+            fontSize: 9,
+          ),
+      children: [
+        TextSpan(
+          text: fmt2(m.stockValue),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: _stockStatusColor(Theme.of(context)),
+          ),
+        ),
+        TextSpan(text: ' ${_getStockUnitLabel(m.stockUnit)}'),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -591,123 +722,83 @@ child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
         m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
     return Card(
-      elevation: dense ? 1 : 2,
+      elevation: 1,
       child: InkWell(
         onTap: () => context.push('/medications/${m.id}'),
-        child: Stack(
-          children: [
-            Padding(
-              padding: dense
-                  ? const EdgeInsets.only(left: 1, right: 1, top: 1, bottom: 0)
-                  : const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Name
+              Text(
+                m.name,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  height: 1.0,
+                  fontSize: 13,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              // Chip + expiry
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Information grid - simplified for dense cards
-                  // Ultra-compact dense layout: name + single summary line
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Line 1: Name
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8, top: 6, right: 8),
-                        child: Text(
-                          m.name,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            height: 1.0,
-                            fontSize: 13,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      _getFormAbbr(m.form),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        height: 1.0,
                       ),
-                      const SizedBox(height: 3),
-                      // Line 2-4: Chip row, then strength, then remaining stock
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    _getFormAbbr(m.form),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onPrimaryContainer,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.0,
-                                    ),
-                                  ),
-                                ),
-                                if (m.expiry != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: Text(
-                                      _formatDateDayMonth(m.expiry!),
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: isExpiringSoon
-                                            ? theme.colorScheme.error
-                                            : theme.colorScheme.onSurfaceVariant,
-                                        height: 1.0,
-                                        fontSize: 9,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.primary,
-                                height: 1.0,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              _stockStatusShortText(),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: _stockStatusColor(theme),
-                                height: 1.0,
-                                fontSize: 9,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
+                  if (m.expiry != null)
+                    Text(
+                      _formatDateDayMonth(m.expiry!),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isExpiringSoon
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.onSurfaceVariant,
+                        height: 1.0,
+                        fontSize: 9,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              // Strength
+              Text(
+                '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.0,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              // Stock
+              RichText(
+                text: _stockSpan(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -766,7 +857,7 @@ child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
       case MedicationForm.tablet:
         return Icons.medication;
       case MedicationForm.capsule:
-        return Icons.medication_liquid;
+        return Icons.bubble_chart;
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:

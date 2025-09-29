@@ -987,7 +987,7 @@ field: FractionallySizedBox(
                     label: 'Expiry date',
                     field: FractionallySizedBox(
                       widthFactor: 0.2,
-                      child: DateButton36(
+child: DateButton36(
                         label: _expiry == null
                             ? 'Select date'
                             : DateFormat.yMd().format(_expiry!),
@@ -1001,6 +1001,7 @@ field: FractionallySizedBox(
                           );
                           if (picked != null) setState(() => _expiry = picked);
                         },
+                        selected: _expiry != null,
                       ),
                     ),
                   ),
