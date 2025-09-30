@@ -462,7 +462,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               decoration: _dec(context, hint: 'eg. Refrigerator'),
             ),
           ),
-          locationHelp: 'Where it's stored (e.g., Refrigerator)',
+          locationHelp: "Where it's stored (e.g., Refrigerator)",
           refrigerateRow: Opacity(
             opacity: _keepFrozen ? 0.5 : 1.0,
             child: Row(children: [
