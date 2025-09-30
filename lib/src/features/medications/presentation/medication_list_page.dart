@@ -296,8 +296,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               ],
             ),
         ],
-      ),
-    );
+      );
   }
 
   List<Medication> _getFilteredAndSortedMedications(
@@ -782,6 +781,7 @@ class _MedCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
     );
   }
 
