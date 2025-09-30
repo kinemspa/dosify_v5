@@ -344,34 +344,28 @@ class _ReconstitutionCalculatorDialogState
               ),
             ),
             const SizedBox(height: 8),
-            // Summary style similar to add-med floating card
-            Card(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Summary',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Syringe: ${_syringe.label} • Fill: ${_round2(_selectedUnits)} IU',
-                    ),
-                    Text(
-                      'Concentration: ${currentC.toStringAsFixed(2)} ${widget.unitLabel}/mL',
-                    ),
-                    Text(
-                      'Vial volume: ${currentV.toStringAsFixed(2)} mL' +
-                          (vialMax != null
-                              ? ' (limit ${vialMax!.toStringAsFixed(2)} mL)'
-                              : ''),
-                    ),
-                  ],
+            // Summary
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Summary',
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  'Syringe: ${_syringe.label} • Fill: ${_round2(_selectedUnits)} IU',
+                ),
+                Text(
+                  'Concentration: ${currentC.toStringAsFixed(2)} ${widget.unitLabel}/mL',
+                ),
+                Text(
+                  'Vial volume: ${currentV.toStringAsFixed(2)} mL' +
+                      (vialMax != null
+                          ? ' (limit ${vialMax!.toStringAsFixed(2)} mL)'
+                          : ''),
+                ),
+              ],
             ),
             if (!fitsVial)
               Padding(
