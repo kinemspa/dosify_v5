@@ -1292,33 +1292,111 @@ _rowLabelField(
   Future<void> _showConfirmDialog() async {
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Center(
-          child: Text(
-            'Confirm medication',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              ctx,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final cs = theme.colorScheme;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          contentPadding: EdgeInsets.zero,
+          title: null,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with gradient background
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [cs.primary, cs.primary.withValues(alpha: 0.8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cs.onPrimary.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add_circle,
+                        size: 40,
+                        color: cs.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Confirm Medication',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Review details before saving',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onPrimary.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content area
+              Container(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: _buildConfirmContent(ctx),
+                ),
+              ),
+            ],
           ),
-        ),
-        actionsAlignment: MainAxisAlignment.center,
-        content: SingleChildScrollView(child: _buildConfirmContent(ctx)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await _persistMedication();
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
-      ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(ctx).pop();
+                      await _persistMedication();
+                    },
+                    child: const Text('Confirm & Save'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1397,20 +1475,71 @@ _rowLabelField(
 
   Widget _buildConfirmContent(BuildContext ctx) {
     final theme = Theme.of(ctx);
-    // Swap styles: labels bold blue (primary), values standard onSurface
-    final labelStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.primary,
-      fontWeight: FontWeight.w800,
+    final cs = theme.colorScheme;
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(
+      color: cs.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      letterSpacing: 0.5,
     );
-    final valueStyle = theme.textTheme.bodyMedium;
-    Widget row(String l, String v) => Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: cs.onSurface,
+      fontWeight: FontWeight.w600,
+      height: 1.4,
+    );
+    final emptyStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: cs.onSurfaceVariant,
+      fontStyle: FontStyle.italic,
+    );
+    
+    Widget row(String l, String v, {bool highlight = false}) => Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: highlight 
+            ? cs.primaryContainer.withValues(alpha: 0.3)
+            : cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: highlight 
+              ? cs.primary.withValues(alpha: 0.3)
+              : cs.outlineVariant.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 140, child: Text(l, style: labelStyle)),
+          Text(l.toUpperCase(), style: labelStyle),
+          const SizedBox(height: 4),
+          Text(
+            v.isEmpty ? 'Not specified' : v,
+            style: v.isEmpty ? emptyStyle : valueStyle,
+          ),
+        ],
+      ),
+    );
+    
+    Widget sectionHeader(String title) => Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 16,
+            decoration: BoxDecoration(
+              color: cs.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           const SizedBox(width: 8),
-          Expanded(child: Text(v.isEmpty ? '-' : v, style: valueStyle)),
+          Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.primary,
+            ),
+          ),
         ],
       ),
     );
@@ -1437,11 +1566,16 @@ _rowLabelField(
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        row('Name', _nameCtrl.text.trim()),
+        sectionHeader('Basic Information'),
+        row('Name', _nameCtrl.text.trim(), highlight: true),
         row('Manufacturer', _manufacturerCtrl.text.trim()),
         row('Description', _descriptionCtrl.text.trim()),
+        
+        sectionHeader('Dosage'),
+        row('Strength', strengthText, highlight: true),
         row('Notes', _notesCtrl.text.trim()),
-        row('Strength', strengthText),
+        
+        sectionHeader('Inventory'),
         row(
           'Stock',
           inventoryText.isEmpty
@@ -1449,21 +1583,70 @@ _rowLabelField(
                     ? ''
                     : _stockCtrl.text.trim() + ' tablets')
               : inventoryText,
+          highlight: true,
         ),
-        row('Quantity unit', 'tablets'),
         row(
           'Low stock alerts',
           _lowStockAlert
-              ? 'On at ${_lowStockThresholdCtrl.text.trim()}'
-              : 'Off',
+              ? 'Enabled at ${_lowStockThresholdCtrl.text.trim()} tablets'
+              : 'Disabled',
         ),
         row('Expiry', _expiryDate == null ? '' : MaterialLocalizations.of(ctx).formatCompactDate(_expiryDate!)),
         row('Batch', _batchNumberCtrl.text.trim()),
-        row('Storage location', _storageLocationCtrl.text.trim()),
-        row('Requires refrigeration', _keepRefrigerated ? 'Yes' : 'No'),
-        row('Keep frozen', _keepFrozen ? 'Yes' : 'No'),
-        row('Dark storage', _lightSensitive ? 'Yes' : 'No'),
-        row('Storage instructions', _storageInstructionsCtrl.text.trim()),
+        
+        sectionHeader('Storage'),
+        row('Location', _storageLocationCtrl.text.trim()),
+        if (_keepRefrigerated || _keepFrozen || _lightSensitive)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: cs.tertiaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: cs.tertiary.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('STORAGE CONDITIONS', style: labelStyle),
+                const SizedBox(height: 8),
+                if (_keepRefrigerated)
+                  Row(
+                    children: [
+                      Icon(Icons.ac_unit, size: 16, color: cs.tertiary),
+                      const SizedBox(width: 8),
+                      Text('Requires refrigeration', style: valueStyle),
+                    ],
+                  ),
+                if (_keepFrozen)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.ac_unit, size: 16, color: cs.tertiary),
+                        const SizedBox(width: 8),
+                        Text('Keep frozen', style: valueStyle),
+                      ],
+                    ),
+                  ),
+                if (_lightSensitive)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.dark_mode, size: 16, color: cs.tertiary),
+                        const SizedBox(width: 8),
+                        Text('Protect from light', style: valueStyle),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        row('Instructions', _storageInstructionsCtrl.text.trim()),
       ],
     );
   }

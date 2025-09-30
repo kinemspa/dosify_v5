@@ -168,18 +168,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         children: [
           // Search section - expands to layout button when activated
