@@ -1072,7 +1072,7 @@ LabelFieldRow(
                         if (widget.kind == InjectionKind.pfs)
                           const DropdownMenuItem(
                             value: StockUnit.preFilledSyringes,
-                            child: Center(child: Text('pre filled syringes')),
+                            child: Center(child: Text('syringes')),
                           ),
                         if (widget.kind == InjectionKind.single)
                           const DropdownMenuItem(

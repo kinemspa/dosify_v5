@@ -181,6 +181,19 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 children: [
                   LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
                   _support(widget.stockHelp),
+                  LabelFieldRow(
+                    label: 'Low stock alert',
+                    field: Builder(builder: (context) {
+                      // Expect caller to manage state; in preview they toggle a bool
+                      return Row(
+                        children: [
+                          // Placeholder Checkbox controlled from preview via ValueListenableBuilder would be ideal,
+                          // but template keeps it simple; caller should pass a ready-made row if needed.
+                          const SizedBox.shrink(),
+                        ],
+                      );
+                    }),
+                  ),
                   LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown),
                   LabelFieldRow(label: 'Expiry date', field: widget.expiryDateButton),
                   _support(widget.expiryHelp),

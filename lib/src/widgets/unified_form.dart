@@ -161,7 +161,7 @@ class DateButton36 extends StatelessWidget {
           );
     // Keep fixed width even when placed inside Expanded by removing horizontal constraints
     return UnconstrainedBox(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.center,
       child: SizedBox(
         height: kFieldHeight,
         width: width ?? kSmallControlWidth,
@@ -193,7 +193,7 @@ class SmallDropdown36<T> extends StatelessWidget {
     final theme = Theme.of(context);
     // Keep fixed width even when placed inside Expanded by removing horizontal constraints
     return UnconstrainedBox(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.center,
       child: SizedBox(
         height: kFieldHeight,
         width: width ?? kSmallControlWidth,
@@ -376,6 +376,7 @@ class StepperRow36 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _pillBtn(context, '−', onDec),
         const SizedBox(width: 6),
@@ -388,7 +389,7 @@ class StepperRow36 extends StatelessWidget {
                 return TextFormField(
                   controller: controller,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
                   decoration: decoration,
                 );
               },

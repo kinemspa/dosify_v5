@@ -15,6 +15,9 @@ class EditorTemplatePreviewPage extends StatefulWidget {
 }
 
 class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
+  // Inventory alert state
+  bool _lowStockAlert = false;
+  final _lowStockThreshold = TextEditingController(text: '0');
   final _name = TextEditingController();
   final _manufacturer = TextEditingController();
   final _description = TextEditingController();
@@ -127,7 +130,13 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             final v = int.tryParse(_strength.text.trim()) ?? 0;
             setState(() => _strength.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: const InputDecoration(hintText: '0'),
+          decoration: const InputDecoration(
+            hintText: '0',
+            isDense: false,
+            isCollapsed: false,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            constraints: BoxConstraints(minHeight: kFieldHeight),
+          ),
         ),
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
@@ -155,7 +164,13 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                   final v = double.tryParse(_perMl.text.trim()) ?? 0;
                   setState(() => _perMl.text = (v + 1).clamp(0, 1000000).toStringAsFixed(0));
                 },
-                decoration: const InputDecoration(hintText: '0'),
+                decoration: const InputDecoration(
+                  hintText: '0',
+                  isDense: false,
+                  isCollapsed: false,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  constraints: BoxConstraints(minHeight: kFieldHeight),
+                ),
               )
             : null,
         strengthHelp: 'Specify the amount per dose and its unit of measurement.',
@@ -172,14 +187,20 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             final v = int.tryParse(_stock.text.trim()) ?? 0;
             setState(() => _stock.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: const InputDecoration(hintText: '0'),
+          decoration: const InputDecoration(
+            hintText: '0',
+            isDense: false,
+            isCollapsed: false,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            constraints: BoxConstraints(minHeight: kFieldHeight),
+          ),
         ),
         stockHelp: 'Enter the amount currently in stock',
         quantityDropdown: SmallDropdown36<StockUnit>(
           value: _stockUnit,
           width: kSmallControlWidth,
           items: const [
-            DropdownMenuItem(value: StockUnit.preFilledSyringes, child: Center(child: Text('pre filled syringes'))),
+            DropdownMenuItem(value: StockUnit.preFilledSyringes, child: Center(child: Text('syringes'))),
           ],
           onChanged: (v) => setState(() => _stockUnit = v ?? _stockUnit),
         ),
