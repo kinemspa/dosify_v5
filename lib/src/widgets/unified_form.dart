@@ -366,12 +366,14 @@ class StepperRow36 extends StatelessWidget {
     required this.onDec,
     required this.onInc,
     required this.decoration,
+    this.compact = false,
   });
 
   final TextEditingController controller;
   final VoidCallback onDec;
   final VoidCallback onInc;
   final InputDecoration decoration;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -386,10 +388,12 @@ class StepperRow36 extends StatelessWidget {
             child: Builder(
               builder: (context) {
                 final theme = Theme.of(context);
+                final base = theme.textTheme.bodyMedium;
+                final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
                 return TextFormField(
                   controller: controller,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                  style: style,
                   decoration: decoration,
                 );
               },

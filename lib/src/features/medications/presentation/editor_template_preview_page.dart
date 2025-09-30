@@ -229,6 +229,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   constraints: BoxConstraints(minHeight: kFieldHeight),
                 ),
+                compact: true,
               )
             : null,
         lowStockHelp: _lowStockAlert
@@ -241,7 +242,12 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                 return 'Set the stock level that triggers a low stock alert';
               })()
             : null,
-        lowStockHelpColor: _lowStockAlert ? Colors.orange : null,
+        lowStockHelpColor: (() {
+          if (!_lowStockAlert) return null;
+          final stock = int.tryParse(_stock.text.trim()) ?? 0;
+          final thr = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
+          return (stock > 0 && thr >= stock) ? Colors.orange : null;
+        })(),
         quantityDropdown: SmallDropdown36<StockUnit>(
           value: _stockUnit,
           width: kSmallControlWidth,
