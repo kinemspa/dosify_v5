@@ -10,6 +10,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.manufacturer,
     this.strengthValue,
     this.strengthUnitLabel,
+    this.perMlValue,
     this.stockCurrent,
     this.stockInitial,
     this.stockUnitLabel,
@@ -33,6 +34,7 @@ class SummaryHeaderCard extends StatelessWidget {
   final String? manufacturer;
   final double? strengthValue;
   final String? strengthUnitLabel;
+  final double? perMlValue;
   final double? stockCurrent;
   final double? stockInitial;
   final String? stockUnitLabel;
@@ -227,6 +229,7 @@ class SummaryHeaderCard extends StatelessWidget {
                                           style: const TextStyle(fontWeight: FontWeight.w800),
                                         ),
                                         TextSpan(text: ' $strengthUnitLabel '),
+                                        if (perMlValue != null) TextSpan(text: 'in ${_fmt2(perMlValue)} mL, '),
                                         TextSpan(text: '$title '),
                                         TextSpan(text: formLabelPlural ?? ''),
                                       ]
@@ -237,8 +240,9 @@ class SummaryHeaderCard extends StatelessWidget {
                                                   text: _fmt2(strengthValue ?? 0),
                                                   style: const TextStyle(fontWeight: FontWeight.w800),
                                                 ),
-                                                TextSpan(text: ' $strengthUnitLabel '),
-                                                const TextSpan(text: 'per '),
+                                                TextSpan(text: ' $strengthUnitLabel'),
+                                                if (perMlValue != null) TextSpan(text: ' in ${_fmt2(perMlValue)} mL'),
+                                                const TextSpan(text: ' per '),
                                                 TextSpan(text: perUnitLabel!),
                                               ]
                                             : (perTabletLabel
@@ -247,16 +251,18 @@ class SummaryHeaderCard extends StatelessWidget {
                                                       text: _fmt2(strengthValue ?? 0),
                                                       style: const TextStyle(fontWeight: FontWeight.w800),
                                                     ),
-                                                    TextSpan(text: ' $strengthUnitLabel '),
-                                                    const TextSpan(text: 'per tablet'),
+                                                    TextSpan(text: ' $strengthUnitLabel'),
+                                                    if (perMlValue != null) TextSpan(text: ' in ${_fmt2(perMlValue)} mL'),
+                                                    const TextSpan(text: ' per tablet'),
                                                   ]
                                                 : [
                                                     TextSpan(
                                                       text: _fmt2(strengthValue ?? 0),
                                                       style: const TextStyle(fontWeight: FontWeight.w800),
                                                     ),
-                                                    TextSpan(text: ' $strengthUnitLabel '),
-                                                    TextSpan(text: formLabelPlural ?? ''),
+                                                    TextSpan(text: ' $strengthUnitLabel'),
+                                                    if (perMlValue != null) TextSpan(text: ' in ${_fmt2(perMlValue)} mL'),
+                                                    TextSpan(text: formLabelPlural != null && formLabelPlural!.isNotEmpty ? ' $formLabelPlural' : ''),
                                                   ]
                                               )
                                       ),

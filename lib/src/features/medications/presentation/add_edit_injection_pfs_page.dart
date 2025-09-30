@@ -534,14 +534,14 @@ class _AddEditInjectionPfsPageState
           final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
           final stockVal = double.tryParse(_stockValueCtrl.text.trim());
           final unitLabel = _unitLabel(_strengthUnit);
-          final perMlVal = double.tryParse(_perMlCtrl.text.trim());
-          final perMlSuffix = _isPerMl && perMlVal != null ? ', ${perMlVal.toStringAsFixed(0)} mL' : '';
+          final perMlVal = _isPerMl ? double.tryParse(_perMlCtrl.text.trim()) : null;
           return SummaryHeaderCard(
             key: key,
             title: name.isEmpty ? 'Pre-Filled Syringes' : name,
             manufacturer: manufacturer.isEmpty ? null : manufacturer,
             strengthValue: strengthVal,
-            strengthUnitLabel: _isPerMl ? '$unitLabel/mL$perMlSuffix' : unitLabel,
+            strengthUnitLabel: unitLabel,
+            perMlValue: perMlVal,
             stockCurrent: stockVal,
             stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
             stockUnitLabel: 'syringes',

@@ -175,11 +175,11 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 children: [
                   LabelFieldRow(label: 'Strength *', field: widget.strengthStepper),
                   LabelFieldRow(label: 'Unit *', field: widget.unitDropdown),
-                  // When */mL is selected, show the support text directly under the Unit dropdown
-                  if (widget.perMlStepper != null) _support(widget.perMlHelp),
+                  // Show strength help first, then perMl section when applicable
+                  _support(widget.strengthHelp),
                   if (widget.perMlStepper != null)
                     LabelFieldRow(label: 'Per mL', field: widget.perMlStepper!),
-                  _support(widget.strengthHelp),
+                  if (widget.perMlStepper != null) _support(widget.perMlHelp),
                 ],
               ),
               const SizedBox(height: 12),

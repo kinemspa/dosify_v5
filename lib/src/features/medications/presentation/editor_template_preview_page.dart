@@ -95,14 +95,14 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           final strengthVal = double.tryParse(_strength.text.trim());
           final stockVal = double.tryParse(_stock.text.trim());
           final unitLabel = _unitLabel(_strengthUnit);
-          final perMlVal = double.tryParse(_perMl.text.trim());
-          final perMlSuffix = _isPerMl && perMlVal != null ? ', ${perMlVal.toStringAsFixed(0)} mL' : '';
+          final perMlVal = _isPerMl ? double.tryParse(_perMl.text.trim()) : null;
           return SummaryHeaderCard(
             key: key,
             title: name.isEmpty ? 'Pre‑Filled Syringes' : name,
             manufacturer: manufacturer.isEmpty ? null : manufacturer,
             strengthValue: strengthVal,
-            strengthUnitLabel: _isPerMl ? '$unitLabel/mL$perMlSuffix' : unitLabel,
+            strengthUnitLabel: unitLabel,
+            perMlValue: perMlVal,
             stockCurrent: stockVal ?? 0,
             stockInitial: stockVal ?? 0,
             stockUnitLabel: 'pre filled syringes',
