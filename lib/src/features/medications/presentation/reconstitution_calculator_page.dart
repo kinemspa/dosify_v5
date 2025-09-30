@@ -279,6 +279,28 @@ class _ReconstitutionCalculatorPageState
             label: '${_round2(_selectedUnits)} IU',
             onChanged: (v) => setState(() => _selectedUnits = v),
           ),
+          // Visual syringe bar
+          Container(
+            height: 16,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: (_selectedUnits / sliderMax).clamp(0, 1),
+                minHeight: 16,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: Material(

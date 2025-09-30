@@ -322,9 +322,26 @@ class _ReconstitutionCalculatorDialogState
               onChanged: (v) => setState(() => _selectedUnits = v),
             ),
             // Visual syringe bar
-            LinearProgressIndicator(
-              value: (_selectedUnits / sliderMax).clamp(0, 1),
-              minHeight: 10,
+            Container(
+              height: 16,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: (_selectedUnits / sliderMax).clamp(0, 1),
+                  minHeight: 16,
+                  backgroundColor: Colors.transparent,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 8),
             // Summary style similar to add-med floating card
