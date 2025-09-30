@@ -185,7 +185,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 child: TextField(
                   autofocus: true,
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, size: 20, color: kTextLightGrey(context)),
+                    prefixIcon: Icon(Icons.search, size: 20, color: kTextLighterGrey(context)),
                     hintText: 'Search medications',
                     isDense: true,
                     filled: true,
@@ -212,7 +212,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     ),
                     suffixIcon: IconButton(
                       iconSize: 20,
-                      icon: Icon(Icons.close, color: kTextLightGrey(context)),
+                      icon: Icon(Icons.close, color: kTextLighterGrey(context)),
                       onPressed: () => setState(() {
                         _searchExpanded = false;
                         _query = '';
@@ -225,7 +225,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             )
           else
             IconButton(
-              icon: Icon(Icons.search, color: kTextLightGrey(context)),
+              icon: Icon(Icons.search, color: kTextLighterGrey(context)),
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search medications',
             ),
@@ -233,7 +233,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           if (_searchExpanded) const SizedBox(width: 8),
           if (_searchExpanded)
             IconButton(
-              icon: Icon(_getViewIcon(_view), color: kTextLightGrey(context)),
+              icon: Icon(_getViewIcon(_view), color: kTextLighterGrey(context)),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
@@ -242,7 +242,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           // Layout toggle as popup menu
           if (!_searchExpanded)
             IconButton(
-              icon: Icon(_getViewIcon(_view), color: kTextLightGrey(context)),
+              icon: Icon(_getViewIcon(_view), color: kTextLighterGrey(context)),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
@@ -256,7 +256,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 Icons.filter_list,
                 color: _filterBy != _FilterBy.all
                     ? Theme.of(context).colorScheme.primary
-                    : kTextLightGrey(context),
+                    : kTextLighterGrey(context),
               ),
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
@@ -283,7 +283,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           // Sort button
           if (!_searchExpanded)
             PopupMenuButton<Object>(
-              icon: Icon(Icons.sort, color: kTextLightGrey(context)),
+              icon: Icon(Icons.sort, color: kTextLighterGrey(context)),
               tooltip: 'Sort medications',
               onSelected: (value) => setState(() {
                 if (value is _SortBy) {
