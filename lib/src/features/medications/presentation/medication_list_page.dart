@@ -169,8 +169,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildToolbar(BuildContext context) {
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Row(
         children: [
           // Search section - expands to layout button when activated
@@ -380,15 +389,15 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   IconData _iconForForm(MedicationForm form) {
     switch (form) {
       case MedicationForm.tablet:
-        return Icons.medication;
+        return Icons.add_circle;
       case MedicationForm.capsule:
         return Icons.bubble_chart;
       case MedicationForm.injectionPreFilledSyringe:
-        return Icons.vaccines;
+        return Icons.colorize;
       case MedicationForm.injectionSingleDoseVial:
-        return Icons.opacity;
+        return Icons.local_drink;
       case MedicationForm.injectionMultiDoseVial:
-        return Icons.science;
+        return Icons.addchart;
     }
   }
 
@@ -840,15 +849,15 @@ class _MedCard extends StatelessWidget {
   IconData _getFormIcon(MedicationForm form) {
     switch (form) {
       case MedicationForm.tablet:
-        return Icons.medication;
-case MedicationForm.capsule:
+        return Icons.add_circle;
+      case MedicationForm.capsule:
         return MdiIcons.pill;
       case MedicationForm.injectionPreFilledSyringe:
-        return Icons.vaccines;
+        return Icons.colorize;
       case MedicationForm.injectionSingleDoseVial:
-        return Icons.opacity;
+        return Icons.local_drink;
       case MedicationForm.injectionMultiDoseVial:
-        return Icons.science;
+        return Icons.addchart;
     }
   }
 

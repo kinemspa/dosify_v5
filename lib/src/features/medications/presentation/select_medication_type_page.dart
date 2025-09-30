@@ -27,7 +27,7 @@ const _ScreenHeader(
           ),
           const SizedBox(height: 16),
           const _TypeTile(
-            icon: Icons.medication,
+            icon: Icons.add_circle,
             title: 'Tablet',
             subtitle: 'Solid pill dosage form',
           ),
@@ -39,7 +39,7 @@ const _TypeTile(
           ),
           const SizedBox(height: 16),
           const _TypeTile(
-            icon: Icons.vaccines,
+            icon: Icons.colorize,
             title: 'Injection',
             subtitle: 'Pre-filled syringes or vials',
           ),
@@ -128,9 +128,9 @@ class _TypeTile extends StatefulWidget {
 class _TypeTileState extends State<_TypeTile> {
   bool _pressed = false;
   IconData _effectiveIcon() {
-if (widget.title == 'Capsule') return MdiIcons.pill;
-    if (widget.title == 'Tablet') return Icons.medication;
-    return Icons.vaccines;
+    if (widget.title == 'Capsule') return MdiIcons.pill;
+    if (widget.title == 'Tablet') return Icons.add_circle;
+    return Icons.colorize;
   }
   @override
   Widget build(BuildContext context) {

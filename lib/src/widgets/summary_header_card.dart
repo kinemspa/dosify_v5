@@ -99,15 +99,15 @@ class SummaryHeaderCard extends StatelessWidget {
     final icon = () {
       switch (m.form) {
         case MedicationForm.tablet:
-          return Icons.medication;
+          return Icons.add_circle;
         case MedicationForm.capsule:
           return MdiIcons.pill;
         case MedicationForm.injectionPreFilledSyringe:
-          return Icons.vaccines;
+          return Icons.colorize;
         case MedicationForm.injectionSingleDoseVial:
-          return Icons.opacity;
+          return Icons.local_drink;
         case MedicationForm.injectionMultiDoseVial:
-          return Icons.science;
+          return Icons.addchart;
       }
     }();
     
@@ -176,7 +176,7 @@ class SummaryHeaderCard extends StatelessWidget {
               ]
             : null,
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

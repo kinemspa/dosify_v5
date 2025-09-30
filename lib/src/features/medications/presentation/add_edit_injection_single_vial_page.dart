@@ -459,10 +459,10 @@ class _AddEditInjectionSingleVialPageState extends ConsumerState<AddEditInjectio
               controller: _location,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: "eg. Refrigerator"),
+              decoration: _dec(context, hint: 'eg. Medicine Cabinet'),
             ),
           ),
-          locationHelp: "Where it's stored (e.g., Refrigerator)",
+          locationHelp: 'Storage location (e.g., Medicine Cabinet, Shelf 2)',
           refrigerateRow: Opacity(
             opacity: _keepFrozen ? 0.5 : 1.0,
             child: Row(children: [
