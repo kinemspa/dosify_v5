@@ -675,7 +675,7 @@ class _AddEditInjectionMultiVialPageState
                       decoration: FormFieldStyler.decoration(
                         context: context,
                         styleIndex: _formStyleIndex,
-                        label: 'Vial Volume (mL) *',
+                        label: 'Vial Fluid Volume (mL) *',
                         hint: '',
                         helper: '',
                       ),
@@ -696,7 +696,7 @@ class _AddEditInjectionMultiVialPageState
               ),
               const SizedBox(height: 4),
               const Text(
-                'Enter the total liquid volume in this vial after reconstitution. Use the calculator to compute it if unsure.',
+                'Current stock: Enter the liquid volume in mL. This is the tracked quantity that decrements with each dose. Use the calculator if reconstitution is needed.',
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
@@ -752,7 +752,7 @@ class _AddEditInjectionMultiVialPageState
                       textAlign: TextAlign.center,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'Stock *',
+                        labelText: 'Reserve *',
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -847,7 +847,7 @@ class _AddEditInjectionMultiVialPageState
               ),
               const SizedBox(height: 4),
               const Text(
-                'Tip: Number of vials is your reserve stock. Each vial may be reconstituted differently as dosage changes.',
+                'Reserve vials: Unopened vials for restocking. These can be pre-filled, need filling with known amounts, or require calculation.',
               ),
 
               Row(
