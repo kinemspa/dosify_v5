@@ -152,10 +152,15 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               );
             }
           }
-          return Column(
+          return Stack(
             children: [
-              _buildToolbar(context),
-              Expanded(child: _buildMedList(context, items)),
+              _buildMedList(context, items),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _buildToolbar(context),
+              ),
             ],
           );
         },
