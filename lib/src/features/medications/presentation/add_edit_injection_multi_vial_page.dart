@@ -642,6 +642,13 @@ class _AddEditInjectionMultiVialPageState
                     },
                   ),
                 ),
+              const SizedBox(height: 4),
+              Text(
+                'Specify the amount per dose and its unit of measurement.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
 
               const SizedBox(height: 16),
               Text(
