@@ -105,7 +105,7 @@ class _AddEditInjectionMultiVialPageState
       _strengthUnit = med.strengthUnit;
       _perMlCtrl.text = med.perMlValue?.toString() ?? '';
       _stockValueCtrl.text = med.stockValue.toString();
-      _vialVolumeCtrl.text = med.containerVolumeMl?.toString() ?? '';
+      _vialVolumeCtrl.text = med.containerVolumeMl?.toString() ?? '0';
       _lowStockEnabled = med.lowStockEnabled;
       _lowStockCtrl.text = med.lowStockVialVolumeThresholdMl?.toString() ?? '';
       _lowStockVialsCtrl.text =
@@ -115,6 +115,9 @@ class _AddEditInjectionMultiVialPageState
       _storageCtrl.text = med.storageLocation ?? '';
       _requiresFridge = med.requiresRefrigeration;
       _storageNotesCtrl.text = med.storageInstructions ?? '';
+    } else {
+      // Initialize vial volume to 0 for new medications
+      _vialVolumeCtrl.text = '0';
     }
     _loadStylePrefs();
   }
