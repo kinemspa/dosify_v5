@@ -31,7 +31,7 @@ class SelectInjectionTypePage extends StatelessWidget {
           ),
           SizedBox(height: 16),
           _Tile(
-            icon: Icons.science,
+            icon: Icons.local_hospital,
             title: 'Single Dose Vial',
             subtitle: 'One time use vial',
             route: '/medications/add/injection/single',

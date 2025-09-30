@@ -382,7 +382,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:
-        return Icons.biotech;
+        return Icons.local_hospital;
       case MedicationForm.injectionMultiDoseVial:
         return Icons.science;
     }
@@ -842,7 +842,7 @@ case MedicationForm.capsule:
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:
-        return Icons.biotech;
+        return Icons.local_hospital;
       case MedicationForm.injectionMultiDoseVial:
         return Icons.science;
     }
