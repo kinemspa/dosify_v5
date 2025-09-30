@@ -105,7 +105,7 @@ class SummaryHeaderCard extends StatelessWidget {
         case MedicationForm.injectionPreFilledSyringe:
           return Icons.vaccines;
         case MedicationForm.injectionSingleDoseVial:
-          return Icons.local_hospital;
+          return Icons.opacity;
         case MedicationForm.injectionMultiDoseVial:
           return Icons.science;
       }
@@ -176,7 +176,7 @@ class SummaryHeaderCard extends StatelessWidget {
               ]
             : null,
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

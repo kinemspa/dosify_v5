@@ -168,7 +168,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    return Row(
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: Row(
         children: [
           // Search section - expands to layout button when activated
           if (_searchExpanded)
@@ -296,7 +299,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               ],
             ),
         ],
-      );
+      ),
+    );
   }
 
   List<Medication> _getFilteredAndSortedMedications(
@@ -382,7 +386,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:
-        return Icons.local_hospital;
+        return Icons.opacity;
       case MedicationForm.injectionMultiDoseVial:
         return Icons.science;
     }
@@ -842,7 +846,7 @@ case MedicationForm.capsule:
       case MedicationForm.injectionPreFilledSyringe:
         return Icons.vaccines;
       case MedicationForm.injectionSingleDoseVial:
-        return Icons.local_hospital;
+        return Icons.opacity;
       case MedicationForm.injectionMultiDoseVial:
         return Icons.science;
     }
