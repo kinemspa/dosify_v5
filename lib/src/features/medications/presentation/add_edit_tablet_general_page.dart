@@ -377,7 +377,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                 child: TextFormField(
                   controller: controller,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
                   keyboardType: const TextInputType.numberWithOptions(
                     signed: false,
                     decimal: false,
@@ -983,7 +983,7 @@ hint: 'eg. Take with water'
                           controller: _lowStockThresholdCtrl,
                           step: 1,
                           min: 0,
-                          max: 100000,
+                          max: stockVal.floor(),
                           width: 120,
                           label: 'Threshold',
                           hint: '0',

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/form_field_styler.dart';
@@ -1126,17 +1127,29 @@ class _AddEditInjectionSingleVialPageState
                           child: _lowStockEnabled
                               ? SizedBox(
                                   width: 120,
-                                  child: TextFormField(
-                                    key: const ValueKey('lowStockField'),
-                                    controller: _lowStockCtrl,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
+                                  child: Builder(
+                                    builder: (context) {
+                                      final theme = Theme.of(context);
+                                      return TextFormField(
+                                        key: const ValueKey('lowStockField'),
+                                        controller: _lowStockCtrl,
+                                        keyboardType: const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    decoration: const InputDecoration(
-                                      labelText: 'Threshold',
-                                      hintText: '0',
-                                    ),
+                                        style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                        decoration: const InputDecoration(
+                                          labelText: 'Threshold',
+                                          hintText: '0',
+                                        ),
+                                        onChanged: (txt) {
+                                          final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                          final t = int.tryParse(txt.trim());
+                                          if (t != null && t > stock) {
+                                            setState(() => _lowStockCtrl.text = stock.toString());
+                                          }
+                                        },
+                                      );
+                                    },
                                   ),
                                 )
                               : const SizedBox(

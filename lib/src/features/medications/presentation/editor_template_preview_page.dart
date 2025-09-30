@@ -219,7 +219,8 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                 },
                 onInc: () {
                   final v = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
-                  setState(() => _lowStockThreshold.text = (v + 1).clamp(0, 1000000).toString());
+                  final maxStock = int.tryParse(_stock.text.trim()) ?? 0;
+                  setState(() => _lowStockThreshold.text = (v + 1).clamp(0, maxStock).toString());
                 },
                 decoration: const InputDecoration(
                   hintText: '0',

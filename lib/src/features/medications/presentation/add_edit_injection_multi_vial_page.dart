@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -851,14 +852,27 @@ class _AddEditInjectionMultiVialPageState
                 child: _lowStockEnabled
                     ? Column(
                         children: [
-                          TextFormField(
-                            controller: _lowStockCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: const InputDecoration(
-                              labelText: 'Low Stock - Vial Volume (mL)',
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final theme = Theme.of(context);
+                              return TextFormField(
+                                controller: _lowStockCtrl,
+                                keyboardType: const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                                style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                decoration: const InputDecoration(
+                                  labelText: 'Low Stock - Vial Volume (mL)',
+                                ),
+                                onChanged: (txt) {
+                                  final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
+                                  final t = double.tryParse(txt.trim());
+                                  if (t != null && t > maxMl) {
+                                    setState(() => _lowStockCtrl.text = maxMl.toStringAsFixed(0));
+                                  }
+                                },
+                              );
+                            },
                           ),
                           const SizedBox(height: 8),
                           Row(
@@ -874,16 +888,28 @@ class _AddEditInjectionMultiVialPageState
                               const SizedBox(width: 6),
                               SizedBox(
                                 width: 96,
-                                child: TextFormField(
-                                  controller: _lowStockVialsCtrl,
-                                  textAlign: TextAlign.center,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
+                                child: Builder(
+                                  builder: (context) {
+                                    final theme = Theme.of(context);
+                                    return TextFormField(
+                                      controller: _lowStockVialsCtrl,
+                                      textAlign: TextAlign.center,
+                                      keyboardType: const TextInputType.numberWithOptions(
                                         decimal: false,
                                       ),
-                                  decoration: const InputDecoration(
-                                    labelText: 'Low Stock - Vials in Reserve',
-                                  ),
+                                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                      decoration: const InputDecoration(
+                                        labelText: 'Low Stock - Vials in Reserve',
+                                      ),
+                                      onChanged: (txt) {
+                                        final stockVials = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                        final t = int.tryParse(txt.trim());
+                                        if (t != null && t > stockVials) {
+                                          setState(() => _lowStockVialsCtrl.text = stockVials.toString());
+                                        }
+                                      },
+                                    );
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 6),

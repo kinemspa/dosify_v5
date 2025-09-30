@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import '../../../core/utils/format.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/form_field_styler.dart';
@@ -775,12 +776,26 @@ children: [
                       field: SizedBox(
                         width: 120,
                         child: Field36(
-                          child: TextFormField(
-                            controller: _lowStockCtrl,
-                            textAlign: TextAlign.center,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: _dec(context: context, label: 'Threshold', hint: '0'),
-                            onChanged: (_) => setState(() {}),
+                          child: Builder(
+                            builder: (context) {
+                              final theme = Theme.of(context);
+                              return TextFormField(
+                                controller: _lowStockCtrl,
+                                textAlign: TextAlign.center,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                decoration: _dec(context: context, label: 'Threshold', hint: '0'),
+                                onChanged: (txt) {
+                                  final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                  final t = int.tryParse(txt.trim());
+                                  if (t != null && t > stock) {
+                                    setState(() => _lowStockCtrl.text = stock.toString());
+                                  } else {
+                                    setState(() {});
+                                  }
+                                },
+                              );
+                            },
                           ),
                         ),
                       ),
