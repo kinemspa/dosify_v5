@@ -183,25 +183,33 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               child: TextField(
                 autofocus: true,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search, color: kTextLightGrey(context)),
                   hintText: 'Search medications',
                   isDense: true,
                   filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
                   ),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close, color: kTextLightGrey(context)),
                     onPressed: () => setState(() {
                       _searchExpanded = false;
                       _query = '';
@@ -217,7 +225,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search medications',
             ),
-
           // When search is expanded, only show layout button
           if (_searchExpanded) const SizedBox(width: 8),
           if (_searchExpanded)
@@ -231,7 +238,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           // Layout toggle as popup menu
           if (!_searchExpanded)
             IconButton(
-              icon: Icon(_getViewIcon(_view), color: Colors.grey.shade400),
+              icon: Icon(_getViewIcon(_view), color: kTextLightGrey(context)),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
