@@ -658,23 +658,41 @@ class _AddEditInjectionMultiVialPageState
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _vialVolumeCtrl,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: FormFieldStyler.decoration(
-                  context: context,
-                  styleIndex: _formStyleIndex,
-                  label: 'Vial Volume (mL) *',
-                  hint: '',
-                  helper: '',
-                ),
-                validator: (v) {
-                  final d = double.tryParse(v ?? '');
-                  if (d == null || d <= 0) return 'Enter > 0 mL';
-                  return null;
-                },
+              Row(
+                children: [
+                  _pillBtn(context, '−', () {
+                    final v = double.tryParse(_vialVolumeCtrl.text) ?? 0;
+                    final nv = (v - 1).clamp(0, 10000);
+                    setState(() => _vialVolumeCtrl.text = nv.toStringAsFixed(0));
+                  }),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _vialVolumeCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: FormFieldStyler.decoration(
+                        context: context,
+                        styleIndex: _formStyleIndex,
+                        label: 'Vial Volume (mL) *',
+                        hint: '',
+                        helper: '',
+                      ),
+                      validator: (v) {
+                        final d = double.tryParse(v ?? '');
+                        if (d == null || d <= 0) return 'Enter > 0 mL';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  _pillBtn(context, '+', () {
+                    final v = double.tryParse(_vialVolumeCtrl.text) ?? 0;
+                    final nv = (v + 1).clamp(0, 10000);
+                    setState(() => _vialVolumeCtrl.text = nv.toStringAsFixed(0));
+                  }),
+                ],
               ),
               const SizedBox(height: 4),
               const Text(
@@ -868,22 +886,41 @@ class _AddEditInjectionMultiVialPageState
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  TextFormField(
-                                    controller: _lowStockCtrl,
-                                    keyboardType: const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
-                                    decoration: const InputDecoration(
-                                      labelText: 'Low Stock - Vial Volume (mL)',
-                                    ),
-                                    onChanged: (txt) {
-                                      final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
-                                      final t = double.tryParse(txt.trim());
-                                      if (t != null && t > maxMl) {
-                                        setState(() => _lowStockCtrl.text = maxMl.toStringAsFixed(0));
-                                      }
-                                    },
+                                  Row(
+                                    children: [
+                                      _pillBtn(context, '−', () {
+                                        final v = double.tryParse(_lowStockCtrl.text) ?? 0;
+                                        final nv = (v - 1).clamp(0, 10000);
+                                        setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
+                                      }),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _lowStockCtrl,
+                                          keyboardType: const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                          style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                          decoration: const InputDecoration(
+                                            labelText: 'Low Stock - Vial Volume (mL)',
+                                          ),
+                                          onChanged: (txt) {
+                                            final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
+                                            final t = double.tryParse(txt.trim());
+                                            if (t != null && t > maxMl) {
+                                              setState(() => _lowStockCtrl.text = maxMl.toStringAsFixed(0));
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      _pillBtn(context, '+', () {
+                                        final v = double.tryParse(_lowStockCtrl.text) ?? 0;
+                                        final maxMl = double.tryParse(_vialVolumeCtrl.text) ?? 10000;
+                                        final nv = (v + 1).clamp(0, maxMl);
+                                        setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
+                                      }),
+                                    ],
                                   ),
                                   Builder(
                                     builder: (context) {
