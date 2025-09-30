@@ -25,7 +25,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
 
   final _strength = TextEditingController(text: '0');
   Unit _strengthUnit = Unit.mg;
-  final _perMl = TextEditingController();
+  final _perMl = TextEditingController(text: '1');
   bool get _isPerMl =>
       _strengthUnit == Unit.mcgPerMl || _strengthUnit == Unit.mgPerMl || _strengthUnit == Unit.gPerMl || _strengthUnit == Unit.unitsPerMl;
 
@@ -61,12 +61,14 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           final strengthVal = double.tryParse(_strength.text.trim());
           final stockVal = double.tryParse(_stock.text.trim());
           final unitLabel = _unitLabel(_strengthUnit);
+          final perMlVal = double.tryParse(_perMl.text.trim());
+          final perMlSuffix = _isPerMl && perMlVal != null ? ', ${perMlVal.toStringAsFixed(0)} mL' : '';
           return SummaryHeaderCard(
             key: key,
             title: name.isEmpty ? 'Pre‑Filled Syringes' : name,
             manufacturer: manufacturer.isEmpty ? null : manufacturer,
             strengthValue: strengthVal,
-            strengthUnitLabel: _isPerMl ? '$unitLabel/mL' : unitLabel,
+            strengthUnitLabel: _isPerMl ? '$unitLabel/mL$perMlSuffix' : unitLabel,
             stockCurrent: stockVal ?? 0,
             stockInitial: stockVal ?? 0,
             stockUnitLabel: 'pre filled syringes',
@@ -77,7 +79,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             lowStockEnabled: _lowStockAlert,
             lowStockThreshold: double.tryParse(_lowStockThreshold.text.trim()),
             includeNameInStrengthLine: false,
-            perTabletLabel: name.isNotEmpty,
+            perTabletLabel: false,
             formLabelPlural: 'pre filled syringes',
           );
         },
@@ -87,6 +89,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _name,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'eg. AcmeTab-500'),
             onChanged: (_) => setState(() {}),
           ),
@@ -95,6 +98,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _manufacturer,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'eg. Contoso Pharma'),
             onChanged: (_) => setState(() {}),
           ),
@@ -103,6 +107,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _description,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'eg. Pain relief'),
             onChanged: (_) => setState(() {}),
           ),
@@ -111,6 +116,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _notes,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'eg. Take with food'),
             onChanged: (_) => setState(() {}),
           ),
@@ -152,21 +158,26 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
             DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
           ],
-          onChanged: (v) => setState(() => _strengthUnit = v ?? _strengthUnit),
+          onChanged: (v) => setState(() {
+            _strengthUnit = v ?? _strengthUnit;
+            if (_isPerMl && _perMl.text.trim().isEmpty) {
+              _perMl.text = '1';
+            }
+          }),
         ),
         perMlStepper: _isPerMl
             ? StepperRow36(
                 controller: _perMl,
                 onDec: () {
-                  final v = double.tryParse(_perMl.text.trim()) ?? 0;
-                  setState(() => _perMl.text = (v - 1).clamp(0, 1000000).toStringAsFixed(0));
+                  final v = double.tryParse(_perMl.text.trim()) ?? 1;
+                  setState(() => _perMl.text = (v - 1).clamp(1, 1000000).toStringAsFixed(0));
                 },
                 onInc: () {
-                  final v = double.tryParse(_perMl.text.trim()) ?? 0;
-                  setState(() => _perMl.text = (v + 1).clamp(0, 1000000).toStringAsFixed(0));
+                  final v = double.tryParse(_perMl.text.trim()) ?? 1;
+                  setState(() => _perMl.text = (v + 1).clamp(1, 1000000).toStringAsFixed(0));
                 },
                 decoration: const InputDecoration(
-                  hintText: '0',
+                  hintText: '1',
                   isDense: false,
                   isCollapsed: false,
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -175,7 +186,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
               )
             : null,
         strengthHelp: 'Specify the amount per dose and its unit of measurement.',
-        perMlHelp: _isPerMl ? 'Enter the volume per mL' : null,
+        perMlHelp: _isPerMl ? 'Volume (mL) for the concentration; defaults to 1 mL.' : null,
 
         // Inventory
         stockStepper: StepperRow36(
