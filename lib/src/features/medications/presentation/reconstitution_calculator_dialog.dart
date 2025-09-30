@@ -126,6 +126,32 @@ class _ReconstitutionCalculatorDialogState
     return (minU, midU, highU);
   }
 
+  InputDecoration _fieldDecoration(BuildContext context, {required String label, String? helper}) {
+    return InputDecoration(
+      labelText: label,
+      helperText: helper,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: Theme.of(context).colorScheme.primary,
+          width: 2,
+        ),
+      ),
+      filled: true,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final Sraw = double.tryParse(_strengthCtrl.text) ?? 0;
@@ -194,9 +220,10 @@ class _ReconstitutionCalculatorDialogState
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(
-                labelText: 'Vial Quantity (${widget.unitLabel})',
-                helperText: 'Total amount in the vial',
+              decoration: _fieldDecoration(
+                context,
+                label: 'Vial Quantity (${widget.unitLabel})',
+                helper: 'Total amount in the vial',
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -209,9 +236,10 @@ class _ReconstitutionCalculatorDialogState
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Desired Dose',
-                      helperText: 'Amount per dose',
+                    decoration: _fieldDecoration(
+                      context,
+                      label: 'Desired Dose',
+                      helper: 'Amount per dose',
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -233,7 +261,7 @@ class _ReconstitutionCalculatorDialogState
                       ],
                     ],
                     onChanged: (v) => setState(() => _doseUnit = v!),
-                    decoration: const InputDecoration(labelText: 'Dose Unit'),
+                    decoration: _fieldDecoration(context, label: 'Dose Unit'),
                   ),
                 ),
               ],
@@ -257,7 +285,7 @@ class _ReconstitutionCalculatorDialogState
                   max(5, (0.05 * total).ceil()).toDouble(),
                 );
               }),
-              decoration: const InputDecoration(labelText: 'Syringe Size'),
+              decoration: _fieldDecoration(context, label: 'Syringe Size'),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -265,9 +293,10 @@ class _ReconstitutionCalculatorDialogState
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Vial Size (mL, optional)',
-                helperText: 'Max volume of the vial (leave empty for none) ',
+              decoration: _fieldDecoration(
+                context,
+                label: 'Vial Size (mL, optional)',
+                helper: 'Max volume of the vial (leave empty for none)',
               ),
               onChanged: (_) => setState(() {}),
             ),
