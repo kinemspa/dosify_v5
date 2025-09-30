@@ -182,16 +182,24 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             Expanded(
               child: TextField(
                 autofocus: true,
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
                   hintText: 'Search medications',
                   isDense: true,
-                  // No background fill or borders in toolbar
-                  filled: false,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                ).copyWith(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => setState(() {
@@ -542,9 +550,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildMedList(BuildContext context, List<Medication> items) {
     switch (_view) {
-case _MedView.list:
-return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+      case _MedView.list:
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
@@ -624,8 +632,8 @@ style: Theme.of(context).textTheme.titleMedium?.copyWith(
           },
         );
       case _MedView.compact:
-return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+        return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: MediaQuery.of(context).size.width > 900
@@ -643,8 +651,8 @@ return GridView.builder(
         );
       case _MedView.large:
         // Large view uses summary-style neutral cards.
-return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
