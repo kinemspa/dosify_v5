@@ -65,21 +65,29 @@ class SummaryHeaderCard extends StatelessWidget {
     String unitLabel;
     switch (m.strengthUnit) {
       case Unit.mcg:
+      case Unit.mcgPerMl:
         unitLabel = 'mcg';
         break;
       case Unit.mg:
+      case Unit.mgPerMl:
         unitLabel = 'mg';
         break;
       case Unit.g:
+      case Unit.gPerMl:
         unitLabel = 'g';
         break;
-      default:
-        unitLabel = m.strengthUnit.name;
+      case Unit.units:
+      case Unit.unitsPerMl:
+        unitLabel = 'units';
+        break;
     }
     String stockUnitLabel;
     switch (m.stockUnit) {
       case StockUnit.tablets:
         stockUnitLabel = 'tablets';
+        break;
+      case StockUnit.preFilledSyringes:
+        stockUnitLabel = 'syringes';
         break;
       default:
         stockUnitLabel = m.stockUnit.name;
@@ -97,11 +105,19 @@ class SummaryHeaderCard extends StatelessWidget {
           return Icons.vaccines;
       }
     }();
+    
+    // Determine if this is a perMl medication and set perUnitLabel for injections
+    String? perUnitLabel;
+    if (m.form == MedicationForm.injectionPreFilledSyringe) {
+      perUnitLabel = 'Syringe';
+    }
+    
     return SummaryHeaderCard(
       title: m.name,
       manufacturer: m.manufacturer,
       strengthValue: m.strengthValue,
       strengthUnitLabel: unitLabel,
+      perMlValue: m.perMlValue,
       stockCurrent: m.stockValue,
       stockInitial: m.initialStockValue ?? m.stockValue,
       stockUnitLabel: stockUnitLabel,
@@ -114,6 +130,8 @@ class SummaryHeaderCard extends StatelessWidget {
       neutral: neutral,
       outlined: outlined,
       leadingIcon: icon,
+      perTabletLabel: false,
+      perUnitLabel: perUnitLabel,
     );
   }
 
@@ -328,13 +346,13 @@ class SummaryHeaderCard extends StatelessWidget {
                                             : (neutral
                                                 ? cs.onSurfaceVariant.withValues(alpha: 0.75)
                                                 : fg.withValues(alpha: 0.85)),
-                                        fontWeight: lowStockActive ? FontWeight.w700 : FontWeight.w600,
+                                        fontWeight: lowStockActive ? FontWeight.w600 : FontWeight.w500,
                                       ),
                                       children: [
                                         const TextSpan(text: 'Alert at '),
                                         TextSpan(
                                           text: _fmt2(lowStockThreshold),
-                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                          style: const TextStyle(fontWeight: FontWeight.w700),
                                         ),
                                         TextSpan(text: ' ${stockUnitLabel ?? 'left'} remaining'),
                                       ],
