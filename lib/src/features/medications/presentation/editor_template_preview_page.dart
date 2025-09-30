@@ -23,6 +23,40 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
   final _description = TextEditingController();
   final _notes = TextEditingController();
 
+  // Match Add Tablet input decoration (size, fill, borders, padding)
+  InputDecoration _dec(BuildContext context, {String? hint}) {
+    final cs = Theme.of(context).colorScheme;
+    return InputDecoration(
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      hintText: hint,
+      // suppress default error line to keep height stable
+      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      filled: true,
+      fillColor: cs.surfaceContainerLowest,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+      ),
+    );
+  }
+
   final _strength = TextEditingController(text: '0');
   Unit _strengthUnit = Unit.mg;
   final _perMl = TextEditingController(text: '1');
@@ -90,7 +124,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _name,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: const InputDecoration(hintText: 'eg. AcmeTab-500'),
+            decoration: _dec(context, hint: 'eg. DosifiTab-500'),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -99,7 +133,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _manufacturer,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: const InputDecoration(hintText: 'eg. Contoso Pharma'),
+            decoration: _dec(context, hint: 'eg. Dosifi Labs'),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -108,7 +142,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _description,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: const InputDecoration(hintText: 'eg. Pain relief'),
+            decoration: _dec(context, hint: 'eg. Pain relief'),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -117,7 +151,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _notes,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: const InputDecoration(hintText: 'eg. Take with food'),
+            decoration: _dec(context, hint: 'eg. Take with water'),
             onChanged: (_) => setState(() {}),
           ),
         ),
