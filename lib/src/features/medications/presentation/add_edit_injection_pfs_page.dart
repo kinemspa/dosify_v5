@@ -561,6 +561,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Name *', hint: 'eg. DosifiTab-500'),
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
             onChanged: (_) => setState(() {}),
@@ -570,6 +571,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _manufacturerCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Manufacturer', hint: 'eg. Dosifi Labs'),
             onChanged: (_) => setState(() {}),
           ),
@@ -578,6 +580,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _descriptionCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Description', hint: 'eg. Pain relief'),
             onChanged: (_) => setState(() {}),
           ),
@@ -586,6 +589,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _notesCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Notes', hint: 'eg. Take with water'),
             onChanged: (_) => setState(() {}),
           ),
@@ -741,6 +745,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _batchCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Batch No.', hint: 'Enter batch number'),
           ),
         ),
@@ -748,6 +753,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _storageCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Location', hint: 'eg. Bathroom cabinet'),
           ),
         ),
@@ -770,6 +776,7 @@ class _AddEditInjectionPfsPageState
           child: TextFormField(
             controller: _storageNotesCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: _dec(context: context, label: 'Storage instructions', hint: 'Enter storage instructions'),
           ),
         ),
