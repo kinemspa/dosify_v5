@@ -176,7 +176,7 @@ class SummaryHeaderCard extends StatelessWidget {
               ]
             : null,
       ),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

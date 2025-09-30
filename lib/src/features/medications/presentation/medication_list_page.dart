@@ -652,7 +652,7 @@ return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 4),
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
         );
     }
