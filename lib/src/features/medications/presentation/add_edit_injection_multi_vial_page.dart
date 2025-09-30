@@ -644,7 +644,7 @@ class _AddEditInjectionMultiVialPageState
                 ),
               const SizedBox(height: 4),
               Text(
-                'Specify the amount per dose and its unit of measurement.',
+                'Medication concentration: Specify the medication strength and unit. This defines the potency, not the quantity.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
