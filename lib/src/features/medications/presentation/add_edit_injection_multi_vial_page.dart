@@ -494,7 +494,7 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -608,7 +608,7 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -746,7 +746,7 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -810,7 +810,7 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
