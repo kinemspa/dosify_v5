@@ -39,6 +39,9 @@ class MedEditorTemplate extends StatefulWidget {
     required this.expiryDateButton,
     this.stockHelp,
     this.expiryHelp,
+    this.lowStockRow,
+    this.lowStockThresholdField,
+    this.lowStockHelp,
 
     // Storage
     required this.batchField,
@@ -84,6 +87,10 @@ class MedEditorTemplate extends StatefulWidget {
   final Widget expiryDateButton;
   final String? stockHelp;
   final String? expiryHelp;
+  // Optional low stock controls
+  final Widget? lowStockRow;
+  final Widget? lowStockThresholdField;
+  final String? lowStockHelp;
 
   // Storage
   final Widget batchField;
@@ -181,19 +188,11 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 children: [
                   LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
                   _support(widget.stockHelp),
-                  LabelFieldRow(
-                    label: 'Low stock alert',
-                    field: Builder(builder: (context) {
-                      // Expect caller to manage state; in preview they toggle a bool
-                      return Row(
-                        children: [
-                          // Placeholder Checkbox controlled from preview via ValueListenableBuilder would be ideal,
-                          // but template keeps it simple; caller should pass a ready-made row if needed.
-                          const SizedBox.shrink(),
-                        ],
-                      );
-                    }),
-                  ),
+                  if (widget.lowStockRow != null)
+                    LabelFieldRow(label: 'Low stock alert', field: widget.lowStockRow!),
+                  if (widget.lowStockThresholdField != null)
+                    LabelFieldRow(label: 'Threshold', field: widget.lowStockThresholdField!),
+                  if (widget.lowStockHelp != null) _support(widget.lowStockHelp),
                   LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown),
                   LabelFieldRow(label: 'Expiry date', field: widget.expiryDateButton),
                   _support(widget.expiryHelp),

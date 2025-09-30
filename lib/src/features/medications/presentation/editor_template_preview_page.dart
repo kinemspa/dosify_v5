@@ -74,7 +74,8 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             showRefrigerate: _refrigerate,
             showFrozen: _keepFrozen,
             showDark: _lightSensitive,
-            lowStockEnabled: false,
+            lowStockEnabled: _lowStockAlert,
+            lowStockThreshold: double.tryParse(_lowStockThreshold.text.trim()),
             includeNameInStrengthLine: false,
             perTabletLabel: name.isNotEmpty,
             formLabelPlural: 'pre filled syringes',
@@ -196,6 +197,40 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           ),
         ),
         stockHelp: 'Enter the amount currently in stock',
+        lowStockRow: Row(
+          children: [
+            Checkbox(value: _lowStockAlert, onChanged: (v) => setState(() => _lowStockAlert = v ?? false)),
+            Expanded(
+              child: Text(
+                'Enable alert when stock is low',
+                style: kCheckboxLabelStyle(context),
+                softWrap: true,
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
+        lowStockThresholdField: _lowStockAlert
+            ? StepperRow36(
+                controller: _lowStockThreshold,
+                onDec: () {
+                  final v = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
+                  setState(() => _lowStockThreshold.text = (v - 1).clamp(0, 1000000).toString());
+                },
+                onInc: () {
+                  final v = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
+                  setState(() => _lowStockThreshold.text = (v + 1).clamp(0, 1000000).toString());
+                },
+                decoration: const InputDecoration(
+                  hintText: '0',
+                  isDense: false,
+                  isCollapsed: false,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  constraints: BoxConstraints(minHeight: kFieldHeight),
+                ),
+              )
+            : null,
+        lowStockHelp: _lowStockAlert ? 'Set the stock level that triggers a low stock alert' : null,
         quantityDropdown: SmallDropdown36<StockUnit>(
           value: _stockUnit,
           width: kSmallControlWidth,
