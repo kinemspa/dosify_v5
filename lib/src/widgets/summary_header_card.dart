@@ -26,6 +26,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.includeNameInStrengthLine = false,
     this.formLabelPlural,
     this.perTabletLabel = true,
+    this.perUnitLabel,
   });
 
   final String title;
@@ -49,6 +50,8 @@ class SummaryHeaderCard extends StatelessWidget {
   final bool includeNameInStrengthLine;
   final String? formLabelPlural;
   final bool perTabletLabel;
+  // Optional: override the default "per tablet" with a custom unit (e.g., "Syringe")
+  final String? perUnitLabel;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -228,23 +231,34 @@ class SummaryHeaderCard extends StatelessWidget {
                                         TextSpan(text: formLabelPlural ?? ''),
                                       ]
                                     : (
-                                        perTabletLabel
+                                        perUnitLabel != null
                                             ? [
                                                 TextSpan(
                                                   text: _fmt2(strengthValue ?? 0),
                                                   style: const TextStyle(fontWeight: FontWeight.w800),
                                                 ),
                                                 TextSpan(text: ' $strengthUnitLabel '),
-                                                const TextSpan(text: 'per tablet'),
+                                                const TextSpan(text: 'per '),
+                                                TextSpan(text: perUnitLabel!),
                                               ]
-                                            : [
-                                                TextSpan(
-                                                  text: _fmt2(strengthValue ?? 0),
-                                                  style: const TextStyle(fontWeight: FontWeight.w800),
-                                                ),
-                                                TextSpan(text: ' $strengthUnitLabel '),
-                                                TextSpan(text: formLabelPlural ?? ''),
-                                              ]
+                                            : (perTabletLabel
+                                                ? [
+                                                    TextSpan(
+                                                      text: _fmt2(strengthValue ?? 0),
+                                                      style: const TextStyle(fontWeight: FontWeight.w800),
+                                                    ),
+                                                    TextSpan(text: ' $strengthUnitLabel '),
+                                                    const TextSpan(text: 'per tablet'),
+                                                  ]
+                                                : [
+                                                    TextSpan(
+                                                      text: _fmt2(strengthValue ?? 0),
+                                                      style: const TextStyle(fontWeight: FontWeight.w800),
+                                                    ),
+                                                    TextSpan(text: ' $strengthUnitLabel '),
+                                                    TextSpan(text: formLabelPlural ?? ''),
+                                                  ]
+                                              )
                                       ),
                               ),
                             ),

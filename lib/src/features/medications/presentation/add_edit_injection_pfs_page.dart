@@ -100,6 +100,10 @@ class _AddEditInjectionPfsPageState
       _lightSensitive = si.toLowerCase().contains('light');
       _keepFrozen = si.toLowerCase().contains('frozen');
     }
+    // Ensure Per mL has a sensible default when using */mL
+    if (_isPerMl && _perMlCtrl.text.trim().isEmpty) {
+      _perMlCtrl.text = '1';
+    }
     _loadStylePrefs();
   }
 
@@ -548,7 +552,7 @@ class _AddEditInjectionPfsPageState
             lowStockThreshold: double.tryParse(_lowStockCtrl.text.trim()),
             includeNameInStrengthLine: false,
             perTabletLabel: false,
-            formLabelPlural: 'pre filled syringes',
+            perUnitLabel: 'Syringe',
           );
         },
 

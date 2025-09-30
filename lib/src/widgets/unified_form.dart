@@ -209,7 +209,7 @@ class SmallDropdown36<T> extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
           decoration: decoration ?? const InputDecoration(isDense: true),
-          menuMaxHeight: 320,
+          menuMaxHeight: 480,
         ),
       ),
     );
