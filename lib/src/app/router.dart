@@ -169,8 +169,7 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) =>
-              const AddEditInjectionUnifiedPage(kind: InjectionKind.pfs),
+          builder: (context, state) => const AddEditInjectionPfsPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
