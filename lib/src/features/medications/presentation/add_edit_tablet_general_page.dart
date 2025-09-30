@@ -39,6 +39,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _strengthValueCtrl = TextEditingController();
   Unit _strengthUnit = Unit.mg;
   // Inventory fields (next section)
+  final _stockCtrl = TextEditingController();
   final _batchCtrl = TextEditingController();
   bool _lowStockClampHint = false;
   bool _lowStockAlert = false;
@@ -215,14 +216,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   }
 
   // Unified support line (error/help) under a field with fixed height and alignment
-  Widget _supportBelowLeftFixed({String? error, String? help, bool compact = false}) {
+  Widget _supportBelowLeftFixed({String? error, String? help, bool compact = false, Color? color}) {
     final theme = Theme.of(context);
     final left = _labelWidth() + 8;
     final text = error ?? help ?? '';
     final style = theme.textTheme.bodySmall?.copyWith(
       color: error != null
           ? theme.colorScheme.error
-          : theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+          : (color ?? theme.colorScheme.onSurfaceVariant.withOpacity(0.75)),
       fontSize: compact ? 11 : null,
     );
     return Padding(
@@ -1005,12 +1006,12 @@ hint: 'eg. Take with water'
                         error: thresholdError,
                         help: (() {
                           if (_lowStockClampHint) {
-                            final s = _stockCtrl.text.trim();
-                            return s.isEmpty ? 'Threshold cannot exceed current stock.' : 'Max threshold is current stock ($s tablets).';
+                            return 'Max threshold cannot exceed stock count.';
                           }
                           return 'Set the stock level that triggers a low stock alert';
                         })(),
                         compact: true,
+                        color: _lowStockClampHint ? Colors.orange : null,
                       ),
                     ],
                     _rowLabelField(

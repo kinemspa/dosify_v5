@@ -42,6 +42,7 @@ class MedEditorTemplate extends StatefulWidget {
     this.lowStockRow,
     this.lowStockThresholdField,
     this.lowStockHelp,
+    this.lowStockHelpColor,
 
     // Storage
     required this.batchField,
@@ -91,6 +92,7 @@ class MedEditorTemplate extends StatefulWidget {
   final Widget? lowStockRow;
   final Widget? lowStockThresholdField;
   final String? lowStockHelp;
+  final Color? lowStockHelpColor;
 
   // Storage
   final Widget batchField;
@@ -188,12 +190,14 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 children: [
                   LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
                   _support(widget.stockHelp),
+                  // Move Quantity unit directly under Stock quantity (paired), before low stock alert
+                  LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown),
                   if (widget.lowStockRow != null)
                     LabelFieldRow(label: 'Low stock alert', field: widget.lowStockRow!),
                   if (widget.lowStockThresholdField != null)
                     LabelFieldRow(label: 'Threshold', field: widget.lowStockThresholdField!),
-                  if (widget.lowStockHelp != null) _support(widget.lowStockHelp),
-                  LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown),
+                  if (widget.lowStockHelp != null)
+                    _supportColored(widget.lowStockHelp, widget.lowStockHelpColor),
                   LabelFieldRow(label: 'Expiry date', field: widget.expiryDateButton),
                   _support(widget.expiryHelp),
                 ],
@@ -241,6 +245,19 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+            ),
+      ),
+    );
+  }
+
+  Widget _supportColored(String? text, Color? color) {
+    if (text == null || text.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: color ?? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
             ),
       ),
     );

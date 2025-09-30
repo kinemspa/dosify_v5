@@ -827,7 +827,7 @@ class _AddEditInjectionMultiVialPageState
                   Expanded(
                     child: CheckboxListTile(
                       title: Text(
-                        'Low Stock (enable thresholds)',
+                        'Low stock alert',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
@@ -881,9 +881,9 @@ class _AddEditInjectionMultiVialPageState
                                       final thr = double.tryParse(_lowStockCtrl.text.trim()) ?? -1;
                                       if (maxMl != double.infinity && thr >= maxMl) {
                                         return Text(
-                                          'Max threshold is current vial volume (${maxMl.toStringAsFixed(0)} mL).',
+                                          'Max threshold cannot exceed stock count.',
                                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                                color: Colors.orange,
                                               ),
                                         );
                                       }
@@ -938,9 +938,9 @@ class _AddEditInjectionMultiVialPageState
                                             final thr = int.tryParse(_lowStockVialsCtrl.text.trim()) ?? -1;
                                             if (stockVials > 0 && thr >= stockVials) {
                                               return Text(
-                                                'Max threshold is current vials in stock ($stockVials vials).',
+                                                'Max threshold cannot exceed stock count.',
                                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                                      color: Colors.orange,
                                                     ),
                                               );
                                             }

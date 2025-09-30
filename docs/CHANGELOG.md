@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. Dates in UT
 
 ## Unreleased
 - Fix: Build errors resolved: removed duplicate 'stockHelp' in editor_template_preview_page.dart and returned Row from StepperRow36.build().
+- UI: Standardize clamp helper message and color across editors. When threshold reaches the cap, show "Max threshold cannot exceed stock count." in orange to indicate a warning (Template Preview, Tablet General, Injection PFS/Single/Multi).
+- Template Preview: Reorder Inventory so "Quantity unit" appears directly under "Stock quantity" and above low-stock controls (paired fields).
+- Template Preview: Allow colored lowStockHelp via new parameter, applied for clamp warning.
+- Labels: Align terminology with Add Tablet — use "Quantity unit", "Low stock alert", and "Threshold" consistently in injection editors (PFS/Single/Multi).
 - PFS Add: Refactored General, Strength, Inventory, and Storage sections to match Add Tablet styling using SectionFormCard (neutral for all). Standardized input decorations to match Tablet exactly (contentPadding, minHeight=36, fillColor surfaceContainerLowest, enabledBorder outlineVariant@0.5 with 0.75px, focused 2px, suppressed error line). Added matching dropdown decoration (_decDrop) and applied to Unit + Quantity unit. Unified small control widths (SmallDropdown36, DateButton36) and aligned label/value layout via LabelFieldRow. Replaced ad-hoc containers. Low stock UI mirrors Tablet pattern; Expiry uses DateButton36. Also aligned LabelFieldRow label color to onSurfaceVariant at 75% opacity for consistency with Tablet.
 - Injection Unified (PFS/Single/Multi): Made section cards neutral to match Tablet. Matched input decoration to Tablet (padding 12/8, minHeight=36, outlineVariant@0.5, focused=2, suppressed error line). Replaced fraction-based widths with fixed 120px controls for Unit, Quantity, and Date using SmallDropdown36/DateButton36 so visuals align with Add Tablet.
 - Select Medication Type: App bar title changed to "Medication Type".

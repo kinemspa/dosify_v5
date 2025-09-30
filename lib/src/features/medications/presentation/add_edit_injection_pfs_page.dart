@@ -808,9 +808,9 @@ children: [
                             final thr = int.tryParse(_lowStockCtrl.text.trim()) ?? -1;
                             if (stock > 0 && thr >= stock) {
                               return Text(
-                                'Max threshold is current stock ($stock pre filled syringes).',
+                                'Max threshold cannot exceed stock count.',
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                      color: Colors.orange,
                                     ),
                               );
                             }
