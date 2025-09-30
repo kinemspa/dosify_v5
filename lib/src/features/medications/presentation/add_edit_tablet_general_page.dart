@@ -39,7 +39,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   final _strengthValueCtrl = TextEditingController();
   Unit _strengthUnit = Unit.mg;
   // Inventory fields (next section)
-  final _stockCtrl = TextEditingController();
+  final _batchCtrl = TextEditingController();
+  bool _lowStockClampHint = false;
   bool _lowStockAlert = false;
   final _lowStockThresholdCtrl = TextEditingController();
   DateTime? _expiryDate;
@@ -367,7 +368,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             _incBtn('−', () {
               final v = int.tryParse(controller.text.trim()) ?? 0;
               final nv = (v - step).clamp(min, max);
-              setState(() => controller.text = nv.toString());
+              setState(() {
+                controller.text = nv.toString();
+                if (identical(controller, _lowStockThresholdCtrl)) {
+                  _lowStockClampHint = false;
+                }
+              });
             }),
             const SizedBox(width: 6),
             SizedBox(
@@ -411,7 +417,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
             _incBtn('+', () {
               final v = int.tryParse(controller.text.trim()) ?? 0;
               final nv = (v + step).clamp(min, max);
-              setState(() => controller.text = nv.toString());
+              setState(() {
+                controller.text = nv.toString();
+                if (identical(controller, _lowStockThresholdCtrl)) {
+                  _lowStockClampHint = nv == v;
+                }
+              });
             }),
           ],
         ),
@@ -992,7 +1003,13 @@ hint: 'eg. Take with water'
                       ),
                       _supportBelowLeftFixed(
                         error: thresholdError,
-                        help: 'Set the stock level that triggers a low stock alert',
+                        help: (() {
+                          if (_lowStockClampHint) {
+                            final s = _stockCtrl.text.trim();
+                            return s.isEmpty ? 'Threshold cannot exceed current stock.' : 'Max threshold is current stock ($s tablets).';
+                          }
+                          return 'Set the stock level that triggers a low stock alert';
+                        })(),
                         compact: true,
                       ),
                     ],

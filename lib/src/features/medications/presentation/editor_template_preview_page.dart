@@ -231,7 +231,16 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                 ),
               )
             : null,
-        lowStockHelp: _lowStockAlert ? 'Set the stock level that triggers a low stock alert' : null,
+        lowStockHelp: _lowStockAlert
+            ? (() {
+                final stock = int.tryParse(_stock.text.trim()) ?? 0;
+                final thr = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
+                if (stock > 0 && thr >= stock) {
+                  return 'Max threshold is the current stock ($stock ${_stockUnit.name.replaceAll('_', ' ')}).';
+                }
+                return 'Set the stock level that triggers a low stock alert';
+              })()
+            : null,
         quantityDropdown: SmallDropdown36<StockUnit>(
           value: _stockUnit,
           width: kSmallControlWidth,

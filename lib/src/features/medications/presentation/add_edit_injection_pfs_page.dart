@@ -770,36 +770,55 @@ children: [
                       ],
                     ),
                   ),
-                  if (_lowStockEnabled)
-                    _rowLabelField(
-                      label: 'Threshold',
-                      field: SizedBox(
-                        width: 120,
-                        child: Field36(
-                          child: Builder(
-                            builder: (context) {
-                              final theme = Theme.of(context);
-                              return TextFormField(
-                                controller: _lowStockCtrl,
-                                textAlign: TextAlign.center,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
-                                decoration: _dec(context: context, label: 'Threshold', hint: '0'),
-                                onChanged: (txt) {
-                                  final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                                  final t = int.tryParse(txt.trim());
-                                  if (t != null && t > stock) {
-                                    setState(() => _lowStockCtrl.text = stock.toString());
-                                  } else {
-                                    setState(() {});
-                                  }
-                                },
-                              );
-                            },
+                    if (_lowStockEnabled) ...[
+                      _rowLabelField(
+                        label: 'Threshold',
+                        field: SizedBox(
+                          width: 120,
+                          child: Field36(
+                            child: Builder(
+                              builder: (context) {
+                                final theme = Theme.of(context);
+                                return TextFormField(
+                                  controller: _lowStockCtrl,
+                                  textAlign: TextAlign.center,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                  decoration: _dec(context: context, label: 'Threshold', hint: '0'),
+                                  onChanged: (txt) {
+                                    final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                    final t = int.tryParse(txt.trim());
+                                    if (t != null && t > stock) {
+                                      setState(() => _lowStockCtrl.text = stock.toString());
+                                    } else {
+                                      setState(() {});
+                                    }
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 120 + 8, top: 2),
+                        child: Builder(
+                          builder: (context) {
+                            final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                            final thr = int.tryParse(_lowStockCtrl.text.trim()) ?? -1;
+                            if (stock > 0 && thr >= stock) {
+                              return Text(
+                                'Max threshold is current stock ($stock pre filled syringes).',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                    ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                    ],
                   _rowLabelField(
                     label: 'Expiry date',
                     field: Align(

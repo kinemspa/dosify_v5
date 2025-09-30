@@ -855,22 +855,42 @@ class _AddEditInjectionMultiVialPageState
                           Builder(
                             builder: (context) {
                               final theme = Theme.of(context);
-                              return TextFormField(
-                                controller: _lowStockCtrl,
-                                keyboardType: const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
-                                style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
-                                decoration: const InputDecoration(
-                                  labelText: 'Low Stock - Vial Volume (mL)',
-                                ),
-                                onChanged: (txt) {
-                                  final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
-                                  final t = double.tryParse(txt.trim());
-                                  if (t != null && t > maxMl) {
-                                    setState(() => _lowStockCtrl.text = maxMl.toStringAsFixed(0));
-                                  }
-                                },
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TextFormField(
+                                    controller: _lowStockCtrl,
+                                    keyboardType: const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Low Stock - Vial Volume (mL)',
+                                    ),
+                                    onChanged: (txt) {
+                                      final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
+                                      final t = double.tryParse(txt.trim());
+                                      if (t != null && t > maxMl) {
+                                        setState(() => _lowStockCtrl.text = maxMl.toStringAsFixed(0));
+                                      }
+                                    },
+                                  ),
+                                  Builder(
+                                    builder: (context) {
+                                      final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
+                                      final thr = double.tryParse(_lowStockCtrl.text.trim()) ?? -1;
+                                      if (maxMl != double.infinity && thr >= maxMl) {
+                                        return Text(
+                                          'Max threshold is current vial volume (${maxMl.toStringAsFixed(0)} mL).',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                              ),
+                                        );
+                                      }
+                                      return const SizedBox.shrink();
+                                    },
+                                  ),
+                                ],
                               );
                             },
                           ),
@@ -891,23 +911,43 @@ class _AddEditInjectionMultiVialPageState
                                 child: Builder(
                                   builder: (context) {
                                     final theme = Theme.of(context);
-                                    return TextFormField(
-                                      controller: _lowStockVialsCtrl,
-                                      textAlign: TextAlign.center,
-                                      keyboardType: const TextInputType.numberWithOptions(
-                                        decimal: false,
-                                      ),
-                                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
-                                      decoration: const InputDecoration(
-                                        labelText: 'Low Stock - Vials in Reserve',
-                                      ),
-                                      onChanged: (txt) {
-                                        final stockVials = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                                        final t = int.tryParse(txt.trim());
-                                        if (t != null && t > stockVials) {
-                                          setState(() => _lowStockVialsCtrl.text = stockVials.toString());
-                                        }
-                                      },
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        TextFormField(
+                                          controller: _lowStockVialsCtrl,
+                                          textAlign: TextAlign.center,
+                                          keyboardType: const TextInputType.numberWithOptions(
+                                            decimal: false,
+                                          ),
+                                          style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                          decoration: const InputDecoration(
+                                            labelText: 'Low Stock - Vials in Reserve',
+                                          ),
+                                          onChanged: (txt) {
+                                            final stockVials = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                            final t = int.tryParse(txt.trim());
+                                            if (t != null && t > stockVials) {
+                                              setState(() => _lowStockVialsCtrl.text = stockVials.toString());
+                                            }
+                                          },
+                                        ),
+                                        Builder(
+                                          builder: (context) {
+                                            final stockVials = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                            final thr = int.tryParse(_lowStockVialsCtrl.text.trim()) ?? -1;
+                                            if (stockVials > 0 && thr >= stockVials) {
+                                              return Text(
+                                                'Max threshold is current vials in stock ($stockVials vials).',
+                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                                    ),
+                                              );
+                                            }
+                                            return const SizedBox.shrink();
+                                          },
+                                        ),
+                                      ],
                                     );
                                   },
                                 ),

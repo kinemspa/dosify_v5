@@ -1125,32 +1125,54 @@ class _AddEditInjectionSingleVialPageState
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 150),
                           child: _lowStockEnabled
-                              ? SizedBox(
-                                  width: 120,
-                                  child: Builder(
-                                    builder: (context) {
-                                      final theme = Theme.of(context);
-                                      return TextFormField(
-                                        key: const ValueKey('lowStockField'),
-                                        controller: _lowStockCtrl,
-                                        keyboardType: const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                        style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
-                                        decoration: const InputDecoration(
-                                          labelText: 'Threshold',
-                                          hintText: '0',
-                                        ),
-                                        onChanged: (txt) {
-                                          final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                                          final t = int.tryParse(txt.trim());
-                                          if (t != null && t > stock) {
-                                            setState(() => _lowStockCtrl.text = stock.toString());
-                                          }
+                              ? Column(
+                                  children: [
+                                    SizedBox(
+                                      width: 120,
+                                      child: Builder(
+                                        builder: (context) {
+                                          final theme = Theme.of(context);
+                                          return TextFormField(
+                                            key: const ValueKey('lowStockField'),
+                                            controller: _lowStockCtrl,
+                                            keyboardType: const TextInputType.numberWithOptions(
+                                              decimal: true,
+                                            ),
+                                            style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                            decoration: const InputDecoration(
+                                              labelText: 'Threshold',
+                                              hintText: '0',
+                                            ),
+                                            onChanged: (txt) {
+                                              final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                              final t = int.tryParse(txt.trim());
+                                              if (t != null && t > stock) {
+                                                setState(() => _lowStockCtrl.text = stock.toString());
+                                              }
+                                            },
+                                          );
                                         },
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 120 + 8, top: 2),
+                                      child: Builder(
+                                        builder: (context) {
+                                          final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                          final thr = int.tryParse(_lowStockCtrl.text.trim()) ?? -1;
+                                          if (stock > 0 && thr >= stock) {
+                                            return Text(
+                                              'Max threshold is current stock ($stock single dose vials).',
+                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                                  ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 )
                               : const SizedBox(
                                   key: ValueKey('lowStockPlaceholder'),
