@@ -174,49 +174,53 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildToolbar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
       child: Row(
         children: [
           // Search section - expands to layout button when activated
           if (_searchExpanded)
             Expanded(
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: kTextLightGrey(context)),
-                  hintText: 'Search medications',
-                  isDense: true,
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+              child: SizedBox(
+                height: 36,
+                child: TextField(
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.search, size: 20, color: kTextLightGrey(context)),
+                    hintText: 'Search medications',
+                    isDense: true,
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                    suffixIcon: IconButton(
+                      iconSize: 20,
+                      icon: Icon(Icons.close, color: kTextLightGrey(context)),
+                      onPressed: () => setState(() {
+                        _searchExpanded = false;
+                        _query = '';
+                      }),
                     ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                    ),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.close, color: kTextLightGrey(context)),
-                    onPressed: () => setState(() {
-                      _searchExpanded = false;
-                      _query = '';
-                    }),
-                  ),
+                  onChanged: (v) => setState(() => _query = v.trim()),
                 ),
-                onChanged: (v) => setState(() => _query = v.trim()),
               ),
             )
           else
