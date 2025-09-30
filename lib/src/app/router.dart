@@ -174,8 +174,7 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) =>
-              const AddEditInjectionUnifiedPage(kind: InjectionKind.single),
+          builder: (context, state) => const AddEditInjectionSingleVialPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',

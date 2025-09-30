@@ -89,6 +89,9 @@ class SummaryHeaderCard extends StatelessWidget {
       case StockUnit.preFilledSyringes:
         stockUnitLabel = 'syringes';
         break;
+      case StockUnit.singleDoseVials:
+        stockUnitLabel = 'vials';
+        break;
       default:
         stockUnitLabel = m.stockUnit.name;
     }
@@ -110,6 +113,8 @@ class SummaryHeaderCard extends StatelessWidget {
     String? perUnitLabel;
     if (m.form == MedicationForm.injectionPreFilledSyringe) {
       perUnitLabel = 'Syringe';
+    } else if (m.form == MedicationForm.injectionSingleDoseVial) {
+      perUnitLabel = 'Vial';
     }
     
     return SummaryHeaderCard(

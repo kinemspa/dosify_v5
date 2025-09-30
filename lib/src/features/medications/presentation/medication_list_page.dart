@@ -168,9 +168,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Row(
+    return Row(
         children: [
           // Search section - expands to layout button when activated
           if (_searchExpanded)
@@ -642,7 +640,7 @@ return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          separatorBuilder: (_, __) => const SizedBox(height: 4),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
         );
     }
@@ -708,10 +706,7 @@ class _MedCard extends StatelessWidget {
     if (!dense) {
       return GestureDetector(
         onTap: () => context.push('/medications/${m.id}'),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
-        ),
+        child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
       );
     }
 
@@ -787,7 +782,6 @@ child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
             ],
           ),
         ),
-      ),
     );
   }
 
