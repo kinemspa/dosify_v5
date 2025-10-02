@@ -27,6 +27,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
   final SyringeSizeMl? initialSyringeSize;
   final double? initialVialSize;
   final void Function(ReconstitutionResult)? onApply;
+  final void Function(ReconstitutionResult, bool)? onCalculate;
   final bool showSummary;
   final bool showApplyButton;
 
@@ -204,6 +205,18 @@ class _ReconstitutionCalculatorWidgetState
     final currentC = _round2(current.cPerMl);
     final currentV = _round2(current.vialVolume);
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
+
+    // Notify parent of calculation result
+    final result = ReconstitutionResult(
+      perMlConcentration: currentC,
+      solventVolumeMl: currentV,
+      recommendedUnits: _round2(_selectedUnits),
+      syringeSizeMl: _syringe.ml,
+    );
+    final isValid = S > 0 && D > 0 && fitsVial;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onCalculate?.call(result, isValid);
+    });
 
     double u1 = sliderMin;
     double u3 = sliderMax;
