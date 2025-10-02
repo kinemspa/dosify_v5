@@ -16,6 +16,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
     this.initialSyringeSize,
     this.initialVialSize,
     this.onApply,
+    this.onCalculate,
     this.showSummary = true,
     this.showApplyButton = false,
   });
