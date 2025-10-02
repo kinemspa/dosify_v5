@@ -81,8 +81,13 @@ class _ReconstitutionCalculatorWidgetState
     required double D,
     required double U,
   }) {
+    // S = total strength in vial (mg)
+    // D = desired dose per injection (mg)
+    // U = IU units to draw from syringe
+    // Formula: V = (S / D) × (U / 100)
+    // Concentration: C = D × (100 / U)
     final c = (100 * D) / max(U, 0.01);
-    final v = S / max(c, 0.000001);
+    final v = (S / max(D, 0.000001)) * (U / 100.0);
     return (cPerMl: c, vialVolume: v);
   }
 
