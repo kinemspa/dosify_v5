@@ -53,6 +53,7 @@ class _AddEditInjectionUnifiedPageState
   String? _lastCalcDoseUnit;
   SyringeSizeMl? _lastCalcSyringe;
   double? _lastCalcVialSize;
+  ReconstitutionResult? _reconResult; // Track current reconstitution calculation
 
   // Inline calculator state (Multi only)
   CalcMode _calcMode = CalcMode.known;
@@ -96,12 +97,22 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.multi => 'multi dose vials',
     };
 
+    // Build additional notes including reconstitution info
+    String? additionalNotes;
+    if (widget.kind == InjectionKind.multi && _reconResult != null && _calcMode == CalcMode.reconstitute) {
+      final r = _reconResult!;
+      additionalNotes = 'Reconstituted: ${r.solventVolumeMl.toStringAsFixed(2)} mL solvent, '
+                       '${r.perMlConcentration.toStringAsFixed(2)} $unitLabel/mL, '
+                       'Draw ${r.recommendedUnits.toStringAsFixed(0)} IU';
+    }
+
     final card = SummaryHeaderCard(
       key: _summaryKey,
       title: headerTitle,
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: _isPerMl ? '$unitLabel/mL' : unitLabel,
+      perMlValue: _isPerMl ? double.tryParse(_perMl.text) : null,
       stockCurrent: stockVal ?? 0,
       stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
       stockUnitLabel: stockUnitLabel,
@@ -113,6 +124,7 @@ class _AddEditInjectionUnifiedPageState
       includeNameInStrengthLine: false,
       perTabletLabel: name.isNotEmpty,
       formLabelPlural: stockUnitLabel,
+      additionalInfo: additionalNotes,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
     return card;
@@ -584,12 +596,15 @@ if (widget.kind == InjectionKind.multi &&
                           setState(() {
                             _perMl.text = fmt2(result.perMlConcentration);
                             _vialVolume.text = fmt2(result.solventVolumeMl);
+                            _reconResult = result; // Store result for summary
                             _calcMode = CalcMode.known; // collapse after apply
                           });
                         },
                         onCalculate: (result, isValid) {
-                          // Update summary card with reconstitution result
-                          setState(() {});
+                          // Update summary card with live reconstitution result
+                          setState(() {
+                            _reconResult = isValid ? result : null;
+                          });
                         },
                       ),
                     ),
