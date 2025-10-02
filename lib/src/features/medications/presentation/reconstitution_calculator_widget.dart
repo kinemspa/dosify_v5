@@ -6,6 +6,71 @@ import '../../../widgets/unified_form.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_dialog.dart';
 
+/// Stepper widget for integer fields with +/- buttons
+class _StepperField extends StatelessWidget {
+  const _StepperField({
+    required this.controller,
+    required this.onDec,
+    required this.onInc,
+    required this.decoration,
+  });
+
+  final TextEditingController controller;
+  final VoidCallback onDec;
+  final VoidCallback onInc;
+  final InputDecoration decoration;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: kBtnSize,
+          height: kFieldHeight,
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            shape: const StadiumBorder(),
+            child: InkWell(
+              onTap: onDec,
+              customBorder: const StadiumBorder(),
+              child: Center(
+                child: Text('-', style: Theme.of(context).textTheme.titleMedium),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Field36(
+            child: TextField(
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: decoration,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: kBtnSize,
+          height: kFieldHeight,
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            shape: const StadiumBorder(),
+            child: InkWell(
+              onTap: onInc,
+              customBorder: const StadiumBorder(),
+              child: Center(
+                child: Text('+', style: Theme.of(context).textTheme.titleMedium),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Reusable reconstitution calculator widget used in both dialog and inline contexts
 class ReconstitutionCalculatorWidget extends StatefulWidget {
   const ReconstitutionCalculatorWidget({
@@ -142,10 +207,14 @@ class _ReconstitutionCalculatorWidgetState
             width: 120,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(child: field),
         ],
       ),
@@ -154,11 +223,10 @@ class _ReconstitutionCalculatorWidgetState
 
   Widget _helperText(String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 132, bottom: 8, top: 2),
+      padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 12,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
         ),
       ),
@@ -246,74 +314,77 @@ class _ReconstitutionCalculatorWidgetState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'Reconstitution Calculator',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 12),
         _rowLabelField(
           context,
           label: 'Desired Dose',
-          field: Field36(
-            child: TextField(
-              controller: _doseCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: _fieldDecoration(context, hint: '0'),
-              onChanged: (_) => setState(() {}),
-            ),
+          field: _StepperField(
+            controller: _doseCtrl,
+            onDec: () {
+              final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+              setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
+            },
+            onInc: () {
+              final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+              setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
+            },
+            decoration: _fieldDecoration(context, hint: '0'),
           ),
         ),
         _helperText('Amount per dose'),
         _rowLabelField(
           context,
           label: 'Dose Unit',
-          field: SizedBox(
+          field: SmallDropdown36<String>(
+            value: _doseUnit,
             width: kSmallControlWidth,
-            child: Field36(
-              child: DropdownButtonFormField<String>(
-                value: _doseUnit,
-                items: [
-                  if (widget.unitLabel == 'units')
-                    const DropdownMenuItem(
-                      value: 'units',
-                      child: Center(child: Text('units')),
-                    ),
-                  if (widget.unitLabel != 'units') ...const [
-                    DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
-                    DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
-                    DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
-                  ],
-                ],
-                onChanged: (v) => setState(() => _doseUnit = v!),
-                decoration: _fieldDecoration(context),
-              ),
-            ),
+            items: [
+              if (widget.unitLabel == 'units')
+                const DropdownMenuItem(
+                  value: 'units',
+                  child: Center(child: Text('units')),
+                ),
+              if (widget.unitLabel != 'units') ...const [
+                DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
+                DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
+                DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
+              ],
+            ],
+            onChanged: (v) => setState(() => _doseUnit = v!),
+            decoration: _fieldDecoration(context),
           ),
         ),
         _helperText('Unit of measurement for the dose'),
         _rowLabelField(
           context,
           label: 'Syringe Size',
-          field: SizedBox(
+          field: SmallDropdown36<SyringeSizeMl>(
+            value: _syringe,
             width: kSmallControlWidth,
-            child: Field36(
-              child: DropdownButtonFormField<SyringeSizeMl>(
-                value: _syringe,
-                items: SyringeSizeMl.values
-                    .map(
-                      (s) => DropdownMenuItem(
-                        value: s,
-                        child: Center(child: Text('${s.label} • ${s.totalUnits} IU')),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() {
-                  _syringe = v!;
-                  final total = _syringe.totalUnits.toDouble();
-                  _selectedUnits = max(
-                    _selectedUnits,
-                    max(5, (0.05 * total).ceil()).toDouble(),
-                  );
-                }),
-                decoration: _fieldDecoration(context),
-              ),
-            ),
+            items: SyringeSizeMl.values
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Center(child: Text('${s.label} • ${s.totalUnits} IU')),
+                  ),
+                )
+                .toList(),
+            onChanged: (v) => setState(() {
+              _syringe = v!;
+              final total = _syringe.totalUnits.toDouble();
+              _selectedUnits = max(
+                _selectedUnits,
+                max(5, (0.05 * total).ceil()).toDouble(),
+              );
+            }),
+            decoration: _fieldDecoration(context),
           ),
         ),
         _helperText('Select the syringe capacity'),
@@ -332,7 +403,13 @@ class _ReconstitutionCalculatorWidgetState
         ),
         _helperText('Maximum fluid volume allowed in the vial'),
         const SizedBox(height: 16),
-        Text('Presets', style: Theme.of(context).textTheme.titleSmall),
+        Text(
+          'Methods',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -500,8 +577,11 @@ class _PresetChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: selected ? theme.colorScheme.onPrimary : null,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: selected
+                  ? theme.colorScheme.onPrimary
+                  : theme.colorScheme.onSurface,
             ),
           ),
           Text(
@@ -509,13 +589,16 @@ class _PresetChip extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               color: selected
                   ? theme.colorScheme.onPrimary.withValues(alpha: 0.9)
-                  : null,
+                  : theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
             ),
           ),
         ],
       ),
       showCheckmark: false,
       selectedColor: theme.colorScheme.primary,
+      backgroundColor: selected
+          ? null
+          : theme.colorScheme.surfaceContainerHighest,
       visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       selected: selected,

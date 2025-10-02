@@ -572,35 +572,25 @@ if (widget.kind == InjectionKind.multi &&
                       padding: const EdgeInsets.only(
                         left: 0,
                         right: 0,
-                        top: 6,
+                        top: 12,
                         bottom: 6,
                       ),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerLowest,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: ReconstitutionCalculatorWidget(
-                            initialStrengthValue: double.tryParse(_strength.text.trim()) ?? 0,
-                            unitLabel: _baseUnit(_strengthUnit),
-                            showSummary: false,
-                            showApplyButton: true,
-                            onApply: (result) {
-                              setState(() {
-                                _perMl.text = fmt2(result.perMlConcentration);
-                                _vialVolume.text = fmt2(result.solventVolumeMl);
-                                _calcMode = CalcMode.known; // collapse after apply
-                              });
-                            },
-                          ),
-                        ),
+                      child: ReconstitutionCalculatorWidget(
+                        initialStrengthValue: double.tryParse(_strength.text.trim()) ?? 0,
+                        unitLabel: _baseUnit(_strengthUnit),
+                        showSummary: false,
+                        showApplyButton: true,
+                        onApply: (result) {
+                          setState(() {
+                            _perMl.text = fmt2(result.perMlConcentration);
+                            _vialVolume.text = fmt2(result.solventVolumeMl);
+                            _calcMode = CalcMode.known; // collapse after apply
+                          });
+                        },
+                        onCalculate: (result, isValid) {
+                          // Update summary card with reconstitution result
+                          setState(() {});
+                        },
                       ),
                     ),
                   Padding(
