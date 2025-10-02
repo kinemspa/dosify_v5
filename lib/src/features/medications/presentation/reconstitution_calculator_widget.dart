@@ -39,7 +39,6 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
 
 class _ReconstitutionCalculatorWidgetState
     extends State<ReconstitutionCalculatorWidget> {
-  late final TextEditingController _strengthCtrl;
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
   late String _doseUnit;
@@ -49,9 +48,6 @@ class _ReconstitutionCalculatorWidgetState
   @override
   void initState() {
     super.initState();
-    _strengthCtrl = TextEditingController(
-      text: widget.initialStrengthValue.toStringAsFixed(2),
-    );
     _doseCtrl = TextEditingController(
       text: (widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05))
           .toStringAsFixed(2),
@@ -66,7 +62,6 @@ class _ReconstitutionCalculatorWidgetState
 
   @override
   void dispose() {
-    _strengthCtrl.dispose();
     _doseCtrl.dispose();
     _vialSizeCtrl.dispose();
     super.dispose();
@@ -174,7 +169,8 @@ class _ReconstitutionCalculatorWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final Sraw = double.tryParse(_strengthCtrl.text) ?? 0;
+    // Use strength from parent (already set above)
+    final Sraw = widget.initialStrengthValue;
     final Draw = double.tryParse(_doseCtrl.text) ?? 0;
 
     double S = Sraw;
@@ -231,38 +227,6 @@ class _ReconstitutionCalculatorWidgetState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _rowLabelField(
-          context,
-          label: 'Vial Quantity',
-          field: Row(
-            children: [
-              _pillBtn(context, '−', () {
-                final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                final nv = (v - 1).clamp(0, 10000);
-                setState(() => _strengthCtrl.text = nv.toStringAsFixed(0));
-              }),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Field36(
-                  child: TextField(
-                    controller: _strengthCtrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration:
-                        _fieldDecoration(context, hint: widget.unitLabel),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              _pillBtn(context, '+', () {
-                final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                final nv = (v + 1).clamp(0, 10000);
-                setState(() => _strengthCtrl.text = nv.toStringAsFixed(0));
-              }),
-            ],
-          ),
-        ),
         _rowLabelField(
           context,
           label: 'Desired Dose',
