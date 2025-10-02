@@ -98,5 +98,25 @@ Theme-only fonts (no inline sizes)
 - Hint and helper colors derive from the theme:
   - hintStyle: from textTheme.bodyMedium with onSurfaceVariant tint
   - helperStyle: from textTheme.bodySmall with onSurfaceVariant tint
-- Checkbox “muted” labels derive from textTheme.bodyMedium with onSurfaceVariant color via kMutedLabelStyle(context).
+- Checkbox "muted" labels derive from textTheme.bodyMedium with onSurfaceVariant color via kMutedLabelStyle(context).
 - If a visual adjustment is needed, update the shared theme in lib/src/app/app.dart rather than setting sizes locally.
+
+Reconstitution Calculator Formula
+- Implementation: ReconstitutionCalculatorWidget in lib/src/features/medications/presentation/
+- Core calculation formula:
+  - Vial Volume (V) = (S / D) × (U / 100)
+  - Concentration (C) = D × (100 / U)
+  - Where:
+    - S = total strength in vial (mg, converted to base units)
+    - D = desired dose per injection (mg, converted to base units)
+    - U = IU units to draw from syringe (based on syringe capacity: 0.3mL=30IU, 0.5mL=50IU, 1mL=100IU, etc.)
+    - V = vial volume in mL (solvent to add for reconstitution)
+    - C = concentration per mL after reconstitution
+- Unit conversion via _toBaseMass(): g→mg (*1000), mcg→mg (/1000), mg→mg (1:1)
+- Preset generation: calculator provides 3 preset options (Concentrated/Standard/Diluted) using 5%, 33%, 80% of syringe capacity
+- Validation examples (all verified):
+  - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
+  - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
+  - Strength 5mg, Dose 250mcg, 25 IU → 5mL vial
+  - Strength 5mg, Dose 500mcg, 20 IU → 2mL vial
+  - Strength 5mg, Dose 500mcg, 90 IU → 9mL vial
