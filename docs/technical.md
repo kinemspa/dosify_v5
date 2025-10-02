@@ -113,7 +113,15 @@ Reconstitution Calculator Formula
     - V = vial volume in mL (solvent to add for reconstitution)
     - C = concentration per mL after reconstitution
 - Unit conversion via _toBaseMass(): g→mg (*1000), mcg→mg (/1000), mg→mg (1:1)
-- Preset generation: calculator provides 3 preset options (Concentrated/Standard/Diluted) using 5%, 33%, 80% of syringe capacity
+- Method generation: calculator provides 3 method options (Concentrated/Standard/Diluted) using 5%, 33%, 80% of syringe capacity
+- UI styling:
+  - No hard card outline (removed DecoratedBox wrapper)
+  - Heading: "Reconstitution Calculator" in titleMedium, primary color, bold
+  - Desired Dose: Integer field with +/- stepper buttons matching strength field width
+  - Dose Unit, Syringe Size: SmallDropdown36 with kSmallControlWidth (120px)
+  - Support text: bodySmall style with onSurfaceVariant color at 75% opacity
+  - Method chips: FilterChip with primary selection color, surfaceContainerHighest for inactive state
+  - Label styles: bodyMedium bold, 14sp, onSurfaceVariant at 75% opacity
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
