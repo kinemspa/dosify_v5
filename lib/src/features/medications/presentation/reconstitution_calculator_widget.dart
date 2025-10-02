@@ -146,6 +146,19 @@ class _ReconstitutionCalculatorWidgetState
     );
   }
 
+  Widget _helperText(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 132, bottom: 8, top: 2),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
+      ),
+    );
+  }
+
   Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
     return Material(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -230,71 +243,74 @@ class _ReconstitutionCalculatorWidgetState
         _rowLabelField(
           context,
           label: 'Desired Dose',
-          field: Row(
-            children: [
-              Expanded(
-                child: Field36(
-                  child: TextField(
-                    controller: _doseCtrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: _fieldDecoration(context),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 96,
-                child: Field36(
-                  child: DropdownButtonFormField<String>(
-                    value: _doseUnit,
-                    items: [
-                      if (widget.unitLabel == 'units')
-                        const DropdownMenuItem(
-                          value: 'units',
-                          child: Text('units'),
-                        ),
-                      if (widget.unitLabel != 'units') ...const [
-                        DropdownMenuItem(value: 'mcg', child: Text('mcg')),
-                        DropdownMenuItem(value: 'mg', child: Text('mg')),
-                        DropdownMenuItem(value: 'g', child: Text('g')),
-                      ],
-                    ],
-                    onChanged: (v) => setState(() => _doseUnit = v!),
-                    decoration: _fieldDecoration(context),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        _rowLabelField(
-          context,
-          label: 'Syringe Size',
           field: Field36(
-            child: DropdownButtonFormField<SyringeSizeMl>(
-              value: _syringe,
-              items: SyringeSizeMl.values
-                  .map(
-                    (s) => DropdownMenuItem(
-                      value: s,
-                      child: Text('${s.label} • ${s.totalUnits} IU'),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (v) => setState(() {
-                _syringe = v!;
-                final total = _syringe.totalUnits.toDouble();
-                _selectedUnits = max(
-                  _selectedUnits,
-                  max(5, (0.05 * total).ceil()).toDouble(),
-                );
-              }),
-              decoration: _fieldDecoration(context),
+            child: TextField(
+              controller: _doseCtrl,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: _fieldDecoration(context, hint: '0'),
+              onChanged: (_) => setState(() {}),
             ),
           ),
         ),
+        _helperText('Amount per dose'),
+        _rowLabelField(
+          context,
+          label: 'Dose Unit',
+          field: SizedBox(
+            width: kSmallControlWidth,
+            child: Field36(
+              child: DropdownButtonFormField<String>(
+                value: _doseUnit,
+                items: [
+                  if (widget.unitLabel == 'units')
+                    const DropdownMenuItem(
+                      value: 'units',
+                      child: Center(child: Text('units')),
+                    ),
+                  if (widget.unitLabel != 'units') ...const [
+                    DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
+                    DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
+                    DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
+                  ],
+                ],
+                onChanged: (v) => setState(() => _doseUnit = v!),
+                decoration: _fieldDecoration(context),
+              ),
+            ),
+          ),
+        ),
+        _helperText('Unit of measurement for the dose'),
+        _rowLabelField(
+          context,
+          label: 'Syringe Size',
+          field: SizedBox(
+            width: kSmallControlWidth,
+            child: Field36(
+              child: DropdownButtonFormField<SyringeSizeMl>(
+                value: _syringe,
+                items: SyringeSizeMl.values
+                    .map(
+                      (s) => DropdownMenuItem(
+                        value: s,
+                        child: Center(child: Text('${s.label} • ${s.totalUnits} IU')),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() {
+                  _syringe = v!;
+                  final total = _syringe.totalUnits.toDouble();
+                  _selectedUnits = max(
+                    _selectedUnits,
+                    max(5, (0.05 * total).ceil()).toDouble(),
+                  );
+                }),
+                decoration: _fieldDecoration(context),
+              ),
+            ),
+          ),
+        ),
+        _helperText('Select the syringe capacity'),
         _rowLabelField(
           context,
           label: 'Max Vial (mL)',
@@ -308,6 +324,7 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         ),
+        _helperText('Maximum fluid volume allowed in the vial'),
         const SizedBox(height: 16),
         Text('Presets', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
