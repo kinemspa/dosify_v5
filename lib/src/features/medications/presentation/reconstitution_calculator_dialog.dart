@@ -127,28 +127,48 @@ class _ReconstitutionCalculatorDialogState
   }
 
   InputDecoration _fieldDecoration(BuildContext context, {required String label, String? helper}) {
+    final cs = Theme.of(context).colorScheme;
     return InputDecoration(
       labelText: label,
       helperText: helper,
+      floatingLabelBehavior: FloatingLabelBehavior.never,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: 36),
+      filled: true,
+      fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: 0.75,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: Theme.of(context).colorScheme.primary,
-          width: 2,
+          color: cs.primary,
+          width: 2.0,
         ),
       ),
-      filled: true,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: cs.error,
+          width: 0.75,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: cs.error,
+          width: 0.75,
+        ),
+      ),
     );
   }
 
