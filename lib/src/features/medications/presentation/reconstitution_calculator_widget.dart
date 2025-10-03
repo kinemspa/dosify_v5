@@ -6,70 +6,7 @@ import '../../../widgets/unified_form.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_dialog.dart';
 
-/// Stepper widget for integer fields with +/- buttons
-class _StepperField extends StatelessWidget {
-  const _StepperField({
-    required this.controller,
-    required this.onDec,
-    required this.onInc,
-    required this.decoration,
-  });
-
-  final TextEditingController controller;
-  final VoidCallback onDec;
-  final VoidCallback onInc;
-  final InputDecoration decoration;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: kBtnSize,
-          height: kFieldHeight,
-          child: Material(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            shape: const StadiumBorder(),
-            child: InkWell(
-              onTap: onDec,
-              customBorder: const StadiumBorder(),
-              child: Center(
-                child: Text('-', style: Theme.of(context).textTheme.titleMedium),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Field36(
-            child: TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: decoration,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: kBtnSize,
-          height: kFieldHeight,
-          child: Material(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            shape: const StadiumBorder(),
-            child: InkWell(
-              onTap: onInc,
-              customBorder: const StadiumBorder(),
-              child: Center(
-                child: Text('+', style: Theme.of(context).textTheme.titleMedium),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+/// Legacy local stepper replaced by shared StepperRow36 for consistency.
 
 /// Reusable reconstitution calculator widget used in both dialog and inline contexts
 class ReconstitutionCalculatorWidget extends StatefulWidget {
@@ -196,39 +133,18 @@ class _ReconstitutionCalculatorWidgetState
     );
   }
 
-  Widget _rowLabelField(BuildContext context,
+Widget _rowLabelField(BuildContext context,
       {required String label, required Widget field}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: field),
-        ],
-      ),
-    );
+    // Use unified row to ensure consistent label styling and spacing.
+    return LabelFieldRow(label: label, field: field);
   }
 
-  Widget _helperText(String text) {
+Widget _helperText(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-        ),
+        style: kMutedLabelStyle(context),
       ),
     );
   }
@@ -324,8 +240,8 @@ class _ReconstitutionCalculatorWidgetState
         const SizedBox(height: 12),
         _rowLabelField(
           context,
-          label: 'Desired Dose',
-          field: _StepperField(
+label: 'Desired Dose',
+          field: StepperRow36(
             controller: _doseCtrl,
             onDec: () {
               final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
@@ -459,42 +375,13 @@ class _ReconstitutionCalculatorWidgetState
           label: '${_round2(_selectedUnits)} IU',
           onChanged: (v) => setState(() => _selectedUnits = v),
         ),
-        // Visual syringe fill indicator
+// Visual syringe fill indicator (standardized)
         Container(
-          height: 20,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Stack(
-            children: [
-              // Background syringe outline
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.3),
-                    width: 1.5,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              // Fill indicator
-              FractionallySizedBox(
-                widthFactor: (_selectedUnits / sliderMax).clamp(0, 1),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
+          decoration: softWhiteCardDecoration(context),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: SyringeGauge(
+            totalIU: _syringe.totalUnits.toDouble(),
+            fillIU: _selectedUnits,
           ),
         ),
         if (widget.showSummary) ...[
@@ -570,7 +457,11 @@ class _PresetChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return FilterChip(
+return PrimaryChoiceChip(
+      selected: selected,
+      onSelected: (v) {
+        if (v) onTap();
+      },
       label: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -579,30 +470,16 @@ class _PresetChip extends StatelessWidget {
             label,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: selected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.onSurface,
             ),
           ),
           Text(
             subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: selected
-                  ? theme.colorScheme.onPrimary.withValues(alpha: 0.9)
-                  : theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
             ),
           ),
         ],
       ),
-      showCheckmark: false,
-      selectedColor: theme.colorScheme.primary,
-      backgroundColor: selected
-          ? null
-          : theme.colorScheme.surfaceContainerHighest,
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      selected: selected,
-      onSelected: (_) => onTap(),
     );
   }
 }
