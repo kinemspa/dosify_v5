@@ -236,7 +236,7 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           ),
           _rowLabelField(
             context,
-            label: 'Vial Quantity',
+            label: 'Vial Strength',
             field: StepperRow36(
               controller: _strengthCtrl,
               onDec: () {
@@ -255,55 +255,59 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           Padding(
             padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
             child: Text(
-              'Enter the total amount of drug in your vial (before dilution)',
+              'Total drug amount in the source vial',
               style: kMutedLabelStyle(context),
             ),
           ),
           _rowLabelField(
             context,
             label: 'Desired Dose',
-            field: Row(
-              children: [
-                Expanded(
-                  child: StepperRow36(
-                    controller: _doseCtrl,
-                    onDec: () {
-                      final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-                      setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
-                    },
-                    onInc: () {
-                      final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-                      setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
-                    },
-                    decoration: _fieldDecoration(context),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SmallDropdown36<String>(
-                  value: _doseUnit,
-                  width: kSmallControlWidth,
-                  items: [
-                    if (widget.unitLabel == 'units')
-                      const DropdownMenuItem(
-                        value: 'units',
-                        child: Center(child: Text('units')),
-                      ),
-                    if (widget.unitLabel != 'units') ...const [
-                      DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
-                      DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
-                      DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
-                    ],
-                  ],
-                  onChanged: (v) => setState(() => _doseUnit = v!),
-                  decoration: _fieldDecoration(context),
-                ),
-              ],
+            field: StepperRow36(
+              controller: _doseCtrl,
+              onDec: () {
+                final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+                setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
+              },
+              onInc: () {
+                final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+                setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
+              },
+              decoration: _fieldDecoration(context),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
             child: Text(
-              'Enter the amount per dose and select its unit',
+              'Amount per dose',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
+          _rowLabelField(
+            context,
+            label: 'Dose Unit',
+            field: SmallDropdown36<String>(
+              value: _doseUnit,
+              width: kSmallControlWidth,
+              items: [
+                if (widget.unitLabel == 'units')
+                  const DropdownMenuItem(
+                    value: 'units',
+                    child: Center(child: Text('units')),
+                  ),
+                if (widget.unitLabel != 'units') ...const [
+                  DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
+                  DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
+                  DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
+                ],
+              ],
+              onChanged: (v) => setState(() => _doseUnit = v!),
+              decoration: _fieldDecoration(context),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
+            child: Text(
+              'Unit of measurement for the dose',
               style: kMutedLabelStyle(context),
             ),
           ),
@@ -336,49 +340,58 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           _rowLabelField(
             context,
             label: 'Max Vial (mL)',
-            field: StepperRow36(
-              controller: _vialSizeCtrl,
-              onDec: () {
-                final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-                setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 10000).toString());
-              },
-              onInc: () {
-                final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-                setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 10000).toString());
-              },
-              decoration: _fieldDecoration(context, hint: 'Optional'),
+            field: Field36(
+              child: TextField(
+                controller: _vialSizeCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: _fieldDecoration(context, hint: 'Optional'),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
+            child: Text(
+              'Maximum capacity of the destination vial',
+              style: kMutedLabelStyle(context),
             ),
           ),
           const SizedBox(height: 16),
-          Text('Reconstitution Options', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          if (sliderMax > 0 && !sliderMax.isNaN) ...[
-            _optionRow(
-              context,
-              'More concentrated',
-              'Lower final volume; higher per‑mL concentration',
-              u1,
-              conc,
-            ),
-            _optionRow(
-              context,
-              'Balanced',
-              'Midpoint between concentration and volume',
-              u2,
-              std,
-            ),
-            _optionRow(
-              context,
-              'More diluted',
-              'Higher final volume; lower per‑mL concentration',
-              u3,
-              dil,
-            ),
-          ] else
-            Padding(
-              padding: const EdgeInsets.only(left: 0),
-              child: Text('No valid options — Check strength, dose, or syringe size', style: kMutedLabelStyle(context)),
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (sliderMax > 0 && !sliderMax.isNaN) ...[
+                _PresetChip(
+                  label: 'More concentrated',
+                  selected: (_selectedUnits - u1).abs() < 0.01,
+                  onTap: () => setState(() => _selectedUnits = u1),
+                  subtitle:
+                      '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLower volume; higher concentration',
+                ),
+                _PresetChip(
+                  label: 'Balanced',
+                  selected: (_selectedUnits - u2).abs() < 0.01,
+                  onTap: () => setState(() => _selectedUnits = u2),
+                  subtitle:
+                      '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nMidpoint option',
+                ),
+                _PresetChip(
+                  label: 'More diluted',
+                  selected: (_selectedUnits - u3).abs() < 0.01,
+                  onTap: () => setState(() => _selectedUnits = u3),
+                  subtitle:
+                      '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHigher volume; lower concentration',
+                ),
+              ] else
+                _PresetChip(
+                  label: 'No valid options',
+                  selected: false,
+                  onTap: () {},
+                  subtitle: 'Check strength, dose, or syringe size',
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
           Text(
             'Adjust IU draw',
@@ -443,48 +456,53 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
   }
 }
 
-Widget _optionRow(
-  BuildContext context,
-  String title,
-  String subtitle,
-  double units,
-  ({double cPerMl, double vialVolume}) calcResult,
-) {
-  final theme = Theme.of(context);
-  final pageState = context.findAncestorStateOfType<_ReconstitutionCalculatorPageState>();
-  final selected = (pageState?._selectedUnits ?? 0 - units).abs() < 0.01;
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: InkWell(
-      onTap: () => pageState?.setState(() => pageState._selectedUnits = units),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: selected ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
-                  Text(subtitle, style: kMutedLabelStyle(context)),
-                  Text('${fmt2(calcResult.cPerMl)} ${pageState?.widget.unitLabel}/mL • ${fmt2(calcResult.vialVolume)} mL • ${fmt2(units)} IU',
-                      style: theme.textTheme.bodySmall),
-                ],
-              ),
+class _PresetChip extends StatelessWidget {
+  const _PresetChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.subtitle,
+  });
+
+  final String label;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return PrimaryChoiceChip(
+      selected: selected,
+      onSelected: (v) {
+        if (v) onTap();
+      },
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            Radio<double>(
-              value: units,
-              groupValue: pageState?._selectedUnits,
-              onChanged: (v) => pageState?.setState(() => pageState._selectedUnits = v ?? units),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 }
