@@ -231,6 +231,10 @@ class _ReconstitutionCalculatorWidgetState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Divider(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+        ),
+        const SizedBox(height: 12),
         Text(
           'Reconstitution Calculator',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -246,10 +250,6 @@ class _ReconstitutionCalculatorWidgetState
             style: kMutedLabelStyle(context),
           ),
         ),
-        Divider(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
-        ),
-        const SizedBox(height: 12),
         _rowLabelField(
           context,
           label: 'Diluent',
@@ -489,16 +489,24 @@ class _ReconstitutionCalculatorWidgetState
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: PrimaryChoiceChip(
-              selected: selected,
-              onSelected: (_) => onTap(),
-              label: Text(
-                '${_round2(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_round2(calcResult.vialVolume)} mL • ${_round2(units)} IU',
-                style: theme.textTheme.bodySmall,
-              ),
+          const Spacer(),
+          ChoiceChip(
+            label: Text(
+              '${_round2(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_round2(calcResult.vialVolume)} mL • ${_round2(units)} IU',
             ),
+            selected: selected,
+            onSelected: (_) => onTap(),
+            selectedColor: theme.colorScheme.primary,
+            backgroundColor: Colors.transparent,
+            side: BorderSide(
+              color: selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outlineVariant,
+            ),
+            labelStyle: theme.textTheme.bodySmall?.copyWith(
+              color: selected ? Colors.white : theme.colorScheme.onSurface,
+            ),
+            showCheckmark: false,
           ),
         ],
       ),

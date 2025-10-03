@@ -218,6 +218,12 @@ class _ReconstitutionCalculatorPageState
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 160),
         children: [
+          Divider(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withOpacity(0.5),
+          ),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
@@ -225,12 +231,6 @@ class _ReconstitutionCalculatorPageState
               style: kMutedLabelStyle(context),
             ),
           ),
-          Divider(
-            color: Theme.of(
-              context,
-            ).colorScheme.outlineVariant.withOpacity(0.5),
-          ),
-          const SizedBox(height: 12),
           _rowLabelField(
             context,
             label: 'Diluent',
@@ -509,16 +509,24 @@ Widget _buildOptionRow(
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: PrimaryChoiceChip(
-            selected: selected,
-            onSelected: (_) => onTap(),
-            label: Text(
-              '${fmt2(calcResult.cPerMl)} $unitLabel/mL • ${fmt2(calcResult.vialVolume)} mL • ${fmt2(units)} IU',
-              style: theme.textTheme.bodySmall,
-            ),
+        const Spacer(),
+        ChoiceChip(
+          label: Text(
+            '${fmt2(calcResult.cPerMl)} $unitLabel/mL • ${fmt2(calcResult.vialVolume)} mL • ${fmt2(units)} IU',
           ),
+          selected: selected,
+          onSelected: (_) => onTap(),
+          selectedColor: theme.colorScheme.primary,
+          backgroundColor: Colors.transparent,
+          side: BorderSide(
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outlineVariant,
+          ),
+          labelStyle: theme.textTheme.bodySmall?.copyWith(
+            color: selected ? Colors.white : theme.colorScheme.onSurface,
+          ),
+          showCheckmark: false,
         ),
       ],
     ),
