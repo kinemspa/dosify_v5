@@ -230,14 +230,15 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           _rowLabelField(
             context,
             label: 'Diluent',
-            field: Field36(
-              child: TextField(
-                controller: _diluentCtrl,
-                decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
-                onChanged: (_) => setState(() {}),
-                textAlign: TextAlign.center,
-              ),
+          field: Field36(
+            child: TextField(
+              controller: _diluentCtrl,
+              decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
+              onChanged: (_) => setState(() {}),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
+          ),
           ),
           _rowLabelField(
             context,

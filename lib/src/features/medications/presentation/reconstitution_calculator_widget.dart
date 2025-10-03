@@ -261,6 +261,7 @@ Widget _helperText(String text) {
               decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
               onChanged: (_) => setState(() {}),
               textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
         ),
