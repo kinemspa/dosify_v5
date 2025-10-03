@@ -804,7 +804,7 @@ class _AddEditInjectionMultiVialPageState
                           alignment: AlignmentDirectional.center,
                           child: Center(
                             child: Text(
-                              'multi dose vials',
+                              'vials',
                               textAlign: TextAlign.center,
                             ),
                           ),

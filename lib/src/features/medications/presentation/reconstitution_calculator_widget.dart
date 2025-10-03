@@ -241,8 +241,13 @@ Widget _helperText(String text) {
           ),
         ),
         const SizedBox(height: 4),
-        _helperText('Enter dose and unit, choose syringe size, then pick an option or adjust the IU slider to see vial volume and concentration.'),
-        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            'Enter dose and unit, choose syringe size, then pick an option or adjust the IU slider to see vial volume and concentration.',
+            style: kMutedLabelStyle(context),
+          ),
+        ),
         _rowLabelField(
           context,
           label: 'Diluent',
@@ -271,7 +276,6 @@ Widget _helperText(String text) {
             decoration: _fieldDecoration(context, hint: '0'),
           ),
         ),
-        _helperText('Amount per dose'),
         _rowLabelField(
           context,
           label: 'Dose Unit',
@@ -294,7 +298,7 @@ Widget _helperText(String text) {
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Unit of measurement for the dose'),
+        _helperText('Enter the amount per dose and select its unit'),
         _rowLabelField(
           context,
           label: 'Syringe Size',
@@ -323,53 +327,37 @@ Widget _helperText(String text) {
         _helperText('Select the syringe capacity'),
         _rowLabelField(
           context,
-          label: 'Max Vial (mL)',
-          field: Field36(
-            child: TextField(
-              controller: _vialSizeCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: _fieldDecoration(context, hint: 'Optional'),
-              onChanged: (_) => setState(() {}),
-            ),
+          label: 'Destination Vial',
+          field: StepperRow36(
+            controller: _vialSizeCtrl,
+            onDec: () {
+              final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+              setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString());
+            },
+            onInc: () {
+              final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+              setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString());
+            },
+            decoration: _fieldDecoration(context, hint: 'mL'),
           ),
         ),
-        _helperText('Maximum capacity of the destination vial'),
+        _helperText('Maximum capacity in mL of the destination vial'),
         const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (sliderMax > 0 && !sliderMax.isNaN) ...[
-              _PresetChip(
-                label: 'More concentrated',
-                selected: (_selectedUnits - u1).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = u1),
-                subtitle:
-                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLower volume; higher concentration',
-              ),
-              _PresetChip(
-                label: 'Balanced',
-                selected: (_selectedUnits - u2).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = u2),
-                subtitle:
-                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nMidpoint option',
-              ),
-              _PresetChip(
-                label: 'More diluted',
-                selected: (_selectedUnits - u3).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = u3),
-                subtitle:
-                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHigher volume; lower concentration',
-              ),
-            ] else
-              _PresetChip(
-                label: 'No valid options',
-                selected: false,
-                onTap: () {},
-                subtitle: 'Check strength, dose, or syringe size',
-              ),
-          ],
-        ),
+        if (sliderMax > 0 && !sliderMax.isNaN) ...[
+          _buildOptionRow(context, 'Concentrated', (_selectedUnits - u1).abs() < 0.01,
+              () => setState(() => _selectedUnits = u1)),
+          _buildOptionRow(context, 'Balanced', (_selectedUnits - u2).abs() < 0.01,
+              () => setState(() => _selectedUnits = u2)),
+          _buildOptionRow(context, 'Diluted', (_selectedUnits - u3).abs() < 0.01,
+              () => setState(() => _selectedUnits = u3)),
+        ] else
+          Padding(
+            padding: const EdgeInsets.only(left: 0, bottom: 8),
+            child: Text(
+              'No valid options — Check strength, dose, or syringe size',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
         const SizedBox(height: 16),
         Text(
           'Adjust IU draw',
@@ -441,55 +429,37 @@ Widget _helperText(String text) {
     );
   }
 
-}
-
-class _PresetChip extends StatelessWidget {
-  const _PresetChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    required this.subtitle,
-  });
-
-  final String label;
-  final String subtitle;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildOptionRow(
+      BuildContext context, String label, bool selected, VoidCallback onTap) {
     final theme = Theme.of(context);
-    return PrimaryChoiceChip(
-      selected: selected,
-      onSelected: (v) {
-        if (v) onTap();
-      },
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
         children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium,
             ),
           ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-                  ),
-                ),
-              ],
+          ChoiceChip(
+            label: const SizedBox.shrink(),
+            selected: selected,
+            onSelected: (_) => onTap(),
+            showCheckmark: false,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            backgroundColor: Colors.transparent,
+            selectedColor: theme.colorScheme.primary.withOpacity(0.15),
+            side: BorderSide(
+              color: selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outlineVariant,
+              width: selected ? 2 : 1,
             ),
           ),
         ],
       ),
     );
   }
+}
 }
