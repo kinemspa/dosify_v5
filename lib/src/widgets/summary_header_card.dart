@@ -28,6 +28,7 @@ class SummaryHeaderCard extends StatelessWidget {
     this.formLabelPlural,
     this.perTabletLabel = true,
     this.perUnitLabel,
+    this.additionalInfo,
   });
 
   final String title;
@@ -54,6 +55,8 @@ class SummaryHeaderCard extends StatelessWidget {
   final bool perTabletLabel;
   // Optional: override the default "per tablet" with a custom unit (e.g., "Syringe")
   final String? perUnitLabel;
+  // Optional additional single-line info to display (e.g., reconstitution summary)
+  final String? additionalInfo;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -392,6 +395,18 @@ class SummaryHeaderCard extends StatelessWidget {
                     ],
                   ],
                 ),
+                if ((additionalInfo ?? '').isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      additionalInfo!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: neutral
+                            ? cs.onSurfaceVariant.withValues(alpha: 0.75)
+                            : fg.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
