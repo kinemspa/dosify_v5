@@ -221,7 +221,7 @@ class _AddEditInjectionMultiVialPageState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Reconstituted: ${result.perMlConcentration.toStringAsFixed(2)} ${unitLabel}/mL • Add ${result.solventVolumeMl.toStringAsFixed(2)} mL • Dose ~ ${result.recommendedUnits.toStringAsFixed(2)} IU on ${result.syringeSizeMl.toStringAsFixed(1)} mL',
+              'Calculator updated: ${result.perMlConcentration.toStringAsFixed(2)} ${unitLabel}/mL concentration, add ${result.solventVolumeMl.toStringAsFixed(2)} mL fluid',
             ),
           ),
         );
@@ -727,7 +727,7 @@ class _AddEditInjectionMultiVialPageState
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Reconstituted: ${fmt2(result.perMlConcentration)} ${unitLabel}/mL • Add ${fmt2(result.solventVolumeMl)} mL • Dose ~ ${fmt2(result.recommendedUnits)} IU on ${result.syringeSizeMl.toStringAsFixed(1)} mL',
+                          'Calculator updated: ${fmt2(result.perMlConcentration)} ${unitLabel}/mL concentration, add ${fmt2(result.solventVolumeMl)} mL fluid',
                         ),
                       ),
                     );

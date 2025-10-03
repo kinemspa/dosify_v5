@@ -231,6 +231,7 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                 controller: _diluentCtrl,
                 decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
                 onChanged: (_) => setState(() {}),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -447,11 +448,14 @@ Widget _buildOptionRow(
           ),
         ),
         ChoiceChip(
-          label: const SizedBox.shrink(),
+          label: Text(
+            selected ? '✓' : '',
+            style: TextStyle(color: theme.colorScheme.primary),
+          ),
           selected: selected,
           onSelected: (_) => onTap(),
           showCheckmark: false,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           backgroundColor: Colors.transparent,
           selectedColor: theme.colorScheme.primary.withOpacity(0.15),
           side: BorderSide(
