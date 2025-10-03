@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import '../../../widgets/form_field_styler.dart';
 import '../../../core/prefs/user_prefs.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 class AddEditInjectionMultiVialPage extends ConsumerStatefulWidget {
   const AddEditInjectionMultiVialPage({super.key, this.initial});
@@ -176,6 +177,30 @@ class _AddEditInjectionMultiVialPageState
       parts.add('Vial Expires - ${DateFormat.yMd().format(_expiry!)}');
     if (_notesCtrl.text.isNotEmpty) parts.add(_notesCtrl.text);
     return parts.join('. ');
+  }
+
+  Widget _buildSummaryCard() {
+    final strengthValue = double.tryParse(_strengthValueCtrl.text);
+    final stockValue = double.tryParse(_stockValueCtrl.text);
+    final perMlValue = _isPerMl ? double.tryParse(_perMlCtrl.text) : null;
+
+    return SummaryHeaderCard(
+      title: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'Multi Dose Vial',
+      manufacturer: _manufacturerCtrl.text.isNotEmpty
+          ? _manufacturerCtrl.text
+          : null,
+      strengthValue: strengthValue,
+      strengthUnitLabel: _unitLabel(_strengthUnit),
+      perMlValue: perMlValue,
+      stockCurrent: stockValue,
+      stockUnitLabel: 'vials',
+      expiryDate: _expiry,
+      showRefrigerate: _requiresFridge,
+      neutral: true,
+      outlined: true,
+      leadingIcon: Icons.local_drink,
+      perUnitLabel: 'Vial',
+    );
   }
 
   Future<void> _pickExpiry() async {
@@ -367,14 +392,18 @@ class _AddEditInjectionMultiVialPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 4),
-              Text(
-                _buildSummary().isEmpty
-                    ? 'Summary will update as you type'
-                    : _buildSummary(),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+              if (_nameCtrl.text.isNotEmpty) _buildSummaryCard(),
+              if (_nameCtrl.text.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Summary will appear as you fill in details',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
-              ),
+              const SizedBox(height: 12),
               // General card
               Container(
                 decoration: BoxDecoration(

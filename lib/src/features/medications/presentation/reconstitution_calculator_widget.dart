@@ -387,6 +387,13 @@ class _ReconstitutionCalculatorWidgetState
         ),
         const SizedBox(height: 16),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Choose reconstitution option: Concentration • Diluent volume • Syringe draw amount',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
           _buildOptionRow(
             context,
             'Concentrated',
