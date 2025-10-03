@@ -646,9 +646,9 @@ class _AddEditInjectionMultiVialPageState
                     },
                   ),
                 ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
-                'Enter the amount of active ingredient in the vial and select its unit. This defines concentration, not total volume.',
+                'Vial contents: Enter the total amount of active medication contained in the vial before reconstitution.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

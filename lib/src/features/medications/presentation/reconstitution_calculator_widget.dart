@@ -78,6 +78,13 @@ class _ReconstitutionCalculatorWidgetState
 
   double _round2(double v) => (v * 100).round() / 100.0;
 
+  String _fmt(double v) {
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    final s = v.toStringAsFixed(2);
+    if (s.endsWith('0')) return v.toStringAsFixed(1);
+    return s;
+  }
+
   double _toBaseMass(double value, String from) {
     if (from == 'g') return value * 1000.0;
     if (from == 'mg') return value;
@@ -242,7 +249,16 @@ class _ReconstitutionCalculatorWidgetState
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            'Using vial strength: ${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+            style: kMutedLabelStyle(
+              context,
+            ).copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
@@ -492,7 +508,7 @@ class _ReconstitutionCalculatorWidgetState
           const Spacer(),
           ChoiceChip(
             label: Text(
-              '${_round2(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_round2(calcResult.vialVolume)} mL • ${_round2(units)} IU',
+              '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_fmt(calcResult.vialVolume)} mL • ${_fmt(units)} IU',
             ),
             selected: selected,
             onSelected: (_) => onTap(),

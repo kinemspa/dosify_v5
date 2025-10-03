@@ -71,6 +71,14 @@ class _ReconstitutionCalculatorPageState
   }
 
   double _round2(double v) => (v * 100).round() / 100.0;
+
+  String _fmt(double v) {
+    if (v == v.roundToDouble()) return v.toInt().toString();
+    final s = v.toStringAsFixed(2);
+    if (s.endsWith('0')) return v.toStringAsFixed(1);
+    return s;
+  }
+
   double _toBaseMass(double value, String from) {
     if (from == 'g') return value * 1000.0; // g->mg
     if (from == 'mg') return value; // mg base
@@ -512,7 +520,7 @@ Widget _buildOptionRow(
         const Spacer(),
         ChoiceChip(
           label: Text(
-            '${fmt2(calcResult.cPerMl)} $unitLabel/mL • ${fmt2(calcResult.vialVolume)} mL • ${fmt2(units)} IU',
+            '${_fmt(calcResult.cPerMl)} $unitLabel/mL • ${_fmt(calcResult.vialVolume)} mL • ${_fmt(units)} IU',
           ),
           selected: selected,
           onSelected: (_) => onTap(),
