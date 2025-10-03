@@ -443,22 +443,31 @@ Widget _helperText(String text) {
               style: theme.textTheme.bodyMedium,
             ),
           ),
-          ChoiceChip(
-            label: Text(
-              selected ? '✓' : '',
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-            selected: selected,
-            onSelected: (_) => onTap(),
-            showCheckmark: false,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            backgroundColor: Colors.transparent,
-            selectedColor: theme.colorScheme.primary.withOpacity(0.15),
-            side: BorderSide(
-              color: selected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outlineVariant,
-              width: selected ? 2 : 1,
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selected
+                    ? theme.colorScheme.primary.withOpacity(0.15)
+                    : Colors.transparent,
+                border: Border.all(
+                  color: selected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outlineVariant,
+                  width: selected ? 2 : 1,
+                ),
+              ),
+              child: selected
+                  ? Icon(
+                      Icons.check,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    )
+                  : null,
             ),
           ),
         ],
