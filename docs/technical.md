@@ -113,15 +113,22 @@ Reconstitution Calculator Formula
     - V = vial volume in mL (solvent to add for reconstitution)
     - C = concentration per mL after reconstitution
 - Unit conversion via _toBaseMass(): g→mg (*1000), mcg→mg (/1000), mg→mg (1:1)
-- Method generation: calculator provides 3 method options (Concentrated/Standard/Diluted) using 5%, 33%, 80% of syringe capacity
+- Option generation: calculator provides 3 reconstitution options (More concentrated/Balanced/More diluted) using min, mid, max IU ranges within slider bounds
 - UI styling (standardized):
   - Layout rows use LabelFieldRow for consistent label column and spacing
   - Heading: "Reconstitution Calculator" in titleMedium, primary color, bold
-  - Desired Dose and Vial Quantity: StepperRow36 controls with Field36 for inputs
-  - Dose Unit, Syringe Size: SmallDropdown36 with kSmallControlWidth (120px)
+  - Usage helper under title: "Enter dose and unit, choose syringe size, then pick an option or adjust the IU slider to see vial volume and concentration."
+  - Diluent: Field36 text input for reconstitution fluid name (e.g., "Sterile Water")
+  - Desired Dose + Dose Unit: Combined row with StepperRow36 (integer stepper) + SmallDropdown36; single helper beneath: "Enter the amount per dose and select its unit"
+  - Syringe Size: SmallDropdown36 with kSmallControlWidth (120px), labels shortened to "0.3 mL", "0.5 mL", "1.0 mL", "3.0 mL", "5.0 mL" (no IU display in dropdown)
+  - Vial Quantity (before dilution): StepperRow36 with integer-only input matching Desired Dose styling; helper: "Enter the total amount of drug in your vial (before dilution)"
+  - Max Vial (mL): Integer-only StepperRow36 for maximum vial volume constraint
+  - Reconstitution Options section: Vertical column of clickable rows (left side: title + subtitle + calc values, right side: Radio selector); no grey background on inactive options; border on selected
+  - Options wording: "More concentrated" (lower volume, higher concentration), "Balanced" (midpoint), "More diluted" (higher volume, lower concentration)
+  - Slider section: "Adjust IU draw" label with helper: "Adjust the IU draw for this syringe"
+  - Inline syringe gauge removed from calculator UI
+  - Action button text: "Save Reconstitution" (previously "Apply to vial" or "Submit")
   - Support text: kMutedLabelStyle(context)
-  - Method chips: PrimaryChoiceChip with Column label (title + subtitle)
-  - Syringe visual: SyringeGauge wrapped in softWhiteCardDecoration
   - Label styles: bodyMedium bold, 14sp, onSurfaceVariant at ~75% opacity
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial

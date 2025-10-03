@@ -36,6 +36,7 @@ class _ReconstitutionCalculatorPageState
   late final TextEditingController _strengthCtrl;
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
+  final TextEditingController _diluentCtrl = TextEditingController();
   late String _doseUnit; // 'mcg'|'mg'|'g'|'units'
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
   double _selectedUnits = 50;
@@ -62,6 +63,7 @@ class _ReconstitutionCalculatorPageState
     _strengthCtrl.dispose();
     _doseCtrl.dispose();
     _vialSizeCtrl.dispose();
+    _diluentCtrl.dispose();
     super.dispose();
   }
 
@@ -207,16 +209,34 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                     context.pop(result);
                   }
                 : null,
-            child: const Text('Apply'),
+            child: const Text('Save Reconstitution'),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 160),
         children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 0, bottom: 8),
+            child: Text(
+              'Enter dose and unit, choose syringe size, then pick an option or adjust the IU slider to see vial volume and concentration.',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
           _rowLabelField(
             context,
-label: 'Vial Quantity',
+            label: 'Diluent',
+            field: Field36(
+              child: TextField(
+                controller: _diluentCtrl,
+                decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
+                onChanged: (_) => setState(() {}),
+              ),
+            ),
+          ),
+          _rowLabelField(
+            context,
+            label: 'Vial Quantity',
             field: StepperRow36(
               controller: _strengthCtrl,
               onDec: () {
@@ -232,23 +252,34 @@ label: 'Vial Quantity',
               decoration: _fieldDecoration(context, hint: '${widget.unitLabel}'),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
+            child: Text(
+              'Enter the total amount of drug in your vial (before dilution)',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
           _rowLabelField(
             context,
             label: 'Desired Dose',
             field: Row(
               children: [
                 Expanded(
-                  child: Field36(
-                    child: TextField(
-                      controller: _doseCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: _fieldDecoration(context),
-                      onChanged: (_) => setState(() {}),
-                    ),
+                  child: StepperRow36(
+                    controller: _doseCtrl,
+                    onDec: () {
+                      final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+                      setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
+                    },
+                    onInc: () {
+                      final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+                      setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
+                    },
+                    decoration: _fieldDecoration(context),
                   ),
                 ),
                 const SizedBox(width: 8),
-SmallDropdown36<String>(
+                SmallDropdown36<String>(
                   value: _doseUnit,
                   width: kSmallControlWidth,
                   items: [
@@ -269,6 +300,13 @@ SmallDropdown36<String>(
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
+            child: Text(
+              'Enter the amount per dose and select its unit',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
           _rowLabelField(
             context,
             label: 'Syringe Size',
@@ -279,7 +317,7 @@ SmallDropdown36<String>(
                     .map(
                       (s) => DropdownMenuItem(
                         value: s,
-                        child: Text('${s.label} • ${s.totalUnits} IU'),
+                        child: Text(s.label),
                       ),
                     )
                     .toList(),
@@ -298,56 +336,60 @@ SmallDropdown36<String>(
           _rowLabelField(
             context,
             label: 'Max Vial (mL)',
-            field: Field36(
-              child: TextField(
-                controller: _vialSizeCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: _fieldDecoration(context, hint: 'Optional'),
-                onChanged: (_) => setState(() {}),
-              ),
+            field: StepperRow36(
+              controller: _vialSizeCtrl,
+              onDec: () {
+                final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+                setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 10000).toString());
+              },
+              onInc: () {
+                final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+                setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 10000).toString());
+              },
+              decoration: _fieldDecoration(context, hint: 'Optional'),
             ),
           ),
           const SizedBox(height: 16),
-          Text('Presets', style: Theme.of(context).textTheme.titleSmall),
+          Text('Reconstitution Options', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _PresetChip(
-                label: 'Concentrated',
-                selected: (_selectedUnits - u1).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = u1),
-                subtitle:
-                    '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLow volume; less injection volume',
-              ),
-              _PresetChip(
-                label: 'Standard',
-                selected: (_selectedUnits - u2).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = u2),
-                subtitle:
-                    '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nBalanced midpoint',
-              ),
-              _PresetChip(
-                label: 'Diluted',
-                selected: (_selectedUnits - u3).abs() < 0.01,
-                onTap: () => setState(() => _selectedUnits = u3),
-                subtitle:
-                    '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHighest volume within limit',
-              ),
-              if (sliderMax <= 0 || sliderMax.isNaN)
-                _PresetChip(
-                  label: 'No valid options',
-                  selected: false,
-                  onTap: () {},
-                  subtitle: 'Check strength, dose, or syringe size',
-                ),
-            ],
-          ),
+          if (sliderMax > 0 && !sliderMax.isNaN) ...[
+            _optionRow(
+              context,
+              'More concentrated',
+              'Lower final volume; higher per‑mL concentration',
+              u1,
+              conc,
+            ),
+            _optionRow(
+              context,
+              'Balanced',
+              'Midpoint between concentration and volume',
+              u2,
+              std,
+            ),
+            _optionRow(
+              context,
+              'More diluted',
+              'Higher final volume; lower per‑mL concentration',
+              u3,
+              dil,
+            ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.only(left: 0),
+              child: Text('No valid options — Check strength, dose, or syringe size', style: kMutedLabelStyle(context)),
+            ),
           const SizedBox(height: 16),
           Text(
-            'Adjust fill (${_syringe.totalUnits} IU max)',
+            'Adjust IU draw',
             style: Theme.of(context).textTheme.titleSmall,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
+            child: Text(
+              'Adjust the IU draw for this syringe',
+              style: kMutedLabelStyle(context),
+            ),
           ),
           Slider(
             value: _selectedUnits,
@@ -356,15 +398,6 @@ SmallDropdown36<String>(
             divisions: (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
             label: '${_round2(_selectedUnits)} IU',
             onChanged: (v) => setState(() => _selectedUnits = v),
-          ),
-// Visual syringe gauge (standardized)
-          Container(
-            decoration: softWhiteCardDecoration(context),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: SyringeGauge(
-              totalIU: _syringe.totalUnits.toDouble(),
-              fillIU: _selectedUnits,
-            ),
           ),
         ],
       ),
@@ -400,7 +433,7 @@ SmallDropdown36<String>(
                         context.pop(result);
                       }
                     : null,
-                child: const Text('Apply to vial'),
+                child: const Text('Save Reconstitution'),
               ),
             ],
           ),
@@ -410,45 +443,48 @@ SmallDropdown36<String>(
   }
 }
 
-class _PresetChip extends StatelessWidget {
-  const _PresetChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    required this.subtitle,
-  });
-
-  final String label;
-  final String subtitle;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-return PrimaryChoiceChip(
-      selected: selected,
-      onSelected: (v) {
-        if (v) onTap();
-      },
-      label: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+Widget _optionRow(
+  BuildContext context,
+  String title,
+  String subtitle,
+  double units,
+  ({double cPerMl, double vialVolume}) calcResult,
+) {
+  final theme = Theme.of(context);
+  final pageState = context.findAncestorStateOfType<_ReconstitutionCalculatorPageState>();
+  final selected = (pageState?._selectedUnits ?? 0 - units).abs() < 0.01;
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: InkWell(
+      onTap: () => pageState?.setState(() => pageState._selectedUnits = units),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: selected ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  Text(subtitle, style: kMutedLabelStyle(context)),
+                  Text('${fmt2(calcResult.cPerMl)} ${pageState?.widget.unitLabel}/mL • ${fmt2(calcResult.vialVolume)} mL • ${fmt2(units)} IU',
+                      style: theme.textTheme.bodySmall),
+                ],
+              ),
             ),
-          ),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+            Radio<double>(
+              value: units,
+              groupValue: pageState?._selectedUnits,
+              onChanged: (v) => pageState?.setState(() => pageState._selectedUnits = v ?? units),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../widgets/field36.dart';
 import '../../../widgets/unified_form.dart';
 import 'ui_consts.dart';
@@ -44,6 +45,7 @@ class _ReconstitutionCalculatorWidgetState
     extends State<ReconstitutionCalculatorWidget> {
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
+  final TextEditingController _diluentNameCtrl = TextEditingController();
   late String _doseUnit;
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
   double _selectedUnits = 50;
@@ -67,6 +69,7 @@ class _ReconstitutionCalculatorWidgetState
   void dispose() {
     _doseCtrl.dispose();
     _vialSizeCtrl.dispose();
+    _diluentNameCtrl.dispose();
     super.dispose();
   }
 
@@ -237,47 +240,63 @@ Widget _helperText(String text) {
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
+        const SizedBox(height: 4),
+        _helperText('Enter dose and unit, choose syringe size, then pick an option or adjust the IU slider to see vial volume and concentration.'),
         const SizedBox(height: 12),
         _rowLabelField(
           context,
-label: 'Desired Dose',
-          field: StepperRow36(
-            controller: _doseCtrl,
-            onDec: () {
-              final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-              setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
-            },
-            onInc: () {
-              final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-              setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
-            },
-            decoration: _fieldDecoration(context, hint: '0'),
+          label: 'Diluent',
+          field: Field36(
+            child: TextField(
+              controller: _diluentNameCtrl,
+              decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
+              onChanged: (_) => setState(() {}),
+            ),
           ),
         ),
-        _helperText('Amount per dose'),
+        _helperText('Reconstitution fluid name'),
         _rowLabelField(
           context,
-          label: 'Dose Unit',
-          field: SmallDropdown36<String>(
-            value: _doseUnit,
-            width: kSmallControlWidth,
-            items: [
-              if (widget.unitLabel == 'units')
-                const DropdownMenuItem(
-                  value: 'units',
-                  child: Center(child: Text('units')),
+          label: 'Desired Dose',
+          field: Row(
+            children: [
+              Expanded(
+                child: StepperRow36(
+                  controller: _doseCtrl,
+                  onDec: () {
+                    final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+                    setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
+                  },
+                  onInc: () {
+                    final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+                    setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
+                  },
+                  decoration: _fieldDecoration(context, hint: '0'),
                 ),
-              if (widget.unitLabel != 'units') ...const [
-                DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
-                DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
-                DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
-              ],
+              ),
+              const SizedBox(width: 8),
+              SmallDropdown36<String>(
+                value: _doseUnit,
+                width: kSmallControlWidth,
+                items: [
+                  if (widget.unitLabel == 'units')
+                    const DropdownMenuItem(
+                      value: 'units',
+                      child: Center(child: Text('units')),
+                    ),
+                  if (widget.unitLabel != 'units') ...const [
+                    DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
+                    DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
+                    DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
+                  ],
+                ],
+                onChanged: (v) => setState(() => _doseUnit = v!),
+                decoration: _fieldDecoration(context),
+              ),
             ],
-            onChanged: (v) => setState(() => _doseUnit = v!),
-            decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Unit of measurement for the dose'),
+        _helperText('Enter the amount per dose and select its unit'),
         _rowLabelField(
           context,
           label: 'Syringe Size',
@@ -288,7 +307,7 @@ label: 'Desired Dose',
                 .map(
                   (s) => DropdownMenuItem(
                     value: s,
-                    child: Center(child: Text('${s.label} • ${s.totalUnits} IU')),
+                    child: Center(child: Text(s.label)),
                   ),
                 )
                 .toList(),
@@ -306,66 +325,63 @@ label: 'Desired Dose',
         _helperText('Select the syringe capacity'),
         _rowLabelField(
           context,
-          label: 'Max Vial (mL)',
-          field: Field36(
-            child: TextField(
-              controller: _vialSizeCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: _fieldDecoration(context, hint: 'Optional'),
-              onChanged: (_) => setState(() {}),
-            ),
+          label: 'Vial Quantity',
+          field: StepperRow36(
+            controller: _vialSizeCtrl,
+            onDec: () {
+              final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+              setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 10000).toString());
+            },
+            onInc: () {
+              final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+              setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 10000).toString());
+            },
+            decoration: _fieldDecoration(context, hint: 'Optional'),
           ),
         ),
-        _helperText('Maximum fluid volume allowed in the vial'),
+        _helperText('Enter the total amount of drug in your vial (before dilution)'),
         const SizedBox(height: 16),
         Text(
-          'Methods',
+          'Reconstitution Options',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _PresetChip(
-              label: 'Concentrated',
-              selected: (_selectedUnits - u1).abs() < 0.01,
-              onTap: () => setState(() => _selectedUnits = u1),
-              subtitle:
-                  '${_round2(conc.cPerMl)} ${widget.unitLabel}/mL • ${_round2(conc.vialVolume)} mL • ${_round2(u1)} IU\nLow volume; less injection volume',
-            ),
-            _PresetChip(
-              label: 'Standard',
-              selected: (_selectedUnits - u2).abs() < 0.01,
-              onTap: () => setState(() => _selectedUnits = u2),
-              subtitle:
-                  '${_round2(std.cPerMl)} ${widget.unitLabel}/mL • ${_round2(std.vialVolume)} mL • ${_round2(u2)} IU\nBalanced midpoint',
-            ),
-            _PresetChip(
-              label: 'Diluted',
-              selected: (_selectedUnits - u3).abs() < 0.01,
-              onTap: () => setState(() => _selectedUnits = u3),
-              subtitle:
-                  '${_round2(dil.cPerMl)} ${widget.unitLabel}/mL • ${_round2(dil.vialVolume)} mL • ${_round2(u3)} IU\nHighest volume within limit',
-            ),
-            if (sliderMax <= 0 || sliderMax.isNaN)
-              _PresetChip(
-                label: 'No valid options',
-                selected: false,
-                onTap: () {},
-                subtitle: 'Check strength, dose, or syringe size',
-              ),
-          ],
-        ),
+        if (sliderMax > 0 && !sliderMax.isNaN) ...[
+          _optionRow(
+            context,
+            'More concentrated',
+            'Lower final volume; higher per‑mL concentration',
+            u1,
+            conc,
+          ),
+          _optionRow(
+            context,
+            'Balanced',
+            'Midpoint between concentration and volume',
+            u2,
+            std,
+          ),
+          _optionRow(
+            context,
+            'More diluted',
+            'Higher final volume; lower per‑mL concentration',
+            u3,
+            dil,
+          ),
+        ] else
+          Text(
+            'No valid options — Check strength, dose, or syringe size',
+            style: kMutedLabelStyle(context),
+          ),
         const SizedBox(height: 16),
         Text(
-          'Adjust fill (${_syringe.totalUnits} IU max)',
+          'Adjust IU draw',
           style: Theme.of(context).textTheme.titleSmall,
         ),
+        _helperText('Adjust the IU draw for this syringe'),
         Slider(
           value: _selectedUnits,
           min: sliderMin,
@@ -374,15 +390,6 @@ label: 'Desired Dose',
               (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
           label: '${_round2(_selectedUnits)} IU',
           onChanged: (v) => setState(() => _selectedUnits = v),
-        ),
-// Visual syringe fill indicator (standardized)
-        Container(
-          decoration: softWhiteCardDecoration(context),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: SyringeGauge(
-            totalIU: _syringe.totalUnits.toDouble(),
-            fillIU: _selectedUnits,
-          ),
         ),
         if (widget.showSummary) ...[
           const SizedBox(height: 16),
@@ -432,53 +439,67 @@ label: 'Desired Dose',
                       widget.onApply?.call(result);
                     }
                   : null,
-              child: const Text('Apply to vial'),
+              child: const Text('Save Reconstitution'),
             ),
           ),
         ],
       ],
     );
   }
-}
 
-class _PresetChip extends StatelessWidget {
-  const _PresetChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    required this.subtitle,
-  });
-
-  final String label;
-  final String subtitle;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _optionRow(
+    BuildContext context,
+    String title,
+    String subtitle,
+    double units,
+    ({double cPerMl, double vialVolume}) calcResult,
+  ) {
+    final selected = (_selectedUnits - units).abs() < 0.01;
     final theme = Theme.of(context);
-return PrimaryChoiceChip(
-      selected: selected,
-      onSelected: (v) {
-        if (v) onTap();
-      },
-      label: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: InkWell(
+        onTap: () => setState(() => _selectedUnits = units),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: selected
+                ? Border.all(color: theme.colorScheme.primary, width: 2)
+                : null,
           ),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: kMutedLabelStyle(context),
+                    ),
+                    Text(
+                      '${_round2(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_round2(calcResult.vialVolume)} mL • ${_round2(units)} IU',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Radio<double>(
+                value: units,
+                groupValue: _selectedUnits,
+                onChanged: (v) => setState(() => _selectedUnits = v!),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -94,7 +94,7 @@ class _ReconstitutionCalculatorDialogState
                   Navigator.of(context).pop(_lastResult);
                 }
               : null,
-          child: const Text('Submit'),
+          child: const Text('Save Reconstitution'),
         ),
       ],
     );
