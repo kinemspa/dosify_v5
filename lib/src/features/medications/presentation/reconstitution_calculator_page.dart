@@ -47,9 +47,11 @@ class _ReconstitutionCalculatorPageState
     _strengthCtrl = TextEditingController(
       text: widget.initialStrengthValue.toStringAsFixed(2),
     );
+    final defaultDose = widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05);
     _doseCtrl = TextEditingController(
-      text: (widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05))
-          .toStringAsFixed(2),
+      text: defaultDose == defaultDose.roundToDouble()
+          ? defaultDose.toInt().toString()
+          : defaultDose.toStringAsFixed(2),
     );
     _doseUnit = widget.initialDoseUnit ?? widget.unitLabel;
     _syringe = widget.initialSyringeSize ?? _syringe;
@@ -219,10 +221,12 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'Enter dose and unit, choose syringe size, then pick an option or adjust the IU slider to see vial volume and concentration.',
+              'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
               style: kMutedLabelStyle(context),
             ),
           ),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+          const SizedBox(height: 12),
           _rowLabelField(
             context,
             label: 'Diluent',
@@ -333,7 +337,7 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           ),
           _rowLabelField(
             context,
-            label: 'Destination Vial',
+            label: 'Max Vial Size',
             field: StepperRow36(
               controller: _vialSizeCtrl,
               onDec: () {
@@ -350,18 +354,19 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           Padding(
             padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
             child: Text(
-              'Maximum capacity in mL of the destination vial',
+              'Maximum capacity in mL of the vial (optional constraint)',
               style: kMutedLabelStyle(context),
             ),
           ),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
           const SizedBox(height: 16),
           if (sliderMax > 0 && !sliderMax.isNaN) ...[
             _buildOptionRow(context, 'Concentrated', (_selectedUnits - u1).abs() < 0.01,
-                () => setState(() => _selectedUnits = u1)),
+                () => setState(() => _selectedUnits = u1), conc, u1, widget.unitLabel),
             _buildOptionRow(context, 'Balanced', (_selectedUnits - u2).abs() < 0.01,
-                () => setState(() => _selectedUnits = u2)),
+                () => setState(() => _selectedUnits = u2), std, u2, widget.unitLabel),
             _buildOptionRow(context, 'Diluted', (_selectedUnits - u3).abs() < 0.01,
-                () => setState(() => _selectedUnits = u3)),
+                () => setState(() => _selectedUnits = u3), dil, u3, widget.unitLabel),
           ] else
             Padding(
               padding: const EdgeInsets.only(left: 0, bottom: 8),
@@ -372,13 +377,13 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
             ),
           const SizedBox(height: 16),
           Text(
-            'Adjust IU draw',
+            'Fine-tune',
             style: Theme.of(context).textTheme.titleSmall,
           ),
           Padding(
             padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
             child: Text(
-              'Adjust the IU draw for this syringe',
+              'Adjust diluent amount (affects IU concentration)',
               style: kMutedLabelStyle(context),
             ),
           ),
@@ -435,43 +440,32 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
 }
 
 Widget _buildOptionRow(
-    BuildContext context, String label, bool selected, VoidCallback onTap) {
+  BuildContext context,
+  String label,
+  bool selected,
+  VoidCallback onTap,
+  ({double cPerMl, double vialVolume}) calcResult,
+  double units,
+  String unitLabel,
+) {
   final theme = Theme.of(context);
   return Padding(
     padding: const EdgeInsets.only(bottom: 8),
     child: Row(
       children: [
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium,
-          ),
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected
-                  ? theme.colorScheme.primary.withOpacity(0.15)
-                  : Colors.transparent,
-              border: Border.all(
-                color: selected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.outlineVariant,
-                width: selected ? 2 : 1,
-              ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: PrimaryChoiceChip(
+            selected: selected,
+            onSelected: (_) => onTap(),
+            label: Text(
+              '${fmt2(calcResult.cPerMl)} $unitLabel/mL • ${fmt2(calcResult.vialVolume)} mL • ${fmt2(units)} IU',
+              style: theme.textTheme.bodySmall,
             ),
-            child: selected
-                ? Icon(
-                    Icons.check,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  )
-                : null,
           ),
         ),
       ],
