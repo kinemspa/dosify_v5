@@ -47,7 +47,8 @@ class _ReconstitutionCalculatorPageState
     _strengthCtrl = TextEditingController(
       text: widget.initialStrengthValue.toStringAsFixed(2),
     );
-    final defaultDose = widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05);
+    final defaultDose =
+        widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05);
     _doseCtrl = TextEditingController(
       text: defaultDose == defaultDose.roundToDouble()
           ? defaultDose.toInt().toString()
@@ -106,9 +107,7 @@ class _ReconstitutionCalculatorPageState
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
@@ -118,15 +117,16 @@ class _ReconstitutionCalculatorPageState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.primary,
-          width: 2.0,
-        ),
+        borderSide: BorderSide(color: cs.primary, width: 2.0),
       ),
     );
   }
 
-Widget _rowLabelField(BuildContext context, {required String label, required Widget field}) {
+  Widget _rowLabelField(
+    BuildContext context, {
+    required String label,
+    required Widget field,
+  }) {
     // Use unified left-label row for consistency with other editors.
     return LabelFieldRow(label: label, field: field);
   }
@@ -142,10 +142,7 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
           width: 36,
           height: kFieldHeight,
           child: Center(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.titleMedium),
           ),
         ),
       ),
@@ -207,6 +204,9 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                       solventVolumeMl: curV,
                       recommendedUnits: _round2(_selectedUnits),
                       syringeSizeMl: _syringe.ml,
+                      diluentName: _diluentCtrl.text.trim().isNotEmpty
+                          ? _diluentCtrl.text.trim()
+                          : null,
                     );
                     context.pop(result);
                   }
@@ -225,20 +225,27 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
               style: kMutedLabelStyle(context),
             ),
           ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+          Divider(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withOpacity(0.5),
+          ),
           const SizedBox(height: 12),
           _rowLabelField(
             context,
             label: 'Diluent',
-          field: Field36(
-            child: TextField(
-              controller: _diluentCtrl,
-              decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
-              onChanged: (_) => setState(() {}),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+            field: Field36(
+              child: TextField(
+                controller: _diluentCtrl,
+                decoration: _fieldDecoration(
+                  context,
+                  hint: 'e.g., Sterile Water',
+                ),
+                onChanged: (_) => setState(() {}),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ),
-          ),
           ),
           _rowLabelField(
             context,
@@ -255,7 +262,10 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                 final nv = (v + 1).clamp(0, 10000);
                 setState(() => _strengthCtrl.text = nv.toStringAsFixed(0));
               },
-              decoration: _fieldDecoration(context, hint: '${widget.unitLabel}'),
+              decoration: _fieldDecoration(
+                context,
+                hint: '${widget.unitLabel}',
+              ),
             ),
           ),
           Padding(
@@ -272,11 +282,15 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
               controller: _doseCtrl,
               onDec: () {
                 final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-                setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
+                setState(
+                  () => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString(),
+                );
               },
               onInc: () {
                 final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-                setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
+                setState(
+                  () => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString(),
+                );
               },
               decoration: _fieldDecoration(context),
             ),
@@ -294,9 +308,18 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                     child: Center(child: Text('units')),
                   ),
                 if (widget.unitLabel != 'units') ...const [
-                  DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
-                  DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
-                  DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
+                  DropdownMenuItem(
+                    value: 'mcg',
+                    child: Center(child: Text('mcg')),
+                  ),
+                  DropdownMenuItem(
+                    value: 'mg',
+                    child: Center(child: Text('mg')),
+                  ),
+                  DropdownMenuItem(
+                    value: 'g',
+                    child: Center(child: Text('g')),
+                  ),
                 ],
               ],
               onChanged: (v) => setState(() => _doseUnit = v!),
@@ -318,10 +341,7 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                 value: _syringe,
                 items: SyringeSizeMl.values
                     .map(
-                      (s) => DropdownMenuItem(
-                        value: s,
-                        child: Text(s.label),
-                      ),
+                      (s) => DropdownMenuItem(value: s, child: Text(s.label)),
                     )
                     .toList(),
                 onChanged: (v) => setState(() {
@@ -343,11 +363,15 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
               controller: _vialSizeCtrl,
               onDec: () {
                 final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-                setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString());
+                setState(
+                  () => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString(),
+                );
               },
               onInc: () {
                 final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-                setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString());
+                setState(
+                  () => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString(),
+                );
               },
               decoration: _fieldDecoration(context, hint: 'mL'),
             ),
@@ -359,15 +383,40 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
               style: kMutedLabelStyle(context),
             ),
           ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+          Divider(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withOpacity(0.5),
+          ),
           const SizedBox(height: 16),
           if (sliderMax > 0 && !sliderMax.isNaN) ...[
-            _buildOptionRow(context, 'Concentrated', (_selectedUnits - u1).abs() < 0.01,
-                () => setState(() => _selectedUnits = u1), conc, u1, widget.unitLabel),
-            _buildOptionRow(context, 'Balanced', (_selectedUnits - u2).abs() < 0.01,
-                () => setState(() => _selectedUnits = u2), std, u2, widget.unitLabel),
-            _buildOptionRow(context, 'Diluted', (_selectedUnits - u3).abs() < 0.01,
-                () => setState(() => _selectedUnits = u3), dil, u3, widget.unitLabel),
+            _buildOptionRow(
+              context,
+              'Concentrated',
+              (_selectedUnits - u1).abs() < 0.01,
+              () => setState(() => _selectedUnits = u1),
+              conc,
+              u1,
+              widget.unitLabel,
+            ),
+            _buildOptionRow(
+              context,
+              'Balanced',
+              (_selectedUnits - u2).abs() < 0.01,
+              () => setState(() => _selectedUnits = u2),
+              std,
+              u2,
+              widget.unitLabel,
+            ),
+            _buildOptionRow(
+              context,
+              'Diluted',
+              (_selectedUnits - u3).abs() < 0.01,
+              () => setState(() => _selectedUnits = u3),
+              dil,
+              u3,
+              widget.unitLabel,
+            ),
           ] else
             Padding(
               padding: const EdgeInsets.only(left: 0, bottom: 8),
@@ -377,10 +426,7 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
               ),
             ),
           const SizedBox(height: 16),
-          Text(
-            'Fine-tune',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          Text('Fine-tune', style: Theme.of(context).textTheme.titleSmall),
           Padding(
             padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
             child: Text(
@@ -426,6 +472,9 @@ Widget _rowLabelField(BuildContext context, {required String label, required Wid
                           solventVolumeMl: curV,
                           recommendedUnits: _round2(_selectedUnits),
                           syringeSizeMl: _syringe.ml,
+                          diluentName: _diluentCtrl.text.trim().isNotEmpty
+                              ? _diluentCtrl.text.trim()
+                              : null,
                         );
                         context.pop(result);
                       }
@@ -456,7 +505,9 @@ Widget _buildOptionRow(
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(

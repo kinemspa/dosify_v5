@@ -53,7 +53,8 @@ class _ReconstitutionCalculatorWidgetState
   @override
   void initState() {
     super.initState();
-    final defaultDose = widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05);
+    final defaultDose =
+        widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05);
     _doseCtrl = TextEditingController(
       text: defaultDose == defaultDose.roundToDouble()
           ? defaultDose.toInt().toString()
@@ -118,9 +119,7 @@ class _ReconstitutionCalculatorWidgetState
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
@@ -130,27 +129,24 @@ class _ReconstitutionCalculatorWidgetState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.primary,
-          width: 2.0,
-        ),
+        borderSide: BorderSide(color: cs.primary, width: 2.0),
       ),
     );
   }
 
-Widget _rowLabelField(BuildContext context,
-      {required String label, required Widget field}) {
+  Widget _rowLabelField(
+    BuildContext context, {
+    required String label,
+    required Widget field,
+  }) {
     // Use unified row to ensure consistent label styling and spacing.
     return LabelFieldRow(label: label, field: field);
   }
 
-Widget _helperText(String text) {
+  Widget _helperText(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
-      child: Text(
-        text,
-        style: kMutedLabelStyle(context),
-      ),
+      child: Text(text, style: kMutedLabelStyle(context)),
     );
   }
 
@@ -165,10 +161,7 @@ Widget _helperText(String text) {
           width: 36,
           height: kFieldHeight,
           child: Center(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            child: Text(label, style: Theme.of(context).textTheme.titleMedium),
           ),
         ),
       ),
@@ -217,6 +210,9 @@ Widget _helperText(String text) {
       solventVolumeMl: currentV,
       recommendedUnits: _round2(_selectedUnits),
       syringeSizeMl: _syringe.ml,
+      diluentName: _diluentNameCtrl.text.trim().isNotEmpty
+          ? _diluentNameCtrl.text.trim()
+          : null,
     );
     final isValid = S > 0 && D > 0 && fitsVial;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -250,7 +246,9 @@ Widget _helperText(String text) {
             style: kMutedLabelStyle(context),
           ),
         ),
-        Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+        Divider(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+        ),
         const SizedBox(height: 12),
         _rowLabelField(
           context,
@@ -258,7 +256,10 @@ Widget _helperText(String text) {
           field: Field36(
             child: TextField(
               controller: _diluentNameCtrl,
-              decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
+              decoration: _fieldDecoration(
+                context,
+                hint: 'e.g., Sterile Water',
+              ),
               onChanged: (_) => setState(() {}),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -273,11 +274,15 @@ Widget _helperText(String text) {
             controller: _doseCtrl,
             onDec: () {
               final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-              setState(() => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString());
+              setState(
+                () => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString(),
+              );
             },
             onInc: () {
               final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
-              setState(() => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString());
+              setState(
+                () => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString(),
+              );
             },
             decoration: _fieldDecoration(context, hint: '0'),
           ),
@@ -295,9 +300,18 @@ Widget _helperText(String text) {
                   child: Center(child: Text('units')),
                 ),
               if (widget.unitLabel != 'units') ...const [
-                DropdownMenuItem(value: 'mcg', child: Center(child: Text('mcg'))),
-                DropdownMenuItem(value: 'mg', child: Center(child: Text('mg'))),
-                DropdownMenuItem(value: 'g', child: Center(child: Text('g'))),
+                DropdownMenuItem(
+                  value: 'mcg',
+                  child: Center(child: Text('mcg')),
+                ),
+                DropdownMenuItem(
+                  value: 'mg',
+                  child: Center(child: Text('mg')),
+                ),
+                DropdownMenuItem(
+                  value: 'g',
+                  child: Center(child: Text('g')),
+                ),
               ],
             ],
             onChanged: (v) => setState(() => _doseUnit = v!),
@@ -338,25 +352,49 @@ Widget _helperText(String text) {
             controller: _vialSizeCtrl,
             onDec: () {
               final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-              setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString());
+              setState(
+                () => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString(),
+              );
             },
             onInc: () {
               final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-              setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString());
+              setState(
+                () => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString(),
+              );
             },
             decoration: _fieldDecoration(context, hint: 'mL'),
           ),
         ),
         _helperText('Maximum capacity in mL of the vial (optional constraint)'),
-        Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+        Divider(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+        ),
         const SizedBox(height: 16),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
-          _buildOptionRow(context, 'Concentrated', (_selectedUnits - u1).abs() < 0.01,
-              () => setState(() => _selectedUnits = u1), conc, u1),
-          _buildOptionRow(context, 'Balanced', (_selectedUnits - u2).abs() < 0.01,
-              () => setState(() => _selectedUnits = u2), std, u2),
-          _buildOptionRow(context, 'Diluted', (_selectedUnits - u3).abs() < 0.01,
-              () => setState(() => _selectedUnits = u3), dil, u3),
+          _buildOptionRow(
+            context,
+            'Concentrated',
+            (_selectedUnits - u1).abs() < 0.01,
+            () => setState(() => _selectedUnits = u1),
+            conc,
+            u1,
+          ),
+          _buildOptionRow(
+            context,
+            'Balanced',
+            (_selectedUnits - u2).abs() < 0.01,
+            () => setState(() => _selectedUnits = u2),
+            std,
+            u2,
+          ),
+          _buildOptionRow(
+            context,
+            'Diluted',
+            (_selectedUnits - u3).abs() < 0.01,
+            () => setState(() => _selectedUnits = u3),
+            dil,
+            u3,
+          ),
         ] else
           Padding(
             padding: const EdgeInsets.only(left: 0, bottom: 8),
@@ -366,17 +404,13 @@ Widget _helperText(String text) {
             ),
           ),
         const SizedBox(height: 16),
-        Text(
-          'Fine-tune',
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
+        Text('Fine-tune', style: Theme.of(context).textTheme.titleSmall),
         _helperText('Adjust diluent amount (affects IU concentration)'),
         Slider(
           value: _selectedUnits,
           min: sliderMin,
           max: sliderMax,
-          divisions:
-              (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
+          divisions: (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
           label: '${_round2(_selectedUnits)} IU',
           onChanged: (v) => setState(() => _selectedUnits = v),
         ),
@@ -385,10 +419,7 @@ Widget _helperText(String text) {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Summary',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
+              Text('Summary', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 4),
               Text(
                 'Syringe: ${_syringe.label} • Fill: ${_round2(_selectedUnits)} IU',
@@ -424,6 +455,9 @@ Widget _helperText(String text) {
                         solventVolumeMl: currentV,
                         recommendedUnits: _round2(_selectedUnits),
                         syringeSizeMl: _syringe.ml,
+                        diluentName: _diluentNameCtrl.text.trim().isNotEmpty
+                            ? _diluentNameCtrl.text.trim()
+                            : null,
                       );
                       widget.onApply?.call(result);
                     }
@@ -451,7 +485,9 @@ Widget _helperText(String text) {
         children: [
           Text(
             label,
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -494,7 +494,9 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -608,7 +610,9 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -644,7 +648,7 @@ class _AddEditInjectionMultiVialPageState
                 ),
               const SizedBox(height: 4),
               Text(
-                'Medication concentration: Specify the medication strength and unit. This defines the potency, not the quantity.',
+                'Enter the amount of active ingredient in the vial and select its unit. This defines concentration, not total volume.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -663,7 +667,9 @@ class _AddEditInjectionMultiVialPageState
                   _pillBtn(context, '−', () {
                     final v = double.tryParse(_vialVolumeCtrl.text) ?? 0;
                     final nv = (v - 1).clamp(0, 10000);
-                    setState(() => _vialVolumeCtrl.text = nv.toStringAsFixed(0));
+                    setState(
+                      () => _vialVolumeCtrl.text = nv.toStringAsFixed(0),
+                    );
                   }),
                   const SizedBox(width: 6),
                   Expanded(
@@ -690,7 +696,9 @@ class _AddEditInjectionMultiVialPageState
                   _pillBtn(context, '+', () {
                     final v = double.tryParse(_vialVolumeCtrl.text) ?? 0;
                     final nv = (v + 1).clamp(0, 10000);
-                    setState(() => _vialVolumeCtrl.text = nv.toStringAsFixed(0));
+                    setState(
+                      () => _vialVolumeCtrl.text = nv.toStringAsFixed(0),
+                    );
                   }),
                 ],
               ),
@@ -764,7 +772,9 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -803,10 +813,7 @@ class _AddEditInjectionMultiVialPageState
                           value: StockUnit.multiDoseVials,
                           alignment: AlignmentDirectional.center,
                           child: Center(
-                            child: Text(
-                              'vials',
-                              textAlign: TextAlign.center,
-                            ),
+                            child: Text('vials', textAlign: TextAlign.center),
                           ),
                         ),
                       ],
@@ -828,7 +835,9 @@ class _AddEditInjectionMultiVialPageState
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -889,49 +898,91 @@ class _AddEditInjectionMultiVialPageState
                                   Row(
                                     children: [
                                       _pillBtn(context, '−', () {
-                                        final v = double.tryParse(_lowStockCtrl.text) ?? 0;
+                                        final v =
+                                            double.tryParse(
+                                              _lowStockCtrl.text,
+                                            ) ??
+                                            0;
                                         final nv = (v - 1).clamp(0, 10000);
-                                        setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
+                                        setState(
+                                          () => _lowStockCtrl.text = nv
+                                              .toStringAsFixed(0),
+                                        );
                                       }),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: TextFormField(
                                           controller: _lowStockCtrl,
-                                          keyboardType: const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                          style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontSize: kInputFontSize,
+                                              ),
                                           decoration: const InputDecoration(
-                                            labelText: 'Low Stock - Vial Volume (mL)',
+                                            labelText:
+                                                'Low Stock - Vial Volume (mL)',
                                           ),
                                           onChanged: (txt) {
-                                            final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
-                                            final t = double.tryParse(txt.trim());
+                                            final maxMl =
+                                                double.tryParse(
+                                                  _vialVolumeCtrl.text.trim(),
+                                                ) ??
+                                                double.infinity;
+                                            final t = double.tryParse(
+                                              txt.trim(),
+                                            );
                                             if (t != null && t > maxMl) {
-                                              setState(() => _lowStockCtrl.text = maxMl.toStringAsFixed(0));
+                                              setState(
+                                                () => _lowStockCtrl.text = maxMl
+                                                    .toStringAsFixed(0),
+                                              );
                                             }
                                           },
                                         ),
                                       ),
                                       const SizedBox(width: 6),
                                       _pillBtn(context, '+', () {
-                                        final v = double.tryParse(_lowStockCtrl.text) ?? 0;
-                                        final maxMl = double.tryParse(_vialVolumeCtrl.text) ?? 10000;
+                                        final v =
+                                            double.tryParse(
+                                              _lowStockCtrl.text,
+                                            ) ??
+                                            0;
+                                        final maxMl =
+                                            double.tryParse(
+                                              _vialVolumeCtrl.text,
+                                            ) ??
+                                            10000;
                                         final nv = (v + 1).clamp(0, maxMl);
-                                        setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
+                                        setState(
+                                          () => _lowStockCtrl.text = nv
+                                              .toStringAsFixed(0),
+                                        );
                                       }),
                                     ],
                                   ),
                                   Builder(
                                     builder: (context) {
-                                      final maxMl = double.tryParse(_vialVolumeCtrl.text.trim()) ?? double.infinity;
-                                      final thr = double.tryParse(_lowStockCtrl.text.trim()) ?? -1;
-                                      if (maxMl != double.infinity && thr >= maxMl) {
+                                      final maxMl =
+                                          double.tryParse(
+                                            _vialVolumeCtrl.text.trim(),
+                                          ) ??
+                                          double.infinity;
+                                      final thr =
+                                          double.tryParse(
+                                            _lowStockCtrl.text.trim(),
+                                          ) ??
+                                          -1;
+                                      if (maxMl != double.infinity &&
+                                          thr >= maxMl) {
                                         return Text(
                                           'Max threshold cannot exceed stock count.',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: Colors.orange,
-                                              ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(color: Colors.orange),
                                         );
                                       }
                                       return const SizedBox.shrink();
@@ -959,34 +1010,60 @@ class _AddEditInjectionMultiVialPageState
                                   builder: (context) {
                                     final theme = Theme.of(context);
                                     return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         TextFormField(
                                           controller: _lowStockVialsCtrl,
                                           textAlign: TextAlign.center,
-                                          keyboardType: const TextInputType.numberWithOptions(
-                                            decimal: false,
-                                          ),
-                                          style: theme.textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: false,
+                                              ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontSize: kInputFontSize,
+                                              ),
                                           decoration: const InputDecoration(
-                                            labelText: 'Low Stock - Vials in Reserve',
+                                            labelText:
+                                                'Low Stock - Vials in Reserve',
                                           ),
                                           onChanged: (txt) {
-                                            final stockVials = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                                            final stockVials =
+                                                int.tryParse(
+                                                  _stockValueCtrl.text.trim(),
+                                                ) ??
+                                                0;
                                             final t = int.tryParse(txt.trim());
                                             if (t != null && t > stockVials) {
-                                              setState(() => _lowStockVialsCtrl.text = stockVials.toString());
+                                              setState(
+                                                () => _lowStockVialsCtrl.text =
+                                                    stockVials.toString(),
+                                              );
                                             }
                                           },
                                         ),
                                         Builder(
                                           builder: (context) {
-                                            final stockVials = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                                            final thr = int.tryParse(_lowStockVialsCtrl.text.trim()) ?? -1;
-                                            if (stockVials > 0 && thr >= stockVials) {
+                                            final stockVials =
+                                                int.tryParse(
+                                                  _stockValueCtrl.text.trim(),
+                                                ) ??
+                                                0;
+                                            final thr =
+                                                int.tryParse(
+                                                  _lowStockVialsCtrl.text
+                                                      .trim(),
+                                                ) ??
+                                                -1;
+                                            if (stockVials > 0 &&
+                                                thr >= stockVials) {
                                               return Text(
                                                 'Max threshold cannot exceed stock count.',
-                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
                                                       color: Colors.orange,
                                                     ),
                                               );

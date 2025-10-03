@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 class SummaryHeaderCard extends StatelessWidget {
   const SummaryHeaderCard({
@@ -29,6 +30,8 @@ class SummaryHeaderCard extends StatelessWidget {
     this.perTabletLabel = true,
     this.perUnitLabel,
     this.additionalInfo,
+    this.reconTotalIU,
+    this.reconFillIU,
   });
 
   final String title;
@@ -57,6 +60,9 @@ class SummaryHeaderCard extends StatelessWidget {
   final String? perUnitLabel;
   // Optional additional single-line info to display (e.g., reconstitution summary)
   final String? additionalInfo;
+  // Optional reconstitution data for syringe gauge visualization
+  final double? reconTotalIU;
+  final double? reconFillIU;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -64,7 +70,11 @@ class SummaryHeaderCard extends StatelessWidget {
   }
 
   // Convenience: build a header card directly from a Medication model
-  factory SummaryHeaderCard.fromMedication(Medication m, {bool neutral = false, bool outlined = false}) {
+  factory SummaryHeaderCard.fromMedication(
+    Medication m, {
+    bool neutral = false,
+    bool outlined = false,
+  }) {
     String unitLabel;
     switch (m.strengthUnit) {
       case Unit.mcg:
@@ -98,7 +108,8 @@ class SummaryHeaderCard extends StatelessWidget {
       default:
         stockUnitLabel = m.stockUnit.name;
     }
-    final showDark = (m.storageInstructions?.toLowerCase().contains('light') ?? false);
+    final showDark =
+        (m.storageInstructions?.toLowerCase().contains('light') ?? false);
     final icon = () {
       switch (m.form) {
         case MedicationForm.tablet:
@@ -113,7 +124,7 @@ class SummaryHeaderCard extends StatelessWidget {
           return Icons.addchart;
       }
     }();
-    
+
     // Determine if this is a perMl medication and set perUnitLabel for injections
     String? perUnitLabel;
     if (m.form == MedicationForm.injectionPreFilledSyringe) {
@@ -121,7 +132,7 @@ class SummaryHeaderCard extends StatelessWidget {
     } else if (m.form == MedicationForm.injectionSingleDoseVial) {
       perUnitLabel = 'Vial';
     }
-    
+
     return SummaryHeaderCard(
       title: m.name,
       manufacturer: m.manufacturer,
@@ -149,7 +160,11 @@ class SummaryHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final bool lowStockActive = lowStockEnabled && stockCurrent != null && lowStockThreshold != null && stockCurrent! <= lowStockThreshold!;
+    final bool lowStockActive =
+        lowStockEnabled &&
+        stockCurrent != null &&
+        lowStockThreshold != null &&
+        stockCurrent! <= lowStockThreshold!;
 
     final Color bg = neutral ? cs.surfaceContainerLowest : cs.primary;
     final Color fg = neutral ? cs.onSurface : cs.onPrimary;
@@ -157,7 +172,9 @@ class SummaryHeaderCard extends StatelessWidget {
     // Resolve localized expiry text if a DateTime was provided
     String? expDisplay;
     if (expiryDate != null) {
-      expDisplay = MaterialLocalizations.of(context).formatCompactDate(expiryDate!);
+      expDisplay = MaterialLocalizations.of(
+        context,
+      ).formatCompactDate(expiryDate!);
     } else {
       expDisplay = expiryText;
     }
@@ -167,7 +184,10 @@ class SummaryHeaderCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(12),
         border: (neutral && outlined)
-            ? Border.all(color: cs.outlineVariant.withValues(alpha: 0.5), width: 0.75)
+            ? Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.5),
+                width: 0.75,
+              )
             : null,
         boxShadow: neutral
             ? [
@@ -187,10 +207,15 @@ class SummaryHeaderCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: (neutral ? cs.primary : cs.onPrimary).withValues(alpha: 0.15),
+              color: (neutral ? cs.primary : cs.onPrimary).withValues(
+                alpha: 0.15,
+              ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(leadingIcon ?? Icons.medication, color: neutral ? cs.primary : fg),
+            child: Icon(
+              leadingIcon ?? Icons.medication,
+              color: neutral ? cs.primary : fg,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -242,9 +267,9 @@ class SummaryHeaderCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if ((strengthUnitLabel ?? '').isNotEmpty && (
-                                includeNameInStrengthLine || (strengthValue != null)
-                              ))
+                          if ((strengthUnitLabel ?? '').isNotEmpty &&
+                              (includeNameInStrengthLine ||
+                                  (strengthValue != null)))
                             RichText(
                               text: TextSpan(
                                 style: theme.textTheme.bodySmall?.copyWith(
@@ -254,55 +279,103 @@ class SummaryHeaderCard extends StatelessWidget {
                                     ? [
                                         TextSpan(
                                           text: _fmt2(strengthValue ?? 0),
-                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                          ),
                                         ),
                                         TextSpan(text: ' $strengthUnitLabel '),
-                                        if (perMlValue != null) TextSpan(text: 'in ${_fmt2(perMlValue)} mL, '),
+                                        if (perMlValue != null)
+                                          TextSpan(
+                                            text:
+                                                'in ${_fmt2(perMlValue)} mL, ',
+                                          ),
                                         TextSpan(text: '$title '),
                                         TextSpan(text: formLabelPlural ?? ''),
                                       ]
-                                    : (
-                                        perUnitLabel != null
-                                            ? [
-                                                TextSpan(
-                                                  text: _fmt2(strengthValue ?? 0),
-                                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                    : (perUnitLabel != null
+                                          ? [
+                                              TextSpan(
+                                                text: _fmt2(strengthValue ?? 0),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w800,
                                                 ),
-                                                TextSpan(text: ' $strengthUnitLabel'),
-                                                if (perMlValue != null) TextSpan(text: ' in ${_fmt2(perMlValue)} mL'),
-                                                const TextSpan(text: ' per '),
-                                                TextSpan(text: perUnitLabel!),
-                                              ]
-                                            : (perTabletLabel
+                                              ),
+                                              TextSpan(
+                                                text: ' $strengthUnitLabel',
+                                              ),
+                                              if (perMlValue != null)
+                                                TextSpan(
+                                                  text:
+                                                      ' in ${_fmt2(perMlValue)} mL',
+                                                ),
+                                              const TextSpan(text: ' per '),
+                                              TextSpan(text: perUnitLabel!),
+                                            ]
+                                          : (perTabletLabel
                                                 ? [
                                                     TextSpan(
-                                                      text: _fmt2(strengthValue ?? 0),
-                                                      style: const TextStyle(fontWeight: FontWeight.w800),
+                                                      text: _fmt2(
+                                                        strengthValue ?? 0,
+                                                      ),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
                                                     ),
-                                                    TextSpan(text: ' $strengthUnitLabel'),
-                                                    if (perMlValue != null) TextSpan(text: ' in ${_fmt2(perMlValue)} mL'),
-                                                    const TextSpan(text: ' per tablet'),
+                                                    TextSpan(
+                                                      text:
+                                                          ' $strengthUnitLabel',
+                                                    ),
+                                                    if (perMlValue != null)
+                                                      TextSpan(
+                                                        text:
+                                                            ' in ${_fmt2(perMlValue)} mL',
+                                                      ),
+                                                    const TextSpan(
+                                                      text: ' per tablet',
+                                                    ),
                                                   ]
                                                 : [
                                                     TextSpan(
-                                                      text: _fmt2(strengthValue ?? 0),
-                                                      style: const TextStyle(fontWeight: FontWeight.w800),
+                                                      text: _fmt2(
+                                                        strengthValue ?? 0,
+                                                      ),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
                                                     ),
-                                                    TextSpan(text: ' $strengthUnitLabel'),
-                                                    if (perMlValue != null) TextSpan(text: ' in ${_fmt2(perMlValue)} mL'),
-                                                    TextSpan(text: formLabelPlural != null && formLabelPlural!.isNotEmpty ? ' $formLabelPlural' : ''),
-                                                  ]
-                                              )
-                                      ),
+                                                    TextSpan(
+                                                      text:
+                                                          ' $strengthUnitLabel',
+                                                    ),
+                                                    if (perMlValue != null)
+                                                      TextSpan(
+                                                        text:
+                                                            ' in ${_fmt2(perMlValue)} mL',
+                                                      ),
+                                                    TextSpan(
+                                                      text:
+                                                          formLabelPlural !=
+                                                                  null &&
+                                                              formLabelPlural!
+                                                                  .isNotEmpty
+                                                          ? ' $formLabelPlural'
+                                                          : '',
+                                                    ),
+                                                  ])),
                               ),
                             ),
-                          if (stockCurrent != null && (stockUnitLabel ?? '').isNotEmpty)
+                          if (stockCurrent != null &&
+                              (stockUnitLabel ?? '').isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
                               child: RichText(
                                 text: TextSpan(
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: neutral ? cs.onSurface : cs.onPrimary,
+                                    color: neutral
+                                        ? cs.onSurface
+                                        : cs.onPrimary,
                                   ),
                                   children: [
                                     TextSpan(
@@ -313,9 +386,12 @@ class SummaryHeaderCard extends StatelessWidget {
                                           final total = stockInitial ?? 0;
                                           if (total <= 0) {
                                             // When no initial stock is set, ensure contrast on primary background
-                                            return neutral ? cs.primary : cs.onPrimary;
+                                            return neutral
+                                                ? cs.primary
+                                                : cs.onPrimary;
                                           }
-                                          final pct = (stockCurrent! / total).clamp(0.0, 1.0);
+                                          final pct = (stockCurrent! / total)
+                                              .clamp(0.0, 1.0);
                                           if (!neutral) return cs.onPrimary;
                                           if (pct <= 0.2) return cs.error;
                                           if (pct <= 0.5) return Colors.orange;
@@ -329,7 +405,9 @@ class SummaryHeaderCard extends StatelessWidget {
                                         text: _fmt2(stockInitial),
                                         style: TextStyle(
                                           fontWeight: FontWeight.w800,
-                                          color: neutral ? cs.primary : cs.onPrimary,
+                                          color: neutral
+                                              ? cs.primary
+                                              : cs.onPrimary,
                                         ),
                                       ),
                                     ],
@@ -345,26 +423,43 @@ class SummaryHeaderCard extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   if (lowStockActive) ...[
-                                    Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade300),
+                                    Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 18,
+                                      color: Colors.amber.shade300,
+                                    ),
                                     const SizedBox(width: 4),
                                   ],
                                   RichText(
                                     text: TextSpan(
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: lowStockActive
-                                            ? Colors.amber.shade200
-                                            : (neutral
-                                                ? cs.onSurfaceVariant.withValues(alpha: 0.75)
-                                                : fg.withValues(alpha: 0.85)),
-                                        fontWeight: lowStockActive ? FontWeight.w600 : FontWeight.w500,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: lowStockActive
+                                                ? Colors.amber.shade200
+                                                : (neutral
+                                                      ? cs.onSurfaceVariant
+                                                            .withValues(
+                                                              alpha: 0.75,
+                                                            )
+                                                      : fg.withValues(
+                                                          alpha: 0.85,
+                                                        )),
+                                            fontWeight: lowStockActive
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
+                                          ),
                                       children: [
                                         const TextSpan(text: 'Alert at '),
                                         TextSpan(
                                           text: _fmt2(lowStockThreshold),
-                                          style: const TextStyle(fontWeight: FontWeight.w700),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
-                                        TextSpan(text: ' ${stockUnitLabel ?? 'left'} remaining'),
+                                        TextSpan(
+                                          text:
+                                              ' ${stockUnitLabel ?? 'left'} remaining',
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -381,14 +476,27 @@ class SummaryHeaderCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (showRefrigerate)
-                            Icon(Icons.kitchen, size: 18, color: neutral ? cs.onSurfaceVariant : fg),
+                            Icon(
+                              Icons.kitchen,
+                              size: 18,
+                              color: neutral ? cs.onSurfaceVariant : fg,
+                            ),
                           if (showFrozen) ...[
                             if (showRefrigerate) const SizedBox(width: 6),
-                            Icon(Icons.ac_unit, size: 18, color: neutral ? cs.onSurfaceVariant : fg),
+                            Icon(
+                              Icons.ac_unit,
+                              size: 18,
+                              color: neutral ? cs.onSurfaceVariant : fg,
+                            ),
                           ],
                           if (showDark) ...[
-                            if (showRefrigerate || showFrozen) const SizedBox(width: 6),
-                            Icon(Icons.dark_mode, size: 18, color: neutral ? cs.onSurfaceVariant : fg),
+                            if (showRefrigerate || showFrozen)
+                              const SizedBox(width: 6),
+                            Icon(
+                              Icons.dark_mode,
+                              size: 18,
+                              color: neutral ? cs.onSurfaceVariant : fg,
+                            ),
                           ],
                         ],
                       ),
@@ -405,6 +513,14 @@ class SummaryHeaderCard extends StatelessWidget {
                             ? cs.onSurfaceVariant.withValues(alpha: 0.75)
                             : fg.withValues(alpha: 0.85),
                       ),
+                    ),
+                  ),
+                if (reconTotalIU != null && reconFillIU != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: WhiteSyringeGauge(
+                      totalIU: reconTotalIU!,
+                      fillIU: reconFillIU!,
                     ),
                   ),
               ],

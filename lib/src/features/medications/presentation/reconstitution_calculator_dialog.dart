@@ -23,12 +23,14 @@ class ReconstitutionResult {
     required this.solventVolumeMl,
     required this.recommendedUnits,
     required this.syringeSizeMl,
+    this.diluentName,
   });
 
   final double perMlConcentration; // same base unit as dose/strength (per mL)
   final double solventVolumeMl; // mL to add to vial
   final double recommendedUnits; // IU fill for the dose
   final double syringeSizeMl; // chosen syringe size mL
+  final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
 }
 
 class ReconstitutionCalculatorDialog extends StatefulWidget {
