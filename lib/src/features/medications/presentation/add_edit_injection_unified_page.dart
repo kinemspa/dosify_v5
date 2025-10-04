@@ -690,38 +690,35 @@ class _AddEditInjectionUnifiedPageState
                             // Reconstitution Calculator Button
                             LabelFieldRow(
                               label: '',
-                              field: OutlinedButton.icon(
-                                onPressed: _strengthForCalculator() == null
-                                    ? null
-                                    : () {
+                              field: _showCalculator
+                                  ? FilledButton.icon(
+                                      onPressed: () {
                                         setState(
-                                          () => _showCalculator =
-                                              !_showCalculator,
+                                          () => _showCalculator = false,
                                         );
                                       },
-                                icon: Icon(
-                                  _showCalculator
-                                      ? Icons.close
-                                      : Icons.calculate,
-                                ),
-                                label: Text(
-                                  _reconResult == null
-                                      ? 'Reconstitution Calculator'
-                                      : 'Edit Reconstitution',
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: _showCalculator
-                                      ? Theme.of(context).colorScheme.secondary
-                                      : Theme.of(context).colorScheme.primary,
-                                  side: BorderSide(
-                                    color: _showCalculator
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.secondary
-                                        : Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ),
+                                      icon: const Icon(Icons.close),
+                                      label: Text(
+                                        _reconResult == null
+                                            ? 'Reconstitution Calculator'
+                                            : 'Edit Reconstitution',
+                                      ),
+                                    )
+                                  : OutlinedButton.icon(
+                                      onPressed: _strengthForCalculator() == null
+                                          ? null
+                                          : () {
+                                              setState(
+                                                () => _showCalculator = true,
+                                              );
+                                            },
+                                      icon: const Icon(Icons.calculate),
+                                      label: Text(
+                                        _reconResult == null
+                                            ? 'Reconstitution Calculator'
+                                            : 'Edit Reconstitution',
+                                      ),
+                                    ),
                             ),
                             // Inline calculator when shown
                             if (_showCalculator)

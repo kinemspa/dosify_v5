@@ -294,8 +294,7 @@ class _ReconstitutionCalculatorWidgetState
             controller: _doseCtrl,
             onDec: () {
               final v = double.tryParse(_doseCtrl.text.trim()) ?? 0;
-              // Don't go below 1
-              final newVal = (v - 1).clamp(1, widget.initialStrengthValue);
+              final newVal = (v - 1).clamp(1, double.infinity);
               setState(() {
                 _doseCtrl.text = newVal == newVal.roundToDouble()
                     ? newVal.toInt().toString()
@@ -304,8 +303,7 @@ class _ReconstitutionCalculatorWidgetState
             },
             onInc: () {
               final v = double.tryParse(_doseCtrl.text.trim()) ?? 0;
-              // Can't exceed vial strength
-              final newVal = (v + 1).clamp(1, widget.initialStrengthValue);
+              final newVal = (v + 1).clamp(1, double.infinity);
               setState(() {
                 _doseCtrl.text = newVal == newVal.roundToDouble()
                     ? newVal.toInt().toString()
@@ -400,7 +398,7 @@ class _ReconstitutionCalculatorWidgetState
         Divider(
           color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
           _buildOptionRow(
             context,
@@ -434,8 +432,13 @@ class _ReconstitutionCalculatorWidgetState
               style: kMutedLabelStyle(context),
             ),
           ),
-        const SizedBox(height: 16),
-        Text('Fine-tune', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 12),
+        Text(
+          'Fine-tune',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
         if (vialMax != null && sliderMax < totalIU)
           Padding(
             padding: const EdgeInsets.only(bottom: 4),
@@ -456,6 +459,13 @@ class _ReconstitutionCalculatorWidgetState
               ).copyWith(fontStyle: FontStyle.italic, fontSize: 11),
             ),
           ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4, top: 4),
+          child: Text(
+            'Adjust diluent amount (affects IU concentration)',
+            style: kMutedLabelStyle(context),
+          ),
+        ),
         Slider(
           value: _selectedUnits,
           min: sliderMin,
@@ -464,16 +474,35 @@ class _ReconstitutionCalculatorWidgetState
           label: '${_round2(_selectedUnits)} IU',
           onChanged: (v) => setState(() => _selectedUnits = v),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-          child: Text(
-            'Adjust diluent amount (affects IU concentration)',
-            style: kMutedLabelStyle(context),
-          ),
-        ),
         // Live syringe gauge preview
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          // Prominent reconstitution instruction
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+                children: [
+                  const TextSpan(text: 'Reconstitute with '),
+                  TextSpan(
+                    text: '${_fmt(currentV)} mL',
+                    style: const TextStyle(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  TextSpan(
+                    text: _diluentNameCtrl.text.trim().isNotEmpty
+                        ? ' ${_diluentNameCtrl.text.trim()}'
+                        : '',
+                  ),
+                ],
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: WhiteSyringeGauge(
@@ -481,7 +510,7 @@ class _ReconstitutionCalculatorWidgetState
               fillIU: _selectedUnits,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           // Conversational explanation
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -663,12 +692,12 @@ class _ReconstitutionCalculatorWidgetState
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 6),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: selected
                 ? theme.colorScheme.primaryContainer.withOpacity(0.3)
@@ -704,16 +733,17 @@ class _ReconstitutionCalculatorWidgetState
                       ),
                     ),
                     if (explainerText.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         explainerText,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic,
+                          fontSize: 11,
                         ),
                       ),
                     ],
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
