@@ -636,12 +636,21 @@ class _AddEditInjectionUnifiedPageState
                               ),
                         ),
                       ),
-                      // Reconstitution Calculator Button (Multi dose vials only)
-                      if (widget.kind == InjectionKind.multi)
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Volume & Reconstitution Card (Multi dose vials only)
+                  if (widget.kind == InjectionKind.multi)
+                    SectionFormCard(
+                      title: 'Volume & Reconstitution',
+                      neutral: true,
+                      children: [
+                        // Reconstitution Calculator Button
                         Padding(
                           padding: const EdgeInsets.only(
                             left: kLabelColWidth + 8,
-                            top: 8,
+                            top: 0,
                             bottom: 8,
                           ),
                           child: FilledButton.icon(
@@ -665,134 +674,137 @@ class _AddEditInjectionUnifiedPageState
                             ),
                           ),
                         ),
-                      // Show saved reconstitution info if exists
-                      if (widget.kind == InjectionKind.multi &&
-                          _reconResult != null &&
-                          !_showCalculator)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: kLabelColWidth + 8,
-                            right: 8,
-                            bottom: 12,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
+                        // Show saved reconstitution info if exists
+                        if (_reconResult != null && !_showCalculator)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: kLabelColWidth + 8,
+                              right: 8,
+                              bottom: 12,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.primary.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _buildReconstitutionText(_reconResult!),
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                WhiteSyringeGauge(
-                                  totalIU: _reconResult!.syringeSizeMl * 100,
-                                  fillIU: _reconResult!.recommendedUnits,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      // Inline calculator when shown
-                      if (widget.kind == InjectionKind.multi && _showCalculator)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 0,
-                            right: 0,
-                            top: 12,
-                            bottom: 6,
-                          ),
-                          child: ReconstitutionCalculatorWidget(
-                            initialStrengthValue:
-                                double.tryParse(_strength.text.trim()) ?? 0,
-                            unitLabel: _baseUnit(_strengthUnit),
-                            initialDoseValue: _lastCalcDose,
-                            initialDoseUnit: _lastCalcDoseUnit,
-                            initialSyringeSize: _lastCalcSyringe,
-                            initialVialSize: _lastCalcVialSize,
-                            showSummary: false,
-                            showApplyButton: true,
-                            onApply: (result) {
-                              setState(() {
-                                _perMl.text = fmt2(result.perMlConcentration);
-                                _vialVolume.text = fmt2(result.solventVolumeMl);
-                                _reconResult = result;
-                                _showCalculator =
-                                    false; // Hide calculator after save
-                              });
-                            },
-                            onCalculate: (result, isValid) {
-                              // Preview only, don't save yet
-                            },
-                          ),
-                        ),
-                      // Helper text
-                      if (widget.kind == InjectionKind.multi &&
-                          !_showCalculator)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: kLabelColWidth + 8,
-                            top: 2,
-                            bottom: 6,
-                          ),
-                          child: Text(
-                            'Enter the volume of fluid in the vial. Use the calculator if you need to determine the correct amount.',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
+                                ).colorScheme.primaryContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
                                   color: Theme.of(
                                     context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  ).colorScheme.primary.withOpacity(0.3),
                                 ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _buildReconstitutionText(_reconResult!),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  WhiteSyringeGauge(
+                                    totalIU: _reconResult!.syringeSizeMl * 100,
+                                    fillIU: _reconResult!.recommendedUnits,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      // Vial Volume field (always visible for multi dose vials)
-                      if (widget.kind == InjectionKind.multi &&
-                          !_showCalculator)
-                        LabelFieldRow(
-                          label: 'Vial volume (mL)',
-                          field: StepperRow36(
-                            controller: _vialVolume,
-                            onDec: () {
-                              final v =
-                                  int.tryParse(_vialVolume.text.trim()) ?? 0;
-                              setState(
-                                () => _vialVolume.text = (v - 1)
-                                    .clamp(0, 1000000)
-                                    .toString(),
-                              );
-                            },
-                            onInc: () {
-                              final v =
-                                  int.tryParse(_vialVolume.text.trim()) ?? 0;
-                              setState(
-                                () => _vialVolume.text = (v + 1)
-                                    .clamp(0, 1000000)
-                                    .toString(),
-                              );
-                            },
-                            decoration: _dec(context, 'Vial volume (mL)', '0'),
+                        // Inline calculator when shown
+                        if (_showCalculator)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 0,
+                              right: 0,
+                              top: 0,
+                              bottom: 6,
+                            ),
+                            child: ReconstitutionCalculatorWidget(
+                              initialStrengthValue:
+                                  double.tryParse(_strength.text.trim()) ?? 0,
+                              unitLabel: _baseUnit(_strengthUnit),
+                              initialDoseValue: _lastCalcDose,
+                              initialDoseUnit: _lastCalcDoseUnit,
+                              initialSyringeSize: _lastCalcSyringe,
+                              initialVialSize: _lastCalcVialSize,
+                              showSummary: false,
+                              showApplyButton: true,
+                              onApply: (result) {
+                                setState(() {
+                                  _perMl.text = fmt2(result.perMlConcentration);
+                                  _vialVolume.text = fmt2(
+                                    result.solventVolumeMl,
+                                  );
+                                  _reconResult = result;
+                                  _showCalculator =
+                                      false; // Hide calculator after save
+                                });
+                              },
+                              onCalculate: (result, isValid) {
+                                // Preview only, don't save yet
+                              },
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
+                        // Helper text
+                        if (!_showCalculator)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: kLabelColWidth + 8,
+                              top: 2,
+                              bottom: 6,
+                            ),
+                            child: Text(
+                              'Enter the volume of fluid in the vial. Use the calculator if you need to determine the correct amount.',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ),
+                        // Vial Volume field (always visible when calculator hidden)
+                        if (!_showCalculator)
+                          LabelFieldRow(
+                            label: 'Vial volume (mL)',
+                            field: StepperRow36(
+                              controller: _vialVolume,
+                              onDec: () {
+                                final v =
+                                    int.tryParse(_vialVolume.text.trim()) ?? 0;
+                                setState(
+                                  () => _vialVolume.text = (v - 1)
+                                      .clamp(0, 1000000)
+                                      .toString(),
+                                );
+                              },
+                              onInc: () {
+                                final v =
+                                    int.tryParse(_vialVolume.text.trim()) ?? 0;
+                                setState(
+                                  () => _vialVolume.text = (v + 1)
+                                      .clamp(0, 1000000)
+                                      .toString(),
+                                );
+                              },
+                              decoration: _dec(
+                                context,
+                                'Vial volume (mL)',
+                                '0',
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  if (widget.kind == InjectionKind.multi)
+                    const SizedBox(height: 12),
 
                   SectionFormCard(
                     title: 'Inventory',
