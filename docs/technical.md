@@ -165,6 +165,17 @@ Reconstitution Calculator Formula
   - Each option card shows description: "Strong small dosage", "Approx 50% syringe size dosage", "Large doses"
   - All text styles use theme constants (theme.textTheme) for consistency
   - Warning text uses theme.textTheme.bodySmall with error color instead of raw TextStyle
+  - Calculator remains visible after saving reconstitution (does not auto-hide)
+  - Removed separate saved reconstitution display - user sees live calculator with dynamic updates
+  - Live syringe gauge and support text always visible in calculator after save
+
+- Multi-Dose Vial Summary Card Format:
+  - Shows total dose and concentration: "XYmg in ZmL, ABmg/mL" format
+  - Example: "10mg in 5mL, 500mcg/mL" or "1000mg in 10mL, 100mg/mL"
+  - Calculates total dose from concentration × volume
+  - Displayed in additionalInfo section of summary card
+  - Only shows when both vial volume and concentration (perMl) are entered
+  - Falls back to "Vial Volume: X mL" if only volume is entered
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
