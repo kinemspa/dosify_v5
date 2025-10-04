@@ -249,9 +249,10 @@ class _ReconstitutionCalculatorWidgetState
         const SizedBox(height: 12),
         Text(
           'Reconstitution Calculator',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 4),
         Padding(
@@ -478,33 +479,6 @@ class _ReconstitutionCalculatorWidgetState
         // Live syringe gauge preview
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
           const SizedBox(height: 12),
-          // Prominent reconstitution instruction
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-            child: RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-                children: [
-                  const TextSpan(text: 'Reconstitute with '),
-                  TextSpan(
-                    text: '${_fmt(currentV)} mL',
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                  TextSpan(
-                    text: _diluentNameCtrl.text.trim().isNotEmpty
-                        ? ' ${_diluentNameCtrl.text.trim()}'
-                        : '',
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: WhiteSyringeGauge(
@@ -517,16 +491,47 @@ class _ReconstitutionCalculatorWidgetState
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Reconstitute '),
+                      TextSpan(
+                        text: '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const TextSpan(text: ' with '),
+                      TextSpan(
+                        text: '${_fmt(currentV)} mL',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      TextSpan(
+                        text: _diluentNameCtrl.text.trim().isNotEmpty
+                            ? ' ${_diluentNameCtrl.text.trim()}'
+                            : ' diluent',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
                 RichText(
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontStyle: FontStyle.italic,
                     ),
-                children: [
-                  const TextSpan(text: 'Add '),
+                    children: [
+                      const TextSpan(text: 'Add '),
                   TextSpan(
                     text: '${_fmt(currentV)} mL',
                     style: TextStyle(

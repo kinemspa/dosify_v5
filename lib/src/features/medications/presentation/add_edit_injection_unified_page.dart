@@ -688,9 +688,8 @@ class _AddEditInjectionUnifiedPageState
                               ),
                             ),
                             // Reconstitution Calculator Button
-                            LabelFieldRow(
-                              label: '',
-                              field: _showCalculator
+                            Center(
+                              child: _showCalculator
                                   ? FilledButton.icon(
                                       onPressed: () {
                                         setState(
@@ -724,14 +723,14 @@ class _AddEditInjectionUnifiedPageState
                             if (_reconResult != null && !_showCalculator) ...[
                               const SizedBox(height: 12),
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  left: kLabelColWidth + 8,
-                                  right: 8,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
                                 ),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     RichText(
+                                      textAlign: TextAlign.center,
                                       text: TextSpan(
                                         style: Theme.of(context)
                                             .textTheme
