@@ -1242,8 +1242,83 @@ class _AddEditInjectionUnifiedPageState
       initialStockValue: initialStock,
     );
 
-    await repo.upsert(med);
+    // Show confirmation dialog
     if (!mounted) return;
-    context.go('/medications');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Center(
+          child: Text(
+            'Confirm Medication',
+            textAlign: TextAlign.center,
+            style: Theme.of(ctx)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${med.name}',
+                style: Theme.of(ctx)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text('Form: ${switch (widget.kind) {
+                InjectionKind.pfs => "Pre-Filled Syringe",
+                InjectionKind.single => "Single Dose Vial",
+                InjectionKind.multi => "Multi Dose Vial",
+              }}'),
+              if (med.manufacturer != null)
+                Text('Manufacturer: ${med.manufacturer}'),
+              Text(
+                'Strength: ${med.strengthValue} ${_baseUnit(med.strengthUnit)}',
+              ),
+              if (med.perMlValue != null && widget.kind == InjectionKind.multi)
+                Text(
+                  'Concentration: ${med.perMlValue} ${_baseUnit(med.strengthUnit)}/mL',
+                ),
+              if (med.containerVolumeMl != null && widget.kind == InjectionKind.multi)
+                Text('Vial Volume: ${med.containerVolumeMl} mL'),
+              Text('Stock: ${med.stockValue} ${_stockUnitLabel()}'),
+              if (med.expiry != null)
+                Text(
+                  'Expiry: ${DateFormat('dd/MM/yy').format(med.expiry!)}',
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await repo.upsert(med);
+      if (!mounted) return;
+      context.go('/medications');
+    }
+  }
+
+  String _stockUnitLabel() {
+    return switch (widget.kind) {
+      InjectionKind.pfs => 'pre-filled syringes',
+      InjectionKind.single => 'single dose vials',
+      InjectionKind.multi => 'multi dose vials',
+    };
   }
 }
