@@ -316,6 +316,20 @@ class DosifiApp extends ConsumerWidget {
       darkTheme: dark,
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        // Wrap with GestureDetector to dismiss keyboard on tap outside fields
+        return GestureDetector(
+          onTap: () {
+            // Unfocus any active input field
+            final currentFocus = FocusScope.of(context);
+            if (!currentFocus.hasPrimaryFocus &&
+                currentFocus.focusedChild != null) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: child,
+        );
+      },
     );
   }
 }
