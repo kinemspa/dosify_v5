@@ -476,13 +476,13 @@ class _ReconstitutionCalculatorWidgetState
         ),
         // Live syringe gauge preview
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           // Prominent reconstitution instruction
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
             child: RichText(
               text: TextSpan(
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
@@ -503,6 +503,7 @@ class _ReconstitutionCalculatorWidgetState
               ),
             ),
           ),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: WhiteSyringeGauge(
@@ -510,7 +511,7 @@ class _ReconstitutionCalculatorWidgetState
               fillIU: _selectedUnits,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           // Conversational explanation
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -552,7 +553,7 @@ class _ReconstitutionCalculatorWidgetState
                       fontStyle: FontStyle.italic,
                     ),
                     children: [
-                      const TextSpan(text: 'This creates '),
+                      const TextSpan(text: '. This creates '),
                       TextSpan(
                         text: '${_fmt(currentC)} ${widget.unitLabel}/mL',
                         style: TextStyle(
@@ -588,7 +589,7 @@ class _ReconstitutionCalculatorWidgetState
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const TextSpan(text: ') from syringe for your '),
+                      const TextSpan(text: ') into syringe for your '),
                       TextSpan(
                         text: '${_fmt(Draw)} ${_doseUnit}',
                         style: TextStyle(
@@ -750,7 +751,9 @@ class _ReconstitutionCalculatorWidgetState
                           color: theme.colorScheme.onSurface,
                         ),
                         children: [
-                          TextSpan(text: '$diluentName: '),
+                          TextSpan(
+                            text: '${_diluentNameCtrl.text.trim().isNotEmpty ? _diluentNameCtrl.text.trim() : "Diluent"}: ',
+                          ),
                           TextSpan(
                             text: '${_fmt(roundedVolume)} mL',
                             style: const TextStyle(fontWeight: FontWeight.w600),

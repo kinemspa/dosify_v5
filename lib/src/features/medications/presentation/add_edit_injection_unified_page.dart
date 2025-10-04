@@ -720,6 +720,63 @@ class _AddEditInjectionUnifiedPageState
                                       ),
                                     ),
                             ),
+                            // Show saved reconstitution info if exists and calculator hidden
+                            if (_reconResult != null && !_showCalculator) ...[
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: kLabelColWidth + 8,
+                                  right: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                        children: [
+                                          const TextSpan(
+                                            text: 'Reconstitute with ',
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                '${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL',
+                                            style: const TextStyle(
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                          ),
+                                          if (_reconResult!.diluentName !=
+                                                  null &&
+                                              _reconResult!.diluentName!
+                                                  .isNotEmpty)
+                                            TextSpan(
+                                              text:
+                                                  ' ${_reconResult!.diluentName}',
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    WhiteSyringeGauge(
+                                      totalIU:
+                                          _reconResult!.syringeSizeMl * 100,
+                                      fillIU: _reconResult!.recommendedUnits,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             // Inline calculator when shown
                             if (_showCalculator)
                               Padding(
