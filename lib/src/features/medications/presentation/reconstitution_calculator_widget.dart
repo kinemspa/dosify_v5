@@ -60,7 +60,7 @@ class _ReconstitutionCalculatorWidgetState
           ? defaultDose.toInt().toString()
           : defaultDose.toStringAsFixed(2),
     );
-    _doseUnit = widget.initialDoseUnit ?? widget.unitLabel;
+    _doseUnit = widget.initialDoseUnit ?? 'mcg';
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
@@ -245,9 +245,6 @@ class _ReconstitutionCalculatorWidgetState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
-        ),
         const SizedBox(height: 12),
         Text(
           'Reconstitution Calculator',
@@ -532,35 +529,65 @@ class _ReconstitutionCalculatorWidgetState
     final mlToDraw = (units / 100) * _syringe.ml;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Spacer(),
-          ChoiceChip(
-            label: Text(
-              '$diluentName: ${_fmt(roundedVolume)} mL | Concentration: ${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL | Syringe (${_syringe.label}): ${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
-            ),
-            selected: selected,
-            onSelected: (_) => onTap(),
-            selectedColor: theme.colorScheme.primary,
-            backgroundColor: Colors.transparent,
-            side: BorderSide(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: selected
+                ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                : Colors.transparent,
+            border: Border.all(
               color: selected
                   ? theme.colorScheme.primary
                   : theme.colorScheme.outlineVariant,
+              width: selected ? 2 : 1,
             ),
-            labelStyle: theme.textTheme.bodySmall?.copyWith(
-              color: selected ? Colors.white : theme.colorScheme.onSurface,
-            ),
-            showCheckmark: false,
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
+          child: Row(
+            children: [
+              Radio<bool>(
+                value: true,
+                groupValue: selected,
+                onChanged: (_) => onTap(),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: selected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$diluentName: ${_fmt(roundedVolume)} mL',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    Text(
+                      'Concentration: ${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    Text(
+                      'Syringe (${_syringe.label}): ${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -642,165 +642,191 @@ class _AddEditInjectionUnifiedPageState
 
                   // Volume & Reconstitution Card (Multi dose vials only)
                   if (widget.kind == InjectionKind.multi)
-                    SectionFormCard(
-                      title: 'Volume & Reconstitution',
-                      neutral: true,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Reconstitution Calculator Button
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: kLabelColWidth + 8,
-                            top: 0,
-                            bottom: 8,
-                          ),
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              setState(
-                                () => _showCalculator = !_showCalculator,
-                              );
-                            },
-                            icon: Icon(
-                              _showCalculator ? Icons.close : Icons.calculate,
+                        SectionFormCard(
+                          title: 'Volume & Reconstitution',
+                          neutral: true,
+                          children: [
+                            // Helper text under heading, full width
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8,
+                                right: 8,
+                                bottom: 12,
+                              ),
+                              child: Text(
+                                'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
                             ),
-                            label: Text(
-                              _reconResult == null
-                                  ? 'Reconstitution Calculator'
-                                  : 'Edit Reconstitution',
-                            ),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: _showCalculator
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                        // Show saved reconstitution info if exists
-                        if (_reconResult != null && !_showCalculator)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: kLabelColWidth + 8,
-                              right: 8,
-                              bottom: 12,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primaryContainer.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withOpacity(0.3),
+                            // Reconstitution Calculator Button
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: kLabelColWidth + 8,
+                                top: 0,
+                                bottom: 8,
+                              ),
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  setState(
+                                    () => _showCalculator = !_showCalculator,
+                                  );
+                                },
+                                icon: Icon(
+                                  _showCalculator
+                                      ? Icons.close
+                                      : Icons.calculate,
+                                ),
+                                label: Text(
+                                  _reconResult == null
+                                      ? 'Reconstitution Calculator'
+                                      : 'Edit Reconstitution',
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: _showCalculator
+                                      ? Theme.of(context).colorScheme.secondary
+                                      : Theme.of(context).colorScheme.primary,
+                                  side: BorderSide(
+                                    color: _showCalculator
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.secondary
+                                        : Theme.of(context).colorScheme.primary,
+                                  ),
                                 ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _buildReconstitutionText(_reconResult!),
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                        ),
+                            ),
+                            // Show saved reconstitution info if exists
+                            if (_reconResult != null && !_showCalculator)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: kLabelColWidth + 8,
+                                  right: 8,
+                                  bottom: 12,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                        .withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.3),
+                                    ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  WhiteSyringeGauge(
-                                    totalIU: _reconResult!.syringeSizeMl * 100,
-                                    fillIU: _reconResult!.recommendedUnits,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _buildReconstitutionText(_reconResult!),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      WhiteSyringeGauge(
+                                        totalIU:
+                                            _reconResult!.syringeSizeMl * 100,
+                                        fillIU: _reconResult!.recommendedUnits,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        // Inline calculator when shown
-                        if (_showCalculator)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 0,
-                              right: 0,
-                              top: 0,
-                              bottom: 6,
-                            ),
-                            child: ReconstitutionCalculatorWidget(
-                              initialStrengthValue:
-                                  double.tryParse(_strength.text.trim()) ?? 0,
-                              unitLabel: _baseUnit(_strengthUnit),
-                              initialDoseValue: _lastCalcDose,
-                              initialDoseUnit: _lastCalcDoseUnit,
-                              initialSyringeSize: _lastCalcSyringe,
-                              initialVialSize: _lastCalcVialSize,
-                              showSummary: false,
-                              showApplyButton: true,
-                              onApply: (result) {
-                                setState(() {
-                                  _perMl.text = fmt2(result.perMlConcentration);
-                                  _vialVolume.text = fmt2(
-                                    result.solventVolumeMl,
-                                  );
-                                  _reconResult = result;
-                                  _showCalculator =
-                                      false; // Hide calculator after save
-                                });
-                              },
-                              onCalculate: (result, isValid) {
-                                // Preview only, don't save yet
-                              },
-                            ),
-                          ),
-                        // Helper text
-                        if (!_showCalculator)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: kLabelColWidth + 8,
-                              top: 2,
-                              bottom: 6,
-                            ),
-                            child: Text(
-                              'Enter the volume of fluid in the vial. Use the calculator if you need to determine the correct amount.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                        // Vial Volume field (always visible when calculator hidden)
-                        if (!_showCalculator)
-                          LabelFieldRow(
-                            label: 'Vial volume (mL)',
-                            field: StepperRow36(
-                              controller: _vialVolume,
-                              onDec: () {
-                                final v =
-                                    int.tryParse(_vialVolume.text.trim()) ?? 0;
-                                setState(
-                                  () => _vialVolume.text = (v - 1)
-                                      .clamp(0, 1000000)
-                                      .toString(),
-                                );
-                              },
-                              onInc: () {
-                                final v =
-                                    int.tryParse(_vialVolume.text.trim()) ?? 0;
-                                setState(
-                                  () => _vialVolume.text = (v + 1)
-                                      .clamp(0, 1000000)
-                                      .toString(),
-                                );
-                              },
-                              decoration: _dec(
-                                context,
-                                'Vial volume (mL)',
-                                '0',
+                            // Inline calculator when shown
+                            if (_showCalculator)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 0,
+                                  right: 0,
+                                  top: 0,
+                                  bottom: 6,
+                                ),
+                                child: ReconstitutionCalculatorWidget(
+                                  initialStrengthValue:
+                                      double.tryParse(_strength.text.trim()) ??
+                                      0,
+                                  unitLabel: _baseUnit(_strengthUnit),
+                                  initialDoseValue: _lastCalcDose,
+                                  initialDoseUnit: _lastCalcDoseUnit,
+                                  initialSyringeSize: _lastCalcSyringe,
+                                  initialVialSize: _lastCalcVialSize,
+                                  showSummary: false,
+                                  showApplyButton: true,
+                                  onApply: (result) {
+                                    setState(() {
+                                      _perMl.text = fmt2(
+                                        result.perMlConcentration,
+                                      );
+                                      _vialVolume.text = fmt2(
+                                        result.solventVolumeMl,
+                                      );
+                                      _reconResult = result;
+                                      _showCalculator =
+                                          false; // Hide calculator after save
+                                    });
+                                  },
+                                  onCalculate: (result, isValid) {
+                                    // Preview only, don't save yet
+                                  },
+                                ),
                               ),
-                            ),
-                          ),
+                            // Vial Volume field (always visible when calculator hidden)
+                            if (!_showCalculator)
+                              LabelFieldRow(
+                                label: 'Vial volume (mL)',
+                                field: StepperRow36(
+                                  controller: _vialVolume,
+                                  onDec: () {
+                                    final v =
+                                        int.tryParse(_vialVolume.text.trim()) ??
+                                        0;
+                                    setState(
+                                      () => _vialVolume.text = (v - 1)
+                                          .clamp(0, 1000000)
+                                          .toString(),
+                                    );
+                                  },
+                                  onInc: () {
+                                    final v =
+                                        int.tryParse(_vialVolume.text.trim()) ??
+                                        0;
+                                    setState(
+                                      () => _vialVolume.text = (v + 1)
+                                          .clamp(0, 1000000)
+                                          .toString(),
+                                    );
+                                  },
+                                  decoration: _dec(
+                                    context,
+                                    'Vial volume (mL)',
+                                    '0',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                   if (widget.kind == InjectionKind.multi)
