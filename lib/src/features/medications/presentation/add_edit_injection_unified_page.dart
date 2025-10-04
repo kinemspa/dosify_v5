@@ -53,7 +53,8 @@ class _AddEditInjectionUnifiedPageState
   String? _lastCalcDoseUnit;
   SyringeSizeMl? _lastCalcSyringe;
   double? _lastCalcVialSize;
-  ReconstitutionResult? _reconResult; // Track current reconstitution calculation
+  ReconstitutionResult?
+  _reconResult; // Track current reconstitution calculation
 
   // Inline calculator state (Multi only)
   CalcMode _calcMode = CalcMode.known;
@@ -99,11 +100,14 @@ class _AddEditInjectionUnifiedPageState
 
     // Build additional notes including reconstitution info
     String? additionalNotes;
-    if (widget.kind == InjectionKind.multi && _reconResult != null && _calcMode == CalcMode.reconstitute) {
+    if (widget.kind == InjectionKind.multi &&
+        _reconResult != null &&
+        _calcMode == CalcMode.reconstitute) {
       final r = _reconResult!;
-      additionalNotes = 'Reconstituted: ${r.solventVolumeMl.toStringAsFixed(2)} mL solvent, '
-                       '${r.perMlConcentration.toStringAsFixed(2)} $unitLabel/mL, '
-                       'Draw ${r.recommendedUnits.toStringAsFixed(0)} IU';
+      additionalNotes =
+          'Reconstituted: ${r.solventVolumeMl.toStringAsFixed(2)} mL solvent, '
+          '${r.perMlConcentration.toStringAsFixed(2)} $unitLabel/mL, '
+          'Draw ${r.recommendedUnits.toStringAsFixed(0)} IU';
     }
 
     final card = SummaryHeaderCard(
@@ -186,7 +190,10 @@ class _AddEditInjectionUnifiedPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: kOutlineWidth,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -217,7 +224,10 @@ class _AddEditInjectionUnifiedPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: 0.75,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -342,562 +352,680 @@ class _AddEditInjectionUnifiedPageState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: _summaryHeight + 10),
-              SectionFormCard(
-                title: 'General',
-                neutral: true,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6),
-                    child: Text(
-                      'Provide general details for this medication.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Name *',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _name,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(context, 'Name *', 'eg. AcmeTab-500'),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
-                    child: Text(
-                      'Enter the medication name',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Manufacturer',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _manufacturer,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          context,
-                          'Manufacturer',
-                          'eg. Contoso Pharma',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
-                    child: Text(
-                      'Enter the brand or company name',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Description',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _description,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          context,
-                          'Description',
-                          'eg. Pain relief',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
-                    child: Text(
-                      'Optional short description',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Notes',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _notes,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          context,
-                          'Notes',
-                          'eg. Take with food',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
-                    child: Text(
-                      'Optional notes',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              SectionFormCard(
-                title: 'Strength',
-                neutral: true,
-                children: [
-                  LabelFieldRow(
-                    label: 'Strength *',
-                    field: StepperRow36(
-                      controller: _strength,
-                      onDec: () {
-                        final v = int.tryParse(_strength.text) ?? 0;
-                        _strength.text = (v - 1).clamp(0, 1000000).toString();
-                        setState(() {});
-                      },
-                      onInc: () {
-                        final v = int.tryParse(_strength.text) ?? 0;
-                        _strength.text = (v + 1).clamp(0, 1000000).toString();
-                        setState(() {});
-                      },
-                      decoration: _dec(context, 'Strength *', '0'),
-                    ),
-                  ),
-LabelFieldRow(
-                    label: 'Unit *',
-                    field: SmallDropdown36<Unit>(
-                        value: _strengthUnit,
-                        width: kSmallControlWidth,
-                      items: const [
-                        DropdownMenuItem(
-                          value: Unit.mcg,
-                          child: Center(child: Text('mcg')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.mg,
-                          child: Center(child: Text('mg')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.g,
-                          child: Center(child: Text('g')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.units,
-                          child: Center(child: Text('units')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.mcgPerMl,
-                          child: Center(child: Text('mcg/mL')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.mgPerMl,
-                          child: Center(child: Text('mg/mL')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.gPerMl,
-                          child: Center(child: Text('g/mL')),
-                        ),
-                        DropdownMenuItem(
-                          value: Unit.unitsPerMl,
-                          child: Center(child: Text('units/mL')),
-                        ),
-                      ],
-                      onChanged: (v) =>
-                          setState(() => _strengthUnit = v ?? Unit.mg),
-                        decoration: _decDrop(context),
-                      ),
-                  ),
-                  if (_isPerMl)
-                    LabelFieldRow(
-                      label: 'Per mL',
-                      field: StepperRow36(
-                        controller: _perMl,
-                        onDec: () {
-                          final v = double.tryParse(_perMl.text.trim()) ?? 0;
-                          _perMl.text = (v - 1).clamp(0, 1000000).toStringAsFixed(0);
-                          setState(() {});
-                        },
-                        onInc: () {
-                          final v = double.tryParse(_perMl.text.trim()) ?? 0;
-                          _perMl.text = (v + 1).clamp(0, 1000000).toStringAsFixed(0);
-                          setState(() {});
-                        },
-                        decoration: _dec(context, 'Per mL', '0'),
-                      ),
-                    ),
-                    if (_isPerMl)
+                  SectionFormCard(
+                    title: 'General',
+                    neutral: true,
+                    children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+                        padding: const EdgeInsets.only(
+                          left: 8,
+                          right: 8,
+                          bottom: 6,
+                        ),
                         child: Text(
-                          'Enter the volume per mL',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                          ),
+                          'Provide general details for this medication.',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ),
-                  if (widget.kind == InjectionKind.multi)
-                    LabelFieldRow(
-                      label: 'Method',
-                      field: Wrap(
-                        spacing: 8,
-                        children: [
-PrimaryChoiceChip(
-                            label: Text('Enter volume'),
-                            selected: _calcMode == CalcMode.known,
-                            onSelected: (_) =>
-                                setState(() => _calcMode = CalcMode.known),
-                          ),
-PrimaryChoiceChip(
-                            label: Text('Reconstitute'),
-                            selected: _calcMode == CalcMode.reconstitute,
-                            onSelected: (_) => setState(
-                              () => _calcMode = CalcMode.reconstitute,
+                      LabelFieldRow(
+                        label: 'Name *',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _name,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Name *',
+                              'eg. AcmeTab-500',
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-if (widget.kind == InjectionKind.multi &&
-                      _calcMode == CalcMode.known)
-                    LabelFieldRow(
-                      label: 'Vial volume (mL)',
-                      field: StepperRow36(
-                        controller: _vialVolume,
-                        onDec: () {
-                          final v = int.tryParse(_vialVolume.text.trim()) ?? 0;
-                          setState(() => _vialVolume.text = (v - 1).clamp(0, 1000000).toString());
-                        },
-                        onInc: () {
-                          final v = int.tryParse(_vialVolume.text.trim()) ?? 0;
-                          setState(() => _vialVolume.text = (v + 1).clamp(0, 1000000).toString());
-                        },
-                        decoration: _dec(context, 'Vial volume (mL)', '0'),
-                      ),
-                    ),
-                  if (widget.kind == InjectionKind.multi &&
-                      _calcMode == CalcMode.reconstitute)
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 0,
-                        right: 0,
-                        top: 12,
-                        bottom: 6,
-                      ),
-                      child: ReconstitutionCalculatorWidget(
-                        initialStrengthValue: double.tryParse(_strength.text.trim()) ?? 0,
-                        unitLabel: _baseUnit(_strengthUnit),
-                        showSummary: false,
-                        showApplyButton: true,
-                        onApply: (result) {
-                          setState(() {
-                            _perMl.text = fmt2(result.perMlConcentration);
-                            _vialVolume.text = fmt2(result.solventVolumeMl);
-                            _reconResult = result; // Store result for summary
-                            _calcMode = CalcMode.known; // collapse after apply
-                          });
-                        },
-                        onCalculate: (result, isValid) {
-                          // Update summary card with live reconstitution result
-                          setState(() {
-                            _reconResult = isValid ? result : null;
-                          });
-                        },
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8),
-                    child: Text(
-                      'Specify the amount per dose and its unit of measurement.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              SectionFormCard(
-                title: 'Inventory',
-                neutral: true,
-                children: [
-                  LabelFieldRow(
-                    label: 'Stock quantity *',
-                    field: StepperRow36(
-                      controller: _stock,
-                      onDec: () {
-                        final v = int.tryParse(_stock.text) ?? 0;
-                        _stock.text = (v - 1).clamp(0, 1000000).toString();
-                        setState(() {});
-                      },
-                      onInc: () {
-                        final v = int.tryParse(_stock.text) ?? 0;
-                        _stock.text = (v + 1).clamp(0, 1000000).toString();
-                        setState(() {});
-                      },
-                      decoration: _dec(context, 'Stock quantity *', '0'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
-                    child: Text(
-                      'Enter the amount currently in stock',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-LabelFieldRow(
-                    label: 'Quantity unit',
-                    field: SmallDropdown36<StockUnit>(
-                        value: _stockUnit,
-                        width: kSmallControlWidth,
-                      items: [
-                        if (widget.kind == InjectionKind.pfs)
-                          const DropdownMenuItem(
-                            value: StockUnit.preFilledSyringes,
-                            child: Center(child: Text('syringes')),
-                          ),
-                        if (widget.kind == InjectionKind.single)
-                          const DropdownMenuItem(
-                            value: StockUnit.singleDoseVials,
-                            child: Center(child: Text('single dose vials')),
-                          ),
-                        if (widget.kind == InjectionKind.multi)
-                          const DropdownMenuItem(
-                            value: StockUnit.multiDoseVials,
-                            child: Center(child: Text('multi dose vials')),
-                          ),
-                      ],
-                      onChanged: (v) =>
-                          setState(() => _stockUnit = v ?? _stockUnit),
-                        decoration: _decDrop(context),
-                      ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: kLabelColWidth + 8),
-                    child: Text(
-                      'Get notified when stock is low',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-LabelFieldRow(
-                    label: 'Expiry date',
-                    field: DateButton36(
-                        label: _expiry == null
-                            ? 'Select date'
-                            : DateFormat.yMd().format(_expiry!),
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final picked = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(now.year - 1),
-                            lastDate: DateTime(now.year + 10),
-                            initialDate: _expiry ?? now,
-                          );
-                          if (picked != null) setState(() => _expiry = picked);
-                        },
-                        width: kSmallControlWidth,
-                        selected: _expiry != null,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
-                      child: Text(
-                        'Enter the expiry date',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
                         ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              SectionFormCard(
-                title: 'Storage',
-                neutral: true,
-                children: [
-                  LabelFieldRow(
-                    label: 'Batch No.',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _batch,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          context,
-                          'Batch No.',
-                          'Enter batch number',
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Enter the medication name',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: kLabelColWidth + 8,
-                      top: 2,
-                      bottom: 6,
-                    ),
-                    child: Text(
-                      'Enter the printed batch or lot number',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Location',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _location,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          context,
-                          'Location',
-                          'eg. Bathroom cabinet',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: kLabelColWidth + 8,
-                      top: 2,
-                      bottom: 6,
-                    ),
-                    child: Text(
-                      'Where it’s stored (e.g., Bathroom cabinet)',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-LabelFieldRow(
-                    label: 'Keep refrigerated',
-                    field: Opacity(
-                      opacity: _keepFrozen ? 0.5 : 1.0,
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: _refrigerate,
-                            onChanged: _keepFrozen
-                                ? null
-                                : (v) => setState(() => _refrigerate = v ?? false),
+                      LabelFieldRow(
+                        label: 'Manufacturer',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _manufacturer,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Manufacturer',
+                              'eg. Contoso Pharma',
+                            ),
                           ),
-                          Text(
-                            'Refrigerate',
-                            style: _keepFrozen ? kMutedLabelStyle(context) : Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: kLabelColWidth + 8,
-                      top: 2,
-                      bottom: 4,
-                    ),
-                    child: Text(
-                      'Enable if this medication must be kept refrigerated',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-LabelFieldRow(
-                    label: 'Keep frozen',
-                    field: Row(
-                      children: [
-                        Checkbox(
-                          value: _keepFrozen,
-                          onChanged: (v) => setState(() {
-                            _keepFrozen = v ?? false;
-                            if (_keepFrozen) _refrigerate = false;
-                          }),
                         ),
-                        Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: kLabelColWidth + 8,
-                      top: 2,
-                      bottom: 4,
-                    ),
-                    child: Text(
-                      'Enable if this medication must be kept frozen',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Enter the brand or company name',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Description',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _description,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Description',
+                              'eg. Pain relief',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Optional short description',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Notes',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _notes,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Notes',
+                              'eg. Take with food',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Optional notes',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                    ],
                   ),
-                  LabelFieldRow(
-                    label: 'Keep in dark',
-                    field: Row(
-                      children: [
-                        Checkbox(
-                          value: _lightSensitive,
+                  const SizedBox(height: 12),
+                  SectionFormCard(
+                    title: 'Strength',
+                    neutral: true,
+                    children: [
+                      LabelFieldRow(
+                        label: 'Strength *',
+                        field: StepperRow36(
+                          controller: _strength,
+                          onDec: () {
+                            final v = int.tryParse(_strength.text) ?? 0;
+                            _strength.text = (v - 1)
+                                .clamp(0, 1000000)
+                                .toString();
+                            setState(() {});
+                          },
+                          onInc: () {
+                            final v = int.tryParse(_strength.text) ?? 0;
+                            _strength.text = (v + 1)
+                                .clamp(0, 1000000)
+                                .toString();
+                            setState(() {});
+                          },
+                          decoration: _dec(context, 'Strength *', '0'),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Unit *',
+                        field: SmallDropdown36<Unit>(
+                          value: _strengthUnit,
+                          width: kSmallControlWidth,
+                          items: const [
+                            DropdownMenuItem(
+                              value: Unit.mcg,
+                              child: Center(child: Text('mcg')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.mg,
+                              child: Center(child: Text('mg')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.g,
+                              child: Center(child: Text('g')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.units,
+                              child: Center(child: Text('units')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.mcgPerMl,
+                              child: Center(child: Text('mcg/mL')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.mgPerMl,
+                              child: Center(child: Text('mg/mL')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.gPerMl,
+                              child: Center(child: Text('g/mL')),
+                            ),
+                            DropdownMenuItem(
+                              value: Unit.unitsPerMl,
+                              child: Center(child: Text('units/mL')),
+                            ),
+                          ],
                           onChanged: (v) =>
-                              setState(() => _lightSensitive = v ?? false),
-                        ),
-                        Text(
-                          'Dark storage',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: kLabelColWidth + 8,
-                      top: 0,
-                      bottom: 6,
-                    ),
-                    child: Text(
-                      'Enable if this medication must be protected from light',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.75),
-                      ),
-                    ),
-                  ),
-                  LabelFieldRow(
-                    label: 'Storage instructions',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _storageNotes,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          context,
-                          'Storage instructions',
-                          'Enter storage instructions',
+                              setState(() => _strengthUnit = v ?? Unit.mg),
+                          decoration: _decDrop(context),
                         ),
                       ),
-                    ),
+                      if (_isPerMl)
+                        LabelFieldRow(
+                          label: 'Per mL',
+                          field: StepperRow36(
+                            controller: _perMl,
+                            onDec: () {
+                              final v =
+                                  double.tryParse(_perMl.text.trim()) ?? 0;
+                              _perMl.text = (v - 1)
+                                  .clamp(0, 1000000)
+                                  .toStringAsFixed(0);
+                              setState(() {});
+                            },
+                            onInc: () {
+                              final v =
+                                  double.tryParse(_perMl.text.trim()) ?? 0;
+                              _perMl.text = (v + 1)
+                                  .clamp(0, 1000000)
+                                  .toStringAsFixed(0);
+                              setState(() {});
+                            },
+                            decoration: _dec(context, 'Per mL', '0'),
+                          ),
+                        ),
+                      if (_isPerMl)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: kLabelColWidth + 8,
+                            top: 2,
+                            bottom: 6,
+                          ),
+                          child: Text(
+                            'Enter the volume per mL',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withOpacity(0.75),
+                                ),
+                          ),
+                        ),
+                      if (widget.kind == InjectionKind.multi)
+                        LabelFieldRow(
+                          label: 'Volume Entry',
+                          field: Wrap(
+                            spacing: 8,
+                            children: [
+                              PrimaryChoiceChip(
+                                label: Text('Enter volume'),
+                                selected: _calcMode == CalcMode.known,
+                                onSelected: (_) =>
+                                    setState(() => _calcMode = CalcMode.known),
+                              ),
+                              PrimaryChoiceChip(
+                                label: Text('Reconstitute'),
+                                selected: _calcMode == CalcMode.reconstitute,
+                                onSelected: (_) => setState(
+                                  () => _calcMode = CalcMode.reconstitute,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (widget.kind == InjectionKind.multi &&
+                          _calcMode == CalcMode.known)
+                        LabelFieldRow(
+                          label: 'Vial volume (mL)',
+                          field: StepperRow36(
+                            controller: _vialVolume,
+                            onDec: () {
+                              final v =
+                                  int.tryParse(_vialVolume.text.trim()) ?? 0;
+                              setState(
+                                () => _vialVolume.text = (v - 1)
+                                    .clamp(0, 1000000)
+                                    .toString(),
+                              );
+                            },
+                            onInc: () {
+                              final v =
+                                  int.tryParse(_vialVolume.text.trim()) ?? 0;
+                              setState(
+                                () => _vialVolume.text = (v + 1)
+                                    .clamp(0, 1000000)
+                                    .toString(),
+                              );
+                            },
+                            decoration: _dec(context, 'Vial volume (mL)', '0'),
+                          ),
+                        ),
+                      if (widget.kind == InjectionKind.multi &&
+                          _calcMode == CalcMode.reconstitute)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 0,
+                            right: 0,
+                            top: 12,
+                            bottom: 6,
+                          ),
+                          child: ReconstitutionCalculatorWidget(
+                            initialStrengthValue:
+                                double.tryParse(_strength.text.trim()) ?? 0,
+                            unitLabel: _baseUnit(_strengthUnit),
+                            showSummary: false,
+                            showApplyButton: true,
+                            onApply: (result) {
+                              setState(() {
+                                _perMl.text = fmt2(result.perMlConcentration);
+                                _vialVolume.text = fmt2(result.solventVolumeMl);
+                                _reconResult =
+                                    result; // Store result for summary
+                                _calcMode =
+                                    CalcMode.known; // collapse after apply
+                              });
+                            },
+                            onCalculate: (result, isValid) {
+                              // Update summary card with live reconstitution result
+                              setState(() {
+                                _reconResult = isValid ? result : null;
+                              });
+                            },
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                        ),
+                        child: Text(
+                          'Specify the amount per dose and its unit of measurement.',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  SectionFormCard(
+                    title: 'Inventory',
+                    neutral: true,
+                    children: [
+                      LabelFieldRow(
+                        label: 'Stock quantity *',
+                        field: StepperRow36(
+                          controller: _stock,
+                          onDec: () {
+                            final v = int.tryParse(_stock.text) ?? 0;
+                            _stock.text = (v - 1).clamp(0, 1000000).toString();
+                            setState(() {});
+                          },
+                          onInc: () {
+                            final v = int.tryParse(_stock.text) ?? 0;
+                            _stock.text = (v + 1).clamp(0, 1000000).toString();
+                            setState(() {});
+                          },
+                          decoration: _dec(context, 'Stock quantity *', '0'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Enter the amount currently in stock',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Quantity unit',
+                        field: SmallDropdown36<StockUnit>(
+                          value: _stockUnit,
+                          width: kSmallControlWidth,
+                          items: [
+                            if (widget.kind == InjectionKind.pfs)
+                              const DropdownMenuItem(
+                                value: StockUnit.preFilledSyringes,
+                                child: Center(child: Text('syringes')),
+                              ),
+                            if (widget.kind == InjectionKind.single)
+                              const DropdownMenuItem(
+                                value: StockUnit.singleDoseVials,
+                                child: Center(child: Text('single dose vials')),
+                              ),
+                            if (widget.kind == InjectionKind.multi)
+                              const DropdownMenuItem(
+                                value: StockUnit.multiDoseVials,
+                                child: Center(child: Text('multi dose vials')),
+                              ),
+                          ],
+                          onChanged: (v) =>
+                              setState(() => _stockUnit = v ?? _stockUnit),
+                          decoration: _decDrop(context),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                        ),
+                        child: Text(
+                          'Get notified when stock is low',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      LabelFieldRow(
+                        label: 'Expiry date',
+                        field: DateButton36(
+                          label: _expiry == null
+                              ? 'Select date'
+                              : DateFormat.yMd().format(_expiry!),
+                          onPressed: () async {
+                            final now = DateTime.now();
+                            final picked = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(now.year - 1),
+                              lastDate: DateTime(now.year + 10),
+                              initialDate: _expiry ?? now,
+                            );
+                            if (picked != null)
+                              setState(() => _expiry = picked);
+                          },
+                          width: kSmallControlWidth,
+                          selected: _expiry != null,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Enter the expiry date',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  SectionFormCard(
+                    title: 'Storage',
+                    neutral: true,
+                    children: [
+                      LabelFieldRow(
+                        label: 'Batch No.',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _batch,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Batch No.',
+                              'Enter batch number',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Enter the printed batch or lot number',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Location',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _location,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Location',
+                              'eg. Bathroom cabinet',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Where it’s stored (e.g., Bathroom cabinet)',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Keep refrigerated',
+                        field: Opacity(
+                          opacity: _keepFrozen ? 0.5 : 1.0,
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: _refrigerate,
+                                onChanged: _keepFrozen
+                                    ? null
+                                    : (v) => setState(
+                                        () => _refrigerate = v ?? false,
+                                      ),
+                              ),
+                              Text(
+                                'Refrigerate',
+                                style: _keepFrozen
+                                    ? kMutedLabelStyle(context)
+                                    : Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 4,
+                        ),
+                        child: Text(
+                          'Enable if this medication must be kept refrigerated',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Keep frozen',
+                        field: Row(
+                          children: [
+                            Checkbox(
+                              value: _keepFrozen,
+                              onChanged: (v) => setState(() {
+                                _keepFrozen = v ?? false;
+                                if (_keepFrozen) _refrigerate = false;
+                              }),
+                            ),
+                            Text(
+                              'Freeze',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 4,
+                        ),
+                        child: Text(
+                          'Enable if this medication must be kept frozen',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Keep in dark',
+                        field: Row(
+                          children: [
+                            Checkbox(
+                              value: _lightSensitive,
+                              onChanged: (v) =>
+                                  setState(() => _lightSensitive = v ?? false),
+                            ),
+                            Text(
+                              'Dark storage',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 0,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Enable if this medication must be protected from light',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant
+                                    .withOpacity(0.75),
+                              ),
+                        ),
+                      ),
+                      LabelFieldRow(
+                        label: 'Storage instructions',
+                        field: Field36(
+                          child: TextFormField(
+                            controller: _storageNotes,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: _dec(
+                              context,
+                              'Storage instructions',
+                              'Enter storage instructions',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-          ),
+            ),
           ),
           Positioned(
             left: 16,
