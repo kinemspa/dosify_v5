@@ -207,6 +207,40 @@ Reconstitution Calculator Formula
   - Option card text uses theme.textTheme.bodySmall/bodyMedium
   - All helper text uses kMutedLabelStyle(context)
   - Explainer text in options uses onSurfaceVariant color
+
+- Reconstitution Text Sizing and Spacing:
+  - "Reconstitute with X mL" text uses titleSmall (not titleMedium)
+  - Vertical padding: 4px (was 8px)
+  - Spacing before text: 12px (was 16px)
+  - Spacing between text and syringe: 8px (was not defined)
+  - Spacing after syringe: 12px (was 16px)
+  - Appropriately sized for context, not overwhelming
+
+- Correct Medical Terminology:
+  - Support text says "Draw X IU into syringe" (not "from syringe")
+  - Medically accurate - you draw medication INTO the syringe from the vial
+  - Applied to all instances of draw instruction text
+
+- Diluent Name Display:
+  - Option cards show actual diluent name when entered
+  - Falls back to generic "Diluent" label if field empty
+  - Dynamic text: `${diluentName.isNotEmpty ? diluentName : "Diluent"}`
+  - More informative for user when reviewing options
+
+- Saved Reconstitution Display:
+  - Appears below calculator button when calculator closed after saving
+  - Shows: Bold primary titleSmall text "Reconstitute with X mL [DiluentName]"
+  - Includes syringe gauge visualization with saved IU values
+  - Positioned with left padding alignment (kLabelColWidth + 8)
+  - Only visible when: _reconResult != null && !_showCalculator
+  - Provides persistent reference without keeping full calculator open
+  - User can click "Edit Reconstitution" button to reopen calculator
+
+- Calculator Minimize Behavior:
+  - Calculator automatically hides after clicking "Save Reconstitution"
+  - Button changes to "Edit Reconstitution" with outlined style
+  - Saved recon display appears in place of calculator
+  - Clean workflow: Calculate → Save → View Summary → Edit if needed
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
