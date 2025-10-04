@@ -136,10 +136,17 @@ Reconstitution Calculator Formula
   - Passed from calculator widget/page/dialog to parent components for persistence and display
 - WhiteSyringeGauge widget (lib/src/widgets/white_syringe_gauge.dart):
   - Reusable widget for visualizing reconstitution syringe fill in summary cards
-  - White styling: fine horizontal baseline, white IU markers (5/10/50 IU intervals), white numbers, thick white fill line (6px)
-  - Takes totalIU and fillIU parameters
+  - PRIMARY COLOR styling: uses theme primary color for all elements (lines, ticks, fill, labels)
+  - Thicker lines (2px baseline, 2px ticks, 8px fill with rounded caps)
+  - IU markers shown on both major (50 IU) AND minor (10 IU) intervals
+  - Numbers positioned BELOW horizontal baseline with proper padding (no overlap)
+  - Ticks aligned to NOT protrude below baseline
+  - Takes totalIU, fillIU, and optional color parameters
+  - Canvas height: 44px (increased for label spacing)
+  - Numbers displayed with padding to prevent collision
+  - Integrated into CALCULATOR WIDGET for live preview (displays during calculation, before save)
   - Integrated into SummaryHeaderCard via optional reconTotalIU/reconFillIU parameters
-  - Usage: Pass reconstitution IU data to SummaryHeaderCard to display graphical syringe gauge below additionalInfo text
+  - Usage: Pass reconstitution IU data to display graphical syringe gauge with theme-aware colors
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial

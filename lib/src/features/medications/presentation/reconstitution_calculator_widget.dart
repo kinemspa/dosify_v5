@@ -483,17 +483,67 @@ class _ReconstitutionCalculatorWidgetState
             totalIU: _syringe.totalUnits.toDouble(),
             fillIU: _selectedUnits,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           // Conversational explanation
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: Text(
-              'Add ${_fmt(currentV)} mL diluent to vial containing ${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}. '
-              'This creates ${_fmt(currentC)} ${widget.unitLabel}/mL concentration. '
-              'Draw ${_fmt(_selectedUnits)} IU (${_fmt((_selectedUnits / 100) * _syringe.ml)} mL) from syringe for your ${_fmt(Draw)} ${_doseUnit} dose.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+                children: [
+                  const TextSpan(text: 'Add '),
+                  TextSpan(
+                    text: '${_fmt(currentV)} mL',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(text: ' diluent to vial containing '),
+                  TextSpan(
+                    text: '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(text: '. This creates '),
+                  TextSpan(
+                    text: '${_fmt(currentC)} ${widget.unitLabel}/mL',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(text: ' concentration. Draw '),
+                  TextSpan(
+                    text: '${_fmt(_selectedUnits)} IU',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(text: ' ('),
+                  TextSpan(
+                    text: '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(text: ') from syringe for your '),
+                  TextSpan(
+                    text: '${_fmt(Draw)} ${_doseUnit}',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(text: ' dose.'),
+                ],
               ),
             ),
           ),
