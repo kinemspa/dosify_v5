@@ -104,10 +104,14 @@ class _AddEditInjectionUnifiedPageState
         _reconResult != null &&
         _calcMode == CalcMode.reconstitute) {
       final r = _reconResult!;
+      final diluentText = r.diluentName?.isNotEmpty == true
+          ? r.diluentName
+          : 'diluent';
+      final syringeSize = r.syringeSizeMl.toStringAsFixed(1);
+      final volume = r.solventVolumeMl.toStringAsFixed(2);
+      final units = r.recommendedUnits.toStringAsFixed(0);
       additionalNotes =
-          'Reconstituted: ${r.solventVolumeMl.toStringAsFixed(2)} mL solvent, '
-          '${r.perMlConcentration.toStringAsFixed(2)} $unitLabel/mL, '
-          'Draw ${r.recommendedUnits.toStringAsFixed(0)} IU';
+          'Reconstitute with $volume mL $diluentText for $units IU on a $syringeSize mL syringe';
     }
 
     // Determine perUnitLabel based on injection type
@@ -150,6 +154,10 @@ class _AddEditInjectionUnifiedPageState
   @override
   void initState() {
     super.initState();
+    // Add listeners to update summary dynamically
+    _name.addListener(() => setState(() {}));
+    _manufacturer.addListener(() => setState(() {}));
+
     final m = widget.initial;
     if (m != null) {
       _name.text = m.name;
