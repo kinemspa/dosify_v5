@@ -14,10 +14,9 @@ import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 enum InjectionKind { pfs, single, multi }
-
-enum CalcMode { known, reconstitute }
 
 class AddEditInjectionUnifiedPage extends ConsumerStatefulWidget {
   const AddEditInjectionUnifiedPage({
@@ -55,9 +54,7 @@ class _AddEditInjectionUnifiedPageState
   double? _lastCalcVialSize;
   ReconstitutionResult?
   _reconResult; // Track current reconstitution calculation
-
-  // Inline calculator state (Multi only)
-  CalcMode _calcMode = CalcMode.known;
+  bool _showCalculator = false; // Toggle inline calculator visibility
 
   final _stock = TextEditingController(text: '0');
   StockUnit _stockUnit = StockUnit.preFilledSyringes;
@@ -98,21 +95,8 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.multi => 'multi dose vials',
     };
 
-    // Build additional notes including reconstitution info
+    // No additional notes in summary card anymore
     String? additionalNotes;
-    if (widget.kind == InjectionKind.multi &&
-        _reconResult != null &&
-        _calcMode == CalcMode.reconstitute) {
-      final r = _reconResult!;
-      final diluentText = r.diluentName?.isNotEmpty == true
-          ? r.diluentName
-          : 'diluent';
-      final syringeSize = r.syringeSizeMl.toStringAsFixed(1);
-      final volume = r.solventVolumeMl.toStringAsFixed(2);
-      final units = r.recommendedUnits.toStringAsFixed(0);
-      additionalNotes =
-          'Reconstitute with $volume mL $diluentText for $units IU on a $syringeSize mL syringe';
-    }
 
     // Determine perUnitLabel based on injection type
     final perUnitLabel = switch (widget.kind) {
@@ -141,11 +125,6 @@ class _AddEditInjectionUnifiedPageState
       perUnitLabel: perUnitLabel,
       formLabelPlural: stockUnitLabel,
       additionalInfo: additionalNotes,
-      // Add syringe gauge for reconstitution
-      reconTotalIU: _reconResult != null
-          ? (_reconResult!.syringeSizeMl * 100)
-          : null,
-      reconFillIU: _reconResult?.recommendedUnits,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
     return card;
@@ -269,6 +248,16 @@ class _AddEditInjectionUnifiedPageState
       _strengthUnit == Unit.mgPerMl ||
       _strengthUnit == Unit.gPerMl ||
       _strengthUnit == Unit.unitsPerMl;
+
+  String _buildReconstitutionText(ReconstitutionResult result) {
+    final diluentText = result.diluentName?.isNotEmpty == true
+        ? result.diluentName
+        : 'diluent';
+    final syringeSize = result.syringeSizeMl.toStringAsFixed(1);
+    final volume = result.solventVolumeMl.toStringAsFixed(2);
+    final units = result.recommendedUnits.toStringAsFixed(0);
+    return 'Reconstitute with $volume mL $diluentText for $units IU on a $syringeSize mL syringe';
+  }
 
   double? _strengthForCalculator() {
     final s = double.tryParse(_strength.text);
@@ -647,30 +636,135 @@ class _AddEditInjectionUnifiedPageState
                               ),
                         ),
                       ),
+                      // Reconstitution Calculator Button (Multi dose vials only)
                       if (widget.kind == InjectionKind.multi)
-                        LabelFieldRow(
-                          label: 'Volume Entry',
-                          field: Wrap(
-                            spacing: 8,
-                            children: [
-                              PrimaryChoiceChip(
-                                label: Text('Enter volume'),
-                                selected: _calcMode == CalcMode.known,
-                                onSelected: (_) =>
-                                    setState(() => _calcMode = CalcMode.known),
-                              ),
-                              PrimaryChoiceChip(
-                                label: Text('Reconstitute'),
-                                selected: _calcMode == CalcMode.reconstitute,
-                                onSelected: (_) => setState(
-                                  () => _calcMode = CalcMode.reconstitute,
-                                ),
-                              ),
-                            ],
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: kLabelColWidth + 8,
+                            top: 8,
+                            bottom: 8,
+                          ),
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              setState(
+                                () => _showCalculator = !_showCalculator,
+                              );
+                            },
+                            icon: Icon(
+                              _showCalculator ? Icons.close : Icons.calculate,
+                            ),
+                            label: Text(
+                              _reconResult == null
+                                  ? 'Reconstitution Calculator'
+                                  : 'Edit Reconstitution',
+                            ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _showCalculator
+                                  ? Theme.of(context).colorScheme.secondary
+                                  : Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                         ),
+                      // Show saved reconstitution info if exists
                       if (widget.kind == InjectionKind.multi &&
-                          _calcMode == CalcMode.known)
+                          _reconResult != null &&
+                          !_showCalculator)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: kLabelColWidth + 8,
+                            right: 8,
+                            bottom: 12,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _buildReconstitutionText(_reconResult!),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                      ),
+                                ),
+                                const SizedBox(height: 8),
+                                WhiteSyringeGauge(
+                                  totalIU: _reconResult!.syringeSizeMl * 100,
+                                  fillIU: _reconResult!.recommendedUnits,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      // Inline calculator when shown
+                      if (widget.kind == InjectionKind.multi && _showCalculator)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 0,
+                            right: 0,
+                            top: 12,
+                            bottom: 6,
+                          ),
+                          child: ReconstitutionCalculatorWidget(
+                            initialStrengthValue:
+                                double.tryParse(_strength.text.trim()) ?? 0,
+                            unitLabel: _baseUnit(_strengthUnit),
+                            initialDoseValue: _lastCalcDose,
+                            initialDoseUnit: _lastCalcDoseUnit,
+                            initialSyringeSize: _lastCalcSyringe,
+                            initialVialSize: _lastCalcVialSize,
+                            showSummary: false,
+                            showApplyButton: true,
+                            onApply: (result) {
+                              setState(() {
+                                _perMl.text = fmt2(result.perMlConcentration);
+                                _vialVolume.text = fmt2(result.solventVolumeMl);
+                                _reconResult = result;
+                                _showCalculator =
+                                    false; // Hide calculator after save
+                              });
+                            },
+                            onCalculate: (result, isValid) {
+                              // Preview only, don't save yet
+                            },
+                          ),
+                        ),
+                      // Helper text
+                      if (widget.kind == InjectionKind.multi &&
+                          !_showCalculator)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: kLabelColWidth + 8,
+                            top: 2,
+                            bottom: 6,
+                          ),
+                          child: Text(
+                            'Enter the volume of fluid in the vial. Use the calculator if you need to determine the correct amount.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                      // Vial Volume field (always visible for multi dose vials)
+                      if (widget.kind == InjectionKind.multi &&
+                          !_showCalculator)
                         LabelFieldRow(
                           label: 'Vial volume (mL)',
                           field: StepperRow36(
@@ -694,39 +788,6 @@ class _AddEditInjectionUnifiedPageState
                               );
                             },
                             decoration: _dec(context, 'Vial volume (mL)', '0'),
-                          ),
-                        ),
-                      if (widget.kind == InjectionKind.multi &&
-                          _calcMode == CalcMode.reconstitute)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            left: 0,
-                            right: 0,
-                            top: 12,
-                            bottom: 6,
-                          ),
-                          child: ReconstitutionCalculatorWidget(
-                            initialStrengthValue:
-                                double.tryParse(_strength.text.trim()) ?? 0,
-                            unitLabel: _baseUnit(_strengthUnit),
-                            showSummary: false,
-                            showApplyButton: true,
-                            onApply: (result) {
-                              setState(() {
-                                _perMl.text = fmt2(result.perMlConcentration);
-                                _vialVolume.text = fmt2(result.solventVolumeMl);
-                                _reconResult =
-                                    result; // Store result for summary
-                                _calcMode =
-                                    CalcMode.known; // collapse after apply
-                              });
-                            },
-                            onCalculate: (result, isValid) {
-                              // Update summary card with live reconstitution result
-                              setState(() {
-                                _reconResult = isValid ? result : null;
-                              });
-                            },
                           ),
                         ),
                     ],
