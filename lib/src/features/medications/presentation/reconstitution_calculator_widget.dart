@@ -703,7 +703,7 @@ class _ReconstitutionCalculatorWidgetState
                             : theme.colorScheme.onSurface,
                       ),
                     ),
-                    if (explainerText.isNotEmpty) ..[
+                    if (explainerText.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         explainerText,
