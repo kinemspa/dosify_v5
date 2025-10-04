@@ -147,6 +147,14 @@ Reconstitution Calculator Formula
   - Integrated into CALCULATOR WIDGET for live preview (displays during calculation, before save)
   - Integrated into SummaryHeaderCard via optional reconTotalIU/reconFillIU parameters
   - Usage: Pass reconstitution IU data to display graphical syringe gauge with theme-aware colors
+  - Support text below gauge uses RichText with bold primary-colored values (16px padding above text)
+
+- Reconstitution Calculator Validation:
+  - Calculator button is DISABLED until vial strength is entered
+  - Helper text changes to error-styled message: "Please enter the vial strength above before using the reconstitution calculator."
+  - Error text shown in error color with bold font weight
+  - Normal helper text shown in muted color when strength is valid
+  - Prevents user confusion by requiring prerequisite data entry
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
