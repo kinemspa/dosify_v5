@@ -137,6 +137,9 @@ class _AddEditInjectionUnifiedPageState
       perUnitLabel: perUnitLabel,
       formLabelPlural: stockUnitLabel,
       additionalInfo: additionalNotes,
+      // Add syringe gauge for reconstitution
+      reconTotalIU: _reconResult?.syringeCapacityUnits,
+      reconFillIU: _reconResult?.recommendedUnits,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
     return card;
