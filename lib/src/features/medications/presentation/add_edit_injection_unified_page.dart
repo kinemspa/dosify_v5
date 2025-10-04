@@ -105,11 +105,15 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.multi => 'Vial',
     };
 
-    // For MDV, include vial volume info
+    // For MDV, build custom additionalInfo with total dose and concentration
     String? mdvAdditionalInfo;
     if (widget.kind == InjectionKind.multi) {
       final vialVol = double.tryParse(_vialVolume.text.trim());
-      if (vialVol != null && vialVol > 0) {
+      final concentration = double.tryParse(_perMl.text.trim());
+      if (vialVol != null && vialVol > 0 && concentration != null && concentration > 0) {
+        final totalDose = concentration * vialVol;
+        mdvAdditionalInfo = '${totalDose.toStringAsFixed(totalDose == totalDose.roundToDouble() ? 0 : 1)}$unitLabel in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
+      } else if (vialVol != null && vialVol > 0) {
         mdvAdditionalInfo = 'Vial Volume: ${vialVol.toStringAsFixed(1)} mL';
       }
     }
@@ -120,7 +124,7 @@ class _AddEditInjectionUnifiedPageState
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: _isPerMl ? '$unitLabel/mL' : unitLabel,
-      perMlValue: _isPerMl ? double.tryParse(_perMl.text) : null,
+      perMlValue: null, // Don't use perMlValue for MDV - we show it in additionalInfo instead
       stockCurrent: stockVal ?? 0,
       stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
       stockUnitLabel: 'unreconstituted $stockUnitLabel',
@@ -719,57 +723,6 @@ class _AddEditInjectionUnifiedPageState
                                 ),
                               ),
                             ),
-                            // Show saved reconstitution info if exists
-                            if (_reconResult != null && !_showCalculator)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: kLabelColWidth + 8,
-                                  right: 8,
-                                  bottom: 12,
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withOpacity(0.3),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _buildReconstitutionText(_reconResult!),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      WhiteSyringeGauge(
-                                        totalIU:
-                                            _reconResult!.syringeSizeMl * 100,
-                                        fillIU: _reconResult!.recommendedUnits,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
                             // Inline calculator when shown
                             if (_showCalculator)
                               Padding(
@@ -799,8 +752,7 @@ class _AddEditInjectionUnifiedPageState
                                         result.solventVolumeMl,
                                       );
                                       _reconResult = result;
-                                      _showCalculator =
-                                          false; // Hide calculator after save
+                                      // Keep calculator visible after save
                                     });
                                   },
                                   onCalculate: (result, isValid) {
