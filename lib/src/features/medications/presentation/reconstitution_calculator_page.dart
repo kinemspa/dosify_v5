@@ -504,6 +504,13 @@ class _ReconstitutionCalculatorPageState
   }
 }
 
+String _fmtNum(double v) {
+  if (v == v.roundToDouble()) return v.toInt().toString();
+  final s = v.toStringAsFixed(2);
+  if (s.endsWith('0')) return v.toStringAsFixed(1);
+  return s;
+}
+
 Widget _buildOptionRow(
   BuildContext context,
   String label,
@@ -527,7 +534,7 @@ Widget _buildOptionRow(
         const Spacer(),
         ChoiceChip(
           label: Text(
-            '${_fmt(calcResult.cPerMl)} $unitLabel/mL • ${_fmt(calcResult.vialVolume)} mL • ${_fmt(units)} IU',
+            '${_fmtNum(calcResult.cPerMl)} $unitLabel/mL • ${_fmtNum(calcResult.vialVolume)} mL • ${_fmtNum(units)} IU',
           ),
           selected: selected,
           onSelected: (_) => onTap(),
