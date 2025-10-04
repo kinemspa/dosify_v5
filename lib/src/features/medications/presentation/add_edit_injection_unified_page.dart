@@ -666,12 +666,20 @@ class _AddEditInjectionUnifiedPageState
                                 bottom: 12,
                               ),
                               child: Text(
-                                'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
+                                _strengthForCalculator() == null
+                                    ? 'Please enter the vial strength above before using the reconstitution calculator.'
+                                    : 'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
+                                      color: _strengthForCalculator() == null
+                                          ? Theme.of(context).colorScheme.error
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                      fontWeight:
+                                          _strengthForCalculator() == null
+                                              ? FontWeight.w600
+                                              : null,
                                     ),
                               ),
                             ),
@@ -679,11 +687,14 @@ class _AddEditInjectionUnifiedPageState
                             LabelFieldRow(
                               label: '',
                               field: OutlinedButton.icon(
-                                onPressed: () {
-                                  setState(
-                                    () => _showCalculator = !_showCalculator,
-                                  );
-                                },
+                                onPressed: _strengthForCalculator() == null
+                                    ? null
+                                    : () {
+                                        setState(
+                                          () => _showCalculator =
+                                              !_showCalculator,
+                                        );
+                                      },
                                 icon: Icon(
                                   _showCalculator
                                       ? Icons.close
