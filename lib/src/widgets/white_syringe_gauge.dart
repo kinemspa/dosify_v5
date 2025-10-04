@@ -1,48 +1,65 @@
 import 'package:flutter/material.dart';
 
-/// White-styled syringe gauge used in reconstitution summary cards
-/// Shows a horizontal line with white IU markers and thick white fill line
+/// Syringe gauge widget used for reconstitution visualization
+/// Shows a horizontal line with IU markers and thick fill line
 class WhiteSyringeGauge extends StatelessWidget {
   const WhiteSyringeGauge({
     super.key,
     required this.totalIU,
     required this.fillIU,
+    this.color,
   });
 
   final double totalIU;
   final double fillIU;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
     return CustomPaint(
-      size: const Size(double.infinity, 32),
-      painter: _WhiteSyringePainter(totalIU: totalIU, fillIU: fillIU),
+      size: const Size(double.infinity, 44),
+      painter: _WhiteSyringePainter(
+        totalIU: totalIU,
+        fillIU: fillIU,
+        color: effectiveColor,
+      ),
     );
   }
 }
 
 class _WhiteSyringePainter extends CustomPainter {
-  _WhiteSyringePainter({required this.totalIU, required this.fillIU});
+  _WhiteSyringePainter({
+    required this.totalIU,
+    required this.fillIU,
+    required this.color,
+  });
 
   final double totalIU;
   final double fillIU;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const whiteColor = Colors.white;
+    // Baseline is at bottom of canvas
+    final baselineY = size.height - 4;
 
-    // Draw horizontal baseline (entire width) - slightly thicker
+    // Draw horizontal baseline (entire width)
     final baselinePaint = Paint()
-      ..color = whiteColor
+      ..color = color
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    canvas.drawLine(const Offset(0, 16), Offset(size.width, 16), baselinePaint);
+    canvas.drawLine(
+      Offset(0, baselineY),
+      Offset(size.width, baselineY),
+      baselinePaint,
+    );
 
-    // Draw IU marker ticks and labels - thicker ticks
+    // Draw IU marker ticks and labels
     final tickPaint = Paint()
-      ..color = whiteColor
+      ..color = color
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
 
@@ -52,46 +69,52 @@ class _WhiteSyringePainter extends CustomPainter {
       final isMajor = iu % 50 == 0;
       final isMinor = iu % 10 == 0 && !isMajor;
 
-      final tickTop = isMajor ? 2.0 : (isMinor ? 8.0 : 12.0);
-      final tickBottom = isMajor ? 30.0 : (isMinor ? 24.0 : 20.0);
+      // All ticks end at baseline, start above it
+      final tickHeight = isMajor ? 20.0 : (isMinor ? 12.0 : 6.0);
+      final tickTop = baselineY - tickHeight;
 
-      canvas.drawLine(Offset(x, tickTop), Offset(x, tickBottom), tickPaint);
+      canvas.drawLine(Offset(x, tickTop), Offset(x, baselineY), tickPaint);
 
-      // Draw white labels for major ticks with padding
+      // Draw labels for major ticks below baseline
       if (isMajor) {
         final tp = TextPainter(
           text: TextSpan(
             text: iu.toStringAsFixed(0),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              color: whiteColor,
+              color: color,
               fontWeight: FontWeight.w600,
-              height: 1.2,
             ),
           ),
           textDirection: TextDirection.ltr,
         )..layout();
-        // Add padding above numbers
-        tp.paint(canvas, Offset(x - tp.width / 2, -2));
+        // Position below baseline with padding
+        tp.paint(canvas, Offset(x - tp.width / 2, baselineY + 4));
       }
     }
 
-    // Draw thick white fill line representing the amount in syringe
+    // Draw thick fill line representing the amount in syringe
     final ratio = totalIU <= 0 ? 0.0 : (fillIU / totalIU).clamp(0.0, 1.0);
     if (ratio > 0 && !ratio.isNaN) {
       final fillPaint = Paint()
-        ..color = whiteColor
+        ..color = color
         ..strokeWidth = 8.0
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
 
       final fillEndX = size.width * ratio;
-      canvas.drawLine(const Offset(0, 16), Offset(fillEndX, 16), fillPaint);
+      canvas.drawLine(
+        Offset(0, baselineY),
+        Offset(fillEndX, baselineY),
+        fillPaint,
+      );
     }
   }
 
   @override
   bool shouldRepaint(covariant _WhiteSyringePainter oldDelegate) {
-    return oldDelegate.totalIU != totalIU || oldDelegate.fillIU != fillIU;
+    return oldDelegate.totalIU != totalIU ||
+        oldDelegate.fillIU != fillIU ||
+        oldDelegate.color != color;
   }
 }

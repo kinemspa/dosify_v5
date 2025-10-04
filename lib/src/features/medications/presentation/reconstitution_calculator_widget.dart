@@ -78,6 +78,11 @@ class _ReconstitutionCalculatorWidgetState
 
   double _round2(double v) => (v * 100).round() / 100.0;
 
+  /// Round to nearest 0.5 mL (whole or half mL)
+  double _roundToHalfMl(double v) {
+    return (v * 2).round() / 2.0;
+  }
+
   String _fmt(double v) {
     if (v == v.roundToDouble()) return v.toInt().toString();
     final s = v.toStringAsFixed(2);
@@ -208,7 +213,9 @@ class _ReconstitutionCalculatorWidgetState
 
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
     final currentC = _round2(current.cPerMl);
-    final currentV = _round2(current.vialVolume);
+    final currentV = _roundToHalfMl(
+      current.vialVolume,
+    ); // Round to nearest 0.5 mL
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
     // Notify parent of calculation result
@@ -515,7 +522,7 @@ class _ReconstitutionCalculatorWidgetState
           const Spacer(),
           ChoiceChip(
             label: Text(
-              '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_fmt(calcResult.vialVolume)} mL • ${_fmt(units)} IU',
+              '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_fmt(_roundToHalfMl(calcResult.vialVolume))} mL • ${_fmt(units)} IU',
             ),
             selected: selected,
             onSelected: (_) => onTap(),
