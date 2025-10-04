@@ -293,22 +293,24 @@ class _ReconstitutionCalculatorWidgetState
           field: StepperRow36(
             controller: _doseCtrl,
             onDec: () {
-              final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+              final v = double.tryParse(_doseCtrl.text.trim()) ?? 0;
               // Don't go below 1
-              setState(
-                () => _doseCtrl.text = (v - 1)
-                    .clamp(1, widget.initialStrengthValue.toInt())
-                    .toString(),
-              );
+              final newVal = (v - 1).clamp(1, widget.initialStrengthValue);
+              setState(() {
+                _doseCtrl.text = newVal == newVal.roundToDouble()
+                    ? newVal.toInt().toString()
+                    : newVal.toString();
+              });
             },
             onInc: () {
-              final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+              final v = double.tryParse(_doseCtrl.text.trim()) ?? 0;
               // Can't exceed vial strength
-              setState(
-                () => _doseCtrl.text = (v + 1)
-                    .clamp(1, widget.initialStrengthValue.toInt())
-                    .toString(),
-              );
+              final newVal = (v + 1).clamp(1, widget.initialStrengthValue);
+              setState(() {
+                _doseCtrl.text = newVal == newVal.roundToDouble()
+                    ? newVal.toInt().toString()
+                    : newVal.toString();
+              });
             },
             decoration: _fieldDecoration(context, hint: '100'),
           ),
@@ -400,13 +402,6 @@ class _ReconstitutionCalculatorWidgetState
         ),
         const SizedBox(height: 16),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              'Choose a reconstitution option. Concentrated for a strong small dosage, balanced for approx 50% syringe size dosage, diluted for large doses',
-              style: kMutedLabelStyle(context),
-            ),
-          ),
           _buildOptionRow(
             context,
             'Concentrated',
@@ -479,72 +474,104 @@ class _ReconstitutionCalculatorWidgetState
         // Live syringe gauge preview
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
           const SizedBox(height: 12),
-          WhiteSyringeGauge(
-            totalIU: _syringe.totalUnits.toDouble(),
-            fillIU: _selectedUnits,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: WhiteSyringeGauge(
+              totalIU: _syringe.totalUnits.toDouble(),
+              fillIU: _selectedUnits,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           // Conversational explanation
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Add '),
+                      TextSpan(
+                        text: '${_fmt(currentV)} mL',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' diluent to vial containing '),
+                      TextSpan(
+                        text: '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: '.'),
+                    ],
+                  ),
                 ),
-                children: [
-                  const TextSpan(text: 'Add '),
-                  TextSpan(
-                    text: '${_fmt(currentV)} mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
                     ),
+                    children: [
+                      const TextSpan(text: 'This creates '),
+                      TextSpan(
+                        text: '${_fmt(currentC)} ${widget.unitLabel}/mL',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' concentration.'),
+                    ],
                   ),
-                  const TextSpan(text: ' diluent to vial containing '),
-                  TextSpan(
-                    text: '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: 4),
+                RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
                     ),
+                    children: [
+                      const TextSpan(text: 'Draw '),
+                      TextSpan(
+                        text: '${_fmt(_selectedUnits)} IU',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' ('),
+                      TextSpan(
+                        text: '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ') from syringe for your '),
+                      TextSpan(
+                        text: '${_fmt(Draw)} ${_doseUnit}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' dose.'),
+                    ],
                   ),
-                  const TextSpan(text: '. This creates '),
-                  TextSpan(
-                    text: '${_fmt(currentC)} ${widget.unitLabel}/mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' concentration. Draw '),
-                  TextSpan(
-                    text: '${_fmt(_selectedUnits)} IU',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' ('),
-                  TextSpan(
-                    text: '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ') from syringe for your '),
-                  TextSpan(
-                    text: '${_fmt(Draw)} ${_doseUnit}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' dose.'),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 4),
@@ -576,7 +603,9 @@ class _ReconstitutionCalculatorWidgetState
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               'Warning: Computed solvent volume (${currentV.toStringAsFixed(2)} mL) exceeds vial size. Try a more concentrated preset (lower IU).',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         if (widget.showApplyButton) ...[
@@ -621,6 +650,18 @@ class _ReconstitutionCalculatorWidgetState
     // Calculate actual mL to draw for the dose
     final mlToDraw = (units / 100) * _syringe.ml;
 
+    // Get explainer text based on label
+    String explainerText;
+    if (label == 'Concentrated') {
+      explainerText = 'Strong small dosage';
+    } else if (label == 'Balanced') {
+      explainerText = 'Approx 50% syringe size dosage';
+    } else if (label == 'Diluted') {
+      explainerText = 'Large doses';
+    } else {
+      explainerText = '';
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -662,7 +703,17 @@ class _ReconstitutionCalculatorWidgetState
                             : theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    if (explainerText.isNotEmpty) ..[
+                      const SizedBox(height: 2),
+                      Text(
+                        explainerText,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
