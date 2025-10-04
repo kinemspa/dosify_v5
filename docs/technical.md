@@ -176,6 +176,37 @@ Reconstitution Calculator Formula
   - Displayed in additionalInfo section of summary card
   - Only shows when both vial volume and concentration (perMl) are entered
   - Falls back to "Vial Volume: X mL" if only volume is entered
+
+- Reconstitution Calculator Button States:
+  - **Not showing**: OutlinedButton with primary color and calculate icon
+  - **Showing**: FilledButton with close icon (primary fill makes it prominent)
+  - Disabled state when no vial strength entered
+
+- Reconstitution Calculator Layout Optimizations:
+  - Reduced padding between sections (16px → 12px)
+  - Compact option cards: 6px padding, 6px bottom margin, smaller text (11px for explainers)
+  - Slider helper text moved above slider for better flow
+  - Reduced spacing between Fine-tune heading and content
+  - All sections designed to fit on screen with 3 options, slider, and syringe
+
+- Prominent Reconstitution Instruction:
+  - Large bold text: "Reconstitute with X mL [DiluentName]"
+  - Positioned above syringe gauge
+  - Primary color with underlined volume for emphasis
+  - titleMedium font size for visibility
+  - Updates dynamically with slider adjustments
+
+- Desired Dose Field Improvements:
+  - Removed upper limit clamping (was limiting to vial strength value)
+  - Now allows entry of any value (user can enter 10000 mcg when vial is 10mg)
+  - Validation happens in calculation logic, not in stepper buttons
+  - Enables proper unit conversion scenarios (mcg/mg/g)
+
+- Text Color Consistency:
+  - Fine-tune heading explicitly uses theme.colorScheme.onSurface
+  - Option card text uses theme.textTheme.bodySmall/bodyMedium
+  - All helper text uses kMutedLabelStyle(context)
+  - Explainer text in options uses onSurfaceVariant color
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
