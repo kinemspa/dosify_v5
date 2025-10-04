@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../widgets/field36.dart';
 import '../../../widgets/unified_form.dart';
+import '../../../widgets/white_syringe_gauge.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_dialog.dart';
 
@@ -248,8 +249,8 @@ class _ReconstitutionCalculatorWidgetState
         const SizedBox(height: 12),
         Text(
           'Reconstitution Calculator',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
@@ -456,6 +457,15 @@ class _ReconstitutionCalculatorWidgetState
             style: kMutedLabelStyle(context),
           ),
         ),
+        // Live syringe gauge preview
+        if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
+          const SizedBox(height: 12),
+          WhiteSyringeGauge(
+            totalIU: _syringe.totalUnits.toDouble(),
+            fillIU: _selectedUnits,
+          ),
+          const SizedBox(height: 4),
+        ],
         if (widget.showSummary) ...[
           const SizedBox(height: 16),
           Column(
@@ -529,12 +539,12 @@ class _ReconstitutionCalculatorWidgetState
     final mlToDraw = (units / 100) * _syringe.ml;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: selected
                 ? theme.colorScheme.primaryContainer.withOpacity(0.3)
@@ -569,18 +579,24 @@ class _ReconstitutionCalculatorWidgetState
                             : theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       '$diluentName: ${_fmt(roundedVolume)} mL',
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       'Concentration: ${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       'Syringe (${_syringe.label}): ${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   ],
                 ),

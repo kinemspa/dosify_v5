@@ -47,7 +47,7 @@ class _AddEditInjectionUnifiedPageState
   final _strength = TextEditingController(text: '0');
   Unit _strengthUnit = Unit.mg;
   final _perMl = TextEditingController();
-  final _vialVolume = TextEditingController();
+  final _vialVolume = TextEditingController(text: '0');
   double? _lastCalcDose;
   String? _lastCalcDoseUnit;
   SyringeSizeMl? _lastCalcSyringe;
@@ -105,6 +105,15 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.multi => 'Vial',
     };
 
+    // For MDV, include vial volume info
+    String? mdvAdditionalInfo;
+    if (widget.kind == InjectionKind.multi) {
+      final vialVol = double.tryParse(_vialVolume.text.trim());
+      if (vialVol != null && vialVol > 0) {
+        mdvAdditionalInfo = 'Vial Volume: ${vialVol.toStringAsFixed(1)} mL';
+      }
+    }
+
     final card = SummaryHeaderCard(
       key: _summaryKey,
       title: headerTitle,
@@ -114,7 +123,7 @@ class _AddEditInjectionUnifiedPageState
       perMlValue: _isPerMl ? double.tryParse(_perMl.text) : null,
       stockCurrent: stockVal ?? 0,
       stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
-      stockUnitLabel: stockUnitLabel,
+      stockUnitLabel: 'unreconstituted $stockUnitLabel',
       expiryDate: _expiry,
       showRefrigerate: _refrigerate,
       showFrozen: _keepFrozen,
@@ -124,7 +133,7 @@ class _AddEditInjectionUnifiedPageState
       perTabletLabel: false,
       perUnitLabel: perUnitLabel,
       formLabelPlural: stockUnitLabel,
-      additionalInfo: additionalNotes,
+      additionalInfo: mdvAdditionalInfo,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateSummaryHeight());
     return card;
@@ -667,13 +676,9 @@ class _AddEditInjectionUnifiedPageState
                               ),
                             ),
                             // Reconstitution Calculator Button
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: kLabelColWidth + 8,
-                                top: 0,
-                                bottom: 8,
-                              ),
-                              child: OutlinedButton.icon(
+                            LabelFieldRow(
+                              label: '',
+                              field: OutlinedButton.icon(
                                 onPressed: () {
                                   setState(
                                     () => _showCalculator = !_showCalculator,
