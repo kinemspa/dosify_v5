@@ -75,8 +75,8 @@ class _WhiteSyringePainter extends CustomPainter {
 
       canvas.drawLine(Offset(x, tickTop), Offset(x, baselineY), tickPaint);
 
-      // Draw labels for major ticks below baseline
-      if (isMajor) {
+      // Draw labels for major and minor ticks below baseline
+      if (isMajor || isMinor) {
         final tp = TextPainter(
           text: TextSpan(
             text: iu.toStringAsFixed(0),

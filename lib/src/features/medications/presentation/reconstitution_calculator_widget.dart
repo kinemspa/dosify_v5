@@ -249,10 +249,9 @@ class _ReconstitutionCalculatorWidgetState
         const SizedBox(height: 12),
         Text(
           'Reconstitution Calculator',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 4),
         Padding(
@@ -442,6 +441,26 @@ class _ReconstitutionCalculatorWidgetState
           ),
         const SizedBox(height: 16),
         Text('Fine-tune', style: Theme.of(context).textTheme.titleSmall),
+        if (vialMax != null && sliderMax < totalIU)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)',
+              style: kMutedLabelStyle(
+                context,
+              ).copyWith(fontStyle: FontStyle.italic, fontSize: 11),
+            ),
+          )
+        else if (sliderMax < totalIU)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              'Range limited by syringe capacity',
+              style: kMutedLabelStyle(
+                context,
+              ).copyWith(fontStyle: FontStyle.italic, fontSize: 11),
+            ),
+          ),
         Slider(
           value: _selectedUnits,
           min: sliderMin,
@@ -463,6 +482,20 @@ class _ReconstitutionCalculatorWidgetState
           WhiteSyringeGauge(
             totalIU: _syringe.totalUnits.toDouble(),
             fillIU: _selectedUnits,
+          ),
+          const SizedBox(height: 8),
+          // Conversational explanation
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            child: Text(
+              'Add ${_fmt(currentV)} mL diluent to vial containing ${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}. '
+              'This creates ${_fmt(currentC)} ${widget.unitLabel}/mL concentration. '
+              'Draw ${_fmt(_selectedUnits)} IU (${_fmt((_selectedUnits / 100) * _syringe.ml)} mL) from syringe for your ${_fmt(Draw)} ${_doseUnit} dose.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ),
           const SizedBox(height: 4),
         ],
@@ -580,22 +613,47 @@ class _ReconstitutionCalculatorWidgetState
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      '$diluentName: ${_fmt(roundedVolume)} mL',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
+                    RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        children: [
+                          TextSpan(text: '$diluentName: '),
+                          TextSpan(
+                            text: '${_fmt(roundedVolume)} mL',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      'Concentration: ${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
+                    RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        children: [
+                          TextSpan(text: 'Concentration: '),
+                          TextSpan(
+                            text:
+                                '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      'Syringe (${_syringe.label}): ${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
+                    RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        children: [
+                          TextSpan(text: 'Syringe (${_syringe.label}): '),
+                          TextSpan(
+                            text: '${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ),
                   ],
