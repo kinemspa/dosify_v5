@@ -752,7 +752,7 @@ class _AddEditInjectionUnifiedPageState
                                         result.solventVolumeMl,
                                       );
                                       _reconResult = result;
-                                      // Keep calculator visible after save
+                                      _showCalculator = false; // Hide calculator after save
                                     });
                                   },
                                   onCalculate: (result, isValid) {
