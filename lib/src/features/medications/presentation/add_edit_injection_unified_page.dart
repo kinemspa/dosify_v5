@@ -110,6 +110,13 @@ class _AddEditInjectionUnifiedPageState
           'Draw ${r.recommendedUnits.toStringAsFixed(0)} IU';
     }
 
+    // Determine perUnitLabel based on injection type
+    final perUnitLabel = switch (widget.kind) {
+      InjectionKind.pfs => 'Syringe',
+      InjectionKind.single => 'Vial',
+      InjectionKind.multi => 'Vial',
+    };
+
     final card = SummaryHeaderCard(
       key: _summaryKey,
       title: headerTitle,
@@ -126,7 +133,8 @@ class _AddEditInjectionUnifiedPageState
       showDark: _lightSensitive,
       lowStockEnabled: false,
       includeNameInStrengthLine: false,
-      perTabletLabel: name.isNotEmpty,
+      perTabletLabel: false,
+      perUnitLabel: perUnitLabel,
       formLabelPlural: stockUnitLabel,
       additionalInfo: additionalNotes,
     );
