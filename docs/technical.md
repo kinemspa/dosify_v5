@@ -155,6 +155,16 @@ Reconstitution Calculator Formula
   - Error text shown in error color with bold font weight
   - Normal helper text shown in muted color when strength is valid
   - Prevents user confusion by requiring prerequisite data entry
+
+- Reconstitution Calculator UX Improvements:
+  - Desired Dose stepper buttons now work correctly with double parsing (not just int)
+  - Syringe gauge has 16px horizontal padding for better visual spacing from card edges
+  - Increased vertical spacing between gauge and support text (24px, up from 16px)
+  - Support text formatted with line breaks - each sentence on separate line for readability
+  - Option explainer text moved inside option cards (not above them)
+  - Each option card shows description: "Strong small dosage", "Approx 50% syringe size dosage", "Large doses"
+  - All text styles use theme constants (theme.textTheme) for consistency
+  - Warning text uses theme.textTheme.bodySmall with error color instead of raw TextStyle
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
