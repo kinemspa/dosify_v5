@@ -610,6 +610,22 @@ class _AddEditInjectionUnifiedPageState
                                 ),
                           ),
                         ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: kLabelColWidth + 8,
+                          top: 2,
+                          bottom: 6,
+                        ),
+                        child: Text(
+                          'Specify the amount per dose and its unit of measurement.',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
                       if (widget.kind == InjectionKind.multi)
                         LabelFieldRow(
                           label: 'Volume Entry',
@@ -692,20 +708,6 @@ class _AddEditInjectionUnifiedPageState
                             },
                           ),
                         ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                        ),
-                        child: Text(
-                          'Specify the amount per dose and its unit of measurement.',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -767,7 +769,7 @@ class _AddEditInjectionUnifiedPageState
                             if (widget.kind == InjectionKind.multi)
                               const DropdownMenuItem(
                                 value: StockUnit.multiDoseVials,
-                                child: Center(child: Text('multi dose vials')),
+                                child: Center(child: Text('vials')),
                               ),
                           ],
                           onChanged: (v) =>

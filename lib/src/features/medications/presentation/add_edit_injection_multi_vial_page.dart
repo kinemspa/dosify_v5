@@ -199,6 +199,7 @@ class _AddEditInjectionMultiVialPageState
       neutral: true,
       outlined: true,
       leadingIcon: Icons.local_drink,
+      perTabletLabel: false,
       perUnitLabel: 'Vial',
     );
   }
