@@ -53,8 +53,8 @@ class _ReconstitutionCalculatorWidgetState
   @override
   void initState() {
     super.initState();
-    final defaultDose =
-        widget.initialDoseValue ?? (widget.initialStrengthValue * 0.05);
+    // Default to 100 or use provided value
+    final defaultDose = widget.initialDoseValue ?? 100;
     _doseCtrl = TextEditingController(
       text: defaultDose == defaultDose.roundToDouble()
           ? defaultDose.toInt().toString()
@@ -297,17 +297,23 @@ class _ReconstitutionCalculatorWidgetState
             controller: _doseCtrl,
             onDec: () {
               final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+              // Don't go below 1
               setState(
-                () => _doseCtrl.text = (v - 1).clamp(0, 1000000).toString(),
+                () => _doseCtrl.text = (v - 1)
+                    .clamp(1, widget.initialStrengthValue.toInt())
+                    .toString(),
               );
             },
             onInc: () {
               final v = int.tryParse(_doseCtrl.text.trim()) ?? 0;
+              // Can't exceed vial strength
               setState(
-                () => _doseCtrl.text = (v + 1).clamp(0, 1000000).toString(),
+                () => _doseCtrl.text = (v + 1)
+                    .clamp(1, widget.initialStrengthValue.toInt())
+                    .toString(),
               );
             },
-            decoration: _fieldDecoration(context, hint: '0'),
+            decoration: _fieldDecoration(context, hint: '100'),
           ),
         ),
         _rowLabelField(
@@ -337,7 +343,10 @@ class _ReconstitutionCalculatorWidgetState
                 ),
               ],
             ],
-            onChanged: (v) => setState(() => _doseUnit = v!),
+            onChanged: (v) {
+              // Don't reset dose value when changing unit
+              setState(() => _doseUnit = v!);
+            },
             decoration: _fieldDecoration(context),
           ),
         ),
@@ -397,7 +406,7 @@ class _ReconstitutionCalculatorWidgetState
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              'Choose reconstitution option: Concentration • Diluent volume • Syringe draw amount',
+              'Choose a reconstitution option. Concentrated for a strong small dosage, balanced for approx 50% syringe size dosage, diluted for large doses',
               style: kMutedLabelStyle(context),
             ),
           ),
@@ -435,7 +444,6 @@ class _ReconstitutionCalculatorWidgetState
           ),
         const SizedBox(height: 16),
         Text('Fine-tune', style: Theme.of(context).textTheme.titleSmall),
-        _helperText('Adjust diluent amount (affects IU concentration)'),
         Slider(
           value: _selectedUnits,
           min: sliderMin,
@@ -443,6 +451,13 @@ class _ReconstitutionCalculatorWidgetState
           divisions: (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
           label: '${_round2(_selectedUnits)} IU',
           onChanged: (v) => setState(() => _selectedUnits = v),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+          child: Text(
+            'Adjust diluent amount (affects IU concentration)',
+            style: kMutedLabelStyle(context),
+          ),
         ),
         if (widget.showSummary) ...[
           const SizedBox(height: 16),
@@ -509,6 +524,13 @@ class _ReconstitutionCalculatorWidgetState
     double units,
   ) {
     final theme = Theme.of(context);
+    final diluentName = _diluentNameCtrl.text.trim().isNotEmpty
+        ? _diluentNameCtrl.text.trim()
+        : 'Diluent';
+    final roundedVolume = _roundToHalfMl(calcResult.vialVolume);
+    // Calculate actual mL to draw for the dose
+    final mlToDraw = (units / 100) * _syringe.ml;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -522,7 +544,7 @@ class _ReconstitutionCalculatorWidgetState
           const Spacer(),
           ChoiceChip(
             label: Text(
-              '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL • ${_fmt(_roundToHalfMl(calcResult.vialVolume))} mL • ${_fmt(units)} IU',
+              '$diluentName: ${_fmt(roundedVolume)} mL | Concentration: ${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL | Syringe (${_syringe.label}): ${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
             ),
             selected: selected,
             onSelected: (_) => onTap(),
