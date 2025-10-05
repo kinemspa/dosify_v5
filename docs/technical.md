@@ -320,3 +320,29 @@ Reconstitution Calculator Formula
   - Strength 5mg, Dose 250mcg, 25 IU → 5mL vial
   - Strength 5mg, Dose 500mcg, 20 IU → 2mL vial
   - Strength 5mg, Dose 500mcg, 90 IU → 9mL vial
+
+- Interactive Syringe Slider:
+  - WhiteSyringeGauge converted to StatefulWidget with GestureDetector
+  - Drag the thick fill line horizontally to adjust diluent amount
+  - Tap anywhere on syringe to jump fill to that position
+  - Parameters: `interactive: true`, `onChanged: (newValue) { ... }`
+  - Dragging updates _dragValue state internally, calls onChanged on drag end
+  - Clamped to slider min/max values by parent widget
+  - Replaces Material Slider widget in calculator for direct manipulation
+  - Helper text: "Drag the fill line or tap on the syringe to adjust diluent amount"
+  - Syringe size label shown in top right: "1.0 mL Syringe" in primary color, italic, small size
+  - Provides more intuitive and direct control over reconstitution settings
+
+- Simplified Vial Tracking (MDV):
+  - REMOVED ActiveVial class and activation workflow (overcomplicated UX)
+  - Simple reconstituted vial tracking using two DateTime fields:
+    - reconstitutedAt (HiveField 24): when current vial was reconstituted
+    - reconstitutedVialExpiry (HiveField 25): when current reconstituted vial expires (typically reconstitutedAt + 48hr)
+  - Stock vials use existing expiry field (sealed vial expiry, typically months/years)
+  - Storage differentiation:
+    - Reconstituted vial: stored in refrigerator (short-term, 48hr)
+    - Stock vials: stored in freezer (long-term, sealed)
+  - No "Activate" button or status cards needed
+  - Tracks single current vial being used vs inventory of sealed vials
+  - Clear workflow: Calculate → Save Reconstitution → Clear Reconstitution (if needed)
+  - Much simpler mental model for users
