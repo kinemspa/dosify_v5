@@ -498,7 +498,7 @@ class _ReconstitutionCalculatorWidgetState
         ),
         // Live syringe gauge preview
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: WhiteSyringeGauge(

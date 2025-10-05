@@ -662,31 +662,38 @@ class _AddEditInjectionUnifiedPageState
                           title: 'Volume & Reconstitution',
                           neutral: true,
                           children: [
-                            // Helper text under heading, full width
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 8,
-                                right: 8,
-                                bottom: 12,
+                            // Helper text under heading, full width (only show if user tried to open without strength)
+                            if (_showCalculator && _strengthForCalculator() == null)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8,
+                                  right: 8,
+                                  bottom: 12,
+                                ),
+                                child: Text(
+                                  'Please enter the vial strength above before using the reconstitution calculator.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context).colorScheme.error,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              )
+                            else if (!_showCalculator)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8,
+                                  right: 8,
+                                  bottom: 12,
+                                ),
+                                child: Text(
+                                  'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
                               ),
-                              child: Text(
-                                _strengthForCalculator() == null
-                                    ? 'Please enter the vial strength above before using the reconstitution calculator.'
-                                    : 'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: _strengthForCalculator() == null
-                                          ? Theme.of(context).colorScheme.error
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onSurfaceVariant,
-                                      fontWeight:
-                                          _strengthForCalculator() == null
-                                              ? FontWeight.w600
-                                              : null,
-                                    ),
-                              ),
-                            ),
                             // Reconstitution Calculator Button
                             Center(
                               child: _showCalculator
@@ -721,7 +728,7 @@ class _AddEditInjectionUnifiedPageState
                             ),
                             // Show saved reconstitution info if exists and calculator hidden
                             if (_reconResult != null && !_showCalculator) ...[
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 16),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -729,58 +736,30 @@ class _AddEditInjectionUnifiedPageState
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    RichText(
-                                      textAlign: TextAlign.center,
-                                      text: TextSpan(
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Reconstitute ',
-                                          ),
-                                          TextSpan(
-                                            text: '${_strength.text.trim()} ${_baseUnit(_strengthUnit)}',
-                                          ),
-                                          if (_name.text.trim().isNotEmpty) ...[
-                                            const TextSpan(text: ' '),
-                                            TextSpan(text: _name.text.trim()),
-                                          ],
-                                          const TextSpan(
-                                            text: ' with ',
-                                          ),
-                                          TextSpan(
-                                            text:
-                                                '${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL',
-                                            style: const TextStyle(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                            ),
-                                          ),
-                                          if (_reconResult!.diluentName !=
-                                                  null &&
-                                              _reconResult!.diluentName!
-                                                  .isNotEmpty)
-                                            TextSpan(
-                                              text:
-                                                  ' ${_reconResult!.diluentName}',
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
                                     WhiteSyringeGauge(
                                       totalIU:
                                           _reconResult!.syringeSizeMl * 100,
                                       fillIU: _reconResult!.recommendedUnits,
                                       color:
                                           Theme.of(context).colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Reconstitute ${_strength.text.trim()} ${_baseUnit(_strengthUnit)}${_name.text.trim().isNotEmpty ? ' ${_name.text.trim()}' : ''} with ${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL${_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty ? ' ${_reconResult!.diluentName}' : ''}',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Draw ${_reconResult!.recommendedUnits.toStringAsFixed(_reconResult!.recommendedUnits == _reconResult!.recommendedUnits.roundToDouble() ? 0 : 1)} IU (${(_reconResult!.recommendedUnits / 100 * _reconResult!.syringeSizeMl).toStringAsFixed(2)} mL) into a ${_reconResult!.syringeSizeMl.toStringAsFixed(1)} mL syringe',
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        fontStyle: FontStyle.italic,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -866,9 +845,7 @@ class _AddEditInjectionUnifiedPageState
                                   bottom: 6,
                                 ),
                                 child: Text(
-                                  _reconResult != null
-                                      ? 'Total volume after reconstitution'
-                                      : 'Volume of medication in vial (if unreconstituted, enter original volume)',
+                                  'If vial is already filled or you know the volume, enter it here. Otherwise, use the calculator to determine the correct reconstitution amount.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(context)
