@@ -1374,7 +1374,7 @@ class _AddEditInjectionUnifiedPageState
       
       // Update medication with active vial and decrement stock
       final currentStock = double.tryParse(_stock.text) ?? 0;
-      final newStock = (currentStock - 1).clamp(0, double.infinity);
+      final newStock = (currentStock - 1).clamp(0.0, double.infinity).toDouble();
       
       final repo = ref.read(medicationRepositoryProvider);
       final updatedMed = widget.initial!.copyWith(
