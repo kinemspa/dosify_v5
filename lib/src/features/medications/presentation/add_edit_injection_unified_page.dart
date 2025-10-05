@@ -711,13 +711,14 @@ class _AddEditInjectionUnifiedPageState
                                       ),
                                     )
                                   : OutlinedButton.icon(
-                                      onPressed: _strengthForCalculator() == null
-                                          ? null
-                                          : () {
-                                              setState(
-                                                () => _showCalculator = true,
-                                              );
-                                            },
+                                      onPressed: () {
+                                        if (_strengthForCalculator() == null) {
+                                          // Show error in helper text when clicked without strength
+                                          setState(() => _showCalculator = true);
+                                        } else {
+                                          setState(() => _showCalculator = true);
+                                        }
+                                      },
                                       icon: const Icon(Icons.calculate),
                                       label: Text(
                                         _reconResult == null
@@ -743,22 +744,72 @@ class _AddEditInjectionUnifiedPageState
                                       color:
                                           Theme.of(context).colorScheme.primary,
                                     ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Reconstitute ${_strength.text.trim()} ${_baseUnit(_strengthUnit)}${_name.text.trim().isNotEmpty ? ' ${_name.text.trim()}' : ''} with ${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL${_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty ? ' ${_reconResult!.diluentName}' : ''}',
+                                    const SizedBox(height: 16),
+                                    RichText(
                                       textAlign: TextAlign.center,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                        fontStyle: FontStyle.italic,
+                                      text: TextSpan(
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        children: [
+                                          const TextSpan(text: 'Reconstitute '),
+                                          TextSpan(
+                                            text: '${_strength.text.trim()} ${_baseUnit(_strengthUnit)}',
+                                            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                          if (_name.text.trim().isNotEmpty) ...[
+                                            const TextSpan(text: ' '),
+                                            TextSpan(
+                                              text: _name.text.trim(),
+                                              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                            ),
+                                          ],
+                                          const TextSpan(text: ' with '),
+                                          TextSpan(
+                                            text: '${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL',
+                                            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                          if (_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty)
+                                            TextSpan(text: ' ${_reconResult!.diluentName}'),
+                                        ],
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      'Draw ${_reconResult!.recommendedUnits.toStringAsFixed(_reconResult!.recommendedUnits == _reconResult!.recommendedUnits.roundToDouble() ? 0 : 1)} IU (${(_reconResult!.recommendedUnits / 100 * _reconResult!.syringeSizeMl).toStringAsFixed(2)} mL) into a ${_reconResult!.syringeSizeMl.toStringAsFixed(1)} mL syringe',
+                                    RichText(
                                       textAlign: TextAlign.center,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                        fontStyle: FontStyle.italic,
+                                      text: TextSpan(
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        children: [
+                                          const TextSpan(text: 'Draw '),
+                                          TextSpan(
+                                            text: '${_reconResult!.recommendedUnits.toStringAsFixed(_reconResult!.recommendedUnits == _reconResult!.recommendedUnits.roundToDouble() ? 0 : 1)} IU',
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const TextSpan(text: ' ('),
+                                          TextSpan(
+                                            text: '${(_reconResult!.recommendedUnits / 100 * _reconResult!.syringeSizeMl).toStringAsFixed(2)} mL',
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const TextSpan(text: ') into a '),
+                                          TextSpan(
+                                            text: '${_reconResult!.syringeSizeMl.toStringAsFixed(1)} mL',
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const TextSpan(text: ' syringe'),
+                                        ],
                                       ),
                                     ),
                                   ],

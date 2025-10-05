@@ -456,7 +456,7 @@ class _ReconstitutionCalculatorWidgetState
           ),
         const SizedBox(height: 12),
         Text(
-          'Adjust reconstitution amount',
+          'Fine-tune',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
@@ -483,24 +483,28 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 4, top: 2),
+          padding: const EdgeInsets.only(bottom: 2, top: 2),
           child: Text(
-            'Drag or tap the syringe to adjust diluent amount',
+            'Adjust diluent amount (affects IU concentration)',
             style: kMutedLabelStyle(context),
           ),
         ),
-        // Interactive syringe slider
+        Slider(
+          value: _selectedUnits,
+          min: sliderMin,
+          max: sliderMax,
+          divisions: (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
+          label: '${_round2(_selectedUnits)} IU',
+          onChanged: (v) => setState(() => _selectedUnits = v),
+        ),
+        // Live syringe gauge preview
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: InteractiveSyringeSlider(
+            child: WhiteSyringeGauge(
               totalIU: _syringe.totalUnits.toDouble(),
               fillIU: _selectedUnits,
-              minIU: sliderMin,
-              maxIU: sliderMax,
-              onChanged: (v) => setState(() => _selectedUnits = v),
-              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 16),
@@ -727,7 +731,7 @@ class _ReconstitutionCalculatorWidgetState
                         fontWeight: FontWeight.w600,
                         color: selected
                             ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
+                            : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                       ),
                     ),
                     if (explainerText.isNotEmpty) ...[
