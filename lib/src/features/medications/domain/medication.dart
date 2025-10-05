@@ -3,74 +3,6 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 part 'medication.g.dart';
 
-/// Represents an active reconstituted vial with short-term expiry
-@HiveType(typeId: 11)
-class ActiveVial {
-  ActiveVial({
-    required this.reconstitutionDate,
-    required this.expiryDate,
-    required this.volumeMl,
-    required this.concentrationPerMl,
-    this.diluentName,
-    this.syringeSizeMl,
-    this.recommendedUnits,
-  });
-
-  @HiveField(0)
-  final DateTime reconstitutionDate;
-
-  @HiveField(1)
-  final DateTime expiryDate;
-
-  @HiveField(2)
-  final double volumeMl;
-
-  @HiveField(3)
-  final double concentrationPerMl;
-
-  @HiveField(4)
-  final String? diluentName;
-
-  @HiveField(5)
-  final double? syringeSizeMl;
-
-  @HiveField(6)
-  final double? recommendedUnits;
-
-  ActiveVial copyWith({
-    DateTime? reconstitutionDate,
-    DateTime? expiryDate,
-    double? volumeMl,
-    double? concentrationPerMl,
-    String? diluentName,
-    double? syringeSizeMl,
-    double? recommendedUnits,
-  }) {
-    return ActiveVial(
-      reconstitutionDate: reconstitutionDate ?? this.reconstitutionDate,
-      expiryDate: expiryDate ?? this.expiryDate,
-      volumeMl: volumeMl ?? this.volumeMl,
-      concentrationPerMl: concentrationPerMl ?? this.concentrationPerMl,
-      diluentName: diluentName ?? this.diluentName,
-      syringeSizeMl: syringeSizeMl ?? this.syringeSizeMl,
-      recommendedUnits: recommendedUnits ?? this.recommendedUnits,
-    );
-  }
-
-  /// Check if vial is expired
-  bool get isExpired => DateTime.now().isAfter(expiryDate);
-
-  /// Check if vial is approaching expiry (within 6 hours)
-  bool get isApproachingExpiry {
-    final now = DateTime.now();
-    final sixHoursBeforeExpiry = expiryDate.subtract(const Duration(hours: 6));
-    return now.isAfter(sixHoursBeforeExpiry) && now.isBefore(expiryDate);
-  }
-
-  /// Get time remaining until expiry
-  Duration get timeUntilExpiry => expiryDate.difference(DateTime.now());
-}
-
 @HiveType(typeId: 10)
 class Medication {
   Medication({
@@ -98,7 +30,8 @@ class Medication {
     this.lowStockVialVolumeThresholdMl,
     this.lowStockVialsThresholdCount,
     this.initialStockValue,
-    this.activeVial,
+    this.reconstitutedAt,
+    this.reconstitutedVialExpiry,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -179,9 +112,13 @@ class Medication {
   @HiveField(23)
   final double? initialStockValue;
 
-  // Active reconstituted vial (for MDV only)
+  // For reconstituted MDV: when the current vial was reconstituted
   @HiveField(24)
-  final ActiveVial? activeVial;
+  final DateTime? reconstitutedAt;
+
+  // For reconstituted MDV: when the current reconstituted vial expires (typically 48hr after reconstitution)
+  @HiveField(25)
+  final DateTime? reconstitutedVialExpiry;
 
   Medication copyWith({
     String? id,
@@ -208,8 +145,9 @@ class Medication {
     double? lowStockVialVolumeThresholdMl,
     double? lowStockVialsThresholdCount,
     double? initialStockValue,
-    ActiveVial? activeVial,
-    bool clearActiveVial = false,
+    DateTime? reconstitutedAt,
+    DateTime? reconstitutedVialExpiry,
+    bool clearReconstitution = false,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -239,7 +177,8 @@ class Medication {
       lowStockVialsThresholdCount:
           lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
       initialStockValue: initialStockValue ?? this.initialStockValue,
-      activeVial: clearActiveVial ? null : (activeVial ?? this.activeVial),
+      reconstitutedAt: clearReconstitution ? null : (reconstitutedAt ?? this.reconstitutedAt),
+      reconstitutedVialExpiry: clearReconstitution ? null : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
     );
   }
 }

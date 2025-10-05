@@ -6,58 +6,6 @@ part of 'medication.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class ActiveVialAdapter extends TypeAdapter<ActiveVial> {
-  @override
-  final int typeId = 11;
-
-  @override
-  ActiveVial read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return ActiveVial(
-      reconstitutionDate: fields[0] as DateTime,
-      expiryDate: fields[1] as DateTime,
-      volumeMl: fields[2] as double,
-      concentrationPerMl: fields[3] as double,
-      diluentName: fields[4] as String?,
-      syringeSizeMl: fields[5] as double?,
-      recommendedUnits: fields[6] as double?,
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, ActiveVial obj) {
-    writer
-      ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.reconstitutionDate)
-      ..writeByte(1)
-      ..write(obj.expiryDate)
-      ..writeByte(2)
-      ..write(obj.volumeMl)
-      ..writeByte(3)
-      ..write(obj.concentrationPerMl)
-      ..writeByte(4)
-      ..write(obj.diluentName)
-      ..writeByte(5)
-      ..write(obj.syringeSizeMl)
-      ..writeByte(6)
-      ..write(obj.recommendedUnits);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ActiveVialAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class MedicationAdapter extends TypeAdapter<Medication> {
   @override
   final int typeId = 10;
@@ -93,14 +41,15 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       lowStockVialVolumeThresholdMl: fields[21] as double?,
       lowStockVialsThresholdCount: fields[22] as double?,
       initialStockValue: fields[23] as double?,
-      activeVial: fields[24] as ActiveVial?,
+      reconstitutedAt: fields[24] as DateTime?,
+      reconstitutedVialExpiry: fields[25] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(25)
+      ..writeByte(26)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -150,7 +99,9 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(23)
       ..write(obj.initialStockValue)
       ..writeByte(24)
-      ..write(obj.activeVial);
+      ..write(obj.reconstitutedAt)
+      ..writeByte(25)
+      ..write(obj.reconstitutedVialExpiry);
   }
 
   @override
