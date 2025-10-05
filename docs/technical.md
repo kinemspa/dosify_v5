@@ -265,6 +265,26 @@ Reconstitution Calculator Formula
   - No error text shown on main page when strength missing
   - Clean UX - calculator appears only when prerequisites met
 
+- Medication Name in Reconstitution Text:
+  - Calculator widget accepts optional medicationName parameter
+  - Main instruction text: "Reconstitute 10mg Insulin with 5mL Sterile Water"
+  - Shows strength, medication name (if provided), volume, and diluent name
+  - Format: "Reconstitute [STRENGTH] [UNIT] [MEDNAME] with [VOLUME] mL [DILUENT]"
+  - Saved display also includes medication name and strength
+  - Makes instructions much more specific and actionable for user
+
+- Helper Text Improvements:
+  - Vial Volume field helper text is context-aware:
+    - If reconstitution saved: "Total volume after reconstitution"
+    - If unreconstituted: "Volume of medication in vial (if unreconstituted, enter original volume)"
+  - Inventory section helper text (MDV only): "Track the number of unreconstituted sealed vials you have in storage. This is used for restocking and low stock alerts."
+  - Clarifies distinction between reconstituted volume vs unreconstituted vial inventory
+
+- Layout Spacing Refinements:
+  - 24px spacing added after calculator/saved display before vial volume field
+  - Prevents visual crowding between syringe graphic and input fields
+  - Improved visual separation between calculator output and manual input sections
+
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
