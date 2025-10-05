@@ -282,8 +282,46 @@ Reconstitution Calculator Formula
 
 - Layout Spacing Refinements:
   - 24px spacing added after calculator/saved display before vial volume field
+  - 24px spacing before interactive syringe slider in calculator
   - Prevents visual crowding between syringe graphic and input fields
   - Improved visual separation between calculator output and manual input sections
+
+- Interactive Syringe Slider (lib/src/widgets/interactive_syringe_slider.dart):
+  - NEW FEATURE: Integrated slider and syringe graphic into single interactive component
+  - Replaces separate Material slider + static WhiteSyringeGauge
+  - User can drag vertically on syringe to adjust fill level
+  - Tap anywhere on syringe to jump to that fill level
+  - Visual feedback during drag with live updates
+  - Displays current fill value (e.g., "45.5 IU") as label on graphic
+  - Shows tick marks and labels at appropriate intervals (10 IU or 50 IU based on range)
+  - Min/max range indicators shown with faint lines
+  - Syringe includes plunger at top, needle at bottom, barrel outline
+  - Fill indicator is thick horizontal line across barrel at current level
+  - Height: 60px (increased from 44px for better interaction)
+  - More intuitive than separate slider - direct manipulation of visual element
+  - Saves screen real estate by combining two UI elements
+  - Heading changed from "Fine-tune" to "Adjust reconstitution amount"
+  - Helper text: "Drag or tap the syringe to adjust diluent amount"
+
+- Saved Reconstitution Display Improvements:
+  - Uses same helper text style (onSurfaceVariant, italic) instead of bold primary
+  - Syringe graphic shown above text (not below)
+  - Two lines of text:
+    - Line 1: "Reconstitute 10mg Insulin with 5mL Sterile Water"
+    - Line 2: "Draw 45 IU (0.45 mL) into a 1.0 mL syringe"
+  - Consistent styling with calculator helper text
+  - More readable and less visually heavy
+
+- Error Handling Improvements:
+  - Calculator error text only shows if user attempts to open calculator without strength
+  - Does NOT show on initial page load
+  - Condition: `if (_showCalculator && _strengthForCalculator() == null)`
+  - Prevents confusing red error text before user interaction
+
+- Vial Volume Helper Text Update:
+  - Single context-aware message for all states
+  - Text: "If vial is already filled or you know the volume, enter it here. Otherwise, use the calculator to determine the correct reconstitution amount."
+  - Clearer guidance on when to use calculator vs manual entry
 
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
