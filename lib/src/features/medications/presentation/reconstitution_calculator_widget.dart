@@ -401,6 +401,13 @@ class _ReconstitutionCalculatorWidgetState
         ),
         const SizedBox(height: 12),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Select a reconstitution option',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
           _buildOptionRow(
             context,
             'Concentrated',
@@ -523,7 +530,7 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 RichText(
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -531,103 +538,42 @@ class _ReconstitutionCalculatorWidgetState
                       fontStyle: FontStyle.italic,
                     ),
                     children: [
-                      const TextSpan(text: 'Add '),
-                  TextSpan(
-                    text: '${_fmt(currentV)} mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                      const TextSpan(text: 'Draw '),
+                      TextSpan(
+                        text: '${_fmt(_selectedUnits)} IU',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' ('),
+                      TextSpan(
+                        text: '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ') into a '),
+                      TextSpan(
+                        text: '${_syringe.label}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' syringe for your '),
+                      TextSpan(
+                        text: '${_fmt(Draw)} ${_doseUnit}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(text: ' dose.'),
+                    ],
                   ),
-                  TextSpan(
-                    text: _diluentNameCtrl.text.trim().isNotEmpty
-                        ? ' ${_diluentNameCtrl.text.trim()}'
-                        : ' diluent',
-                  ),
-                  const TextSpan(text: ' to vial containing '),
-                  TextSpan(
-                    text: '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: '.'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
                 ),
-                children: [
-                  const TextSpan(text: 'This creates '),
-                  TextSpan(
-                    text: '${_fmt(currentC)} ${widget.unitLabel}/mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' = '),
-                  TextSpan(
-                    text: '${_fmt(currentC)} ${widget.unitLabel} per mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' concentration.'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 4),
-            RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-                children: [
-                  const TextSpan(text: 'Draw '),
-                  TextSpan(
-                    text: '${_fmt(_selectedUnits)} IU',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' ('),
-                  TextSpan(
-                    text: '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ') into '),
-                  TextSpan(
-                    text: '${_syringe.label}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' syringe for your '),
-                  TextSpan(
-                    text: '${_fmt(Draw)} ${_doseUnit}',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const TextSpan(text: ' dose.'),
-                ],
-              ),
-            ),
               ],
             ),
           ),
