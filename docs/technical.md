@@ -286,37 +286,28 @@ Reconstitution Calculator Formula
   - Prevents visual crowding between syringe graphic and input fields
   - Improved visual separation between calculator output and manual input sections
 
-- Interactive Syringe Slider (lib/src/widgets/interactive_syringe_slider.dart):
-  - NEW FEATURE: Integrated slider and syringe graphic into single interactive component
-  - Replaces separate Material slider + static WhiteSyringeGauge
-  - User can drag vertically on syringe to adjust fill level
-  - Tap anywhere on syringe to jump to that fill level
-  - Visual feedback during drag with live updates
-  - Displays current fill value (e.g., "45.5 IU") as label on graphic
-  - Shows tick marks and labels at appropriate intervals (10 IU or 50 IU based on range)
-  - Min/max range indicators shown with faint lines
-  - Syringe includes plunger at top, needle at bottom, barrel outline
-  - Fill indicator is thick horizontal line across barrel at current level
-  - Height: 60px (increased from 44px for better interaction)
-  - More intuitive than separate slider - direct manipulation of visual element
-  - Saves screen real estate by combining two UI elements
-  - Heading changed from "Fine-tune" to "Adjust reconstitution amount"
-  - Helper text: "Drag or tap the syringe to adjust diluent amount"
+- Option Card Text Colors:
+  - Unselected option labels now use onSurfaceVariant.withOpacity(0.5) - 50% opacity
+  - Makes unselected options MUCH lighter than before
+  - Selected option labels remain primary color with full opacity
+  - Proper visual hierarchy - selected option stands out prominently
+  - Helper text (explainer text in options) remains lighter than unselected labels
 
-- Saved Reconstitution Display Improvements:
-  - Uses same helper text style (onSurfaceVariant, italic) instead of bold primary
-  - Syringe graphic shown above text (not below)
-  - Two lines of text:
-    - Line 1: "Reconstitute 10mg Insulin with 5mL Sterile Water"
-    - Line 2: "Draw 45 IU (0.45 mL) into a 1.0 mL syringe"
-  - Consistent styling with calculator helper text
-  - More readable and less visually heavy
+- Saved Reconstitution Display Styling:
+  - Matches calculator display styling EXACTLY
+  - WhiteSyringeGauge shown at top
+  - Main instruction text: bodyMedium, onSurface, bold with primary-colored values
+  - Format: "Reconstitute 10mg Insulin with 5mL Sterile Water"
+  - Helper text below: bodySmall, onSurfaceVariant, italic with primary-colored values
+  - Format: "Draw 45 IU (0.45 mL) into a 1.0 mL syringe"
+  - Same visual weight and prominence as calculator display
+  - Professional and consistent appearance
 
-- Error Handling Improvements:
-  - Calculator error text only shows if user attempts to open calculator without strength
-  - Does NOT show on initial page load
-  - Condition: `if (_showCalculator && _strengthForCalculator() == null)`
-  - Prevents confusing red error text before user interaction
+- Calculator Button Behavior:
+  - Button is ALWAYS enabled (never greyed out)
+  - Clicking without strength input shows error in helper text
+  - Error text only displays when `_showCalculator && _strengthForCalculator() == null`
+  - Better UX - user can click to see what's wrong vs greyed out button with no feedback
 
 - Vial Volume Helper Text Update:
   - Single context-aware message for all states
