@@ -254,9 +254,9 @@ class _ReconstitutionCalculatorWidgetState
         const SizedBox(height: 8),
         Text(
           'Reconstitution Calculator',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.8),
           ),
         ),
         const SizedBox(height: 4),
@@ -416,7 +416,8 @@ class _ReconstitutionCalculatorWidgetState
           _buildOptionRow(
             context,
             'Concentrated',
-            (_selectedUnits - u1).abs() < 0.01,
+            'concentrated',
+            (_selectedUnits - u1).abs() < 0.01 ? 'concentrated' : null,
             () => setState(() => _selectedUnits = u1),
             conc,
             u1,
@@ -425,7 +426,8 @@ class _ReconstitutionCalculatorWidgetState
           _buildOptionRow(
             context,
             'Balanced',
-            (_selectedUnits - u2).abs() < 0.01,
+            'balanced',
+            (_selectedUnits - u2).abs() < 0.01 ? 'balanced' : null,
             () => setState(() => _selectedUnits = u2),
             std,
             u2,
@@ -434,7 +436,8 @@ class _ReconstitutionCalculatorWidgetState
           _buildOptionRow(
             context,
             'Diluted',
-            (_selectedUnits - u3).abs() < 0.01,
+            'diluted',
+            (_selectedUnits - u3).abs() < 0.01 ? 'diluted' : null,
             () => setState(() => _selectedUnits = u3),
             dil,
             u3,
@@ -648,12 +651,14 @@ class _ReconstitutionCalculatorWidgetState
   Widget _buildOptionRow(
     BuildContext context,
     String label,
-    bool selected,
+    String optionValue,
+    String? selectedValue,
     VoidCallback onTap,
     ({double cPerMl, double vialVolume}) calcResult,
     double units, {
     bool isValid = true,
   }) {
+    final selected = selectedValue == optionValue;
     final theme = Theme.of(context);
     final diluentName = _diluentNameCtrl.text.trim().isNotEmpty
         ? _diluentNameCtrl.text.trim()
@@ -697,10 +702,10 @@ class _ReconstitutionCalculatorWidgetState
             ),
           child: Row(
             children: [
-              Radio<bool>(
-                value: true,
-                groupValue: selected,
-                onChanged: (_) => onTap(),
+              Radio<String>(
+                value: optionValue,
+                groupValue: selectedValue,
+                onChanged: isValid ? (_) => onTap() : null,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               const SizedBox(width: 8),
