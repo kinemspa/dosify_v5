@@ -743,7 +743,17 @@ class _AddEditInjectionUnifiedPageState
                                             ),
                                         children: [
                                           const TextSpan(
-                                            text: 'Reconstitute with ',
+                                            text: 'Reconstitute ',
+                                          ),
+                                          TextSpan(
+                                            text: '${_strength.text.trim()} ${_baseUnit(_strengthUnit)}',
+                                          ),
+                                          if (_name.text.trim().isNotEmpty) ...[
+                                            const TextSpan(text: ' '),
+                                            TextSpan(text: _name.text.trim()),
+                                          ],
+                                          const TextSpan(
+                                            text: ' with ',
                                           ),
                                           TextSpan(
                                             text:
@@ -790,6 +800,7 @@ class _AddEditInjectionUnifiedPageState
                                       double.tryParse(_strength.text.trim()) ??
                                       0,
                                   unitLabel: _baseUnit(_strengthUnit),
+                                  medicationName: _name.text.trim().isNotEmpty ? _name.text.trim() : null,
                                   initialDoseValue: _lastCalcDose,
                                   initialDoseUnit: _lastCalcDoseUnit,
                                   initialSyringeSize: _lastCalcSyringe,
@@ -813,8 +824,10 @@ class _AddEditInjectionUnifiedPageState
                                   },
                                 ),
                               ),
+                            // Add spacing after calculator/saved display
+                            if (!_showCalculator) const SizedBox(height: 24),
                             // Vial Volume field (always visible when calculator hidden)
-                            if (!_showCalculator)
+                            if (!_showCalculator) ...[
                               LabelFieldRow(
                                 label: 'Vial volume (mL)',
                                 field: StepperRow36(
@@ -846,6 +859,26 @@ class _AddEditInjectionUnifiedPageState
                                   ),
                                 ),
                               ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: kLabelColWidth + 8,
+                                  top: 2,
+                                  bottom: 6,
+                                ),
+                                child: Text(
+                                  _reconResult != null
+                                      ? 'Total volume after reconstitution'
+                                      : 'Volume of medication in vial (if unreconstituted, enter original volume)',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                            .withOpacity(0.75),
+                                      ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -857,6 +890,25 @@ class _AddEditInjectionUnifiedPageState
                     title: 'Inventory',
                     neutral: true,
                     children: [
+                      // Helper text for inventory section
+                      if (widget.kind == InjectionKind.multi)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 8,
+                            right: 8,
+                            bottom: 12,
+                          ),
+                          child: Text(
+                            'Track the number of unreconstituted sealed vials you have in storage. This is used for restocking and low stock alerts.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withOpacity(0.75),
+                                ),
+                          ),
+                        ),
                       LabelFieldRow(
                         label: 'Stock quantity *',
                         field: StepperRow36(

@@ -16,6 +16,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
     super.key,
     required this.initialStrengthValue,
     required this.unitLabel,
+    this.medicationName,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -28,6 +29,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
 
   final double initialStrengthValue;
   final String unitLabel;
+  final String? medicationName;
   final double? initialDoseValue;
   final String? initialDoseUnit;
   final SyringeSizeMl? initialSyringeSize;
@@ -526,6 +528,15 @@ class _ReconstitutionCalculatorWidgetState
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
+                      if (widget.medicationName != null && widget.medicationName!.isNotEmpty) ...[
+                        const TextSpan(text: ' '),
+                        TextSpan(
+                          text: widget.medicationName!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                       const TextSpan(text: ' with '),
                       TextSpan(
                         text: '${_fmt(currentV)} mL',
