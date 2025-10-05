@@ -241,6 +241,30 @@ Reconstitution Calculator Formula
   - Button changes to "Edit Reconstitution" with outlined style
   - Saved recon display appears in place of calculator
   - Clean workflow: Calculate → Save → View Summary → Edit if needed
+
+- Option Card Selection Logic:
+  - Fixed Radio button selection to use unique values per option
+  - Each option has unique value: 'concentrated', 'balanced', 'diluted'
+  - Selected state determined by comparing _selectedUnits with option's u1/u2/u3 values
+  - Prevents issue where all 3 options appear selected simultaneously
+  - Invalid options (outside slider range) are greyed out (40% opacity) and not clickable
+  - Radio buttons disabled for invalid options via onChanged: null
+
+- Calculator Text Color Theme Compliance:
+  - Calculator heading: bodyMedium, fontWeight w500, onSurfaceVariant with 0.8 opacity
+  - Fine-tune heading: bodyLarge, fontWeight w600, onSurfaceVariant
+  - Option card labels: bodyMedium with onSurfaceVariant (not onSurface)
+  - Option card details: bodySmall with onSurfaceVariant
+  - All helper text: kMutedLabelStyle(context)
+  - Primary values highlighted with primary color
+  - Ensures proper visual hierarchy - no text is "too dark"
+
+- Calculator Visibility Logic:
+  - Returns SizedBox.shrink() if initialStrengthValue <= 0
+  - Only renders calculator content when strength is valid
+  - No error text shown on main page when strength missing
+  - Clean UX - calculator appears only when prerequisites met
+
 - Validation examples (all verified):
   - Strength 5mg, Dose 250mcg, 5 IU → 1mL vial
   - Strength 5mg, Dose 250mcg, 15 IU → 3mL vial
