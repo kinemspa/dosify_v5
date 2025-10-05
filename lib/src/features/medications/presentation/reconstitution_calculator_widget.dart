@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../../widgets/field36.dart';
 import '../../../widgets/unified_form.dart';
 import '../../../widgets/white_syringe_gauge.dart';
+import '../../../widgets/interactive_syringe_slider.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_dialog.dart';
 
@@ -453,9 +454,9 @@ class _ReconstitutionCalculatorWidgetState
               style: kMutedLabelStyle(context),
             ),
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text(
-          'Fine-tune',
+          'Adjust reconstitution amount',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
@@ -463,7 +464,7 @@ class _ReconstitutionCalculatorWidgetState
         ),
         if (vialMax != null && sliderMax < totalIU)
           Padding(
-            padding: const EdgeInsets.only(bottom: 4),
+            padding: const EdgeInsets.only(bottom: 4, top: 2),
             child: Text(
               'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)',
               style: kMutedLabelStyle(
@@ -473,7 +474,7 @@ class _ReconstitutionCalculatorWidgetState
           )
         else if (sliderMax < totalIU)
           Padding(
-            padding: const EdgeInsets.only(bottom: 4),
+            padding: const EdgeInsets.only(bottom: 4, top: 2),
             child: Text(
               'Range limited by syringe capacity',
               style: kMutedLabelStyle(
@@ -482,28 +483,24 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 2, top: 2),
+          padding: const EdgeInsets.only(bottom: 4, top: 2),
           child: Text(
-            'Adjust diluent amount (affects IU concentration)',
+            'Drag or tap the syringe to adjust diluent amount',
             style: kMutedLabelStyle(context),
           ),
         ),
-        Slider(
-          value: _selectedUnits,
-          min: sliderMin,
-          max: sliderMax,
-          divisions: (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
-          label: '${_round2(_selectedUnits)} IU',
-          onChanged: (v) => setState(() => _selectedUnits = v),
-        ),
-        // Live syringe gauge preview
+        // Interactive syringe slider
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: WhiteSyringeGauge(
+            child: InteractiveSyringeSlider(
               totalIU: _syringe.totalUnits.toDouble(),
               fillIU: _selectedUnits,
+              minIU: sliderMin,
+              maxIU: sliderMax,
+              onChanged: (v) => setState(() => _selectedUnits = v),
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 16),
