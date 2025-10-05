@@ -12,6 +12,7 @@ import 'providers.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/active_vial_status_card.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
@@ -855,19 +856,28 @@ class _AddEditInjectionUnifiedPageState
                                         // Preview only, don't save yet
                                       },
                                     ),
-                                    if (_reconResult != null) ...[
+                                    if (_reconResult != null && widget.initial?.activeVial == null) ...[
                                       const SizedBox(height: 12),
-                                      Center(
-                                        child: TextButton.icon(
-                                          onPressed: () {
-                                            setState(() {
-                                              _reconResult = null;
-                                              _perMl.text = '';
-                                            });
-                                          },
-                                          icon: const Icon(Icons.clear),
-                                          label: const Text('Clear Reconstitution'),
-                                        ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          TextButton.icon(
+                                            onPressed: () {
+                                              setState(() {
+                                                _reconResult = null;
+                                                _perMl.text = '';
+                                              });
+                                            },
+                                            icon: const Icon(Icons.clear),
+                                            label: const Text('Clear'),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          FilledButton.icon(
+                                            onPressed: _activateVial,
+                                            icon: const Icon(Icons.play_arrow),
+                                            label: const Text('Activate Vial'),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ],
@@ -936,6 +946,21 @@ class _AddEditInjectionUnifiedPageState
                     ),
                   if (widget.kind == InjectionKind.multi)
                     const SizedBox(height: 12),
+
+                  // Active Vial Status Card (MDV only, when active vial exists)
+                  if (widget.kind == InjectionKind.multi && widget.initial?.activeVial != null)
+                    Column(
+                      children: [
+                        ActiveVialStatusCard(
+                          activeVial: widget.initial!.activeVial!,
+                          medicationName: _name.text.trim(),
+                          strengthValue: double.tryParse(_strength.text.trim()) ?? 0,
+                          strengthUnit: _baseUnit(_strengthUnit),
+                          onDiscard: _discardActiveVial,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
 
                   SectionFormCard(
                     title: 'Inventory',
@@ -1282,6 +1307,154 @@ class _AddEditInjectionUnifiedPageState
         ],
       ),
     );
+  }
+
+  /// Activate a vial from stock - creates active vial with 48hr expiry
+  Future<void> _activateVial() async {
+    if (_reconResult == null || widget.initial == null) return;
+    
+    final now = DateTime.now();
+    final expiryDate = now.add(const Duration(hours: 48)); // 48 hour default
+    
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Activate Reconstituted Vial'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This will activate a vial from your stock with the current reconstitution settings.',
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Reconstitution: ${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL',
+              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Expiry: ${DateFormat('MMM d, y h:mm a').format(expiryDate)} (48 hours)',
+              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Stock will be reduced by 1 vial.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Activate'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true && mounted) {
+      final activeVial = ActiveVial(
+        reconstitutionDate: now,
+        expiryDate: expiryDate,
+        volumeMl: _reconResult!.solventVolumeMl,
+        concentrationPerMl: _reconResult!.perMlConcentration,
+        diluentName: _reconResult!.diluentName,
+        syringeSizeMl: _reconResult!.syringeSizeMl,
+        recommendedUnits: _reconResult!.recommendedUnits,
+      );
+      
+      // Update medication with active vial and decrement stock
+      final currentStock = double.tryParse(_stock.text) ?? 0;
+      final newStock = (currentStock - 1).clamp(0, double.infinity);
+      
+      final repo = ref.read(medicationRepositoryProvider);
+      final updatedMed = widget.initial!.copyWith(
+        activeVial: activeVial,
+        stockValue: newStock,
+        containerVolumeMl: _reconResult!.solventVolumeMl,
+        perMlValue: _reconResult!.perMlConcentration,
+      );
+      
+      await repo.upsert(updatedMed);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vial activated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/medications');
+      }
+    }
+  }
+  
+  /// Discard the active vial
+  Future<void> _discardActiveVial() async {
+    if (widget.initial?.activeVial == null) return;
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Discard Active Vial'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.initial!.activeVial!.isExpired
+                  ? 'This vial has expired and should be discarded.'
+                  : 'Are you sure you want to discard the active vial?',
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'You can activate a new vial from your stock after discarding.',
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true && mounted) {
+      final repo = ref.read(medicationRepositoryProvider);
+      final updatedMed = widget.initial!.copyWith(
+        clearActiveVial: true,
+      );
+      
+      await repo.upsert(updatedMed);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vial discarded'),
+          ),
+        );
+        context.go('/medications');
+      }
+    }
   }
 
   Future<void> _submit() async {
