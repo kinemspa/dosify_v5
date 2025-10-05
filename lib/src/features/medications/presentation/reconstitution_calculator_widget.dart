@@ -183,6 +183,11 @@ class _ReconstitutionCalculatorWidgetState
 
   @override
   Widget build(BuildContext context) {
+    // Only show calculator content if strength is valid
+    if (widget.initialStrengthValue <= 0) {
+      return const SizedBox.shrink();
+    }
+
     // Use strength from parent (already set above)
     final Sraw = widget.initialStrengthValue;
     final Draw = double.tryParse(_doseCtrl.text) ?? 0;
@@ -246,10 +251,10 @@ class _ReconstitutionCalculatorWidgetState
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(
           'Reconstitution Calculator',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -415,6 +420,7 @@ class _ReconstitutionCalculatorWidgetState
             () => setState(() => _selectedUnits = u1),
             conc,
             u1,
+            isValid: u1 >= sliderMin && u1 <= sliderMax,
           ),
           _buildOptionRow(
             context,
@@ -423,6 +429,7 @@ class _ReconstitutionCalculatorWidgetState
             () => setState(() => _selectedUnits = u2),
             std,
             u2,
+            isValid: u2 >= sliderMin && u2 <= sliderMax,
           ),
           _buildOptionRow(
             context,
@@ -431,6 +438,7 @@ class _ReconstitutionCalculatorWidgetState
             () => setState(() => _selectedUnits = u3),
             dil,
             u3,
+            isValid: u3 >= sliderMin && u3 <= sliderMax,
           ),
         ] else
           Padding(
@@ -643,8 +651,9 @@ class _ReconstitutionCalculatorWidgetState
     bool selected,
     VoidCallback onTap,
     ({double cPerMl, double vialVolume}) calcResult,
-    double units,
-  ) {
+    double units, {
+    bool isValid = true,
+  }) {
     final theme = Theme.of(context);
     final diluentName = _diluentNameCtrl.text.trim().isNotEmpty
         ? _diluentNameCtrl.text.trim()
@@ -668,22 +677,24 @@ class _ReconstitutionCalculatorWidgetState
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: InkWell(
-        onTap: onTap,
+        onTap: isValid ? onTap : null,
         borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: selected
-                ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                : Colors.transparent,
-            border: Border.all(
+        child: Opacity(
+          opacity: isValid ? 1.0 : 0.4,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
               color: selected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outlineVariant,
-              width: selected ? 2 : 1,
+                  ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                  : Colors.transparent,
+              border: Border.all(
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outlineVariant,
+                width: selected ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
             ),
-            borderRadius: BorderRadius.circular(8),
-          ),
           child: Row(
             children: [
               Radio<bool>(
@@ -770,6 +781,7 @@ class _ReconstitutionCalculatorWidgetState
           ),
         ),
       ),
+    ),
     );
   }
 }
