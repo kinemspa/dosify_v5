@@ -757,7 +757,7 @@ class _ReconstitutionCalculatorWidgetState
                         fontWeight: FontWeight.w600,
                         color: selected
                             ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     if (explainerText.isNotEmpty) ...[
@@ -775,7 +775,7 @@ class _ReconstitutionCalculatorWidgetState
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         children: [
                           TextSpan(
@@ -791,7 +791,7 @@ class _ReconstitutionCalculatorWidgetState
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         children: [
                           TextSpan(text: 'Concentration: '),
@@ -806,7 +806,7 @@ class _ReconstitutionCalculatorWidgetState
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         children: [
                           TextSpan(text: 'Syringe (${_syringe.label}): '),
