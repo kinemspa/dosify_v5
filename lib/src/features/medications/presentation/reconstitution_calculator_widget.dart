@@ -485,7 +485,7 @@ class _ReconstitutionCalculatorWidgetState
         Padding(
           padding: const EdgeInsets.only(bottom: 2, top: 2),
           child: Text(
-            'Adjust diluent amount (affects IU concentration)',
+            'Drag the fill line or tap on the syringe to adjust diluent amount',
             style: kMutedLabelStyle(context),
           ),
         ),
@@ -497,9 +497,9 @@ class _ReconstitutionCalculatorWidgetState
           label: '${_round2(_selectedUnits)} IU',
           onChanged: (v) => setState(() => _selectedUnits = v),
         ),
-        // Live syringe gauge preview
+        // Live syringe gauge preview (interactive)
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Stack(
@@ -508,6 +508,12 @@ class _ReconstitutionCalculatorWidgetState
                 WhiteSyringeGauge(
                   totalIU: _syringe.totalUnits.toDouble(),
                   fillIU: _selectedUnits,
+                  interactive: true,
+                  onChanged: (newValue) {
+                    // Clamp to slider min/max
+                    final clampedValue = newValue.clamp(sliderMin, sliderMax);
+                    setState(() => _selectedUnits = clampedValue);
+                  },
                 ),
                 Positioned(
                   top: -2,

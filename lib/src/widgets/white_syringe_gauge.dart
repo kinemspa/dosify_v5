@@ -2,27 +2,79 @@ import 'package:flutter/material.dart';
 
 /// Syringe gauge widget used for reconstitution visualization
 /// Shows a horizontal line with IU markers and thick fill line
-class WhiteSyringeGauge extends StatelessWidget {
+/// Can be interactive - drag the fill line to adjust value
+class WhiteSyringeGauge extends StatefulWidget {
   const WhiteSyringeGauge({
     super.key,
     required this.totalIU,
     required this.fillIU,
     this.color,
+    this.onChanged,
+    this.interactive = false,
   });
 
   final double totalIU;
   final double fillIU;
   final Color? color;
+  final ValueChanged<double>? onChanged;
+  final bool interactive;
+
+  @override
+  State<WhiteSyringeGauge> createState() => _WhiteSyringeGaugeState();
+}
+
+class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
+  double? _dragValue;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
-    return CustomPaint(
-      size: const Size(double.infinity, 44),
-      painter: _WhiteSyringePainter(
-        totalIU: totalIU,
-        fillIU: fillIU,
-        color: effectiveColor,
+    final effectiveColor = widget.color ?? Theme.of(context).colorScheme.primary;
+    final currentFill = _dragValue ?? widget.fillIU;
+
+    return GestureDetector(
+      onHorizontalDragUpdate: widget.interactive
+          ? (details) {
+              final RenderBox? box = context.findRenderObject() as RenderBox?;
+              if (box == null) return;
+              final localPosition = box.globalToLocal(details.globalPosition);
+              final width = box.size.width;
+              final fillRatio = (localPosition.dx / width).clamp(0.0, 1.0);
+              final newFillIU = fillRatio * widget.totalIU;
+              setState(() {
+                _dragValue = newFillIU;
+              });
+            }
+          : null,
+      onHorizontalDragEnd: widget.interactive
+          ? (details) {
+              if (_dragValue != null && widget.onChanged != null) {
+                widget.onChanged!(_dragValue!);
+              }
+              setState(() {
+                _dragValue = null;
+              });
+            }
+          : null,
+      onTapUp: widget.interactive
+          ? (details) {
+              final RenderBox? box = context.findRenderObject() as RenderBox?;
+              if (box == null) return;
+              final localPosition = box.globalToLocal(details.globalPosition);
+              final width = box.size.width;
+              final fillRatio = (localPosition.dx / width).clamp(0.0, 1.0);
+              final newFillIU = fillRatio * widget.totalIU;
+              if (widget.onChanged != null) {
+                widget.onChanged!(newFillIU);
+              }
+            }
+          : null,
+      child: CustomPaint(
+        size: const Size(double.infinity, 44),
+        painter: _WhiteSyringePainter(
+          totalIU: widget.totalIU,
+          fillIU: currentFill,
+          color: effectiveColor,
+        ),
       ),
     );
   }
