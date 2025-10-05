@@ -502,9 +502,26 @@ class _ReconstitutionCalculatorWidgetState
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: WhiteSyringeGauge(
-              totalIU: _syringe.totalUnits.toDouble(),
-              fillIU: _selectedUnits,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                WhiteSyringeGauge(
+                  totalIU: _syringe.totalUnits.toDouble(),
+                  fillIU: _selectedUnits,
+                ),
+                Positioned(
+                  top: -2,
+                  right: 0,
+                  child: Text(
+                    '${_syringe.label} Syringe',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontStyle: FontStyle.italic,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -749,7 +766,9 @@ class _ReconstitutionCalculatorWidgetState
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: selected
+                              ? theme.colorScheme.onSurfaceVariant
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                         ),
                         children: [
                           TextSpan(
@@ -765,7 +784,9 @@ class _ReconstitutionCalculatorWidgetState
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: selected
+                              ? theme.colorScheme.onSurfaceVariant
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                         ),
                         children: [
                           TextSpan(text: 'Concentration: '),
@@ -780,7 +801,9 @@ class _ReconstitutionCalculatorWidgetState
                     RichText(
                       text: TextSpan(
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: selected
+                              ? theme.colorScheme.onSurfaceVariant
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                         ),
                         children: [
                           TextSpan(text: 'Syringe (${_syringe.label}): '),

@@ -367,6 +367,7 @@ class StepperRow36 extends StatelessWidget {
     required this.onInc,
     required this.decoration,
     this.compact = false,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -374,13 +375,14 @@ class StepperRow36 extends StatelessWidget {
   final VoidCallback onInc;
   final InputDecoration decoration;
   final bool compact;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _pillBtn(context, '−', onDec),
+        _pillBtn(context, '−', enabled ? onDec : () {}),
         const SizedBox(width: 6),
         SizedBox(
           width: kSmallControlWidth,
@@ -395,13 +397,14 @@ class StepperRow36 extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: style,
                   decoration: decoration,
+                  enabled: enabled,
                 );
               },
             ),
           ),
         ),
         const SizedBox(width: 6),
-        _pillBtn(context, '+', onInc),
+        _pillBtn(context, '+', enabled ? onInc : () {}),
       ],
     );
   }
@@ -417,7 +420,7 @@ class StepperRow36 extends StatelessWidget {
           visualDensity: VisualDensity.compact,
           minimumSize: const Size(30, 30),
         ),
-        onPressed: onTap,
+        onPressed: enabled ? onTap : null,
         child: Text(
           symbol,
           style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),

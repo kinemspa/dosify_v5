@@ -818,14 +818,16 @@ class _AddEditInjectionUnifiedPageState
                             ],
                             // Inline calculator when shown
                             if (_showCalculator)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 0,
-                                  right: 0,
-                                  top: 0,
-                                  bottom: 6,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerLowest.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: ReconstitutionCalculatorWidget(
+                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(top: 8),
+                                child: Column(
+                                  children: [
+                                    ReconstitutionCalculatorWidget(
                                   initialStrengthValue:
                                       double.tryParse(_strength.text.trim()) ??
                                       0,
@@ -849,9 +851,26 @@ class _AddEditInjectionUnifiedPageState
                                       _showCalculator = false; // Hide calculator after save
                                     });
                                   },
-                                  onCalculate: (result, isValid) {
-                                    // Preview only, don't save yet
-                                  },
+                                      onCalculate: (result, isValid) {
+                                        // Preview only, don't save yet
+                                      },
+                                    ),
+                                    if (_reconResult != null) ...[
+                                      const SizedBox(height: 12),
+                                      Center(
+                                        child: TextButton.icon(
+                                          onPressed: () {
+                                            setState(() {
+                                              _reconResult = null;
+                                              _perMl.text = '';
+                                            });
+                                          },
+                                          icon: const Icon(Icons.clear),
+                                          label: const Text('Clear Reconstitution'),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             // Add spacing after calculator/saved display
@@ -862,7 +881,9 @@ class _AddEditInjectionUnifiedPageState
                                 label: 'Vial volume (mL)',
                                 field: StepperRow36(
                                   controller: _vialVolume,
+                                  enabled: _reconResult == null, // Disable if reconstituted
                                   onDec: () {
+                                    if (_reconResult != null) return;
                                     final v =
                                         int.tryParse(_vialVolume.text.trim()) ??
                                         0;
@@ -873,6 +894,7 @@ class _AddEditInjectionUnifiedPageState
                                     );
                                   },
                                   onInc: () {
+                                    if (_reconResult != null) return;
                                     final v =
                                         int.tryParse(_vialVolume.text.trim()) ??
                                         0;
@@ -891,12 +913,13 @@ class _AddEditInjectionUnifiedPageState
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(
-                                  left: kLabelColWidth + 8,
+                                  left: 8,
+                                  right: 8,
                                   top: 2,
                                   bottom: 6,
                                 ),
                                 child: Text(
-                                  'If vial is already filled or you know the volume, enter it here. Otherwise, use the calculator to determine the correct reconstitution amount.',
+                                  'Enter known volume or use calculator to determine reconstitution amount.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(context)
