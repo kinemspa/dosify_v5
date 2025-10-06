@@ -51,6 +51,7 @@ class _ReconstitutionCalculatorWidgetState
   late String _doseUnit;
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
   double _selectedUnits = 50;
+  String? _selectedOption; // Track which option is selected
 
   @override
   void initState() {
@@ -420,8 +421,11 @@ class _ReconstitutionCalculatorWidgetState
             context,
             'Concentrated',
             'concentrated',
-            (_selectedUnits - u1).abs() < 0.01 ? 'concentrated' : null,
-            () => setState(() => _selectedUnits = u1),
+            _selectedOption,
+            () => setState(() {
+              _selectedUnits = u1;
+              _selectedOption = 'concentrated';
+            }),
             conc,
             u1,
             isValid: u1 >= sliderMin && u1 <= sliderMax,
@@ -430,8 +434,11 @@ class _ReconstitutionCalculatorWidgetState
             context,
             'Balanced',
             'balanced',
-            (_selectedUnits - u2).abs() < 0.01 ? 'balanced' : null,
-            () => setState(() => _selectedUnits = u2),
+            _selectedOption,
+            () => setState(() {
+              _selectedUnits = u2;
+              _selectedOption = 'balanced';
+            }),
             std,
             u2,
             isValid: u2 >= sliderMin && u2 <= sliderMax,
@@ -440,8 +447,11 @@ class _ReconstitutionCalculatorWidgetState
             context,
             'Diluted',
             'diluted',
-            (_selectedUnits - u3).abs() < 0.01 ? 'diluted' : null,
-            () => setState(() => _selectedUnits = u3),
+            _selectedOption,
+            () => setState(() {
+              _selectedUnits = u3;
+              _selectedOption = 'diluted';
+            }),
             dil,
             u3,
             isValid: u3 >= sliderMin && u3 <= sliderMax,
@@ -463,23 +473,7 @@ class _ReconstitutionCalculatorWidgetState
             style: kMutedLabelStyle(context),
           ),
         ),
-        // Range limit text - always occupies space to prevent nudging
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(
-            (vialMax != null &&
-                    sliderMax < totalIU &&
-                    (_selectedUnits >= sliderMax - 1))
-                ? 'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
-                : (sliderMax < totalIU && (_selectedUnits >= sliderMax - 1))
-                ? 'Range limited by syringe capacity'
-                : '', // Empty string maintains space
-            style: kMutedLabelStyle(context).copyWith(
-              fontSize: 11,
-              color: Theme.of(context).colorScheme.error, // Warning color
-            ),
-          ),
-        ),
+        // Range limit warning removed - using snackbar only for cleaner UI
         const SizedBox(height: 8),
         // Live syringe gauge preview (interactive)
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
@@ -510,7 +504,11 @@ class _ReconstitutionCalculatorWidgetState
                   onChanged: (newValue) {
                     // Clamp to slider min/max
                     final clampedValue = newValue.clamp(sliderMin, sliderMax);
-                    setState(() => _selectedUnits = clampedValue);
+                    setState(() {
+                      _selectedUnits = clampedValue;
+                      _selectedOption =
+                          null; // Clear option selection on manual adjust
+                    });
                   },
                 ),
                 Positioned(
@@ -531,12 +529,12 @@ class _ReconstitutionCalculatorWidgetState
           const SizedBox(height: 28),
           // Conversational explanation
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RichText(
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
@@ -563,7 +561,7 @@ class _ReconstitutionCalculatorWidgetState
                       ],
                       const TextSpan(text: ' with '),
                       TextSpan(
-                        text: '${currentV.toStringAsFixed(1)} mL',
+                        text: '${currentV.toStringAsFixed(2)} mL',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -579,7 +577,7 @@ class _ReconstitutionCalculatorWidgetState
                 const SizedBox(height: 6),
                 // Split into 3 lines to prevent shifting
                 RichText(
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -608,7 +606,7 @@ class _ReconstitutionCalculatorWidgetState
                 ),
                 const SizedBox(height: 2),
                 RichText(
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -628,7 +626,7 @@ class _ReconstitutionCalculatorWidgetState
                 ),
                 const SizedBox(height: 2),
                 RichText(
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -757,7 +755,7 @@ class _ReconstitutionCalculatorWidgetState
                 color: selected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.outlineVariant,
-                width: selected ? 2 : 1,
+                width: 2, // Consistent width to prevent nudging
               ),
               borderRadius: BorderRadius.circular(8),
             ),
