@@ -383,27 +383,31 @@ class StepperRow36 extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _pillBtn(context, '−', enabled ? onDec : () {}),
-        const SizedBox(width: 6),
-        SizedBox(
-          width: kSmallControlWidth,
-          child: Field36(
-            child: Builder(
-              builder: (context) {
-                final theme = Theme.of(context);
-                final base = theme.textTheme.bodyMedium;
-                final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
-                return TextFormField(
-                  controller: controller,
-                  textAlign: TextAlign.center,
-                  style: style,
-                  decoration: decoration,
-                  enabled: enabled,
-                );
-              },
+        const SizedBox(width: 4),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: kSmallControlWidth,
+            ),
+            child: Field36(
+              child: Builder(
+                builder: (context) {
+                  final theme = Theme.of(context);
+                  final base = theme.textTheme.bodyMedium;
+                  final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
+                  return TextFormField(
+                    controller: controller,
+                    textAlign: TextAlign.center,
+                    style: style,
+                    decoration: decoration,
+                    enabled: enabled,
+                  );
+                },
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         _pillBtn(context, '+', enabled ? onInc : () {}),
       ],
     );
@@ -412,18 +416,18 @@ class StepperRow36 extends StatelessWidget {
   Widget _pillBtn(BuildContext context, String symbol, VoidCallback onTap) {
     final theme = Theme.of(context);
     return SizedBox(
-      height: 30,
-      width: 30,
+      height: 28,
+      width: 28,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
-          minimumSize: const Size(30, 30),
+          minimumSize: const Size(28, 28),
         ),
         onPressed: enabled ? onTap : null,
         child: Text(
           symbol,
-          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
         ),
       ),
     );

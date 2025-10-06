@@ -36,6 +36,7 @@ class _AddEditInjectionUnifiedPageState
     extends ConsumerState<AddEditInjectionUnifiedPage> {
   // Floating summary like Tablet/Capsule
   final GlobalKey _summaryKey = GlobalKey();
+  final GlobalKey _vialVolumeKey = GlobalKey(); // For scrolling to vial volume
   double _summaryHeight = 0;
   final _formKey = GlobalKey<FormState>();
 
@@ -957,6 +958,20 @@ class _AddEditInjectionUnifiedPageState
                                           _showCalculator =
                                               false; // Hide calculator after save
                                         });
+                                        // Scroll to vial volume field after save
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          if (_vialVolumeKey.currentContext !=
+                                              null) {
+                                            Scrollable.ensureVisible(
+                                              _vialVolumeKey.currentContext!,
+                                              duration: const Duration(
+                                                milliseconds: 300,
+                                              ),
+                                              curve: Curves.easeInOut,
+                                            );
+                                          }
+                                        });
                                       },
                                       onCalculate: (result, isValid) {
                                         // Preview only, don't save yet
@@ -987,6 +1002,7 @@ class _AddEditInjectionUnifiedPageState
                             // Vial Volume field (always visible when calculator hidden)
                             if (!_showCalculator) ...[
                               LabelFieldRow(
+                                key: _vialVolumeKey, // For scrolling after save
                                 label: 'Vial volume (mL)',
                                 field: StepperRow36(
                                   controller: _vialVolume,
