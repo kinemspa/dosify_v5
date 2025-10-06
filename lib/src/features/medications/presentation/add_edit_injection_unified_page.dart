@@ -1491,60 +1491,125 @@ class _AddEditInjectionUnifiedPageState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Center(
-          child: Text(
-            'Confirm Medication',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              ctx,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          'Confirm Medication',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${med.name}',
-                style: Theme.of(
-                  ctx,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Form: ${switch (widget.kind) {
-                  InjectionKind.pfs => "Pre-Filled Syringe",
-                  InjectionKind.single => "Single Dose Vial",
-                  InjectionKind.multi => "Multi Dose Vial",
-                }}',
-              ),
-              if (med.manufacturer != null)
-                Text('Manufacturer: ${med.manufacturer}'),
-              Text(
-                'Strength: ${med.strengthValue} ${_baseUnit(med.strengthUnit)}',
-              ),
-              if (med.perMlValue != null && widget.kind == InjectionKind.multi)
-                Text(
-                  'Concentration: ${med.perMlValue} ${_baseUnit(med.strengthUnit)}/mL',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Styled summary preview block
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF09A8BD), Color(0xFF18537D)],
                 ),
-              if (med.containerVolumeMl != null &&
-                  widget.kind == InjectionKind.multi)
-                Text('Vial Volume: ${med.containerVolumeMl} mL'),
-              Text('Stock: ${med.stockValue} ${_stockUnitLabel()}'),
-              if (med.expiry != null)
-                Text('Expiry: ${DateFormat('dd/MM/yy').format(med.expiry!)}'),
-            ],
-          ),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                '${med.name}${med.manufacturer != null ? " from ${med.manufacturer}" : ""}',
+                style: const TextStyle(color: Colors.white, height: 1.3),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Full details list
+            _detailRow(
+              ctx,
+              'Form',
+              switch (widget.kind) {
+                InjectionKind.pfs => "Pre-Filled Syringe",
+                InjectionKind.single => "Single Dose Vial",
+                InjectionKind.multi => "Multi Dose Vial",
+              },
+            ),
+            _detailRow(ctx, 'Name', med.name),
+            if (med.manufacturer != null)
+              _detailRow(ctx, 'Manufacturer', med.manufacturer!),
+            _detailRow(
+              ctx,
+              'Strength',
+              '${fmt2(med.strengthValue)} ${_baseUnit(med.strengthUnit)}',
+            ),
+            if (med.perMlValue != null && widget.kind == InjectionKind.multi)
+              _detailRow(
+                ctx,
+                'Concentration',
+                '${fmt2(med.perMlValue!)} ${_baseUnit(med.strengthUnit)}/mL',
+              ),
+            if (med.containerVolumeMl != null &&
+                widget.kind == InjectionKind.multi)
+              _detailRow(
+                ctx,
+                'Vial Volume',
+                '${fmt2(med.containerVolumeMl!)} mL',
+              ),
+            _detailRow(
+              ctx,
+              'Stock',
+              '${fmt2(med.stockValue)} ${_stockUnitLabel()}',
+            ),
+            _detailRow(
+              ctx,
+              'Expiry',
+              med.expiry != null
+                  ? DateTime.now().isAfter(med.expiry!)
+                        ? 'Expired'
+                        : '${med.expiry!.day}/${med.expiry!.month}/${med.expiry!.year}'
+                  : 'No expiry',
+            ),
+            if (med.batchNumber != null)
+              _detailRow(ctx, 'Batch #', med.batchNumber!),
+            if (med.storageLocation != null)
+              _detailRow(ctx, 'Storage', med.storageLocation!),
+            _detailRow(
+              ctx,
+              'Requires refrigeration',
+              med.requiresRefrigeration ? 'Yes' : 'No',
+            ),
+            if (med.storageInstructions != null)
+              _detailRow(ctx, 'Storage notes', med.storageInstructions!),
+            if (med.description != null)
+              _detailRow(ctx, 'Description', med.description!),
+            if (med.notes != null) _detailRow(ctx, 'Notes', med.notes!),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey.shade600,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.teal.shade600,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            child: const Text(
+              'Confirm',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
@@ -1563,5 +1628,29 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.single => 'single dose vials',
       InjectionKind.multi => 'multi dose vials',
     };
+  }
+
+  Widget _detailRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
+      ),
+    );
   }
 }
