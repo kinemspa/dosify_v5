@@ -323,15 +323,28 @@ Reconstitution Calculator Formula
 
 - Interactive Syringe Slider:
   - WhiteSyringeGauge converted to StatefulWidget with GestureDetector
-  - Drag the thick fill line horizontally to adjust diluent amount
-  - Tap anywhere on syringe to jump fill to that position
-  - Parameters: `interactive: true`, `onChanged: (newValue) { ... }`
-  - Dragging updates _dragValue state internally, calls onChanged on drag end
+  - **Draggable Handle Indicator**: Circular handle (6px radius) drawn at fill line end
+    - Filled with primary color, white center (3px radius) for visibility
+    - Only shown when interactive=true to indicate draggability
+    - Provides clear visual affordance that the fill line can be dragged
+  - **Drag Interaction**: Drag the thick fill line horizontally to adjust diluent amount
+    - onHorizontalDragUpdate tracks finger position and updates fill in real-time
+    - onHorizontalDragEnd commits the change via onChanged callback
+  - **Tap Interaction**: Tap anywhere on syringe to jump fill to that position
+    - onTapUp calculates position and immediately calls onChanged
+  - **Max Constraint Enforcement**: 
+    - Parameters: `maxConstraint` (double) and `onMaxConstraintHit` (VoidCallback)
+    - Dragging/tapping beyond maxConstraint automatically clamps to limit
+    - Shows floating SnackBar when constraint is hit: "Limited by max vial size (X mL)" or "Limited by syringe capacity"
+    - Prevents user confusion about why slider won't go higher
+    - _hitConstraint flag ensures alert only fires once per drag session
+  - Parameters: `interactive: true`, `onChanged: (newValue) { ... }`, `maxConstraint`, `onMaxConstraintHit`
   - Clamped to slider min/max values by parent widget
-  - Replaces Material Slider widget in calculator for direct manipulation
-  - Helper text: "Drag the fill line or tap on the syringe to adjust diluent amount"
+  - **FULLY REPLACES Material Slider widget** - legacy slider removed from calculator
+  - Helper text repositioned ABOVE syringe graphic for better information hierarchy
+  - Conversational results text below syringe NO LONGER italic (cleaner appearance)
   - Syringe size label shown in top right: "1.0 mL Syringe" in primary color, italic, small size
-  - Provides more intuitive and direct control over reconstitution settings
+  - Provides more intuitive and direct control with clear visual feedback
 
 - Simplified Vial Tracking (MDV):
   - REMOVED ActiveVial class and activation workflow (overcomplicated UX)
