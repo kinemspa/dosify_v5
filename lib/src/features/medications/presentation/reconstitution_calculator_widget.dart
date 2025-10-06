@@ -463,7 +463,10 @@ class _ReconstitutionCalculatorWidgetState
             style: kMutedLabelStyle(context),
           ),
         ),
-        if (vialMax != null && sliderMax < totalIU)
+        // Only show limit text when user is actually at the limit
+        if (vialMax != null &&
+            sliderMax < totalIU &&
+            (_selectedUnits >= sliderMax - 1))
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Text(
@@ -471,7 +474,7 @@ class _ReconstitutionCalculatorWidgetState
               style: kMutedLabelStyle(context).copyWith(fontSize: 11),
             ),
           )
-        else if (sliderMax < totalIU)
+        else if (sliderMax < totalIU && (_selectedUnits >= sliderMax - 1))
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Text(
@@ -527,7 +530,7 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
           // Conversational explanation
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -562,7 +565,7 @@ class _ReconstitutionCalculatorWidgetState
                       ],
                       const TextSpan(text: ' with '),
                       TextSpan(
-                        text: '${_fmt(currentV)} mL',
+                        text: '${currentV.toStringAsFixed(1)} mL',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -575,8 +578,10 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
+                // Split into 3 lines to prevent shifting
                 RichText(
+                  textAlign: TextAlign.center,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -584,7 +589,7 @@ class _ReconstitutionCalculatorWidgetState
                     children: [
                       const TextSpan(text: 'Draw '),
                       TextSpan(
-                        text: '${_fmt(_selectedUnits)} IU',
+                        text: '${_selectedUnits.toStringAsFixed(1)} IU',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -593,29 +598,53 @@ class _ReconstitutionCalculatorWidgetState
                       const TextSpan(text: ' ('),
                       TextSpan(
                         text:
-                            '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
+                            '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(1)} mL',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const TextSpan(text: ') into a '),
+                      const TextSpan(text: ')'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    children: [
+                      const TextSpan(text: 'into a '),
                       TextSpan(
-                        text: '${_syringe.label}',
+                        text: _syringe.label,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const TextSpan(text: ' syringe for your '),
+                      const TextSpan(text: ' syringe'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    children: [
+                      const TextSpan(text: 'for your '),
                       TextSpan(
-                        text: '${_fmt(Draw)} ${_doseUnit}',
+                        text: '${_fmt(Draw)} $_doseUnit',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const TextSpan(text: ' dose.'),
+                      const TextSpan(text: ' dose'),
                     ],
                   ),
                 ),
