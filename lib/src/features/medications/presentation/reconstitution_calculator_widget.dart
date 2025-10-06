@@ -1,11 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../widgets/field36.dart';
 import '../../../widgets/unified_form.dart';
 import '../../../widgets/white_syringe_gauge.dart';
-import '../../../widgets/interactive_syringe_slider.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_dialog.dart';
 
@@ -259,7 +257,9 @@ class _ReconstitutionCalculatorWidgetState
           'Reconstitution Calculator',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.8),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withOpacity(0.8),
           ),
         ),
         const SizedBox(height: 4),
@@ -455,51 +455,33 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         const SizedBox(height: 12),
-        Text(
-          'Fine-tune',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (vialMax != null && sliderMax < totalIU)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4, top: 2),
-            child: Text(
-              'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)',
-              style: kMutedLabelStyle(
-                context,
-              ).copyWith(fontStyle: FontStyle.italic, fontSize: 11),
-            ),
-          )
-        else if (sliderMax < totalIU)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4, top: 2),
-            child: Text(
-              'Range limited by syringe capacity',
-              style: kMutedLabelStyle(
-                context,
-              ).copyWith(fontStyle: FontStyle.italic, fontSize: 11),
-            ),
-          ),
+        // Support text above syringe
         Padding(
-          padding: const EdgeInsets.only(bottom: 2, top: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Text(
             'Drag the fill line or tap on the syringe to adjust diluent amount',
             style: kMutedLabelStyle(context),
           ),
         ),
-        Slider(
-          value: _selectedUnits,
-          min: sliderMin,
-          max: sliderMax,
-          divisions: (_syringe.totalUnits - sliderMin.toInt()).clamp(1, 100),
-          label: '${_round2(_selectedUnits)} IU',
-          onChanged: (v) => setState(() => _selectedUnits = v),
-        ),
+        if (vialMax != null && sliderMax < totalIU)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)',
+              style: kMutedLabelStyle(context).copyWith(fontSize: 11),
+            ),
+          )
+        else if (sliderMax < totalIU)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              'Range limited by syringe capacity',
+              style: kMutedLabelStyle(context).copyWith(fontSize: 11),
+            ),
+          ),
+        const SizedBox(height: 8),
         // Live syringe gauge preview (interactive)
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Stack(
@@ -509,6 +491,21 @@ class _ReconstitutionCalculatorWidgetState
                   totalIU: _syringe.totalUnits.toDouble(),
                   fillIU: _selectedUnits,
                   interactive: true,
+                  maxConstraint: sliderMax,
+                  onMaxConstraintHit: () {
+                    // Show snackbar when user hits constraint
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          vialMax != null
+                              ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                              : 'Limited by syringe capacity',
+                        ),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
                   onChanged: (newValue) {
                     // Clamp to slider min/max
                     final clampedValue = newValue.clamp(sliderMin, sliderMax);
@@ -530,7 +527,7 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           // Conversational explanation
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -547,12 +544,14 @@ class _ReconstitutionCalculatorWidgetState
                     children: [
                       const TextSpan(text: 'Reconstitute '),
                       TextSpan(
-                        text: '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+                        text:
+                            '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
-                      if (widget.medicationName != null && widget.medicationName!.isNotEmpty) ...[
+                      if (widget.medicationName != null &&
+                          widget.medicationName!.isNotEmpty) ...[
                         const TextSpan(text: ' '),
                         TextSpan(
                           text: widget.medicationName!,
@@ -581,7 +580,6 @@ class _ReconstitutionCalculatorWidgetState
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
                     ),
                     children: [
                       const TextSpan(text: 'Draw '),
@@ -594,7 +592,8 @@ class _ReconstitutionCalculatorWidgetState
                       ),
                       const TextSpan(text: ' ('),
                       TextSpan(
-                        text: '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
+                        text:
+                            '${_fmt((_selectedUnits / 100) * _syringe.ml)} mL',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -735,99 +734,111 @@ class _ReconstitutionCalculatorWidgetState
               ),
               borderRadius: BorderRadius.circular(8),
             ),
-          child: Row(
-            children: [
-              Radio<String>(
-                value: optionValue,
-                groupValue: selectedValue,
-                onChanged: isValid ? (_) => onTap() : null,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: selected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-                      ),
-                    ),
-                    if (explainerText.isNotEmpty) ...[
-                      const SizedBox(height: 1),
+            child: Row(
+              children: [
+                Radio<String>(
+                  value: optionValue,
+                  groupValue: selectedValue,
+                  onChanged: isValid ? (_) => onTap() : null,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        explainerText,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                          fontSize: 11,
+                        label,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: selected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                                  0.5,
+                                ),
+                        ),
+                      ),
+                      if (explainerText.isNotEmpty) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          explainerText,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 2),
+                      RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: selected
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
+                          ),
+                          children: [
+                            TextSpan(
+                              text:
+                                  '${_diluentNameCtrl.text.trim().isNotEmpty ? _diluentNameCtrl.text.trim() : "Diluent"}: ',
+                            ),
+                            TextSpan(
+                              text: '${_fmt(roundedVolume)} mL',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: selected
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
+                          ),
+                          children: [
+                            TextSpan(text: 'Concentration: '),
+                            TextSpan(
+                              text:
+                                  '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: selected
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
+                          ),
+                          children: [
+                            TextSpan(text: 'Syringe (${_syringe.label}): '),
+                            TextSpan(
+                              text: '${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                    const SizedBox(height: 2),
-                    RichText(
-                      text: TextSpan(
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: selected
-                              ? theme.colorScheme.onSurfaceVariant
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '${_diluentNameCtrl.text.trim().isNotEmpty ? _diluentNameCtrl.text.trim() : "Diluent"}: ',
-                          ),
-                          TextSpan(
-                            text: '${_fmt(roundedVolume)} mL',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: selected
-                              ? theme.colorScheme.onSurfaceVariant
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-                        ),
-                        children: [
-                          TextSpan(text: 'Concentration: '),
-                          TextSpan(
-                            text:
-                                '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: selected
-                              ? theme.colorScheme.onSurfaceVariant
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-                        ),
-                        children: [
-                          TextSpan(text: 'Syringe (${_syringe.label}): '),
-                          TextSpan(
-                            text: '${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }

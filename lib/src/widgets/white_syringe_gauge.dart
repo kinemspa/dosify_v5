@@ -11,6 +11,8 @@ class WhiteSyringeGauge extends StatefulWidget {
     this.color,
     this.onChanged,
     this.interactive = false,
+    this.maxConstraint,
+    this.onMaxConstraintHit,
   });
 
   final double totalIU;
@@ -18,6 +20,8 @@ class WhiteSyringeGauge extends StatefulWidget {
   final Color? color;
   final ValueChanged<double>? onChanged;
   final bool interactive;
+  final double? maxConstraint;
+  final VoidCallback? onMaxConstraintHit;
 
   @override
   State<WhiteSyringeGauge> createState() => _WhiteSyringeGaugeState();
@@ -25,10 +29,12 @@ class WhiteSyringeGauge extends StatefulWidget {
 
 class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
   double? _dragValue;
+  bool _hitConstraint = false;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = widget.color ?? Theme.of(context).colorScheme.primary;
+    final effectiveColor =
+        widget.color ?? Theme.of(context).colorScheme.primary;
     final currentFill = _dragValue ?? widget.fillIU;
 
     return GestureDetector(
@@ -39,7 +45,20 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               final localPosition = box.globalToLocal(details.globalPosition);
               final width = box.size.width;
               final fillRatio = (localPosition.dx / width).clamp(0.0, 1.0);
-              final newFillIU = fillRatio * widget.totalIU;
+              var newFillIU = fillRatio * widget.totalIU;
+
+              // Check max constraint
+              if (widget.maxConstraint != null &&
+                  newFillIU > widget.maxConstraint!) {
+                newFillIU = widget.maxConstraint!;
+                if (!_hitConstraint) {
+                  _hitConstraint = true;
+                  widget.onMaxConstraintHit?.call();
+                }
+              } else {
+                _hitConstraint = false;
+              }
+
               setState(() {
                 _dragValue = newFillIU;
               });
@@ -52,6 +71,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               }
               setState(() {
                 _dragValue = null;
+                _hitConstraint = false;
               });
             }
           : null,
@@ -62,7 +82,15 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               final localPosition = box.globalToLocal(details.globalPosition);
               final width = box.size.width;
               final fillRatio = (localPosition.dx / width).clamp(0.0, 1.0);
-              final newFillIU = fillRatio * widget.totalIU;
+              var newFillIU = fillRatio * widget.totalIU;
+
+              // Check max constraint
+              if (widget.maxConstraint != null &&
+                  newFillIU > widget.maxConstraint!) {
+                newFillIU = widget.maxConstraint!;
+                widget.onMaxConstraintHit?.call();
+              }
+
               if (widget.onChanged != null) {
                 widget.onChanged!(newFillIU);
               }
@@ -74,6 +102,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
           totalIU: widget.totalIU,
           fillIU: currentFill,
           color: effectiveColor,
+          interactive: widget.interactive,
         ),
       ),
     );
@@ -85,11 +114,13 @@ class _WhiteSyringePainter extends CustomPainter {
     required this.totalIU,
     required this.fillIU,
     required this.color,
+    this.interactive = false,
   });
 
   final double totalIU;
   final double fillIU;
   final Color color;
+  final bool interactive;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -160,6 +191,22 @@ class _WhiteSyringePainter extends CustomPainter {
         Offset(fillEndX, baselineY),
         fillPaint,
       );
+
+      // Draw draggable handle indicator if interactive
+      if (interactive && fillEndX > 0) {
+        final handlePaint = Paint()
+          ..color = color
+          ..style = PaintingStyle.fill;
+
+        // Draw a circular handle at the end of the fill line
+        canvas.drawCircle(Offset(fillEndX, baselineY), 6.0, handlePaint);
+
+        // Draw white center to make it more visible
+        final centerPaint = Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.fill;
+        canvas.drawCircle(Offset(fillEndX, baselineY), 3.0, centerPaint);
+      }
     }
   }
 
@@ -167,6 +214,7 @@ class _WhiteSyringePainter extends CustomPainter {
   bool shouldRepaint(covariant _WhiteSyringePainter oldDelegate) {
     return oldDelegate.totalIU != totalIU ||
         oldDelegate.fillIU != fillIU ||
-        oldDelegate.color != color;
+        oldDelegate.color != color ||
+        oldDelegate.interactive != interactive;
   }
 }
