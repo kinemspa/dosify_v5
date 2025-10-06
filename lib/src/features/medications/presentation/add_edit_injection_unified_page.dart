@@ -1092,7 +1092,7 @@ class _AddEditInjectionUnifiedPageState
                             bottom: 12,
                           ),
                           child: Text(
-                            'Track the number of unreconstituted sealed vials you have in storage. This is used for restocking and low stock alerts.',
+                            'Track the number of vials you have in storage. This includes unreconstituted sealed vials or pre-reconstituted multi-dose vials. Used for restocking and low stock alerts.',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: Theme.of(context)
