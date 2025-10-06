@@ -221,15 +221,16 @@ class _ReconstitutionCalculatorWidgetState
 
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
     final currentC = _round2(current.cPerMl);
-    final currentV = _roundToHalfMl(
+    final currentV = current.vialVolume; // Use precise value for live display
+    final currentVRounded = _roundToHalfMl(
       current.vialVolume,
-    ); // Round to nearest 0.5 mL
+    ); // Rounded for saving
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
-    // Notify parent of calculation result
+    // Notify parent of calculation result (use rounded value for saving)
     final result = ReconstitutionResult(
       perMlConcentration: currentC,
-      solventVolumeMl: currentV,
+      solventVolumeMl: currentVRounded,
       recommendedUnits: _round2(_selectedUnits),
       syringeSizeMl: _syringe.ml,
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
