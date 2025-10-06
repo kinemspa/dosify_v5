@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../widgets/field36.dart';
 import '../../../widgets/unified_form.dart';
+import '../../../widgets/app_header.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_widget.dart';
 import 'reconstitution_calculator_dialog.dart';
@@ -32,6 +33,7 @@ class ReconstitutionCalculatorPage extends StatefulWidget {
 class _ReconstitutionCalculatorPageState
     extends State<ReconstitutionCalculatorPage> {
   late final TextEditingController _strengthCtrl;
+  late final TextEditingController _medNameCtrl;
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
 
@@ -46,11 +48,13 @@ class _ReconstitutionCalculatorPageState
                 : widget.initialStrengthValue.toStringAsFixed(2))
           : '',
     );
+    _medNameCtrl = TextEditingController();
   }
 
   @override
   void dispose() {
     _strengthCtrl.dispose();
+    _medNameCtrl.dispose();
     super.dispose();
   }
 
@@ -92,13 +96,30 @@ class _ReconstitutionCalculatorPageState
     final strengthValue = double.tryParse(_strengthCtrl.text) ?? 0;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(),
-        title: const Text('Reconstitution Calculator'),
-      ),
+      appBar: const GradientAppBar(title: 'Reconstitution Calculator'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Medication name input (optional)
+          LabelFieldRow(
+            label: 'Medication',
+            field: Field36(
+              child: TextField(
+                controller: _medNameCtrl,
+                decoration: _fieldDecoration(context, hint: 'Optional'),
+                onChanged: (_) => setState(() {}),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 12, top: 2),
+            child: Text(
+              'Enter the medication name (optional, for context)',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
           // Strength input row
           LabelFieldRow(
             label: 'Vial Strength',
@@ -144,6 +165,9 @@ class _ReconstitutionCalculatorPageState
             ReconstitutionCalculatorWidget(
               initialStrengthValue: strengthValue,
               unitLabel: widget.unitLabel,
+              medicationName: _medNameCtrl.text.trim().isNotEmpty
+                  ? _medNameCtrl.text.trim()
+                  : null,
               initialDoseValue: widget.initialDoseValue,
               initialDoseUnit: widget.initialDoseUnit,
               initialSyringeSize: widget.initialSyringeSize,

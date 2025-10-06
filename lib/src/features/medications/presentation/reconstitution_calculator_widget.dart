@@ -463,25 +463,23 @@ class _ReconstitutionCalculatorWidgetState
             style: kMutedLabelStyle(context),
           ),
         ),
-        // Only show limit text when user is actually at the limit
-        if (vialMax != null &&
-            sliderMax < totalIU &&
-            (_selectedUnits >= sliderMax - 1))
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)',
-              style: kMutedLabelStyle(context).copyWith(fontSize: 11),
-            ),
-          )
-        else if (sliderMax < totalIU && (_selectedUnits >= sliderMax - 1))
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              'Range limited by syringe capacity',
-              style: kMutedLabelStyle(context).copyWith(fontSize: 11),
+        // Range limit text - always occupies space to prevent nudging
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            (vialMax != null &&
+                    sliderMax < totalIU &&
+                    (_selectedUnits >= sliderMax - 1))
+                ? 'Range limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                : (sliderMax < totalIU && (_selectedUnits >= sliderMax - 1))
+                ? 'Range limited by syringe capacity'
+                : '', // Empty string maintains space
+            style: kMutedLabelStyle(context).copyWith(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.error, // Warning color
             ),
           ),
+        ),
         const SizedBox(height: 8),
         // Live syringe gauge preview (interactive)
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
@@ -530,10 +528,10 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 28),
           // Conversational explanation
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -598,7 +596,7 @@ class _ReconstitutionCalculatorWidgetState
                       const TextSpan(text: ' ('),
                       TextSpan(
                         text:
-                            '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(1)} mL',
+                            '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
