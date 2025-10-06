@@ -6,6 +6,7 @@ import '../../../widgets/app_header.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_widget.dart';
 import 'reconstitution_calculator_dialog.dart';
+import '../../medications/domain/medication.dart';
 
 class ReconstitutionCalculatorPage extends StatefulWidget {
   const ReconstitutionCalculatorPage({
@@ -19,7 +20,7 @@ class ReconstitutionCalculatorPage extends StatefulWidget {
   });
 
   final double initialStrengthValue;
-  final String unitLabel;
+  final String unitLabel; // This becomes the initial unit
   final double? initialDoseValue;
   final String? initialDoseUnit;
   final SyringeSizeMl? initialSyringeSize;
@@ -34,6 +35,7 @@ class _ReconstitutionCalculatorPageState
     extends State<ReconstitutionCalculatorPage> {
   late final TextEditingController _strengthCtrl;
   late final TextEditingController _medNameCtrl;
+  late String _selectedUnit; // Track selected unit
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
 
@@ -49,6 +51,18 @@ class _ReconstitutionCalculatorPageState
           : '',
     );
     _medNameCtrl = TextEditingController();
+    // Initialize unit from unitLabel, default to mg if invalid
+    _selectedUnit = _parseUnitFromLabel(widget.unitLabel);
+  }
+
+  String _parseUnitFromLabel(String label) {
+    // Parse the unit label to get a valid unit string
+    final lowerLabel = label.toLowerCase();
+    if (lowerLabel.contains('units')) return 'units';
+    if (lowerLabel.contains('mcg')) return 'mcg';
+    if (lowerLabel.contains('mg')) return 'mg';
+    if (lowerLabel.contains('g')) return 'g';
+    return 'mg'; // Default to mg
   }
 
   @override
@@ -91,6 +105,28 @@ class _ReconstitutionCalculatorPageState
     );
   }
 
+  InputDecoration _dropdownDecoration(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InputDecoration(
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      filled: true,
+      fillColor: cs.surfaceContainerLowest,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: 0.75,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final strengthValue = double.tryParse(_strengthCtrl.text) ?? 0;
@@ -117,6 +153,41 @@ class _ReconstitutionCalculatorPageState
             padding: const EdgeInsets.only(left: 128, bottom: 12, top: 2),
             child: Text(
               'Enter the medication name (optional, for context)',
+              style: kMutedLabelStyle(context),
+            ),
+          ),
+          // Unit dropdown
+          LabelFieldRow(
+            label: 'Strength Unit',
+            field: SmallDropdown36<String>(
+              value: _selectedUnit,
+              width: kSmallControlWidth,
+              items: const [
+                DropdownMenuItem(
+                  value: 'mcg',
+                  child: Center(child: Text('mcg')),
+                ),
+                DropdownMenuItem(
+                  value: 'mg',
+                  child: Center(child: Text('mg')),
+                ),
+                DropdownMenuItem(
+                  value: 'g',
+                  child: Center(child: Text('g')),
+                ),
+                DropdownMenuItem(
+                  value: 'units',
+                  child: Center(child: Text('units')),
+                ),
+              ],
+              onChanged: (v) => setState(() => _selectedUnit = v ?? 'mg'),
+              decoration: _dropdownDecoration(context),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 128, bottom: 12, top: 2),
+            child: Text(
+              'Select the unit for vial strength',
               style: kMutedLabelStyle(context),
             ),
           ),
@@ -164,7 +235,7 @@ class _ReconstitutionCalculatorPageState
           if (strengthValue > 0)
             ReconstitutionCalculatorWidget(
               initialStrengthValue: strengthValue,
-              unitLabel: widget.unitLabel,
+              unitLabel: _selectedUnit,
               medicationName: _medNameCtrl.text.trim().isNotEmpty
                   ? _medNameCtrl.text.trim()
                   : null,
