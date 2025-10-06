@@ -508,15 +508,16 @@ class _AddEditInjectionUnifiedPageState
                       ),
                       LabelFieldRow(
                         label: 'Notes',
-                        field: Field36(
-                          child: TextFormField(
-                            controller: _notes,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Notes',
-                              'eg. Take with food',
-                            ),
+                        field: TextFormField(
+                          controller: _notes,
+                          keyboardType: TextInputType.multiline,
+                          minLines: 2,
+                          maxLines: null,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          decoration: _dec(
+                            context,
+                            'Notes',
+                            'eg. Take with food',
                           ),
                         ),
                       ),
