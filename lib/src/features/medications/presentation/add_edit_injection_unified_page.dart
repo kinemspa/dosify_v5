@@ -110,9 +110,13 @@ class _AddEditInjectionUnifiedPageState
     if (widget.kind == InjectionKind.multi) {
       final vialVol = double.tryParse(_vialVolume.text.trim());
       final concentration = double.tryParse(_perMl.text.trim());
-      if (vialVol != null && vialVol > 0 && concentration != null && concentration > 0) {
+      if (vialVol != null &&
+          vialVol > 0 &&
+          concentration != null &&
+          concentration > 0) {
         final totalDose = concentration * vialVol;
-        mdvAdditionalInfo = '${totalDose.toStringAsFixed(totalDose == totalDose.roundToDouble() ? 0 : 1)}$unitLabel in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
+        mdvAdditionalInfo =
+            '${totalDose.toStringAsFixed(totalDose == totalDose.roundToDouble() ? 0 : 1)}$unitLabel in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
       } else if (vialVol != null && vialVol > 0) {
         mdvAdditionalInfo = 'Vial Volume: ${vialVol.toStringAsFixed(1)} mL';
       }
@@ -124,7 +128,8 @@ class _AddEditInjectionUnifiedPageState
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: _isPerMl ? '$unitLabel/mL' : unitLabel,
-      perMlValue: null, // Don't use perMlValue for MDV - we show it in additionalInfo instead
+      perMlValue:
+          null, // Don't use perMlValue for MDV - we show it in additionalInfo instead
       stockCurrent: stockVal ?? 0,
       stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
       stockUnitLabel: 'unreconstituted $stockUnitLabel',
@@ -663,7 +668,8 @@ class _AddEditInjectionUnifiedPageState
                           neutral: true,
                           children: [
                             // Helper text under heading, full width (only show if user tried to open without strength)
-                            if (_showCalculator && _strengthForCalculator() == null)
+                            if (_showCalculator &&
+                                _strengthForCalculator() == null)
                               Padding(
                                 padding: const EdgeInsets.only(
                                   left: 8,
@@ -674,7 +680,9 @@ class _AddEditInjectionUnifiedPageState
                                   'Please enter the vial strength above before using the reconstitution calculator.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
-                                        color: Theme.of(context).colorScheme.error,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
                                         fontWeight: FontWeight.w600,
                                       ),
                                 ),
@@ -690,7 +698,9 @@ class _AddEditInjectionUnifiedPageState
                                   'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
                                       ),
                                 ),
                               ),
@@ -699,9 +709,7 @@ class _AddEditInjectionUnifiedPageState
                               child: _showCalculator
                                   ? FilledButton.icon(
                                       onPressed: () {
-                                        setState(
-                                          () => _showCalculator = false,
-                                        );
+                                        setState(() => _showCalculator = false);
                                       },
                                       icon: const Icon(Icons.close),
                                       label: Text(
@@ -714,9 +722,13 @@ class _AddEditInjectionUnifiedPageState
                                       onPressed: () {
                                         if (_strengthForCalculator() == null) {
                                           // Show error in helper text when clicked without strength
-                                          setState(() => _showCalculator = true);
+                                          setState(
+                                            () => _showCalculator = true,
+                                          );
                                         } else {
-                                          setState(() => _showCalculator = true);
+                                          setState(
+                                            () => _showCalculator = true,
+                                          );
                                         }
                                       },
                                       icon: const Icon(Icons.calculate),
@@ -741,74 +753,160 @@ class _AddEditInjectionUnifiedPageState
                                       totalIU:
                                           _reconResult!.syringeSizeMl * 100,
                                       fillIU: _reconResult!.recommendedUnits,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                     const SizedBox(height: 16),
                                     RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                         children: [
                                           const TextSpan(text: 'Reconstitute '),
                                           TextSpan(
-                                            text: '${_strength.text.trim()} ${_baseUnit(_strengthUnit)}',
-                                            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                            text:
+                                                '${_strength.text.trim()} ${_baseUnit(_strengthUnit)}',
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            ),
                                           ),
                                           if (_name.text.trim().isNotEmpty) ...[
                                             const TextSpan(text: ' '),
                                             TextSpan(
                                               text: _name.text.trim(),
-                                              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                              style: TextStyle(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                              ),
                                             ),
                                           ],
                                           const TextSpan(text: ' with '),
                                           TextSpan(
-                                            text: '${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL',
-                                            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                            text:
+                                                '${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL',
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            ),
                                           ),
-                                          if (_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty)
-                                            TextSpan(text: ' ${_reconResult!.diluentName}'),
+                                          if (_reconResult!.diluentName !=
+                                                  null &&
+                                              _reconResult!
+                                                  .diluentName!
+                                                  .isNotEmpty)
+                                            TextSpan(
+                                              text:
+                                                  ' ${_reconResult!.diluentName}',
+                                            ),
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 6),
+                                    // Split into 3 lines like calculator display
                                     RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          fontStyle: FontStyle.italic,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            ),
                                         children: [
                                           const TextSpan(text: 'Draw '),
                                           TextSpan(
-                                            text: '${_reconResult!.recommendedUnits.toStringAsFixed(_reconResult!.recommendedUnits == _reconResult!.recommendedUnits.roundToDouble() ? 0 : 1)} IU',
+                                            text:
+                                                '${_reconResult!.recommendedUnits.toStringAsFixed(1)} IU',
                                             style: TextStyle(
-                                              color: Theme.of(context).colorScheme.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const TextSpan(text: ' ('),
                                           TextSpan(
-                                            text: '${(_reconResult!.recommendedUnits / 100 * _reconResult!.syringeSizeMl).toStringAsFixed(2)} mL',
+                                            text:
+                                                '${(_reconResult!.recommendedUnits / 100 * _reconResult!.syringeSizeMl).toStringAsFixed(2)} mL',
                                             style: TextStyle(
-                                              color: Theme.of(context).colorScheme.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          const TextSpan(text: ') into a '),
+                                          const TextSpan(text: ')'),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            ),
+                                        children: [
+                                          const TextSpan(text: 'into a '),
                                           TextSpan(
-                                            text: '${_reconResult!.syringeSizeMl.toStringAsFixed(1)} mL',
+                                            text:
+                                                '${_reconResult!.syringeSizeMl.toStringAsFixed(1)} mL',
                                             style: TextStyle(
-                                              color: Theme.of(context).colorScheme.primary,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           const TextSpan(text: ' syringe'),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            ),
+                                        children: [
+                                          const TextSpan(text: 'for your '),
+                                          TextSpan(
+                                            text:
+                                                '${_reconResult!.perMlConcentration.toStringAsFixed(_reconResult!.perMlConcentration == _reconResult!.perMlConcentration.roundToDouble() ? 0 : 1)} ${_baseUnit(_strengthUnit)}',
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const TextSpan(text: ' dose'),
                                         ],
                                       ),
                                     ),
@@ -820,7 +918,10 @@ class _AddEditInjectionUnifiedPageState
                             if (_showCalculator)
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surfaceContainerLowest.withOpacity(0.3),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerLowest
+                                      .withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(12),
@@ -828,29 +929,35 @@ class _AddEditInjectionUnifiedPageState
                                 child: Column(
                                   children: [
                                     ReconstitutionCalculatorWidget(
-                                  initialStrengthValue:
-                                      double.tryParse(_strength.text.trim()) ??
-                                      0,
-                                  unitLabel: _baseUnit(_strengthUnit),
-                                  medicationName: _name.text.trim().isNotEmpty ? _name.text.trim() : null,
-                                  initialDoseValue: _lastCalcDose,
-                                  initialDoseUnit: _lastCalcDoseUnit,
-                                  initialSyringeSize: _lastCalcSyringe,
-                                  initialVialSize: _lastCalcVialSize,
-                                  showSummary: false,
-                                  showApplyButton: true,
-                                  onApply: (result) {
-                                    setState(() {
-                                      _perMl.text = fmt2(
-                                        result.perMlConcentration,
-                                      );
-                                      _vialVolume.text = fmt2(
-                                        result.solventVolumeMl,
-                                      );
-                                      _reconResult = result;
-                                      _showCalculator = false; // Hide calculator after save
-                                    });
-                                  },
+                                      initialStrengthValue:
+                                          double.tryParse(
+                                            _strength.text.trim(),
+                                          ) ??
+                                          0,
+                                      unitLabel: _baseUnit(_strengthUnit),
+                                      medicationName:
+                                          _name.text.trim().isNotEmpty
+                                          ? _name.text.trim()
+                                          : null,
+                                      initialDoseValue: _lastCalcDose,
+                                      initialDoseUnit: _lastCalcDoseUnit,
+                                      initialSyringeSize: _lastCalcSyringe,
+                                      initialVialSize: _lastCalcVialSize,
+                                      showSummary: false,
+                                      showApplyButton: true,
+                                      onApply: (result) {
+                                        setState(() {
+                                          _perMl.text = fmt2(
+                                            result.perMlConcentration,
+                                          );
+                                          _vialVolume.text = fmt2(
+                                            result.solventVolumeMl,
+                                          );
+                                          _reconResult = result;
+                                          _showCalculator =
+                                              false; // Hide calculator after save
+                                        });
+                                      },
                                       onCalculate: (result, isValid) {
                                         // Preview only, don't save yet
                                       },
@@ -866,7 +973,9 @@ class _AddEditInjectionUnifiedPageState
                                             });
                                           },
                                           icon: const Icon(Icons.clear),
-                                          label: const Text('Clear Reconstitution'),
+                                          label: const Text(
+                                            'Clear Reconstitution',
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -881,7 +990,9 @@ class _AddEditInjectionUnifiedPageState
                                 label: 'Vial volume (mL)',
                                 field: StepperRow36(
                                   controller: _vialVolume,
-                                  enabled: _reconResult == null, // Disable if reconstituted
+                                  enabled:
+                                      _reconResult ==
+                                      null, // Disable if reconstituted
                                   onDec: () {
                                     if (_reconResult != null) return;
                                     final v =
@@ -1353,10 +1464,9 @@ class _AddEditInjectionUnifiedPageState
           child: Text(
             'Confirm Medication',
             textAlign: TextAlign.center,
-            style: Theme.of(ctx)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(
+              ctx,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
         ),
         content: SingleChildScrollView(
@@ -1366,17 +1476,18 @@ class _AddEditInjectionUnifiedPageState
             children: [
               Text(
                 '${med.name}',
-                style: Theme.of(ctx)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  ctx,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Text('Form: ${switch (widget.kind) {
-                InjectionKind.pfs => "Pre-Filled Syringe",
-                InjectionKind.single => "Single Dose Vial",
-                InjectionKind.multi => "Multi Dose Vial",
-              }}'),
+              Text(
+                'Form: ${switch (widget.kind) {
+                  InjectionKind.pfs => "Pre-Filled Syringe",
+                  InjectionKind.single => "Single Dose Vial",
+                  InjectionKind.multi => "Multi Dose Vial",
+                }}',
+              ),
               if (med.manufacturer != null)
                 Text('Manufacturer: ${med.manufacturer}'),
               Text(
@@ -1386,13 +1497,12 @@ class _AddEditInjectionUnifiedPageState
                 Text(
                   'Concentration: ${med.perMlValue} ${_baseUnit(med.strengthUnit)}/mL',
                 ),
-              if (med.containerVolumeMl != null && widget.kind == InjectionKind.multi)
+              if (med.containerVolumeMl != null &&
+                  widget.kind == InjectionKind.multi)
                 Text('Vial Volume: ${med.containerVolumeMl} mL'),
               Text('Stock: ${med.stockValue} ${_stockUnitLabel()}'),
               if (med.expiry != null)
-                Text(
-                  'Expiry: ${DateFormat('dd/MM/yy').format(med.expiry!)}',
-                ),
+                Text('Expiry: ${DateFormat('dd/MM/yy').format(med.expiry!)}'),
             ],
           ),
         ),
