@@ -96,9 +96,6 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.multi => 'multi dose vials',
     };
 
-    // No additional notes in summary card anymore
-    String? additionalNotes;
-
     // Determine perUnitLabel based on injection type
     final perUnitLabel = switch (widget.kind) {
       InjectionKind.pfs => 'Syringe',
@@ -106,21 +103,36 @@ class _AddEditInjectionUnifiedPageState
       InjectionKind.multi => 'Vial',
     };
 
-    // For MDV, build custom additionalInfo with total dose and concentration
+    // For MDV, build custom additionalInfo with 3-line format:
+    // Line 1: "10mg per Vial"
+    // Line 2: "in 4.5mL of ReconName, X/mL"
+    // Line 3: "X unreconstituted vials remain in stock"
     String? mdvAdditionalInfo;
-    if (widget.kind == InjectionKind.multi) {
+    if (widget.kind == InjectionKind.multi && strengthVal != null && strengthVal > 0) {
       final vialVol = double.tryParse(_vialVolume.text.trim());
       final concentration = double.tryParse(_perMl.text.trim());
-      if (vialVol != null &&
-          vialVol > 0 &&
-          concentration != null &&
-          concentration > 0) {
-        final totalDose = concentration * vialVol;
-        mdvAdditionalInfo =
-            '${totalDose.toStringAsFixed(totalDose == totalDose.roundToDouble() ? 0 : 1)}$unitLabel in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
+      final stockCount = stockVal?.toInt() ?? 0;
+      
+      // Line 1: Strength per vial
+      final line1 =
+          '${strengthVal.toStringAsFixed(strengthVal == strengthVal.roundToDouble() ? 0 : 1)}$unitLabel per Vial';
+      
+      // Line 2: Reconstitution details (if available)
+      String? line2;
+      if (vialVol != null && vialVol > 0 && concentration != null && concentration > 0) {
+        final diluentName = _reconResult?.diluentName ?? 'diluent';
+        line2 = 'in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL of $diluentName, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
       } else if (vialVol != null && vialVol > 0) {
-        mdvAdditionalInfo = 'Vial Volume: ${vialVol.toStringAsFixed(1)} mL';
+        line2 = 'Vial Volume: ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)} mL';
       }
+      
+      // Line 3: Stock count
+      String line3 = '$stockCount unreconstituted ${stockCount == 1 ? "vial" : "vials"} remain in stock';
+      
+      // Combine lines with line breaks
+      mdvAdditionalInfo = line1;
+      if (line2 != null) mdvAdditionalInfo += '\n$line2';
+      mdvAdditionalInfo += '\n$line3';
     }
 
     final card = SummaryHeaderCard(
@@ -665,7 +677,7 @@ class _AddEditInjectionUnifiedPageState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SectionFormCard(
-                          title: 'Volume & Reconstitution',
+                          title: 'Active Vial',
                           neutral: true,
                           children: [
                             // Helper text under heading, full width (only show if user tried to open without strength)
@@ -1046,7 +1058,9 @@ class _AddEditInjectionUnifiedPageState
                                   bottom: 6,
                                 ),
                                 child: Text(
-                                  'Enter known volume or use calculator to determine reconstitution amount.',
+                                  _reconResult != null
+                                      ? 'Edit reconstitution to change vial volume.'
+                                      : 'Enter known volume or use calculator to determine reconstitution amount.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: Theme.of(context)
@@ -1065,7 +1079,7 @@ class _AddEditInjectionUnifiedPageState
                     const SizedBox(height: 12),
 
                   SectionFormCard(
-                    title: 'Inventory',
+                    title: widget.kind == InjectionKind.multi ? 'Vial Inventory' : 'Inventory',
                     neutral: true,
                     children: [
                       // Helper text for inventory section
