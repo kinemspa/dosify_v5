@@ -13,6 +13,17 @@ const double kLabelColWidth = 120.0;
 /// Default width for compact controls (dropdowns, numeric fields, date button)
 const double kSmallControlWidth = 120.0;
 
+/// Responsive width fraction for compact controls (as percentage of available field space)
+/// 0.5 = 50% of available space in Expanded field area
+/// This provides consistent sizing across different screen sizes
+const double kCompactControlWidthFraction = 0.5;
+
+/// Minimum width for compact controls (prevents controls from becoming too small)
+const double kMinCompactControlWidth = 100.0;
+
+/// Maximum width for compact controls (prevents controls from becoming too large)
+const double kMaxCompactControlWidth = 180.0;
+
 /// A section card with identical decoration to the Tablet/Capsule screens.
 class SectionFormCard extends StatelessWidget {
   const SectionFormCard({
@@ -159,12 +170,28 @@ class DateButton36 extends StatelessWidget {
               minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
             ),
           );
-    // Keep fixed width even when placed inside Expanded by removing horizontal constraints
+    // Use responsive width if no explicit width provided
+    if (width == null) {
+      return Align(
+        alignment: Alignment.center,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kMinCompactControlWidth,
+            maxWidth: kMaxCompactControlWidth,
+          ),
+          child: FractionallySizedBox(
+            widthFactor: kCompactControlWidthFraction,
+            child: SizedBox(height: kFieldHeight, child: btn),
+          ),
+        ),
+      );
+    }
+    // Use explicit width if provided
     return UnconstrainedBox(
       alignment: Alignment.center,
       child: SizedBox(
         height: kFieldHeight,
-        width: width ?? kSmallControlWidth,
+        width: width,
         child: btn,
       ),
     );
@@ -191,12 +218,44 @@ class SmallDropdown36<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Keep fixed width even when placed inside Expanded by removing horizontal constraints
+    // Use responsive width if no explicit width provided
+    if (width == null) {
+      return Align(
+        alignment: Alignment.center,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kMinCompactControlWidth,
+            maxWidth: kMaxCompactControlWidth,
+          ),
+          child: FractionallySizedBox(
+            widthFactor: kCompactControlWidthFraction,
+            child: SizedBox(
+              height: kFieldHeight,
+              child: DropdownButtonFormField<T>(
+          value: value,
+          isExpanded: false,
+          alignment: AlignmentDirectional.center,
+          style: theme.textTheme.bodyMedium,
+          items: items,
+          onChanged: onChanged,
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                decoration: decoration ?? const InputDecoration(isDense: true),
+                menuMaxHeight: 480,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    // Use explicit width if provided
     return UnconstrainedBox(
       alignment: Alignment.center,
       child: SizedBox(
         height: kFieldHeight,
-        width: width ?? kSmallControlWidth,
+        width: width,
         child: DropdownButtonFormField<T>(
           value: value,
           isExpanded: false,
@@ -384,24 +443,30 @@ class StepperRow36 extends StatelessWidget {
       children: [
         _pillBtn(context, '−', enabled ? onDec : () {}),
         const SizedBox(width: 4),
-        // Use UnconstrainedBox to maintain fixed width like other controls
-        UnconstrainedBox(
-          child: SizedBox(
-            width: kSmallControlWidth,
-            child: Field36(
-              child: Builder(
-                builder: (context) {
-                  final theme = Theme.of(context);
-                  final base = theme.textTheme.bodyMedium;
-                  final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
-                  return TextFormField(
-                    controller: controller,
-                    textAlign: TextAlign.center,
-                    style: style,
-                    decoration: decoration,
-                    enabled: enabled,
-                  );
-                },
+        // Use responsive width with constraints
+        Flexible(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: kMinCompactControlWidth,
+              maxWidth: kMaxCompactControlWidth,
+            ),
+            child: FractionallySizedBox(
+              widthFactor: kCompactControlWidthFraction,
+              child: Field36(
+                child: Builder(
+                  builder: (context) {
+                    final theme = Theme.of(context);
+                    final base = theme.textTheme.bodyMedium;
+                    final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
+                    return TextFormField(
+                      controller: controller,
+                      textAlign: TextAlign.center,
+                      style: style,
+                      decoration: decoration,
+                      enabled: enabled,
+                    );
+                  },
+                ),
               ),
             ),
           ),
