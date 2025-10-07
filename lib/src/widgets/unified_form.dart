@@ -384,11 +384,10 @@ class StepperRow36 extends StatelessWidget {
       children: [
         _pillBtn(context, '−', enabled ? onDec : () {}),
         const SizedBox(width: 4),
-        Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: kSmallControlWidth,
-            ),
+        // Use UnconstrainedBox to maintain fixed width like other controls
+        UnconstrainedBox(
+          child: SizedBox(
+            width: kSmallControlWidth,
             child: Field36(
               child: Builder(
                 builder: (context) {
