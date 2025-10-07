@@ -351,93 +351,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     );
   }
 
-  Widget _incBtn(String symbol, VoidCallback onTap) {
-    return SizedBox(
-      height: 30,
-      width: 30,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-          minimumSize: const Size(30, 30),
-        ),
-        onPressed: onTap,
-        child: Text(symbol),
-      ),
-    );
-  }
-
-  Widget _intStepper({
-    required TextEditingController controller,
-    int step = 1,
-    int min = 0,
-    int max = 1000000,
-    int width = 80,
-    String? label,
-    String? hint,
-    String? helper,
-    bool error = false,
-  }) {
-    return SizedBox(
-      height: 36,
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _incBtn('−', () {
-              final v = int.tryParse(controller.text.trim()) ?? 0;
-              final nv = (v - step).clamp(min, max);
-              setState(() => controller.text = nv.toString());
-            }),
-            const SizedBox(width: 6),
-            SizedBox(
-              width: width.toDouble(),
-              child: SizedBox(
-                height: kFieldHeight,
-                child: TextFormField(
-                  controller: controller,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    signed: false,
-                    decimal: false,
-                  ),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: (() {
-                    final base = _dec(
-                      label: label ?? '',
-                      hint: hint,
-                      helper: helper,
-                    );
-                    if (!error) return base;
-                    final cs = Theme.of(context).colorScheme;
-                    return base.copyWith(
-                      errorText: null,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-                      ),
-                    );
-                  })(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            _incBtn('+', () {
-              final v = int.tryParse(controller.text.trim()) ?? 0;
-              final nv = (v + step).clamp(min, max);
-              setState(() => controller.text = nv.toString());
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildEnhancedSummary() {
     if (_nameCtrl.text.isEmpty) {
       return Text(
@@ -1015,131 +928,77 @@ hint: 'eg. Take with water'
                     [
                       _rowLabelField(
                         label: 'Strength *',
-                        field: SizedBox(
-                          height: 36,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              _incBtn('−', () {
-                                final d = double.tryParse(
-                                  _strengthValueCtrl.text.trim(),
-                                );
-                                final base = d?.floor() ?? 0;
-                                final nv = (base - 1).clamp(0, 1000000000);
-                                setState(() {
-                                  _strengthValueCtrl.text = nv.toString();
-                                  _touchedStrengthAmt = true;
-                                });
-                              }),
-                              const SizedBox(width: 6),
-                              SizedBox(
-                                width: 120,
-                                child: Field36(
-                                  child: TextFormField(
-                                    controller: _strengthValueCtrl,
-                                    textAlign: TextAlign.center,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                    textAlignVertical: TextAlignVertical.center,
-                                    decoration:
-                                        _dec(
-                                          label: 'Amount *',
-                                          hint: '0',
-                                        ).copyWith(
-                                          errorText: null,
-                                          enabledBorder: gStrengthAmtError == null
-                                              ? null
-                                              : OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                                ),
-                                          focusedBorder: gStrengthAmtError == null
-                                              ? null
-                                              : OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                                ),
-                                        ),
-                                    onChanged: (_) => setState(() {
-                                      _touchedStrengthAmt = true;
-                                    }),
+                        field: StepperRow36(
+                          controller: _strengthValueCtrl,
+                          onDec: () {
+                            final d = double.tryParse(
+                              _strengthValueCtrl.text.trim(),
+                            );
+                            final base = d?.floor() ?? 0;
+                            final nv = (base - 1).clamp(0, 1000000000);
+                            setState(() {
+                              _strengthValueCtrl.text = nv.toString();
+                              _touchedStrengthAmt = true;
+                            });
+                          },
+                          onInc: () {
+                            final d = double.tryParse(
+                              _strengthValueCtrl.text.trim(),
+                            );
+                            final base = d?.floor() ?? 0;
+                            final nv = (base + 1).clamp(0, 1000000000);
+                            setState(() {
+                              _strengthValueCtrl.text = nv.toString();
+                              _touchedStrengthAmt = true;
+                            });
+                          },
+                          decoration: _dec(
+                            label: 'Amount *',
+                            hint: '0',
+                          ).copyWith(
+                            errorText: null,
+                            enabledBorder: gStrengthAmtError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              _incBtn('+', () {
-                                final d = double.tryParse(
-                                  _strengthValueCtrl.text.trim(),
-                                );
-                                final base = d?.floor() ?? 0;
-                                final nv = (base + 1).clamp(0, 1000000000);
-                                setState(() {
-                                  _strengthValueCtrl.text = nv.toString();
-                                  _touchedStrengthAmt = true;
-                                });
-                              }),
-                            ],
+                            focusedBorder: gStrengthAmtError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
                           ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          onChanged: (_) => setState(() {
+                            _touchedStrengthAmt = true;
+                          }),
                         ),
                       ),
                       _rowLabelField(
                         label: 'Unit *',
-                        field: Align(
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            height: kFieldHeight,
-                            width: 120,
-                            child: DropdownButtonFormField<Unit>(
-                              value: _strengthUnit,
-                              isExpanded: false,
-                              alignment: AlignmentDirectional.center,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              dropdownColor: Theme.of(
-                                context,
-                              ).colorScheme.surface,
-                              menuMaxHeight: 320,
-                              selectedItemBuilder: (ctx) =>
-                                  const [Unit.mcg, Unit.mg, Unit.g]
-                                      .map(
-                                        (u) => Center(
-                                          child: Text(
-                                            u == Unit.mcg
-                                                ? 'mcg'
-                                                : (u == Unit.mg ? 'mg' : 'g'),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                              items: const [Unit.mcg, Unit.mg, Unit.g]
-                                  .map(
-                                    (u) => DropdownMenuItem(
-                                      value: u,
-                                      alignment: AlignmentDirectional.center,
-                                      child: Center(
-                                        child: Text(
-                                          u == Unit.mcg
-                                              ? 'mcg'
-                                              : (u == Unit.mg ? 'mg' : 'g'),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (u) => setState(
-                                () => _strengthUnit = u ?? _strengthUnit,
-                              ),
-                              decoration: _decDrop(
-                                label: '',
-                                hint: null,
-                                helper: null,
-                              ),
-                            ),
+                        field: SmallDropdown36<Unit>(
+                          value: _strengthUnit,
+                          items: const [Unit.mcg, Unit.mg, Unit.g],
+                          itemBuilder: (u) => u == Unit.mcg
+                              ? 'mcg'
+                              : (u == Unit.mg ? 'mg' : 'g'),
+                          onChanged: (u) => setState(
+                            () => _strengthUnit = u ?? _strengthUnit,
+                          ),
+                          decoration: _decDrop(
+                            label: '',
+                            hint: null,
+                            helper: null,
                           ),
                         ),
                       ),
@@ -1210,15 +1069,53 @@ hint: 'eg. Take with water'
                     if (_lowStockEnabled) ...[
                       _rowLabelField(
                         label: 'Threshold',
-                        field: _intStepper(
+                        field: StepperRow36(
                           controller: _lowStockCtrl,
-                          step: 1,
-                          min: 0,
-                          max: 100000,
-                          width: 120,
-                          label: 'Threshold',
-                          hint: '0',
-                          error: gThresholdError != null,
+                          onDec: () {
+                            final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
+                            final nv = (v - 1).clamp(0, 100000);
+                            setState(() {
+                              _lowStockCtrl.text = nv.toString();
+                              _touchedThreshold = true;
+                            });
+                          },
+                          onInc: () {
+                            final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
+                            final nv = (v + 1).clamp(0, 100000);
+                            setState(() {
+                              _lowStockCtrl.text = nv.toString();
+                              _touchedThreshold = true;
+                            });
+                          },
+                          decoration: _dec(
+                            label: 'Threshold',
+                            hint: '0',
+                          ).copyWith(
+                            errorText: null,
+                            enabledBorder: gThresholdError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
+                            focusedBorder: gThresholdError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            signed: false,
+                            decimal: false,
+                          ),
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         ),
                       ),
                       if (gThresholdError != null)
@@ -1231,23 +1128,20 @@ hint: 'eg. Take with water'
                     ],
                     _rowLabelField(
                       label: 'Expiry date',
-                      field: SizedBox(
-                        width: 120,
-child: DateButton36(
-                          label: _expiry == null
-                              ? 'Select date'
-                              : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: context,
-                              firstDate: DateTime(now.year - 1),
-                              lastDate: DateTime(now.year + 10),
-                              initialDate: _expiry ?? now,
-                            );
-                            if (picked != null) setState(() => _expiry = picked);
-                          },
-                          width: 120,
+                      field: DateButton36(
+                        label: _expiry == null
+                            ? 'Select date'
+                            : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(now.year - 1),
+                            lastDate: DateTime(now.year + 10),
+                            initialDate: _expiry ?? now,
+                          );
+                          if (picked != null) setState(() => _expiry = picked);
+                        },
                           selected: _expiry != null,
                         ),
                       ),

@@ -669,144 +669,88 @@ hint: 'eg. Take with water'
                   _section('Strength', [
                     _rowLabelField(
                       label: 'Strength *',
-                      field: SizedBox(
-                        height: 36,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _incBtn('−', () {
-                              final d = double.tryParse(
-                                _strengthValueCtrl.text.trim(),
-                              );
-                              final base = d?.floor() ?? 0;
-                              final nv = (base - 1).clamp(0, 1000000000);
-                              setState(() {
-                                _strengthValueCtrl.text = nv.toString();
-                                _touchedStrengthAmt = true;
-                              });
-                            }),
-                            const SizedBox(width: 6),
-                            SizedBox(
-                              width: 120,
-                              child: Field36(
-                                child: TextFormField(
-                                  controller: _strengthValueCtrl,
-                                  textAlign: TextAlign.center,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
-                                    ),
-                                  ],
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  decoration: _dec(label: 'Amount *', hint: '0')
-                                      .copyWith(
-                                        errorText: null,
-                                        enabledBorder: gStrengthAmtError == null
-                                            ? null
-                                            : OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                              ),
-                                        focusedBorder: gStrengthAmtError == null
-                                            ? null
-                                            : OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                                borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                              ),
-                                      ),
-                                  validator: (v) {
-                                    final t = v?.trim() ?? '';
-                                    if (t.isEmpty) return 'Required';
-                                    final d = double.tryParse(t);
-                                    if (d == null) return 'Invalid number';
-                                    if (d <= 0) return 'Must be > 0';
-                                    return null;
-                                  },
-                                  onChanged: (_) => setState(() {
-                                    _touchedStrengthAmt = true;
-                                  }),
+                      field: StepperRow36(
+                        controller: _strengthValueCtrl,
+                        onDec: () {
+                          final d = double.tryParse(
+                            _strengthValueCtrl.text.trim(),
+                          );
+                          final base = d?.floor() ?? 0;
+                          final nv = (base - 1).clamp(0, 1000000000);
+                          setState(() {
+                            _strengthValueCtrl.text = nv.toString();
+                            _touchedStrengthAmt = true;
+                          });
+                        },
+                        onInc: () {
+                          final d = double.tryParse(
+                            _strengthValueCtrl.text.trim(),
+                          );
+                          final base = d?.floor() ?? 0;
+                          final nv = (base + 1).clamp(0, 1000000000);
+                          setState(() {
+                            _strengthValueCtrl.text = nv.toString();
+                            _touchedStrengthAmt = true;
+                          });
+                        },
+                        decoration: _dec(label: 'Amount *', hint: '0').copyWith(
+                          errorText: null,
+                          enabledBorder: gStrengthAmtError == null
+                              ? null
+                              : OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            _incBtn('+', () {
-                              final d = double.tryParse(
-                                _strengthValueCtrl.text.trim(),
-                              );
-                              final base = d?.floor() ?? 0;
-                              final nv = (base + 1).clamp(0, 1000000000);
-                              setState(() {
-                                _strengthValueCtrl.text = nv.toString();
-                                _touchedStrengthAmt = true;
-                              });
-                            }),
-                          ],
+                          focusedBorder: gStrengthAmtError == null
+                              ? null
+                              : OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
+                                  ),
+                                ),
                         ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'),
+                          ),
+                        ],
+                        validator: (v) {
+                          final t = v?.trim() ?? '';
+                          if (t.isEmpty) return 'Required';
+                          final d = double.tryParse(t);
+                          if (d == null) return 'Invalid number';
+                          if (d <= 0) return 'Must be > 0';
+                          return null;
+                        },
+                        onChanged: (_) => setState(() {
+                          _touchedStrengthAmt = true;
+                        }),
                       ),
                     ),
                     _rowLabelField(
                       label: 'Unit *',
-                      field: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              height: kFieldHeight,
-                              width: 120,
-                              child: DropdownButtonFormField<Unit>(
-                                value: _strengthUnit,
-                                isExpanded: false,
-                                alignment: AlignmentDirectional.center,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                dropdownColor: Theme.of(
-                                  context,
-                                ).colorScheme.surface,
-                                menuMaxHeight: 320,
-                                selectedItemBuilder: (ctx) =>
-                                    const [Unit.mcg, Unit.mg, Unit.g]
-                                        .map(
-                                          (u) => Center(
-                                            child: Text(
-                                              u == Unit.mcg
-                                                  ? 'mcg'
-                                                  : (u == Unit.mg ? 'mg' : 'g'),
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                items: const [Unit.mcg, Unit.mg, Unit.g]
-                                    .map(
-                                      (u) => DropdownMenuItem(
-                                        value: u,
-                                        alignment: AlignmentDirectional.center,
-                                        child: Center(
-                                          child: Text(
-                                            u == Unit.mcg
-                                                ? 'mcg'
-                                                : (u == Unit.mg ? 'mg' : 'g'),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (u) => setState(
-                                  () => _strengthUnit = u ?? _strengthUnit,
-                                ),
-                                decoration: _decDrop(
-                                  label: '',
-                                  hint: null,
-                                  helper: null,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ],
+                      field: SmallDropdown36<Unit>(
+                        value: _strengthUnit,
+                        items: const [Unit.mcg, Unit.mg, Unit.g],
+                        itemBuilder: (u) => u == Unit.mcg
+                            ? 'mcg'
+                            : (u == Unit.mg ? 'mg' : 'g'),
+                        onChanged: (u) => setState(
+                          () => _strengthUnit = u ?? _strengthUnit,
+                        ),
+                        decoration: _decDrop(
+                          label: '',
+                          hint: null,
+                          helper: null,
+                        ),
                       ),
                     ),
                     if (gStrengthAmtError != null)
@@ -1095,22 +1039,6 @@ _rowLabelField(
           },
           child: const Text('Save'),
         ),
-      ),
-    );
-  }
-
-  Widget _incBtn(String symbol, VoidCallback onTap) {
-    return SizedBox(
-      height: 30,
-      width: 30,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-          minimumSize: const Size(30, 30),
-        ),
-        onPressed: onTap,
-        child: Text(symbol),
       ),
     );
   }
