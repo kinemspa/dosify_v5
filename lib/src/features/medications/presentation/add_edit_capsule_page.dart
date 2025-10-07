@@ -976,22 +976,27 @@ hint: 'eg. Take with water'
                                     ),
                                   ),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          onChanged: (_) => setState(() {
-                            _touchedStrengthAmt = true;
-                          }),
                         ),
                       ),
                       _rowLabelField(
                         label: 'Unit *',
                         field: SmallDropdown36<Unit>(
                           value: _strengthUnit,
-                          items: const [Unit.mcg, Unit.mg, Unit.g],
-                          itemBuilder: (u) => u == Unit.mcg
-                              ? 'mcg'
-                              : (u == Unit.mg ? 'mg' : 'g'),
+                          items: const [Unit.mcg, Unit.mg, Unit.g]
+                              .map(
+                                (u) => DropdownMenuItem(
+                                  value: u,
+                                  alignment: AlignmentDirectional.center,
+                                  child: Center(
+                                    child: Text(
+                                      u == Unit.mcg
+                                          ? 'mcg'
+                                          : (u == Unit.mg ? 'mg' : 'g'),
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                           onChanged: (u) => setState(
                             () => _strengthUnit = u ?? _strengthUnit,
                           ),
@@ -1111,11 +1116,6 @@ hint: 'eg. Take with water'
                                     ),
                                   ),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            signed: false,
-                            decimal: false,
-                          ),
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         ),
                       ),
                       if (gThresholdError != null)
