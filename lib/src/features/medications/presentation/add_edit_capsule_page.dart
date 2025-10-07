@@ -1142,8 +1142,7 @@ hint: 'eg. Take with water'
                           );
                           if (picked != null) setState(() => _expiry = picked);
                         },
-                          selected: _expiry != null,
-                        ),
+                        selected: _expiry != null,
                       ),
                     ),
                   _helperBelowLeft(context, 'Enter the expiry date'),

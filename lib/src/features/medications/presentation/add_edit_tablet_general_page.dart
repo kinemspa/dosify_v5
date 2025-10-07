@@ -349,88 +349,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
-  Widget _intStepper({
-    required TextEditingController controller,
-    int step = 1,
-    int min = 0,
-    int max = 1000000,
-    int width = 80,
-    String? label,
-    String? hint,
-    String? helper,
-    bool error = false,
-  }) {
-    return SizedBox(
-      height: 36,
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _incBtn('−', () {
-              final v = int.tryParse(controller.text.trim()) ?? 0;
-              final nv = (v - step).clamp(min, max);
-              setState(() {
-                controller.text = nv.toString();
-                if (identical(controller, _lowStockThresholdCtrl)) {
-                  _lowStockClampHint = false;
-                }
-              });
-            }),
-            const SizedBox(width: 6),
-            SizedBox(
-              width: width.toDouble(),
-              child: SizedBox(
-                height: kFieldHeight,
-                child: TextFormField(
-                  controller: controller,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: kInputFontSize),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    signed: false,
-                    decimal: false,
-                  ),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: (() {
-                    final base = _dec(
-                      label: label ?? '',
-                      hint: hint,
-                      helper: helper,
-                    );
-                    if (!error) return base;
-                    final cs = Theme.of(context).colorScheme;
-                    return base.copyWith(
-                      // Do not set errorText so InputDecorator doesn't alter layout
-                      errorText: null,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-                      ),
-                    );
-                  })(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            _incBtn('+', () {
-              final v = int.tryParse(controller.text.trim()) ?? 0;
-              final nv = (v + step).clamp(min, max);
-              setState(() {
-                controller.text = nv.toString();
-                if (identical(controller, _lowStockThresholdCtrl)) {
-                  _lowStockClampHint = nv == v;
-                }
-              });
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _updateSummaryHeight() {
     // Measure the summary card height and update spacer
     final ctx = _summaryKey.currentContext;
@@ -714,35 +632,27 @@ hint: 'eg. Take with water'
                                   ),
                                 ),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^$|^\\d{0,7}(?:\\.\\d{0,2})?$'),
-                          ),
-                        ],
-                        validator: (v) {
-                          final t = v?.trim() ?? '';
-                          if (t.isEmpty) return 'Required';
-                          final d = double.tryParse(t);
-                          if (d == null) return 'Invalid number';
-                          if (d <= 0) return 'Must be > 0';
-                          return null;
-                        },
-                        onChanged: (_) => setState(() {
-                          _touchedStrengthAmt = true;
-                        }),
                       ),
                     ),
                     _rowLabelField(
                       label: 'Unit *',
                       field: SmallDropdown36<Unit>(
                         value: _strengthUnit,
-                        items: const [Unit.mcg, Unit.mg, Unit.g],
-                        itemBuilder: (u) => u == Unit.mcg
-                            ? 'mcg'
-                            : (u == Unit.mg ? 'mg' : 'g'),
+                        items: const [Unit.mcg, Unit.mg, Unit.g]
+                            .map(
+                              (u) => DropdownMenuItem(
+                                value: u,
+                                alignment: AlignmentDirectional.center,
+                                child: Center(
+                                  child: Text(
+                                    u == Unit.mcg
+                                        ? 'mcg'
+                                        : (u == Unit.mg ? 'mg' : 'g'),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (u) => setState(
                           () => _strengthUnit = u ?? _strengthUnit,
                         ),
@@ -817,15 +727,48 @@ hint: 'eg. Take with water'
                     if (_lowStockAlert) ...[
                       _rowLabelField(
                         label: 'Threshold',
-                        field: _intStepper(
+                        field: StepperRow36(
                           controller: _lowStockThresholdCtrl,
-                          step: 1,
-                          min: 0,
-                          max: stockVal.floor(),
-                          width: 120,
-                          label: 'Threshold',
-                          hint: '0',
-                          error: thresholdError != null,
+                          onDec: () {
+                            final v = int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
+                            final nv = (v - 1).clamp(0, stockVal.floor());
+                            setState(() {
+                              _lowStockThresholdCtrl.text = nv.toString();
+                              _lowStockClampHint = false;
+                            });
+                          },
+                          onInc: () {
+                            final v = int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
+                            final nv = (v + 1).clamp(0, stockVal.floor());
+                            setState(() {
+                              _lowStockThresholdCtrl.text = nv.toString();
+                              _lowStockClampHint = nv == v;
+                            });
+                          },
+                          decoration: _dec(
+                            label: 'Threshold',
+                            hint: '0',
+                          ).copyWith(
+                            errorText: null,
+                            enabledBorder: thresholdError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
+                            focusedBorder: thresholdError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
+                          ),
                         ),
                       ),
                       _supportBelowLeftFixed(
@@ -842,35 +785,21 @@ hint: 'eg. Take with water'
                     ],
                     _rowLabelField(
                       label: 'Expiry date',
-                      field: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-child: SizedBox(
-                              height: kFieldHeight,
-                              width: 120,
-                              child: DateButton36(
-                                label: _expiryDate == null
-                                    ? 'Select date'
-                                    : _fmtDateLocal(context, _expiryDate!),
-                                onPressed: () async {
-                                  final now = DateTime.now();
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    firstDate: DateTime(now.year - 1),
-                                    lastDate: DateTime(now.year + 10),
-                                    initialDate: _expiryDate ?? now,
-                                  );
-                                  if (picked != null) setState(() => _expiryDate = picked);
-                                },
-                                width: 120,
-                                selected: _expiryDate != null,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                        ],
+                      field: DateButton36(
+                        label: _expiryDate == null
+                            ? 'Select date'
+                            : _fmtDateLocal(context, _expiryDate!),
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(now.year - 1),
+                            lastDate: DateTime(now.year + 10),
+                            initialDate: _expiryDate ?? now,
+                          );
+                          if (picked != null) setState(() => _expiryDate = picked);
+                        },
+                        selected: _expiryDate != null,
                       ),
                     ),
                     _helperBelowLeft('Enter the expiry date'),
