@@ -1126,54 +1126,17 @@ class _AddEditInjectionUnifiedPageState
                           bottom: 6,
                         ),
                         child: Text(
-                          'Enter the amount currently in stock',
+                          'Enter the number of ${switch (widget.kind) {
+                            InjectionKind.pfs => 'pre-filled syringes',
+                            InjectionKind.single => 'single dose vials',
+                            InjectionKind.multi => 'vials',
+                          }} currently in stock',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurfaceVariant
                                     .withOpacity(0.75),
-                              ),
-                        ),
-                      ),
-                      LabelFieldRow(
-                        label: 'Quantity unit',
-                        field: SmallDropdown36<StockUnit>(
-                          value: _stockUnit,
-                          width: kSmallControlWidth,
-                          items: [
-                            if (widget.kind == InjectionKind.pfs)
-                              const DropdownMenuItem(
-                                value: StockUnit.preFilledSyringes,
-                                child: Center(child: Text('syringes')),
-                              ),
-                            if (widget.kind == InjectionKind.single)
-                              const DropdownMenuItem(
-                                value: StockUnit.singleDoseVials,
-                                child: Center(child: Text('single dose vials')),
-                              ),
-                            if (widget.kind == InjectionKind.multi)
-                              const DropdownMenuItem(
-                                value: StockUnit.multiDoseVials,
-                                child: Center(child: Text('vials')),
-                              ),
-                          ],
-                          onChanged: (v) =>
-                              setState(() => _stockUnit = v ?? _stockUnit),
-                          decoration: _decDrop(context),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                        ),
-                        child: Text(
-                          'Get notified when stock is low',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
                               ),
                         ),
                       ),

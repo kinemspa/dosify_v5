@@ -820,151 +820,33 @@ hint: 'eg. Take with water'
                   _section('Inventory', [
                     _rowLabelField(
                       label: 'Stock quantity *',
-                      field: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: kFieldHeight,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _incBtn('−', () {
-                                  final d =
-                                      double.tryParse(_stockCtrl.text.trim()) ??
-                                      0;
-                                  final nv = (d - 1)
-                                      .clamp(0, 1000000000)
-                                      .toStringAsFixed(0);
-                                  setState(() {
-                                    _stockCtrl.text = nv;
-                                    _touchedStock = true;
-                                  });
-                                }),
-                                const SizedBox(width: 6),
-                                SizedBox(
-                                  width: 120,
-                                  child: Field36(
-                                    child: TextFormField(
-                                      controller: _stockCtrl,
-                                      textAlign: TextAlign.center,
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
-                                        ),
-                                      ],
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium,
-                                      decoration:
-                                          _dec(
-                                            label: 'Stock amount *',
-                                            hint: '0.00',
-                                          ).copyWith(
-                                            errorText: null,
-                                            enabledBorder: gStockError == null
-                                                ? null
-                                                : OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                                  ),
-                                            focusedBorder: gStockError == null
-                                                ? null
-                                                : OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                                  ),
-                                          ),
-                                      validator: (v) {
-                                        if (v == null || v.trim().isEmpty)
-                                          return 'Required';
-                                        final d = double.tryParse(v);
-                                        if (d == null) return 'Invalid number';
-                                        if (d < 0) return 'Must be ≥ 0';
-                                        return null;
-                                      },
-                                      onChanged: (v) {
-                                        final d = double.tryParse(v);
-                                        setState(() {
-                                          _touchedStock = true;
-                                          if (d == null ||
-                                              ((d * 100).round() % 25 == 0)) {
-                                            _stockError = null;
-                                          } else {
-                                            _stockError =
-                                                'Use .00, .25, .50, or .75';
-                                          }
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                _incBtn('+', () {
-                                  final d =
-                                      double.tryParse(_stockCtrl.text.trim()) ??
-                                      0;
-                                  final nv = (d + 1)
-                                      .clamp(0, 1000000000)
-                                      .toStringAsFixed(0);
-                                  setState(() {
-                                    _stockCtrl.text = nv;
-                                    _touchedStock = true;
-                                  });
-                                }),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    _rowLabelField(
-                      label: 'Quantity unit',
-                      field: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              height: kFieldHeight,
-                              width: 120,
-                              child: DropdownButtonFormField<String>(
-                                value: 'tablets',
-                                isExpanded: false,
-                                alignment: AlignmentDirectional.center,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                dropdownColor: Theme.of(
-                                  context,
-                                ).colorScheme.surface,
-                                menuMaxHeight: 320,
-                                selectedItemBuilder: (ctx) => const [
-                                  'tablets',
-                                ].map((t) => Center(child: Text(t))).toList(),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'tablets',
-                                    child: Center(child: Text('tablets')),
-                                  ),
-                                ],
-                                onChanged: null, // locked
-                                decoration: _decDrop(
-                                  label: '',
-                                  hint: null,
-                                  helper: null,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                        ],
+                      field: StepperRow36(
+                        controller: _stockCtrl,
+                        onDec: () {
+                          final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
+                          final nv = (d - 1).clamp(0, 1000000000).toStringAsFixed(0);
+                          setState(() {
+                            _stockCtrl.text = nv;
+                            _touchedStock = true;
+                          });
+                        },
+                        onInc: () {
+                          final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
+                          final nv = (d + 1).clamp(0, 1000000000).toStringAsFixed(0);
+                          setState(() {
+                            _stockCtrl.text = nv;
+                            _touchedStock = true;
+                          });
+                        },
+                        decoration: _dec(
+                          label: 'Stock quantity *',
+                          hint: '0',
+                        ),
                       ),
                     ),
                     _supportBelowLeftFixed(
                       error: gStockError,
-                      help: 'Enter the amount of tablets in stock',
+                      help: 'Enter the number of tablets currently in stock',
                     ),
 
                     // Low stock alert toggle + threshold
