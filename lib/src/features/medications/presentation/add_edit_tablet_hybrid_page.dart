@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -317,26 +318,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     );
   }
 
-  Widget _incBtn(String symbol, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      height: kBtnSize,
-      width: kBtnSize,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-          minimumSize: const Size(kBtnSize, kBtnSize),
-        ),
-        onPressed: onTap,
-        child: Text(
-          symbol,
-          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     debugPrint('[HYBRID] build() called, initial=${widget.initial != null}');
@@ -413,91 +394,37 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                 _section(context, 'Strength', [
                   _rowLabelField(
                     label: 'Amount *',
-                    field: Row(
-                      children: [
-                        _incBtn('−', () {
-                          final d = double.tryParse(
-                            _strengthValueCtrl.text.trim(),
-                          );
-                          final base = d?.floor() ?? 0;
-                          final nv = (base - 1).clamp(0, 1000000000);
-                          setState(
-                            () => _strengthValueCtrl.text = nv.toString(),
-                          );
-                        }),
-                        const SizedBox(width: 6),
-                        SizedBox(
-                          width: 120,
-                          child: TextFormField(
-                            controller: _strengthValueCtrl,
-                            textAlign: TextAlign.center,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            inputFormatters: const [
-                              _TwoDecimalTextInputFormatter(),
-                            ],
-                            decoration: _dec(hint: '0'),
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Required'
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        _incBtn('+', () {
-                          final d = double.tryParse(
-                            _strengthValueCtrl.text.trim(),
-                          );
-                          final base = d?.floor() ?? 0;
-                          final nv = (base + 1).clamp(0, 1000000000);
-                          setState(
-                            () => _strengthValueCtrl.text = nv.toString(),
-                          );
-                        }),
-                      ],
+                    field: StepperRow36(
+                      controller: _strengthValueCtrl,
+                      min: 0,
+                      step: 1,
+                      decimalPlaces: 2,
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
                   _rowLabelField(
                     label: 'Unit *',
-                    field: SizedBox(
-                      width: 120,
-                      height: kFieldHeight,
-                      child: DropdownButtonFormField<Unit>(
-                        value: _strengthUnit,
-                        isExpanded: false,
-                        alignment: AlignmentDirectional.center,
-                        menuMaxHeight: 320,
-                        selectedItemBuilder: (ctx) =>
-                            const [Unit.mcg, Unit.mg, Unit.g]
-                                .map(
-                                  (u) => Center(
-                                    child: Text(
-                                      u == Unit.mcg
-                                          ? 'mcg'
-                                          : (u == Unit.mg ? 'mg' : 'g'),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                        items: const [Unit.mcg, Unit.mg, Unit.g]
-                            .map(
-                              (u) => DropdownMenuItem(
-                                value: u,
-                                alignment: AlignmentDirectional.center,
-                                child: Center(
-                                  child: Text(
-                                    u == Unit.mcg
-                                        ? 'mcg'
-                                        : (u == Unit.mg ? 'mg' : 'g'),
-                                  ),
+                    field: SmallDropdown36<Unit>(
+                      value: _strengthUnit,
+                      items: const [Unit.mcg, Unit.mg, Unit.g]
+                          .map(
+                            (u) => DropdownMenuItem(
+                              value: u,
+                              alignment: AlignmentDirectional.center,
+                              child: Center(
+                                child: Text(
+                                  u == Unit.mcg
+                                      ? 'mcg'
+                                      : (u == Unit.mg ? 'mg' : 'g'),
                                 ),
                               ),
-                            )
-                            .toList(),
-                        onChanged: (u) =>
-                            setState(() => _strengthUnit = u ?? _strengthUnit),
-                        decoration: _dec(),
-                      ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (u) =>
+                          setState(() => _strengthUnit = u ?? _strengthUnit),
+                      decoration: _dec(),
                     ),
                   ),
                 ]),
@@ -507,95 +434,25 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                 // Inventory
                 _section(context, 'Inventory', [
                   _rowLabelField(
-                    label: 'Stock *',
-                    field: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            _incBtn('−', () {
-                              final v =
-                                  double.tryParse(_stockValueCtrl.text) ?? 0;
-                              final nv = (v - 0.25).clamp(0, 1000000);
-                              setState(
-                                () => _stockValueCtrl.text = nv.toStringAsFixed(
-                                  2,
-                                ),
-                              );
-                            }),
-                            const SizedBox(width: 6),
-                            SizedBox(
-                              width: 120,
-                              child: TextFormField(
-                                controller: _stockValueCtrl,
-                                textAlign: TextAlign.center,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                inputFormatters: const [
-                                  _TwoDecimalTextInputFormatter(),
-                                ],
-                                decoration: _dec(hint: '0.00'),
-                                validator: (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                    ? 'Required'
-                                    : null,
-                                onChanged: (v) {
-                                  final d = double.tryParse(v);
-                                  setState(() {
-                                    if (d == null || _isQuarter(d)) {
-                                      _stockError = null;
-                                    } else {
-                                      _stockError =
-                                          'Stock should be .00, .25, .50 or .75';
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            _incBtn('+', () {
-                              final v =
-                                  double.tryParse(_stockValueCtrl.text) ?? 0;
-                              final nv = (v + 0.25).clamp(0, 1000000);
-                              setState(
-                                () => _stockValueCtrl.text = nv.toStringAsFixed(
-                                  2,
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                        if (_stockError != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              _stockError!,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                      ],
+                    label: 'Stock',
+                    field: StepperRow36(
+                      controller: _stockValueCtrl,
+                      min: 0,
+                      step: 0.25,
+                      decimalPlaces: 2,
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
                   _rowLabelField(
-                    label: 'Unit *',
-                    field: SizedBox(
-                      height: kFieldHeight,
-                      child: DropdownButtonFormField<StockUnit>(
-                        value: StockUnit.tablets,
-                        isExpanded: true,
-                        items: const [
-                          DropdownMenuItem(
-                            value: StockUnit.tablets,
-                            child: Text('tablets'),
-                          ),
-                        ],
-                        onChanged: null,
-                        decoration: _dec(),
+                    label: '',
+                    field: Text(
+                      'tablets',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),

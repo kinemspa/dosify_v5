@@ -14,9 +14,9 @@ const double kLabelColWidth = 120.0;
 const double kSmallControlWidth = 120.0;
 
 /// Responsive width fraction for compact controls (as percentage of available field space)
-/// 0.5 = 50% of available space in Expanded field area
+/// 0.75 = 75% of available space in Expanded field area
 /// This provides consistent sizing across different screen sizes
-const double kCompactControlWidthFraction = 0.5;
+const double kCompactControlWidthFraction = 0.75;
 
 /// Minimum width for compact controls (prevents controls from becoming too small)
 const double kMinCompactControlWidth = 100.0;
@@ -189,11 +189,7 @@ class DateButton36 extends StatelessWidget {
     // Use explicit width if provided
     return UnconstrainedBox(
       alignment: Alignment.center,
-      child: SizedBox(
-        height: kFieldHeight,
-        width: width,
-        child: btn,
-      ),
+      child: SizedBox(height: kFieldHeight, width: width, child: btn),
     );
   }
 }
@@ -232,12 +228,12 @@ class SmallDropdown36<T> extends StatelessWidget {
             child: SizedBox(
               height: kFieldHeight,
               child: DropdownButtonFormField<T>(
-          value: value,
-          isExpanded: false,
-          alignment: AlignmentDirectional.center,
-          style: theme.textTheme.bodyMedium,
-          items: items,
-          onChanged: onChanged,
+                value: value,
+                isExpanded: false,
+                alignment: AlignmentDirectional.center,
+                style: theme.textTheme.bodyMedium,
+                items: items,
+                onChanged: onChanged,
                 icon: Icon(
                   Icons.arrow_drop_down,
                   color: theme.colorScheme.onSurfaceVariant,
@@ -294,7 +290,8 @@ class PrimaryChoiceChip extends StatelessWidget {
     final labelColor = selected ? Colors.white : theme.colorScheme.onSurface;
     return ChoiceChip(
       label: DefaultTextStyle(
-        style: theme.textTheme.labelLarge?.copyWith(
+        style:
+            theme.textTheme.labelLarge?.copyWith(
               color: labelColor,
               fontWeight: FontWeight.w600,
             ) ??
@@ -457,7 +454,9 @@ class StepperRow36 extends StatelessWidget {
                   builder: (context) {
                     final theme = Theme.of(context);
                     final base = theme.textTheme.bodyMedium;
-                    final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
+                    final style = compact
+                        ? base?.copyWith(fontSize: kInputFontSize)
+                        : base;
                     return TextFormField(
                       controller: controller,
                       textAlign: TextAlign.center,
