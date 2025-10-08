@@ -4,6 +4,7 @@ import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
@@ -59,6 +60,17 @@ class _MdvVolumeReconstitutionSectionState
     Unit.g => 'g',
     _ => u.name,
   };
+
+  /// Convert a double ml value back to SyringeSizeMl enum
+  SyringeSizeMl? _mlToSyringeSize(double? ml) {
+    if (ml == null) return null;
+    if ((ml - 0.3).abs() < 0.01) return SyringeSizeMl.ml0_3;
+    if ((ml - 0.5).abs() < 0.01) return SyringeSizeMl.ml0_5;
+    if ((ml - 1.0).abs() < 0.01) return SyringeSizeMl.ml1;
+    if ((ml - 3.0).abs() < 0.01) return SyringeSizeMl.ml3;
+    if ((ml - 5.0).abs() < 0.01) return SyringeSizeMl.ml5;
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,10 +144,10 @@ class _MdvVolumeReconstitutionSectionState
       medicationName: medName.isEmpty ? null : medName,
       initialDoseValue: _reconResult?.recommendedDose,
       initialDoseUnit: _reconResult?.doseUnit,
-      initialSyringeSize: _reconResult?.syringeSizeMl,
+      initialSyringeSize: _mlToSyringeSize(_reconResult?.syringeSizeMl),
       initialVialSize: _reconResult?.maxVialSizeMl,
-      initialDiluentName: _reconResult?.diluentName,
-      onSave: (result) {
+      showApplyButton: true,
+      onApply: (result) {
         setState(() {
           _reconResult = result;
           _showCalculator = false;
