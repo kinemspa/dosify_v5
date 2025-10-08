@@ -13,13 +13,21 @@ Structure (selected)
 - lib/src/core: cross-cutting util (formatting, prefs, hive bootstrap, notifications)
 - lib/src/features: feature-oriented modules (medications, schedules, calendar, etc.)
 
-Medications module (in-progress)
-- Tablet screens:
-  - add_edit_tablet_page.dart (primary/hybrid WIP)
-  - add_edit_tablet_hybrid_page.dart (hybrid detailed form)
-  - add_edit_tablet_details_style_page.dart (details-style form)
-- Shared components: FormFieldStyler, StrengthInput, AppHeader
-- Design spec reference: docs/product-design.md (section: Add/Edit Medication – Tablet)
+Medications module (unified architecture)
+- **UnifiedAddEditMedicationPage**: Single page for all medication types
+  - Handles: Tablet, Capsule, Pre-filled Syringe, Single Dose Vial, Multi-Dose Vial
+  - Auto-determines stock unit based on MedicationForm enum (no dropdown)
+  - Conditional rendering: MDV shows Volume & Reconstitution section
+  - Extracted MDV complexity into MdvVolumeReconstitutionSection widget
+  - Common sections: General, Strength, Inventory, Storage
+  - Dynamic floating summary card (MDV uses 3-line format)
+- **Legacy pages** (deprecated, to be removed after testing):
+  - add_edit_tablet_general_page.dart, add_edit_capsule_page.dart
+  - add_edit_injection_pfs_page.dart, add_edit_injection_single_vial_page.dart
+  - add_edit_injection_multi_vial_page.dart, add_edit_injection_unified_page.dart
+  - add_edit_tablet_hybrid_page.dart, add_edit_tablet_details_style_page.dart
+- Shared components: unified_form.dart widgets, reconstitution calculator
+- Design spec reference: docs/product-design.md
 
 Conventions
 - Use package: imports for files under lib/
@@ -101,15 +109,37 @@ Unified Form Controls (lib/src/widgets/unified_form.dart)
   - kMaxCompactControlWidth = 180.0 (prevents controls from becoming too large)
   - All compact controls use FractionallySizedBox with these constraints
   - Ensures consistent sizing across different screen sizes and orientations
-- **Migration Complete**:
-  - add_edit_tablet_general_page.dart: ✓ Standardized
-  - add_edit_capsule_page.dart: ✓ Standardized
-  - add_edit_tablet_hybrid_page.dart: ✓ Standardized
-  - add_edit_injection_unified_page.dart: ✓ Standardized (MDV)
+- **Unified Page Architecture**:
+  - All add/edit medication routes now use UnifiedAddEditMedicationPage
+  - Stock unit is automatically determined from MedicationForm (no dropdown)
+  - MDV section extracted to MdvVolumeReconstitutionSection (343 lines)
+  - Router updated to pass form parameter for type-specific rendering
   - All custom _incBtn and _intStepper methods removed
   - All hardcoded widths (120px) replaced with responsive width system
+  - Stock units: tablet→tablets, capsule→capsules, PFS→preFilledSyringes, 
+    singleVial→singleDoseVials, MDV→multiDoseVials
 - **DO NOT**: Create new custom stepper or dropdown implementations
 - **ALWAYS USE**: unified_form.dart widgets for all new medication forms
+
+MDV Volume & Reconstitution Section (MdvVolumeReconstitutionSection)
+- Extracted component for multi-dose vial complexity (343 lines)
+- **Location**: lib/src/features/medications/presentation/sections/mdv_volume_reconstitution_section.dart
+- **Features**:
+  - Vial volume input field that locks when reconstitution is saved
+  - Reconstitution calculator integration (opens/closes inline)
+  - Saved reconstitution display with syringe gauge and formatted instructions
+  - Calculator button disabled until strength is entered
+  - Helper text explaining when to use calculator vs direct input
+- **Type Safety**:
+  - ReconstitutionResult stores syringeSizeMl as double (0.3, 0.5, 1.0, 3.0, 5.0)
+  - _mlToSyringeSize() converts double back to SyringeSizeMl enum for reopening calculator
+  - Handles nullable parameters gracefully
+- **Integration**:
+  - Called from UnifiedAddEditMedicationPage when _isMdv is true
+  - Receives controllers and callbacks from parent
+  - Updates vialVolume and perMl controllers when reconstitution is saved
+  - Triggers parent's onReconstitutionChanged callback
+  - Scrolls to vial volume field after save using vialVolumeKey
 
 Surfaced validation in helper rows (with touched gating)
 - Default InputDecoration error line is hidden to preserve the 36px control height.
