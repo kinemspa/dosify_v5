@@ -9,6 +9,7 @@ import '../features/medications/presentation/select_medication_type_page.dart';
 import '../features/medications/presentation/editor_template_preview_page.dart';
 import '../features/medications/presentation/select_injection_type_page.dart';
 import '../features/medications/presentation/unified_add_edit_medication_page.dart';
+import '../features/medications/presentation/unified_add_edit_medication_page_template.dart';
 import '../features/medications/domain/enums.dart';
 import '../features/medications/presentation/reconstitution_calculator_page.dart';
 import '../features/medications/presentation/reconstitution_calculator_dialog.dart';
@@ -136,7 +137,7 @@ final router = GoRouter(
           path: '/medications/add/tablet',
           name: 'addTablet',
           builder: (context, state) =>
-              const UnifiedAddEditMedicationPage(form: MedicationForm.tablet),
+              const UnifiedAddEditMedicationPageTemplate(form: MedicationForm.tablet),
         ),
         GoRoute(
           path: '/medications/add/capsule',
@@ -173,7 +174,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPage(
+            return UnifiedAddEditMedicationPageTemplate(
               form: MedicationForm.tablet,
               initial: med,
             );
