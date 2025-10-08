@@ -24,6 +24,9 @@ class ReconstitutionResult {
     required this.recommendedUnits,
     required this.syringeSizeMl,
     this.diluentName,
+    this.recommendedDose,
+    this.doseUnit,
+    this.maxVialSizeMl,
   });
 
   final double perMlConcentration; // same base unit as dose/strength (per mL)
@@ -31,6 +34,9 @@ class ReconstitutionResult {
   final double recommendedUnits; // IU fill for the dose
   final double syringeSizeMl; // chosen syringe size mL
   final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
+  final double? recommendedDose; // desired dose value for reopening calculator
+  final String? doseUnit; // dose unit (mcg/mg/g) for reopening calculator
+  final double? maxVialSizeMl; // max vial size constraint for reopening calculator
 }
 
 class ReconstitutionCalculatorDialog extends StatefulWidget {
