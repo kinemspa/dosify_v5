@@ -358,7 +358,7 @@ class _UnifiedAddEditMedicationPageTemplateState
               child: Center(child: Text(_formLabelPlural)),
             ),
           ],
-          onChanged: null, // Read-only - auto-determined by form type
+          onChanged: (_) {}, // Read-only - auto-determined by form type
         ),
         expiryDateButton: DateButton36(
           label: _expiry == null
@@ -395,7 +395,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             decoration: const InputDecoration(hintText: 'eg. Bathroom cabinet'),
           ),
         ),
-        locationHelp: 'Where it's stored (e.g., Bathroom cabinet)',
+        locationHelp: "Where it's stored (e.g., Bathroom cabinet)",
         refrigerateRow: Opacity(
           opacity: _keepFrozen ? 0.5 : 1.0,
           child: Row(
