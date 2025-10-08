@@ -74,8 +74,42 @@ UI Blueprint Adoption
   - Storage toggles (Refrigerate/Freeze/Dark) with helpers
 - Apply the same pattern for all medication forms going forward.
 
-Dropdown alignment
-- Unit and quantity dropdowns are centered within a 120px-wide box with a 36px control height, matching the integer fields. Do not use manual pixel padding for alignment; rely on center alignment inside the fixed-width box instead.
+Unified Form Controls (lib/src/widgets/unified_form.dart)
+- ALL medication add/edit screens use standardized form widgets for consistent look and behavior
+- **StepperRow36**: Numeric input with increment/decrement buttons
+  - 36px height, responsive width based on kCompactControlWidthFraction (75% of available space)
+  - Min/max width constraints: 100px-180px
+  - Parameters: controller, min, step, decimalPlaces, validator
+  - Used for: Strength, Stock quantity, Dose amounts
+- **SmallDropdown36**: Dropdown with matching responsive width
+  - 36px height, same responsive width system as StepperRow36
+  - Parameters: value, items (List<DropdownMenuItem<T>>), onChanged, decoration
+  - Used for: Unit selection, Quantity units
+- **DateButton36**: Date picker button with responsive width
+  - 36px height, calendar icon, same responsive width system
+  - Parameters: label, onPressed, width (optional), selected
+  - Used for: Expiry date, Batch date selection
+- **LabelFieldRow**: Left-label + right-field row layout
+  - Fixed label width (kLabelColWidth = 120px), expanded field area
+  - Consistent spacing and text styling across all forms
+- **SectionFormCard**: Section wrapper with title and children
+  - Consistent card styling, padding, and borders
+  - Used for: General, Strength, Inventory, Storage sections
+- **Responsive Width System**:
+  - kCompactControlWidthFraction = 0.75 (75% of available field space)
+  - kMinCompactControlWidth = 100.0 (prevents controls from becoming too small)
+  - kMaxCompactControlWidth = 180.0 (prevents controls from becoming too large)
+  - All compact controls use FractionallySizedBox with these constraints
+  - Ensures consistent sizing across different screen sizes and orientations
+- **Migration Complete**:
+  - add_edit_tablet_general_page.dart: ✓ Standardized
+  - add_edit_capsule_page.dart: ✓ Standardized
+  - add_edit_tablet_hybrid_page.dart: ✓ Standardized
+  - add_edit_injection_unified_page.dart: ✓ Standardized (MDV)
+  - All custom _incBtn and _intStepper methods removed
+  - All hardcoded widths (120px) replaced with responsive width system
+- **DO NOT**: Create new custom stepper or dropdown implementations
+- **ALWAYS USE**: unified_form.dart widgets for all new medication forms
 
 Surfaced validation in helper rows (with touched gating)
 - Default InputDecoration error line is hidden to preserve the 36px control height.
