@@ -396,11 +396,23 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     label: 'Amount *',
                     field: StepperRow36(
                       controller: _strengthValueCtrl,
-                      min: 0,
-                      step: 1,
-                      decimalPlaces: 2,
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      onDec: () {
+                        final d = double.tryParse(
+                          _strengthValueCtrl.text.trim(),
+                        );
+                        final base = d?.floor() ?? 0;
+                        final nv = (base - 1).clamp(0, 1000000000);
+                        setState(() => _strengthValueCtrl.text = nv.toString());
+                      },
+                      onInc: () {
+                        final d = double.tryParse(
+                          _strengthValueCtrl.text.trim(),
+                        );
+                        final base = d?.floor() ?? 0;
+                        final nv = (base + 1).clamp(0, 1000000000);
+                        setState(() => _strengthValueCtrl.text = nv.toString());
+                      },
+                      decoration: _dec(hint: '0'),
                     ),
                   ),
                   _rowLabelField(
@@ -437,11 +449,21 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     label: 'Stock',
                     field: StepperRow36(
                       controller: _stockValueCtrl,
-                      min: 0,
-                      step: 0.25,
-                      decimalPlaces: 2,
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      onDec: () {
+                        final v = double.tryParse(_stockValueCtrl.text) ?? 0;
+                        final nv = (v - 0.25).clamp(0, 1000000);
+                        setState(
+                          () => _stockValueCtrl.text = nv.toStringAsFixed(2),
+                        );
+                      },
+                      onInc: () {
+                        final v = double.tryParse(_stockValueCtrl.text) ?? 0;
+                        final nv = (v + 0.25).clamp(0, 1000000);
+                        setState(
+                          () => _stockValueCtrl.text = nv.toStringAsFixed(2),
+                        );
+                      },
+                      decoration: _dec(hint: '0.00'),
                     ),
                   ),
                   _rowLabelField(
