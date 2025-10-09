@@ -14,19 +14,23 @@ Structure (selected)
 - lib/src/features: feature-oriented modules (medications, schedules, calendar, etc.)
 
 Medications module (unified architecture)
-- **UnifiedAddEditMedicationPage**: Single page for all medication types
+- **UnifiedAddEditMedicationPageTemplate**: Single template-based page for all medication types
+  - Location: lib/src/features/medications/presentation/unified_add_edit_medication_page_template.dart
+  - Uses MedEditorTemplate widget for consistent layout across all medication types
   - Handles: Tablet, Capsule, Pre-filled Syringe, Single Dose Vial, Multi-Dose Vial
-  - Auto-determines stock unit based on MedicationForm enum (no dropdown)
-  - Conditional rendering: MDV shows Volume & Reconstitution section
-  - Extracted MDV complexity into MdvVolumeReconstitutionSection widget
+  - Auto-determines stock unit based on MedicationForm enum (no dropdown required)
+  - Conditional rendering: MDV shows Volume & Reconstitution section via mdvSection parameter
+  - Extracted MDV complexity into MdvVolumeReconstitutionSection widget (343 lines)
   - Common sections: General, Strength, Inventory, Storage
-  - Dynamic floating summary card (MDV uses 3-line format)
-- **Legacy pages** (deprecated, to be removed after testing):
+  - Dynamic floating summary card with proper MDV reconstitution display
+  - All routes updated to use template version (add/edit for all 5 medication types)
+- **Legacy pages** (deprecated, to be removed after final testing):
+  - unified_add_edit_medication_page.dart (original non-template version)
   - add_edit_tablet_general_page.dart, add_edit_capsule_page.dart
   - add_edit_injection_pfs_page.dart, add_edit_injection_single_vial_page.dart
   - add_edit_injection_multi_vial_page.dart, add_edit_injection_unified_page.dart
   - add_edit_tablet_hybrid_page.dart, add_edit_tablet_details_style_page.dart
-- Shared components: unified_form.dart widgets, reconstitution calculator
+- Shared components: unified_form.dart widgets, MedEditorTemplate, reconstitution calculator
 - Design spec reference: docs/product-design.md
 
 Conventions
@@ -103,23 +107,55 @@ Unified Form Controls (lib/src/widgets/unified_form.dart)
 - **SectionFormCard**: Section wrapper with title and children
   - Consistent card styling, padding, and borders
   - Used for: General, Strength, Inventory, Storage sections
-- **Responsive Width System**:
-  - kCompactControlWidthFraction = 0.75 (75% of available field space)
-  - kMinCompactControlWidth = 100.0 (prevents controls from becoming too small)
-  - kMaxCompactControlWidth = 180.0 (prevents controls from becoming too large)
-  - All compact controls use FractionallySizedBox with these constraints
+- **Responsive Width System** (using LayoutBuilder):
+  - kMinCompactControlWidth = 120.0 (increased from 100px)
+  - kMaxCompactControlWidth = 240.0 (increased from 180px)
+  - Uses LayoutBuilder with constraints.maxWidth.clamp(min, max) for direct measurement
+  - Dropdown width adjusted to match stepper field width (subtracts 64px button width)
   - Ensures consistent sizing across different screen sizes and orientations
-- **Unified Page Architecture**:
-  - All add/edit medication routes now use UnifiedAddEditMedicationPage
+  - Stepper buttons centered next to fields (not at screen edges)
+- **Template-Based Page Architecture** (Phase 1 & 2 Complete):
+  - All add/edit medication routes use UnifiedAddEditMedicationPageTemplate
+  - MedEditorTemplate widget provides consistent layout structure
   - Stock unit is automatically determined from MedicationForm (no dropdown)
   - MDV section extracted to MdvVolumeReconstitutionSection (343 lines)
-  - Router updated to pass form parameter for type-specific rendering
+  - Router updated to use template for all 5 medication types
   - All custom _incBtn and _intStepper methods removed
-  - All hardcoded widths (120px) replaced with responsive width system
+  - All hardcoded widths replaced with responsive width system
   - Stock units: tablet→tablets, capsule→capsules, PFS→preFilledSyringes, 
     singleVial→singleDoseVials, MDV→multiDoseVials
+  - Consistent 36px field heights across all input types
+  - Theme-adaptable card colors using surfaceContainerLowest
 - **DO NOT**: Create new custom stepper or dropdown implementations
 - **ALWAYS USE**: unified_form.dart widgets for all new medication forms
+
+Unified Template Refactoring Project (Completed)
+- **Goal**: Consolidate all 5 medication types into single template-based page for consistency
+- **Phase 1** (Tablet, Capsule, PFS, Single Dose Vial):
+  - Created UnifiedAddEditMedicationPageTemplate using MedEditorTemplate widget
+  - Removed quantity unit dropdown (auto-determined from MedicationForm)
+  - Fixed responsive width system using LayoutBuilder
+  - Fixed dropdown width alignment with stepper fields
+  - Made quantityDropdown optional parameter in MedEditorTemplate
+  - Updated router for 4 simple medication types
+  - Git commits: 3b70312, 9d035e0, 7aba4fa, bcc25df, f869a49
+- **Phase 2** (Multi-Dose Vial):
+  - Added MDV-specific fields and mdvSection parameter to template
+  - Integrated MdvVolumeReconstitutionSection widget
+  - Updated save/load logic for perMlValue and containerVolumeMl
+  - Removed MDV rejection screen
+  - Updated router for MDV routes
+  - Git commit: bcc25df
+- **UI Polish**:
+  - Fixed stepper button alignment (centered, not at screen edges)
+  - Fixed field heights to consistent 36px across all inputs
+  - Standardized card fill colors to surfaceContainerLowest for theme adaptability
+  - Refined reconstitution calculator width and spacing
+  - Fixed MDV helper text clarity
+  - Added reconstitution data to summary card display
+  - Git commits: c04b276, 3cffff0, 526051f, 7845a2e, a054345, d9eb78e, 4fc670c
+- **Result**: All 5 medication types use unified template with consistent UX
+- **Legacy Cleanup**: Original unified_add_edit_medication_page.dart can be removed after testing
 
 MDV Volume & Reconstitution Section (MdvVolumeReconstitutionSection)
 - Extracted component for multi-dose vial complexity (343 lines)
