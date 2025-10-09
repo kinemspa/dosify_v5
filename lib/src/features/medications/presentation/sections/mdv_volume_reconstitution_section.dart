@@ -226,20 +226,20 @@ class _MdvVolumeReconstitutionSectionState
         ? result.syringeSizeMl.toStringAsFixed(1)
         : result.syringeSizeMl.toString();
 
-    return Padding(
-      padding: EdgeInsets.only(left: _labelWidth() + 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Syringe gauge
-          WhiteSyringeGauge(
-            totalIU: result.syringeSizeMl * 100,
-            fillIU: result.recommendedUnits,
-            interactive: false,
-          ),
-          const SizedBox(height: 12),
-          // Main instruction
-          RichText(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Syringe gauge spans full width
+        WhiteSyringeGauge(
+          totalIU: result.syringeSizeMl * 100,
+          fillIU: result.recommendedUnits,
+          interactive: false,
+        ),
+        const SizedBox(height: 12),
+        // Text content with left padding
+        Padding(
+          padding: EdgeInsets.only(left: _labelWidth() + 8),
+          child: RichText(
             text: TextSpan(
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface,
@@ -267,9 +267,12 @@ class _MdvVolumeReconstitutionSectionState
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          // Supporting details
-          RichText(
+        ),
+        const SizedBox(height: 8),
+        // Supporting details with left padding
+        Padding(
+          padding: EdgeInsets.only(left: _labelWidth() + 8),
+          child: RichText(
             text: TextSpan(
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -304,8 +307,8 @@ class _MdvVolumeReconstitutionSectionState
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

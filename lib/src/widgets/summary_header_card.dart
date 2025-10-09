@@ -525,55 +525,50 @@ class SummaryHeaderCard extends StatelessWidget {
           ),
           // Reconstitution section: spans full width outside the Row
           if (reconTotalIU != null && reconFillIU != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Padding(
-              padding: const EdgeInsets.only(left: 48), // Align with text content
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: neutral
-                            ? cs.onSurfaceVariant.withValues(alpha: 0.75)
-                            : fg.withValues(alpha: 0.85),
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'Reconstitution: ',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        const TextSpan(
-                          text: 'Draw ',
-                        ),
-                        TextSpan(
-                          text: '${reconFillIU!.toStringAsFixed(1)} IU',
-                          style: TextStyle(
-                            color: neutral ? cs.primary : fg,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const TextSpan(text: ' ('),
-                        TextSpan(
-                          text:
-                              '${((reconFillIU! / 100) * (reconTotalIU! / 100)).toStringAsFixed(2)} mL',
-                          style: TextStyle(
-                            color: neutral ? cs.primary : fg,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const TextSpan(text: ')'),
-                      ],
+              padding: const EdgeInsets.only(left: 48), // Align text with content
+              child: RichText(
+                text: TextSpan(
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: neutral
+                        ? cs.onSurfaceVariant.withValues(alpha: 0.75)
+                        : fg.withValues(alpha: 0.85),
+                  ),
+                  children: [
+                    const TextSpan(
+                      text: 'Reconstitution: ',
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  WhiteSyringeGauge(
-                    totalIU: reconTotalIU!,
-                    fillIU: reconFillIU!,
-                    interactive: false,
-                  ),
-                ],
+                    const TextSpan(
+                      text: 'Draw ',
+                    ),
+                    TextSpan(
+                      text: '${reconFillIU!.toStringAsFixed(1)} IU',
+                      style: TextStyle(
+                        color: neutral ? cs.primary : fg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const TextSpan(text: ' ('),
+                    TextSpan(
+                      text:
+                          '${((reconFillIU! / 100) * (reconTotalIU! / 100)).toStringAsFixed(2)} mL',
+                      style: TextStyle(
+                        color: neutral ? cs.primary : fg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const TextSpan(text: ')'),
+                  ],
+                ),
               ),
+            ),
+            const SizedBox(height: 6),
+            WhiteSyringeGauge(
+              totalIU: reconTotalIU!,
+              fillIU: reconFillIU!,
+              interactive: false,
             ),
           ],
         ],
