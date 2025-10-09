@@ -350,7 +350,7 @@ class _MdvVolumeReconstitutionSectionState
           child: Text(
             isLocked
                 ? 'Total volume after reconstitution (locked - use calculator to adjust)'
-                : 'Volume of medication in vial (if unreconstituted, enter original volume)',
+                : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above',
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,

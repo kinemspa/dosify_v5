@@ -443,24 +443,29 @@ class StepperRow36 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _pillBtn(context, '−', enabled ? onDec : () {}),
-        const SizedBox(width: 4),
-        // Use responsive width with constraints
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Use all available width up to max constraint
-              final width = constraints.maxWidth.clamp(
-                kMinCompactControlWidth,
-                kMaxCompactControlWidth,
-              );
-              return Align(
-                alignment: Alignment.center,
-                child: SizedBox(
-                  width: width,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate responsive width for the field
+        final fieldWidth = constraints.maxWidth.clamp(
+          kMinCompactControlWidth,
+          kMaxCompactControlWidth,
+        );
+        // Total width: field + 2 buttons + 2 spacings
+        // 28px per button + 4px spacing = 64px total
+        const buttonsAndSpacing = 64.0;
+        final totalWidth = fieldWidth + buttonsAndSpacing;
+        
+        return Align(
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: totalWidth,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _pillBtn(context, '−', enabled ? onDec : () {}),
+                const SizedBox(width: 4),
+                SizedBox(
+                  width: fieldWidth,
                   child: Field36(
                     child: Builder(
                       builder: (context) {
@@ -480,13 +485,13 @@ class StepperRow36 extends StatelessWidget {
                     ),
                   ),
                 ),
-              );
-            },
+                const SizedBox(width: 4),
+                _pillBtn(context, '+', enabled ? onInc : () {}),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 4),
-        _pillBtn(context, '+', enabled ? onInc : () {}),
-      ],
+        );
+      },
     );
   }
 
