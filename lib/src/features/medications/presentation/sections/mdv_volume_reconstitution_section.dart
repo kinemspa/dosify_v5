@@ -269,43 +269,40 @@ class _MdvVolumeReconstitutionSectionState
           ),
         ),
         const SizedBox(height: 8),
-        // Supporting details with left padding
-        Padding(
-          padding: EdgeInsets.only(left: _labelWidth() + 8),
-          child: RichText(
-            text: TextSpan(
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
-              ),
-              children: [
-                const TextSpan(text: 'Draw '),
-                TextSpan(
-                  text: '$drawStr IU',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const TextSpan(text: ' ('),
-                TextSpan(
-                  text: '$mlDrawStr mL',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const TextSpan(text: ') into a '),
-                TextSpan(
-                  text: '$syringeStr mL',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const TextSpan(text: ' syringe'),
-              ],
+        // Supporting details span full width
+        RichText(
+          text: TextSpan(
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
             ),
+            children: [
+              const TextSpan(text: 'Draw '),
+              TextSpan(
+                text: '$drawStr IU',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const TextSpan(text: ' ('),
+              TextSpan(
+                text: '$mlDrawStr mL',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const TextSpan(text: ') into a '),
+              TextSpan(
+                text: '$syringeStr mL',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const TextSpan(text: ' syringe'),
+            ],
           ),
         ),
       ],
