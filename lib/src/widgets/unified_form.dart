@@ -445,51 +445,47 @@ class StepperRow36 extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate responsive width for the field
-        final fieldWidth = constraints.maxWidth.clamp(
+        // Account for buttons and spacing in the available width
+        // 2 buttons (28px each) + 2 spacings (4px each) = 64px total
+        const buttonsAndSpacing = 64.0;
+        
+        // Calculate field width from available space, subtracting button widths
+        final availableForField = constraints.maxWidth - buttonsAndSpacing;
+        final fieldWidth = availableForField.clamp(
           kMinCompactControlWidth,
           kMaxCompactControlWidth,
         );
-        // Total width: field + 2 buttons + 2 spacings
-        // 28px per button + 4px spacing = 64px total
-        const buttonsAndSpacing = 64.0;
-        final totalWidth = fieldWidth + buttonsAndSpacing;
         
-        return Align(
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: totalWidth,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _pillBtn(context, '−', enabled ? onDec : () {}),
-                const SizedBox(width: 4),
-                SizedBox(
-                  width: fieldWidth,
-                  child: Field36(
-                    child: Builder(
-                      builder: (context) {
-                        final theme = Theme.of(context);
-                        final base = theme.textTheme.bodyMedium;
-                        final style = compact
-                            ? base?.copyWith(fontSize: kInputFontSize)
-                            : base;
-                        return TextFormField(
-                          controller: controller,
-                          textAlign: TextAlign.center,
-                          style: style,
-                          decoration: decoration,
-                          enabled: enabled,
-                        );
-                      },
-                    ),
-                  ),
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _pillBtn(context, '−', enabled ? onDec : () {}),
+            const SizedBox(width: 4),
+            SizedBox(
+              width: fieldWidth,
+              child: Field36(
+                child: Builder(
+                  builder: (context) {
+                    final theme = Theme.of(context);
+                    final base = theme.textTheme.bodyMedium;
+                    final style = compact
+                        ? base?.copyWith(fontSize: kInputFontSize)
+                        : base;
+                    return TextFormField(
+                      controller: controller,
+                      textAlign: TextAlign.center,
+                      style: style,
+                      decoration: decoration,
+                      enabled: enabled,
+                    );
+                  },
                 ),
-                const SizedBox(width: 4),
-                _pillBtn(context, '+', enabled ? onInc : () {}),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: 4),
+            _pillBtn(context, '+', enabled ? onInc : () {}),
+          ],
         );
       },
     );
