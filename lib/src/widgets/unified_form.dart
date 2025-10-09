@@ -222,8 +222,11 @@ class SmallDropdown36<T> extends StatelessWidget {
     if (width == null) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          // Use all available width up to max constraint
-          final width = constraints.maxWidth.clamp(
+          // Account for stepper buttons: 2 buttons (28px each) + 2 spacings (4px each) = 64px
+          // This makes dropdown match the width of the stepper field (excluding buttons)
+          const stepperButtonsWidth = 64.0;
+          final adjustedMax = constraints.maxWidth - stepperButtonsWidth;
+          final width = adjustedMax.clamp(
             kMinCompactControlWidth,
             kMaxCompactControlWidth,
           );
