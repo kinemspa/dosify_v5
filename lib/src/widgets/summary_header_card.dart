@@ -200,26 +200,29 @@ class SummaryHeaderCard extends StatelessWidget {
             : null,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: (neutral ? cs.primary : cs.onPrimary).withValues(
-                alpha: 0.15,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: (neutral ? cs.primary : cs.onPrimary).withValues(
+                    alpha: 0.15,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  leadingIcon ?? Icons.medication,
+                  color: neutral ? cs.primary : fg,
+                ),
               ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              leadingIcon ?? Icons.medication,
-              color: neutral ? cs.primary : fg,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -515,17 +518,64 @@ class SummaryHeaderCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (reconTotalIU != null && reconFillIU != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: WhiteSyringeGauge(
-                      totalIU: reconTotalIU!,
-                      fillIU: reconFillIU!,
-                    ),
-                  ),
               ],
             ),
           ),
+            ],
+          ),
+          // Reconstitution section: spans full width outside the Row
+          if (reconTotalIU != null && reconFillIU != null) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 48), // Align with text content
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: neutral
+                            ? cs.onSurfaceVariant.withValues(alpha: 0.75)
+                            : fg.withValues(alpha: 0.85),
+                      ),
+                      children: [
+                        const TextSpan(
+                          text: 'Reconstitution: ',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        const TextSpan(
+                          text: 'Draw ',
+                        ),
+                        TextSpan(
+                          text: '${reconFillIU!.toStringAsFixed(1)} IU',
+                          style: TextStyle(
+                            color: neutral ? cs.primary : fg,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const TextSpan(text: ' ('),
+                        TextSpan(
+                          text:
+                              '${((reconFillIU! / 100) * (reconTotalIU! / 100)).toStringAsFixed(2)} mL',
+                          style: TextStyle(
+                            color: neutral ? cs.primary : fg,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const TextSpan(text: ')'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  WhiteSyringeGauge(
+                    totalIU: reconTotalIU!,
+                    fillIU: reconFillIU!,
+                    interactive: false,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
