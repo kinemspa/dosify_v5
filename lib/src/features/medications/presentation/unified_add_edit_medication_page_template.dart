@@ -10,6 +10,8 @@ import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/sections/mdv_volume_reconstitution_section.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 
 /// Template-based unified page for adding/editing medications.
 /// Phase 1: Supports tablet, capsule, PFS, and single-dose vial.
@@ -55,6 +57,14 @@ class _UnifiedAddEditMedicationPageTemplateState
   bool _lightSensitive = false;
   final _storageNotesCtrl = TextEditingController();
 
+  // MDV-specific fields
+  final _perMlCtrl = TextEditingController();
+  final _vialVolumeCtrl = TextEditingController(text: '0');
+  final GlobalKey _vialVolumeKey = GlobalKey();
+  ReconstitutionResult? _reconResult;
+
+  bool get _isMdv => widget.form == MedicationForm.injectionMultiDoseVial;
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +96,12 @@ class _UnifiedAddEditMedicationPageTemplateState
       final si = (m.storageInstructions ?? '').toLowerCase();
       _keepFrozen = si.contains('frozen');
       _lightSensitive = si.contains('light');
+
+      // MDV-specific
+      if (_isMdv) {
+        _perMlCtrl.text = m.perMlValue?.toString() ?? '';
+        _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
+      }
     }
   }
 
@@ -101,6 +117,8 @@ class _UnifiedAddEditMedicationPageTemplateState
     _batchCtrl.dispose();
     _storageCtrl.dispose();
     _storageNotesCtrl.dispose();
+    _perMlCtrl.dispose();
+    _vialVolumeCtrl.dispose();
     super.dispose();
   }
 
@@ -110,7 +128,7 @@ class _UnifiedAddEditMedicationPageTemplateState
     MedicationForm.capsule => 'Capsule',
     MedicationForm.injectionPreFilledSyringe => 'Pre-Filled Syringe',
     MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
-    MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial (coming soon)',
+    MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial',
   };
 
   String get _formLabelPlural => switch (widget.form) {
@@ -170,23 +188,6 @@ class _UnifiedAddEditMedicationPageTemplateState
 
   @override
   Widget build(BuildContext context) {
-    // Reject MDV for now
-    if (widget.form == MedicationForm.injectionMultiDoseVial) {
-      return Scaffold(
-        appBar: const GradientAppBar(title: 'Not Implemented Yet', forceBackButton: true),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Text(
-              'Multi-Dose Vial support is coming in Phase 2.\nPlease use the old unified page for now.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: GradientAppBar(
         title: widget.initial == null ? 'Add $_formLabel' : 'Edit $_formLabel',
@@ -278,6 +279,22 @@ class _UnifiedAddEditMedicationPageTemplateState
         ),
         strengthHelp: 'Specify the amount per ${_formLabel.toLowerCase()} and its unit of measurement.',
 
+        // MDV Volume & Reconstitution section (only for multi-dose vials)
+        mdvSection: _isMdv
+            ? MdvVolumeReconstitutionSection(
+                strengthController: _strengthValueCtrl,
+                strengthUnit: _strengthUnit,
+                perMlController: _perMlCtrl,
+                vialVolumeController: _vialVolumeCtrl,
+                medicationNameController: _nameCtrl,
+                vialVolumeKey: _vialVolumeKey,
+                initialReconResult: _reconResult,
+                onReconstitutionChanged: (result) {
+                  setState(() => _reconResult = result);
+                },
+              )
+            : null,
+
         // Inventory
         stockStepper: StepperRow36(
           controller: _stockValueCtrl,
@@ -297,7 +314,9 @@ class _UnifiedAddEditMedicationPageTemplateState
             constraints: BoxConstraints(minHeight: kFieldHeight),
           ),
         ),
-        stockHelp: 'Enter the number of $_formLabelPlural currently in stock',
+        stockHelp: _isMdv
+            ? 'Track the number of unreconstituted sealed vials you have in storage'
+            : 'Enter the number of $_formLabelPlural currently in stock',
         lowStockRow: Row(
           children: [
             Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
@@ -496,6 +515,10 @@ class _UnifiedAddEditMedicationPageTemplateState
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: strength,
       strengthUnit: _strengthUnit,
+      // MDV-specific: include perMlValue and containerVolumeMl
+      perMlValue: _isMdv && _perMlCtrl.text.isNotEmpty
+          ? double.tryParse(_perMlCtrl.text.trim())
+          : null,
       stockValue: stock,
       stockUnit: _stockUnit, // Auto-set based on form!
       lowStockEnabled: _lowStockEnabled,
@@ -511,6 +534,10 @@ class _UnifiedAddEditMedicationPageTemplateState
           : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _buildStorageInstructions(),
+      // MDV-specific: vial volume (total volume after reconstitution)
+      containerVolumeMl: _isMdv && _vialVolumeCtrl.text.isNotEmpty
+          ? double.tryParse(_vialVolumeCtrl.text.trim())
+          : null,
       initialStockValue: initialStock,
     );
 

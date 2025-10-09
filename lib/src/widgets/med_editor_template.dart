@@ -60,6 +60,9 @@ class MedEditorTemplate extends StatefulWidget {
 
     // Optional top intro under General title
     this.generalIntro,
+
+    // Optional MDV section (rendered between Strength and Inventory)
+    this.mdvSection,
   });
 
   final String appBarTitle;
@@ -110,6 +113,9 @@ class MedEditorTemplate extends StatefulWidget {
 
   // Optional intro under General title
   final String? generalIntro;
+
+  // Optional MDV Volume & Reconstitution section (rendered between Strength and Inventory)
+  final Widget? mdvSection;
 
   @override
   State<MedEditorTemplate> createState() => _MedEditorTemplateState();
@@ -183,6 +189,12 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 ],
               ),
               const SizedBox(height: 12),
+
+              // MDV Volume & Reconstitution section (optional, only for multi-dose vials)
+              if (widget.mdvSection != null) ...[
+                widget.mdvSection!,
+                const SizedBox(height: 12),
+              ],
 
               // Inventory
               SectionFormCard(

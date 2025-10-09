@@ -162,7 +162,7 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
-          builder: (context, state) => const UnifiedAddEditMedicationPage(
+          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
             form: MedicationForm.injectionMultiDoseVial,
           ),
         ),
@@ -226,7 +226,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPage(
+            return UnifiedAddEditMedicationPageTemplate(
               form: MedicationForm.injectionMultiDoseVial,
               initial: med,
             );
