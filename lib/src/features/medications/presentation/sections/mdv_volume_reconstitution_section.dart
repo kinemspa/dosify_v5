@@ -332,6 +332,10 @@ class _MdvVolumeReconstitutionSectionState
             decoration: InputDecoration(
               hintText: '0.0',
               errorStyle: const TextStyle(fontSize: 0, height: 0),
+              isDense: false,
+              isCollapsed: false,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              constraints: const BoxConstraints(minHeight: kFieldHeight),
               hintStyle: theme.textTheme.bodySmall?.copyWith(
                 fontSize: kHintFontSize,
                 color: theme.colorScheme.onSurfaceVariant,

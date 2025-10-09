@@ -46,7 +46,7 @@ class SectionFormCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: neutral
             ? theme.colorScheme.surfaceContainerLowest
-            : theme.colorScheme.primary.withValues(alpha: 0.03),
+            : theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: neutral
             ? Border.all(
