@@ -229,7 +229,7 @@ class SmallDropdown36<T> extends StatelessWidget {
               height: kFieldHeight,
               child: DropdownButtonFormField<T>(
                 value: value,
-                isExpanded: false,
+                isExpanded: true,
                 alignment: AlignmentDirectional.center,
                 style: theme.textTheme.bodyMedium,
                 items: items,
@@ -254,7 +254,7 @@ class SmallDropdown36<T> extends StatelessWidget {
         width: width,
         child: DropdownButtonFormField<T>(
           value: value,
-          isExpanded: false,
+          isExpanded: true,
           alignment: AlignmentDirectional.center,
           style: theme.textTheme.bodyMedium,
           items: items,
@@ -441,7 +441,7 @@ class StepperRow36 extends StatelessWidget {
         _pillBtn(context, '−', enabled ? onDec : () {}),
         const SizedBox(width: 4),
         // Use responsive width with constraints
-        Flexible(
+        Expanded(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: kMinCompactControlWidth,

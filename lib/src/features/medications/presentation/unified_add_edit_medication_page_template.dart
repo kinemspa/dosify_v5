@@ -233,14 +233,15 @@ class _UnifiedAddEditMedicationPageTemplateState
             onChanged: (_) => setState(() {}),
           ),
         ),
-        notesField: Field36(
-          child: TextFormField(
-            controller: _notesCtrl,
-            textCapitalization: TextCapitalization.sentences,
-            style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Take with water'),
-            onChanged: (_) => setState(() {}),
-          ),
+        notesField: TextFormField(
+          controller: _notesCtrl,
+          textCapitalization: TextCapitalization.sentences,
+          keyboardType: TextInputType.multiline,
+          minLines: 2,
+          maxLines: null,
+          style: Theme.of(context).textTheme.bodyMedium,
+          decoration: _dec(context, hint: 'eg. Take with water'),
+          onChanged: (_) => setState(() {}),
         ),
         nameHelp: 'Enter the medication name',
         manufacturerHelp: 'Enter the brand or company name',
@@ -268,7 +269,6 @@ class _UnifiedAddEditMedicationPageTemplateState
         ),
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
-          width: kSmallControlWidth,
           items: const [
             DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
             DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
@@ -297,7 +297,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             constraints: BoxConstraints(minHeight: kFieldHeight),
           ),
         ),
-        stockHelp: 'Enter the amount currently in stock',
+        stockHelp: 'Enter the number of $_formLabelPlural currently in stock',
         lowStockRow: Row(
           children: [
             Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
@@ -466,7 +466,7 @@ class _UnifiedAddEditMedicationPageTemplateState
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: threshold,
       includeNameInStrengthLine: false,
-      perTabletLabel: name.isNotEmpty,
+      perTabletLabel: name.isNotEmpty && (widget.form == MedicationForm.tablet || widget.form == MedicationForm.capsule),
       formLabelPlural: _formLabelPlural,
     );
   }

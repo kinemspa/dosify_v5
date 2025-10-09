@@ -6,7 +6,7 @@ import '../features/home/presentation/home_page.dart';
 import '../features/medications/presentation/medication_list_page.dart';
 import '../features/medications/presentation/medication_detail_page.dart';
 import '../features/medications/presentation/select_medication_type_page.dart';
-import '../features/medications/presentation/editor_template_preview_page.dart';
+import '../features/medications/presentation/med_editor_template_demo_page.dart';
 import '../features/medications/presentation/select_injection_type_page.dart';
 import '../features/medications/presentation/unified_add_edit_medication_page.dart';
 import '../features/medications/presentation/unified_add_edit_medication_page_template.dart';
