@@ -143,19 +143,19 @@ final router = GoRouter(
           path: '/medications/add/capsule',
           name: 'addCapsule',
           builder: (context, state) =>
-              const UnifiedAddEditMedicationPage(form: MedicationForm.capsule),
+              const UnifiedAddEditMedicationPageTemplate(form: MedicationForm.capsule),
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) => const UnifiedAddEditMedicationPage(
+          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
             form: MedicationForm.injectionPreFilledSyringe,
           ),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) => const UnifiedAddEditMedicationPage(
+          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
             form: MedicationForm.injectionSingleDoseVial,
           ),
         ),
@@ -187,7 +187,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPage(
+            return UnifiedAddEditMedicationPageTemplate(
               form: MedicationForm.capsule,
               initial: med,
             );
@@ -200,7 +200,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPage(
+            return UnifiedAddEditMedicationPageTemplate(
               form: MedicationForm.injectionPreFilledSyringe,
               initial: med,
             );
@@ -213,7 +213,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPage(
+            return UnifiedAddEditMedicationPageTemplate(
               form: MedicationForm.injectionSingleDoseVial,
               initial: med,
             );
