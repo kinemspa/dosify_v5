@@ -329,7 +329,6 @@ class _ReconstitutionCalculatorWidgetState
           label: 'Dose Unit',
           field: SmallDropdown36<String>(
             value: _doseUnit,
-            width: kSmallControlWidth,
             items: [
               if (widget.unitLabel == 'units')
                 const DropdownMenuItem(
@@ -364,7 +363,6 @@ class _ReconstitutionCalculatorWidgetState
           label: 'Syringe Size',
           field: SmallDropdown36<SyringeSizeMl>(
             value: _syringe,
-            width: kSmallControlWidth,
             items: SyringeSizeMl.values
                 .map(
                   (s) => DropdownMenuItem(
@@ -649,28 +647,6 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
           const SizedBox(height: 4),
-        ],
-        if (widget.showSummary) ...[
-          const SizedBox(height: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Summary', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 4),
-              Text(
-                'Syringe: ${_syringe.label} • Fill: ${_round2(_selectedUnits)} IU',
-              ),
-              Text(
-                'Concentration: ${currentC.toStringAsFixed(2)} ${widget.unitLabel}/mL',
-              ),
-              Text(
-                'Vial volume: ${currentV.toStringAsFixed(2)} mL' +
-                    (vialMax != null
-                        ? ' (limit ${vialMax!.toStringAsFixed(2)} mL)'
-                        : ''),
-              ),
-            ],
-          ),
         ],
         if (!fitsVial)
           Padding(

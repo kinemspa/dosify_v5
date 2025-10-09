@@ -475,6 +475,9 @@ class _UnifiedAddEditMedicationPageTemplateState
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: unitLabel,
+      perMlValue: _isMdv && _perMlCtrl.text.isNotEmpty
+          ? double.tryParse(_perMlCtrl.text.trim())
+          : null,
       stockCurrent: stockVal ?? 0,
       stockInitial: initialStock,
       stockUnitLabel: _formLabelPlural,
@@ -487,6 +490,9 @@ class _UnifiedAddEditMedicationPageTemplateState
       includeNameInStrengthLine: false,
       perTabletLabel: name.isNotEmpty && (widget.form == MedicationForm.tablet || widget.form == MedicationForm.capsule),
       formLabelPlural: _formLabelPlural,
+      // MDV reconstitution gauge data
+      reconTotalIU: _isMdv && _reconResult != null ? _reconResult!.syringeSizeMl * 100 : null,
+      reconFillIU: _isMdv && _reconResult != null ? _reconResult!.recommendedUnits : null,
     );
   }
 
