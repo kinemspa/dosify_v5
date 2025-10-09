@@ -147,6 +147,18 @@ class _MdvVolumeReconstitutionSectionState
       initialSyringeSize: _mlToSyringeSize(_reconResult?.syringeSizeMl),
       initialVialSize: _reconResult?.maxVialSizeMl,
       showApplyButton: true,
+      onCalculate: (result, isIntermediate) {
+        // Update vial volume dynamically as user adjusts calculator
+        // Only update the field, don't save the result yet
+        if (mounted) {
+          widget.vialVolumeController.text = result.solventVolumeMl
+              .toStringAsFixed(
+                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
+                    ? 0
+                    : 1,
+              );
+        }
+      },
       onApply: (result) {
         setState(() {
           _reconResult = result;
@@ -299,7 +311,9 @@ class _MdvVolumeReconstitutionSectionState
 
   Widget _buildVialVolumeField() {
     final theme = Theme.of(context);
-    final isLocked = _reconResult != null;
+    // Lock field only when reconstitution is saved AND calculator is closed
+    // When calculator is open, allow dynamic updates from calculator
+    final isLocked = _reconResult != null && !_showCalculator;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,9 +366,11 @@ class _MdvVolumeReconstitutionSectionState
         Padding(
           padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4),
           child: Text(
-            isLocked
-                ? 'Total volume after reconstitution (locked - use calculator to adjust)'
-                : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above',
+            _showCalculator
+                ? 'Vial volume updates automatically as you adjust the calculator above'
+                : (isLocked
+                    ? 'Total volume after reconstitution (locked - use calculator to adjust)'
+                    : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above'),
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,

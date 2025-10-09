@@ -246,7 +246,16 @@ class SmallDropdown36<T> extends StatelessWidget {
                   Icons.arrow_drop_down,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
-                decoration: decoration ?? const InputDecoration(isDense: true),
+                decoration: decoration ??
+                    InputDecoration(
+                      isDense: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outlineVariant,
+                        ),
+                      ),
+                    ),
                 menuMaxHeight: 480,
               ),
             ),
@@ -271,7 +280,16 @@ class SmallDropdown36<T> extends StatelessWidget {
             Icons.arrow_drop_down,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          decoration: decoration ?? const InputDecoration(isDense: true),
+          decoration: decoration ??
+              InputDecoration(
+                isDense: true,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outlineVariant,
+                  ),
+                ),
+              ),
           menuMaxHeight: 480,
         ),
       ),
@@ -501,6 +519,9 @@ class StepperRow36 extends StatelessWidget {
           padding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
           minimumSize: const Size(28, 28),
+          side: BorderSide(
+            color: theme.colorScheme.outlineVariant,
+          ),
         ),
         onPressed: enabled ? onTap : null,
         child: Text(
