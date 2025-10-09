@@ -349,17 +349,7 @@ class _UnifiedAddEditMedicationPageTemplateState
           final thr = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
           return (stock > 0 && thr >= stock) ? Colors.orange : null;
         })(),
-        quantityDropdown: SmallDropdown36<StockUnit>(
-          value: _stockUnit,
-          width: kSmallControlWidth,
-          items: [
-            DropdownMenuItem(
-              value: _stockUnit,
-              child: Center(child: Text(_formLabelPlural)),
-            ),
-          ],
-          onChanged: (_) {}, // Read-only - auto-determined by form type
-        ),
+        quantityDropdown: null, // Stock unit is auto-determined by form type
         expiryDateButton: DateButton36(
           label: _expiry == null
               ? 'Select date'
@@ -384,6 +374,7 @@ class _UnifiedAddEditMedicationPageTemplateState
           child: TextFormField(
             controller: _batchCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'Enter batch number'),
           ),
         ),
@@ -392,6 +383,7 @@ class _UnifiedAddEditMedicationPageTemplateState
           child: TextFormField(
             controller: _storageCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'eg. Bathroom cabinet'),
           ),
         ),
@@ -439,6 +431,7 @@ class _UnifiedAddEditMedicationPageTemplateState
           child: TextFormField(
             controller: _storageNotesCtrl,
             textCapitalization: TextCapitalization.sentences,
+            style: Theme.of(context).textTheme.bodyMedium,
             decoration: const InputDecoration(hintText: 'Enter storage instructions'),
           ),
         ),

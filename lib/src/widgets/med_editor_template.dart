@@ -35,7 +35,7 @@ class MedEditorTemplate extends StatefulWidget {
 
     // Inventory
     required this.stockStepper,
-    required this.quantityDropdown,
+    this.quantityDropdown,
     required this.expiryDateButton,
     this.stockHelp,
     this.expiryHelp,
@@ -84,7 +84,7 @@ class MedEditorTemplate extends StatefulWidget {
 
   // Inventory
   final Widget stockStepper;
-  final Widget quantityDropdown;
+  final Widget? quantityDropdown;
   final Widget expiryDateButton;
   final String? stockHelp;
   final String? expiryHelp;
@@ -189,10 +189,11 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 title: 'Inventory',
                 neutral: true,
                 children: [
-                  LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
-                  _support(widget.stockHelp),
-                  // Move Quantity unit directly under Stock quantity (paired), before low stock alert
-                  LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown),
+                LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
+                _support(widget.stockHelp),
+                // Show Quantity unit only if provided (optional for auto-determined stock units)
+                if (widget.quantityDropdown != null)
+                  LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown!),
                   if (widget.lowStockRow != null)
                     LabelFieldRow(label: 'Low stock alert', field: widget.lowStockRow!),
                   if (widget.lowStockThresholdField != null)
