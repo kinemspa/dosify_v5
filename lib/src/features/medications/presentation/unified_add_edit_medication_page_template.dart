@@ -270,10 +270,19 @@ class _UnifiedAddEditMedicationPageTemplateState
         ),
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
-          items: const [
-            DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
-            DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
-            DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
+          items: [
+            const DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
+            const DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
+            const DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
+            const DropdownMenuItem(value: Unit.units, child: Center(child: Text('units'))),
+            // Add concentration units for pre-filled syringes and single dose vials
+            if (widget.form == MedicationForm.injectionPreFilledSyringe ||
+                widget.form == MedicationForm.injectionSingleDoseVial) ...[
+              const DropdownMenuItem(value: Unit.mcgPerMl, child: Center(child: Text('mcg/mL'))),
+              const DropdownMenuItem(value: Unit.mgPerMl, child: Center(child: Text('mg/mL'))),
+              const DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
+              const DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
+            ],
           ],
           onChanged: (v) => setState(() => _strengthUnit = v ?? _strengthUnit),
         ),
