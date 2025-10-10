@@ -152,6 +152,17 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Validate medication selection
+    if (_selectedMed == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a medication first'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     // If name was auto-generated, ask user if they want to edit before saving
     if (_nameAuto) {
       final proceed =
@@ -887,78 +898,29 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 context,
                 label: 'Medication',
                 field: Field36(
-                  child: DropdownButtonFormField<Medication>(
-                    value: _selectedMed,
-                    isExpanded: true,
-                    alignment: AlignmentDirectional.center,
-                    decoration: const InputDecoration(labelText: ''),
-                    selectedItemBuilder: (ctx) =>
-                        Hive.box<Medication>('medications').values
-                            .map(
-                              (m) => Center(
-                                child: Text(
-                                  '${m.name} — ${_medStrengthAndStock(m)}',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(ctx).textTheme.bodyMedium,
-                                ),
-                              ),
-                            )
-                            .toList(),
-                    items: Hive.box<Medication>('medications').values
-                        .map(
-                          (m) => DropdownMenuItem<Medication>(
-                            value: m,
-                            alignment: AlignmentDirectional.center,
-                            child: Center(
-                              child: Text(
-                                '${m.name} — ${_medStrengthAndStock(m)}',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (m) {
-                      setState(() {
-                        _selectedMed = m;
-                        _medicationId = m?.id;
-                        _medicationName.text = m?.name ?? '';
-                        if (m != null) {
-                          switch (m.form) {
-                            case MedicationForm.tablet:
-                              _doseUnit.text = 'tablets';
-                              if ((_doseValue.text).trim().isEmpty)
-                                _doseValue.text = '1';
-                              break;
-                            case MedicationForm.capsule:
-                              _doseUnit.text = 'capsules';
-                              if ((_doseValue.text).trim().isEmpty)
-                                _doseValue.text = '1';
-                              break;
-                            case MedicationForm.injectionPreFilledSyringe:
-                              _doseUnit.text = 'syringes';
-                              if ((_doseValue.text).trim().isEmpty)
-                                _doseValue.text = '1';
-                              break;
-                            case MedicationForm.injectionSingleDoseVial:
-                              _doseUnit.text = 'vials';
-                              if ((_doseValue.text).trim().isEmpty)
-                                _doseValue.text = '1';
-                              break;
-                            case MedicationForm.injectionMultiDoseVial:
-                              final u = m.strengthUnit;
-                              _doseUnit.text = (u == Unit.unitsPerMl)
-                                  ? 'IU'
-                                  : 'mg';
-                              if ((_doseValue.text).trim().isEmpty)
-                                _doseValue.text = '1';
-                              break;
-                          }
-                        }
-                        _maybeAutoName();
-                      });
-                    },
-                    validator: (v) => v == null ? 'Required' : null,
+                  child: OutlinedButton.icon(
+                    onPressed: _pickMedication,
+                    icon: Icon(
+                      _selectedMed == null
+                          ? Icons.add_circle_outline
+                          : Icons.edit_outlined,
+                      size: 18,
+                    ),
+                    label: Text(
+                      _selectedMed == null
+                          ? 'Select Medication'
+                          : '${_selectedMed!.name} — ${_medStrengthAndStock(_selectedMed!)}',
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(36),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
                   ),
                 ),
               ),
