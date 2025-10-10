@@ -179,6 +179,26 @@ class _ReconstitutionCalculatorWidgetState
       return const SizedBox.shrink();
     }
 
+    // Sync dose unit with vial unit when vial changes to/from 'units'
+    // This handles the case where user changes medication strength unit
+    if (widget.unitLabel == 'units' && _doseUnit != 'units') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _doseUnit = 'units';
+          });
+        }
+      });
+    } else if (widget.unitLabel != 'units' && _doseUnit == 'units') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _doseUnit = 'mcg'; // Default back to mcg for mass-based units
+          });
+        }
+      });
+    }
+
     // Use strength from parent (already set above)
     final Sraw = widget.initialStrengthValue;
     final Draw = double.tryParse(_doseCtrl.text) ?? 0;
