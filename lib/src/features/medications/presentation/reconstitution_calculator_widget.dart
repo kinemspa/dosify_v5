@@ -6,6 +6,7 @@ import '../../../widgets/unified_form.dart';
 import '../../../widgets/white_syringe_gauge.dart';
 import 'ui_consts.dart';
 import 'reconstitution_calculator_dialog.dart';
+import 'reconstitution_calculator_helpers.dart';
 
 /// Legacy local stepper replaced by shared StepperRow36 for consistency.
 
@@ -79,26 +80,11 @@ class _ReconstitutionCalculatorWidgetState
     super.dispose();
   }
 
-  double _round2(double v) => (v * 100).round() / 100.0;
-
-  /// Round to nearest 0.5 mL (whole or half mL)
-  double _roundToHalfMl(double v) {
-    return (v * 2).round() / 2.0;
-  }
-
-  String _fmt(double v) {
-    if (v == v.roundToDouble()) return v.toInt().toString();
-    final s = v.toStringAsFixed(2);
-    if (s.endsWith('0')) return v.toStringAsFixed(1);
-    return s;
-  }
-
-  double _toBaseMass(double value, String from) {
-    if (from == 'g') return value * 1000.0;
-    if (from == 'mg') return value;
-    if (from == 'mcg') return value / 1000.0;
-    return value;
-  }
+  // Helper methods now imported from reconstitution_calculator_helpers.dart
+  // - round2() - Round to 2 decimal places
+  // - roundToHalfMl() - Round to nearest 0.5 mL
+  // - formatDouble() - Format for display (was _fmt)
+  // - toBaseMass() - Convert units to mg (was _toBaseMass)
 
   ({double cPerMl, double vialVolume}) _computeForUnits({
     required double S,
@@ -118,8 +104,8 @@ class _ReconstitutionCalculatorWidgetState
   (double, double, double) _presetUnitsRaw() {
     final total = _syringe.totalUnits.toDouble();
     final minU = max(5, (total * 0.05).ceil()).toDouble();
-    final midU = _round2(total * 0.33);
-    final highU = _round2(total * 0.80);
+    final midU = round2(total * 0.33);
+    final highU = round2(total * 0.80);
     return (minU, midU, highU);
   }
 
@@ -197,8 +183,8 @@ class _ReconstitutionCalculatorWidgetState
     double S = Sraw;
     double D = Draw;
     if (widget.unitLabel != 'units') {
-      final S_mg = _toBaseMass(Sraw, widget.unitLabel);
-      final D_mg = _toBaseMass(Draw, _doseUnit);
+      final S_mg = toBaseMass(Sraw, widget.unitLabel);
+      final D_mg = toBaseMass(Draw, _doseUnit);
       S = S_mg;
       D = D_mg;
     }
@@ -220,9 +206,9 @@ class _ReconstitutionCalculatorWidgetState
     _selectedUnits = _selectedUnits.clamp(sliderMin, sliderMax);
 
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
-    final currentC = _round2(current.cPerMl);
+    final currentC = round2(current.cPerMl);
     final currentV = current.vialVolume; // Use precise value for live display
-    final currentVRounded = _roundToHalfMl(
+    final currentVRounded = roundToHalfMl(
       current.vialVolume,
     ); // Rounded for saving
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
@@ -231,7 +217,7 @@ class _ReconstitutionCalculatorWidgetState
     final result = ReconstitutionResult(
       perMlConcentration: currentC,
       solventVolumeMl: currentVRounded,
-      recommendedUnits: _round2(_selectedUnits),
+      recommendedUnits: round2(_selectedUnits),
       syringeSizeMl: _syringe.ml,
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
@@ -268,7 +254,7 @@ class _ReconstitutionCalculatorWidgetState
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            'Using vial strength: ${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+            'Using vial strength: ${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
             style: kMutedLabelStyle(
               context,
             ).copyWith(fontWeight: FontWeight.w600),
@@ -543,7 +529,7 @@ class _ReconstitutionCalculatorWidgetState
                       const TextSpan(text: 'Reconstitute '),
                       TextSpan(
                         text:
-                            '${_fmt(widget.initialStrengthValue)} ${widget.unitLabel}',
+                            '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -633,7 +619,7 @@ class _ReconstitutionCalculatorWidgetState
                     children: [
                       const TextSpan(text: 'for your '),
                       TextSpan(
-                        text: '${_fmt(Draw)} $_doseUnit',
+                        text: '${formatDouble(Draw)} $_doseUnit',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -667,7 +653,7 @@ class _ReconstitutionCalculatorWidgetState
                       final result = ReconstitutionResult(
                         perMlConcentration: currentC,
                         solventVolumeMl: currentV,
-                        recommendedUnits: _round2(_selectedUnits),
+                        recommendedUnits: round2(_selectedUnits),
                         syringeSizeMl: _syringe.ml,
                         diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                             ? _diluentNameCtrl.text.trim()
@@ -699,7 +685,7 @@ class _ReconstitutionCalculatorWidgetState
     final diluentName = _diluentNameCtrl.text.trim().isNotEmpty
         ? _diluentNameCtrl.text.trim()
         : 'Diluent';
-    final roundedVolume = _roundToHalfMl(calcResult.vialVolume);
+    final roundedVolume = roundToHalfMl(calcResult.vialVolume);
     // Calculate actual mL to draw for the dose
     final mlToDraw = (units / 100) * _syringe.ml;
 
@@ -786,7 +772,7 @@ class _ReconstitutionCalculatorWidgetState
                                   '${_diluentNameCtrl.text.trim().isNotEmpty ? _diluentNameCtrl.text.trim() : "Diluent"}: ',
                             ),
                             TextSpan(
-                              text: '${_fmt(roundedVolume)} mL',
+                              text: '${formatDouble(roundedVolume)} mL',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -806,7 +792,7 @@ class _ReconstitutionCalculatorWidgetState
                             TextSpan(text: 'Concentration: '),
                             TextSpan(
                               text:
-                                  '${_fmt(calcResult.cPerMl)} ${widget.unitLabel}/mL',
+                                  '${formatDouble(calcResult.cPerMl)} ${widget.unitLabel}/mL',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -825,7 +811,8 @@ class _ReconstitutionCalculatorWidgetState
                           children: [
                             TextSpan(text: 'Syringe (${_syringe.label}): '),
                             TextSpan(
-                              text: '${_fmt(units)} IU / ${_fmt(mlToDraw)} mL',
+                              text:
+                                  '${formatDouble(units)} IU / ${formatDouble(mlToDraw)} mL',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
