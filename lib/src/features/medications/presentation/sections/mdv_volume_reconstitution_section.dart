@@ -236,36 +236,33 @@ class _MdvVolumeReconstitutionSectionState
           interactive: false,
         ),
         const SizedBox(height: 12),
-        // Text content with left padding
-        Padding(
-          padding: EdgeInsets.only(left: _labelWidth() + 8),
-          child: RichText(
-            text: TextSpan(
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-              children: [
-                const TextSpan(text: 'Reconstitute '),
-                TextSpan(
-                  text: '$strengthStr$unitLabel',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (medName.isNotEmpty) TextSpan(text: ' $medName'),
-                const TextSpan(text: ' with '),
-                TextSpan(
-                  text: '$volumeStr mL',
-                  style: TextStyle(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                TextSpan(text: ' $diluentName'),
-              ],
+        // Main instruction text spans full width
+        RichText(
+          text: TextSpan(
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
+            children: [
+              const TextSpan(text: 'Reconstitute '),
+              TextSpan(
+                text: '$strengthStr$unitLabel',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (medName.isNotEmpty) TextSpan(text: ' $medName'),
+              const TextSpan(text: ' with '),
+              TextSpan(
+                text: '$volumeStr mL',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              TextSpan(text: ' $diluentName'),
+            ],
           ),
         ),
         const SizedBox(height: 8),
