@@ -1118,14 +1118,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     children: [
                       _incBtn('−', () {
                         final unit = _doseUnit.text.trim().toLowerCase();
-                        final step = 1.0;
+                        // Smart step: 0.25 for tablets, 1.0 for everything else
+                        final step = unit == 'tablets' ? 0.25 : 1.0;
                         final v =
                             double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                        final nv = (v - step);
+                        final nv = (v - step).clamp(0, 1e12);
                         setState(() {
                           _doseValue.text = (unit == 'tablets')
-                              ? nv.clamp(0, 1e12).toStringAsFixed(2)
-                              : nv.clamp(0, 1e12).round().toString();
+                              ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
+                              : nv.round().toString();
                           _coerceDoseValueForUnit();
                           _maybeAutoName();
                         });
@@ -1176,14 +1177,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                       const SizedBox(width: 6),
                       _incBtn('+', () {
                         final unit = _doseUnit.text.trim().toLowerCase();
-                        final step = 1.0;
+                        // Smart step: 0.25 for tablets, 1.0 for everything else
+                        final step = unit == 'tablets' ? 0.25 : 1.0;
                         final v =
                             double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                        final nv = (v + step);
+                        final nv = (v + step).clamp(0, 1e12);
                         setState(() {
                           _doseValue.text = (unit == 'tablets')
-                              ? nv.clamp(0, 1e12).toStringAsFixed(2)
-                              : nv.clamp(0, 1e12).round().toString();
+                              ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
+                              : nv.round().toString();
                           _coerceDoseValueForUnit();
                           _maybeAutoName();
                         });

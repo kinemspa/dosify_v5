@@ -27,31 +27,52 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
     final formattedValue = value == value.roundToDouble()
         ? value.toInt().toString()
         : value.toString();
-    return '$formattedValue ${m.strengthUnit.displayName}';
+    return '$formattedValue ${_unitDisplayName(m.strengthUnit)}';
+  }
+
+  String _unitDisplayName(Unit unit) {
+    switch (unit) {
+      case Unit.mcg:
+        return 'mcg';
+      case Unit.mg:
+        return 'mg';
+      case Unit.g:
+        return 'g';
+      case Unit.units:
+        return 'IU';
+      case Unit.mcgPerMl:
+        return 'mcg/mL';
+      case Unit.mgPerMl:
+        return 'mg/mL';
+      case Unit.gPerMl:
+        return 'g/mL';
+      case Unit.unitsPerMl:
+        return 'IU/mL';
+    }
   }
 
   String _formatStock(Medication m) {
     switch (m.form) {
       case MedicationForm.tablet:
-        final qty = m.stockQuantity?.toInt() ?? 0;
+        final qty = m.stockValue?.toInt() ?? 0;
         return '$qty tablet${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.capsule:
-        final qty = m.stockQuantity?.toInt() ?? 0;
+        final qty = m.stockValue?.toInt() ?? 0;
         return '$qty capsule${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.injectionPreFilledSyringe:
-        final qty = m.stockQuantity?.toInt() ?? 0;
+        final qty = m.stockValue?.toInt() ?? 0;
         return '$qty syringe${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.injectionSingleDoseVial:
-        final qty = m.stockQuantity?.toInt() ?? 0;
+        final qty = m.stockValue?.toInt() ?? 0;
         return '$qty vial${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.injectionMultiDoseVial:
-        final qty = m.stockQuantity?.toInt() ?? 0;
+        final qty = m.stockValue?.toInt() ?? 0;
         return '$qty vial${qty == 1 ? '' : 's'} in stock';
     }
   }
 
   Color _getStockColor(BuildContext context, Medication m) {
-    final qty = m.stockQuantity?.toInt() ?? 0;
+    final qty = m.stockValue?.toInt() ?? 0;
     final lowStock = m.lowStockThreshold?.toInt() ?? 5;
     if (qty == 0) {
       return Theme.of(context).colorScheme.error;
@@ -67,23 +88,12 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
     final meds = box.values.toList(growable: false);
 
     // Filter out medications with no stock
-    final availableMeds = meds
-        .where((m) => (m.stockQuantity ?? 0) > 0)
-        .toList();
+    final availableMeds = meds.where((m) => (m.stockValue ?? 0) > 0).toList();
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          AppHeader(
-            title: 'Select Medication',
-            subtitle: availableMeds.isEmpty
-                ? 'No medications available'
-                : '${availableMeds.length} medication${availableMeds.length == 1 ? '' : 's'} available',
-          ),
-          if (availableMeds.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
+      appBar: const GradientAppBar(title: 'Select Medication'),
+      body: availableMeds.isEmpty
+          ? Center(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
