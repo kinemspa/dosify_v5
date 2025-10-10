@@ -32,6 +32,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   String? _medicationId;
   final List<TimeOfDay> _times = [const TimeOfDay(hour: 9, minute: 0)];
   final Set<int> _days = {1, 2, 3, 4, 5, 6, 7};
+  final Set<int> _daysOfMonth = {}; // 1-31 for monthly schedules
   bool _active = true;
   bool _useCycle = false;
   final TextEditingController _cycleN = TextEditingController(text: '2');
@@ -57,6 +58,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       _days
         ..clear()
         ..addAll(s.daysOfWeek);
+      if (s.daysOfMonth != null && s.daysOfMonth!.isNotEmpty) {
+        _daysOfMonth
+          ..clear()
+          ..addAll(s.daysOfMonth!);
+      }
       _active = s.active;
       _useCycle = s.cycleEveryNDays != null;
       if (_useCycle) {
@@ -68,7 +74,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     // Initialize mode based on current fields
     _mode = _useCycle
         ? ScheduleMode.daysOnOff
-        : (_days.length == 7 ? ScheduleMode.everyDay : ScheduleMode.daysOfWeek);
+        : (_daysOfMonth.isNotEmpty
+              ? ScheduleMode.daysOfMonth
+              : (_days.length == 7
+                    ? ScheduleMode.everyDay
+                    : ScheduleMode.daysOfWeek));
 
     _name.addListener(() {
       // If user edits name manually, stop auto-updating
@@ -405,6 +415,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       cycleEveryNDays: _useCycle ? int.tryParse(_cycleN.text.trim()) : null,
       cycleAnchorDate: _useCycle
           ? DateTime(_cycleAnchor.year, _cycleAnchor.month, _cycleAnchor.day)
+          : null,
+      daysOfMonth: _daysOfMonth.isNotEmpty
+          ? (_daysOfMonth.toList()..sort())
           : null,
       doseUnitCode: doseUnitCode,
       doseMassMcg: doseMassMcg,
@@ -1282,13 +1295,23 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               ..clear()
                               ..addAll([1, 2, 3, 4, 5, 6, 7]);
                             _useCycle = false;
+                            _daysOfMonth.clear();
                           } else if (_mode == ScheduleMode.daysOfWeek) {
                             _useCycle = false;
+                            _daysOfMonth.clear();
                             if (_days.isEmpty) {
                               _days.addAll([1, 2, 3, 4, 5]);
                             }
                           } else if (_mode == ScheduleMode.daysOnOff) {
                             _useCycle = true;
+                            _daysOfMonth.clear();
+                          } else if (_mode == ScheduleMode.daysOfMonth) {
+                            _useCycle = false;
+                            if (_daysOfMonth.isEmpty) {
+                              _daysOfMonth.addAll([
+                                1,
+                              ]); // Default to 1st of month
+                            }
                           }
                         });
                       },
@@ -1476,6 +1499,50 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                       ),
                     ),
                   ],
+                  if (_mode == ScheduleMode.daysOfMonth) ...[
+                    _helperBelowLeft('Select days of the month (1-31)'),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: List.generate(31, (i) {
+                          final day = i + 1;
+                          final selected = _daysOfMonth.contains(day);
+                          return FilterChip(
+                            label: Text(
+                              '$day',
+                              style: TextStyle(
+                                color: selected
+                                    ? theme.colorScheme.onPrimary
+                                    : null,
+                                fontSize: 12,
+                              ),
+                            ),
+                            showCheckmark: false,
+                            selectedColor: theme.colorScheme.primary,
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            selected: selected,
+                            onSelected: (sel) {
+                              setState(() {
+                                if (sel) {
+                                  _daysOfMonth.add(day);
+                                } else {
+                                  _daysOfMonth.remove(day);
+                                }
+                              });
+                            },
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   _rowLabelField(
                     context,
@@ -1644,12 +1711,13 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   }
 }
 
-enum ScheduleMode { everyDay, daysOfWeek, daysOnOff }
+enum ScheduleMode { everyDay, daysOfWeek, daysOnOff, daysOfMonth }
 
 String _modeLabel(ScheduleMode m) => switch (m) {
   ScheduleMode.everyDay => 'Every day',
   ScheduleMode.daysOfWeek => 'Days of the week',
   ScheduleMode.daysOnOff => 'Days on / days off',
+  ScheduleMode.daysOfMonth => 'Days of the month',
 };
 
 class _DoseFormulaStrip extends StatelessWidget {
