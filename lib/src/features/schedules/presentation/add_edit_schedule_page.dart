@@ -1238,6 +1238,22 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             _helperBelowLeft(
               'Enter dose amount and unit (tablets allow 0.25 steps)',
             ),
+            // Dose calculation summary
+            if (_selectedMed != null)
+              Padding(
+                padding: EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width >= 400
+                      ? 128.0
+                      : 118.0,
+                  right: 10,
+                  bottom: 10,
+                ),
+                child: _DoseFormulaStrip(
+                  selectedMed: _selectedMed,
+                  valueCtrl: _doseValue,
+                  unitCtrl: _doseUnit,
+                ),
+              ),
             const SizedBox(height: 10),
             _section(context, 'Schedule', [
               Column(
