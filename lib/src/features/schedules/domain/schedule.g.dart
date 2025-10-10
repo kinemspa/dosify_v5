@@ -32,6 +32,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       timesOfDayUtc: (fields[13] as List?)?.cast<int>(),
       cycleEveryNDays: fields[14] as int?,
       cycleAnchorDate: fields[15] as DateTime?,
+      daysOfMonth: (fields[26] as List?)?.cast<int>(),
       doseUnitCode: fields[16] as int?,
       doseMassMcg: fields[17] as int?,
       doseVolumeMicroliter: fields[18] as int?,
@@ -49,7 +50,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
   @override
   void write(BinaryWriter writer, Schedule obj) {
     writer
-      ..writeByte(26)
+      ..writeByte(27)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -82,6 +83,8 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..write(obj.cycleEveryNDays)
       ..writeByte(15)
       ..write(obj.cycleAnchorDate)
+      ..writeByte(26)
+      ..write(obj.daysOfMonth)
       ..writeByte(16)
       ..write(obj.doseUnitCode)
       ..writeByte(17)

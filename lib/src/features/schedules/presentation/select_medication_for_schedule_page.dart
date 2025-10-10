@@ -94,99 +94,93 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
       appBar: const GradientAppBar(title: 'Select Medication'),
       body: availableMeds.isEmpty
           ? Center(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.medication_outlined,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.outlineVariant,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.medication_outlined,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No medications with stock',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No medications with stock',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add medications first to create schedules',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Add medications first to create schedules',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             )
-          else
-            SliverPadding(
+          : ListView.builder(
               padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, i) {
-                  final m = availableMeds[i];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Card(
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => Navigator.of(context).pop(m),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      m.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
+              itemCount: availableMeds.length,
+              itemBuilder: (context, i) {
+                final m = availableMeds[i];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(m),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    m.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
-                                  Icon(
-                                    Icons.chevron_right,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              _InfoRow(
-                                label: 'Type',
-                                value: _formatMedicationType(m.form),
-                                icon: Icons.medication,
-                              ),
-                              const SizedBox(height: 8),
-                              _InfoRow(
-                                label: 'Strength',
-                                value: _formatStrength(m),
-                                icon: Icons.science_outlined,
-                              ),
-                              const SizedBox(height: 8),
-                              _InfoRow(
-                                label: 'Stock',
-                                value: _formatStock(m),
-                                icon: Icons.inventory_2_outlined,
-                                valueColor: _getStockColor(context, m),
-                              ),
-                            ],
-                          ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _InfoRow(
+                              label: 'Type',
+                              value: _formatMedicationType(m.form),
+                              icon: Icons.medication,
+                            ),
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              label: 'Strength',
+                              value: _formatStrength(m),
+                              icon: Icons.science_outlined,
+                            ),
+                            const SizedBox(height: 8),
+                            _InfoRow(
+                              label: 'Stock',
+                              value: _formatStock(m),
+                              icon: Icons.inventory_2_outlined,
+                              valueColor: _getStockColor(context, m),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  );
-                }, childCount: availableMeds.length),
-              ),
+                  ),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }

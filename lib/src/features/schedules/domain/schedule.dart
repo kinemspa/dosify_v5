@@ -20,6 +20,7 @@ class Schedule {
     this.timesOfDayUtc,
     this.cycleEveryNDays,
     this.cycleAnchorDate,
+    this.daysOfMonth,
     // New typed dose fields (all optional for backward compatibility)
     this.doseUnitCode,
     this.doseMassMcg,
@@ -76,6 +77,10 @@ class Schedule {
   @HiveField(15)
   final DateTime? cycleAnchorDate; // local date anchor for cycle (midnight)
 
+  // Days of month (1-31, if set daysOfWeek is ignored)
+  @HiveField(26)
+  final List<int>? daysOfMonth; // e.g., [1, 15] for 1st and 15th of each month
+
   // Typed dose fields (persisted as primitives to avoid new adapters)
   @HiveField(16)
   final int? doseUnitCode; // maps to DoseUnit index
@@ -101,6 +106,7 @@ class Schedule {
   bool get hasUtc => minutesOfDayUtc != null && daysOfWeekUtc != null;
   bool get hasMultipleTimes => timesOfDay != null && timesOfDay!.isNotEmpty;
   bool get hasCycle => cycleEveryNDays != null && cycleEveryNDays! > 0;
+  bool get hasDaysOfMonth => daysOfMonth != null && daysOfMonth!.isNotEmpty;
 
   // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
   DoseUnit? get doseUnitEnum =>
