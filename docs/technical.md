@@ -459,3 +459,61 @@ Reconstitution Calculator Formula
   - Tracks single current vial being used vs inventory of sealed vials
   - Clear workflow: Calculate → Save Reconstitution → Clear Reconstitution (if needed)
   - Much simpler mental model for users
+
+
+Schedules Module Improvements (Enhanced UX)
+- **Card-Based Medication Selection**: 
+  - Replaced dropdown with SelectMedicationForSchedulePage showing detailed cards
+  - Each card displays: Name, Type (Tablet/Capsule/Injection), Strength, Stock quantity
+  - Color-coded stock status: error (0), orange (low), normal (sufficient)
+  - Only shows medications with available stock (>0)
+  - Empty state with helpful message when no stock available
+  - ListView for smooth scrolling through many medications
+  - Location: lib/src/features/schedules/presentation/select_medication_for_schedule_page.dart
+
+- **Smart Dose Input with Validation**:
+  - **Tablet Doses**: Allow quarter-tablet increments (0.25 steps)
+    - Increment buttons use 0.25 step for tablets
+    - Validation requires values in quarter-tablet steps
+    - Display formatting: shows decimals only when needed (1 vs 1.25)
+  - **Capsule Doses**: Enforce whole-number-only dosing
+    - Increment buttons use 1.0 step for capsules
+    - Validation requires integer values only
+    - Prevents fractional capsule entries
+  - Other medication forms (injections) use whole number increments
+  - All validation logic already in place with proper error messages
+
+- **Live Dose Calculation Summary**:
+  - Shows instant feedback below dose input using _DoseFormulaStrip widget
+  - Examples: '1 tablet × 20mg = 20mcg (20mg)', '0.5 tablets × 50mg = 25mg'
+  - Updates immediately as user changes dose value or unit
+  - Positioned with proper padding alignment for visual consistency
+  - Helps users verify correct dose entry before saving schedule
+  - Reuses existing dose calculation widget for consistency
+
+- **Days of Month Schedule Type**:
+  - Added ScheduleMode.daysOfMonth enum value
+  - Schedule model extended with daysOfMonth field (HiveField 26)
+  - UI: Compact 31-day FilterChip grid for selecting specific days
+  - Helper text: 'Select days of the month (1-31)'
+  - State management: _daysOfMonth Set<int> tracks selections
+  - Mode switching: clears daysOfMonth when switching to other schedule types
+  - Default: 1st of month when switching to monthly mode
+  - Save logic: includes daysOfMonth in Schedule object when applicable
+  - Use case: Medications taken on specific days each month (e.g., 1st and 15th)
+  - Scheduler integration: Ready for notification scheduling (requires ScheduleScheduler update)
+
+- **Schedule Form Structure**:
+  - General section: Medication selection with detailed card UI
+  - Instructions section: Live preview of schedule with dose calculations
+  - Dose section: Value + Unit with smart validation and live summary
+  - Schedule section: Type, Start/End dates, Day selection (week/month/cycle), Times
+  - Helper text placement: Consistently positioned under fields with left alignment
+  - Form validation: Prevents save with invalid inputs
+  - Auto-name generation: Creates schedule name from medication and dose
+
+- **Next Steps for Schedules**:
+  - Update ScheduleScheduler to handle daysOfMonth for notification scheduling
+  - Consider adding batch schedule creation (multiple medications at once)
+  - Add schedule templates for common patterns (daily morning/evening, etc.)
+
