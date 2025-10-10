@@ -64,7 +64,10 @@ class _ReconstitutionCalculatorWidgetState
           ? defaultDose.toInt().toString()
           : defaultDose.toStringAsFixed(2),
     );
-    _doseUnit = widget.initialDoseUnit ?? 'mcg';
+    // Set dose unit to match vial unit for IU medications, otherwise default to mcg
+    _doseUnit =
+        widget.initialDoseUnit ??
+        (widget.unitLabel == 'units' ? 'units' : 'mcg');
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
