@@ -73,9 +73,40 @@ Notifications (architecture and delivery)
   - low_stock, expiry (Default)
   - test_alarm (Max) for diagnostics with short delays
 
+Schedules Module Enhancements
+- **Medication Selector Redesign**: Replaced navigation-based card selector with inline expandable UI
+  - _MedicationSummaryDisplay widget shows selected medication details inline
+  - _InlineMedicationSelector provides scrollable medication list (max 400px height)
+  - Shows Type, Strength, Stock, and Manufacturer without modal navigation
+  - Quick swap or clear selected medication with icon buttons
+  - Consistent card styling with surfaceContainerLowest and primary border
+- **Schedule Flow Reorganization**: Logical step-by-step sequence
+  1. Choose schedule type (Every day, Days of week, Days on/off, Days of month)
+  2. Select start date
+  3. Select days/months based on chosen type
+  4. Add dosing times (with add/remove)
+  5. Select end date (optional, with "No end" checkbox)
+  - Numbered comments in code clarify each step
+  - Improved UX with clear progression through setup
+- **Summary Card Redesign**: Instructions section converted to styled summary card
+  - _ScheduleSummaryCard widget matches SummaryHeaderCard styling
+  - Primary color background with onPrimary text
+  - Medication icon and name in header with strength below
+  - Rich text formatting: "Take X tablets at 9:00 AM" with bold dose
+  - Clear frequency display (every day, on Mon/Wed/Fri, etc.)
+  - Dose calculation for tablets/capsules (mg per dose)
+  - Start/end dates with bullet separator
+  - Empty state with info icon when incomplete
+- **Remaining Work**:
+  - Schedule screen card styling (large & compact cards)
+  - List view styling to match medication screen
+  - Overflow fixes on large schedule cards
+  - Git commits: e79f51f, 0cc6f03, 6dacff1
+
 Notes & next steps
 - Many analyzer infos/warnings are style/order issues; plan a cleanup pass after UI layout is stabilized.
 - Ensure every file ends with a newline (eol_at_end_of_file) and prefer package imports.
+- Complete schedule screen card styling to match medication cards
 
 UI Blueprint Adoption
 - Add Capsule screen now mirrors the Add Tablet blueprint:
