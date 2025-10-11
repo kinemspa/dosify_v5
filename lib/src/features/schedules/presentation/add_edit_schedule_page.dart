@@ -928,156 +928,20 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               ],
             ]),
             const SizedBox(height: 10),
-            _section(context, 'Summary', [
-              Builder(
-                builder: (context) {
-                  final med = _selectedMed;
-                  final name = _medicationName.text.trim();
-                  final doseVal = double.tryParse(_doseValue.text.trim()) ?? 0;
-                  final unit = _doseUnit.text.trim();
-                  if (med == null ||
-                      name.isEmpty ||
-                      doseVal <= 0 ||
-                      unit.isEmpty) {
-                    return const Text('Enter dose details to see instructions');
-                  }
-                  final doseFixed = doseVal == doseVal.roundToDouble()
-                      ? doseVal.toStringAsFixed(0)
-                      : doseVal.toStringAsFixed(2);
-                  final unitTxt = unit.toLowerCase();
-                  final line1 = 'Take $doseFixed $name $unitTxt';
-                  String times = _times
-                      .map((t) => t.format(context))
-                      .join(', ');
-                  String line2;
-                  if (_mode == ScheduleMode.everyDay) {
-                    line2 = 'at $times everyday';
-                  } else if (_mode == ScheduleMode.daysOfWeek) {
-                    const labels = [
-                      'Mon',
-                      'Tue',
-                      'Wed',
-                      'Thu',
-                      'Fri',
-                      'Sat',
-                      'Sun',
-                    ];
-                    final ds = _days.toList()..sort();
-                    final dtext = ds.map((i) => labels[i - 1]).join(', ');
-                    line2 = 'at $times on $dtext';
-                  } else {
-                    final n = int.tryParse(_cycleN.text.trim());
-                    final every = n == null
-                        ? 'every N days'
-                        : 'every ${n.toString()} days';
-                    line2 = 'at $times $every';
-                  }
-                  double perUnitMcg;
-                  bool canComputeCount = false;
-                  switch (med.form) {
-                    case MedicationForm.tablet:
-                      if (unitTxt == 'tablets') {
-                        perUnitMcg = switch (med.strengthUnit) {
-                          Unit.mcg => med.strengthValue,
-                          Unit.mg => med.strengthValue * 1000,
-                          Unit.g => med.strengthValue * 1e6,
-                          _ => med.strengthValue,
-                        };
-                        canComputeCount = true;
-                      } else {
-                        perUnitMcg = 0;
-                      }
-                      break;
-                    case MedicationForm.capsule:
-                      if (unitTxt == 'capsules') {
-                        perUnitMcg = switch (med.strengthUnit) {
-                          Unit.mcg => med.strengthValue,
-                          Unit.mg => med.strengthValue * 1000,
-                          Unit.g => med.strengthValue * 1e6,
-                          _ => med.strengthValue,
-                        };
-                        canComputeCount = true;
-                      } else {
-                        perUnitMcg = 0;
-                      }
-                      break;
-                    default:
-                      perUnitMcg = 0;
-                      break;
-                  }
-                  String line3;
-                  String line4;
-                  final startStr = '${_startDate.toLocal()}'.split(' ').first;
-                  final endStr = _noEnd || _endDate == null
-                      ? 'No end'
-                      : '${_endDate!.toLocal()}'.split(' ').first;
-                  if (canComputeCount) {
-                    final totalMcg = perUnitMcg * doseVal;
-                    final totalMg = totalMcg / 1000.0;
-                    final strengthShort = _medStrengthLabel(med);
-                    line3 =
-                        '$doseFixed $name ${unitTxt.substring(0, unitTxt.length)} @ $strengthShort =';
-                    line4 =
-                        '${totalMg == totalMg.roundToDouble() ? totalMg.toStringAsFixed(0) : totalMg.toStringAsFixed(2)}mg of $name per dose';
-                  } else {
-                    line3 = '';
-                    line4 = '';
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        line1,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          line2,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                          'Start $startStr · ${endStr == 'No end' ? endStr : 'Ends $endStr'}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ),
-                      if (line3.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            line3,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ),
-                      if (line4.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            line4,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ]),
+            _ScheduleSummaryCard(
+              medication: _selectedMed,
+              medicationName: _medicationName.text.trim(),
+              doseValue: double.tryParse(_doseValue.text.trim()) ?? 0,
+              doseUnit: _doseUnit.text.trim(),
+              times: _times,
+              mode: _mode,
+              days: _days,
+              daysOfMonth: _daysOfMonth,
+              cycleN: int.tryParse(_cycleN.text.trim()),
+              startDate: _startDate,
+              endDate: _endDate,
+              noEnd: _noEnd,
+            ),
             const SizedBox(height: 10),
 
             const SizedBox(height: 10),
@@ -1857,6 +1721,248 @@ class _DoseFormulaStrip extends StatelessWidget {
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
+      ),
+    );
+  }
+}
+
+// Schedule summary card similar to medication summary cards
+class _ScheduleSummaryCard extends StatelessWidget {
+  const _ScheduleSummaryCard({
+    required this.medication,
+    required this.medicationName,
+    required this.doseValue,
+    required this.doseUnit,
+    required this.times,
+    required this.mode,
+    required this.days,
+    required this.daysOfMonth,
+    required this.cycleN,
+    required this.startDate,
+    required this.endDate,
+    required this.noEnd,
+  });
+
+  final Medication? medication;
+  final String medicationName;
+  final double doseValue;
+  final String doseUnit;
+  final List<TimeOfDay> times;
+  final ScheduleMode mode;
+  final Set<int> days;
+  final Set<int> daysOfMonth;
+  final int? cycleN;
+  final DateTime startDate;
+  final DateTime? endDate;
+  final bool noEnd;
+
+  String _medStrengthLabel(Medication m) {
+    final unitLabel = switch (m.strengthUnit) {
+      Unit.mcg || Unit.mcgPerMl => 'mcg',
+      Unit.mg || Unit.mgPerMl => 'mg',
+      Unit.g || Unit.gPerMl => 'g',
+      Unit.units || Unit.unitsPerMl => 'units',
+    };
+    final v = m.strengthValue;
+    final val = v == v.roundToDouble()
+        ? v.toStringAsFixed(0)
+        : v
+              .toStringAsFixed(2)
+              .replaceFirst(RegExp(r'\.0+$'), '')
+              .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
+    return '$val $unitLabel';
+  }
+
+  IconData _medIcon(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => Icons.add_circle,
+    MedicationForm.capsule => MdiIcons.pill,
+    MedicationForm.injectionPreFilledSyringe => Icons.colorize,
+    MedicationForm.injectionSingleDoseVial => Icons.local_drink,
+    MedicationForm.injectionMultiDoseVial => Icons.addchart,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    // Check if we have enough info to show summary
+    if (medication == null ||
+        medicationName.isEmpty ||
+        doseValue <= 0 ||
+        doseUnit.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Select medication and dose to see schedule summary',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Build the summary text
+    final doseFixed = doseValue == doseValue.roundToDouble()
+        ? doseValue.toStringAsFixed(0)
+        : doseValue.toStringAsFixed(2);
+    final unitTxt = doseUnit.toLowerCase();
+
+    // Build time/frequency text
+    String timesStr = times.map((t) => t.format(context)).join(', ');
+    String frequencyText;
+    if (mode == ScheduleMode.everyDay) {
+      frequencyText = 'every day';
+    } else if (mode == ScheduleMode.daysOfWeek) {
+      const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final ds = days.toList()..sort();
+      final dtext = ds.map((i) => labels[i - 1]).join(', ');
+      frequencyText = 'on $dtext';
+    } else if (mode == ScheduleMode.daysOfMonth) {
+      final sorted = daysOfMonth.toList()..sort();
+      final dayText = sorted.take(5).join(', ');
+      frequencyText = sorted.length > 5
+          ? 'on days $dayText... each month'
+          : 'on day${sorted.length > 1 ? 's' : ''} $dayText each month';
+    } else {
+      final n = cycleN ?? 2;
+      frequencyText = 'every $n days';
+    }
+
+    // Build dose calculation if applicable
+    String? doseCalc;
+    if (medication != null) {
+      final unitTxt = doseUnit.toLowerCase();
+      if ((medication!.form == MedicationForm.tablet && unitTxt == 'tablets') ||
+          (medication!.form == MedicationForm.capsule &&
+              unitTxt == 'capsules')) {
+        final perUnitMcg = switch (medication!.strengthUnit) {
+          Unit.mcg => medication!.strengthValue,
+          Unit.mg => medication!.strengthValue * 1000,
+          Unit.g => medication!.strengthValue * 1e6,
+          _ => medication!.strengthValue,
+        };
+        final totalMcg = perUnitMcg * doseValue;
+        final totalMg = totalMcg / 1000.0;
+        final mgStr = totalMg == totalMg.roundToDouble()
+            ? totalMg.toStringAsFixed(0)
+            : totalMg.toStringAsFixed(2);
+        doseCalc = '$mgStr mg per dose';
+      }
+    }
+
+    final startStr = '${startDate.toLocal()}'.split(' ').first;
+    final endStr = noEnd || endDate == null
+        ? 'No end'
+        : '${endDate!.toLocal()}'.split(' ').first;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row with icon and medication name
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: cs.onPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  _medIcon(medication!.form),
+                  color: cs.onPrimary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      medicationName,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _medStrengthLabel(medication!),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onPrimary.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Divider
+          Divider(color: cs.onPrimary.withValues(alpha: 0.2), height: 1),
+          const SizedBox(height: 10),
+          // Schedule details
+          RichText(
+            text: TextSpan(
+              style: theme.textTheme.bodyMedium?.copyWith(color: cs.onPrimary),
+              children: [
+                const TextSpan(text: 'Take '),
+                TextSpan(
+                  text: '$doseFixed $unitTxt',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                TextSpan(text: ' at $timesStr'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            frequencyText[0].toUpperCase() + frequencyText.substring(1),
+            style: theme.textTheme.bodyMedium?.copyWith(color: cs.onPrimary),
+          ),
+          if (doseCalc != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              doseCalc,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            'Start $startStr  •  ${endStr == 'No end' ? endStr : 'Ends $endStr'}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onPrimary.withValues(alpha: 0.9),
+            ),
+          ),
+        ],
       ),
     );
   }
