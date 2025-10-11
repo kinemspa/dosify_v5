@@ -1233,6 +1233,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             _section(context, 'Schedule', [
               Column(
                 children: [
+                  // 1. Choose schedule type
                   _rowLabelField(
                     context,
                     label: 'Schedule type',
@@ -1280,6 +1281,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     ),
                   ),
                   _helperBelowLeft('Choose how this schedule repeats'),
+                  // 2. Select start date
                   _rowLabelField(
                     context,
                     label: 'Start date',
@@ -1306,54 +1308,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     ),
                   ),
                   _helperBelowLeft('Select when this schedule should start'),
-                  _rowLabelField(
-                    context,
-                    label: 'End date',
-                    field: Row(
-                      children: [
-                        Field36(
-                          width: 120,
-                          child: FilledButton.icon(
-                            onPressed: _noEnd
-                                ? null
-                                : () async {
-                                    final now = DateTime.now();
-                                    final picked = await showDatePicker(
-                                      context: context,
-                                      firstDate: DateTime(now.year - 1),
-                                      lastDate: DateTime(now.year + 10),
-                                      initialDate: _endDate ?? _startDate,
-                                    );
-                                    if (picked != null)
-                                      setState(() {
-                                        _endDate = picked;
-                                        _noEnd = false;
-                                      });
-                                  },
-                            icon: const Icon(Icons.event, size: 18),
-                            label: Text(
-                              _noEnd || _endDate == null
-                                  ? 'No end'
-                                  : '${_endDate!.toLocal()}'.split(' ').first,
-                            ),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(120, kFieldHeight),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Checkbox(
-                          value: _noEnd,
-                          onChanged: (v) => setState(() {
-                            _noEnd = v ?? true;
-                            if (_noEnd) _endDate = null;
-                          }),
-                        ),
-                        const Text('No end'),
-                      ],
-                    ),
-                  ),
-                  _helperBelowLeft('Optional end date (or leave as No end)'),
+                  // 3. Select days/months based on mode
+                  // Days/months selection section
                   if (_mode == ScheduleMode.daysOfWeek) ...[
                     _helperBelowLeft('Select days of the week'),
                     Padding(
@@ -1505,6 +1461,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                       ),
                     ),
                   ],
+                  // 4. Add dosing times
                   const SizedBox(height: 8),
                   _rowLabelField(
                     context,
@@ -1560,6 +1517,55 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     ),
                   ),
                   _helperBelowLeft('Add one or more dosing times'),
+                  // 5. Select end date
+                  _rowLabelField(
+                    context,
+                    label: 'End date',
+                    field: Row(
+                      children: [
+                        Field36(
+                          width: 120,
+                          child: FilledButton.icon(
+                            onPressed: _noEnd
+                                ? null
+                                : () async {
+                                    final now = DateTime.now();
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      firstDate: DateTime(now.year - 1),
+                                      lastDate: DateTime(now.year + 10),
+                                      initialDate: _endDate ?? _startDate,
+                                    );
+                                    if (picked != null)
+                                      setState(() {
+                                        _endDate = picked;
+                                        _noEnd = false;
+                                      });
+                                  },
+                            icon: const Icon(Icons.event, size: 18),
+                            label: Text(
+                              _noEnd || _endDate == null
+                                  ? 'No end'
+                                  : '${_endDate!.toLocal()}'.split(' ').first,
+                            ),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(120, kFieldHeight),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Checkbox(
+                          value: _noEnd,
+                          onChanged: (v) => setState(() {
+                            _noEnd = v ?? true;
+                            if (_noEnd) _endDate = null;
+                          }),
+                        ),
+                        const Text('No end'),
+                      ],
+                    ),
+                  ),
+                  _helperBelowLeft('Optional end date (or leave as No end)'),
                 ],
               ),
               const SizedBox(height: 8),
