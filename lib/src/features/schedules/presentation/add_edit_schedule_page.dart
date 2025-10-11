@@ -6,8 +6,8 @@ import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'select_medication_for_schedule_page.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 
@@ -105,48 +105,45 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     if (picked != null) setState(() => _times[index] = picked);
   }
 
-  Future<void> _pickMedication() async {
-    if (!mounted) return;
-    final selected = await context.push<Medication>(
-      '/schedules/select-medication',
-    );
-    if (selected != null) {
-      setState(() {
-        _selectedMed = selected;
-        _medicationId = selected.id;
-        _medicationName.text = selected.name;
-        // Set sensible defaults based on form
-        switch (selected.form) {
-          case MedicationForm.tablet:
-            _doseUnit.text = 'tablets';
-            if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-            break;
-          case MedicationForm.capsule:
-            _doseUnit.text = 'capsules';
-            if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-            break;
-          case MedicationForm.injectionPreFilledSyringe:
-            _doseUnit.text = 'syringes';
-            if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-            break;
-          case MedicationForm.injectionSingleDoseVial:
-            _doseUnit.text = 'vials';
-            if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-            break;
-          case MedicationForm.injectionMultiDoseVial:
-            // Default to mg if mg/mL, else units if units/mL, else mg
-            final u = selected.strengthUnit;
-            if (u == Unit.unitsPerMl) {
-              _doseUnit.text = 'IU';
-            } else {
-              _doseUnit.text = 'mg';
-            }
-            if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
-            break;
-        }
-        _maybeAutoName();
-      });
-    }
+  bool _showMedSelector = false;
+
+  void _pickMedication(Medication selected) {
+    setState(() {
+      _selectedMed = selected;
+      _medicationId = selected.id;
+      _medicationName.text = selected.name;
+      _showMedSelector = false;
+      // Set sensible defaults based on form
+      switch (selected.form) {
+        case MedicationForm.tablet:
+          _doseUnit.text = 'tablets';
+          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+          break;
+        case MedicationForm.capsule:
+          _doseUnit.text = 'capsules';
+          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+          break;
+        case MedicationForm.injectionPreFilledSyringe:
+          _doseUnit.text = 'syringes';
+          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+          break;
+        case MedicationForm.injectionSingleDoseVial:
+          _doseUnit.text = 'vials';
+          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+          break;
+        case MedicationForm.injectionMultiDoseVial:
+          // Default to mg if mg/mL, else units if units/mL, else mg
+          final u = selected.strengthUnit;
+          if (u == Unit.unitsPerMl) {
+            _doseUnit.text = 'IU';
+          } else {
+            _doseUnit.text = 'mg';
+          }
+          if ((_doseValue.text).trim().isEmpty) _doseValue.text = '1';
+          break;
+      }
+      _maybeAutoName();
+    });
   }
 
   Future<void> _save() async {
@@ -893,42 +890,45 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
-            _section(context, 'General', [
-              _rowLabelField(
-                context,
-                label: 'Medication',
-                field: Field36(
-                  child: OutlinedButton.icon(
-                    onPressed: _pickMedication,
-                    icon: Icon(
-                      _selectedMed == null
-                          ? Icons.add_circle_outline
-                          : Icons.edit_outlined,
-                      size: 18,
-                    ),
-                    label: Text(
-                      _selectedMed == null
-                          ? 'Select Medication'
-                          : '${_selectedMed!.name} — ${_medStrengthAndStock(_selectedMed!)}',
-                      style: theme.textTheme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(36),
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+            _section(context, 'Medication', [
+              // Selected medication display or selection button
+              if (_selectedMed != null)
+                _MedicationSummaryDisplay(
+                  medication: _selectedMed!,
+                  onClear: () => setState(() {
+                    _selectedMed = null;
+                    _medicationId = null;
+                    _medicationName.clear();
+                  }),
+                  onExpand: () =>
+                      setState(() => _showMedSelector = !_showMedSelector),
+                  isExpanded: _showMedSelector,
+                )
+              else
+                OutlinedButton.icon(
+                  onPressed: () => setState(() => _showMedSelector = true),
+                  icon: const Icon(Icons.add_circle_outline, size: 18),
+                  label: const Text('Select Medication'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40),
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
                   ),
                 ),
-              ),
+              // Inline medication selector
+              if (_showMedSelector) ...[
+                const SizedBox(height: 8),
+                _InlineMedicationSelector(
+                  onSelect: _pickMedication,
+                  onCancel: () => setState(() => _showMedSelector = false),
+                ),
+              ],
             ]),
-            // Helper under Medication
-            _helperBelowLeft('Select a medication from your saved list'),
             const SizedBox(height: 10),
-            _section(context, 'Instructions', [
+            _section(context, 'Summary', [
               Builder(
                 builder: (context) {
                   final med = _selectedMed;
@@ -1851,6 +1851,353 @@ class _DoseFormulaStrip extends StatelessWidget {
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
         ),
+      ),
+    );
+  }
+}
+
+// Widget to display selected medication with its details
+class _MedicationSummaryDisplay extends StatelessWidget {
+  const _MedicationSummaryDisplay({
+    required this.medication,
+    required this.onClear,
+    required this.onExpand,
+    required this.isExpanded,
+  });
+
+  final Medication medication;
+  final VoidCallback onClear;
+  final VoidCallback onExpand;
+  final bool isExpanded;
+
+  String _formatStock(Medication m) {
+    final stock = m.stockValue;
+    final s = stock == stock.roundToDouble()
+        ? stock.toStringAsFixed(0)
+        : stock
+              .toStringAsFixed(2)
+              .replaceFirst(RegExp(r'\.0+$'), '')
+              .replaceFirst(RegExp(r'(\.\ d*?)0+$'), r'$1');
+    return '$s remaining';
+  }
+
+  String _formatStrength(Medication m) {
+    final v = m.strengthValue;
+    final val = v == v.roundToDouble()
+        ? v.toStringAsFixed(0)
+        : v
+              .toStringAsFixed(2)
+              .replaceFirst(RegExp(r'\.0+$'), '')
+              .replaceFirst(RegExp(r'(\.\ d*?)0+$'), r'$1');
+    final unitLabel = switch (m.strengthUnit) {
+      Unit.mcg || Unit.mcgPerMl => 'mcg',
+      Unit.mg || Unit.mgPerMl => 'mg',
+      Unit.g || Unit.gPerMl => 'g',
+      Unit.units || Unit.unitsPerMl => 'units',
+    };
+    return '$val $unitLabel';
+  }
+
+  String _formLabel(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => 'Tablet',
+    MedicationForm.capsule => 'Capsule',
+    MedicationForm.injectionPreFilledSyringe => 'Pre-filled Syringe',
+    MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
+    MedicationForm.injectionMultiDoseVial => 'Multi-Dose Vial',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: cs.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.medication, color: cs.primary, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  medication.name,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Change medication',
+                icon: Icon(Icons.swap_horiz, size: 20, color: cs.primary),
+                onPressed: onExpand,
+                visualDensity: VisualDensity.compact,
+              ),
+              IconButton(
+                tooltip: 'Clear selection',
+                icon: Icon(Icons.close, size: 20, color: cs.error),
+                onPressed: onClear,
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _DetailRow(label: 'Type', value: _formLabel(medication.form)),
+          _DetailRow(label: 'Strength', value: _formatStrength(medication)),
+          _DetailRow(label: 'Stock', value: _formatStock(medication)),
+          if (medication.manufacturer != null &&
+              medication.manufacturer!.isNotEmpty)
+            _DetailRow(label: 'Manufacturer', value: medication.manufacturer!),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Inline medication selector showing all medications in a scrollable list
+class _InlineMedicationSelector extends StatelessWidget {
+  const _InlineMedicationSelector({
+    required this.onSelect,
+    required this.onCancel,
+  });
+
+  final void Function(Medication) onSelect;
+  final VoidCallback onCancel;
+
+  String _formatStock(Medication m) {
+    final stock = m.stockValue;
+    final s = stock == stock.roundToDouble()
+        ? stock.toStringAsFixed(0)
+        : stock
+              .toStringAsFixed(2)
+              .replaceFirst(RegExp(r'\.0+$'), '')
+              .replaceFirst(RegExp(r'(\.\ d*?)0+$'), r'$1');
+    return '$s';
+  }
+
+  String _formatStrength(Medication m) {
+    final v = m.strengthValue;
+    final val = v == v.roundToDouble()
+        ? v.toStringAsFixed(0)
+        : v
+              .toStringAsFixed(2)
+              .replaceFirst(RegExp(r'\.0+$'), '')
+              .replaceFirst(RegExp(r'(\.\ d*?)0+$'), r'$1');
+    final unitLabel = switch (m.strengthUnit) {
+      Unit.mcg || Unit.mcgPerMl => 'mcg',
+      Unit.mg || Unit.mgPerMl => 'mg',
+      Unit.g || Unit.gPerMl => 'g',
+      Unit.units || Unit.unitsPerMl => 'units',
+    };
+    return '$val $unitLabel';
+  }
+
+  IconData _formIcon(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => Icons.add_circle,
+    MedicationForm.capsule => MdiIcons.pill,
+    MedicationForm.injectionPreFilledSyringe => Icons.colorize,
+    MedicationForm.injectionSingleDoseVial => Icons.local_drink,
+    MedicationForm.injectionMultiDoseVial => Icons.addchart,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final medBox = Hive.box<Medication>('medications');
+    final medications = medBox.values.toList();
+
+    if (medications.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outlineVariant),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 48,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'No medications saved yet',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add medications first before creating schedules',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: onCancel,
+              icon: const Icon(Icons.close, size: 18),
+              label: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 400),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(11),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search, color: cs.onSurfaceVariant, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Select a medication',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  tooltip: 'Cancel',
+                  icon: Icon(Icons.close, size: 20, color: cs.onSurfaceVariant),
+                  onPressed: onCancel,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+          ),
+          // Scrollable medication list
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(8),
+              itemCount: medications.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final med = medications[index];
+                return InkWell(
+                  onTap: () => onSelect(med),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: cs.primaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            _formIcon(med.form),
+                            color: cs.onPrimaryContainer,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                med.name,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${_formatStrength(med)} • ${_formatStock(med)} remaining',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
