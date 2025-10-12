@@ -897,7 +897,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
-            // Summary card at the top
+            // Summary card at the top - same as add medication screen
             if (_selectedMed != null)
               SummaryHeaderCard.fromMedication(
                 _selectedMed!,
@@ -910,15 +910,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                  border: Border.all(
+                    color: theme.colorScheme.outlineVariant,
+                  ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.5,
-                      ),
+                      color: theme.colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.5),
                       size: 32,
                     ),
                     const SizedBox(width: 12),
@@ -933,7 +934,6 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                   ],
                 ),
               ),
-            const SizedBox(height: 10),
             _section(context, 'Medication', [
               // Medication row with label
               _rowLabelField(
