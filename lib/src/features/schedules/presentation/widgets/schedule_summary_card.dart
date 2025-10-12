@@ -206,7 +206,7 @@ class ScheduleSummaryCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   // Remaining tablets/stock
                   Text(
-                    '${_fmt2(med.stockValue)} $stockLabel',
+                    '${_fmt2(med.stockValue)} $stockLabel remaining',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: fg.withValues(alpha: 0.85),
                     ),
@@ -248,29 +248,29 @@ class ScheduleSummaryCard extends StatelessWidget {
     if (takeMatch != null) {
       lines.add(TextSpan(
         text: 'Take ',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg.withValues(alpha: 0.95),
           fontWeight: FontWeight.w500,
         ),
       ));
       lines.add(TextSpan(
         text: '${takeMatch.group(1)}',
-        style: theme.textTheme.titleLarge?.copyWith(
+        style: theme.textTheme.bodyLarge?.copyWith(
           color: fg,
-          fontWeight: FontWeight.w900,
-          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          fontSize: 16,
         ),
       ));
       lines.add(TextSpan(
         text: ' ${takeMatch.group(2)} ',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg.withValues(alpha: 0.95),
           fontWeight: FontWeight.w500,
         ),
       ));
       lines.add(TextSpan(
         text: takeMatch.group(3) ?? '',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg,
           fontWeight: FontWeight.w700,
         ),
@@ -281,7 +281,7 @@ class ScheduleSummaryCard extends StatelessWidget {
     if (frequencyMatch != null) {
       lines.add(TextSpan(
         text: '\n${frequencyMatch.group(1)?.trim()}',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg.withValues(alpha: 0.95),
           fontWeight: FontWeight.w500,
         ),
@@ -292,7 +292,7 @@ class ScheduleSummaryCard extends StatelessWidget {
     if (timeMatch != null) {
       lines.add(TextSpan(
         text: '\nat ${timeMatch.group(1)?.trim()}',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg.withValues(alpha: 0.95),
           fontWeight: FontWeight.w500,
         ),
@@ -303,22 +303,22 @@ class ScheduleSummaryCard extends StatelessWidget {
     if (doseMatch != null) {
       lines.add(TextSpan(
         text: '\nDose equals ',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg.withValues(alpha: 0.95),
           fontWeight: FontWeight.w500,
         ),
       ));
       lines.add(TextSpan(
         text: '${doseMatch.group(1)}',
-        style: theme.textTheme.titleLarge?.copyWith(
+        style: theme.textTheme.bodyLarge?.copyWith(
           color: fg,
-          fontWeight: FontWeight.w900,
-          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          fontSize: 16,
         ),
       ));
       lines.add(TextSpan(
         text: doseMatch.group(2) ?? '',
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: fg,
           fontWeight: FontWeight.w700,
         ),
