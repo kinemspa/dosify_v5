@@ -919,33 +919,57 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               )
             else
               Container(
-                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerLowest,
+                  color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.5,
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onPrimary.withValues(
+                          alpha: 0.15,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      size: 32,
+                      child: Icon(
+                        Icons.calendar_today,
+                        color: theme.colorScheme.onPrimary,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        'Select a medication to schedule',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Schedule',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Select a medication to schedule',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
+            const SizedBox(height: 10),
             _section(context, 'Medication', [
               // Medication row with label
               _rowLabelField(
