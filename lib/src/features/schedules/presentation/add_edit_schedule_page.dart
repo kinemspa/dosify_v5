@@ -1433,6 +1433,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       medication: _selectedMed,
       scheduleDescription: _buildScheduleDescription(),
       showInfoOnly: _selectedMed == null || _showMedSelector,
+      startDate: _startDate,
+      endDate: _noEnd ? null : _endDate,
     );
     // Update height after render
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -2276,18 +2278,20 @@ class _MedicationSummaryDisplay extends StatelessWidget {
       onPressed: onExpand,
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(36),
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         side: BorderSide(color: cs.primary.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
             child: Text(
               medication.name,
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: cs.onSurface,
+                color: cs.onSurface.withValues(alpha: 0.75),
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -2295,7 +2299,7 @@ class _MedicationSummaryDisplay extends StatelessWidget {
           Icon(
             isExpanded ? Icons.expand_less : Icons.expand_more,
             size: 18,
-            color: cs.onSurfaceVariant,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.6),
           ),
         ],
       ),
@@ -2360,6 +2364,20 @@ class _InlineMedicationSelector extends StatelessWidget {
     final expStr = '${exp.toLocal()}'.split(' ').first;
     return 'Exp: $expStr';
   }
+  
+  String _formatDateDdMm(DateTime d) {
+    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+  }
+  
+  String _getUnitName(MedicationForm form) {
+    return switch (form) {
+      MedicationForm.tablet => 'tablets',
+      MedicationForm.capsule => 'capsules',
+      MedicationForm.injectionPreFilledSyringe => 'syringes',
+      MedicationForm.injectionSingleDoseVial => 'vials',
+      MedicationForm.injectionMultiDoseVial => 'vials',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2420,107 +2438,113 @@ class _InlineMedicationSelector extends StatelessWidget {
         shrinkWrap: true,
         padding: const EdgeInsets.all(4),
         itemCount: medications.length,
-        separatorBuilder: (_, __) =>
-            Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.3)),
+        separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final med = medications[index];
+          final formLabel = _formLabel(med.form);
 
-          // Determine unit label
-          final unit = switch (med.form) {
-            MedicationForm.tablet => 'tablets',
-            MedicationForm.capsule => 'capsules',
-            MedicationForm.injectionPreFilledSyringe => 'syringes',
-            MedicationForm.injectionSingleDoseVial => 'vials',
-            MedicationForm.injectionMultiDoseVial => 'vials',
-          };
+          // Determine stock color based on low stock status
+          Color stockColor;
+          final baseline = med.lowStockThreshold;
+          if (baseline != null && baseline > 0) {
+            final pct = (med.stockValue / baseline).clamp(0.0, 1.0);
+            if (pct <= 0.2) {
+              stockColor = cs.error;
+            } else if (pct <= 0.5) {
+              stockColor = Colors.orange;
+            } else {
+              stockColor = cs.primary;
+            }
+          } else if (med.lowStockEnabled &&
+              med.stockValue <= (med.lowStockThreshold ?? 0)) {
+            stockColor = cs.error;
+          } else {
+            stockColor = cs.onSurface;
+          }
 
-          return InkWell(
-            onTap: () => onSelect(med),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              child: Row(
+          return ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
+            title: RichText(
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                text: med.name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                med.name,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurface,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: cs.primaryContainer,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                _formLabel(med.form),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: cs.onPrimaryContainer,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${_formatStrength(med)} • ${med.manufacturer}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '${_formatStock(med)} $unit remaining',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              _expiryLabel(med),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    med.expiry != null &&
-                                        med.expiry!
-                                                .difference(DateTime.now())
-                                                .inDays <
-                                            30
-                                    ? cs.error
-                                    : cs.onSurfaceVariant,
-                                fontWeight:
-                                    med.expiry != null &&
-                                        med.expiry!
-                                                .difference(DateTime.now())
-                                                .inDays <
-                                            30
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                  if (med.manufacturer != null && med.manufacturer!.isNotEmpty)
+                    TextSpan(
+                      text: '  •  ${med.manufacturer!}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${_formatStrength(med)} $formLabel',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.85),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: '${_formatStock(med)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: stockColor,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '/${_formatStock(med)} ${_getUnitName(med.form)}',
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (med.expiry != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          _formatDateDdMm(med.expiry!),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: med.expiry!.isBefore(
+                              DateTime.now().add(const Duration(days: 30)),
+                            )
+                                ? cs.error
+                                : cs.onSurfaceVariant.withValues(alpha: 0.75),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () => onSelect(med),
           );
         },
       ),

@@ -10,11 +10,15 @@ class ScheduleSummaryCard extends StatelessWidget {
     this.medication,
     this.scheduleDescription,
     this.showInfoOnly = false,
+    this.startDate,
+    this.endDate,
   });
 
   final Medication? medication;
   final String? scheduleDescription;
   final bool showInfoOnly;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   String _fmt2(double? v) {
     if (v == null) return '-';
@@ -222,111 +226,216 @@ class ScheduleSummaryCard extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8),
               child: _buildStyledDescription(context, scheduleDescription!, fg),
             ),
+          // Dates row
+          if (startDate != null) ..[
+            const SizedBox(height: 8),
+            _buildDatesRow(context, fg),
+          ],
         ],
       ),
     );
   }
 
   /// Builds the schedule description with prominent styling
-  /// Format: "Take 1 Panadol tablet\nEvery Day\nat 9:00 AM\nDose equals 20mg"
+  /// Format: Two-column responsive layout with dates
   Widget _buildStyledDescription(BuildContext context, String description, Color fg) {
     final theme = Theme.of(context);
     
     // Parse the description to extract parts
     // Original format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
     
-    // Extract parts using regex
-    final takeMatch = RegExp(r'Take (\d+\.?\d*)\s+(\S+)\s+(tablet|tablets|capsule|capsules|syringe|syringes|vial|vials)', caseSensitive: false).firstMatch(description);
-    final frequencyMatch = RegExp(r'(Every [^at]+)', caseSensitive: false).firstMatch(description);
-    final timeMatch = RegExp(r'at ([\d:,\s]+(?:AM|PM|am|pm)[^.]*)', caseSensitive: false).firstMatch(description);
-    final doseMatch = RegExp(r'is (\d+\.?\d*)(mg|mcg|g|IU|units|ml)', caseSensitive: false).firstMatch(description);
+    // Extract parts using improved regex
+    final takeMatch = RegExp(
+      r'Take (\d+\.?\d*)\s+(\S+)\s+(Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)',
+      caseSensitive: false,
+    ).firstMatch(description);
     
-    // Build formatted text
-    final lines = <TextSpan>[];
+    // Improved frequency match - capture everything between medType and " at "
+    final frequencyMatch = RegExp(
+      r'(?:Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)\s+(Every[^.]+?)\s+at\s+',
+      caseSensitive: false,
+    ).firstMatch(description);
     
-    // Line 1: "Take 1 Panadol tablet"
-    if (takeMatch != null) {
-      lines.add(TextSpan(
-        text: 'Take ',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg.withValues(alpha: 0.95),
-          fontWeight: FontWeight.w500,
-        ),
-      ));
-      lines.add(TextSpan(
-        text: '${takeMatch.group(1)}',
-        style: theme.textTheme.bodyLarge?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w800,
-          fontSize: 16,
-        ),
-      ));
-      lines.add(TextSpan(
-        text: ' ${takeMatch.group(2)} ',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg.withValues(alpha: 0.95),
-          fontWeight: FontWeight.w500,
-        ),
-      ));
-      lines.add(TextSpan(
-        text: takeMatch.group(3) ?? '',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w700,
-        ),
-      ));
-    }
+    final timeMatch = RegExp(
+      r'at\s+([\d:,\s]+(?:AM|PM|am|pm)(?:,\s*[\d:,\s]+(?:AM|PM|am|pm))*)',
+      caseSensitive: false,
+    ).firstMatch(description);
     
-    // Line 2: "Every Day"
-    if (frequencyMatch != null) {
-      lines.add(TextSpan(
-        text: '\n${frequencyMatch.group(1)?.trim()}',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg.withValues(alpha: 0.95),
-          fontWeight: FontWeight.w500,
-        ),
-      ));
-    }
+    final doseMatch = RegExp(
+      r'is\s+(\d+\.?\d*)(mg|mcg|g|IU|units|ml)(?!.*is)',
+      caseSensitive: false,
+    ).allMatches(description).lastOrNull;
     
-    // Line 3: "at 9:00 AM"
-    if (timeMatch != null) {
-      lines.add(TextSpan(
-        text: '\nat ${timeMatch.group(1)?.trim()}',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg.withValues(alpha: 0.95),
-          fontWeight: FontWeight.w500,
-        ),
-      ));
-    }
-    
-    // Line 4: "Dose equals 20mg"
-    if (doseMatch != null) {
-      lines.add(TextSpan(
-        text: '\nDose equals ',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg.withValues(alpha: 0.95),
-          fontWeight: FontWeight.w500,
-        ),
-      ));
-      lines.add(TextSpan(
-        text: '${doseMatch.group(1)}',
-        style: theme.textTheme.bodyLarge?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w800,
-          fontSize: 16,
-        ),
-      ));
-      lines.add(TextSpan(
-        text: doseMatch.group(2) ?? '',
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w700,
-        ),
-      ));
-    }
+    // Build two-column layout (responsive)
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTwoColumn = constraints.maxWidth > 300;
+        
+        if (isTwoColumn) {
+          // Two-column layout
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left column: Take instruction and frequency
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTakeLine(theme, takeMatch, fg),
+                    if (frequencyMatch != null) ...[              const SizedBox(height: 2),
+                      _buildTextLine(theme, frequencyMatch.group(1)?.trim() ?? '', fg),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Right column: Time and dose
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (timeMatch != null) ..[
+                      _buildTextLine(theme, timeMatch.group(1)?.trim() ?? '', fg, prefix: 'at '),
+                      const SizedBox(height: 2),
+                    ],
+                    if (doseMatch != null)
+                      _buildDoseLine(theme, doseMatch, fg),
+                  ],
+                ),
+              ),
+            ],
+          );
+        } else {
+          // Single column for narrow screens
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTakeLine(theme, takeMatch, fg),
+              if (frequencyMatch != null) ..[
+                const SizedBox(height: 2),
+                _buildTextLine(theme, frequencyMatch.group(1)?.trim() ?? '', fg),
+              ],
+              if (timeMatch != null) ..[
+                const SizedBox(height: 2),
+                _buildTextLine(theme, timeMatch.group(1)?.trim() ?? '', fg, prefix: 'at '),
+              ],
+              if (doseMatch != null) ..[
+                const SizedBox(height: 2),
+                _buildDoseLine(theme, doseMatch, fg),
+              ],
+            ],
+          );
+        }
+      },
+    );
+  }
+  
+  Widget _buildTakeLine(ThemeData theme, RegExpMatch? match, Color fg) {
+    if (match == null) return const SizedBox.shrink();
     
     return RichText(
-      text: TextSpan(children: lines),
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: 'Take ',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: fg.withValues(alpha: 0.95),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          TextSpan(
+            text: '${match.group(1)}',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
+          ),
+          TextSpan(
+            text: ' ${match.group(2)}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: fg.withValues(alpha: 0.95),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildTextLine(ThemeData theme, String text, Color fg, {String prefix = ''}) {
+    return Text(
+      '$prefix$text',
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: fg.withValues(alpha: 0.95),
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+  
+  Widget _buildDoseLine(ThemeData theme, RegExpMatch match, Color fg) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: 'Dose: ',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: fg.withValues(alpha: 0.95),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          TextSpan(
+            text: '${match.group(1)}',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+            ),
+          ),
+          TextSpan(
+            text: match.group(2) ?? '',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildDatesRow(BuildContext context, Color fg) {
+    final theme = Theme.of(context);
+    final startStr = MaterialLocalizations.of(context).formatCompactDate(startDate!);
+    final endStr = endDate != null
+        ? MaterialLocalizations.of(context).formatCompactDate(endDate!)
+        : null;
+    
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Start: $startStr',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: 0.9),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        if (endStr != null)
+          Expanded(
+            child: Text(
+              'End: $endStr',
+              textAlign: TextAlign.right,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: fg.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
