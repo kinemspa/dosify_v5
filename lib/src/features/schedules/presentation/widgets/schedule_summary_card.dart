@@ -230,9 +230,9 @@ class ScheduleSummaryCard extends StatelessWidget {
             const SizedBox(height: 8),
             _buildCompactInstructions(context, scheduleDescription!, fg),
           ],
-          // Dates row
+          // Dates row on its own line
           if (startDate != null) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             _buildDatesRow(context, fg),
           ],
         ],
@@ -240,8 +240,8 @@ class ScheduleSummaryCard extends StatelessWidget {
     );
   }
 
-  /// Builds compact single-line instructions
-  /// Format: "Take 1 tablet • Every Day • 9:00 AM • Total: 20mg"
+  /// Builds compact instructions with total dose on bottom-right
+  /// Format: "Take 1 tablet • Every Day • 9:00 AM" with "Total: 20mg" bottom-right
   Widget _buildCompactInstructions(BuildContext context, String description, Color fg) {
     final theme = Theme.of(context);
     
@@ -272,22 +272,22 @@ class ScheduleSummaryCard extends StatelessWidget {
       caseSensitive: false,
     ).allMatches(description).lastOrNull;
     
-    // Build compact instruction parts
+    // Build instruction parts (without total dose)
     final parts = <String>[];
     
-    // Part 1: "Take X form"
+    // Part 1: "Take X form" with fractional display and singular/plural
     if (doseFormMatch != null) {
-      final dose = doseFormMatch.group(1);
+      final doseStr = doseFormMatch.group(1);
+      final dose = double.tryParse(doseStr ?? '0') ?? 0;
       final form = doseFormMatch.group(2)?.toLowerCase() ?? '';
-      // Simplify form name
-      String simpleForm = form
-        .replaceAll('pre-filled syringes', 'syringe')
-        .replaceAll('pre-filled syringe', 'syringe')
-        .replaceAll('single dose vials', 'vial')
-        .replaceAll('single dose vial', 'vial')
-        .replaceAll('multi dose vials', 'vial')
-        .replaceAll('multi dose vial', 'vial');
-      parts.add('Take $dose $simpleForm');
+      
+      // Convert decimal to fraction for common values
+      String displayDose = _toFractional(dose);
+      
+      // Simplify and make singular/plural aware
+      String simpleForm = _simplifyForm(form, dose);
+      
+      parts.add('Take $displayDose $simpleForm');
     }
     
     // Part 2: Frequency
@@ -306,26 +306,86 @@ class ScheduleSummaryCard extends StatelessWidget {
       }
     }
     
-    // Part 4: Total dose
+    // Join instruction parts with bullet separator
+    final instructionText = parts.join(' • ');
+    
+    // Build total dose text separately for bottom-right placement
+    String? totalDose;
     if (strengthMatch != null) {
       final amount = strengthMatch.group(1);
       final unit = strengthMatch.group(2);
-      parts.add('Total: $amount$unit');
+      totalDose = 'Total: $amount$unit';
     }
     
-    // Join parts with bullet separator
-    final instructionText = parts.join(' • ');
-    
-    return Text(
-      instructionText,
-      style: theme.textTheme.bodySmall?.copyWith(
-        color: fg.withValues(alpha: 0.95),
-        fontWeight: FontWeight.w500,
-        height: 1.3,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            instructionText,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: 0.95),
+              fontWeight: FontWeight.w500,
+              height: 1.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (totalDose != null) ...[
+          const SizedBox(width: 8),
+          Text(
+            totalDose,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: 0.95),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ],
     );
+  }
+  
+  /// Convert decimal dose to fractional display (0.25 -> 1/4, 0.5 -> 1/2, 0.75 -> 3/4)
+  String _toFractional(double dose) {
+    if (dose == dose.roundToDouble()) {
+      return dose.toStringAsFixed(0);
+    }
+    
+    // Check for common fractions
+    if ((dose - 0.25).abs() < 0.01) return '¼';  // ¼
+    if ((dose - 0.5).abs() < 0.01) return '½';   // ½
+    if ((dose - 0.75).abs() < 0.01) return '¾';  // ¾
+    if ((dose - 1.25).abs() < 0.01) return '1¼';
+    if ((dose - 1.5).abs() < 0.01) return '1½';
+    if ((dose - 1.75).abs() < 0.01) return '1¾';
+    if ((dose - 2.25).abs() < 0.01) return '2¼';
+    if ((dose - 2.5).abs() < 0.01) return '2½';
+    if ((dose - 2.75).abs() < 0.01) return '2¾';
+    
+    // For other decimals, show as-is
+    return dose.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+  }
+  
+  /// Simplify form name and make it singular/plural aware
+  String _simplifyForm(String form, double dose) {
+    final isPlural = dose > 1;
+    
+    // Normalize form string
+    final lower = form.toLowerCase();
+    
+    if (lower.contains('tablet')) {
+      return isPlural ? 'tablets' : 'tablet';
+    } else if (lower.contains('capsule')) {
+      return isPlural ? 'capsules' : 'capsule';
+    } else if (lower.contains('syringe')) {
+      return isPlural ? 'syringes' : 'syringe';
+    } else if (lower.contains('vial')) {
+      return isPlural ? 'vials' : 'vial';
+    }
+    
+    // Fallback
+    return form;
   }
   
   Widget _buildDatesRow(BuildContext context, Color fg) {
