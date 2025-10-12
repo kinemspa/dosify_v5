@@ -1458,10 +1458,13 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       ),
           // Floating summary card pinned beneath app bar (always show, even during med selection)
           Positioned(
-            left: 10,
-            right: 10,
-            top: 8,
-            child: IgnorePointer(child: _buildFloatingSummary()),
+            left: 0,
+            right: 0,
+            top: 0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: IgnorePointer(child: _buildFloatingSummary()),
+            ),
           ),
         ],
       ),

@@ -215,23 +215,7 @@ class ScheduleSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          // Bottom row: Storage icons
-          if (med.requiresRefrigeration ||
-              (med.storageInstructions?.toLowerCase().contains('light') ?? false))
-            Padding(
-              padding: const EdgeInsets.only(top: 8, left: 48),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (med.requiresRefrigeration) ...[
-                    Icon(Icons.kitchen, size: 18, color: fg),
-                    const SizedBox(width: 6),
-                  ],
-                  if (med.storageInstructions?.toLowerCase().contains('light') ?? false)
-                    Icon(Icons.dark_mode, size: 18, color: fg),
-                ],
-              ),
-            ),
+          // Storage icons removed per user request
           // Dose description with prominent styling
           if (scheduleDescription != null && scheduleDescription!.isNotEmpty)
             Padding(
@@ -243,63 +227,106 @@ class ScheduleSummaryCard extends StatelessWidget {
     );
   }
 
-  /// Builds the schedule description with prominent styling for dose keywords
+  /// Builds the schedule description with prominent styling
+  /// Format: "Take 1 Panadol tablet\nEvery Day\nat 9:00 AM\nDose equals 20mg"
   Widget _buildStyledDescription(BuildContext context, String description, Color fg) {
     final theme = Theme.of(context);
     
-    // Parse the description to style specific parts
-    // Format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
-    final spans = <TextSpan>[];
-    final regex = RegExp(r'(\d+\.?\d*)\s*(tablet|tablets|capsule|capsules|syringe|syringes|vial|vials|mg|mcg|g|IU|units|ml)', caseSensitive: false);
+    // Parse the description to extract parts
+    // Original format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
     
-    int lastMatchEnd = 0;
-    for (final match in regex.allMatches(description)) {
-      // Add text before match (normal style)
-      if (match.start > lastMatchEnd) {
-        spans.add(TextSpan(
-          text: description.substring(lastMatchEnd, match.start),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: fg.withValues(alpha: 0.9),
-          ),
-        ));
-      }
-      
-      // Add the number (prominent style)
-      spans.add(TextSpan(
-        text: match.group(1),
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w900,
-          fontSize: 18,
+    // Extract parts using regex
+    final takeMatch = RegExp(r'Take (\d+\.?\d*)\s+(\S+)\s+(tablet|tablets|capsule|capsules|syringe|syringes|vial|vials)', caseSensitive: false).firstMatch(description);
+    final frequencyMatch = RegExp(r'(Every [^at]+)', caseSensitive: false).firstMatch(description);
+    final timeMatch = RegExp(r'at ([\d:,\s]+(?:AM|PM|am|pm)[^.]*)', caseSensitive: false).firstMatch(description);
+    final doseMatch = RegExp(r'is (\d+\.?\d*)(mg|mcg|g|IU|units|ml)', caseSensitive: false).firstMatch(description);
+    
+    // Build formatted text
+    final lines = <TextSpan>[];
+    
+    // Line 1: "Take 1 Panadol tablet"
+    if (takeMatch != null) {
+      lines.add(TextSpan(
+        text: 'Take ',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg.withValues(alpha: 0.95),
+          fontWeight: FontWeight.w500,
         ),
       ));
-      
-      // Add the unit (semi-prominent style)
-      if (match.group(2) != null) {
-        spans.add(TextSpan(
-          text: ' ${match.group(2)}',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: fg,
-            fontWeight: FontWeight.w700,
-          ),
-        ));
-      }
-      
-      lastMatchEnd = match.end;
+      lines.add(TextSpan(
+        text: '${takeMatch.group(1)}',
+        style: theme.textTheme.titleLarge?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w900,
+          fontSize: 20,
+        ),
+      ));
+      lines.add(TextSpan(
+        text: ' ${takeMatch.group(2)} ',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg.withValues(alpha: 0.95),
+          fontWeight: FontWeight.w500,
+        ),
+      ));
+      lines.add(TextSpan(
+        text: takeMatch.group(3) ?? '',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w700,
+        ),
+      ));
     }
     
-    // Add remaining text
-    if (lastMatchEnd < description.length) {
-      spans.add(TextSpan(
-        text: description.substring(lastMatchEnd),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: fg.withValues(alpha: 0.9),
+    // Line 2: "Every Day"
+    if (frequencyMatch != null) {
+      lines.add(TextSpan(
+        text: '\n${frequencyMatch.group(1)?.trim()}',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg.withValues(alpha: 0.95),
+          fontWeight: FontWeight.w500,
+        ),
+      ));
+    }
+    
+    // Line 3: "at 9:00 AM"
+    if (timeMatch != null) {
+      lines.add(TextSpan(
+        text: '\nat ${timeMatch.group(1)?.trim()}',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg.withValues(alpha: 0.95),
+          fontWeight: FontWeight.w500,
+        ),
+      ));
+    }
+    
+    // Line 4: "Dose equals 20mg"
+    if (doseMatch != null) {
+      lines.add(TextSpan(
+        text: '\nDose equals ',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg.withValues(alpha: 0.95),
+          fontWeight: FontWeight.w500,
+        ),
+      ));
+      lines.add(TextSpan(
+        text: '${doseMatch.group(1)}',
+        style: theme.textTheme.titleLarge?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w900,
+          fontSize: 20,
+        ),
+      ));
+      lines.add(TextSpan(
+        text: doseMatch.group(2) ?? '',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w700,
         ),
       ));
     }
     
     return RichText(
-      text: TextSpan(children: spans),
+      text: TextSpan(children: lines),
     );
   }
 }
