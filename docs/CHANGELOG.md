@@ -10,14 +10,18 @@ All notable changes to this project will be documented in this file. Dates in UT
   - Card stays visible while scrolling through form sections
   - **Always visible**: Shows info card when med picker appears, then shows full summary after selection
   - Uses primary gradient background (consistent with medication screens)
-  - **Prominent dose display**: Numbers styled at fontSize 20, fontWeight 900 (extra bold)
+  - **Optimized dose display**: Numbers styled at fontSize 16, fontWeight 800 for balance
+  - **Text sizing refined**: Main instruction text uses bodyMedium for appropriate sizing (not too large)
   - **Improved layout**: Med strength and remaining tablets moved to right side under expiry
+  - **Stock display format**: Shows "X tablets remaining" instead of "X/X"
   - **Multi-line dose format** for better readability:
     - Line 1: "Take 1 Panadol tablet" (dose number and unit prominent)
     - Line 2: "Every Day" (frequency)
     - Line 3: "at 9:00 AM" (times)
     - Line 4: "Dose equals 20mg" (total strength prominent)
   - Storage icons (refrigerate, freeze, dark) removed from schedule summary
+  - **Unified card styling**: Schedule form sections now use SectionFormCard matching medication screens
+  - **Simplified medication button**: Selected medication displays only name (not full details)
   - Regex-based text parsing to extract and format dose components
   - Dynamic height adjustment based on content
   - Times displayed in chronological order
