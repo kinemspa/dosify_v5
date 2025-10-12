@@ -901,8 +901,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             if (_selectedMed != null)
               SummaryHeaderCard.fromMedication(
                 _selectedMed!,
-                neutral: true,
-                outlined: true,
+                neutral: false,
+                outlined: false,
               )
             else
               Container(
