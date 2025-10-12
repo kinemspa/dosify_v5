@@ -555,3 +555,56 @@ Schedules Module Improvements (Enhanced UX)
   - Consider adding batch schedule creation (multiple medications at once)
   - Add schedule templates for common patterns (daily morning/evening, etc.)
 
+- **Latest Schedule UI Improvements** (Git commit: 6bed182):
+  - **Medication Selector Redesign**:
+    - Button centered text, removed add icon, uses theme bodyMedium font and onSurface color
+    - Helper text updated to "Select a medication to schedule"
+    - Selected medication display shows expand/collapse icon instead of swap icon
+  - **Enriched Medication List**:
+    - Each medication card now shows:
+      * Medication name (bodyMedium, w600)
+      * Type badge (Tablet/Capsule/PFS/SDV/MDV) in primaryContainer color
+      * Strength + manufacturer on second line
+      * Stock remaining + expiry date on third line
+      * Expiry shown in red if <30 days, with bold font weight
+    - List items properly spaced with 12px vertical padding
+    - No icons or chevrons, clean card-based layout
+  - **Summary Card Repositioned**:
+    - Moved to top of screen (first element after app bar)
+    - Floating summary card visible throughout entire form
+    - Format completely redesigned with structured multi-line layout:
+      * Line 1: Medication name + Type badge | Manufacturer (right-aligned)
+      * Line 2: Strength per unit | Stock remaining (right-aligned)
+      * Divider
+      * Line 3: "Take X unit of [MedName] at [Time1, Time2...]" with bold dose and times
+      * Line 4: Schedule frequency (Every day, On Mon/Wed/Fri, etc.)
+      * Line 5: Dose calculation (e.g., "Each dose is 20mg per dose")
+      * Line 6: Stock depletion estimate with calculated date and days remaining (tertiary color, bold)
+      * Line 7: Start date and end date with bullet separator
+    - Uses surfaceContainerLowest background with outlineVariant border (not primary color)
+    - All fonts use proper theme textTheme styles (no hardcoded sizes or colors)
+    - Empty state shows "Select a medication to schedule" with info icon
+  - **Days On/Off Redesign**:
+    - Replaced single "Every N days" + anchor date with two separate integer inputs:
+      * "Days on" field (e.g., 5 days)
+      * "Days off" field (e.g., 2 days)
+    - Removed anchor date field completely
+    - Helper text: "Take doses for specified days on, then stop for days off. Cycle repeats continuously."
+    - Schedule mode description dynamically shows: "Take doses for X days, then stop for Y days, repeating continuously"
+    - Stock depletion calculation uses cycle-aware daily usage: on/(on+off) ratio
+    - Added _daysOn and _daysOff TextEditingControllers for state management
+    - Backward compatibility: loads existing cycleEveryNDays into equal split between on/off
+  - **All Theme Compliance**:
+    - All text styles use theme.textTheme constants (bodyMedium, bodySmall, titleMedium, etc.)
+    - All colors use theme.colorScheme properties (onSurface, onSurfaceVariant, primary, error, tertiary)
+    - Medication type badges use primaryContainer/onPrimaryContainer
+    - Stock depletion text uses tertiary color for prominence
+    - Expiry warnings use error color when <30 days
+    - No hardcoded font sizes or colors anywhere
+  - **Bug Fixes**:
+    - Fixed medication.expiry field name (was incorrectly expiryDate)
+    - Fixed nullable medication.manufacturer display (uses ?? '')
+    - Fixed endDate nullable access in summary card
+    - Removed unused material_design_icons_flutter import
+    - Fixed type errors in stock depletion calculation
+
