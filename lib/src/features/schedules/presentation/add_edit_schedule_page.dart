@@ -891,33 +891,44 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
             _section(context, 'Medication', [
-              // Selected medication display or selection button
-              if (_selectedMed != null)
-                _MedicationSummaryDisplay(
-                  medication: _selectedMed!,
-                  onClear: () => setState(() {
-                    _selectedMed = null;
-                    _medicationId = null;
-                    _medicationName.clear();
-                  }),
-                  onExpand: () =>
-                      setState(() => _showMedSelector = !_showMedSelector),
-                  isExpanded: _showMedSelector,
-                )
-              else
-                OutlinedButton.icon(
-                  onPressed: () => setState(() => _showMedSelector = true),
-                  icon: const Icon(Icons.add_circle_outline, size: 18),
-                  label: const Text('Select Medication'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(40),
-                    alignment: Alignment.centerLeft,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                ),
+              // Medication row with label
+              _rowLabelField(
+                context,
+                label: 'Medication',
+                field: _selectedMed != null
+                    ? _MedicationSummaryDisplay(
+                        medication: _selectedMed!,
+                        onClear: () => setState(() {
+                          _selectedMed = null;
+                          _medicationId = null;
+                          _medicationName.clear();
+                        }),
+                        onExpand: () => setState(
+                          () => _showMedSelector = !_showMedSelector,
+                        ),
+                        isExpanded: _showMedSelector,
+                      )
+                    : OutlinedButton.icon(
+                        onPressed: () =>
+                            setState(() => _showMedSelector = true),
+                        icon: const Icon(Icons.add_circle_outline, size: 18),
+                        label: const Text('Select Medication'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(36),
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                        ),
+                      ),
+              ),
+              // Helper text
+              _helperBelowLeft(
+                _selectedMed == null
+                    ? 'Select a medication to continue'
+                    : 'Tap to change medication',
+              ),
               // Inline medication selector
               if (_showMedSelector) ...[
                 const SizedBox(height: 8),
@@ -946,316 +957,200 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
 
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
-            _section(context, 'Dose', [
-              _rowLabelField(
-                context,
-                label: 'Dose value',
-                field: SizedBox(
-                  height: 36,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _incBtn('−', () {
-                        final unit = _doseUnit.text.trim().toLowerCase();
-                        // Smart step: 0.25 for tablets, 1.0 for everything else
-                        final step = unit == 'tablets' ? 0.25 : 1.0;
-                        final v =
-                            double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                        final nv = (v - step).clamp(0, 1e12);
-                        setState(() {
-                          _doseValue.text = (unit == 'tablets')
-                              ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
-                              : nv.round().toString();
-                          _coerceDoseValueForUnit();
-                          _maybeAutoName();
-                        });
-                      }),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        width: 120,
-                        child: Field36(
-                          child: TextFormField(
-                            controller: _doseValue,
-                            textAlign: TextAlign.center,
-                            decoration: const InputDecoration(labelText: ''),
-                            keyboardType:
-                                (_doseUnit.text.trim().toLowerCase() ==
-                                    'tablets')
-                                ? const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  )
-                                : TextInputType.number,
-                            onChanged: (_) {
-                              _coerceDoseValueForUnit();
-                              _maybeAutoName();
-                              setState(() {});
-                            },
-                            validator: (v) {
-                              final d = double.tryParse(v?.trim() ?? '');
-                              if (d == null || d <= 0)
-                                return 'Enter a positive number';
-                              final unit = _doseUnit.text.trim().toLowerCase();
-                              if ([
-                                'capsules',
-                                'syringes',
-                                'vials',
-                              ].contains(unit)) {
-                                if (d % 1 != 0) return 'Whole numbers only';
-                              }
-                              if (unit == 'tablets') {
-                                final q = (d * 4).roundToDouble();
-                                if ((q - d * 4).abs() > 1e-6 && d % 0.25 != 0) {
-                                  return 'Use quarter-tablet steps (0.25)';
+            if (_selectedMed != null)
+              _section(context, 'Dose', [
+                _rowLabelField(
+                  context,
+                  label: 'Dose value',
+                  field: SizedBox(
+                    height: 36,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _incBtn('−', () {
+                          final unit = _doseUnit.text.trim().toLowerCase();
+                          // Smart step: 0.25 for tablets, 1.0 for everything else
+                          final step = unit == 'tablets' ? 0.25 : 1.0;
+                          final v =
+                              double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                          final nv = (v - step).clamp(0, 1e12);
+                          setState(() {
+                            _doseValue.text = (unit == 'tablets')
+                                ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
+                                : nv.round().toString();
+                            _coerceDoseValueForUnit();
+                            _maybeAutoName();
+                          });
+                        }),
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 120,
+                          child: Field36(
+                            child: TextFormField(
+                              controller: _doseValue,
+                              textAlign: TextAlign.center,
+                              decoration: const InputDecoration(labelText: ''),
+                              keyboardType:
+                                  (_doseUnit.text.trim().toLowerCase() ==
+                                      'tablets')
+                                  ? const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    )
+                                  : TextInputType.number,
+                              onChanged: (_) {
+                                _coerceDoseValueForUnit();
+                                _maybeAutoName();
+                                setState(() {});
+                              },
+                              validator: (v) {
+                                final d = double.tryParse(v?.trim() ?? '');
+                                if (d == null || d <= 0)
+                                  return 'Enter a positive number';
+                                final unit = _doseUnit.text
+                                    .trim()
+                                    .toLowerCase();
+                                if ([
+                                  'capsules',
+                                  'syringes',
+                                  'vials',
+                                ].contains(unit)) {
+                                  if (d % 1 != 0) return 'Whole numbers only';
                                 }
-                              }
-                              return null;
-                            },
+                                if (unit == 'tablets') {
+                                  final q = (d * 4).roundToDouble();
+                                  if ((q - d * 4).abs() > 1e-6 &&
+                                      d % 0.25 != 0) {
+                                    return 'Use quarter-tablet steps (0.25)';
+                                  }
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      _incBtn('+', () {
-                        final unit = _doseUnit.text.trim().toLowerCase();
-                        // Smart step: 0.25 for tablets, 1.0 for everything else
-                        final step = unit == 'tablets' ? 0.25 : 1.0;
-                        final v =
-                            double.tryParse(_doseValue.text.trim()) ?? 0.0;
-                        final nv = (v + step).clamp(0, 1e12);
-                        setState(() {
-                          _doseValue.text = (unit == 'tablets')
-                              ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
-                              : nv.round().toString();
-                          _coerceDoseValueForUnit();
-                          _maybeAutoName();
-                        });
-                      }),
-                    ],
+                        const SizedBox(width: 6),
+                        _incBtn('+', () {
+                          final unit = _doseUnit.text.trim().toLowerCase();
+                          // Smart step: 0.25 for tablets, 1.0 for everything else
+                          final step = unit == 'tablets' ? 0.25 : 1.0;
+                          final v =
+                              double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                          final nv = (v + step).clamp(0, 1e12);
+                          setState(() {
+                            _doseValue.text = (unit == 'tablets')
+                                ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
+                                : nv.round().toString();
+                            _coerceDoseValueForUnit();
+                            _maybeAutoName();
+                          });
+                        }),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _rowLabelField(
-                context,
-                label: 'Unit',
-                field: Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: kFieldHeight,
-                    width: 120,
-                    child: DropdownButtonFormField<String>(
-                      value: _doseUnit.text.isEmpty ? null : _doseUnit.text,
-                      isExpanded: false,
-                      alignment: AlignmentDirectional.center,
-                      decoration: const InputDecoration(labelText: ''),
-                      items: _doseUnitOptions()
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              alignment: AlignmentDirectional.center,
-                              child: Center(
-                                child: Text(
-                                  e,
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                _rowLabelField(
+                  context,
+                  label: 'Unit',
+                  field: Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      height: kFieldHeight,
+                      width: 120,
+                      child: DropdownButtonFormField<String>(
+                        value: _doseUnit.text.isEmpty ? null : _doseUnit.text,
+                        isExpanded: false,
+                        alignment: AlignmentDirectional.center,
+                        decoration: const InputDecoration(labelText: ''),
+                        items: _doseUnitOptions()
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e,
+                                alignment: AlignmentDirectional.center,
+                                child: Center(
+                                  child: Text(
+                                    e,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
+                                  ),
                                 ),
                               ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (v) {
-                        setState(() {
-                          _doseUnit.text = v ?? '';
-                          _coerceDoseValueForUnit();
-                          _maybeAutoName();
-                        });
-                      },
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                  ),
-                ),
-              ),
-            ]),
-            _helperBelowLeft(
-              'Enter dose amount and unit (tablets allow 0.25 steps)',
-            ),
-            // Dose calculation summary
-            if (_selectedMed != null)
-              Padding(
-                padding: EdgeInsets.only(
-                  left: MediaQuery.of(context).size.width >= 400
-                      ? 128.0
-                      : 118.0,
-                  right: 10,
-                  bottom: 10,
-                ),
-                child: _DoseFormulaStrip(
-                  selectedMed: _selectedMed,
-                  valueCtrl: _doseValue,
-                  unitCtrl: _doseUnit,
-                ),
-              ),
-            const SizedBox(height: 10),
-            _section(context, 'Schedule', [
-              Column(
-                children: [
-                  // 1. Choose schedule type
-                  _rowLabelField(
-                    context,
-                    label: 'Schedule type',
-                    field: DropdownButtonFormField<ScheduleMode>(
-                      value: _mode,
-                      isExpanded: true,
-                      decoration: const InputDecoration(labelText: ''),
-                      items: ScheduleMode.values
-                          .map(
-                            (m) => DropdownMenuItem(
-                              value: m,
-                              child: Text(_modeLabel(m)),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (m) {
-                        if (m == null) return;
-                        setState(() {
-                          _mode = m;
-                          if (_mode == ScheduleMode.everyDay) {
-                            _days
-                              ..clear()
-                              ..addAll([1, 2, 3, 4, 5, 6, 7]);
-                            _useCycle = false;
-                            _daysOfMonth.clear();
-                          } else if (_mode == ScheduleMode.daysOfWeek) {
-                            _useCycle = false;
-                            _daysOfMonth.clear();
-                            if (_days.isEmpty) {
-                              _days.addAll([1, 2, 3, 4, 5]);
-                            }
-                          } else if (_mode == ScheduleMode.daysOnOff) {
-                            _useCycle = true;
-                            _daysOfMonth.clear();
-                          } else if (_mode == ScheduleMode.daysOfMonth) {
-                            _useCycle = false;
-                            if (_daysOfMonth.isEmpty) {
-                              _daysOfMonth.addAll([
-                                1,
-                              ]); // Default to 1st of month
-                            }
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                  _helperBelowLeft('Choose how this schedule repeats'),
-                  // 2. Select start date
-                  _rowLabelField(
-                    context,
-                    label: 'Start date',
-                    field: Field36(
-                      width: 120,
-                      child: FilledButton.icon(
-                        onPressed: () async {
-                          final now = DateTime.now();
-                          final picked = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime(now.year - 1),
-                            lastDate: DateTime(now.year + 10),
-                            initialDate: _startDate,
-                          );
-                          if (picked != null)
-                            setState(() => _startDate = picked);
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _doseUnit.text = v ?? '';
+                            _coerceDoseValueForUnit();
+                            _maybeAutoName();
+                          });
                         },
-                        icon: const Icon(Icons.calendar_today, size: 18),
-                        label: Text('${_startDate.toLocal()}'.split(' ').first),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(120, kFieldHeight),
-                        ),
+                        validator: (v) =>
+                            (v == null || v.trim().isEmpty) ? 'Required' : null,
                       ),
                     ),
                   ),
-                  _helperBelowLeft('Select when this schedule should start'),
-                  // 3. Select days/months based on mode
-                  // Days/months selection section
-                  if (_mode == ScheduleMode.daysOfWeek) ...[
-                    _helperBelowLeft('Select days of the week'),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: List.generate(7, (i) {
-                          final dayIndex = i + 1; // 1..7
-                          const labels = [
-                            'Mon',
-                            'Tue',
-                            'Wed',
-                            'Thu',
-                            'Fri',
-                            'Sat',
-                            'Sun',
-                          ];
-                          final selected = _days.contains(dayIndex);
-                          return FilterChip(
-                            label: Text(
-                              labels[i],
-                              style: TextStyle(
-                                color: selected
-                                    ? theme.colorScheme.onPrimary
-                                    : null,
+                ),
+                _helperBelowLeft(
+                  'Enter dose amount and unit (tablets allow 0.25 steps)',
+                ),
+              ]),
+            const SizedBox(height: 10),
+            if (_selectedMed != null)
+              _section(context, 'Schedule', [
+                Column(
+                  children: [
+                    // 1. Choose schedule type
+                    _rowLabelField(
+                      context,
+                      label: 'Schedule type',
+                      field: DropdownButtonFormField<ScheduleMode>(
+                        value: _mode,
+                        isExpanded: true,
+                        decoration: const InputDecoration(labelText: ''),
+                        items: ScheduleMode.values
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(_modeLabel(m)),
                               ),
-                            ),
-                            showCheckmark: false,
-                            selectedColor: theme.colorScheme.primary,
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            selected: selected,
-                            onSelected: (sel) {
-                              setState(() {
-                                if (sel) {
-                                  _days.add(dayIndex);
-                                } else {
-                                  _days.remove(dayIndex);
-                                }
-                              });
-                            },
-                          );
-                        }),
+                            )
+                            .toList(),
+                        onChanged: (m) {
+                          if (m == null) return;
+                          setState(() {
+                            _mode = m;
+                            if (_mode == ScheduleMode.everyDay) {
+                              _days
+                                ..clear()
+                                ..addAll([1, 2, 3, 4, 5, 6, 7]);
+                              _useCycle = false;
+                              _daysOfMonth.clear();
+                            } else if (_mode == ScheduleMode.daysOfWeek) {
+                              _useCycle = false;
+                              _daysOfMonth.clear();
+                              if (_days.isEmpty) {
+                                _days.addAll([1, 2, 3, 4, 5]);
+                              }
+                            } else if (_mode == ScheduleMode.daysOnOff) {
+                              _useCycle = true;
+                              _daysOfMonth.clear();
+                            } else if (_mode == ScheduleMode.daysOfMonth) {
+                              _useCycle = false;
+                              if (_daysOfMonth.isEmpty) {
+                                _daysOfMonth.addAll([
+                                  1,
+                                ]); // Default to 1st of month
+                              }
+                            }
+                          });
+                        },
                       ),
                     ),
-                  ],
-                  if (_mode == ScheduleMode.daysOnOff) ...[
+                    _helperBelowLeft('Choose how this schedule repeats'),
+                    // 2. Select start date
                     _rowLabelField(
                       context,
-                      label: 'Every N days',
-                      field: SizedBox(
-                        width: 120,
-                        height: kFieldHeight,
-                        child: Field36(
-                          child: TextFormField(
-                            controller: _cycleN,
-                            textAlign: TextAlign.center,
-                            decoration: const InputDecoration(labelText: ''),
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: false,
-                            ),
-                            validator: (v) {
-                              final n = int.tryParse(v?.trim() ?? '');
-                              if (_mode == ScheduleMode.daysOnOff &&
-                                  (n == null || n < 1))
-                                return '>= 1';
-                              return null;
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    _helperBelowLeft('Choose the cycle length and anchor date'),
-                    _rowLabelField(
-                      context,
-                      label: 'Anchor date',
+                      label: 'Start date',
                       field: Field36(
                         width: 120,
                         child: FilledButton.icon(
@@ -1265,14 +1160,14 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               context: context,
                               firstDate: DateTime(now.year - 1),
                               lastDate: DateTime(now.year + 10),
-                              initialDate: _cycleAnchor,
+                              initialDate: _startDate,
                             );
                             if (picked != null)
-                              setState(() => _cycleAnchor = picked);
+                              setState(() => _startDate = picked);
                           },
-                          icon: const Icon(Icons.event, size: 18),
+                          icon: const Icon(Icons.calendar_today, size: 18),
                           label: Text(
-                            '${_cycleAnchor.toLocal()}'.split(' ').first,
+                            '${_startDate.toLocal()}'.split(' ').first,
                           ),
                           style: FilledButton.styleFrom(
                             minimumSize: const Size(120, kFieldHeight),
@@ -1280,167 +1175,282 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         ),
                       ),
                     ),
-                  ],
-                  if (_mode == ScheduleMode.daysOfMonth) ...[
-                    _helperBelowLeft('Select days of the month (1-31)'),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: List.generate(31, (i) {
-                          final day = i + 1;
-                          final selected = _daysOfMonth.contains(day);
-                          return FilterChip(
-                            label: Text(
-                              '$day',
-                              style: TextStyle(
-                                color: selected
-                                    ? theme.colorScheme.onPrimary
-                                    : null,
-                                fontSize: 12,
-                              ),
-                            ),
-                            showCheckmark: false,
-                            selectedColor: theme.colorScheme.primary,
-                            visualDensity: VisualDensity.compact,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 2,
-                            ),
-                            selected: selected,
-                            onSelected: (sel) {
-                              setState(() {
-                                if (sel) {
-                                  _daysOfMonth.add(day);
-                                } else {
-                                  _daysOfMonth.remove(day);
-                                }
-                              });
-                            },
-                          );
-                        }),
-                      ),
-                    ),
-                  ],
-                  // 4. Add dosing times
-                  const SizedBox(height: 8),
-                  _rowLabelField(
-                    context,
-                    label: 'Time 1',
-                    field: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
+                    _helperBelowLeft('Select when this schedule should start'),
+                    // 3. Select days/months based on mode
+                    // Days/months selection section
+                    if (_mode == ScheduleMode.daysOfWeek) ...[
+                      _helperBelowLeft('Select days of the week'),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: List.generate(_times.length, (i) {
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Field36(
-                                  width: 120,
-                                  child: FilledButton.icon(
-                                    onPressed: () => _pickTimeAt(i),
-                                    icon: const Icon(Icons.schedule, size: 18),
-                                    label: Text(_times[i].format(context)),
-                                    style: FilledButton.styleFrom(
-                                      minimumSize: const Size(
-                                        120,
-                                        kFieldHeight,
-                                      ),
-                                    ),
-                                  ),
+                          children: List.generate(7, (i) {
+                            final dayIndex = i + 1; // 1..7
+                            const labels = [
+                              'Mon',
+                              'Tue',
+                              'Wed',
+                              'Thu',
+                              'Fri',
+                              'Sat',
+                              'Sun',
+                            ];
+                            final selected = _days.contains(dayIndex);
+                            return FilterChip(
+                              label: Text(
+                                labels[i],
+                                style: TextStyle(
+                                  color: selected
+                                      ? theme.colorScheme.onPrimary
+                                      : null,
                                 ),
-                                const SizedBox(width: 4),
-                                if (_times.length > 1)
-                                  IconButton(
-                                    tooltip: 'Remove',
-                                    onPressed: () =>
-                                        setState(() => _times.removeAt(i)),
-                                    visualDensity: VisualDensity.compact,
-                                    icon: const Icon(
-                                      Icons.remove_circle_outline,
-                                      size: 18,
-                                    ),
-                                  ),
-                              ],
+                              ),
+                              showCheckmark: false,
+                              selectedColor: theme.colorScheme.primary,
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              selected: selected,
+                              onSelected: (sel) {
+                                setState(() {
+                                  if (sel) {
+                                    _days.add(dayIndex);
+                                  } else {
+                                    _days.remove(dayIndex);
+                                  }
+                                });
+                              },
                             );
                           }),
                         ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              setState(() => _times.add(_times.last)),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add time'),
+                      ),
+                    ],
+                    if (_mode == ScheduleMode.daysOnOff) ...[
+                      _rowLabelField(
+                        context,
+                        label: 'Every N days',
+                        field: SizedBox(
+                          width: 120,
+                          height: kFieldHeight,
+                          child: Field36(
+                            child: TextFormField(
+                              controller: _cycleN,
+                              textAlign: TextAlign.center,
+                              decoration: const InputDecoration(labelText: ''),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: false,
+                                  ),
+                              validator: (v) {
+                                final n = int.tryParse(v?.trim() ?? '');
+                                if (_mode == ScheduleMode.daysOnOff &&
+                                    (n == null || n < 1))
+                                  return '>= 1';
+                                return null;
+                              },
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                  _helperBelowLeft('Add one or more dosing times'),
-                  // 5. Select end date
-                  _rowLabelField(
-                    context,
-                    label: 'End date',
-                    field: Row(
-                      children: [
-                        Field36(
+                      ),
+                      _helperBelowLeft(
+                        'Choose the cycle length and anchor date',
+                      ),
+                      _rowLabelField(
+                        context,
+                        label: 'Anchor date',
+                        field: Field36(
                           width: 120,
                           child: FilledButton.icon(
-                            onPressed: _noEnd
-                                ? null
-                                : () async {
-                                    final now = DateTime.now();
-                                    final picked = await showDatePicker(
-                                      context: context,
-                                      firstDate: DateTime(now.year - 1),
-                                      lastDate: DateTime(now.year + 10),
-                                      initialDate: _endDate ?? _startDate,
-                                    );
-                                    if (picked != null)
-                                      setState(() {
-                                        _endDate = picked;
-                                        _noEnd = false;
-                                      });
-                                  },
+                            onPressed: () async {
+                              final now = DateTime.now();
+                              final picked = await showDatePicker(
+                                context: context,
+                                firstDate: DateTime(now.year - 1),
+                                lastDate: DateTime(now.year + 10),
+                                initialDate: _cycleAnchor,
+                              );
+                              if (picked != null)
+                                setState(() => _cycleAnchor = picked);
+                            },
                             icon: const Icon(Icons.event, size: 18),
                             label: Text(
-                              _noEnd || _endDate == null
-                                  ? 'No end'
-                                  : '${_endDate!.toLocal()}'.split(' ').first,
+                              '${_cycleAnchor.toLocal()}'.split(' ').first,
                             ),
                             style: FilledButton.styleFrom(
                               minimumSize: const Size(120, kFieldHeight),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Checkbox(
-                          value: _noEnd,
-                          onChanged: (v) => setState(() {
-                            _noEnd = v ?? true;
-                            if (_noEnd) _endDate = null;
+                      ),
+                    ],
+                    if (_mode == ScheduleMode.daysOfMonth) ...[
+                      _helperBelowLeft('Select days of the month (1-31)'),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: List.generate(31, (i) {
+                            final day = i + 1;
+                            final selected = _daysOfMonth.contains(day);
+                            return FilterChip(
+                              label: Text(
+                                '$day',
+                                style: TextStyle(
+                                  color: selected
+                                      ? theme.colorScheme.onPrimary
+                                      : null,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              showCheckmark: false,
+                              selectedColor: theme.colorScheme.primary,
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
+                              selected: selected,
+                              onSelected: (sel) {
+                                setState(() {
+                                  if (sel) {
+                                    _daysOfMonth.add(day);
+                                  } else {
+                                    _daysOfMonth.remove(day);
+                                  }
+                                });
+                              },
+                            );
                           }),
                         ),
-                        const Text('No end'),
-                      ],
+                      ),
+                    ],
+                    // 4. Add dosing times
+                    const SizedBox(height: 8),
+                    _rowLabelField(
+                      context,
+                      label: 'Time 1',
+                      field: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: List.generate(_times.length, (i) {
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Field36(
+                                    width: 120,
+                                    child: FilledButton.icon(
+                                      onPressed: () => _pickTimeAt(i),
+                                      icon: const Icon(
+                                        Icons.schedule,
+                                        size: 18,
+                                      ),
+                                      label: Text(_times[i].format(context)),
+                                      style: FilledButton.styleFrom(
+                                        minimumSize: const Size(
+                                          120,
+                                          kFieldHeight,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  if (_times.length > 1)
+                                    IconButton(
+                                      tooltip: 'Remove',
+                                      onPressed: () =>
+                                          setState(() => _times.removeAt(i)),
+                                      visualDensity: VisualDensity.compact,
+                                      icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                        size: 18,
+                                      ),
+                                    ),
+                                ],
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            onPressed: () =>
+                                setState(() => _times.add(_times.last)),
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add time'),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  _helperBelowLeft('Optional end date (or leave as No end)'),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const SizedBox(height: 12),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
-                value: _active,
-                onChanged: (v) => setState(() => _active = v),
-              ),
-            ]),
+                    _helperBelowLeft('Add one or more dosing times'),
+                    // 5. Select end date
+                    _rowLabelField(
+                      context,
+                      label: 'End date',
+                      field: Row(
+                        children: [
+                          Field36(
+                            width: 120,
+                            child: FilledButton.icon(
+                              onPressed: _noEnd
+                                  ? null
+                                  : () async {
+                                      final now = DateTime.now();
+                                      final picked = await showDatePicker(
+                                        context: context,
+                                        firstDate: DateTime(now.year - 1),
+                                        lastDate: DateTime(now.year + 10),
+                                        initialDate: _endDate ?? _startDate,
+                                      );
+                                      if (picked != null)
+                                        setState(() {
+                                          _endDate = picked;
+                                          _noEnd = false;
+                                        });
+                                    },
+                              icon: const Icon(Icons.event, size: 18),
+                              label: Text(
+                                _noEnd || _endDate == null
+                                    ? 'No end'
+                                    : '${_endDate!.toLocal()}'.split(' ').first,
+                              ),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(120, kFieldHeight),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Checkbox(
+                            value: _noEnd,
+                            onChanged: (v) => setState(() {
+                              _noEnd = v ?? true;
+                              if (_noEnd) _endDate = null;
+                            }),
+                          ),
+                          const Text('No end'),
+                        ],
+                      ),
+                    ),
+                    _helperBelowLeft('Optional end date (or leave as No end)'),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active'),
+                  value: _active,
+                  onChanged: (v) => setState(() => _active = v),
+                ),
+              ]),
           ],
         ),
       ),
@@ -1989,8 +1999,18 @@ class _MedicationSummaryDisplay extends StatelessWidget {
         : stock
               .toStringAsFixed(2)
               .replaceFirst(RegExp(r'\.0+$'), '')
-              .replaceFirst(RegExp(r'(\.\ d*?)0+$'), r'$1');
-    return '$s remaining';
+              .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
+
+    // Add form-specific unit
+    final unit = switch (m.form) {
+      MedicationForm.tablet => 'tablets',
+      MedicationForm.capsule => 'capsules',
+      MedicationForm.injectionPreFilledSyringe => 'syringes',
+      MedicationForm.injectionSingleDoseVial => 'vials',
+      MedicationForm.injectionMultiDoseVial => 'vials',
+    };
+
+    return '$s $unit remaining';
   }
 
   String _formatStrength(Medication m) {
@@ -2000,7 +2020,7 @@ class _MedicationSummaryDisplay extends StatelessWidget {
         : v
               .toStringAsFixed(2)
               .replaceFirst(RegExp(r'\.0+$'), '')
-              .replaceFirst(RegExp(r'(\.\ d*?)0+$'), r'$1');
+              .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
     final unitLabel = switch (m.strengthUnit) {
       Unit.mcg || Unit.mcgPerMl => 'mcg',
       Unit.mg || Unit.mgPerMl => 'mg',
@@ -2038,8 +2058,6 @@ class _MedicationSummaryDisplay extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.medication, color: cs.primary, size: 20),
-              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   medication.name,
@@ -2051,13 +2069,13 @@ class _MedicationSummaryDisplay extends StatelessWidget {
               ),
               IconButton(
                 tooltip: 'Change medication',
-                icon: Icon(Icons.swap_horiz, size: 20, color: cs.primary),
+                icon: Icon(Icons.swap_horiz, size: 18, color: cs.primary),
                 onPressed: onExpand,
                 visualDensity: VisualDensity.compact,
               ),
               IconButton(
                 tooltip: 'Clear selection',
-                icon: Icon(Icons.close, size: 20, color: cs.error),
+                icon: Icon(Icons.close, size: 18, color: cs.error),
                 onPressed: onClear,
                 visualDensity: VisualDensity.compact,
               ),
