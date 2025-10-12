@@ -3,13 +3,17 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
-- Schedules: Enhanced Add/Edit Schedule screen with floating summary card (same pattern as medication screens)
-  - Summary card now floats at top of screen using Stack/Positioned layout
+- Schedules: Enhanced Add/Edit Schedule screen with custom floating summary card
+  - Created custom ScheduleSummaryCard widget specifically for schedules (doesn't affect medication screens)
+  - Card floats at top of screen using Stack/Positioned layout
   - Card stays visible while scrolling through form sections
+  - **Always visible**: Shows info card when med picker appears, then shows full summary after selection
   - Uses primary gradient background (consistent with medication screens)
-  - Improved schedule description format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
-  - Example: "Take 1 Panadol Tablets Every Day at 22:00. Dose is 1 tablet is 20mg."
-  - Removed low stock alert from schedule summary (not relevant for scheduling)
+  - **Prominent dose display**: Numbers and units are styled larger and bolder (fontSize 18, fontWeight 900)
+  - **Improved layout**: Med strength and remaining tablets moved to right side under expiry
+  - Schedule description format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
+  - Example with styling: "Take **1** **tablet** Panadol Tablets Every Day at 22:00. Dose is **1** **tablet** is **20mg**."
+  - Regex-based text parsing to highlight dose values and units
   - Dynamic height adjustment based on content
   - Times displayed in chronological order
   - Dynamic updates to summary as user edits dose, times, or frequency

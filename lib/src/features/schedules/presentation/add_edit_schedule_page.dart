@@ -10,6 +10,7 @@ import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'widgets/schedule_summary_card.dart';
 
 class AddEditSchedulePage extends StatefulWidget {
   const AddEditSchedulePage({super.key, this.initial});
@@ -1455,14 +1456,13 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           ],
         ),
       ),
-          // Floating summary card pinned beneath app bar
-          if (_selectedMed != null)
-            Positioned(
-              left: 10,
-              right: 10,
-              top: 8,
-              child: IgnorePointer(child: _buildFloatingSummary()),
-            ),
+          // Floating summary card pinned beneath app bar (always show, even during med selection)
+          Positioned(
+            left: 10,
+            right: 10,
+            top: 8,
+            child: IgnorePointer(child: _buildFloatingSummary()),
+          ),
         ],
       ),
     );
@@ -1470,23 +1470,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   
   /// Builds the floating summary card that stays at top of screen
   Widget _buildFloatingSummary() {
-    final card = SummaryHeaderCard(
+    final card = ScheduleSummaryCard(
       key: _summaryKey,
-      title: _selectedMed!.name,
-      manufacturer: _selectedMed!.manufacturer,
-      strengthValue: _selectedMed!.strengthValue,
-      strengthUnitLabel: _getUnitLabel(_selectedMed!.strengthUnit),
-      stockCurrent: _selectedMed!.stockValue,
-      stockInitial: _selectedMed!.initialStockValue ?? _selectedMed!.stockValue,
-      stockUnitLabel: _getStockUnitLabel(_selectedMed!),
-      expiryDate: _selectedMed!.expiry,
-      showRefrigerate: _selectedMed!.requiresRefrigeration,
-      lowStockEnabled: false,  // Don't show low stock alert in schedule summary
-      lowStockThreshold: null,
-      neutral: false,  // Use primary gradient like medication screens
-      outlined: false,
-      leadingIcon: _getMedicationIcon(_selectedMed!.form),
-      additionalInfo: _buildScheduleDescription(),
+      medication: _selectedMed,
+      scheduleDescription: _buildScheduleDescription(),
+      showInfoOnly: _selectedMed == null || _showMedSelector,
     );
     // Update height after render
     WidgetsBinding.instance.addPostFrameCallback((_) {
