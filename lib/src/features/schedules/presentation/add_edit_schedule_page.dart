@@ -899,10 +899,23 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           children: [
             // Summary card at the top - same as add medication screen
             if (_selectedMed != null)
-              SummaryHeaderCard.fromMedication(
-                _selectedMed!,
+              SummaryHeaderCard(
+                title: _selectedMed!.name,
+                manufacturer: _selectedMed!.manufacturer,
+                strengthValue: _selectedMed!.strengthValue,
+                strengthUnitLabel: _getUnitLabel(_selectedMed!.strengthUnit),
+                stockCurrent: _selectedMed!.stockValue,
+                stockInitial:
+                    _selectedMed!.initialStockValue ?? _selectedMed!.stockValue,
+                stockUnitLabel: _getStockUnitLabel(_selectedMed!),
+                expiryDate: _selectedMed!.expiry,
+                showRefrigerate: _selectedMed!.requiresRefrigeration,
+                lowStockEnabled: _selectedMed!.lowStockEnabled,
+                lowStockThreshold: _selectedMed!.lowStockThreshold,
                 neutral: false,
                 outlined: false,
+                leadingIcon: _getMedicationIcon(_selectedMed!.form),
+                additionalInfo: _buildScheduleInfo(),
               )
             else
               Container(
@@ -910,16 +923,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: theme.colorScheme.outlineVariant,
-                  ),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: theme.colorScheme.onSurfaceVariant
-                          .withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
                       size: 32,
                     ),
                     const SizedBox(width: 12),
@@ -1581,6 +1593,69 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     final unit = _doseUnit.text.trim();
     if (med.isEmpty || dose.isEmpty || unit.isEmpty) return;
     _name.text = '$med — $dose $unit';
+  }
+
+  String _getUnitLabel(Unit u) => switch (u) {
+    Unit.mcg || Unit.mcgPerMl => 'mcg',
+    Unit.mg || Unit.mgPerMl => 'mg',
+    Unit.g || Unit.gPerMl => 'g',
+    Unit.units || Unit.unitsPerMl => 'units',
+  };
+
+  String _getStockUnitLabel(Medication m) => switch (m.form) {
+    MedicationForm.tablet => 'tablets',
+    MedicationForm.capsule => 'capsules',
+    MedicationForm.injectionPreFilledSyringe => 'syringes',
+    MedicationForm.injectionSingleDoseVial => 'vials',
+    MedicationForm.injectionMultiDoseVial => 'vials',
+  };
+
+  IconData _getMedicationIcon(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => Icons.add_circle,
+    MedicationForm.capsule => Icons.medication,
+    MedicationForm.injectionPreFilledSyringe => Icons.colorize,
+    MedicationForm.injectionSingleDoseVial => Icons.local_drink,
+    MedicationForm.injectionMultiDoseVial => Icons.addchart,
+  };
+
+  String? _buildScheduleInfo() {
+    final doseVal = double.tryParse(_doseValue.text.trim());
+    final doseUnitText = _doseUnit.text.trim();
+
+    if (doseVal == null ||
+        doseVal <= 0 ||
+        doseUnitText.isEmpty ||
+        _times.isEmpty) {
+      return null;
+    }
+
+    final doseStr = doseVal == doseVal.roundToDouble()
+        ? doseVal.toStringAsFixed(0)
+        : doseVal.toStringAsFixed(2);
+
+    final timesStr = _times.map((t) => t.format(context)).join(', ');
+
+    String frequencyText;
+    if (_mode == ScheduleMode.everyDay) {
+      frequencyText = 'every day';
+    } else if (_mode == ScheduleMode.daysOfWeek) {
+      const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final ds = _days.toList()..sort();
+      final dtext = ds.map((i) => labels[i - 1]).join(', ');
+      frequencyText = 'on $dtext';
+    } else if (_mode == ScheduleMode.daysOfMonth) {
+      final sorted = _daysOfMonth.toList()..sort();
+      final dayText = sorted.take(3).join(', ');
+      frequencyText = sorted.length > 3
+          ? 'on days $dayText...'
+          : 'on day${sorted.length > 1 ? 's' : ''} $dayText';
+    } else {
+      final on = int.tryParse(_daysOn.text.trim()) ?? 5;
+      final off = int.tryParse(_daysOff.text.trim()) ?? 2;
+      frequencyText = '$on days on, $off days off';
+    }
+
+    return 'Take $doseStr $doseUnitText at $timesStr $frequencyText';
   }
 
   String _getScheduleModeDescription(ScheduleMode mode) {
