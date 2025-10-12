@@ -910,6 +910,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               startDate: _startDate,
               endDate: _endDate,
               noEnd: _noEnd,
+              daysOnController: _daysOn,
+              daysOffController: _daysOff,
             ),
             const SizedBox(height: 10),
             _section(context, 'Medication', [
@@ -1775,6 +1777,8 @@ class _ScheduleSummaryCard extends StatelessWidget {
     required this.startDate,
     required this.endDate,
     required this.noEnd,
+    required this.daysOnController,
+    required this.daysOffController,
   });
 
   final Medication? medication;
@@ -1789,6 +1793,8 @@ class _ScheduleSummaryCard extends StatelessWidget {
   final DateTime startDate;
   final DateTime? endDate;
   final bool noEnd;
+  final TextEditingController daysOnController;
+  final TextEditingController daysOffController;
 
   String _medStrengthLabel(Medication m) {
     final unitLabel = switch (m.strengthUnit) {
@@ -1910,7 +1916,7 @@ class _ScheduleSummaryCard extends StatelessWidget {
     final startStr = '${startDate.toLocal()}'.split(' ').first;
     final endStr = noEnd || endDate == null
         ? 'No end'
-        : '${endDate.toLocal()}'.split(' ').first;
+        : '${endDate!.toLocal()}'.split(' ').first;
 
     // Calculate stock depletion
     String stockDepletionText = '';
@@ -1929,8 +1935,8 @@ class _ScheduleSummaryCard extends StatelessWidget {
         dailyUsage = doseValue * timesPerDay * (daysOfMonth.length / 30.0);
       } else if (mode == ScheduleMode.daysOnOff) {
         // Calculate average based on days on/off cycle
-        final on = int.tryParse(_daysOn.text.trim()) ?? 5;
-        final off = int.tryParse(_daysOff.text.trim()) ?? 2;
+        final on = int.tryParse(daysOnController.text.trim()) ?? 5;
+        final off = int.tryParse(daysOffController.text.trim()) ?? 2;
         final cycleLength = on + off;
         dailyUsage = doseValue * timesPerDay * (on / cycleLength);
       }
