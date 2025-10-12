@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- Schedules: Enhanced Add/Edit Schedule screen with improved summary card display
+  - Summary card now uses neutral styling (surface background) for consistency with other edit screens
+  - Improved schedule description format: "dose • frequency at times" (e.g., "2.5 tablets • Every Monday, Wednesday at 9:00 AM, 6:00 PM")
+  - Times displayed in chronological order with "+N more" indicator for 4+ times
+  - Full day names in frequency patterns (e.g., "Every Monday, Tuesday, Wednesday")
+  - Automatic "Every day" when all 7 days selected
+  - Dynamic updates to summary as user edits dose, times, or frequency
 - Fix: Build errors resolved: removed duplicate 'stockHelp' in editor_template_preview_page.dart and returned Row from StepperRow36.build().
 - UI: Standardize clamp helper message and color across editors. When threshold reaches the cap, show "Max threshold cannot exceed stock count." in orange (only when maxed) to indicate no further increments (Template Preview, Tablet General, Injection PFS/Single/Multi).
 - Template Preview: Reorder Inventory so "Quantity unit" appears directly under "Stock quantity" and above low-stock controls (paired fields).

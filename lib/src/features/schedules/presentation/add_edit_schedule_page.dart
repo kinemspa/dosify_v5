@@ -912,10 +912,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 showRefrigerate: _selectedMed!.requiresRefrigeration,
                 lowStockEnabled: _selectedMed!.lowStockEnabled,
                 lowStockThreshold: _selectedMed!.lowStockThreshold,
-                neutral: false,
+                neutral: true,  // Use surface background for edit screens
                 outlined: false,
                 leadingIcon: _getMedicationIcon(_selectedMed!.form),
-                additionalInfo: _buildScheduleInfo(),
+                additionalInfo: _buildScheduleDescription(),
               )
             else
               Container(
@@ -1642,7 +1642,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     MedicationForm.injectionMultiDoseVial => Icons.addchart,
   };
 
-  String? _buildScheduleInfo() {
+  /// Builds the schedule description for the summary card
+  /// Format: "{dose} • {frequency} at {times}"
+  /// Example: "2.5 tablets • Every Monday, Wednesday at 9:00 AM, 6:00 PM"
+  String? _buildScheduleDescription() {
     final doseVal = double.tryParse(_doseValue.text.trim());
     final doseUnitText = _doseUnit.text.trim();
 
@@ -1653,33 +1656,52 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       return null;
     }
 
+    // Format dose value (no trailing zeros)
     final doseStr = doseVal == doseVal.roundToDouble()
         ? doseVal.toStringAsFixed(0)
         : doseVal.toStringAsFixed(2);
 
-    final timesStr = _times.map((t) => t.format(context)).join(', ');
+    // Format times (chronological order)
+    final sortedTimes = _times.toList()
+      ..sort((a, b) {
+        final aMin = a.hour * 60 + a.minute;
+        final bMin = b.hour * 60 + b.minute;
+        return aMin.compareTo(bMin);
+      });
+    
+    // Limit to 3 times, show "+N more" if there are more
+    final timesStr = sortedTimes.length <= 3
+        ? sortedTimes.map((t) => t.format(context)).join(', ')
+        : '${sortedTimes.take(2).map((t) => t.format(context)).join(', ')}, +${sortedTimes.length - 2} more';
 
+    // Format frequency pattern
     String frequencyText;
     if (_mode == ScheduleMode.everyDay) {
-      frequencyText = 'every day';
+      frequencyText = 'Every day';
     } else if (_mode == ScheduleMode.daysOfWeek) {
-      const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      final ds = _days.toList()..sort();
-      final dtext = ds.map((i) => labels[i - 1]).join(', ');
-      frequencyText = 'on $dtext';
+      // Check if all 7 days are selected (treat as "Every day")
+      if (_days.length == 7) {
+        frequencyText = 'Every day';
+      } else {
+        const labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        final ds = _days.toList()..sort();
+        final dtext = ds.map((i) => labels[i - 1]).join(', ');
+        frequencyText = 'Every $dtext';
+      }
     } else if (_mode == ScheduleMode.daysOfMonth) {
       final sorted = _daysOfMonth.toList()..sort();
       final dayText = sorted.take(3).join(', ');
       frequencyText = sorted.length > 3
-          ? 'on days $dayText...'
-          : 'on day${sorted.length > 1 ? 's' : ''} $dayText';
+          ? 'On days $dayText... of month'
+          : 'On day${sorted.length > 1 ? 's' : ''} $dayText of month';
     } else {
-      final on = int.tryParse(_daysOn.text.trim()) ?? 5;
-      final off = int.tryParse(_daysOff.text.trim()) ?? 2;
-      frequencyText = '$on days on, $off days off';
+      // Days on/off cycle
+      final cycle = int.tryParse(_cycleN.text.trim()) ?? 2;
+      frequencyText = 'Every $cycle days';
     }
 
-    return 'Take $doseStr $doseUnitText at $timesStr $frequencyText';
+    // Combine: dose • frequency at times
+    return '$doseStr $doseUnitText • $frequencyText at $timesStr';
   }
 
   String _getScheduleModeDescription(ScheduleMode mode) {
