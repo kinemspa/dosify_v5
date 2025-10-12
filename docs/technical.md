@@ -97,11 +97,18 @@ Schedules Module Enhancements
   - Dose calculation for tablets/capsules (mg per dose)
   - Start/end dates with bullet separator
   - Empty state with info icon when incomplete
+- **Latest Improvements** (Git commits: 04be266, f709828, 062bb63):
+  - Medication selector completely redesigned with app-native styling
+  - Removed modal header, icon backgrounds, chevrons, custom colors
+  - Selected med shows inline with name, strength, and stock
+  - Summary card cleaned up: no icon, fixed pluralization
+  - Dynamic schedule type helper text
+  - Dose and Schedule sections hidden until medication selected
 - **Remaining Work**:
   - Schedule screen card styling (large & compact cards)
   - List view styling to match medication screen
   - Overflow fixes on large schedule cards
-  - Git commits: e79f51f, 0cc6f03, 6dacff1
+  - Medication stock handling settings feature
 
 Notes & next steps
 - Many analyzer infos/warnings are style/order issues; plan a cleanup pass after UI layout is stabilized.
