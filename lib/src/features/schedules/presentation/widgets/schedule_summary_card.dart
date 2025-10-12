@@ -227,7 +227,7 @@ class ScheduleSummaryCard extends StatelessWidget {
               child: _buildStyledDescription(context, scheduleDescription!, fg),
             ),
           // Dates row
-          if (startDate != null) ..[
+          if (startDate != null) ...[
             const SizedBox(height: 8),
             _buildDatesRow(context, fg),
           ],
@@ -283,7 +283,8 @@ class ScheduleSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTakeLine(theme, takeMatch, fg),
-                    if (frequencyMatch != null) ...[              const SizedBox(height: 2),
+                    if (frequencyMatch != null) ...[
+                      const SizedBox(height: 2),
                       _buildTextLine(theme, frequencyMatch.group(1)?.trim() ?? '', fg),
                     ],
                   ],
@@ -296,7 +297,7 @@ class ScheduleSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (timeMatch != null) ..[
+                    if (timeMatch != null) ...[
                       _buildTextLine(theme, timeMatch.group(1)?.trim() ?? '', fg, prefix: 'at '),
                       const SizedBox(height: 2),
                     ],
@@ -313,15 +314,15 @@ class ScheduleSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTakeLine(theme, takeMatch, fg),
-              if (frequencyMatch != null) ..[
+              if (frequencyMatch != null) ...[
                 const SizedBox(height: 2),
                 _buildTextLine(theme, frequencyMatch.group(1)?.trim() ?? '', fg),
               ],
-              if (timeMatch != null) ..[
+              if (timeMatch != null) ...[
                 const SizedBox(height: 2),
                 _buildTextLine(theme, timeMatch.group(1)?.trim() ?? '', fg, prefix: 'at '),
               ],
-              if (doseMatch != null) ..[
+              if (doseMatch != null) ...[
                 const SizedBox(height: 2),
                 _buildDoseLine(theme, doseMatch, fg),
               ],
