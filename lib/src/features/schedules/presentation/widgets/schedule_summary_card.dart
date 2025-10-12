@@ -219,16 +219,20 @@ class ScheduleSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          // Storage icons removed per user request
-          // Dose description with prominent styling
-          if (scheduleDescription != null && scheduleDescription!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: _buildStyledDescription(context, scheduleDescription!, fg),
+          // Divider between med info and instructions
+          if (scheduleDescription != null && scheduleDescription!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Divider(
+              height: 1,
+              thickness: 0.5,
+              color: fg.withValues(alpha: 0.2),
             ),
+            const SizedBox(height: 8),
+            _buildCompactInstructions(context, scheduleDescription!, fg),
+          ],
           // Dates row
           if (startDate != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             _buildDatesRow(context, fg),
           ],
         ],
@@ -236,174 +240,91 @@ class ScheduleSummaryCard extends StatelessWidget {
     );
   }
 
-  /// Builds the schedule description with prominent styling
-  /// Format: Two-column responsive layout with dates
-  Widget _buildStyledDescription(BuildContext context, String description, Color fg) {
+  /// Builds compact single-line instructions
+  /// Format: "Take 1 tablet • Every Day • 9:00 AM • Total: 20mg"
+  Widget _buildCompactInstructions(BuildContext context, String description, Color fg) {
     final theme = Theme.of(context);
     
-    // Parse the description to extract parts
-    // Original format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
+    // Parse description to extract components
+    // Format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
     
-    // Extract parts using improved regex
-    final takeMatch = RegExp(
-      r'Take (\d+\.?\d*)\s+(\S+)\s+(Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)',
+    // Extract dose and form (tablet/capsule/etc)
+    final doseFormMatch = RegExp(
+      r'Take\s+(\d+\.?\d*)\s+\S+\s+(Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)',
       caseSensitive: false,
     ).firstMatch(description);
     
-    // Improved frequency match - capture everything between medType and " at "
+    // Extract frequency (Everything between form and "at")
     final frequencyMatch = RegExp(
-      r'(?:Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)\s+(Every[^.]+?)\s+at\s+',
+      r'(?:Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)\s+(.+?)\s+at\s+',
       caseSensitive: false,
     ).firstMatch(description);
     
+    // Extract times
     final timeMatch = RegExp(
       r'at\s+([\d:,\s]+(?:AM|PM|am|pm)(?:,\s*[\d:,\s]+(?:AM|PM|am|pm))*)',
       caseSensitive: false,
     ).firstMatch(description);
     
-    final doseMatch = RegExp(
-      r'is\s+(\d+\.?\d*)(mg|mcg|g|IU|units|ml)(?!.*is)',
+    // Extract total dose/strength (last occurrence of "is {number}{unit}")
+    final strengthMatch = RegExp(
+      r'is\s+(\d+\.?\d*)(mg|mcg|g|IU|units|ml)',
       caseSensitive: false,
     ).allMatches(description).lastOrNull;
     
-    // Build two-column layout (responsive)
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isTwoColumn = constraints.maxWidth > 300;
-        
-        if (isTwoColumn) {
-          // Two-column layout
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left column: Take instruction and frequency
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTakeLine(theme, takeMatch, fg),
-                    if (frequencyMatch != null) ...[
-                      const SizedBox(height: 2),
-                      _buildTextLine(theme, frequencyMatch.group(1)?.trim() ?? '', fg),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Right column: Time and dose
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (timeMatch != null) ...[
-                      _buildTextLine(theme, timeMatch.group(1)?.trim() ?? '', fg, prefix: 'at '),
-                      const SizedBox(height: 2),
-                    ],
-                    if (doseMatch != null)
-                      _buildDoseLine(theme, doseMatch, fg),
-                  ],
-                ),
-              ),
-            ],
-          );
-        } else {
-          // Single column for narrow screens
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTakeLine(theme, takeMatch, fg),
-              if (frequencyMatch != null) ...[
-                const SizedBox(height: 2),
-                _buildTextLine(theme, frequencyMatch.group(1)?.trim() ?? '', fg),
-              ],
-              if (timeMatch != null) ...[
-                const SizedBox(height: 2),
-                _buildTextLine(theme, timeMatch.group(1)?.trim() ?? '', fg, prefix: 'at '),
-              ],
-              if (doseMatch != null) ...[
-                const SizedBox(height: 2),
-                _buildDoseLine(theme, doseMatch, fg),
-              ],
-            ],
-          );
-        }
-      },
-    );
-  }
-  
-  Widget _buildTakeLine(ThemeData theme, RegExpMatch? match, Color fg) {
-    if (match == null) return const SizedBox.shrink();
+    // Build compact instruction parts
+    final parts = <String>[];
     
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: 'Take ',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: fg.withValues(alpha: 0.95),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          TextSpan(
-            text: '${match.group(1)}',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
-            ),
-          ),
-          TextSpan(
-            text: ' ${match.group(2)}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: fg.withValues(alpha: 0.95),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildTextLine(ThemeData theme, String text, Color fg, {String prefix = ''}) {
+    // Part 1: "Take X form"
+    if (doseFormMatch != null) {
+      final dose = doseFormMatch.group(1);
+      final form = doseFormMatch.group(2)?.toLowerCase() ?? '';
+      // Simplify form name
+      String simpleForm = form
+        .replaceAll('pre-filled syringes', 'syringe')
+        .replaceAll('pre-filled syringe', 'syringe')
+        .replaceAll('single dose vials', 'vial')
+        .replaceAll('single dose vial', 'vial')
+        .replaceAll('multi dose vials', 'vial')
+        .replaceAll('multi dose vial', 'vial');
+      parts.add('Take $dose $simpleForm');
+    }
+    
+    // Part 2: Frequency
+    if (frequencyMatch != null) {
+      final freq = frequencyMatch.group(1)?.trim() ?? '';
+      if (freq.isNotEmpty) {
+        parts.add(freq);
+      }
+    }
+    
+    // Part 3: Times
+    if (timeMatch != null) {
+      final times = timeMatch.group(1)?.trim() ?? '';
+      if (times.isNotEmpty) {
+        parts.add(times);
+      }
+    }
+    
+    // Part 4: Total dose
+    if (strengthMatch != null) {
+      final amount = strengthMatch.group(1);
+      final unit = strengthMatch.group(2);
+      parts.add('Total: $amount$unit');
+    }
+    
+    // Join parts with bullet separator
+    final instructionText = parts.join(' • ');
+    
     return Text(
-      '$prefix$text',
-      style: theme.textTheme.bodyMedium?.copyWith(
+      instructionText,
+      style: theme.textTheme.bodySmall?.copyWith(
         color: fg.withValues(alpha: 0.95),
         fontWeight: FontWeight.w500,
+        height: 1.3,
       ),
-    );
-  }
-  
-  Widget _buildDoseLine(ThemeData theme, RegExpMatch match, Color fg) {
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: 'Dose: ',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: fg.withValues(alpha: 0.95),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          TextSpan(
-            text: '${match.group(1)}',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
-            ),
-          ),
-          TextSpan(
-            text: match.group(2) ?? '',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
   
