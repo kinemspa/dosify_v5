@@ -7,7 +7,6 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 
@@ -35,6 +34,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   final Set<int> _daysOfMonth = {}; // 1-31 for monthly schedules
   bool _active = true;
   bool _useCycle = false;
+  final TextEditingController _daysOn = TextEditingController(text: '5');
+  final TextEditingController _daysOff = TextEditingController(text: '2');
   final TextEditingController _cycleN = TextEditingController(text: '2');
   DateTime _cycleAnchor = DateTime.now();
   bool _nameAuto = true;
@@ -67,6 +68,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       _useCycle = s.cycleEveryNDays != null;
       if (_useCycle) {
         _cycleN.text = s.cycleEveryNDays!.toString();
+        // Try to parse as days on/off if possible
+        // For backward compatibility, assume equal days on and off
+        final n = s.cycleEveryNDays ?? 2;
+        _daysOn.text = '${n ~/ 2}';
+        _daysOff.text = '${n - (n ~/ 2)}';
         _cycleAnchor = s.cycleAnchorDate ?? DateTime.now();
       }
       _nameAuto = false; // existing schedule name considered manual
@@ -890,6 +896,22 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
+            // Summary card at the top
+            _ScheduleSummaryCard(
+              medication: _selectedMed,
+              medicationName: _medicationName.text.trim(),
+              doseValue: double.tryParse(_doseValue.text.trim()) ?? 0,
+              doseUnit: _doseUnit.text.trim(),
+              times: _times,
+              mode: _mode,
+              days: _days,
+              daysOfMonth: _daysOfMonth,
+              cycleN: int.tryParse(_cycleN.text.trim()),
+              startDate: _startDate,
+              endDate: _endDate,
+              noEnd: _noEnd,
+            ),
+            const SizedBox(height: 10),
             _section(context, 'Medication', [
               // Medication row with label
               _rowLabelField(
@@ -908,17 +930,20 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         ),
                         isExpanded: _showMedSelector,
                       )
-                    : OutlinedButton.icon(
+                    : OutlinedButton(
                         onPressed: () =>
                             setState(() => _showMedSelector = true),
-                        icon: const Icon(Icons.add_circle_outline, size: 18),
-                        label: const Text('Select Medication'),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(36),
-                          alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
-                            vertical: 6,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: Text(
+                          'Select Medication',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -926,7 +951,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               // Helper text
               _helperBelowLeft(
                 _selectedMed == null
-                    ? 'Select a medication to continue'
+                    ? 'Select a medication to schedule'
                     : 'Tap to change medication',
               ),
               // Inline medication selector
@@ -938,23 +963,6 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 ),
               ],
             ]),
-            const SizedBox(height: 10),
-            _ScheduleSummaryCard(
-              medication: _selectedMed,
-              medicationName: _medicationName.text.trim(),
-              doseValue: double.tryParse(_doseValue.text.trim()) ?? 0,
-              doseUnit: _doseUnit.text.trim(),
-              times: _times,
-              mode: _mode,
-              days: _days,
-              daysOfMonth: _daysOfMonth,
-              cycleN: int.tryParse(_cycleN.text.trim()),
-              startDate: _startDate,
-              endDate: _endDate,
-              noEnd: _noEnd,
-            ),
-            const SizedBox(height: 10),
-
             const SizedBox(height: 10),
             // Dose controls (Typed) in a card with summary
             if (_selectedMed != null)
@@ -1233,13 +1241,13 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     if (_mode == ScheduleMode.daysOnOff) ...[
                       _rowLabelField(
                         context,
-                        label: 'Every N days',
+                        label: 'Days on',
                         field: SizedBox(
                           width: 120,
                           height: kFieldHeight,
                           child: Field36(
                             child: TextFormField(
-                              controller: _cycleN,
+                              controller: _daysOn,
                               textAlign: TextAlign.center,
                               decoration: const InputDecoration(labelText: ''),
                               keyboardType:
@@ -1253,39 +1261,40 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                   return '>= 1';
                                 return null;
                               },
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _rowLabelField(
+                        context,
+                        label: 'Days off',
+                        field: SizedBox(
+                          width: 120,
+                          height: kFieldHeight,
+                          child: Field36(
+                            child: TextFormField(
+                              controller: _daysOff,
+                              textAlign: TextAlign.center,
+                              decoration: const InputDecoration(labelText: ''),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: false,
+                                  ),
+                              validator: (v) {
+                                final n = int.tryParse(v?.trim() ?? '');
+                                if (_mode == ScheduleMode.daysOnOff &&
+                                    (n == null || n < 1))
+                                  return '>= 1';
+                                return null;
+                              },
+                              onChanged: (_) => setState(() {}),
                             ),
                           ),
                         ),
                       ),
                       _helperBelowLeft(
-                        'Choose the cycle length and anchor date',
-                      ),
-                      _rowLabelField(
-                        context,
-                        label: 'Anchor date',
-                        field: Field36(
-                          width: 120,
-                          child: FilledButton.icon(
-                            onPressed: () async {
-                              final now = DateTime.now();
-                              final picked = await showDatePicker(
-                                context: context,
-                                firstDate: DateTime(now.year - 1),
-                                lastDate: DateTime(now.year + 10),
-                                initialDate: _cycleAnchor,
-                              );
-                              if (picked != null)
-                                setState(() => _cycleAnchor = picked);
-                            },
-                            icon: const Icon(Icons.event, size: 18),
-                            label: Text(
-                              '${_cycleAnchor.toLocal()}'.split(' ').first,
-                            ),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(120, kFieldHeight),
-                            ),
-                          ),
-                        ),
+                        'Take doses for specified days on, then stop for days off. Cycle repeats continuously.',
                       ),
                     ],
                     if (_mode == ScheduleMode.daysOfMonth) ...[
@@ -1559,7 +1568,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       case ScheduleMode.daysOfWeek:
         return 'Choose specific days of the week (e.g., Mon, Wed, Fri)';
       case ScheduleMode.daysOnOff:
-        return 'Repeating cycle: take for N days, calculated from anchor date';
+        final on = int.tryParse(_daysOn.text.trim()) ?? 5;
+        final off = int.tryParse(_daysOff.text.trim()) ?? 2;
+        return 'Take doses for $on days, then stop for $off days, repeating continuously';
       case ScheduleMode.daysOfMonth:
         return 'Take on specific calendar dates each month (e.g., 1st, 15th)';
     }
@@ -1837,7 +1848,7 @@ class _ScheduleSummaryCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Select medication and dose to see schedule summary',
+                'Select a medication to schedule',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -1896,74 +1907,194 @@ class _ScheduleSummaryCard extends StatelessWidget {
         doseCalc = '$mgStr mg per dose';
       }
     }
-
     final startStr = '${startDate.toLocal()}'.split(' ').first;
     final endStr = noEnd || endDate == null
         ? 'No end'
-        : '${endDate!.toLocal()}'.split(' ').first;
+        : '${endDate.toLocal()}'.split(' ').first;
+
+    // Calculate stock depletion
+    String stockDepletionText = '';
+    if (medication!.stockValue > 0) {
+      // Calculate daily usage based on schedule mode
+      double dailyUsage = 0;
+      final timesPerDay = times.length;
+
+      if (mode == ScheduleMode.everyDay) {
+        dailyUsage = doseValue * timesPerDay;
+      } else if (mode == ScheduleMode.daysOfWeek) {
+        // Average based on days per week
+        dailyUsage = doseValue * timesPerDay * (days.length / 7.0);
+      } else if (mode == ScheduleMode.daysOfMonth) {
+        // Average based on days per month
+        dailyUsage = doseValue * timesPerDay * (daysOfMonth.length / 30.0);
+      } else if (mode == ScheduleMode.daysOnOff) {
+        // Calculate average based on days on/off cycle
+        final on = int.tryParse(_daysOn.text.trim()) ?? 5;
+        final off = int.tryParse(_daysOff.text.trim()) ?? 2;
+        final cycleLength = on + off;
+        dailyUsage = doseValue * timesPerDay * (on / cycleLength);
+      }
+
+      if (dailyUsage > 0) {
+        final daysRemaining = (medication!.stockValue / dailyUsage).floor();
+        final depletionDate = DateTime.now().add(Duration(days: daysRemaining));
+        final depletionStr = '${depletionDate.toLocal()}'.split(' ').first;
+        stockDepletionText =
+            'Estimated stock depletion by $depletionStr ($daysRemaining days)';
+      }
+    }
+
+    // Get form label for dose
+    final formLabel = switch (medication!.form) {
+      MedicationForm.tablet => 'tablet',
+      MedicationForm.capsule => 'capsule',
+      MedicationForm.injectionPreFilledSyringe => 'syringe',
+      MedicationForm.injectionSingleDoseVial => 'vial',
+      MedicationForm.injectionMultiDoseVial => unitTxt,
+    };
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.primary,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header - medication name and strength
-          Text(
-            medicationName,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: cs.onPrimary,
-            ),
+          // Line 1: MED NAME + Med Type | Manufacturer
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        medicationName,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.primaryContainer,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        medication!.form == MedicationForm.tablet
+                            ? 'Tablet'
+                            : medication!.form == MedicationForm.capsule
+                            ? 'Capsule'
+                            : medication!.form ==
+                                  MedicationForm.injectionPreFilledSyringe
+                            ? 'PFS'
+                            : medication!.form ==
+                                  MedicationForm.injectionSingleDoseVial
+                            ? 'SDV'
+                            : 'MDV',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: cs.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                medication!.manufacturer ?? '',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
-          Text(
-            _medStrengthLabel(medication!),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onPrimary.withValues(alpha: 0.9),
-            ),
+          const SizedBox(height: 8),
+          // Line 2: Med Strength in MedType | Remaining
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${_medStrengthLabel(medication!)} per $formLabel',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${medication!.stockValue.toStringAsFixed(medication!.stockValue == medication!.stockValue.roundToDouble() ? 0 : 1)} remaining',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          // Divider
-          Divider(color: cs.onPrimary.withValues(alpha: 0.2), height: 1),
-          const SizedBox(height: 10),
-          // Schedule details
+          const SizedBox(height: 12),
+          Divider(color: cs.outlineVariant, height: 1),
+          const SizedBox(height: 12),
+          // Line 3: Take X medtype of medname at Time1, Time2... | Schedule Type
           RichText(
             text: TextSpan(
-              style: theme.textTheme.bodyMedium?.copyWith(color: cs.onPrimary),
+              style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface),
               children: [
                 const TextSpan(text: 'Take '),
                 TextSpan(
                   text: _formatDoseWithUnit(doseValue, unitTxt),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
-                TextSpan(text: ' at $timesStr'),
+                TextSpan(text: ' of $medicationName at '),
+                TextSpan(
+                  text: timesStr,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 4),
           Text(
             frequencyText[0].toUpperCase() + frequencyText.substring(1),
-            style: theme.textTheme.bodyMedium?.copyWith(color: cs.onPrimary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
           ),
+          // Line 4: Each Dose of X is Y strength/MedtypeUnit
           if (doseCalc != null) ...[
             const SizedBox(height: 8),
             Text(
-              doseCalc,
+              'Each dose is $doseCalc',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: cs.onPrimary,
-                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
               ),
             ),
           ],
+          // Line 5: Stock depletion estimate
+          if (stockDepletionText.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              stockDepletionText,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: cs.tertiary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          // Line 6: Starts X Ends Y
           const SizedBox(height: 8),
           Text(
-            'Start $startStr  •  ${endStr == 'No end' ? endStr : 'Ends $endStr'}',
+            'Starts $startStr  •  ${endStr == 'No end' ? endStr : 'Ends $endStr'}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.onPrimary.withValues(alpha: 0.9),
+              color: cs.onSurfaceVariant,
             ),
           ),
         ],
@@ -2061,7 +2192,11 @@ class _MedicationSummaryDisplay extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.swap_horiz, size: 16, color: cs.primary),
+          Icon(
+            isExpanded ? Icons.expand_less : Icons.expand_more,
+            size: 18,
+            color: cs.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -2106,13 +2241,25 @@ class _InlineMedicationSelector extends StatelessWidget {
     return '$val $unitLabel';
   }
 
-  IconData _formIcon(MedicationForm form) => switch (form) {
-    MedicationForm.tablet => Icons.add_circle,
-    MedicationForm.capsule => MdiIcons.pill,
-    MedicationForm.injectionPreFilledSyringe => Icons.colorize,
-    MedicationForm.injectionSingleDoseVial => Icons.local_drink,
-    MedicationForm.injectionMultiDoseVial => Icons.addchart,
+  String _formLabel(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => 'Tablet',
+    MedicationForm.capsule => 'Capsule',
+    MedicationForm.injectionPreFilledSyringe => 'PFS',
+    MedicationForm.injectionSingleDoseVial => 'SDV',
+    MedicationForm.injectionMultiDoseVial => 'MDV',
   };
+
+  String _expiryLabel(Medication m) {
+    if (m.expiry == null) return 'No expiry';
+    final exp = m.expiry!;
+    final now = DateTime.now();
+    final diff = exp.difference(now).inDays;
+    if (diff < 0) return 'Expired';
+    if (diff == 0) return 'Expires today';
+    if (diff <= 30) return 'Expires in $diff days';
+    final expStr = '${exp.toLocal()}'.split(' ').first;
+    return 'Exp: $expStr';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2190,22 +2337,85 @@ class _InlineMedicationSelector extends StatelessWidget {
           return InkWell(
             onTap: () => onSelect(med),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
                 children: [
-                  Text(
-                    med.name,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${_formatStrength(med)} • ${_formatStock(med)} $unit remaining',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                med.name,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurface,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: cs.primaryContainer,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                _formLabel(med.form),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: cs.onPrimaryContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_formatStrength(med)} • ${med.manufacturer}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${_formatStock(med)} $unit remaining',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              _expiryLabel(med),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color:
+                                    med.expiry != null &&
+                                        med.expiry!
+                                                .difference(DateTime.now())
+                                                .inDays <
+                                            30
+                                    ? cs.error
+                                    : cs.onSurfaceVariant,
+                                fontWeight:
+                                    med.expiry != null &&
+                                        med.expiry!
+                                                .difference(DateTime.now())
+                                                .inDays <
+                                            30
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
