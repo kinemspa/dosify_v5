@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 class AddEditSchedulePage extends StatefulWidget {
   const AddEditSchedulePage({super.key, this.initial});
@@ -897,22 +898,41 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
           children: [
             // Summary card at the top
-            _ScheduleSummaryCard(
-              medication: _selectedMed,
-              medicationName: _medicationName.text.trim(),
-              doseValue: double.tryParse(_doseValue.text.trim()) ?? 0,
-              doseUnit: _doseUnit.text.trim(),
-              times: _times,
-              mode: _mode,
-              days: _days,
-              daysOfMonth: _daysOfMonth,
-              cycleN: int.tryParse(_cycleN.text.trim()),
-              startDate: _startDate,
-              endDate: _endDate,
-              noEnd: _noEnd,
-              daysOnController: _daysOn,
-              daysOffController: _daysOff,
-            ),
+            if (_selectedMed != null)
+              SummaryHeaderCard.fromMedication(
+                _selectedMed!,
+                neutral: true,
+                outlined: true,
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                      size: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Select a medication to schedule',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const SizedBox(height: 10),
             _section(context, 'Medication', [
               // Medication row with label
