@@ -1146,7 +1146,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         },
                       ),
                     ),
-                    _helperBelowLeft('Choose how this schedule repeats'),
+                    _helperBelowLeft(_getScheduleModeDescription(_mode)),
                     // 2. Select start date
                     _rowLabelField(
                       context,
@@ -1551,6 +1551,19 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     if (med.isEmpty || dose.isEmpty || unit.isEmpty) return;
     _name.text = '$med — $dose $unit';
   }
+
+  String _getScheduleModeDescription(ScheduleMode mode) {
+    switch (mode) {
+      case ScheduleMode.everyDay:
+        return 'Medication will be taken every single day';
+      case ScheduleMode.daysOfWeek:
+        return 'Choose specific days of the week (e.g., Mon, Wed, Fri)';
+      case ScheduleMode.daysOnOff:
+        return 'Repeating cycle: take for N days, calculated from anchor date';
+      case ScheduleMode.daysOfMonth:
+        return 'Take on specific calendar dates each month (e.g., 1st, 15th)';
+    }
+  }
 }
 
 enum ScheduleMode { everyDay, daysOfWeek, daysOnOff, daysOfMonth }
@@ -1783,13 +1796,20 @@ class _ScheduleSummaryCard extends StatelessWidget {
     return '$val $unitLabel';
   }
 
-  IconData _medIcon(MedicationForm form) => switch (form) {
-    MedicationForm.tablet => Icons.add_circle,
-    MedicationForm.capsule => MdiIcons.pill,
-    MedicationForm.injectionPreFilledSyringe => Icons.colorize,
-    MedicationForm.injectionSingleDoseVial => Icons.local_drink,
-    MedicationForm.injectionMultiDoseVial => Icons.addchart,
-  };
+  String _formatDoseWithUnit(double dose, String unit) {
+    final doseStr = dose == dose.roundToDouble()
+        ? dose.toStringAsFixed(0)
+        : dose.toStringAsFixed(2);
+
+    // Singularize unit if dose is 1
+    if (dose == 1.0) {
+      if (unit.endsWith('s') && unit.length > 1) {
+        return '$doseStr ${unit.substring(0, unit.length - 1)}';
+      }
+    }
+
+    return '$doseStr $unit';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1891,46 +1911,20 @@ class _ScheduleSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row with icon and medication name
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: cs.onPrimary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  _medIcon(medication!.form),
-                  color: cs.onPrimary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      medicationName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: cs.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _medStrengthLabel(medication!),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onPrimary.withValues(alpha: 0.9),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          // Header - medication name and strength
+          Text(
+            medicationName,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.onPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            _medStrengthLabel(medication!),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: cs.onPrimary.withValues(alpha: 0.9),
+            ),
           ),
           const SizedBox(height: 10),
           // Divider
@@ -1943,7 +1937,7 @@ class _ScheduleSummaryCard extends StatelessWidget {
               children: [
                 const TextSpan(text: 'Take '),
                 TextSpan(
-                  text: '$doseFixed $unitTxt',
+                  text: _formatDoseWithUnit(doseValue, unitTxt),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 TextSpan(text: ' at $timesStr'),
