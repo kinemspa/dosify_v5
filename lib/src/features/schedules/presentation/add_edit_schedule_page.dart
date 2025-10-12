@@ -24,6 +24,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   DateTime? _endDate;
   bool _noEnd = true;
   final _formKey = GlobalKey<FormState>();
+  
+  // For floating summary card
+  final GlobalKey _summaryKey = GlobalKey();
+  double _summaryHeight = 130; // Initial height estimate
 
   late final TextEditingController _name;
   late final TextEditingController _medicationName;
@@ -892,84 +896,14 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         width: 120,
         child: FilledButton(onPressed: _save, child: const Text('Save')),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(10, 8, 10, 96),
-          children: [
-            // Summary card at the top - same as add medication screen
-            if (_selectedMed != null)
-              SummaryHeaderCard(
-                title: _selectedMed!.name,
-                manufacturer: _selectedMed!.manufacturer,
-                strengthValue: _selectedMed!.strengthValue,
-                strengthUnitLabel: _getUnitLabel(_selectedMed!.strengthUnit),
-                stockCurrent: _selectedMed!.stockValue,
-                stockInitial:
-                    _selectedMed!.initialStockValue ?? _selectedMed!.stockValue,
-                stockUnitLabel: _getStockUnitLabel(_selectedMed!),
-                expiryDate: _selectedMed!.expiry,
-                showRefrigerate: _selectedMed!.requiresRefrigeration,
-                lowStockEnabled: _selectedMed!.lowStockEnabled,
-                lowStockThreshold: _selectedMed!.lowStockThreshold,
-                neutral: true,  // Use surface background for edit screens
-                outlined: false,
-                leadingIcon: _getMedicationIcon(_selectedMed!.form),
-                additionalInfo: _buildScheduleDescription(),
-              )
-            else
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.onPrimary.withValues(
-                          alpha: 0.15,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.calendar_today,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Schedule',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Select a medication to schedule',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 10),
+      body: Stack(
+        children: [
+          // Main scrollable content
+          Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(10, _summaryHeight + 18, 10, 96),
+              children: [
             _section(context, 'Medication', [
               // Medication row with label
               _rowLabelField(
@@ -1521,7 +1455,53 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           ],
         ),
       ),
+          // Floating summary card pinned beneath app bar
+          if (_selectedMed != null)
+            Positioned(
+              left: 10,
+              right: 10,
+              top: 8,
+              child: IgnorePointer(child: _buildFloatingSummary()),
+            ),
+        ],
+      ),
     );
+  }
+  
+  /// Builds the floating summary card that stays at top of screen
+  Widget _buildFloatingSummary() {
+    final card = SummaryHeaderCard(
+      key: _summaryKey,
+      title: _selectedMed!.name,
+      manufacturer: _selectedMed!.manufacturer,
+      strengthValue: _selectedMed!.strengthValue,
+      strengthUnitLabel: _getUnitLabel(_selectedMed!.strengthUnit),
+      stockCurrent: _selectedMed!.stockValue,
+      stockInitial: _selectedMed!.initialStockValue ?? _selectedMed!.stockValue,
+      stockUnitLabel: _getStockUnitLabel(_selectedMed!),
+      expiryDate: _selectedMed!.expiry,
+      showRefrigerate: _selectedMed!.requiresRefrigeration,
+      lowStockEnabled: false,  // Don't show low stock alert in schedule summary
+      lowStockThreshold: null,
+      neutral: false,  // Use primary gradient like medication screens
+      outlined: false,
+      leadingIcon: _getMedicationIcon(_selectedMed!.form),
+      additionalInfo: _buildScheduleDescription(),
+    );
+    // Update height after render
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _summaryKey.currentContext;
+      if (ctx != null) {
+        final rb = ctx.findRenderObject();
+        if (rb is RenderBox) {
+          final h = rb.size.height;
+          if (h != _summaryHeight && h > 0) {
+            setState(() => _summaryHeight = h);
+          }
+        }
+      }
+    });
+    return card;
   }
 
   String _unitShort(Unit u) => switch (u) {
@@ -1643,9 +1623,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   };
 
   /// Builds the schedule description for the summary card
-  /// Format: "{dose} • {frequency} at {times}"
-  /// Example: "2.5 tablets • Every Monday, Wednesday at 9:00 AM, 6:00 PM"
+  /// Format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
+  /// Example: "Take 1 Panadol Tablets Every Day at 22:00. Dose is 1 tablet is 20mg."
   String? _buildScheduleDescription() {
+    final med = _selectedMed;
+    if (med == null) return null;
+    
     final doseVal = double.tryParse(_doseValue.text.trim());
     final doseUnitText = _doseUnit.text.trim();
 
@@ -1669,21 +1652,18 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         return aMin.compareTo(bMin);
       });
     
-    // Limit to 3 times, show "+N more" if there are more
-    final timesStr = sortedTimes.length <= 3
-        ? sortedTimes.map((t) => t.format(context)).join(', ')
-        : '${sortedTimes.take(2).map((t) => t.format(context)).join(', ')}, +${sortedTimes.length - 2} more';
+    final timesStr = sortedTimes.map((t) => t.format(context)).join(', ');
 
     // Format frequency pattern
     String frequencyText;
     if (_mode == ScheduleMode.everyDay) {
-      frequencyText = 'Every day';
+      frequencyText = 'Every Day';
     } else if (_mode == ScheduleMode.daysOfWeek) {
       // Check if all 7 days are selected (treat as "Every day")
       if (_days.length == 7) {
-        frequencyText = 'Every day';
+        frequencyText = 'Every Day';
       } else {
-        const labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         final ds = _days.toList()..sort();
         final dtext = ds.map((i) => labels[i - 1]).join(', ');
         frequencyText = 'Every $dtext';
@@ -1692,16 +1672,56 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       final sorted = _daysOfMonth.toList()..sort();
       final dayText = sorted.take(3).join(', ');
       frequencyText = sorted.length > 3
-          ? 'On days $dayText... of month'
-          : 'On day${sorted.length > 1 ? 's' : ''} $dayText of month';
+          ? 'Days $dayText...'
+          : 'Day${sorted.length > 1 ? 's' : ''} $dayText';
     } else {
       // Days on/off cycle
       final cycle = int.tryParse(_cycleN.text.trim()) ?? 2;
       frequencyText = 'Every $cycle days';
     }
+    
+    // Get medication form label
+    String medType;
+    switch (med.form) {
+      case MedicationForm.tablet:
+        medType = 'Tablets';
+        break;
+      case MedicationForm.capsule:
+        medType = 'Capsules';
+        break;
+      case MedicationForm.injectionPreFilledSyringe:
+        medType = 'Pre-Filled Syringes';
+        break;
+      case MedicationForm.injectionSingleDoseVial:
+        medType = 'Single Dose Vials';
+        break;
+      case MedicationForm.injectionMultiDoseVial:
+        medType = 'Multi Dose Vials';
+        break;
+    }
+    
+    // Get strength info for dose calculation
+    String strengthInfo = '';
+    final strengthVal = med.strengthValue;
+    final strengthUnit = _getUnitLabel(med.strengthUnit);
+    
+    // Calculate total strength based on dose
+    if (doseUnitText.toLowerCase() == 'tablets' || 
+        doseUnitText.toLowerCase() == 'tablet' ||
+        doseUnitText.toLowerCase() == 'capsules' ||
+        doseUnitText.toLowerCase() == 'capsule') {
+      final totalStrength = strengthVal * doseVal;
+      final totalStr = totalStrength == totalStrength.roundToDouble()
+          ? totalStrength.toStringAsFixed(0)
+          : totalStrength.toStringAsFixed(2);
+      strengthInfo = ' is $totalStr$strengthUnit';
+    } else {
+      // For mg/mcg/g doses, strength is the dose itself
+      strengthInfo = ' is $doseStr$doseUnitText';
+    }
 
-    // Combine: dose • frequency at times
-    return '$doseStr $doseUnitText • $frequencyText at $timesStr';
+    // Format: Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit}{strengthInfo}.
+    return 'Take $doseStr ${med.name} $medType $frequencyText at $timesStr. Dose is $doseStr $doseUnitText$strengthInfo.';
   }
 
   String _getScheduleModeDescription(ScheduleMode mode) {
