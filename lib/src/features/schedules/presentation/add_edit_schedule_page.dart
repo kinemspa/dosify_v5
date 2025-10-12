@@ -1978,7 +1978,7 @@ class _ScheduleSummaryCard extends StatelessWidget {
   }
 }
 
-// Widget to display selected medication with its details
+// Widget to display selected medication inline
 class _MedicationSummaryDisplay extends StatelessWidget {
   const _MedicationSummaryDisplay({
     required this.medication,
@@ -2001,7 +2001,6 @@ class _MedicationSummaryDisplay extends StatelessWidget {
               .replaceFirst(RegExp(r'\.0+$'), '')
               .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
 
-    // Add form-specific unit
     final unit = switch (m.form) {
       MedicationForm.tablet => 'tablets',
       MedicationForm.capsule => 'capsules',
@@ -2010,7 +2009,7 @@ class _MedicationSummaryDisplay extends StatelessWidget {
       MedicationForm.injectionMultiDoseVial => 'vials',
     };
 
-    return '$s $unit remaining';
+    return '$s $unit';
   }
 
   String _formatStrength(Medication m) {
@@ -2030,100 +2029,45 @@ class _MedicationSummaryDisplay extends StatelessWidget {
     return '$val $unitLabel';
   }
 
-  String _formLabel(MedicationForm form) => switch (form) {
-    MedicationForm.tablet => 'Tablet',
-    MedicationForm.capsule => 'Capsule',
-    MedicationForm.injectionPreFilledSyringe => 'Pre-filled Syringe',
-    MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
-    MedicationForm.injectionMultiDoseVial => 'Multi-Dose Vial',
-  };
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cs.primary.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
+    return OutlinedButton(
+      onPressed: onExpand,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(36),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        side: BorderSide(color: cs.primary.withValues(alpha: 0.5), width: 1),
       ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  medication.name,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Change medication',
-                icon: Icon(Icons.swap_horiz, size: 18, color: cs.primary),
-                onPressed: onExpand,
-                visualDensity: VisualDensity.compact,
-              ),
-              IconButton(
-                tooltip: 'Clear selection',
-                icon: Icon(Icons.close, size: 18, color: cs.error),
-                onPressed: onClear,
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          _DetailRow(label: 'Type', value: _formLabel(medication.form)),
-          _DetailRow(label: 'Strength', value: _formatStrength(medication)),
-          _DetailRow(label: 'Stock', value: _formatStock(medication)),
-          if (medication.manufacturer != null &&
-              medication.manufacturer!.isNotEmpty)
-            _DetailRow(label: 'Manufacturer', value: medication.manufacturer!),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
           Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  medication.name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_formatStrength(medication)} • ${_formatStock(medication)} remaining',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
+          Icon(Icons.swap_horiz, size: 16, color: cs.primary),
         ],
       ),
     );
@@ -2225,109 +2169,56 @@ class _InlineMedicationSelector extends StatelessWidget {
     }
 
     return Container(
-      constraints: const BoxConstraints(maxHeight: 400),
+      constraints: const BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(11),
+      child: ListView.separated(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(4),
+        itemCount: medications.length,
+        separatorBuilder: (_, __) =>
+            Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.3)),
+        itemBuilder: (context, index) {
+          final med = medications[index];
+
+          // Determine unit label
+          final unit = switch (med.form) {
+            MedicationForm.tablet => 'tablets',
+            MedicationForm.capsule => 'capsules',
+            MedicationForm.injectionPreFilledSyringe => 'syringes',
+            MedicationForm.injectionSingleDoseVial => 'vials',
+            MedicationForm.injectionMultiDoseVial => 'vials',
+          };
+
+          return InkWell(
+            onTap: () => onSelect(med),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    med.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${_formatStrength(med)} • ${_formatStock(med)} $unit remaining',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: cs.onSurfaceVariant, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Select a medication',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  tooltip: 'Cancel',
-                  icon: Icon(Icons.close, size: 20, color: cs.onSurfaceVariant),
-                  onPressed: onCancel,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
-            ),
-          ),
-          // Scrollable medication list
-          Flexible(
-            child: ListView.separated(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8),
-              itemCount: medications.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final med = medications[index];
-                return InkWell(
-                  onTap: () => onSelect(med),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: cs.primaryContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            _formIcon(med.form),
-                            color: cs.onPrimaryContainer,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                med.name,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${_formatStrength(med)} • ${_formatStock(med)} remaining',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
