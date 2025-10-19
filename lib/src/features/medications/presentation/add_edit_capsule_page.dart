@@ -223,17 +223,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     return parts.join('. ');
   }
 
-  Future<void> _pickExpiry() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      firstDate: DateTime(now.year - 1),
-      lastDate: DateTime(now.year + 20),
-      initialDate: _expiry ?? now,
-    );
-    if (picked != null) setState(() => _expiry = picked);
-  }
-
   String _unitLabel(Unit u) {
     switch (u) {
       case Unit.mcg:
@@ -334,87 +323,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       ),
     );
   }
-
-  Widget _buildEnhancedSummary() {
-    if (_nameCtrl.text.isEmpty) {
-      return Text(
-        'Fill in medication details to see summary',
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: Colors.white70, fontStyle: FontStyle.italic),
-      );
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RichText(
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
-                  children: [
-                    TextSpan(
-                      text: _nameCtrl.text,
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    if (_manufacturerCtrl.text.isNotEmpty)
-                      TextSpan(
-                        text: ' from ${_manufacturerCtrl.text}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    const TextSpan(
-                      text: '.',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              if (_strengthValueCtrl.text.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)} capsules.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (_stockValueCtrl.text.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} left',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-          ),
-        if (_requiresFridge)
-          Container(
-            margin: const EdgeInsets.only(left: 8),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.lightBlue.shade100,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Icon(Icons.ac_unit, size: 20, color: Colors.blue.shade700),
-          ),
-      ],
-    );
-  }
-
-  bool _isWhole(num v) => v == v.roundToDouble();
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -550,50 +458,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     }
   }
 
-  Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    final radius = BorderRadius.circular(8);
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: radius),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: radius,
-        ),
-        child: InkWell(
-          customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(label, style: theme.textTheme.labelLarge),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _generalOnlySummary() {
-    final name = _nameCtrl.text.trim();
-    final mfr = _manufacturerCtrl.text.trim();
-    if (name.isEmpty && mfr.isEmpty) return const SizedBox.shrink();
-    final s = name.isEmpty ? mfr : (mfr.isEmpty ? name : '$name – $mfr');
-    return Text(s, overflow: TextOverflow.ellipsis);
-  }
-
-  String _strengthSummary() {
-    // Hide until user changes the default (0) value
-    if (!_touchedStrengthAmt) return '';
-    final v = _strengthValueCtrl.text.trim();
-    final d = double.tryParse(v) ?? 0;
-    if (d <= 0) return '';
-    final unit = _unitLabel(_strengthUnit);
-    final name = _nameCtrl.text.trim();
-    final med = name.isEmpty ? '' : ' per $name capsule';
-    return '${d == d.roundToDouble() ? d.toStringAsFixed(0) : d.toString()}$unit$med';
-  }
-
   Widget _errorUnderLabel(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 2, top: 2, bottom: 4),
@@ -603,56 +467,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
           context,
         ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
       ),
-    );
-  }
-
-  Widget _buildSummarySheet(BuildContext context) {
-    // reuse the confirm dialog content in a sheet-like layout
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'Summary',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 8),
-        _detailRow(context, 'Form', 'Capsule'),
-        _detailRow(context, 'Name', _nameCtrl.text.trim()),
-        if (_manufacturerCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Manufacturer', _manufacturerCtrl.text.trim()),
-        if (_descriptionCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Description', _descriptionCtrl.text.trim()),
-        if (_notesCtrl.text.trim().isNotEmpty) _detailRow(context, 'Notes', _notesCtrl.text.trim()),
-        if (_strengthValueCtrl.text.trim().isNotEmpty)
-          _detailRow(
-            context,
-            'Strength',
-            '${_strengthValueCtrl.text.trim()} ${_unitLabel(_strengthUnit)}',
-          ),
-        if (_stockValueCtrl.text.trim().isNotEmpty)
-          _detailRow(
-            context,
-            'Stock',
-            '${_stockValueCtrl.text.trim()} ${_stockUnitLabel(_stockUnit)}',
-          ),
-        if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Low stock at', _lowStockCtrl.text.trim()),
-        _detailRow(
-          context,
-          'Expiry',
-          _expiry != null ? DateFormat('dd/MM/yy').format(_expiry!) : 'No expiry',
-        ),
-        if (_batchCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Batch #', _batchCtrl.text.trim()),
-        if (_storageCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Storage', _storageCtrl.text.trim()),
-        _detailRow(context, 'Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
-        if (_keepFrozen) _detailRow(context, 'Keep frozen', 'Yes'),
-        if (_lightSensitive) _detailRow(context, 'Protect from light', 'Yes'),
-        if (_storageNotesCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Storage notes', _storageNotesCtrl.text.trim()),
-      ],
     );
   }
 
@@ -723,8 +537,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     final gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
     final gStockError = (_submitted || _touchedStock) ? stockError : null;
     final gThresholdError = (_submitted || _touchedThreshold) ? thresholdError : null;
-
-    final theme = Theme.of(context);
 
     // Determine if required fields are valid (for Save state)
     final requiredOk = (() {
