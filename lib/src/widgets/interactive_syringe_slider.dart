@@ -175,12 +175,10 @@ class _InteractiveSyringePainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // Min line
-    const minRatio = 0.0; // minIU is at bottom
     final minY = barrelBottom;
     canvas.drawLine(Offset(barrelLeft - 4, minY), Offset(barrelRight + 4, minY), rangePaint);
 
     // Max line
-    const maxRatio = 1.0; // maxIU is at top
     final maxY = barrelTop;
     canvas.drawLine(Offset(barrelLeft - 4, maxY), Offset(barrelRight + 4, maxY), rangePaint);
 

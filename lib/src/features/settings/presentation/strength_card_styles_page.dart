@@ -177,7 +177,6 @@ class _StyleCard extends StatelessWidget {
 
     // Mock data for preview
     const strengthValue = 250.0;
-    const strengthUnit = Unit.mg;
 
     switch (style) {
       case StrengthCardStyle.classic:

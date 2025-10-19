@@ -395,7 +395,6 @@ class _StrengthInputState extends State<StrengthInput> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final box = Container(
       padding: widget.padding ?? const EdgeInsets.all(12),
       decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(12)),

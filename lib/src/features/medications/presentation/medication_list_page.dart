@@ -583,7 +583,6 @@ class _MedCard extends StatelessWidget {
   final bool dense;
 
   TextSpan _stockSpan(BuildContext context) {
-    final theme = Theme.of(context);
     // Count-based units show current/total unit
     final isCountUnit =
         m.stockUnit == StockUnit.preFilledSyringes ||

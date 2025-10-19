@@ -1610,9 +1610,6 @@ class _ScheduleSummaryCard extends StatelessWidget {
     }
 
     // Build the summary text
-    final doseFixed = doseValue == doseValue.roundToDouble()
-        ? doseValue.toStringAsFixed(0)
-        : doseValue.toStringAsFixed(2);
     final unitTxt = doseUnit.toLowerCase();
 
     // Build time/frequency text

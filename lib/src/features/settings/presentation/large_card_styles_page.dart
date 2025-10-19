@@ -177,11 +177,8 @@ class _StyleCard extends StatelessWidget {
     const medicationName = 'Panadol Extra';
     const manufacturer = 'GlaxoSmithKline';
     const strengthValue = 500.0;
-    const strengthUnit = Unit.mg;
     const stockValue = 24.0;
     final expiry = DateTime.now().add(const Duration(days: 180));
-    const requiresFridge = false;
-    const storageLocation = 'Medicine Cabinet';
 
     switch (style) {
       case LargeCardStyle.classic:
