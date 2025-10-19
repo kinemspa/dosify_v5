@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class LargeCardStylesPage extends StatelessWidget {
