@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// A reusable editor template that mirrors the Add Tablet screen layout exactly.
@@ -12,45 +15,25 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 /// Usage: provide the exact field widgets used in Add Tablet for perfect visual parity.
 class MedEditorTemplate extends StatefulWidget {
   const MedEditorTemplate({
-    super.key,
-    required this.appBarTitle,
-    required this.summaryBuilder,
-
-    // General
-    required this.nameField,
-    required this.manufacturerField,
-    required this.descriptionField,
-    required this.notesField,
+    required this.appBarTitle, required this.summaryBuilder, // General
+    required this.nameField, required this.manufacturerField, required this.descriptionField, required this.notesField, // Strength
+    required this.strengthStepper, required this.unitDropdown, // Inventory
+    required this.stockStepper, required this.expiryDateButton, // Storage
+    required this.batchField, required this.locationField, required this.refrigerateRow, required this.freezeRow, required this.darkRow, required this.storageInstructionsField, super.key,
     this.nameHelp,
     this.manufacturerHelp,
     this.descriptionHelp,
     this.notesHelp,
-
-    // Strength
-    required this.strengthStepper,
-    required this.unitDropdown,
     this.perMlStepper,
     this.strengthHelp,
     this.perMlHelp,
-
-    // Inventory
-    required this.stockStepper,
     this.quantityDropdown,
-    required this.expiryDateButton,
     this.stockHelp,
     this.expiryHelp,
     this.lowStockRow,
     this.lowStockThresholdField,
     this.lowStockHelp,
     this.lowStockHelpColor,
-
-    // Storage
-    required this.batchField,
-    required this.locationField,
-    required this.refrigerateRow,
-    required this.freezeRow,
-    required this.darkRow,
-    required this.storageInstructionsField,
     this.batchHelp,
     this.locationHelp,
     this.refrigerateHelp,
@@ -158,8 +141,8 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                       child: Text(
                         widget.generalIntro!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   LabelFieldRow(label: 'Name *', field: widget.nameField),
@@ -191,21 +174,18 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
               const SizedBox(height: 12),
 
               // MDV Volume & Reconstitution section (optional, only for multi-dose vials)
-              if (widget.mdvSection != null) ...[
-                widget.mdvSection!,
-                const SizedBox(height: 12),
-              ],
+              if (widget.mdvSection != null) ...[widget.mdvSection!, const SizedBox(height: 12)],
 
               // Inventory
               SectionFormCard(
                 title: 'Inventory',
                 neutral: true,
                 children: [
-                LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
-                _support(widget.stockHelp),
-                // Show Quantity unit only if provided (optional for auto-determined stock units)
-                if (widget.quantityDropdown != null)
-                  LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown!),
+                  LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
+                  _support(widget.stockHelp),
+                  // Show Quantity unit only if provided (optional for auto-determined stock units)
+                  if (widget.quantityDropdown != null)
+                    LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown!),
                   if (widget.lowStockRow != null)
                     LabelFieldRow(label: 'Low stock alert', field: widget.lowStockRow!),
                   if (widget.lowStockThresholdField != null)
@@ -233,7 +213,10 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                   _support(widget.freezeHelp),
                   LabelFieldRow(label: 'Keep in dark', field: widget.darkRow),
                   _support(widget.darkHelp),
-                  LabelFieldRow(label: 'Storage instructions', field: widget.storageInstructionsField),
+                  LabelFieldRow(
+                    label: 'Storage instructions',
+                    field: widget.storageInstructionsField,
+                  ),
                   _support(widget.storageInstructionsHelp),
                 ],
               ),
@@ -258,8 +241,8 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-            ),
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
       ),
     );
   }
@@ -271,8 +254,8 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color ?? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
-            ),
+          color: color ?? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+        ),
       ),
     );
   }

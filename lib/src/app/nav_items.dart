@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class NavItemConfig {
@@ -22,18 +23,8 @@ const allNavItems = <NavItemConfig>[
     icon: Icons.medication,
     location: '/medications',
   ),
-  NavItemConfig(
-    id: 'supplies',
-    label: 'Supplies',
-    icon: Icons.inventory_2,
-    location: '/supplies',
-  ),
-  NavItemConfig(
-    id: 'schedules',
-    label: 'Schedules',
-    icon: Icons.alarm,
-    location: '/schedules',
-  ),
+  NavItemConfig(id: 'supplies', label: 'Supplies', icon: Icons.inventory_2, location: '/supplies'),
+  NavItemConfig(id: 'schedules', label: 'Schedules', icon: Icons.alarm, location: '/schedules'),
   NavItemConfig(
     id: 'calendar',
     label: 'Calendar',
@@ -46,26 +37,11 @@ const allNavItems = <NavItemConfig>[
     icon: Icons.science,
     location: '/medications/reconstitution',
   ),
-  NavItemConfig(
-    id: 'analytics',
-    label: 'Analytics',
-    icon: Icons.insights,
-    location: '/analytics',
-  ),
-  NavItemConfig(
-    id: 'settings',
-    label: 'Settings',
-    icon: Icons.settings,
-    location: '/settings',
-  ),
+  NavItemConfig(id: 'analytics', label: 'Analytics', icon: Icons.insights, location: '/analytics'),
+  NavItemConfig(id: 'settings', label: 'Settings', icon: Icons.settings, location: '/settings'),
 ];
 
 NavItemConfig? findNavItem(String id) => allNavItems.firstWhere(
   (e) => e.id == id,
-  orElse: () => const NavItemConfig(
-    id: 'home',
-    label: 'Home',
-    icon: Icons.home,
-    location: '/',
-  ),
+  orElse: () => const NavItemConfig(id: 'home', label: 'Home', icon: Icons.home, location: '/'),
 );

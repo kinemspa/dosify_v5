@@ -1,5 +1,8 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import '../domain/medication.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
 class MedicationRepository {
   MedicationRepository(this._box);

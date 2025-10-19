@@ -1,7 +1,10 @@
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../domain/medication.dart';
-import '../../medications/data/medication_repository.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
 final medicationsBoxProvider = Provider<Box<Medication>>((ref) {
   final box = Hive.box<Medication>('medications');

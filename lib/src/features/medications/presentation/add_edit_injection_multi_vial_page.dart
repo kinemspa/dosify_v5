@@ -1,19 +1,24 @@
+// Dart imports:
 import 'dart:math';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../medications/domain/enums.dart';
-import '../../medications/domain/medication.dart';
-import '../presentation/providers.dart';
-import 'reconstitution_calculator_dialog.dart';
-import '../../../core/utils/format.dart';
-import 'package:go_router/go_router.dart';
-import '../../../widgets/form_field_styler.dart';
-import '../../../core/prefs/user_prefs.dart';
+// Project imports:
+import 'package:dosifi_v5/src/core/prefs/user_prefs.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/form_field_styler.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 class AddEditInjectionMultiVialPage extends ConsumerStatefulWidget {
@@ -26,8 +31,7 @@ class AddEditInjectionMultiVialPage extends ConsumerStatefulWidget {
       _AddEditInjectionMultiVialPageState();
 }
 
-class _AddEditInjectionMultiVialPageState
-    extends ConsumerState<AddEditInjectionMultiVialPage> {
+class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjectionMultiVialPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameCtrl = TextEditingController();
@@ -53,7 +57,7 @@ class _AddEditInjectionMultiVialPageState
   bool _requiresFridge = false;
   final _storageNotesCtrl = TextEditingController();
 
-  bool _summaryExpanded = true;
+  final bool _summaryExpanded = true;
 
   int _formStyleIndex = 0;
 
@@ -68,12 +72,8 @@ class _AddEditInjectionMultiVialPageState
   SyringeSizeMl? _lastCalcSyringe;
   double? _lastCalcVialSize;
 
-  bool get _isPerMl => {
-    Unit.mcgPerMl,
-    Unit.mgPerMl,
-    Unit.gPerMl,
-    Unit.unitsPerMl,
-  }.contains(_strengthUnit);
+  bool get _isPerMl =>
+      {Unit.mcgPerMl, Unit.mgPerMl, Unit.gPerMl, Unit.unitsPerMl}.contains(_strengthUnit);
 
   String _baseUnit(Unit u) {
     if (u == Unit.mcg || u == Unit.mcgPerMl) return 'mcg';
@@ -109,8 +109,7 @@ class _AddEditInjectionMultiVialPageState
       _vialVolumeCtrl.text = med.containerVolumeMl?.toString() ?? '0';
       _lowStockEnabled = med.lowStockEnabled;
       _lowStockCtrl.text = med.lowStockVialVolumeThresholdMl?.toString() ?? '';
-      _lowStockVialsCtrl.text =
-          med.lowStockVialsThresholdCount?.toString() ?? '';
+      _lowStockVialsCtrl.text = med.lowStockVialsThresholdCount?.toString() ?? '';
       _expiry = med.expiry;
       _batchCtrl.text = med.batchNumber ?? '';
       _storageCtrl.text = med.storageLocation ?? '';
@@ -162,19 +161,15 @@ class _AddEditInjectionMultiVialPageState
           '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unit, ${fmt2(double.tryParse(_perMlCtrl.text) ?? 0)} mL',
         );
       } else {
-        parts.add(
-          '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unit',
-        );
+        parts.add('${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unit');
       }
     }
-    if (_stockValueCtrl.text.isNotEmpty)
-      parts.add(
-        '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} multi dose vials in stock',
-      );
+    if (_stockValueCtrl.text.isNotEmpty) {
+      parts.add('${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} multi dose vials in stock');
+    }
     if (_manufacturerCtrl.text.isNotEmpty) parts.add(_manufacturerCtrl.text);
     if (_requiresFridge) parts.add('Keep refrigerated');
-    if (_expiry != null)
-      parts.add('Vial Expires - ${DateFormat.yMd().format(_expiry!)}');
+    if (_expiry != null) parts.add('Vial Expires - ${DateFormat.yMd().format(_expiry!)}');
     if (_notesCtrl.text.isNotEmpty) parts.add(_notesCtrl.text);
     return parts.join('. ');
   }
@@ -186,9 +181,7 @@ class _AddEditInjectionMultiVialPageState
 
     return SummaryHeaderCard(
       title: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'Multi Dose Vial',
-      manufacturer: _manufacturerCtrl.text.isNotEmpty
-          ? _manufacturerCtrl.text
-          : null,
+      manufacturer: _manufacturerCtrl.text.isNotEmpty ? _manufacturerCtrl.text : null,
       strengthValue: strengthValue,
       strengthUnitLabel: _unitLabel(_strengthUnit),
       perMlValue: perMlValue,
@@ -227,8 +220,7 @@ class _AddEditInjectionMultiVialPageState
         initialDoseValue: _lastCalcDose,
         initialDoseUnit: _lastCalcDoseUnit,
         initialSyringeSize: _lastCalcSyringe,
-        initialVialSize:
-            _lastCalcVialSize ?? double.tryParse(_vialVolumeCtrl.text),
+        initialVialSize: _lastCalcVialSize ?? double.tryParse(_vialVolumeCtrl.text),
       ),
     );
 
@@ -237,8 +229,7 @@ class _AddEditInjectionMultiVialPageState
         _perMlCtrl.text = fmt2(result.perMlConcentration);
         _vialVolumeCtrl.text = fmt2(result.solventVolumeMl);
         // remember
-        _lastCalcDose =
-            _lastCalcDose ?? double.tryParse(_strengthValueCtrl.text);
+        _lastCalcDose = _lastCalcDose ?? double.tryParse(_strengthValueCtrl.text);
         _lastCalcDoseUnit = unitLabel;
         _lastCalcSyringe = _lastCalcSyringe ?? SyringeSizeMl.ml1;
         _lastCalcVialSize = result.solventVolumeMl;
@@ -247,7 +238,7 @@ class _AddEditInjectionMultiVialPageState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Calculator updated: ${result.perMlConcentration.toStringAsFixed(2)} ${unitLabel}/mL concentration, add ${result.solventVolumeMl.toStringAsFixed(2)} mL fluid',
+              'Calculator updated: ${result.perMlConcentration.toStringAsFixed(2)} $unitLabel/mL concentration, add ${result.solventVolumeMl.toStringAsFixed(2)} mL fluid',
             ),
           ),
         );
@@ -274,18 +265,12 @@ class _AddEditInjectionMultiVialPageState
       id: id,
       form: MedicationForm.injectionMultiDoseVial,
       name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty
-          ? null
-          : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
+      manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
+      description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: double.parse(_strengthValueCtrl.text),
       strengthUnit: _strengthUnit,
-      perMlValue: _isPerMl && _perMlCtrl.text.isNotEmpty
-          ? double.parse(_perMlCtrl.text)
-          : null,
+      perMlValue: _isPerMl && _perMlCtrl.text.isNotEmpty ? double.parse(_perMlCtrl.text) : null,
       stockValue: stock,
       stockUnit: StockUnit.multiDoseVials,
       containerVolumeMl: double.tryParse(_vialVolumeCtrl.text),
@@ -293,21 +278,15 @@ class _AddEditInjectionMultiVialPageState
       lowStockThreshold: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty
           ? double.parse(_lowStockCtrl.text)
           : null,
-      lowStockVialVolumeThresholdMl:
-          _lowStockEnabled && _lowStockCtrl.text.isNotEmpty
+      lowStockVialVolumeThresholdMl: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty
           ? double.tryParse(_lowStockCtrl.text)
           : null,
-      lowStockVialsThresholdCount:
-          _lowStockEnabled && _lowStockVialsCtrl.text.isNotEmpty
+      lowStockVialsThresholdCount: _lowStockEnabled && _lowStockVialsCtrl.text.isNotEmpty
           ? double.tryParse(_lowStockVialsCtrl.text)
           : null,
       expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _storageNotesCtrl.text.trim().isEmpty
           ? null
@@ -323,18 +302,12 @@ class _AddEditInjectionMultiVialPageState
         content: Text(_buildSummary()),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm'),
-          ),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Confirm')),
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed ?? false) {
       await repo.upsert(med);
       if (!mounted) return;
       context.go('/medications');
@@ -354,9 +327,7 @@ class _AddEditInjectionMultiVialPageState
         ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(
-            theme.colorScheme.primary.withValues(alpha: 0.12),
-          ),
+          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -408,14 +379,10 @@ class _AddEditInjectionMultiVialPageState
               // General card
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.03),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.06),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -431,9 +398,9 @@ class _AddEditInjectionMultiVialPageState
                   children: [
                     Text(
                       'General',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -445,8 +412,7 @@ class _AddEditInjectionMultiVialPageState
                         hint: 'Enter the Medication Name',
                         helper: '',
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 8),
@@ -514,13 +480,8 @@ class _AddEditInjectionMultiVialPageState
                       decoration: InputDecoration(
                         labelText: 'Strength *',
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
@@ -555,7 +516,7 @@ class _AddEditInjectionMultiVialPageState
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<Unit>(
-                      value: _strengthUnit,
+                      initialValue: _strengthUnit,
                       isExpanded: true,
                       alignment: AlignmentDirectional.center,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -563,61 +524,42 @@ class _AddEditInjectionMultiVialPageState
                         DropdownMenuItem(
                           value: Unit.mcg,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('mcg', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('mcg', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.mg,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('mg', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('mg', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.g,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('g', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('g', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.units,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('units', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('units', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.mcgPerMl,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('mcg/mL', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('mcg/mL', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.mgPerMl,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('mg/mL', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('mg/mL', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.gPerMl,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('g/mL', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('g/mL', textAlign: TextAlign.center)),
                         ),
                         DropdownMenuItem(
                           value: Unit.unitsPerMl,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text(
-                              'units/mL',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                          child: Center(child: Text('units/mL', textAlign: TextAlign.center)),
                         ),
                       ],
                       onChanged: (v) {
@@ -630,13 +572,8 @@ class _AddEditInjectionMultiVialPageState
                       decoration: InputDecoration(
                         labelText: 'Unit *',
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
@@ -661,12 +598,10 @@ class _AddEditInjectionMultiVialPageState
               ),
               if (_isPerMl)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
+                  padding: const EdgeInsets.only(top: 8),
                   child: TextFormField(
                     controller: _perMlCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(labelText: 'Per mL'),
                     validator: (v) {
                       if (!_isPerMl) return null;
@@ -697,17 +632,13 @@ class _AddEditInjectionMultiVialPageState
                   _pillBtn(context, '−', () {
                     final v = double.tryParse(_vialVolumeCtrl.text) ?? 0;
                     final nv = (v - 1).clamp(0, 10000);
-                    setState(
-                      () => _vialVolumeCtrl.text = nv.toStringAsFixed(0),
-                    );
+                    setState(() => _vialVolumeCtrl.text = nv.toStringAsFixed(0));
                   }),
                   const SizedBox(width: 6),
                   Expanded(
                     child: TextFormField(
                       controller: _vialVolumeCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       decoration: FormFieldStyler.decoration(
                         context: context,
                         styleIndex: _formStyleIndex,
@@ -726,9 +657,7 @@ class _AddEditInjectionMultiVialPageState
                   _pillBtn(context, '+', () {
                     final v = double.tryParse(_vialVolumeCtrl.text) ?? 0;
                     final nv = (v + 1).clamp(0, 10000);
-                    setState(
-                      () => _vialVolumeCtrl.text = nv.toStringAsFixed(0),
-                    );
+                    setState(() => _vialVolumeCtrl.text = nv.toStringAsFixed(0));
                   }),
                 ],
               ),
@@ -751,8 +680,7 @@ class _AddEditInjectionMultiVialPageState
                               'doseUnit': _lastCalcDoseUnit,
                               'syringe': _lastCalcSyringe,
                               'vialSize':
-                                  _lastCalcVialSize ??
-                                  double.tryParse(_vialVolumeCtrl.text),
+                                  _lastCalcVialSize ?? double.tryParse(_vialVolumeCtrl.text),
                             },
                           )
                           as ReconstitutionResult?;
@@ -765,7 +693,7 @@ class _AddEditInjectionMultiVialPageState
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Calculator updated: ${fmt2(result.perMlConcentration)} ${unitLabel}/mL concentration, add ${fmt2(result.solventVolumeMl)} mL fluid',
+                          'Calculator updated: ${fmt2(result.perMlConcentration)} $unitLabel/mL concentration, add ${fmt2(result.solventVolumeMl)} mL fluid',
                         ),
                       ),
                     );
@@ -792,13 +720,8 @@ class _AddEditInjectionMultiVialPageState
                       decoration: InputDecoration(
                         labelText: 'Reserve *',
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
@@ -818,8 +741,7 @@ class _AddEditInjectionMultiVialPageState
                       ),
                       validator: (v) {
                         final i = int.tryParse(v?.trim() ?? '');
-                        if (i == null || i <= 0)
-                          return 'Enter whole number > 0';
+                        if (i == null || i <= 0) return 'Enter whole number > 0';
                         return null;
                       },
                       onChanged: (_) => setState(() {}),
@@ -834,7 +756,7 @@ class _AddEditInjectionMultiVialPageState
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<StockUnit>(
-                      value: _stockUnit,
+                      initialValue: _stockUnit,
                       isExpanded: true,
                       alignment: AlignmentDirectional.center,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -842,9 +764,7 @@ class _AddEditInjectionMultiVialPageState
                         DropdownMenuItem(
                           value: StockUnit.multiDoseVials,
                           alignment: AlignmentDirectional.center,
-                          child: Center(
-                            child: Text('vials', textAlign: TextAlign.center),
-                          ),
+                          child: Center(child: Text('vials', textAlign: TextAlign.center)),
                         ),
                       ],
                       onChanged: (v) => setState(() => _stockUnit = v!),
@@ -855,13 +775,8 @@ class _AddEditInjectionMultiVialPageState
                       decoration: InputDecoration(
                         labelText: 'Unit *',
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
@@ -895,19 +810,18 @@ class _AddEditInjectionMultiVialPageState
                     child: CheckboxListTile(
                       title: Text(
                         'Low stock alert',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                       ),
                       subtitle: Text(
                         'Set when to alert for low volume or vial count',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
                       ),
                       value: _lowStockEnabled,
-                      onChanged: (v) =>
-                          setState(() => _lowStockEnabled = v ?? false),
+                      onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: EdgeInsets.zero,
                     ),
@@ -928,46 +842,31 @@ class _AddEditInjectionMultiVialPageState
                                   Row(
                                     children: [
                                       _pillBtn(context, '−', () {
-                                        final v =
-                                            double.tryParse(
-                                              _lowStockCtrl.text,
-                                            ) ??
-                                            0;
+                                        final v = double.tryParse(_lowStockCtrl.text) ?? 0;
                                         final nv = (v - 1).clamp(0, 10000);
-                                        setState(
-                                          () => _lowStockCtrl.text = nv
-                                              .toStringAsFixed(0),
-                                        );
+                                        setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
                                       }),
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: TextFormField(
                                           controller: _lowStockCtrl,
-                                          keyboardType:
-                                              const TextInputType.numberWithOptions(
-                                                decimal: true,
-                                              ),
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                fontSize: kInputFontSize,
-                                              ),
+                                          keyboardType: const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontSize: kInputFontSize,
+                                          ),
                                           decoration: const InputDecoration(
-                                            labelText:
-                                                'Low Stock - Vial Volume (mL)',
+                                            labelText: 'Low Stock - Vial Volume (mL)',
                                           ),
                                           onChanged: (txt) {
                                             final maxMl =
-                                                double.tryParse(
-                                                  _vialVolumeCtrl.text.trim(),
-                                                ) ??
+                                                double.tryParse(_vialVolumeCtrl.text.trim()) ??
                                                 double.infinity;
-                                            final t = double.tryParse(
-                                              txt.trim(),
-                                            );
+                                            final t = double.tryParse(txt.trim());
                                             if (t != null && t > maxMl) {
                                               setState(
-                                                () => _lowStockCtrl.text = maxMl
-                                                    .toStringAsFixed(0),
+                                                () => _lowStockCtrl.text = maxMl.toStringAsFixed(0),
                                               );
                                             }
                                           },
@@ -975,44 +874,26 @@ class _AddEditInjectionMultiVialPageState
                                       ),
                                       const SizedBox(width: 6),
                                       _pillBtn(context, '+', () {
-                                        final v =
-                                            double.tryParse(
-                                              _lowStockCtrl.text,
-                                            ) ??
-                                            0;
+                                        final v = double.tryParse(_lowStockCtrl.text) ?? 0;
                                         final maxMl =
-                                            double.tryParse(
-                                              _vialVolumeCtrl.text,
-                                            ) ??
-                                            10000;
+                                            double.tryParse(_vialVolumeCtrl.text) ?? 10000;
                                         final nv = (v + 1).clamp(0, maxMl);
-                                        setState(
-                                          () => _lowStockCtrl.text = nv
-                                              .toStringAsFixed(0),
-                                        );
+                                        setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
                                       }),
                                     ],
                                   ),
                                   Builder(
                                     builder: (context) {
                                       final maxMl =
-                                          double.tryParse(
-                                            _vialVolumeCtrl.text.trim(),
-                                          ) ??
+                                          double.tryParse(_vialVolumeCtrl.text.trim()) ??
                                           double.infinity;
-                                      final thr =
-                                          double.tryParse(
-                                            _lowStockCtrl.text.trim(),
-                                          ) ??
-                                          -1;
-                                      if (maxMl != double.infinity &&
-                                          thr >= maxMl) {
+                                      final thr = double.tryParse(_lowStockCtrl.text.trim()) ?? -1;
+                                      if (maxMl != double.infinity && thr >= maxMl) {
                                         return Text(
                                           'Max threshold cannot exceed stock count.',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(color: Colors.orange),
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall?.copyWith(color: Colors.orange),
                                         );
                                       }
                                       return const SizedBox.shrink();
@@ -1026,12 +907,9 @@ class _AddEditInjectionMultiVialPageState
                           Row(
                             children: [
                               _pillBtn(context, '−', () {
-                                final v =
-                                    int.tryParse(_lowStockVialsCtrl.text) ?? 0;
+                                final v = int.tryParse(_lowStockVialsCtrl.text) ?? 0;
                                 final nv = (v - 1).clamp(0, 1000000);
-                                setState(
-                                  () => _lowStockVialsCtrl.text = nv.toString(),
-                                );
+                                setState(() => _lowStockVialsCtrl.text = nv.toString());
                               }),
                               const SizedBox(width: 6),
                               SizedBox(
@@ -1040,35 +918,28 @@ class _AddEditInjectionMultiVialPageState
                                   builder: (context) {
                                     final theme = Theme.of(context);
                                     return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         TextFormField(
                                           controller: _lowStockVialsCtrl,
                                           textAlign: TextAlign.center,
-                                          keyboardType:
-                                              const TextInputType.numberWithOptions(
-                                                decimal: false,
-                                              ),
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                fontSize: kInputFontSize,
-                                              ),
+                                          keyboardType: const TextInputType.numberWithOptions(
+                                            
+                                          ),
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontSize: kInputFontSize,
+                                          ),
                                           decoration: const InputDecoration(
-                                            labelText:
-                                                'Low Stock - Vials in Reserve',
+                                            labelText: 'Low Stock - Vials in Reserve',
                                           ),
                                           onChanged: (txt) {
                                             final stockVials =
-                                                int.tryParse(
-                                                  _stockValueCtrl.text.trim(),
-                                                ) ??
-                                                0;
+                                                int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                                             final t = int.tryParse(txt.trim());
                                             if (t != null && t > stockVials) {
                                               setState(
-                                                () => _lowStockVialsCtrl.text =
-                                                    stockVials.toString(),
+                                                () =>
+                                                    _lowStockVialsCtrl.text = stockVials.toString(),
                                               );
                                             }
                                           },
@@ -1076,26 +947,14 @@ class _AddEditInjectionMultiVialPageState
                                         Builder(
                                           builder: (context) {
                                             final stockVials =
-                                                int.tryParse(
-                                                  _stockValueCtrl.text.trim(),
-                                                ) ??
-                                                0;
+                                                int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                                             final thr =
-                                                int.tryParse(
-                                                  _lowStockVialsCtrl.text
-                                                      .trim(),
-                                                ) ??
-                                                -1;
-                                            if (stockVials > 0 &&
-                                                thr >= stockVials) {
+                                                int.tryParse(_lowStockVialsCtrl.text.trim()) ?? -1;
+                                            if (stockVials > 0 && thr >= stockVials) {
                                               return Text(
                                                 'Max threshold cannot exceed stock count.',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall
-                                                    ?.copyWith(
-                                                      color: Colors.orange,
-                                                    ),
+                                                style: Theme.of(context).textTheme.bodySmall
+                                                    ?.copyWith(color: Colors.orange),
                                               );
                                             }
                                             return const SizedBox.shrink();
@@ -1108,12 +967,9 @@ class _AddEditInjectionMultiVialPageState
                               ),
                               const SizedBox(width: 6),
                               _pillBtn(context, '+', () {
-                                final v =
-                                    int.tryParse(_lowStockVialsCtrl.text) ?? 0;
+                                final v = int.tryParse(_lowStockVialsCtrl.text) ?? 0;
                                 final nv = (v + 1).clamp(0, 1000000);
-                                setState(
-                                  () => _lowStockVialsCtrl.text = nv.toString(),
-                                );
+                                setState(() => _lowStockVialsCtrl.text = nv.toString());
                               }),
                             ],
                           ),

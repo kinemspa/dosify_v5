@@ -1,9 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class SelectMedicationTypePage extends StatelessWidget {
   const SelectMedicationTypePage({super.key});
@@ -13,38 +17,35 @@ class SelectMedicationTypePage extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return Scaffold(
-      appBar: const GradientAppBar(
-        title: 'Medication Type',
-        forceBackButton: true,
-      ),
+      appBar: const GradientAppBar(title: 'Medication Type', forceBackButton: true),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
-        children: [
-const _ScreenHeader(
+        children: const [
+          _ScreenHeader(
             icon: Icons.add_circle_outline,
             title: 'Choose medication type',
             subtitle: 'We’ll tailor the fields for your choice',
           ),
-          const SizedBox(height: 16),
-          const _TypeTile(
+          SizedBox(height: 16),
+          _TypeTile(
             icon: Icons.add_circle,
             title: 'Tablet',
             subtitle: 'Solid pill dosage form',
           ),
-          const SizedBox(height: 16),
-const _TypeTile(
+          SizedBox(height: 16),
+          _TypeTile(
             icon: Icons.medication, // placeholder, overridden in widget with MDI when available
             title: 'Capsule',
             subtitle: 'Powder or pellets in a gelatin shell',
           ),
-          const SizedBox(height: 16),
-          const _TypeTile(
+          SizedBox(height: 16),
+          _TypeTile(
             icon: Icons.colorize,
             title: 'Injection',
             subtitle: 'Pre-filled syringes or vials',
           ),
-          const SizedBox(height: 16),
-          const _TypeTile(
+          SizedBox(height: 16),
+          _TypeTile(
             icon: Icons.description,
             title: 'Editor Template (Preview)',
             subtitle: 'Open the template-based editor',
@@ -96,11 +97,10 @@ class _Section extends StatelessWidget {
             ...children,
             const SizedBox(height: 16),
             // Template preview entry to verify layout parity on-device
-            _TypeTile(
+            const _TypeTile(
               icon: Icons.description,
-              title: 'Editor Template (Preview)'.toString(),
+              title: 'Editor Template (Preview)',
               subtitle: 'Open the template-based editor to verify exact layout',
-              primary: false,
             ),
           ],
         ),
@@ -114,7 +114,6 @@ class _TypeTile extends StatefulWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.primary = false,
   });
   final IconData icon;
   final String title;
@@ -132,6 +131,7 @@ class _TypeTileState extends State<_TypeTile> {
     if (widget.title == 'Tablet') return Icons.add_circle;
     return Icons.colorize;
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -173,10 +173,7 @@ class _TypeTileState extends State<_TypeTile> {
             duration: const Duration(milliseconds: 120),
             curve: Curves.easeOutCubic,
             decoration: isPrimary
-                ? BoxDecoration(
-                    color: tileBg,
-                    borderRadius: BorderRadius.circular(12),
-                  )
+                ? BoxDecoration(color: tileBg, borderRadius: BorderRadius.circular(12))
                 : softWhiteCardDecoration(context),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             child: Row(
@@ -185,11 +182,8 @@ class _TypeTileState extends State<_TypeTile> {
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: BoxDecoration(
-                    color: badgeBg,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-child: Icon(_effectiveIcon(), color: badgeIconColor, size: 20),
+                  decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
+                  child: Icon(_effectiveIcon(), color: badgeIconColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -206,9 +200,7 @@ child: Icon(_effectiveIcon(), color: badgeIconColor, size: 20),
                       const SizedBox(height: 2),
                       Text(
                         widget.subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: subtitleColor,
-                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(color: subtitleColor),
                       ),
                     ],
                   ),
@@ -224,11 +216,7 @@ child: Icon(_effectiveIcon(), color: badgeIconColor, size: 20),
 }
 
 class _ScreenHeader extends StatelessWidget {
-  const _ScreenHeader({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
+  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
   final IconData icon;
   final String title;
   final String subtitle;
@@ -238,13 +226,9 @@ class _ScreenHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return Container(
-      decoration: BoxDecoration(
-        color: cs.primary,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(12)),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 36,
@@ -268,12 +252,7 @@ class _ScreenHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onPrimary,
-                  ),
-                ),
+                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
               ],
             ),
           ),

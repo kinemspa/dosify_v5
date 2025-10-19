@@ -1,14 +1,17 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:timezone/timezone.dart' as tz;
-import '../domain/schedule.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 class ScheduleScheduler {
   static int _stableHash32(String s) {
     // Deterministic 32-bit FNV-1a hash
-    const int fnvOffset = 0x811C9DC5;
-    const int fnvPrime = 0x01000193;
-    int hash = fnvOffset;
+    const fnvOffset = 0x811C9DC5;
+    const fnvPrime = 0x01000193;
+    var hash = fnvOffset;
     for (final codeUnit in s.codeUnits) {
       hash ^= codeUnit & 0xFF;
       hash = (hash * fnvPrime) & 0xFFFFFFFF;
@@ -37,10 +40,7 @@ class ScheduleScheduler {
     return _stableHash32(key);
   }
 
-  static (int weekdayLocal, int minutesLocal) _utcToLocalSlot(
-    int utcWeekday,
-    int minutesOfDayUtc,
-  ) {
+  static (int weekdayLocal, int minutesLocal) _utcToLocalSlot(int utcWeekday, int minutesOfDayUtc) {
     final nowUtc = tz.TZDateTime.now(tz.getLocation('UTC'));
     final hour = minutesOfDayUtc ~/ 60;
     final minute = minutesOfDayUtc % 60;
@@ -67,7 +67,7 @@ class ScheduleScheduler {
     if (s.hasCycle) {
       final n = s.cycleEveryNDays!.clamp(1, 365);
       final anchor = s.cycleAnchorDate ?? DateTime.now();
-      final times = (s.timesOfDay ?? [s.minutesOfDay]);
+      final times = s.timesOfDay ?? [s.minutesOfDay];
       // Schedule for the next ~30 occurrences
       final now = DateTime.now();
       var day = DateTime(anchor.year, anchor.month, anchor.day);
@@ -75,27 +75,11 @@ class ScheduleScheduler {
       while (day.isBefore(DateTime(now.year, now.month, now.day))) {
         day = day.add(Duration(days: n));
       }
-      for (int i = 0; i < 30; i++) {
+      for (var i = 0; i < 30; i++) {
         for (final minutes in times) {
-          final dt = DateTime(
-            day.year,
-            day.month,
-            day.day,
-            minutes ~/ 60,
-            minutes % 60,
-          );
-          final id = _slotId(
-            s.id,
-            weekday: dt.weekday,
-            minutes: minutes,
-            occurrence: i,
-          );
-          await NotificationService.scheduleAtAlarmClock(
-            id,
-            dt,
-            title: title,
-            body: body,
-          );
+          final dt = DateTime(day.year, day.month, day.day, minutes ~/ 60, minutes % 60);
+          final id = _slotId(s.id, weekday: dt.weekday, minutes: minutes, occurrence: i);
+          await NotificationService.scheduleAtAlarmClock(id, dt, title: title, body: body);
         }
         day = day.add(Duration(days: n));
       }
@@ -108,39 +92,23 @@ class ScheduleScheduler {
     final useUtc = s.hasUtc;
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day);
-    final timesLocal = (s.timesOfDay ?? [s.minutesOfDay]);
-    final timesUtc = (s.timesOfDayUtc ?? [s.minutesOfDayUtc ?? s.minutesOfDay]);
+    final timesLocal = s.timesOfDay ?? [s.minutesOfDay];
+    final timesUtc = s.timesOfDayUtc ?? [s.minutesOfDayUtc ?? s.minutesOfDay];
     final daysLocal = s.daysOfWeek;
     final daysUtc = s.daysOfWeekUtc ?? const <int>[];
 
-    for (int dayOffset = 0; dayOffset < 60; dayOffset++) {
+    for (var dayOffset = 0; dayOffset < 60; dayOffset++) {
       final date = start.add(Duration(days: dayOffset));
       if (useUtc) {
         // Check UTC weekday against daysOfWeekUtc using the UTC date
         final utcWeekday = date.toUtc().weekday; // 1..7
         if (daysUtc.contains(utcWeekday)) {
           for (final mUtc in timesUtc) {
-            final dtUtc = DateTime.utc(
-              date.year,
-              date.month,
-              date.day,
-              mUtc ~/ 60,
-              mUtc % 60,
-            );
+            final dtUtc = DateTime.utc(date.year, date.month, date.day, mUtc ~/ 60, mUtc % 60);
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now)) {
-              final id = _slotId(
-                s.id,
-                weekday: date.weekday,
-                minutes: mUtc,
-                occurrence: dayOffset,
-              );
-              await NotificationService.scheduleAtAlarmClock(
-                id,
-                dtLocal,
-                title: title,
-                body: body,
-              );
+              final id = _slotId(s.id, weekday: date.weekday, minutes: mUtc, occurrence: dayOffset);
+              await NotificationService.scheduleAtAlarmClock(id, dtLocal, title: title, body: body);
             }
           }
         }
@@ -148,13 +116,7 @@ class ScheduleScheduler {
         // Local weekly pattern
         if (daysLocal.contains(date.weekday)) {
           for (final mLocal in timesLocal) {
-            final dt = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              mLocal ~/ 60,
-              mLocal % 60,
-            );
+            final dt = DateTime(date.year, date.month, date.day, mLocal ~/ 60, mLocal % 60);
             if (dt.isAfter(now)) {
               final id = _slotId(
                 s.id,
@@ -162,12 +124,7 @@ class ScheduleScheduler {
                 minutes: mLocal,
                 occurrence: dayOffset,
               );
-              await NotificationService.scheduleAtAlarmClock(
-                id,
-                dt,
-                title: title,
-                body: body,
-              );
+              await NotificationService.scheduleAtAlarmClock(id, dt, title: title, body: body);
             }
           }
         }
@@ -175,10 +132,7 @@ class ScheduleScheduler {
     }
   }
 
-  static Future<void> cancelFor(
-    String scheduleId, {
-    Iterable<int>? days,
-  }) async {
+  static Future<void> cancelFor(String scheduleId, {Iterable<int>? days}) async {
     // Best-effort cancel that supports both legacy and new ID schemes without exceeding 32-bit range.
     final box = Hive.box<Schedule>('schedules');
     final existing = box.get(scheduleId); // may be null for brand-new schedules
@@ -188,24 +142,13 @@ class ScheduleScheduler {
       if (existing.hasCycle) {
         final n = existing.cycleEveryNDays!.clamp(1, 365);
         final anchor = existing.cycleAnchorDate ?? DateTime.now();
-        final times = (existing.timesOfDay ?? [existing.minutesOfDay]);
+        final times = existing.timesOfDay ?? [existing.minutesOfDay];
         var day = DateTime(anchor.year, anchor.month, anchor.day);
         // cancel ~30 occurrences ahead
-        for (int i = 0; i < 30; i++) {
+        for (var i = 0; i < 30; i++) {
           for (final minutes in times) {
-            final dt = DateTime(
-              day.year,
-              day.month,
-              day.day,
-              minutes ~/ 60,
-              minutes % 60,
-            );
-            final id = _slotId(
-              existing.id,
-              weekday: dt.weekday,
-              minutes: minutes,
-              occurrence: i,
-            );
+            final dt = DateTime(day.year, day.month, day.day, minutes ~/ 60, minutes % 60);
+            final id = _slotId(existing.id, weekday: dt.weekday, minutes: minutes, occurrence: i);
             await NotificationService.cancel(id);
           }
           day = day.add(Duration(days: n));
@@ -215,13 +158,12 @@ class ScheduleScheduler {
         final useUtc = existing.hasUtc;
         final now = DateTime.now();
         final start = DateTime(now.year, now.month, now.day);
-        final timesLocal = (existing.timesOfDay ?? [existing.minutesOfDay]);
+        final timesLocal = existing.timesOfDay ?? [existing.minutesOfDay];
         final timesUtc =
-            (existing.timesOfDayUtc ??
-            [existing.minutesOfDayUtc ?? existing.minutesOfDay]);
+            existing.timesOfDayUtc ?? [existing.minutesOfDayUtc ?? existing.minutesOfDay];
         final daysLocal = existing.daysOfWeek;
         final daysUtc = existing.daysOfWeekUtc ?? const <int>[];
-        for (int dayOffset = 0; dayOffset < 60; dayOffset++) {
+        for (var dayOffset = 0; dayOffset < 60; dayOffset++) {
           final date = start.add(Duration(days: dayOffset));
           if (useUtc) {
             final utcWeekday = date.toUtc().weekday;

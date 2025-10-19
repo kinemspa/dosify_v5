@@ -1,11 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 /// Multi-dose vial specific section for vial volume and reconstitution calculator.
@@ -13,13 +14,7 @@ import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 /// vial volume input, and dynamic summary display.
 class MdvVolumeReconstitutionSection extends StatefulWidget {
   const MdvVolumeReconstitutionSection({
-    super.key,
-    required this.strengthController,
-    required this.strengthUnit,
-    required this.perMlController,
-    required this.vialVolumeController,
-    required this.medicationNameController,
-    required this.onReconstitutionChanged,
+    required this.strengthController, required this.strengthUnit, required this.perMlController, required this.vialVolumeController, required this.medicationNameController, required this.onReconstitutionChanged, super.key,
     this.initialReconResult,
     this.vialVolumeKey,
   });
@@ -34,12 +29,10 @@ class MdvVolumeReconstitutionSection extends StatefulWidget {
   final GlobalKey? vialVolumeKey;
 
   @override
-  State<MdvVolumeReconstitutionSection> createState() =>
-      _MdvVolumeReconstitutionSectionState();
+  State<MdvVolumeReconstitutionSection> createState() => _MdvVolumeReconstitutionSectionState();
 }
 
-class _MdvVolumeReconstitutionSectionState
-    extends State<MdvVolumeReconstitutionSection> {
+class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitutionSection> {
   ReconstitutionResult? _reconResult;
   bool _showCalculator = false;
 
@@ -120,22 +113,17 @@ class _MdvVolumeReconstitutionSectionState
               label: const Text('Close Calculator'),
             )
           : OutlinedButton.icon(
-              onPressed: hasStrength
-                  ? () => setState(() => _showCalculator = true)
-                  : null,
+              onPressed: hasStrength ? () => setState(() => _showCalculator = true) : null,
               icon: const Icon(Icons.calculate, size: 18),
               label: Text(
-                _reconResult == null
-                    ? 'Reconstitution Calculator'
-                    : 'Edit Reconstitution',
+                _reconResult == null ? 'Reconstitution Calculator' : 'Edit Reconstitution',
               ),
             ),
     );
   }
 
   Widget _buildCalculatorWidget() {
-    final strengthVal =
-        double.tryParse(widget.strengthController.text.trim()) ?? 0;
+    final strengthVal = double.tryParse(widget.strengthController.text.trim()) ?? 0;
     final medName = widget.medicationNameController.text.trim();
 
     return ReconstitutionCalculatorWidget(
@@ -151,12 +139,9 @@ class _MdvVolumeReconstitutionSectionState
         // Update vial volume dynamically as user adjusts calculator
         // Only update the field, don't save the result yet
         if (mounted) {
-          widget.vialVolumeController.text = result.solventVolumeMl
-              .toStringAsFixed(
-                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
-                    ? 0
-                    : 1,
-              );
+          widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(
+            result.solventVolumeMl == result.solventVolumeMl.roundToDouble() ? 0 : 1,
+          );
         }
       },
       onApply: (result) {
@@ -165,21 +150,14 @@ class _MdvVolumeReconstitutionSectionState
           _showCalculator = false;
 
           // Update vial volume with calculated value
-          widget.vialVolumeController.text = result.solventVolumeMl
-              .toStringAsFixed(
-                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
-                    ? 0
-                    : 1,
-              );
+          widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(
+            result.solventVolumeMl == result.solventVolumeMl.roundToDouble() ? 0 : 1,
+          );
 
           // Update perMl concentration
-          widget.perMlController.text = result.perMlConcentration
-              .toStringAsFixed(
-                result.perMlConcentration ==
-                        result.perMlConcentration.roundToDouble()
-                    ? 0
-                    : 2,
-              );
+          widget.perMlController.text = result.perMlConcentration.toStringAsFixed(
+            result.perMlConcentration == result.perMlConcentration.roundToDouble() ? 0 : 2,
+          );
         });
         widget.onReconstitutionChanged(result);
 
@@ -203,8 +181,7 @@ class _MdvVolumeReconstitutionSectionState
     final theme = Theme.of(context);
     final result = _reconResult!;
     final medName = widget.medicationNameController.text.trim();
-    final strengthVal =
-        double.tryParse(widget.strengthController.text.trim()) ?? 0;
+    final strengthVal = double.tryParse(widget.strengthController.text.trim()) ?? 0;
     final unitLabel = _baseUnit(widget.strengthUnit);
     final diluentName = result.diluentName ?? 'diluent';
 
@@ -212,17 +189,14 @@ class _MdvVolumeReconstitutionSectionState
     final strengthStr = strengthVal == strengthVal.roundToDouble()
         ? strengthVal.toStringAsFixed(0)
         : strengthVal.toString();
-    final volumeStr =
-        result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
+    final volumeStr = result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
         ? result.solventVolumeMl.toStringAsFixed(0)
         : result.solventVolumeMl.toStringAsFixed(1);
-    final drawStr =
-        result.recommendedUnits == result.recommendedUnits.roundToDouble()
+    final drawStr = result.recommendedUnits == result.recommendedUnits.roundToDouble()
         ? result.recommendedUnits.toStringAsFixed(0)
         : result.recommendedUnits.toStringAsFixed(1);
     final mlDrawStr = (result.recommendedUnits / 100).toStringAsFixed(2);
-    final syringeStr =
-        result.syringeSizeMl == result.syringeSizeMl.roundToDouble()
+    final syringeStr = result.syringeSizeMl == result.syringeSizeMl.roundToDouble()
         ? result.syringeSizeMl.toStringAsFixed(1)
         : result.syringeSizeMl.toString();
 
@@ -233,7 +207,6 @@ class _MdvVolumeReconstitutionSectionState
         WhiteSyringeGauge(
           totalIU: result.syringeSizeMl * 100,
           fillIU: result.recommendedUnits,
-          interactive: false,
         ),
         const SizedBox(height: 12),
         // Main instruction text spans full width
@@ -247,19 +220,13 @@ class _MdvVolumeReconstitutionSectionState
               const TextSpan(text: 'Reconstitute '),
               TextSpan(
                 text: '$strengthStr$unitLabel',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w700),
               ),
               if (medName.isNotEmpty) TextSpan(text: ' $medName'),
               const TextSpan(text: ' with '),
               TextSpan(
                 text: '$volumeStr mL',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w700),
               ),
               TextSpan(text: ' $diluentName'),
             ],
@@ -277,26 +244,17 @@ class _MdvVolumeReconstitutionSectionState
               const TextSpan(text: 'Draw '),
               TextSpan(
                 text: '$drawStr IU',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
               ),
               const TextSpan(text: ' ('),
               TextSpan(
                 text: '$mlDrawStr mL',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
               ),
               const TextSpan(text: ') into a '),
               TextSpan(
                 text: '$syringeStr mL',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
               ),
               const TextSpan(text: ' syringe'),
             ],
@@ -324,8 +282,7 @@ class _MdvVolumeReconstitutionSectionState
             enabled: !isLocked,
             onDec: () {
               if (isLocked) return;
-              final d =
-                  double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+              final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
               final nv = (d - 0.5).clamp(0, 1000);
               setState(() {
                 widget.vialVolumeController.text = nv.toStringAsFixed(1);
@@ -333,8 +290,7 @@ class _MdvVolumeReconstitutionSectionState
             },
             onInc: () {
               if (isLocked) return;
-              final d =
-                  double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+              final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
               final nv = (d + 0.5).clamp(0, 1000);
               setState(() {
                 widget.vialVolumeController.text = nv.toStringAsFixed(1);
@@ -353,9 +309,7 @@ class _MdvVolumeReconstitutionSectionState
               ),
               filled: true,
               fillColor: isLocked
-                  ? theme.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.5,
-                    )
+                  ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
                   : theme.colorScheme.surfaceContainerLowest,
             ),
           ),
@@ -366,8 +320,8 @@ class _MdvVolumeReconstitutionSectionState
             _showCalculator
                 ? 'Vial volume updates automatically as you adjust the calculator above'
                 : (isLocked
-                    ? 'Total volume after reconstitution (locked - use calculator to adjust)'
-                    : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above'),
+                      ? 'Total volume after reconstitution (locked - use calculator to adjust)'
+                      : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above'),
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,

@@ -1,22 +1,23 @@
 /// Reconstitution Calculator Formula - Version 2.0
-/// 
+///
 /// ⚠️ CRITICAL MEDICAL CALCULATION
-/// 
+///
 /// This file implements the medically accurate reconstitution formula for ALL
 /// medication units (mg, mcg, g, IU).
-/// 
+///
 /// **See docs/RECONSTITUTION_CALCULATOR_FORMULA.md for full documentation**
-/// 
+///
 /// DO NOT MODIFY WITHOUT:
 /// 1. Reading the documentation
 /// 2. Testing all 7 validated examples
 /// 3. Medical review
-/// 
+///
 /// Last Updated: 2025-01-10
 /// Version: 2.0 (Proper IU Support)
+library;
 
-import 'dart:math';
-import 'reconstitution_calculator_helpers.dart';
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_helpers.dart';
 
 /// Result of reconstitution calculation
 class ReconstitutionCalculation {
@@ -50,25 +51,25 @@ class ReconstitutionCalculation {
 }
 
 /// Calculate reconstitution for a medication vial
-/// 
+///
 /// **FORMULA (Universal for ALL units):**
 /// ```
 /// Concentration (C) = Total_Strength / Diluent_Volume
 /// Volume_per_Dose (V) = Desired_Dose / Concentration
 /// Syringe_Markings = Volume_per_Dose × 100
 /// ```
-/// 
+///
 /// **CRITICAL RULES:**
 /// 1. Strength and Dose MUST be in the same unit
 /// 2. IU (International Units) is medication potency, NOT syringe markings
 /// 3. Works for mg, mcg, g, and IU identically
-/// 
+///
 /// **Parameters:**
 /// - [totalStrength]: Total amount in vial (e.g., 10 IU, 5mg, 2000mcg)
 /// - [desiredDose]: Amount per injection (e.g., 2 IU, 0.25mg, 250mcg)
 /// - [diluentVolume]: mL of water/diluent to add to vial
 /// - [unitLabel]: Unit name for validation ('mg', 'mcg', 'g', 'units')
-/// 
+///
 /// **Example 1: HGH**
 /// ```dart
 /// calculate(
@@ -82,7 +83,7 @@ class ReconstitutionCalculation {
 /// // - volumePerDose: 0.2 mL
 /// // - syringeMarkings: 20 (on 1mL syringe)
 /// ```
-/// 
+///
 /// **Example 2: BPC-157**
 /// ```dart
 /// calculate(
@@ -103,7 +104,7 @@ ReconstitutionCalculation calculateReconstitution({
   required String unitLabel,
 }) {
   // Validation
-  if (!isValidValue(totalStrength, min: 0)) {
+  if (!isValidValue(totalStrength)) {
     return const ReconstitutionCalculation(
       concentration: 0,
       volumePerDose: 0,
@@ -114,7 +115,7 @@ ReconstitutionCalculation calculateReconstitution({
     );
   }
 
-  if (!isValidValue(desiredDose, min: 0)) {
+  if (!isValidValue(desiredDose)) {
     return const ReconstitutionCalculation(
       concentration: 0,
       volumePerDose: 0,
@@ -125,7 +126,7 @@ ReconstitutionCalculation calculateReconstitution({
     );
   }
 
-  if (!isValidValue(diluentVolume, min: 0)) {
+  if (!isValidValue(diluentVolume)) {
     return const ReconstitutionCalculation(
       concentration: 0,
       volumePerDose: 0,
@@ -137,7 +138,7 @@ ReconstitutionCalculation calculateReconstitution({
   }
 
   // CRITICAL FORMULA - See docs/RECONSTITUTION_CALCULATOR_FORMULA.md
-  
+
   // Step 1: Calculate concentration after reconstitution
   // Concentration (C) = Total_Strength / Diluent_Volume
   final concentration = totalStrength / diluentVolume;
@@ -160,15 +161,15 @@ ReconstitutionCalculation calculateReconstitution({
 }
 
 /// Calculate dose from volume (reverse calculation)
-/// 
+///
 /// Used when user drags slider to see what dose they would get
-/// 
+///
 /// **Formula:**
 /// ```
 /// Dose = Volume × Concentration
 /// Concentration = Total_Strength / Diluent_Volume
 /// ```
-/// 
+///
 /// **Example:**
 /// ```dart
 /// calculateDoseFromVolume(
@@ -183,9 +184,9 @@ double calculateDoseFromVolume({
   required double totalStrength,
   required double diluentVolume,
 }) {
-  if (!isValidValue(volumeMl, min: 0)) return 0;
-  if (!isValidValue(totalStrength, min: 0)) return 0;
-  if (!isValidValue(diluentVolume, min: 0)) return 0;
+  if (!isValidValue(volumeMl)) return 0;
+  if (!isValidValue(totalStrength)) return 0;
+  if (!isValidValue(diluentVolume)) return 0;
 
   // Concentration = Total_Strength / Diluent_Volume
   final concentration = totalStrength / diluentVolume;
@@ -197,9 +198,9 @@ double calculateDoseFromVolume({
 }
 
 /// Calculate volume from dose (forward calculation)
-/// 
+///
 /// Used when user types dose to see what volume to draw
-/// 
+///
 /// **Formula:**
 /// ```
 /// Volume = Dose / Concentration
@@ -210,9 +211,9 @@ double calculateVolumeFromDose({
   required double totalStrength,
   required double diluentVolume,
 }) {
-  if (!isValidValue(dose, min: 0)) return 0;
-  if (!isValidValue(totalStrength, min: 0)) return 0;
-  if (!isValidValue(diluentVolume, min: 0)) return 0;
+  if (!isValidValue(dose)) return 0;
+  if (!isValidValue(totalStrength)) return 0;
+  if (!isValidValue(diluentVolume)) return 0;
 
   // Concentration = Total_Strength / Diluent_Volume
   final concentration = totalStrength / diluentVolume;

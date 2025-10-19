@@ -1,7 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class SelectMedicationForSchedulePage extends StatelessWidget {
@@ -54,25 +59,25 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
   String _formatStock(Medication m) {
     switch (m.form) {
       case MedicationForm.tablet:
-        final qty = m.stockValue?.toInt() ?? 0;
+        final qty = m.stockValue.toInt() ?? 0;
         return '$qty tablet${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.capsule:
-        final qty = m.stockValue?.toInt() ?? 0;
+        final qty = m.stockValue.toInt() ?? 0;
         return '$qty capsule${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.injectionPreFilledSyringe:
-        final qty = m.stockValue?.toInt() ?? 0;
+        final qty = m.stockValue.toInt() ?? 0;
         return '$qty syringe${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.injectionSingleDoseVial:
-        final qty = m.stockValue?.toInt() ?? 0;
+        final qty = m.stockValue.toInt() ?? 0;
         return '$qty vial${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.injectionMultiDoseVial:
-        final qty = m.stockValue?.toInt() ?? 0;
+        final qty = m.stockValue.toInt() ?? 0;
         return '$qty vial${qty == 1 ? '' : 's'} in stock';
     }
   }
 
   Color _getStockColor(BuildContext context, Medication m) {
-    final qty = m.stockValue?.toInt() ?? 0;
+    final qty = m.stockValue.toInt() ?? 0;
     final lowStock = m.lowStockThreshold?.toInt() ?? 5;
     if (qty == 0) {
       return Theme.of(context).colorScheme.error;
@@ -140,17 +145,14 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     m.name,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                                   ),
                                 ),
                                 Icon(
                                   Icons.chevron_right,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ],
                             ),
@@ -186,12 +188,7 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.valueColor,
-  });
+  const _InfoRow({required this.label, required this.value, required this.icon, this.valueColor});
 
   final String label;
   final String value;
@@ -206,16 +203,15 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: valueColor,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, color: valueColor),
         ),
       ],
     );

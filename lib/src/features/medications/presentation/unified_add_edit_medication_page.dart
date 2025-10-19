@@ -1,37 +1,36 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/sections/mdv_volume_reconstitution_section.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Unified page for adding/editing all medication types.
 /// Handles tablets, capsules, PFS, single-dose vials, and multi-dose vials.
 class UnifiedAddEditMedicationPage extends ConsumerStatefulWidget {
-  const UnifiedAddEditMedicationPage({
-    super.key,
-    required this.form,
-    this.initial,
-  });
+  const UnifiedAddEditMedicationPage({required this.form, super.key, this.initial});
 
   final MedicationForm form;
   final Medication? initial;
 
   @override
-  ConsumerState<UnifiedAddEditMedicationPage> createState() =>
-      _UnifiedAddEditMedicationPageState();
+  ConsumerState<UnifiedAddEditMedicationPage> createState() => _UnifiedAddEditMedicationPageState();
 }
 
-class _UnifiedAddEditMedicationPageState
-    extends ConsumerState<UnifiedAddEditMedicationPage> {
+class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMedicationPage> {
   final _formKey = GlobalKey<FormState>();
   final GlobalKey _summaryKey = GlobalKey();
   final GlobalKey _vialVolumeKey = GlobalKey();
@@ -72,7 +71,7 @@ class _UnifiedAddEditMedicationPageState
   final _perMlCtrl = TextEditingController();
   final _vialVolumeCtrl = TextEditingController(text: '0');
   ReconstitutionResult? _reconResult;
-  bool _showCalculator = false;
+  final bool _showCalculator = false;
 
   @override
   void initState() {
@@ -219,8 +218,7 @@ class _UnifiedAddEditMedicationPageState
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.sentences,
             decoration: _dec(hint: 'eg. Panadol'),
-            validator: (v) =>
-                (v == null || v.trim().isEmpty) ? 'Required' : null,
+            validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
             onChanged: (_) => setState(() => _touchedName = true),
           ),
         ),
@@ -399,9 +397,7 @@ class _UnifiedAddEditMedicationPageState
       _rowLabelField(
         label: 'Expiry',
         field: DateButton36(
-          label: _expiry == null
-              ? 'Pick expiry date'
-              : DateFormat.yMd().format(_expiry!),
+          label: _expiry == null ? 'Pick expiry date' : DateFormat.yMd().format(_expiry!),
           onPressed: _pickExpiry,
           selected: _expiry != null,
         ),
@@ -513,10 +509,7 @@ class _UnifiedAddEditMedicationPageState
 
       // Line 2: Reconstitution details (if available)
       String? line2;
-      if (vialVol != null &&
-          vialVol > 0 &&
-          concentration != null &&
-          concentration > 0) {
+      if (vialVol != null && vialVol > 0 && concentration != null && concentration > 0) {
         final diluentName = _reconResult?.diluentName ?? 'diluent';
         line2 =
             'in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL of $diluentName, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
@@ -543,16 +536,13 @@ class _UnifiedAddEditMedicationPageState
       strengthUnitLabel: unitLabel,
       stockCurrent: stockVal ?? 0,
       stockInitial: initialStock,
-      stockUnitLabel: _isMdv
-          ? 'unreconstituted $_formLabelPlural'
-          : _formLabelPlural,
+      stockUnitLabel: _isMdv ? 'unreconstituted $_formLabelPlural' : _formLabelPlural,
       expiryDate: _expiry,
       showRefrigerate: _requiresFridge,
       showFrozen: _keepFrozen,
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: threshold,
-      includeNameInStrengthLine: false,
       perTabletLabel: name.isNotEmpty,
       formLabelPlural: _formLabelPlural,
       additionalInfo: mdvAdditionalInfo,
@@ -614,12 +604,8 @@ class _UnifiedAddEditMedicationPageState
       id: id,
       form: widget.form,
       name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty
-          ? null
-          : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
+      manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
+      description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: strength,
       strengthUnit: _strengthUnit,
@@ -631,26 +617,18 @@ class _UnifiedAddEditMedicationPageState
           ? double.tryParse(_lowStockCtrl.text.trim())
           : null,
       expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _buildStorageInstructions(),
       initialStockValue: initialStock,
-      containerVolumeMl: _isMdv
-          ? double.tryParse(_vialVolumeCtrl.text.trim())
-          : null,
+      containerVolumeMl: _isMdv ? double.tryParse(_vialVolumeCtrl.text.trim()) : null,
     );
 
     await repo.upsert(med);
     if (!mounted) return;
     context.go('/medications');
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Medication saved')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medication saved')));
   }
 
   String? _buildStorageInstructions() {
@@ -660,8 +638,7 @@ class _UnifiedAddEditMedicationPageState
     if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
       parts.add('Keep frozen');
     }
-    if (_lightSensitive &&
-        !parts.any((p) => p.toLowerCase().contains('light'))) {
+    if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
       parts.add('Protect from light');
     }
     return parts.isEmpty ? null : parts.join('. ');

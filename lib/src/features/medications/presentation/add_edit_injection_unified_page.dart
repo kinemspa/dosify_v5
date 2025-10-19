@@ -1,39 +1,37 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/services.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'providers.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
-import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 enum InjectionKind { pfs, single, multi }
 
 class AddEditInjectionUnifiedPage extends ConsumerStatefulWidget {
-  const AddEditInjectionUnifiedPage({
-    super.key,
-    required this.kind,
-    this.initial,
-  });
+  const AddEditInjectionUnifiedPage({required this.kind, super.key, this.initial});
   final InjectionKind kind;
   final Medication? initial;
 
   @override
-  ConsumerState<AddEditInjectionUnifiedPage> createState() =>
-      _AddEditInjectionUnifiedPageState();
+  ConsumerState<AddEditInjectionUnifiedPage> createState() => _AddEditInjectionUnifiedPageState();
 }
 
-class _AddEditInjectionUnifiedPageState
-    extends ConsumerState<AddEditInjectionUnifiedPage> {
+class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUnifiedPage> {
   // Floating summary like Tablet/Capsule
   final GlobalKey _summaryKey = GlobalKey();
   final GlobalKey _vialVolumeKey = GlobalKey(); // For scrolling to vial volume
@@ -53,8 +51,7 @@ class _AddEditInjectionUnifiedPageState
   String? _lastCalcDoseUnit;
   SyringeSizeMl? _lastCalcSyringe;
   double? _lastCalcVialSize;
-  ReconstitutionResult?
-  _reconResult; // Track current reconstitution calculation
+  ReconstitutionResult? _reconResult; // Track current reconstitution calculation
   bool _showCalculator = false; // Toggle inline calculator visibility
 
   final _stock = TextEditingController(text: '0');
@@ -112,23 +109,26 @@ class _AddEditInjectionUnifiedPageState
       final vialVol = double.tryParse(_vialVolume.text.trim());
       final concentration = double.tryParse(_perMl.text.trim());
       final stockCount = stockVal?.toInt() ?? 0;
-      
+
       // Line 1: Strength per vial
       final line1 =
           '${strengthVal.toStringAsFixed(strengthVal == strengthVal.roundToDouble() ? 0 : 1)}$unitLabel per Vial';
-      
+
       // Line 2: Reconstitution details (if available)
       String? line2;
       if (vialVol != null && vialVol > 0 && concentration != null && concentration > 0) {
         final diluentName = _reconResult?.diluentName ?? 'diluent';
-        line2 = 'in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL of $diluentName, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
+        line2 =
+            'in ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)}mL of $diluentName, ${concentration.toStringAsFixed(concentration == concentration.roundToDouble() ? 0 : 1)}$unitLabel/mL';
       } else if (vialVol != null && vialVol > 0) {
-        line2 = 'Vial Volume: ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)} mL';
+        line2 =
+            'Vial Volume: ${vialVol.toStringAsFixed(vialVol == vialVol.roundToDouble() ? 0 : 1)} mL';
       }
-      
+
       // Line 3: Stock count
-      String line3 = '$stockCount unreconstituted ${stockCount == 1 ? "vial" : "vials"} remain in stock';
-      
+      final line3 =
+          '$stockCount unreconstituted ${stockCount == 1 ? "vial" : "vials"} remain in stock';
+
       // Combine lines with line breaks
       mdvAdditionalInfo = line1;
       if (line2 != null) mdvAdditionalInfo += '\n$line2';
@@ -141,8 +141,6 @@ class _AddEditInjectionUnifiedPageState
       manufacturer: manufacturer.isEmpty ? null : manufacturer,
       strengthValue: strengthVal,
       strengthUnitLabel: _isPerMl ? '$unitLabel/mL' : unitLabel,
-      perMlValue:
-          null, // Don't use perMlValue for MDV - we show it in additionalInfo instead
       stockCurrent: stockVal ?? 0,
       stockInitial: widget.initial?.initialStockValue ?? stockVal ?? 0,
       stockUnitLabel: 'unreconstituted $stockUnitLabel',
@@ -150,8 +148,6 @@ class _AddEditInjectionUnifiedPageState
       showRefrigerate: _refrigerate,
       showFrozen: _keepFrozen,
       showDark: _lightSensitive,
-      lowStockEnabled: false,
-      includeNameInStrengthLine: false,
       perTabletLabel: false,
       perUnitLabel: perUnitLabel,
       formLabelPlural: stockUnitLabel,
@@ -193,13 +189,10 @@ class _AddEditInjectionUnifiedPageState
       switch (widget.kind) {
         case InjectionKind.pfs:
           _stockUnit = StockUnit.preFilledSyringes;
-          break;
         case InjectionKind.single:
           _stockUnit = StockUnit.singleDoseVials;
-          break;
         case InjectionKind.multi:
           _stockUnit = StockUnit.multiDoseVials;
-          break;
       }
     }
   }
@@ -221,10 +214,7 @@ class _AddEditInjectionUnifiedPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: kOutlineWidth,
-        ),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -255,10 +245,7 @@ class _AddEditInjectionUnifiedPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
-        ),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -281,9 +268,7 @@ class _AddEditInjectionUnifiedPageState
       _strengthUnit == Unit.unitsPerMl;
 
   String _buildReconstitutionText(ReconstitutionResult result) {
-    final diluentText = result.diluentName?.isNotEmpty == true
-        ? result.diluentName
-        : 'diluent';
+    final diluentText = result.diluentName?.isNotEmpty ?? false ? result.diluentName : 'diluent';
     final syringeSize = result.syringeSizeMl.toStringAsFixed(1);
     final volume = result.solventVolumeMl.toStringAsFixed(2);
     final units = result.recommendedUnits.toStringAsFixed(0);
@@ -347,11 +332,11 @@ class _AddEditInjectionUnifiedPageState
 
   (double, double, double) _presetUnitsRaw(SyringeSizeMl syringe) {
     final total = syringe.totalUnits.toDouble();
-    double minU = (total * 0.05).ceil().toDouble();
+    var minU = (total * 0.05).ceil().toDouble();
     if (minU < 1.0) minU = 1.0;
     if (minU > total) minU = total;
-    final double midU = _round2(total * 0.33);
-    final double highU = _round2(total * 0.80);
+    final midU = _round2(total * 0.33);
+    final highU = _round2(total * 0.80);
     return (minU, midU, highU);
   }
 
@@ -398,19 +383,12 @@ class _AddEditInjectionUnifiedPageState
                     neutral: true,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: 8,
-                          right: 8,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6),
                         child: Text(
                           'Provide general details for this medication.',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -419,29 +397,17 @@ class _AddEditInjectionUnifiedPageState
                           child: TextFormField(
                             controller: _name,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Name *',
-                              'eg. AcmeTab-500',
-                            ),
+                            decoration: _dec(context, 'Name *', 'eg. AcmeTab-500'),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Enter the medication name',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -450,29 +416,17 @@ class _AddEditInjectionUnifiedPageState
                           child: TextFormField(
                             controller: _manufacturer,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Manufacturer',
-                              'eg. Contoso Pharma',
-                            ),
+                            decoration: _dec(context, 'Manufacturer', 'eg. Contoso Pharma'),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Enter the brand or company name',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -481,29 +435,17 @@ class _AddEditInjectionUnifiedPageState
                           child: TextFormField(
                             controller: _description,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Description',
-                              'eg. Pain relief',
-                            ),
+                            decoration: _dec(context, 'Description', 'eg. Pain relief'),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Optional short description',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -514,28 +456,16 @@ class _AddEditInjectionUnifiedPageState
                           minLines: 2,
                           maxLines: null,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(
-                            context,
-                            'Notes',
-                            'eg. Take with food',
-                          ),
+                          decoration: _dec(context, 'Notes', 'eg. Take with food'),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Optional notes',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                     ],
@@ -551,16 +481,12 @@ class _AddEditInjectionUnifiedPageState
                           controller: _strength,
                           onDec: () {
                             final v = int.tryParse(_strength.text) ?? 0;
-                            _strength.text = (v - 1)
-                                .clamp(0, 1000000)
-                                .toString();
+                            _strength.text = (v - 1).clamp(0, 1000000).toString();
                             setState(() {});
                           },
                           onInc: () {
                             final v = int.tryParse(_strength.text) ?? 0;
-                            _strength.text = (v + 1)
-                                .clamp(0, 1000000)
-                                .toString();
+                            _strength.text = (v + 1).clamp(0, 1000000).toString();
                             setState(() {});
                           },
                           decoration: _dec(context, 'Strength *', '0'),
@@ -605,8 +531,7 @@ class _AddEditInjectionUnifiedPageState
                               child: Center(child: Text('units/mL')),
                             ),
                           ],
-                          onChanged: (v) =>
-                              setState(() => _strengthUnit = v ?? Unit.mg),
+                          onChanged: (v) => setState(() => _strengthUnit = v ?? Unit.mg),
                           decoration: _decDrop(context),
                         ),
                       ),
@@ -616,19 +541,13 @@ class _AddEditInjectionUnifiedPageState
                           field: StepperRow36(
                             controller: _perMl,
                             onDec: () {
-                              final v =
-                                  double.tryParse(_perMl.text.trim()) ?? 0;
-                              _perMl.text = (v - 1)
-                                  .clamp(0, 1000000)
-                                  .toStringAsFixed(0);
+                              final v = double.tryParse(_perMl.text.trim()) ?? 0;
+                              _perMl.text = (v - 1).clamp(0, 1000000).toStringAsFixed(0);
                               setState(() {});
                             },
                             onInc: () {
-                              final v =
-                                  double.tryParse(_perMl.text.trim()) ?? 0;
-                              _perMl.text = (v + 1)
-                                  .clamp(0, 1000000)
-                                  .toStringAsFixed(0);
+                              final v = double.tryParse(_perMl.text.trim()) ?? 0;
+                              _perMl.text = (v + 1).clamp(0, 1000000).toStringAsFixed(0);
                               setState(() {});
                             },
                             decoration: _dec(context, 'Per mL', '0'),
@@ -643,29 +562,20 @@ class _AddEditInjectionUnifiedPageState
                           ),
                           child: Text(
                             'Enter the volume per mL',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                      .withOpacity(0.75),
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                            ),
                           ),
                         ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Specify the amount per dose and its unit of measurement.',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     ],
@@ -682,40 +592,25 @@ class _AddEditInjectionUnifiedPageState
                           neutral: true,
                           children: [
                             // Helper text under heading, full width (only show if user tried to open without strength)
-                            if (_showCalculator &&
-                                _strengthForCalculator() == null)
+                            if (_showCalculator && _strengthForCalculator() == null)
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 8,
-                                  right: 8,
-                                  bottom: 12,
-                                ),
+                                padding: const EdgeInsets.only(left: 8, right: 8, bottom: 12),
                                 child: Text(
                                   'Please enter the vial strength above before using the reconstitution calculator.',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.error,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               )
                             else if (!_showCalculator)
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 8,
-                                  right: 8,
-                                  bottom: 12,
-                                ),
+                                padding: const EdgeInsets.only(left: 8, right: 8, bottom: 12),
                                 child: Text(
                                   'Enter the volume of fluid in the vial, or use the calculator to determine the correct reconstitution amount.',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                      ),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             // Reconstitution Calculator Button
@@ -736,13 +631,9 @@ class _AddEditInjectionUnifiedPageState
                                       onPressed: () {
                                         if (_strengthForCalculator() == null) {
                                           // Show error in helper text when clicked without strength
-                                          setState(
-                                            () => _showCalculator = true,
-                                          );
+                                          setState(() => _showCalculator = true);
                                         } else {
-                                          setState(
-                                            () => _showCalculator = true,
-                                          );
+                                          setState(() => _showCalculator = true);
                                         }
                                       },
                                       icon: const Icon(Icons.calculate),
@@ -757,42 +648,29 @@ class _AddEditInjectionUnifiedPageState
                             if (_reconResult != null && !_showCalculator) ...[
                               const SizedBox(height: 16),
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     WhiteSyringeGauge(
-                                      totalIU:
-                                          _reconResult!.syringeSizeMl * 100,
+                                      totalIU: _reconResult!.syringeSizeMl * 100,
                                       fillIU: _reconResult!.recommendedUnits,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
                                     const SizedBox(height: 16),
                                     RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                         children: [
                                           const TextSpan(text: 'Reconstitute '),
                                           TextSpan(
                                             text:
                                                 '${_strength.text.trim()} ${_baseUnit(_strengthUnit)}',
                                             style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.primary,
                                             ),
                                           ),
                                           if (_name.text.trim().isNotEmpty) ...[
@@ -800,9 +678,7 @@ class _AddEditInjectionUnifiedPageState
                                             TextSpan(
                                               text: _name.text.trim(),
                                               style: TextStyle(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
+                                                color: Theme.of(context).colorScheme.primary,
                                               ),
                                             ),
                                           ],
@@ -811,20 +687,12 @@ class _AddEditInjectionUnifiedPageState
                                             text:
                                                 '${_reconResult!.solventVolumeMl.toStringAsFixed(_reconResult!.solventVolumeMl == _reconResult!.solventVolumeMl.roundToDouble() ? 0 : 1)} mL',
                                             style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.primary,
                                             ),
                                           ),
-                                          if (_reconResult!.diluentName !=
-                                                  null &&
-                                              _reconResult!
-                                                  .diluentName!
-                                                  .isNotEmpty)
-                                            TextSpan(
-                                              text:
-                                                  ' ${_reconResult!.diluentName}',
-                                            ),
+                                          if (_reconResult!.diluentName != null &&
+                                              _reconResult!.diluentName!.isNotEmpty)
+                                            TextSpan(text: ' ${_reconResult!.diluentName}'),
                                         ],
                                       ),
                                     ),
@@ -833,23 +701,16 @@ class _AddEditInjectionUnifiedPageState
                                     RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                            ),
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
                                         children: [
                                           const TextSpan(text: 'Draw '),
                                           TextSpan(
                                             text:
                                                 '${_reconResult!.recommendedUnits.toStringAsFixed(1)} IU',
                                             style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -858,9 +719,7 @@ class _AddEditInjectionUnifiedPageState
                                             text:
                                                 '${(_reconResult!.recommendedUnits / 100 * _reconResult!.syringeSizeMl).toStringAsFixed(2)} mL',
                                             style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -872,23 +731,16 @@ class _AddEditInjectionUnifiedPageState
                                     RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                            ),
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
                                         children: [
                                           const TextSpan(text: 'into a '),
                                           TextSpan(
                                             text:
                                                 '${_reconResult!.syringeSizeMl.toStringAsFixed(1)} mL',
                                             style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -900,23 +752,16 @@ class _AddEditInjectionUnifiedPageState
                                     RichText(
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                            ),
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        ),
                                         children: [
                                           const TextSpan(text: 'for your '),
                                           TextSpan(
                                             text:
                                                 '${_reconResult!.perMlConcentration.toStringAsFixed(_reconResult!.perMlConcentration == _reconResult!.perMlConcentration.roundToDouble() ? 0 : 1)} ${_baseUnit(_strengthUnit)}',
                                             style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
+                                              color: Theme.of(context).colorScheme.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -932,10 +777,9 @@ class _AddEditInjectionUnifiedPageState
                             if (_showCalculator)
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerLowest
-                                      .withOpacity(0.3),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerLowest.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(12),
@@ -944,13 +788,9 @@ class _AddEditInjectionUnifiedPageState
                                   children: [
                                     ReconstitutionCalculatorWidget(
                                       initialStrengthValue:
-                                          double.tryParse(
-                                            _strength.text.trim(),
-                                          ) ??
-                                          0,
+                                          double.tryParse(_strength.text.trim()) ?? 0,
                                       unitLabel: _baseUnit(_strengthUnit),
-                                      medicationName:
-                                          _name.text.trim().isNotEmpty
+                                      medicationName: _name.text.trim().isNotEmpty
                                           ? _name.text.trim()
                                           : null,
                                       initialDoseValue: _lastCalcDose,
@@ -961,26 +801,17 @@ class _AddEditInjectionUnifiedPageState
                                       showApplyButton: true,
                                       onApply: (result) {
                                         setState(() {
-                                          _perMl.text = fmt2(
-                                            result.perMlConcentration,
-                                          );
-                                          _vialVolume.text = fmt2(
-                                            result.solventVolumeMl,
-                                          );
+                                          _perMl.text = fmt2(result.perMlConcentration);
+                                          _vialVolume.text = fmt2(result.solventVolumeMl);
                                           _reconResult = result;
-                                          _showCalculator =
-                                              false; // Hide calculator after save
+                                          _showCalculator = false; // Hide calculator after save
                                         });
                                         // Scroll to vial volume field after save
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (_vialVolumeKey.currentContext !=
-                                              null) {
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          if (_vialVolumeKey.currentContext != null) {
                                             Scrollable.ensureVisible(
                                               _vialVolumeKey.currentContext!,
-                                              duration: const Duration(
-                                                milliseconds: 300,
-                                              ),
+                                              duration: const Duration(milliseconds: 300),
                                               curve: Curves.easeInOut,
                                             );
                                           }
@@ -1001,9 +832,7 @@ class _AddEditInjectionUnifiedPageState
                                             });
                                           },
                                           icon: const Icon(Icons.clear),
-                                          label: const Text(
-                                            'Clear Reconstitution',
-                                          ),
+                                          label: const Text('Clear Reconstitution'),
                                         ),
                                       ),
                                     ],
@@ -1019,36 +848,22 @@ class _AddEditInjectionUnifiedPageState
                                 label: 'Vial volume (mL)',
                                 field: StepperRow36(
                                   controller: _vialVolume,
-                                  enabled:
-                                      _reconResult ==
-                                      null, // Disable if reconstituted
+                                  enabled: _reconResult == null, // Disable if reconstituted
                                   onDec: () {
                                     if (_reconResult != null) return;
-                                    final v =
-                                        int.tryParse(_vialVolume.text.trim()) ??
-                                        0;
+                                    final v = int.tryParse(_vialVolume.text.trim()) ?? 0;
                                     setState(
-                                      () => _vialVolume.text = (v - 1)
-                                          .clamp(0, 1000000)
-                                          .toString(),
+                                      () => _vialVolume.text = (v - 1).clamp(0, 1000000).toString(),
                                     );
                                   },
                                   onInc: () {
                                     if (_reconResult != null) return;
-                                    final v =
-                                        int.tryParse(_vialVolume.text.trim()) ??
-                                        0;
+                                    final v = int.tryParse(_vialVolume.text.trim()) ?? 0;
                                     setState(
-                                      () => _vialVolume.text = (v + 1)
-                                          .clamp(0, 1000000)
-                                          .toString(),
+                                      () => _vialVolume.text = (v + 1).clamp(0, 1000000).toString(),
                                     );
                                   },
-                                  decoration: _dec(
-                                    context,
-                                    'Vial volume (mL)',
-                                    '0',
-                                  ),
+                                  decoration: _dec(context, 'Vial volume (mL)', '0'),
                                 ),
                               ),
                               Padding(
@@ -1062,13 +877,11 @@ class _AddEditInjectionUnifiedPageState
                                   _reconResult != null
                                       ? 'Edit reconstitution to change vial volume.'
                                       : 'Enter known volume or use calculator to determine reconstitution amount.',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant
-                                            .withOpacity(0.75),
-                                      ),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                                  ),
                                 ),
                               ),
                             ],
@@ -1076,8 +889,7 @@ class _AddEditInjectionUnifiedPageState
                         ),
                       ],
                     ),
-                  if (widget.kind == InjectionKind.multi)
-                    const SizedBox(height: 12),
+                  if (widget.kind == InjectionKind.multi) const SizedBox(height: 12),
 
                   SectionFormCard(
                     title: widget.kind == InjectionKind.multi ? 'Vial Inventory' : 'Inventory',
@@ -1086,20 +898,14 @@ class _AddEditInjectionUnifiedPageState
                       // Helper text for inventory section
                       if (widget.kind == InjectionKind.multi)
                         Padding(
-                          padding: const EdgeInsets.only(
-                            left: 8,
-                            right: 8,
-                            bottom: 12,
-                          ),
+                          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 12),
                           child: Text(
                             'Track the number of vials you have in storage. This includes unreconstituted sealed vials or pre-reconstituted multi-dose vials. Used for restocking and low stock alerts.',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                      .withOpacity(0.75),
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                            ),
                           ),
                         ),
                       LabelFieldRow(
@@ -1120,24 +926,16 @@ class _AddEditInjectionUnifiedPageState
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Enter the number of ${switch (widget.kind) {
                             InjectionKind.pfs => 'pre-filled syringes',
                             InjectionKind.single => 'single dose vials',
                             InjectionKind.multi => 'vials',
                           }} currently in stock',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -1155,28 +953,19 @@ class _AddEditInjectionUnifiedPageState
                               lastDate: DateTime(now.year + 10),
                               initialDate: _expiry ?? now,
                             );
-                            if (picked != null)
-                              setState(() => _expiry = picked);
+                            if (picked != null) setState(() => _expiry = picked);
                           },
                           width: kSmallControlWidth,
                           selected: _expiry != null,
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Enter the expiry date',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                     ],
@@ -1193,29 +982,17 @@ class _AddEditInjectionUnifiedPageState
                           child: TextFormField(
                             controller: _batch,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Batch No.',
-                              'Enter batch number',
-                            ),
+                            decoration: _dec(context, 'Batch No.', 'Enter batch number'),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Enter the printed batch or lot number',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -1224,29 +1001,17 @@ class _AddEditInjectionUnifiedPageState
                           child: TextFormField(
                             controller: _location,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
-                              context,
-                              'Location',
-                              'eg. Bathroom cabinet',
-                            ),
+                            decoration: _dec(context, 'Location', 'eg. Bathroom cabinet'),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
                         child: Text(
                           'Where it’s stored (e.g., Bathroom cabinet)',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -1259,9 +1024,7 @@ class _AddEditInjectionUnifiedPageState
                                 value: _refrigerate,
                                 onChanged: _keepFrozen
                                     ? null
-                                    : (v) => setState(
-                                        () => _refrigerate = v ?? false,
-                                      ),
+                                    : (v) => setState(() => _refrigerate = v ?? false),
                               ),
                               Text(
                                 'Refrigerate',
@@ -1274,20 +1037,12 @@ class _AddEditInjectionUnifiedPageState
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 4,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 4),
                         child: Text(
                           'Enable if this medication must be kept refrigerated',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -1301,28 +1056,17 @@ class _AddEditInjectionUnifiedPageState
                                 if (_keepFrozen) _refrigerate = false;
                               }),
                             ),
-                            Text(
-                              'Freeze',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
                           ],
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 2,
-                          bottom: 4,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 4),
                         child: Text(
                           'Enable if this medication must be kept frozen',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -1331,31 +1075,19 @@ class _AddEditInjectionUnifiedPageState
                           children: [
                             Checkbox(
                               value: _lightSensitive,
-                              onChanged: (v) =>
-                                  setState(() => _lightSensitive = v ?? false),
+                              onChanged: (v) => setState(() => _lightSensitive = v ?? false),
                             ),
-                            Text(
-                              'Dark storage',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
                           ],
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: kLabelColWidth + 8,
-                          top: 0,
-                          bottom: 6,
-                        ),
+                        padding: const EdgeInsets.only(left: kLabelColWidth + 8, bottom: 6),
                         child: Text(
                           'Enable if this medication must be protected from light',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.75),
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+                          ),
                         ),
                       ),
                       LabelFieldRow(
@@ -1392,8 +1124,7 @@ class _AddEditInjectionUnifiedPageState
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final repo = ref.read(medicationRepositoryProvider);
-    final id =
-        widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
+    final id = widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
 
     final stock = double.tryParse(_stock.text.trim()) ?? 0;
     final previous = widget.initial;
@@ -1411,18 +1142,12 @@ class _AddEditInjectionUnifiedPageState
         InjectionKind.multi => MedicationForm.injectionMultiDoseVial,
       },
       name: _name.text.trim(),
-      manufacturer: _manufacturer.text.trim().isEmpty
-          ? null
-          : _manufacturer.text.trim(),
-      description: _description.text.trim().isEmpty
-          ? null
-          : _description.text.trim(),
+      manufacturer: _manufacturer.text.trim().isEmpty ? null : _manufacturer.text.trim(),
+      description: _description.text.trim().isEmpty ? null : _description.text.trim(),
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
       strengthValue: double.tryParse(_strength.text) ?? 0,
       strengthUnit: _strengthUnit,
-      perMlValue: _perMl.text.trim().isEmpty
-          ? null
-          : double.tryParse(_perMl.text.trim()),
+      perMlValue: _perMl.text.trim().isEmpty ? null : double.tryParse(_perMl.text.trim()),
       stockValue: stock,
       stockUnit: _stockUnit,
       expiry: _expiry,
@@ -1430,20 +1155,18 @@ class _AddEditInjectionUnifiedPageState
       containerVolumeMl: _vialVolume.text.trim().isEmpty
           ? null
           : double.tryParse(_vialVolume.text.trim()),
-      storageLocation: _location.text.trim().isEmpty
-          ? null
-          : _location.text.trim(),
+      storageLocation: _location.text.trim().isEmpty ? null : _location.text.trim(),
       requiresRefrigeration: _refrigerate,
       storageInstructions: (() {
         final parts = <String>[];
         final s = _storageNotes.text.trim();
         if (s.isNotEmpty) parts.add(s);
-        if (_keepFrozen &&
-            !parts.any((p) => p.toLowerCase().contains('frozen')))
+        if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
           parts.add('Keep frozen');
-        if (_lightSensitive &&
-            !parts.any((p) => p.toLowerCase().contains('light')))
+        }
+        if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
           parts.add('Protect from light');
+        }
         return parts.isEmpty ? null : parts.join('. ');
       })(),
       initialStockValue: initialStock,
@@ -1484,18 +1207,13 @@ class _AddEditInjectionUnifiedPageState
             ),
             const SizedBox(height: 12),
             // Full details list
-            _detailRow(
-              ctx,
-              'Form',
-              switch (widget.kind) {
-                InjectionKind.pfs => "Pre-Filled Syringe",
-                InjectionKind.single => "Single Dose Vial",
-                InjectionKind.multi => "Multi Dose Vial",
-              },
-            ),
+            _detailRow(ctx, 'Form', switch (widget.kind) {
+              InjectionKind.pfs => 'Pre-Filled Syringe',
+              InjectionKind.single => 'Single Dose Vial',
+              InjectionKind.multi => 'Multi Dose Vial',
+            }),
             _detailRow(ctx, 'Name', med.name),
-            if (med.manufacturer != null)
-              _detailRow(ctx, 'Manufacturer', med.manufacturer!),
+            if (med.manufacturer != null) _detailRow(ctx, 'Manufacturer', med.manufacturer!),
             _detailRow(
               ctx,
               'Strength',
@@ -1507,18 +1225,9 @@ class _AddEditInjectionUnifiedPageState
                 'Concentration',
                 '${fmt2(med.perMlValue!)} ${_baseUnit(med.strengthUnit)}/mL',
               ),
-            if (med.containerVolumeMl != null &&
-                widget.kind == InjectionKind.multi)
-              _detailRow(
-                ctx,
-                'Vial Volume',
-                '${fmt2(med.containerVolumeMl!)} mL',
-              ),
-            _detailRow(
-              ctx,
-              'Stock',
-              '${fmt2(med.stockValue)} ${_stockUnitLabel()}',
-            ),
+            if (med.containerVolumeMl != null && widget.kind == InjectionKind.multi)
+              _detailRow(ctx, 'Vial Volume', '${fmt2(med.containerVolumeMl!)} mL'),
+            _detailRow(ctx, 'Stock', '${fmt2(med.stockValue)} ${_stockUnitLabel()}'),
             _detailRow(
               ctx,
               'Expiry',
@@ -1528,19 +1237,12 @@ class _AddEditInjectionUnifiedPageState
                         : '${med.expiry!.day}/${med.expiry!.month}/${med.expiry!.year}'
                   : 'No expiry',
             ),
-            if (med.batchNumber != null)
-              _detailRow(ctx, 'Batch #', med.batchNumber!),
-            if (med.storageLocation != null)
-              _detailRow(ctx, 'Storage', med.storageLocation!),
-            _detailRow(
-              ctx,
-              'Requires refrigeration',
-              med.requiresRefrigeration ? 'Yes' : 'No',
-            ),
+            if (med.batchNumber != null) _detailRow(ctx, 'Batch #', med.batchNumber!),
+            if (med.storageLocation != null) _detailRow(ctx, 'Storage', med.storageLocation!),
+            _detailRow(ctx, 'Requires refrigeration', med.requiresRefrigeration ? 'Yes' : 'No'),
             if (med.storageInstructions != null)
               _detailRow(ctx, 'Storage notes', med.storageInstructions!),
-            if (med.description != null)
-              _detailRow(ctx, 'Description', med.description!),
+            if (med.description != null) _detailRow(ctx, 'Description', med.description!),
             if (med.notes != null) _detailRow(ctx, 'Notes', med.notes!),
           ],
         ),
@@ -1550,14 +1252,9 @@ class _AddEditInjectionUnifiedPageState
             style: TextButton.styleFrom(
               foregroundColor: Colors.grey.shade600,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
+            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w500)),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -1565,20 +1262,15 @@ class _AddEditInjectionUnifiedPageState
               backgroundColor: Colors.teal.shade600,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
-            child: const Text(
-              'Confirm',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
+            child: const Text('Confirm', style: TextStyle(fontWeight: FontWeight.w500)),
           ),
         ],
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed ?? false) {
       await repo.upsert(med);
       if (!mounted) return;
       context.go('/medications');
@@ -1603,15 +1295,11 @@ class _AddEditInjectionUnifiedPageState
             width: 120,
             child: Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium)),
         ],
       ),
     );

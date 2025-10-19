@@ -1,8 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../widgets/app_header.dart';
-import '../../../core/utils/format.dart';
-import '../../medications/domain/enums.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class StrengthCardStylesPage extends StatelessWidget {
   const StrengthCardStylesPage({super.key});
@@ -10,10 +12,7 @@ class StrengthCardStylesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(
-        title: 'Strength Card Styles',
-        forceBackButton: true,
-      ),
+      appBar: const GradientAppBar(title: 'Strength Card Styles', forceBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -58,10 +57,7 @@ class StrengthCardStylesPage extends StatelessWidget {
                     itemBuilder: (context, index) => _StyleCard(
                       style: StrengthCardStyle.values[index],
                       isSelected: false, // TODO: Add persistence
-                      onTap: () => _selectStyle(
-                        context,
-                        StrengthCardStyle.values[index],
-                      ),
+                      onTap: () => _selectStyle(context, StrengthCardStyle.values[index]),
                     ),
                   );
                 },
@@ -125,11 +121,7 @@ extension StrengthCardStyleExtension on StrengthCardStyle {
 }
 
 class _StyleCard extends StatelessWidget {
-  const _StyleCard({
-    required this.style,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _StyleCard({required this.style, required this.isSelected, required this.onTap});
 
   final StrengthCardStyle style;
   final bool isSelected;
@@ -147,9 +139,7 @@ class _StyleCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: isSelected
-                ? Border.all(color: theme.colorScheme.primary, width: 2)
-                : null,
+            border: isSelected ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
           ),
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -167,11 +157,7 @@ class _StyleCard extends StatelessWidget {
                   ),
                   if (isSelected) ...[
                     const Spacer(),
-                    Icon(
-                      Icons.check_circle,
-                      color: theme.colorScheme.primary,
-                      size: 18,
-                    ),
+                    Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 18),
                   ],
                 ],
               ),
@@ -235,11 +221,7 @@ class _StyleCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.medication,
-                    size: 12,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.medication, size: 12, color: theme.colorScheme.primary),
                   const SizedBox(width: 4),
                   Text(
                     'Strength',
@@ -297,7 +279,6 @@ class _StyleCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(8),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -408,10 +389,7 @@ class _StyleCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Row(
             children: [
-              Text(
-                'Strength: ',
-                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
-              ),
+              Text('Strength: ', style: theme.textTheme.bodySmall?.copyWith(fontSize: 10)),
               Text(
                 '${fmt2(strengthValue)} mg',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -435,11 +413,7 @@ class _StyleCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 3,
-                    height: 12,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Container(width: 3, height: 12, color: theme.colorScheme.primary),
                   const SizedBox(width: 6),
                   Text(
                     'Strength',
@@ -470,7 +444,6 @@ class _StyleCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(8),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -481,7 +454,7 @@ class _StyleCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${fmt2(strengthValue)}',
+                fmt2(strengthValue),
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.bold,

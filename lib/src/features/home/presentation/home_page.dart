@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,10 +20,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Welcome to Dosifi v5',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('Welcome to Dosifi v5', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
               'This is a starter scaffold. From here you can add medications and schedules.',

@@ -1,9 +1,9 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class StepperField extends StatefulWidget {
   const StepperField({
-    super.key,
-    required this.controller,
+    required this.controller, super.key,
     this.label,
     this.hint,
     this.onChanged,
@@ -50,14 +50,11 @@ class _StepperFieldState extends State<StepperField> {
           child: TextFormField(
             controller: widget.controller,
             enabled: widget.enabled,
-            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+            keyboardType: const TextInputType.numberWithOptions(),
             decoration: InputDecoration(
               labelText: widget.label,
               hintText: widget.hint,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 16,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             ),
             onChanged: widget.onChanged,
           ),

@@ -1,16 +1,23 @@
+// Dart imports:
 import 'dart:math';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
-import '../presentation/providers.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class AddEditInjectionPfsPage extends ConsumerStatefulWidget {
   const AddEditInjectionPfsPage({super.key, this.initial});
@@ -35,7 +42,10 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
   Unit _strengthUnit = Unit.mg;
   final _perMl = TextEditingController(text: '1');
   bool get _isPerMl =>
-      _strengthUnit == Unit.mcgPerMl || _strengthUnit == Unit.mgPerMl || _strengthUnit == Unit.gPerMl || _strengthUnit == Unit.unitsPerMl;
+      _strengthUnit == Unit.mcgPerMl ||
+      _strengthUnit == Unit.mgPerMl ||
+      _strengthUnit == Unit.gPerMl ||
+      _strengthUnit == Unit.unitsPerMl;
 
   // Inventory
   final _stock = TextEditingController(text: '0');
@@ -143,13 +153,16 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
     final repo = ref.read(medicationRepositoryProvider);
     final id =
         widget.initial?.id ??
-        (DateTime.now().microsecondsSinceEpoch.toString() + Random().nextInt(9999).toString().padLeft(4, '0'));
+        (DateTime.now().microsecondsSinceEpoch.toString() +
+            Random().nextInt(9999).toString().padLeft(4, '0'));
 
     final previous = widget.initial;
     final stock = double.parse(_stock.text);
     final initialStock = previous == null
         ? stock
-        : (stock > previous.stockValue ? stock : (previous.initialStockValue ?? previous.stockValue));
+        : (stock > previous.stockValue
+              ? stock
+              : (previous.initialStockValue ?? previous.stockValue));
 
     final med = Medication(
       id: id,
@@ -164,7 +177,9 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
       stockValue: stock,
       stockUnit: StockUnit.preFilledSyringes,
       lowStockEnabled: _lowStockAlert,
-      lowStockThreshold: _lowStockAlert && _lowStockThreshold.text.isNotEmpty ? double.parse(_lowStockThreshold.text) : null,
+      lowStockThreshold: _lowStockAlert && _lowStockThreshold.text.isNotEmpty
+          ? double.parse(_lowStockThreshold.text)
+          : null,
       expiry: _expiry,
       batchNumber: _batch.text.trim().isEmpty ? null : _batch.text.trim(),
       storageLocation: _location.text.trim().isEmpty ? null : _location.text.trim(),
@@ -173,8 +188,12 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
         final parts = <String>[];
         final s = _storageNotes.text.trim();
         if (s.isNotEmpty) parts.add(s);
-        if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) parts.add('Keep frozen');
-        if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) parts.add('Protect from light');
+        if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
+          parts.add('Keep frozen');
+        }
+        if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
+          parts.add('Protect from light');
+        }
         return parts.isEmpty ? null : parts.join('. ');
       })(),
       initialStockValue: initialStock,
@@ -198,7 +217,9 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
 
     return Scaffold(
       appBar: GradientAppBar(
-        title: widget.initial == null ? 'Add Medication - Pre-Filled Syringe' : 'Edit Medication - Pre-Filled Syringe',
+        title: widget.initial == null
+            ? 'Add Medication - Pre-Filled Syringe'
+            : 'Edit Medication - Pre-Filled Syringe',
         forceBackButton: true,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -213,7 +234,9 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
       body: Form(
         key: _formKey,
         child: MedEditorTemplate(
-          appBarTitle: widget.initial == null ? 'Add Pre-Filled Syringe' : 'Edit Pre-Filled Syringe',
+          appBarTitle: widget.initial == null
+              ? 'Add Pre-Filled Syringe'
+              : 'Edit Pre-Filled Syringe',
           summaryBuilder: (key) {
             final name = _name.text.trim();
             final manufacturer = _manufacturer.text.trim();
@@ -237,7 +260,6 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               showDark: _lightSensitive,
               lowStockEnabled: _lowStockAlert,
               lowStockThreshold: double.tryParse(_lowStockThreshold.text.trim()),
-              includeNameInStrengthLine: false,
               perTabletLabel: false,
               perUnitLabel: 'Syringe',
             );
@@ -309,14 +331,38 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
             value: _strengthUnit,
             width: kSmallControlWidth,
             items: const [
-              DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
-              DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
-              DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
-              DropdownMenuItem(value: Unit.units, child: Center(child: Text('units'))),
-              DropdownMenuItem(value: Unit.mcgPerMl, child: Center(child: Text('mcg/mL'))),
-              DropdownMenuItem(value: Unit.mgPerMl, child: Center(child: Text('mg/mL'))),
-              DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
-              DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
+              DropdownMenuItem(
+                value: Unit.mcg,
+                child: Center(child: Text('mcg')),
+              ),
+              DropdownMenuItem(
+                value: Unit.mg,
+                child: Center(child: Text('mg')),
+              ),
+              DropdownMenuItem(
+                value: Unit.g,
+                child: Center(child: Text('g')),
+              ),
+              DropdownMenuItem(
+                value: Unit.units,
+                child: Center(child: Text('units')),
+              ),
+              DropdownMenuItem(
+                value: Unit.mcgPerMl,
+                child: Center(child: Text('mcg/mL')),
+              ),
+              DropdownMenuItem(
+                value: Unit.mgPerMl,
+                child: Center(child: Text('mg/mL')),
+              ),
+              DropdownMenuItem(
+                value: Unit.gPerMl,
+                child: Center(child: Text('g/mL')),
+              ),
+              DropdownMenuItem(
+                value: Unit.unitsPerMl,
+                child: Center(child: Text('units/mL')),
+              ),
             ],
             onChanged: (v) => setState(() {
               _strengthUnit = v ?? _strengthUnit;
@@ -370,7 +416,10 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
           stockHelp: 'Enter the amount currently in stock',
           lowStockRow: Row(
             children: [
-              Checkbox(value: _lowStockAlert, onChanged: (v) => setState(() => _lowStockAlert = v ?? false)),
+              Checkbox(
+                value: _lowStockAlert,
+                onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
+              ),
               Expanded(
                 child: Text(
                   'Enable alert when stock is low',
@@ -423,12 +472,17 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
             value: _stockUnit,
             width: kSmallControlWidth,
             items: const [
-              DropdownMenuItem(value: StockUnit.preFilledSyringes, child: Center(child: Text('syringes'))),
+              DropdownMenuItem(
+                value: StockUnit.preFilledSyringes,
+                child: Center(child: Text('syringes')),
+              ),
             ],
             onChanged: (v) => setState(() => _stockUnit = v ?? _stockUnit),
           ),
           expiryDateButton: DateButton36(
-            label: _expiry == null ? 'Select date' : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
+            label: _expiry == null
+                ? 'Select date'
+                : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
             onPressed: () async {
               final now = DateTime.now();
               final picked = await showDatePicker(
@@ -465,26 +519,44 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
           locationHelp: 'Storage location (e.g., Medicine Cabinet, Shelf 2)',
           refrigerateRow: Opacity(
             opacity: _keepFrozen ? 0.5 : 1.0,
-            child: Row(children: [
-              Checkbox(value: _refrigerate, onChanged: _keepFrozen ? null : (v) => setState(() => _refrigerate = v ?? false)),
-              Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : Theme.of(context).textTheme.bodyMedium),
-            ]),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: _refrigerate,
+                  onChanged: _keepFrozen ? null : (v) => setState(() => _refrigerate = v ?? false),
+                ),
+                Text(
+                  'Refrigerate',
+                  style: _keepFrozen
+                      ? kMutedLabelStyle(context)
+                      : Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
           ),
           refrigerateHelp: 'Enable if this medication must be kept refrigerated',
-          freezeRow: Row(children: [
-            Checkbox(
+          freezeRow: Row(
+            children: [
+              Checkbox(
                 value: _keepFrozen,
                 onChanged: (v) => setState(() {
-                      _keepFrozen = v ?? false;
-                      if (_keepFrozen) _refrigerate = false;
-                    })),
-            Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
-          ]),
+                  _keepFrozen = v ?? false;
+                  if (_keepFrozen) _refrigerate = false;
+                }),
+              ),
+              Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
           freezeHelp: 'Enable if this medication must be kept frozen',
-          darkRow: Row(children: [
-            Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
-            Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
-          ]),
+          darkRow: Row(
+            children: [
+              Checkbox(
+                value: _lightSensitive,
+                onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+              ),
+              Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
           darkHelp: 'Enable if this medication must be protected from light',
           storageInstructionsField: Field36(
             child: TextFormField(

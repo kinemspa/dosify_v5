@@ -1,12 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import '../../medications/domain/medication.dart';
-import '../domain/enums.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class MedicationDetailPage extends StatelessWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
@@ -16,27 +21,20 @@ class MedicationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<Medication>('medications');
-    final med =
-        initial ?? (medicationId != null ? box.get(medicationId!) : null);
+    final med = initial ?? (medicationId != null ? box.get(medicationId) : null);
 
     if (med == null) {
-      return Scaffold(
-        appBar: const GradientAppBar(
-          title: 'Medication',
-          forceBackButton: true,
-        ),
-        body: const Center(child: Text('Medication not found')),
+      return const Scaffold(
+        appBar: GradientAppBar(title: 'Medication', forceBackButton: true),
+        body: Center(child: Text('Medication not found')),
       );
     }
 
     final cs = Theme.of(context).colorScheme;
-    final labelStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      fontWeight: FontWeight.w700,
-      color: cs.onSurfaceVariant,
-    );
-    final valueStyle = Theme.of(
+    final labelStyle = Theme.of(
       context,
-    ).textTheme.bodyMedium?.copyWith(color: cs.onSurface);
+    ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurfaceVariant);
+    final valueStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurface);
 
     Widget row(String label, String? value) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -102,7 +100,7 @@ class MedicationDetailPage extends StatelessWidget {
               final related = schedulesBox.values
                   .where((s) => s.medicationId == med.id)
                   .toList(growable: false);
-              int removed = 0;
+              var removed = 0;
               for (final s in related) {
                 await ScheduleScheduler.cancelFor(s.id);
                 await schedulesBox.delete(s.id);
@@ -114,9 +112,7 @@ class MedicationDetailPage extends StatelessWidget {
                 context.go('/medications');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      'Deleted "${med.name}" — removed $removed linked schedule(s)',
-                    ),
+                    content: Text('Deleted "${med.name}" — removed $removed linked schedule(s)'),
                   ),
                 );
               }
@@ -169,10 +165,7 @@ class MedicationDetailPage extends StatelessWidget {
           _section(context, 'Storage', [
             row('Expiry', med.expiry != null ? _fmtDate(med.expiry!) : null),
             row('Storage location', med.storageLocation),
-            row(
-              'Requires refrigeration',
-              med.requiresRefrigeration ? 'Yes' : 'No',
-            ),
+            row('Requires refrigeration', med.requiresRefrigeration ? 'Yes' : 'No'),
             row('Storage instructions', med.storageInstructions),
           ]),
           const SizedBox(height: 12),
@@ -187,8 +180,7 @@ class MedicationDetailPage extends StatelessWidget {
 }
 
 String _twoDigits(int n) => n.toString().padLeft(2, '0');
-String _fmtDate(DateTime d) =>
-    '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
+String _fmtDate(DateTime d) => '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
 
 Widget _section(BuildContext context, String title, List<Widget> children) {
   final theme = Theme.of(context);

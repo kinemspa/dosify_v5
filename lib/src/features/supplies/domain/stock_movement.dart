@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 @HiveType(typeId: 51)
@@ -90,16 +91,12 @@ class MovementReasonAdapter extends TypeAdapter<MovementReason> {
     switch (obj) {
       case MovementReason.purchase:
         writer.writeByte(0);
-        break;
       case MovementReason.used:
         writer.writeByte(1);
-        break;
       case MovementReason.correction:
         writer.writeByte(2);
-        break;
       case MovementReason.other:
         writer.writeByte(3);
-        break;
     }
   }
 }

@@ -1,20 +1,24 @@
+// Dart imports:
 import 'dart:math';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:go_router/go_router.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
+// Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class AddEditCapsulePage extends ConsumerStatefulWidget {
   const AddEditCapsulePage({super.key, this.initial});
@@ -157,7 +161,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
     final stockVal = double.tryParse(_stockValueCtrl.text.trim());
     final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
-    String unitLabel = _unitLabel(_strengthUnit);
+    final unitLabel = _unitLabel(_strengthUnit);
     final threshold = double.tryParse(_lowStockCtrl.text.trim());
     final headerTitle = name.isEmpty ? 'Capsules' : name;
 
@@ -176,7 +180,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: threshold,
-      includeNameInStrengthLine: false,
       perTabletLabel: name.isNotEmpty,
       formLabelPlural: 'capsules',
     );
@@ -206,14 +209,10 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     final parts = <String>['Capsules'];
     if (_nameCtrl.text.isNotEmpty) parts.add(_nameCtrl.text);
     if (_strengthValueCtrl.text.isNotEmpty) {
-      parts.add(
-        '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unitLabel per capsule',
-      );
+      parts.add('${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)}$unitLabel per capsule');
     }
     if (_stockValueCtrl.text.isNotEmpty) {
-      parts.add(
-        '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} $stockLabel in stock',
-      );
+      parts.add('${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} $stockLabel in stock');
     }
     if (_manufacturerCtrl.text.isNotEmpty) parts.add(_manufacturerCtrl.text);
     if (_requiresFridge) parts.add('Keep refrigerated');
@@ -283,10 +282,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: kOutlineWidth,
-        ),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -300,26 +296,15 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
       ),
-      // No in-field label text
-      labelText: null,
     );
   }
 
-  InputDecoration _decDrop({
-    required String label,
-    String? hint,
-    String? helper,
-  }) {
+  InputDecoration _decDrop({required String label, String? hint, String? helper}) {
     return _dec(label: label, hint: hint, helper: helper);
   }
 
   Widget _section(String title, List<Widget> children, {Widget? trailing}) {
-    return SectionFormCard(
-      title: title,
-      neutral: true,
-      trailing: trailing,
-      children: children,
-    );
+    return SectionFormCard(title: title, neutral: true, trailing: trailing, children: children);
   }
 
   Widget _rowLabelField({required String label, required Widget field}) {
@@ -327,7 +312,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: _labelWidth(),
@@ -355,10 +339,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     if (_nameCtrl.text.isEmpty) {
       return Text(
         'Fill in medication details to see summary',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Colors.white70,
-          fontStyle: FontStyle.italic,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: Colors.white70, fontStyle: FontStyle.italic),
       );
     }
 
@@ -370,16 +353,11 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
             children: [
               RichText(
                 text: TextSpan(
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
                   children: [
                     TextSpan(
                       text: _nameCtrl.text,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     if (_manufacturerCtrl.text.isNotEmpty)
                       TextSpan(
@@ -458,12 +436,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       id: id,
       form: MedicationForm.capsule,
       name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty
-          ? null
-          : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
+      manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
+      description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: double.parse(_strengthValueCtrl.text),
       strengthUnit: _strengthUnit,
@@ -474,23 +448,19 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
           ? double.parse(_lowStockCtrl.text)
           : null,
       expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: (() {
         final parts = <String>[];
         final s = _storageNotesCtrl.text.trim();
         if (s.isNotEmpty) parts.add(s);
-        if (_keepFrozen &&
-            !parts.any((p) => p.toLowerCase().contains('frozen')))
+        if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
           parts.add('Keep frozen');
-        if (_lightSensitive &&
-            !parts.any((p) => p.toLowerCase().contains('light')))
+        }
+        if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
           parts.add('Protect from light');
+        }
         return parts.isEmpty ? null : parts.join('. ');
       })(),
       initialStockValue: initialStock,
@@ -501,7 +471,11 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Center(
-          child: Text('Confirm Medication', textAlign: TextAlign.center, style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+          child: Text(
+            'Confirm Medication',
+            textAlign: TextAlign.center,
+            style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
         ),
         actionsAlignment: MainAxisAlignment.center,
         content: SingleChildScrollView(
@@ -509,88 +483,67 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // Simple summary (no gradient card)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                _buildSummary(),
-                style: Theme.of(
+              // Simple summary (no gradient card)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  _buildSummary(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+              // Full details
+              _detailRow(context, 'Form', 'Capsule'),
+              _detailRow(context, 'Name', _nameCtrl.text.trim()),
+              if (_manufacturerCtrl.text.trim().isNotEmpty)
+                _detailRow(context, 'Manufacturer', _manufacturerCtrl.text.trim()),
+              if (_descriptionCtrl.text.trim().isNotEmpty)
+                _detailRow(context, 'Description', _descriptionCtrl.text.trim()),
+              if (_notesCtrl.text.trim().isNotEmpty)
+                _detailRow(context, 'Notes', _notesCtrl.text.trim()),
+              if (_strengthValueCtrl.text.trim().isNotEmpty)
+                _detailRow(
                   context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-              ),
-            ),
-            // Full details
-            _detailRow(context, 'Form', 'Capsule'),
-            _detailRow(context, 'Name', _nameCtrl.text.trim()),
-            if (_manufacturerCtrl.text.trim().isNotEmpty)
+                  'Strength',
+                  '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)}',
+                ),
+              if (_stockValueCtrl.text.trim().isNotEmpty)
+                _detailRow(
+                  context,
+                  'Stock',
+                  '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
+                ),
+              if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty)
+                _detailRow(
+                  context,
+                  'Low stock at',
+                  '${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
+                ),
               _detailRow(
                 context,
-                'Manufacturer',
-                _manufacturerCtrl.text.trim(),
+                'Expiry',
+                _expiry != null ? DateFormat('dd/MM/yy').format(_expiry!) : 'No expiry',
               ),
-            if (_descriptionCtrl.text.trim().isNotEmpty)
-              _detailRow(context, 'Description', _descriptionCtrl.text.trim()),
-            if (_notesCtrl.text.trim().isNotEmpty)
-              _detailRow(context, 'Notes', _notesCtrl.text.trim()),
-            if (_strengthValueCtrl.text.trim().isNotEmpty)
-              _detailRow(
-                context,
-                'Strength',
-                '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)}',
-              ),
-            if (_stockValueCtrl.text.trim().isNotEmpty)
-              _detailRow(
-                context,
-                'Stock',
-                '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
-              ),
-            if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty)
-              _detailRow(
-                context,
-                'Low stock at',
-                '${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
-              ),
-            _detailRow(
-              context,
-              'Expiry',
-              _expiry != null
-                  ? DateFormat('dd/MM/yy').format(_expiry!)
-                  : 'No expiry',
-            ),
-            if (_batchCtrl.text.trim().isNotEmpty)
-              _detailRow(context, 'Batch #', _batchCtrl.text.trim()),
-            if (_storageCtrl.text.trim().isNotEmpty)
-              _detailRow(context, 'Storage', _storageCtrl.text.trim()),
-            _detailRow(
-              context,
-              'Requires refrigeration',
-              _requiresFridge ? 'Yes' : 'No',
-            ),
-            if (_keepFrozen) _detailRow(context, 'Keep frozen', 'Yes'),
-            if (_lightSensitive)
-              _detailRow(context, 'Protect from light', 'Yes'),
-            if (_storageNotesCtrl.text.trim().isNotEmpty)
-              _detailRow(
-                context,
-                'Storage notes',
-                _storageNotesCtrl.text.trim(),
-              ),
+              if (_batchCtrl.text.trim().isNotEmpty)
+                _detailRow(context, 'Batch #', _batchCtrl.text.trim()),
+              if (_storageCtrl.text.trim().isNotEmpty)
+                _detailRow(context, 'Storage', _storageCtrl.text.trim()),
+              _detailRow(context, 'Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
+              if (_keepFrozen) _detailRow(context, 'Keep frozen', 'Yes'),
+              if (_lightSensitive) _detailRow(context, 'Protect from light', 'Yes'),
+              if (_storageNotesCtrl.text.trim().isNotEmpty)
+                _detailRow(context, 'Storage notes', _storageNotesCtrl.text.trim()),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm'),
-          ),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Confirm')),
         ],
       ),
     );
-    if (confirmed == true) {
+    if (confirmed ?? false) {
       await repo.upsert(med);
       if (!mounted) return;
       context.go('/medications');
@@ -610,9 +563,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(
-            theme.colorScheme.primary.withValues(alpha: 0.12),
-          ),
+          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -648,9 +599,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       padding: const EdgeInsets.only(left: 2, top: 2, bottom: 4),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.error,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
       ),
     );
   }
@@ -663,9 +614,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       children: [
         Text(
           'Summary',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
         _detailRow(context, 'Form', 'Capsule'),
@@ -674,13 +623,12 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
           _detailRow(context, 'Manufacturer', _manufacturerCtrl.text.trim()),
         if (_descriptionCtrl.text.trim().isNotEmpty)
           _detailRow(context, 'Description', _descriptionCtrl.text.trim()),
-        if (_notesCtrl.text.trim().isNotEmpty)
-          _detailRow(context, 'Notes', _notesCtrl.text.trim()),
+        if (_notesCtrl.text.trim().isNotEmpty) _detailRow(context, 'Notes', _notesCtrl.text.trim()),
         if (_strengthValueCtrl.text.trim().isNotEmpty)
           _detailRow(
             context,
             'Strength',
-            '${(_strengthValueCtrl.text.trim())} ${_unitLabel(_strengthUnit)}',
+            '${_strengthValueCtrl.text.trim()} ${_unitLabel(_strengthUnit)}',
           ),
         if (_stockValueCtrl.text.trim().isNotEmpty)
           _detailRow(
@@ -693,19 +641,13 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
         _detailRow(
           context,
           'Expiry',
-          _expiry != null
-              ? DateFormat('dd/MM/yy').format(_expiry!)
-              : 'No expiry',
+          _expiry != null ? DateFormat('dd/MM/yy').format(_expiry!) : 'No expiry',
         ),
         if (_batchCtrl.text.trim().isNotEmpty)
           _detailRow(context, 'Batch #', _batchCtrl.text.trim()),
         if (_storageCtrl.text.trim().isNotEmpty)
           _detailRow(context, 'Storage', _storageCtrl.text.trim()),
-        _detailRow(
-          context,
-          'Requires refrigeration',
-          _requiresFridge ? 'Yes' : 'No',
-        ),
+        _detailRow(context, 'Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
         if (_keepFrozen) _detailRow(context, 'Keep frozen', 'Yes'),
         if (_lightSensitive) _detailRow(context, 'Protect from light', 'Yes'),
         if (_storageNotesCtrl.text.trim().isNotEmpty)
@@ -731,9 +673,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium)),
         ],
       ),
     );
@@ -742,16 +682,16 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   @override
   Widget build(BuildContext context) {
     // Derive validation messages to surface in helper rows
-    String? nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
+    final var nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
     String? strengthAmtError;
     final strengthTxt = _strengthValueCtrl.text.trim();
     if (strengthTxt.isEmpty) {
       strengthAmtError = 'Required';
     } else {
       final d = double.tryParse(strengthTxt);
-      if (d == null)
+      if (d == null) {
         strengthAmtError = 'Invalid number';
-      else if (d <= 0)
+      } else if (d <= 0)
         strengthAmtError = 'Must be > 0';
     }
     String? stockError;
@@ -760,17 +700,17 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       stockError = 'Required';
     } else {
       final d = double.tryParse(stockTxt);
-      if (d == null)
+      if (d == null) {
         stockError = 'Invalid number';
-      else if (d < 0)
+      } else if (d < 0)
         stockError = 'Must be ≥ 0';
     }
     String? thresholdError;
     if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty) {
       final d = double.tryParse(_lowStockCtrl.text.trim());
-      if (d == null)
+      if (d == null) {
         thresholdError = 'Invalid number';
-      else if (d < 0)
+      } else if (d < 0)
         thresholdError = 'Must be ≥ 0';
       else {
         final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
@@ -779,21 +719,15 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     }
 
     // Gate errors until touched or submitted
-    final String? gNameError = (_submitted || _touchedName) ? nameError : null;
-    final String? gStrengthAmtError = (_submitted || _touchedStrengthAmt)
-        ? strengthAmtError
-        : null;
-    final String? gStockError = (_submitted || _touchedStock)
-        ? stockError
-        : null;
-    final String? gThresholdError = (_submitted || _touchedThreshold)
-        ? thresholdError
-        : null;
+    final gNameError = (_submitted || _touchedName) ? nameError : null;
+    final gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
+    final gStockError = (_submitted || _touchedStock) ? stockError : null;
+    final gThresholdError = (_submitted || _touchedThreshold) ? thresholdError : null;
 
     final theme = Theme.of(context);
 
     // Determine if required fields are valid (for Save state)
-    final bool requiredOk = (() {
+    final requiredOk = (() {
       final nameOk = _nameCtrl.text.trim().isNotEmpty;
       final aTxt = _strengthValueCtrl.text.trim();
       final a = double.tryParse(aTxt);
@@ -818,7 +752,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-children: [
+                children: [
                   SizedBox(height: _summaryHeight + 10),
                   _section('General', [
                     _rowLabelField(
@@ -830,29 +764,27 @@ children: [
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration:
-                              _dec(
-                                label: 'Name *',
-hint: 'eg. DosifiCaps-500'
-                              ).copyWith(
-                                // keep decorator out of error mode; we color border ourselves
-                                errorText: null,
-                                enabledBorder: gNameError == null
-                                    ? null
-                                    : OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                      ),
-                                focusedBorder: gNameError == null
-                                    ? null
-                                    : OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: kOutlineWidth),
-                                      ),
-                              ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required'
-                              : null,
+                          decoration: _dec(label: 'Name *', hint: 'eg. DosifiCaps-500').copyWith(
+                            enabledBorder: gNameError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
+                            focusedBorder: gNameError == null
+                                ? null
+                                : OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.error,
+                                      width: kOutlineWidth,
+                                    ),
+                                  ),
+                          ),
+                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                           onChanged: (_) => setState(() {
                             _touchedName = true;
                           }),
@@ -872,18 +804,12 @@ hint: 'eg. DosifiCaps-500'
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(
-                            label: 'Manufacturer',
-hint: 'eg. Dosifi Labs'
-                          ),
+                          decoration: _dec(label: 'Manufacturer', hint: 'eg. Dosifi Labs'),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
                     ),
-                    _helperBelowLeft(
-                      context,
-                      'Enter the brand or company name',
-                    ),
+                    _helperBelowLeft(context, 'Enter the brand or company name'),
                     _rowLabelField(
                       label: 'Description',
                       field: Field36(
@@ -893,10 +819,7 @@ hint: 'eg. Dosifi Labs'
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(
-                            label: 'Description',
-hint: 'eg. Pain relief'
-                          ),
+                          decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -913,109 +836,85 @@ hint: 'eg. Pain relief'
                         maxLines: null,
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlignVertical: TextAlignVertical.center,
-                        decoration: _dec(
-                          label: 'Notes',
-hint: 'eg. Take with water'
-                        ),
+                        decoration: _dec(label: 'Notes', hint: 'eg. Take with water'),
                         onChanged: (_) => setState(() {}),
                       ),
                     ),
                     _helperBelowLeft(context, 'Optional notes'),
                   ]),
                   const SizedBox(height: 10),
-                  _section(
-                    'Strength',
-                    [
-                      _rowLabelField(
-                        label: 'Strength *',
-                        field: StepperRow36(
-                          controller: _strengthValueCtrl,
-                          onDec: () {
-                            final d = double.tryParse(
-                              _strengthValueCtrl.text.trim(),
-                            );
-                            final base = d?.floor() ?? 0;
-                            final nv = (base - 1).clamp(0, 1000000000);
-                            setState(() {
-                              _strengthValueCtrl.text = nv.toString();
-                              _touchedStrengthAmt = true;
-                            });
-                          },
-                          onInc: () {
-                            final d = double.tryParse(
-                              _strengthValueCtrl.text.trim(),
-                            );
-                            final base = d?.floor() ?? 0;
-                            final nv = (base + 1).clamp(0, 1000000000);
-                            setState(() {
-                              _strengthValueCtrl.text = nv.toString();
-                              _touchedStrengthAmt = true;
-                            });
-                          },
-                          decoration: _dec(
-                            label: 'Amount *',
-                            hint: '0',
-                          ).copyWith(
-                            errorText: null,
-                            enabledBorder: gStrengthAmtError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
-                                  ),
-                            focusedBorder: gStrengthAmtError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ),
-                      _rowLabelField(
-                        label: 'Unit *',
-                        field: SmallDropdown36<Unit>(
-                          value: _strengthUnit,
-                          items: const [Unit.mcg, Unit.mg, Unit.g]
-                              .map(
-                                (u) => DropdownMenuItem(
-                                  value: u,
-                                  alignment: AlignmentDirectional.center,
-                                  child: Center(
-                                    child: Text(
-                                      u == Unit.mcg
-                                          ? 'mcg'
-                                          : (u == Unit.mg ? 'mg' : 'g'),
-                                    ),
+                  _section('Strength', [
+                    _rowLabelField(
+                      label: 'Strength *',
+                      field: StepperRow36(
+                        controller: _strengthValueCtrl,
+                        onDec: () {
+                          final d = double.tryParse(_strengthValueCtrl.text.trim());
+                          final base = d?.floor() ?? 0;
+                          final nv = (base - 1).clamp(0, 1000000000);
+                          setState(() {
+                            _strengthValueCtrl.text = nv.toString();
+                            _touchedStrengthAmt = true;
+                          });
+                        },
+                        onInc: () {
+                          final d = double.tryParse(_strengthValueCtrl.text.trim());
+                          final base = d?.floor() ?? 0;
+                          final nv = (base + 1).clamp(0, 1000000000);
+                          setState(() {
+                            _strengthValueCtrl.text = nv.toString();
+                            _touchedStrengthAmt = true;
+                          });
+                        },
+                        decoration: _dec(label: 'Amount *', hint: '0').copyWith(
+                          enabledBorder: gStrengthAmtError == null
+                              ? null
+                              : OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
                                   ),
                                 ),
-                              )
-                              .toList(),
-                          onChanged: (u) => setState(
-                            () => _strengthUnit = u ?? _strengthUnit,
-                          ),
-                          decoration: _decDrop(
-                            label: '',
-                            hint: null,
-                            helper: null,
-                          ),
+                          focusedBorder: gStrengthAmtError == null
+                              ? null
+                              : OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
+                                  ),
+                                ),
                         ),
                       ),
-                      if (gStrengthAmtError != null)
-                        _errorUnderLabel(context, gStrengthAmtError)
-                      else
-                        _helperBelowCenter(
-                          context,
-                          'Specify the amount per capsule and its unit of measurement.',
-                        ),
-                    ],
-                  ),
+                    ),
+                    _rowLabelField(
+                      label: 'Unit *',
+                      field: SmallDropdown36<Unit>(
+                        value: _strengthUnit,
+                        items: const [Unit.mcg, Unit.mg, Unit.g]
+                            .map(
+                              (u) => DropdownMenuItem(
+                                value: u,
+                                alignment: AlignmentDirectional.center,
+                                child: Center(
+                                  child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                        decoration: _decDrop(label: ''),
+                      ),
+                    ),
+                    if (gStrengthAmtError != null)
+                      _errorUnderLabel(context, gStrengthAmtError)
+                    else
+                      _helperBelowCenter(
+                        context,
+                        'Specify the amount per capsule and its unit of measurement.',
+                      ),
+                  ]),
                   const SizedBox(height: 10),
                   _section('Inventory', [
                     _rowLabelField(
@@ -1038,27 +937,20 @@ hint: 'eg. Take with water'
                             _touchedStock = true;
                           });
                         },
-                        decoration: _dec(
-                          label: 'Stock quantity *',
-                          hint: '0',
-                        ),
+                        decoration: _dec(label: 'Stock quantity *', hint: '0'),
                       ),
                     ),
                     if (gStockError != null)
                       _errorUnderLabel(context, gStockError)
                     else
-                      _helperBelowLeft(
-                        context,
-                        'Enter the number of capsules currently in stock',
-                      ),
+                      _helperBelowLeft(context, 'Enter the number of capsules currently in stock'),
                     _rowLabelField(
                       label: 'Low stock alert',
                       field: Row(
                         children: [
                           Checkbox(
                             value: _lowStockEnabled,
-                            onChanged: (v) =>
-                                setState(() => _lowStockEnabled = v ?? false),
+                            onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
                           ),
                           Expanded(
                             child: Text(
@@ -1092,11 +984,7 @@ hint: 'eg. Take with water'
                               _touchedThreshold = true;
                             });
                           },
-                          decoration: _dec(
-                            label: 'Threshold',
-                            hint: '0',
-                          ).copyWith(
-                            errorText: null,
+                          decoration: _dec(label: 'Threshold', hint: '0').copyWith(
                             enabledBorder: gThresholdError == null
                                 ? null
                                 : OutlineInputBorder(
@@ -1145,7 +1033,7 @@ hint: 'eg. Take with water'
                         selected: _expiry != null,
                       ),
                     ),
-                  _helperBelowLeft(context, 'Enter the expiry date'),
+                    _helperBelowLeft(context, 'Enter the expiry date'),
                   ]),
                   const SizedBox(height: 10),
                   _section('Storage', [
@@ -1158,17 +1046,11 @@ hint: 'eg. Take with water'
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(
-                            label: 'Batch No.',
-                            hint: 'Enter batch number',
-                          ),
+                          decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
                         ),
                       ),
                     ),
-                    _helperBelowLeft(
-                      context,
-                      'Enter the printed batch or lot number',
-                    ),
+                    _helperBelowLeft(context, 'Enter the printed batch or lot number'),
                     _rowLabelField(
                       label: 'Location',
                       field: Field36(
@@ -1178,18 +1060,12 @@ hint: 'eg. Take with water'
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(
-                            label: 'Location',
-                            hint: 'eg. Bathroom cabinet',
-                          ),
+                          decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
                         ),
                       ),
                     ),
-                    _helperBelowLeft(
-                      context,
-                      'Where it’s stored (e.g., Bathroom cabinet)',
-                    ),
-_rowLabelField(
+                    _helperBelowLeft(context, 'Where it’s stored (e.g., Bathroom cabinet)'),
+                    _rowLabelField(
                       label: 'Keep refrigerated',
                       field: Opacity(
                         opacity: _keepFrozen ? 0.5 : 1.0,
@@ -1197,22 +1073,20 @@ _rowLabelField(
                           children: [
                             Checkbox(
                               value: _requiresFridge,
-                            onChanged: _keepFrozen
-                                ? null
-                                : (v) => setState(
-                                    () => _requiresFridge = v ?? false,
-                                  ),
-                          ),
-                          Text(
-                            'Refrigerate',
-                            style: _keepFrozen
-                                ? kMutedLabelStyle(context)
-                                : kCheckboxLabelStyle(context),
-                          ),
-                        ],
+                              onChanged: _keepFrozen
+                                  ? null
+                                  : (v) => setState(() => _requiresFridge = v ?? false),
+                            ),
+                            Text(
+                              'Refrigerate',
+                              style: _keepFrozen
+                                  ? kMutedLabelStyle(context)
+                                  : kCheckboxLabelStyle(context),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                     _helperBelowLeftCompact(
                       context,
                       'Enable if this medication must be kept refrigerated',
@@ -1242,13 +1116,9 @@ _rowLabelField(
                         children: [
                           Checkbox(
                             value: _lightSensitive,
-                            onChanged: (v) =>
-                                setState(() => _lightSensitive = v ?? false),
+                            onChanged: (v) => setState(() => _lightSensitive = v ?? false),
                           ),
-                          Text(
-                            'Dark storage',
-                            style: kCheckboxLabelStyle(context),
-                          ),
+                          Text('Dark storage', style: kCheckboxLabelStyle(context)),
                         ],
                       ),
                     ),
@@ -1291,14 +1161,10 @@ _rowLabelField(
         width: 120,
         child: FilledButton(
           style: FilledButton.styleFrom(
-            backgroundColor: requiredOk
-                ? null
-                : Theme.of(context).colorScheme.surfaceVariant,
+            backgroundColor: requiredOk ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
             foregroundColor: requiredOk
                 ? null
-                : Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           onPressed: () {
             setState(() => _submitted = true);

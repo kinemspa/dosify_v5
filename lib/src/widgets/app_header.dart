@@ -1,10 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
 
 class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   const GradientAppBar({
-    super.key,
-    required this.title,
+    required this.title, super.key,
     this.actions,
     this.forceBackButton = false,
   });
@@ -51,29 +53,21 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
             switch (value) {
               case 'home':
                 context.go('/');
-                break;
               case 'medications':
                 context.go('/medications');
-                break;
               case 'supplies':
                 context.go('/supplies');
-                break;
               case 'schedules':
                 context.go('/schedules');
-                break;
               case 'calendar':
                 context.go('/calendar');
-                break;
               case 'reconstitution':
                 // Calculator is nested under medications; push so back returns to current
                 context.push('/medications/reconstitution');
-                break;
               case 'analytics':
                 context.go('/analytics');
-                break;
               case 'settings':
                 context.go('/settings');
-                break;
             }
           },
           itemBuilder: (context) => const [
@@ -82,10 +76,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
             PopupMenuItem(value: 'supplies', child: Text('Supplies')),
             PopupMenuItem(value: 'schedules', child: Text('Schedules')),
             PopupMenuItem(value: 'calendar', child: Text('Calendar')),
-            PopupMenuItem(
-              value: 'reconstitution',
-              child: Text('Reconstitution Calculator'),
-            ),
+            PopupMenuItem(value: 'reconstitution', child: Text('Reconstitution Calculator')),
             PopupMenuItem(value: 'analytics', child: Text('Analytics')),
             PopupMenuItem(value: 'settings', child: Text('Settings')),
           ],

@@ -1,33 +1,37 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../features/home/presentation/home_page.dart';
-import '../features/medications/presentation/medication_list_page.dart';
-import '../features/medications/presentation/medication_detail_page.dart';
-import '../features/medications/presentation/select_medication_type_page.dart';
-import '../features/medications/presentation/med_editor_template_demo_page.dart';
-import '../features/medications/presentation/select_injection_type_page.dart';
-import '../features/medications/presentation/unified_add_edit_medication_page.dart';
-import '../features/medications/presentation/unified_add_edit_medication_page_template.dart';
-import '../features/medications/domain/enums.dart';
-import '../features/medications/presentation/reconstitution_calculator_page.dart';
-import '../features/medications/presentation/reconstitution_calculator_dialog.dart';
-import '../features/medications/domain/medication.dart';
-import '../features/schedules/presentation/schedules_page.dart';
-import '../features/schedules/presentation/add_edit_schedule_page.dart';
-import '../features/schedules/presentation/select_medication_for_schedule_page.dart';
-import '../features/schedules/domain/schedule.dart';
-import '../features/settings/presentation/settings_page.dart';
-import '../features/settings/presentation/large_card_styles_page.dart';
-import '../features/settings/presentation/strength_input_styles_page.dart';
-import '../features/settings/presentation/form_field_styles_page.dart';
-import '../features/settings/presentation/bottom_nav_settings_page.dart';
-import '../features/supplies/presentation/supplies_page.dart';
+// Project imports:
+import 'package:dosifi_v5/src/app/shell_scaffold.dart';
+import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
+import 'package:dosifi_v5/src/features/calendar/presentation/calendar_page.dart';
+import 'package:dosifi_v5/src/features/home/presentation/home_page.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/med_editor_template_demo_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_detail_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_list_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/select_injection_type_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/select_medication_type_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/unified_add_edit_medication_page_template.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/select_medication_for_schedule_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/bottom_nav_settings_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/form_field_styles_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/large_card_styles_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/settings_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/strength_input_styles_page.dart';
+import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart';
+
 // Removed incorrect import
-import '../features/calendar/presentation/calendar_page.dart';
-import '../features/analytics/presentation/analytics_page.dart';
-import 'shell_scaffold.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
@@ -41,11 +45,7 @@ final router = GoRouter(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => ShellScaffold(child: child),
       routes: [
-        GoRoute(
-          path: '/',
-          name: 'home',
-          builder: (context, state) => const HomePage(),
-        ),
+        GoRoute(path: '/', name: 'home', builder: (context, state) => const HomePage()),
         GoRoute(
           path: '/medications',
           name: 'medications',
@@ -174,10 +174,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.tablet,
-              initial: med,
-            );
+            return UnifiedAddEditMedicationPageTemplate(form: MedicationForm.tablet, initial: med);
           },
         ),
         GoRoute(
@@ -187,10 +184,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.capsule,
-              initial: med,
-            );
+            return UnifiedAddEditMedicationPageTemplate(form: MedicationForm.capsule, initial: med);
           },
         ),
         GoRoute(

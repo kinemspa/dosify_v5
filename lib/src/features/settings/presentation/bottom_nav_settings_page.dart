@@ -1,12 +1,16 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/app/nav_items.dart';
 
-final bottomNavIdsProvider =
-    StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
-      return BottomNavIdsController()..load();
-    });
+final bottomNavIdsProvider = StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
+  return BottomNavIdsController()..load();
+});
 
 class BottomNavIdsController extends StateNotifier<List<String>> {
   BottomNavIdsController() : super(const []);
@@ -35,8 +39,7 @@ class BottomNavSettingsPage extends ConsumerStatefulWidget {
   const BottomNavSettingsPage({super.key});
 
   @override
-  ConsumerState<BottomNavSettingsPage> createState() =>
-      _BottomNavSettingsPageState();
+  ConsumerState<BottomNavSettingsPage> createState() => _BottomNavSettingsPageState();
 }
 
 class _BottomNavSettingsPageState extends ConsumerState<BottomNavSettingsPage> {
@@ -96,10 +99,7 @@ class _BottomNavSettingsPageState extends ConsumerState<BottomNavSettingsPage> {
             child: ListView(
               padding: const EdgeInsets.all(12),
               children: [
-                const Text(
-                  'Available',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                const Text('Available', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 ...allNavItems.map((e) {
                   final isSelected = _selected.contains(e.id);

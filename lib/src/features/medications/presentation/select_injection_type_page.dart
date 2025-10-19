@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -10,10 +15,7 @@ class SelectInjectionTypePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: const GradientAppBar(
-        title: 'Select Injection Type',
-        forceBackButton: true,
-      ),
+      appBar: const GradientAppBar(title: 'Select Injection Type', forceBackButton: true),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: const [
@@ -55,7 +57,6 @@ class _Tile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.route,
-    this.primary = false,
   });
   final IconData icon;
   final String title;
@@ -72,9 +73,7 @@ class _Tile extends StatelessWidget {
     final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
     final titleColor = isPrimary ? cs.onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
-    final badgeBg = isPrimary
-        ? cs.onPrimary.withOpacity(0.15)
-        : cs.primary.withOpacity(0.12);
+    final badgeBg = isPrimary ? cs.onPrimary.withOpacity(0.15) : cs.primary.withOpacity(0.12);
     final badgeIconColor = isPrimary ? cs.onPrimary : cs.primary;
     final chevronColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
 
@@ -84,28 +83,22 @@ class _Tile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.push(route),
         child: AnimatedScale(
-          scale: 1.0,
+          scale: 1,
           duration: const Duration(milliseconds: 120),
           curve: Curves.easeOutCubic,
-child: AnimatedContainer(
+          child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             curve: Curves.easeOutCubic,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: isPrimary
-                ? BoxDecoration(
-                    color: tileBg,
-                    borderRadius: BorderRadius.circular(12),
-                  )
+                ? BoxDecoration(color: tileBg, borderRadius: BorderRadius.circular(12))
                 : softWhiteCardDecoration(context),
             child: Row(
               children: [
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: BoxDecoration(
-                    color: badgeBg,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
                   child: Icon(icon, color: badgeIconColor, size: 20),
                 ),
                 const SizedBox(width: 12),
@@ -123,9 +116,7 @@ child: AnimatedContainer(
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: subtitleColor,
-                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(color: subtitleColor),
                       ),
                     ],
                   ),
@@ -141,11 +132,7 @@ child: AnimatedContainer(
 }
 
 class _ScreenHeader extends StatelessWidget {
-  const _ScreenHeader({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
+  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
   final IconData icon;
   final String title;
   final String subtitle;
@@ -155,13 +142,9 @@ class _ScreenHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return Container(
-      decoration: BoxDecoration(
-        color: cs.primary,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(12)),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 36,
@@ -185,12 +168,7 @@ class _ScreenHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: cs.onPrimary,
-                  ),
-                ),
+                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
               ],
             ),
           ),

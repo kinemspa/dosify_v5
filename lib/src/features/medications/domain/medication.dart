@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 part 'medication.g.dart';
@@ -9,14 +12,10 @@ class Medication {
     required this.id,
     required this.form,
     required this.name,
-    this.manufacturer,
+    required this.strengthValue, required this.strengthUnit, required this.stockValue, required this.stockUnit, this.manufacturer,
     this.description,
     this.notes,
-    required this.strengthValue,
-    required this.strengthUnit,
     this.perMlValue,
-    required this.stockValue,
-    required this.stockUnit,
     this.lowStockEnabled = false,
     this.lowStockThreshold,
     this.expiry,
@@ -166,19 +165,19 @@ class Medication {
       expiry: expiry ?? this.expiry,
       batchNumber: batchNumber ?? this.batchNumber,
       storageLocation: storageLocation ?? this.storageLocation,
-      requiresRefrigeration:
-          requiresRefrigeration ?? this.requiresRefrigeration,
+      requiresRefrigeration: requiresRefrigeration ?? this.requiresRefrigeration,
       storageInstructions: storageInstructions ?? this.storageInstructions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       containerVolumeMl: containerVolumeMl ?? this.containerVolumeMl,
       lowStockVialVolumeThresholdMl:
           lowStockVialVolumeThresholdMl ?? this.lowStockVialVolumeThresholdMl,
-      lowStockVialsThresholdCount:
-          lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
+      lowStockVialsThresholdCount: lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
       initialStockValue: initialStockValue ?? this.initialStockValue,
       reconstitutedAt: clearReconstitution ? null : (reconstitutedAt ?? this.reconstitutedAt),
-      reconstitutedVialExpiry: clearReconstitution ? null : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
+      reconstitutedVialExpiry: clearReconstitution
+          ? null
+          : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
     );
   }
 }

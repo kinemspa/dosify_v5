@@ -110,7 +110,5 @@ class MedicationAdapter extends TypeAdapter<Medication> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MedicationAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is MedicationAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }

@@ -1,21 +1,25 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 class AddEditTabletHybridPage extends StatefulWidget {
   const AddEditTabletHybridPage({super.key, this.initial});
   final Medication? initial;
 
   @override
-  State<AddEditTabletHybridPage> createState() =>
-      _AddEditTabletHybridPageState();
+  State<AddEditTabletHybridPage> createState() => _AddEditTabletHybridPageState();
 }
 
 class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
@@ -56,8 +60,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
       _manufacturerCtrl.text = m.manufacturer ?? '';
       _descriptionCtrl.text = m.description ?? '';
       _notesCtrl.text = m.notes ?? '';
-      _strengthValueCtrl.text =
-          (m.strengthValue == m.strengthValue.roundToDouble())
+      _strengthValueCtrl.text = (m.strengthValue == m.strengthValue.roundToDouble())
           ? m.strengthValue.toStringAsFixed(0)
           : m.strengthValue.toString();
       _strengthUnit = m.strengthUnit;
@@ -140,14 +143,10 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
       builder: (ctx) {
         final theme = Theme.of(ctx);
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           title: Text(
             'Confirm medication',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -165,9 +164,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
               _confirmRow(
                 ctx,
                 'Stock',
-                roundedStock == null
-                    ? '-'
-                    : _formatQuarter(roundedStock) + ' tablets',
+                roundedStock == null ? '-' : '${_formatQuarter(roundedStock)} tablets',
               ),
               _confirmRow(
                 ctx,
@@ -181,27 +178,13 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
               ),
               _confirmRow(ctx, 'Batch', _batchCtrl.text.trim()),
               _confirmRow(ctx, 'Storage location', _storageCtrl.text.trim()),
-              _confirmRow(
-                ctx,
-                'Requires refrigeration',
-                _requiresFridge ? 'Yes' : 'No',
-              ),
-              _confirmRow(
-                ctx,
-                'Storage instructions',
-                _storageNotesCtrl.text.trim(),
-              ),
+              _confirmRow(ctx, 'Requires refrigeration', _requiresFridge ? 'Yes' : 'No'),
+              _confirmRow(ctx, 'Storage instructions', _storageNotesCtrl.text.trim()),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Save'),
-            ),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Save')),
           ],
         );
       },
@@ -209,34 +192,23 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     if (confirmed != true) return;
 
     final med = Medication(
-      id:
-          widget.initial?.id ??
-          DateTime.now().microsecondsSinceEpoch.toString(),
+      id: widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
       form: MedicationForm.tablet,
       name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty
-          ? null
-          : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
+      manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
+      description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: double.parse(_strengthValueCtrl.text.trim()),
       strengthUnit: _strengthUnit,
-      stockValue: (roundedStock ?? 0).toDouble(),
+      stockValue: roundedStock ?? 0,
       stockUnit: StockUnit.tablets,
       lowStockEnabled: _lowStockEnabled,
-      lowStockThreshold:
-          _lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty
+      lowStockThreshold: _lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty
           ? double.tryParse(_lowStockCtrl.text.trim())
           : null,
       expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _storageNotesCtrl.text.trim().isEmpty
           ? null
@@ -248,11 +220,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     context.go('/medications');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          widget.initial == null
-              ? 'Added "${med.name}"'
-              : 'Updated "${med.name}"',
-        ),
+        content: Text(widget.initial == null ? 'Added "${med.name}"' : 'Updated "${med.name}"'),
       ),
     );
   }
@@ -262,7 +230,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 120,
@@ -323,7 +290,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     debugPrint('[HYBRID] build() called, initial=${widget.initial != null}');
     final mq = MediaQuery.of(context);
     return MediaQuery(
-      data: mq.copyWith(textScaleFactor: 1.0),
+      data: mq.copyWith(textScaler: const TextScaler.linear(1)),
       child: Scaffold(
         appBar: GradientAppBar(
           title: widget.initial == null ? 'Add Medication' : 'Edit Medication',
@@ -358,8 +325,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                       controller: _nameCtrl,
                       textCapitalization: TextCapitalization.sentences,
                       decoration: _dec(hint: 'eg. Panadol'),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
                   _rowLabelField(
@@ -397,17 +363,13 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: StepperRow36(
                       controller: _strengthValueCtrl,
                       onDec: () {
-                        final d = double.tryParse(
-                          _strengthValueCtrl.text.trim(),
-                        );
+                        final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
                         final nv = (base - 1).clamp(0, 1000000000);
                         setState(() => _strengthValueCtrl.text = nv.toString());
                       },
                       onInc: () {
-                        final d = double.tryParse(
-                          _strengthValueCtrl.text.trim(),
-                        );
+                        final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
                         final nv = (base + 1).clamp(0, 1000000000);
                         setState(() => _strengthValueCtrl.text = nv.toString());
@@ -425,17 +387,12 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                               value: u,
                               alignment: AlignmentDirectional.center,
                               child: Center(
-                                child: Text(
-                                  u == Unit.mcg
-                                      ? 'mcg'
-                                      : (u == Unit.mg ? 'mg' : 'g'),
-                                ),
+                                child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')),
                               ),
                             ),
                           )
                           .toList(),
-                      onChanged: (u) =>
-                          setState(() => _strengthUnit = u ?? _strengthUnit),
+                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
                       decoration: _dec(),
                     ),
                   ),
@@ -452,16 +409,12 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                       onDec: () {
                         final v = double.tryParse(_stockValueCtrl.text) ?? 0;
                         final nv = (v - 0.25).clamp(0, 1000000);
-                        setState(
-                          () => _stockValueCtrl.text = nv.toStringAsFixed(2),
-                        );
+                        setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
                       },
                       onInc: () {
                         final v = double.tryParse(_stockValueCtrl.text) ?? 0;
                         final nv = (v + 0.25).clamp(0, 1000000);
-                        setState(
-                          () => _stockValueCtrl.text = nv.toStringAsFixed(2),
-                        );
+                        setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
                       },
                       decoration: _dec(hint: '0.00'),
                     ),
@@ -471,9 +424,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: Text(
                       'tablets',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -486,9 +437,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                         onPressed: _pickExpiry,
                         icon: const Icon(Icons.calendar_month, size: 18),
                         label: Text(
-                          _expiry == null
-                              ? 'Pick expiry date'
-                              : DateFormat.yMd().format(_expiry!),
+                          _expiry == null ? 'Pick expiry date' : DateFormat.yMd().format(_expiry!),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -502,14 +451,11 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                       Expanded(
                         child: CheckboxListTile(
                           value: _lowStockEnabled,
-                          onChanged: (v) =>
-                              setState(() => _lowStockEnabled = v ?? false),
+                          onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
                           controlAffinity: ListTileControlAffinity.leading,
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Low stock alerts'),
-                          subtitle: const Text(
-                            'Notify when reaching threshold',
-                          ),
+                          subtitle: const Text('Notify when reaching threshold'),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -521,20 +467,14 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                                 width: 120,
                                 child: TextFormField(
                                   controller: _lowStockCtrl,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  inputFormatters: const [
-                                    _TwoDecimalTextInputFormatter(),
-                                  ],
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  inputFormatters: const [_TwoDecimalTextInputFormatter()],
                                   decoration: _dec(hint: '0'),
                                 ),
                               )
-                            : const SizedBox(
-                                key: ValueKey('lowStockOff'),
-                                width: 120,
-                              ),
+                            : const SizedBox(key: ValueKey('lowStockOff'), width: 120),
                       ),
                     ],
                   ),
@@ -564,8 +504,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     title: const Text('Requires Refrigeration'),
                     subtitle: const Text('Must be stored in refrigerator'),
                     value: _requiresFridge,
-                    onChanged: (v) =>
-                        setState(() => _requiresFridge = v ?? false),
+                    onChanged: (v) => setState(() => _requiresFridge = v ?? false),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -625,12 +564,7 @@ Widget _confirmRow(BuildContext context, String label, String value) {
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value.isEmpty ? '-' : value,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(value.isEmpty ? '-' : value, style: theme.textTheme.bodyMedium)),
       ],
     ),
   );
@@ -650,10 +584,7 @@ bool _isQuarter(double v) {
 class _TwoDecimalTextInputFormatter extends TextInputFormatter {
   const _TwoDecimalTextInputFormatter();
   @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final text = newValue.text;
     if (text.isEmpty) return newValue; // allow deletion to empty
     final reg = RegExp(r'^\d{0,7}(?:\.\d{0,2})?$');
@@ -662,12 +593,7 @@ class _TwoDecimalTextInputFormatter extends TextInputFormatter {
   }
 }
 
-Widget _section(
-  BuildContext context,
-  String title,
-  List<Widget> children, {
-  Widget? trailing,
-}) {
+Widget _section(BuildContext context, String title, List<Widget> children, {Widget? trailing}) {
   final theme = Theme.of(context);
   final isLight = Theme.of(context).brightness == Brightness.light;
   return Card(
@@ -711,7 +637,7 @@ Widget _section(
 }
 
 class SizeReporter extends StatefulWidget {
-  const SizeReporter({super.key, required this.tag, required this.child});
+  const SizeReporter({required this.tag, required this.child, super.key});
   final String tag;
   final Widget child;
   @override
@@ -726,14 +652,11 @@ class _SizeReporterState extends State<SizeReporter> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final rb = _key.currentContext?.findRenderObject() as RenderBox?;
       if (rb != null) {
-        debugPrint(
-          '[SizeReporter] ${widget.tag}: \\${rb.size.width} x \\${rb.size.height}',
-        );
+        debugPrint('[SizeReporter] ${widget.tag}: \\${rb.size.width} x \\${rb.size.height}');
       }
     });
   }
 
   @override
-  Widget build(BuildContext context) =>
-      Container(key: _key, child: widget.child);
+  Widget build(BuildContext context) => Container(key: _key, child: widget.child);
 }

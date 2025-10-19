@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// Syringe gauge widget used for reconstitution visualization
@@ -5,9 +6,7 @@ import 'package:flutter/material.dart';
 /// Can be interactive - drag the fill line to adjust value
 class WhiteSyringeGauge extends StatefulWidget {
   const WhiteSyringeGauge({
-    super.key,
-    required this.totalIU,
-    required this.fillIU,
+    required this.totalIU, required this.fillIU, super.key,
     this.color,
     this.onChanged,
     this.interactive = false,
@@ -33,14 +32,13 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor =
-        widget.color ?? Theme.of(context).colorScheme.primary;
+    final effectiveColor = widget.color ?? Theme.of(context).colorScheme.primary;
     final currentFill = _dragValue ?? widget.fillIU;
 
     return GestureDetector(
       onHorizontalDragUpdate: widget.interactive
           ? (details) {
-              final RenderBox? box = context.findRenderObject() as RenderBox?;
+              final box = context.findRenderObject() as RenderBox?;
               if (box == null) return;
               final localPosition = box.globalToLocal(details.globalPosition);
               final width = box.size.width;
@@ -48,8 +46,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               var newFillIU = fillRatio * widget.totalIU;
 
               // Check max constraint
-              if (widget.maxConstraint != null &&
-                  newFillIU > widget.maxConstraint!) {
+              if (widget.maxConstraint != null && newFillIU > widget.maxConstraint!) {
                 newFillIU = widget.maxConstraint!;
                 if (!_hitConstraint) {
                   _hitConstraint = true;
@@ -77,7 +74,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
           : null,
       onTapUp: widget.interactive
           ? (details) {
-              final RenderBox? box = context.findRenderObject() as RenderBox?;
+              final box = context.findRenderObject() as RenderBox?;
               if (box == null) return;
               final localPosition = box.globalToLocal(details.globalPosition);
               final width = box.size.width;
@@ -85,8 +82,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               var newFillIU = fillRatio * widget.totalIU;
 
               // Check max constraint
-              if (widget.maxConstraint != null &&
-                  newFillIU > widget.maxConstraint!) {
+              if (widget.maxConstraint != null && newFillIU > widget.maxConstraint!) {
                 newFillIU = widget.maxConstraint!;
                 widget.onMaxConstraintHit?.call();
               }
@@ -134,11 +130,7 @@ class _WhiteSyringePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    canvas.drawLine(
-      Offset(0, baselineY),
-      Offset(size.width, baselineY),
-      baselinePaint,
-    );
+    canvas.drawLine(Offset(0, baselineY), Offset(size.width, baselineY), baselinePaint);
 
     // Draw IU marker ticks and labels
     final tickPaint = Paint()
@@ -163,11 +155,7 @@ class _WhiteSyringePainter extends CustomPainter {
         final tp = TextPainter(
           text: TextSpan(
             text: iu.toStringAsFixed(0),
-            style: TextStyle(
-              fontSize: 10,
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600),
           ),
           textDirection: TextDirection.ltr,
         )..layout();
@@ -186,11 +174,7 @@ class _WhiteSyringePainter extends CustomPainter {
         ..style = PaintingStyle.stroke;
 
       final fillEndX = size.width * ratio;
-      canvas.drawLine(
-        Offset(0, baselineY),
-        Offset(fillEndX, baselineY),
-        fillPaint,
-      );
+      canvas.drawLine(Offset(0, baselineY), Offset(fillEndX, baselineY), fillPaint);
 
       // Draw draggable handle indicator if interactive
       if (interactive && fillEndX > 0) {
@@ -199,13 +183,13 @@ class _WhiteSyringePainter extends CustomPainter {
           ..style = PaintingStyle.fill;
 
         // Draw a circular handle at the end of the fill line
-        canvas.drawCircle(Offset(fillEndX, baselineY), 6.0, handlePaint);
+        canvas.drawCircle(Offset(fillEndX, baselineY), 6, handlePaint);
 
         // Draw white center to make it more visible
         final centerPaint = Paint()
           ..color = Colors.white
           ..style = PaintingStyle.fill;
-        canvas.drawCircle(Offset(fillEndX, baselineY), 3.0, centerPaint);
+        canvas.drawCircle(Offset(fillEndX, baselineY), 3, centerPaint);
       }
     }
   }

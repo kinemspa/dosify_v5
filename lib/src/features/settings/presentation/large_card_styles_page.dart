@@ -1,9 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
-import '../../../widgets/app_header.dart';
-import '../../../core/utils/format.dart';
-import '../../medications/domain/enums.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class LargeCardStylesPage extends StatelessWidget {
   const LargeCardStylesPage({super.key});
@@ -11,10 +15,7 @@ class LargeCardStylesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(
-        title: 'Large Card Styles',
-        forceBackButton: true,
-      ),
+      appBar: const GradientAppBar(title: 'Large Card Styles', forceBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -54,8 +55,7 @@ class LargeCardStylesPage extends StatelessWidget {
                     itemBuilder: (context, index) => _StyleCard(
                       style: LargeCardStyle.values[index],
                       isSelected: false, // TODO: Add persistence
-                      onTap: () =>
-                          _selectStyle(context, LargeCardStyle.values[index]),
+                      onTap: () => _selectStyle(context, LargeCardStyle.values[index]),
                     ),
                   );
                 },
@@ -119,11 +119,7 @@ extension LargeCardStyleExtension on LargeCardStyle {
 }
 
 class _StyleCard extends StatelessWidget {
-  const _StyleCard({
-    required this.style,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _StyleCard({required this.style, required this.isSelected, required this.onTap});
 
   final LargeCardStyle style;
   final bool isSelected;
@@ -141,9 +137,7 @@ class _StyleCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: isSelected
-                ? Border.all(color: theme.colorScheme.primary, width: 2)
-                : null,
+            border: isSelected ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
           ),
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -161,11 +155,7 @@ class _StyleCard extends StatelessWidget {
                   ),
                   if (isSelected) ...[
                     const Spacer(),
-                    Icon(
-                      Icons.check_circle,
-                      color: theme.colorScheme.primary,
-                      size: 18,
-                    ),
+                    Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 18),
                   ],
                 ],
               ),
@@ -199,9 +189,7 @@ class _StyleCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.3),
-            ),
+            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
           ),
           padding: const EdgeInsets.all(12),
           child: Row(
@@ -212,9 +200,7 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Text(
                       medicationName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -239,10 +225,7 @@ class _StyleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(4),
@@ -293,17 +276,11 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.medication,
-                          size: 16,
-                          color: theme.colorScheme.primary,
-                        ),
+                        Icon(Icons.medication, size: 16, color: theme.colorScheme.primary),
                         const SizedBox(width: 4),
                         Text(
                           medicationName,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
@@ -347,9 +324,7 @@ class _StyleCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       medicationName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
                     ),
                   ),
                   Text(
@@ -371,10 +346,7 @@ class _StyleCard extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  Text(
-                    '${fmt2(stockValue)} tablets',
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  Text('${fmt2(stockValue)} tablets', style: theme.textTheme.bodyMedium),
                 ],
               ),
             ],
@@ -399,9 +371,7 @@ class _StyleCard extends StatelessWidget {
                       children: [
                         Text(
                           medicationName,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         Text(
                           'by $manufacturer',
@@ -413,10 +383,7 @@ class _StyleCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
@@ -471,9 +438,7 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Text(
                       medicationName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       manufacturer,
@@ -491,10 +456,7 @@ class _StyleCard extends StatelessWidget {
                             color: theme.colorScheme.primary,
                           ),
                         ),
-                        Text(
-                          ' • ${fmt2(stockValue)} left',
-                          style: theme.textTheme.bodySmall,
-                        ),
+                        Text(' • ${fmt2(stockValue)} left', style: theme.textTheme.bodySmall),
                       ],
                     ),
                   ],
@@ -507,11 +469,7 @@ class _StyleCard extends StatelessWidget {
                   color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  Icons.medication,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                ),
+                child: Icon(Icons.medication, color: theme.colorScheme.primary, size: 20),
               ),
             ],
           ),
@@ -538,18 +496,11 @@ class _StyleCard extends StatelessWidget {
                 height: 50,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primaryContainer,
-                      theme.colorScheme.primary,
-                    ],
+                    colors: [theme.colorScheme.primaryContainer, theme.colorScheme.primary],
                   ),
                   borderRadius: BorderRadius.circular(25),
                 ),
-                child: const Icon(
-                  Icons.medication,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: const Icon(Icons.medication, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -558,9 +509,7 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Text(
                       medicationName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     Text(
                       manufacturer,
@@ -605,9 +554,7 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Text(
                       medicationName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     Text(
                       manufacturer,
@@ -617,10 +564,7 @@ class _StyleCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -649,18 +593,12 @@ class _StyleCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             children: [
-              Icon(
-                Icons.medication,
-                color: theme.colorScheme.primary,
-                size: 18,
-              ),
+              Icon(Icons.medication, color: theme.colorScheme.primary, size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   '$medicationName - ${fmt2(strengthValue)} mg',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               Text(
@@ -702,9 +640,7 @@ class _StyleCard extends StatelessWidget {
                   children: [
                     Text(
                       medicationName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       '$manufacturer • ${fmt2(strengthValue)} mg',
@@ -722,7 +658,7 @@ class _StyleCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${fmt2(stockValue)}',
+                  fmt2(stockValue),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w600,
@@ -750,7 +686,7 @@ class _StyleCard extends StatelessWidget {
                 width: 6,
                 height: 50,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Colors.blue, Colors.purple],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -772,16 +708,11 @@ class _StyleCard extends StatelessWidget {
                     ),
                     Text(
                       manufacturer,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.purple.shade700,
-                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.purple.shade700),
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.8),
                         borderRadius: BorderRadius.circular(8),
@@ -805,11 +736,7 @@ class _StyleCard extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.theme,
-  });
+  const _InfoChip({required this.icon, required this.label, required this.theme});
 
   final IconData icon;
   final String label;
@@ -873,10 +800,7 @@ class _DetailItem extends StatelessWidget {
             ),
             Text(
               value,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
+              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 10),
             ),
           ],
         ),

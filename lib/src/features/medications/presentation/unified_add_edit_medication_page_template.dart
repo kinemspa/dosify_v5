@@ -1,27 +1,28 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/sections/mdv_volume_reconstitution_section.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/sections/mdv_volume_reconstitution_section.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Template-based unified page for adding/editing medications.
 /// Phase 1: Supports tablet, capsule, PFS, and single-dose vial.
 /// MDV support coming in Phase 2.
 class UnifiedAddEditMedicationPageTemplate extends ConsumerStatefulWidget {
-  const UnifiedAddEditMedicationPageTemplate({
-    super.key,
-    required this.form,
-    this.initial,
-  });
+  const UnifiedAddEditMedicationPageTemplate({required this.form, super.key, this.initial});
 
   final MedicationForm form;
   final Medication? initial;
@@ -204,7 +205,7 @@ class _UnifiedAddEditMedicationPageTemplateState
       ),
       body: MedEditorTemplate(
         appBarTitle: widget.initial == null ? 'Add $_formLabel' : 'Edit $_formLabel',
-        summaryBuilder: (key) => _buildSummaryCard(key),
+        summaryBuilder: _buildSummaryCard,
 
         // General
         nameField: Field36(
@@ -271,22 +272,47 @@ class _UnifiedAddEditMedicationPageTemplateState
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
           items: [
-            const DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
-            const DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
-            const DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
-            const DropdownMenuItem(value: Unit.units, child: Center(child: Text('units'))),
+            const DropdownMenuItem(
+              value: Unit.mcg,
+              child: Center(child: Text('mcg')),
+            ),
+            const DropdownMenuItem(
+              value: Unit.mg,
+              child: Center(child: Text('mg')),
+            ),
+            const DropdownMenuItem(
+              value: Unit.g,
+              child: Center(child: Text('g')),
+            ),
+            const DropdownMenuItem(
+              value: Unit.units,
+              child: Center(child: Text('units')),
+            ),
             // Add concentration units for pre-filled syringes and single dose vials
             if (widget.form == MedicationForm.injectionPreFilledSyringe ||
                 widget.form == MedicationForm.injectionSingleDoseVial) ...[
-              const DropdownMenuItem(value: Unit.mcgPerMl, child: Center(child: Text('mcg/mL'))),
-              const DropdownMenuItem(value: Unit.mgPerMl, child: Center(child: Text('mg/mL'))),
-              const DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
-              const DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
+              const DropdownMenuItem(
+                value: Unit.mcgPerMl,
+                child: Center(child: Text('mcg/mL')),
+              ),
+              const DropdownMenuItem(
+                value: Unit.mgPerMl,
+                child: Center(child: Text('mg/mL')),
+              ),
+              const DropdownMenuItem(
+                value: Unit.gPerMl,
+                child: Center(child: Text('g/mL')),
+              ),
+              const DropdownMenuItem(
+                value: Unit.unitsPerMl,
+                child: Center(child: Text('units/mL')),
+              ),
             ],
           ],
           onChanged: (v) => setState(() => _strengthUnit = v ?? _strengthUnit),
         ),
-        strengthHelp: 'Specify the amount per ${_formLabel.toLowerCase()} and its unit of measurement.',
+        strengthHelp:
+            'Specify the amount per ${_formLabel.toLowerCase()} and its unit of measurement.',
 
         // MDV Volume & Reconstitution section (only for multi-dose vials)
         mdvSection: _isMdv
@@ -328,7 +354,10 @@ class _UnifiedAddEditMedicationPageTemplateState
             : 'Enter the number of $_formLabelPlural currently in stock',
         lowStockRow: Row(
           children: [
-            Checkbox(value: _lowStockEnabled, onChanged: (v) => setState(() => _lowStockEnabled = v ?? false)),
+            Checkbox(
+              value: _lowStockEnabled,
+              onChanged: (v) => setState(() => _lowStockEnabled = v ?? false),
+            ),
             Expanded(
               child: Text(
                 'Enable alert when stock is low',
@@ -377,7 +406,6 @@ class _UnifiedAddEditMedicationPageTemplateState
           final thr = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
           return (stock > 0 && thr >= stock) ? Colors.orange : null;
         })(),
-        quantityDropdown: null, // Stock unit is auto-determined by form type
         expiryDateButton: DateButton36(
           label: _expiry == null
               ? 'Select date'
@@ -426,7 +454,9 @@ class _UnifiedAddEditMedicationPageTemplateState
               ),
               Text(
                 'Refrigerate',
-                style: _keepFrozen ? kMutedLabelStyle(context) : Theme.of(context).textTheme.bodyMedium,
+                style: _keepFrozen
+                    ? kMutedLabelStyle(context)
+                    : Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
@@ -496,8 +526,9 @@ class _UnifiedAddEditMedicationPageTemplateState
       showDark: _lightSensitive,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: threshold,
-      includeNameInStrengthLine: false,
-      perTabletLabel: name.isNotEmpty && (widget.form == MedicationForm.tablet || widget.form == MedicationForm.capsule),
+      perTabletLabel:
+          name.isNotEmpty &&
+          (widget.form == MedicationForm.tablet || widget.form == MedicationForm.capsule),
       formLabelPlural: _formLabelPlural,
       // MDV reconstitution gauge data
       reconTotalIU: _isMdv && _reconResult != null ? _reconResult!.syringeSizeMl * 100 : null,
@@ -521,12 +552,8 @@ class _UnifiedAddEditMedicationPageTemplateState
       id: id,
       form: widget.form,
       name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty
-          ? null
-          : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
+      manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
+      description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: strength,
       strengthUnit: _strengthUnit,
@@ -541,12 +568,8 @@ class _UnifiedAddEditMedicationPageTemplateState
           ? double.tryParse(_lowStockCtrl.text.trim())
           : null,
       expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _buildStorageInstructions(),
       // MDV-specific: vial volume (total volume after reconstitution)
@@ -559,9 +582,7 @@ class _UnifiedAddEditMedicationPageTemplateState
     await repo.upsert(med);
     if (!mounted) return;
     context.go('/medications');
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Medication saved')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medication saved')));
   }
 
   String? _buildStorageInstructions() {
@@ -571,8 +592,7 @@ class _UnifiedAddEditMedicationPageTemplateState
     if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
       parts.add('Keep frozen');
     }
-    if (_lightSensitive &&
-        !parts.any((p) => p.toLowerCase().contains('light'))) {
+    if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
       parts.add('Protect from light');
     }
     return parts.isEmpty ? null : parts.join('. ');

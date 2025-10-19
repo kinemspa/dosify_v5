@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class AnalyticsPage extends StatelessWidget {
@@ -6,9 +9,9 @@ class AnalyticsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const GradientAppBar(title: 'Analytics', forceBackButton: true),
-      body: const Center(child: Text('Analytics coming soon')),
+    return const Scaffold(
+      appBar: GradientAppBar(title: 'Analytics', forceBackButton: true),
+      body: Center(child: Text('Analytics coming soon')),
     );
   }
 }

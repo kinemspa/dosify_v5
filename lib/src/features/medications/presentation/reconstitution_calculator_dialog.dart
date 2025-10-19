@@ -1,5 +1,8 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'reconstitution_calculator_widget.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 
 enum SyringeSizeMl { ml0_3, ml0_5, ml1, ml3, ml5 }
 
@@ -40,10 +43,7 @@ class ReconstitutionResult {
 }
 
 class ReconstitutionCalculatorDialog extends StatefulWidget {
-  const ReconstitutionCalculatorDialog({
-    super.key,
-    required this.initialStrengthValue,
-    required this.unitLabel, // e.g., mg, mcg, g, units
+  const ReconstitutionCalculatorDialog({super.key, required this.initialStrengthValue, required this.unitLabel, // e.g., mg, mcg, g, units, super.key,, super.key,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -58,12 +58,10 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
   final double? initialVialSize; // mL
 
   @override
-  State<ReconstitutionCalculatorDialog> createState() =>
-      _ReconstitutionCalculatorDialogState();
+  State<ReconstitutionCalculatorDialog> createState() => _ReconstitutionCalculatorDialogState();
 }
 
-class _ReconstitutionCalculatorDialogState
-    extends State<ReconstitutionCalculatorDialog> {
+class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculatorDialog> {
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
 
@@ -86,8 +84,6 @@ class _ReconstitutionCalculatorDialogState
           initialDoseUnit: widget.initialDoseUnit,
           initialSyringeSize: widget.initialSyringeSize,
           initialVialSize: widget.initialVialSize,
-          showSummary: true,
-          showApplyButton: false,
           onCalculate: _onCalculation,
         ),
       ),

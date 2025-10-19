@@ -1,18 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../widgets/field36.dart';
-import '../../../widgets/unified_form.dart';
-import '../../../widgets/app_header.dart';
-import 'ui_consts.dart';
-import 'reconstitution_calculator_widget.dart';
-import 'reconstitution_calculator_dialog.dart';
-import '../../medications/domain/medication.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class ReconstitutionCalculatorPage extends StatefulWidget {
   const ReconstitutionCalculatorPage({
-    super.key,
-    required this.initialStrengthValue,
-    required this.unitLabel,
+    required this.initialStrengthValue, required this.unitLabel, super.key,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -27,12 +26,10 @@ class ReconstitutionCalculatorPage extends StatefulWidget {
   final double? initialVialSize;
 
   @override
-  State<ReconstitutionCalculatorPage> createState() =>
-      _ReconstitutionCalculatorPageState();
+  State<ReconstitutionCalculatorPage> createState() => _ReconstitutionCalculatorPageState();
 }
 
-class _ReconstitutionCalculatorPageState
-    extends State<ReconstitutionCalculatorPage> {
+class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorPage> {
   late final TextEditingController _strengthCtrl;
   late final TextEditingController _medNameCtrl;
   late String _selectedUnit; // Track selected unit
@@ -44,8 +41,7 @@ class _ReconstitutionCalculatorPageState
     super.initState();
     _strengthCtrl = TextEditingController(
       text: widget.initialStrengthValue > 0
-          ? (widget.initialStrengthValue ==
-                    widget.initialStrengthValue.roundToDouble()
+          ? (widget.initialStrengthValue == widget.initialStrengthValue.roundToDouble()
                 ? widget.initialStrengthValue.toInt().toString()
                 : widget.initialStrengthValue.toStringAsFixed(2))
           : '',
@@ -93,14 +89,11 @@ class _ReconstitutionCalculatorPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
-        ),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2.0),
+        borderSide: BorderSide(color: cs.primary, width: 2),
       ),
     );
   }
@@ -115,10 +108,7 @@ class _ReconstitutionCalculatorPageState
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
-        ),
+        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -186,10 +176,7 @@ class _ReconstitutionCalculatorPageState
           ),
           Padding(
             padding: const EdgeInsets.only(left: 128, bottom: 12, top: 2),
-            child: Text(
-              'Select the unit for vial strength',
-              style: kMutedLabelStyle(context),
-            ),
+            child: Text('Select the unit for vial strength', style: kMutedLabelStyle(context)),
           ),
           // Strength input row
           LabelFieldRow(
@@ -225,26 +212,19 @@ class _ReconstitutionCalculatorPageState
             ),
           ),
           // Divider
-          Divider(
-            color: Theme.of(
-              context,
-            ).colorScheme.outlineVariant.withOpacity(0.5),
-          ),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
           const SizedBox(height: 12),
           // Embedded calculator widget
           if (strengthValue > 0)
             ReconstitutionCalculatorWidget(
               initialStrengthValue: strengthValue,
               unitLabel: _selectedUnit,
-              medicationName: _medNameCtrl.text.trim().isNotEmpty
-                  ? _medNameCtrl.text.trim()
-                  : null,
+              medicationName: _medNameCtrl.text.trim().isNotEmpty ? _medNameCtrl.text.trim() : null,
               initialDoseValue: widget.initialDoseValue,
               initialDoseUnit: widget.initialDoseUnit,
               initialSyringeSize: widget.initialSyringeSize,
               initialVialSize: widget.initialVialSize,
               showSummary: false,
-              showApplyButton: false,
               onCalculate: _onCalculation,
             )
           else

@@ -1,15 +1,14 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import '../features/medications/domain/enums.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 /// Ten chip-based integer input styles with a spinner-style unit dropdown.
 /// The value is always an integer with +/- controls; units are chosen via DropdownButtonFormField.
 class StrengthInput extends StatefulWidget {
   const StrengthInput({
-    super.key,
-    required this.controller,
-    required this.unit,
-    required this.onUnitChanged,
-    required this.styleIndex,
+    required this.controller, required this.unit, required this.onUnitChanged, required this.styleIndex, super.key,
     this.labelAmount = 'Amount *',
     this.labelUnit = 'Unit *',
     this.min = 0,
@@ -60,18 +59,11 @@ class _StrengthInputState extends State<StrengthInput> {
       child: SizedBox(
         height: 36,
         child: DropdownButtonFormField<Unit>(
-          value: _unit,
-          isExpanded: false,
+          initialValue: _unit,
           alignment: AlignmentDirectional.center,
           menuMaxHeight: 320,
           selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
-              .map(
-                (u) => Center(
-                  child: Text(
-                    u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'),
-                  ),
-                ),
-              )
+              .map((u) => Center(child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g'))))
               .toList(),
           items: const [
             DropdownMenuItem(
@@ -95,18 +87,12 @@ class _StrengthInputState extends State<StrengthInput> {
             setState(() => _unit = nv);
             widget.onUnitChanged(nv);
           },
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
           style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             labelText: widget.labelUnit,
             isDense: false,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             constraints: const BoxConstraints(minHeight: 36),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
@@ -115,10 +101,7 @@ class _StrengthInputState extends State<StrengthInput> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: theme.colorScheme.primary,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
             ),
             filled: true,
           ),
@@ -132,14 +115,11 @@ class _StrengthInputState extends State<StrengthInput> {
     final tf = TextFormField(
       controller: widget.controller,
       textAlign: align,
-      keyboardType: const TextInputType.numberWithOptions(decimal: false),
+      keyboardType: const TextInputType.numberWithOptions(),
       decoration: InputDecoration(
         labelText: widget.labelAmount,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 10,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -202,17 +182,11 @@ class _StrengthInputState extends State<StrengthInput> {
             ),
             Positioned(
               left: 8,
-              child: IconButton.filledTonal(
-                onPressed: _dec,
-                icon: const Icon(Icons.remove),
-              ),
+              child: IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
             ),
             Positioned(
               right: 8,
-              child: IconButton.filledTonal(
-                onPressed: _inc,
-                icon: const Icon(Icons.add),
-              ),
+              child: IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
             ),
           ],
         ),
@@ -228,14 +202,8 @@ class _StrengthInputState extends State<StrengthInput> {
       children: [
         Column(
           children: [
-            IconButton.filledTonal(
-              onPressed: _inc,
-              icon: const Icon(Icons.keyboard_arrow_up),
-            ),
-            IconButton.filledTonal(
-              onPressed: _dec,
-              icon: const Icon(Icons.keyboard_arrow_down),
-            ),
+            IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.keyboard_arrow_up)),
+            IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.keyboard_arrow_down)),
           ],
         ),
         const SizedBox(width: 8),
@@ -311,17 +279,11 @@ class _StrengthInputState extends State<StrengthInput> {
         const SizedBox(height: 8),
         Row(
           children: [
-            IconButton.filledTonal(
-              onPressed: _dec,
-              icon: const Icon(Icons.remove),
-            ),
+            IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
             const SizedBox(width: 8),
             _amountField(width: 100),
             const SizedBox(width: 8),
-            IconButton.filledTonal(
-              onPressed: _inc,
-              icon: const Icon(Icons.add),
-            ),
+            IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
             const SizedBox(width: 12),
             Expanded(child: _unitDropdown()),
           ],
@@ -343,9 +305,7 @@ class _StrengthInputState extends State<StrengthInput> {
         ),
         child: InkWell(
           customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(
-            theme.colorScheme.primary.withValues(alpha: 0.12),
-          ),
+          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -360,11 +320,11 @@ class _StrengthInputState extends State<StrengthInput> {
     // Pill group (outlined amount field + compact +/- chips)
     return Row(
       children: [
-        _pillBtn('−', () => _dec()),
+        _pillBtn('−', _dec),
         const SizedBox(width: 6),
         SizedBox(width: 96, child: _amountField()),
         const SizedBox(width: 6),
-        _pillBtn('+', () => _inc()),
+        _pillBtn('+', _inc),
         const SizedBox(width: 12),
         Expanded(child: _unitDropdown()),
       ],
@@ -377,15 +337,9 @@ class _StrengthInputState extends State<StrengthInput> {
       children: [
         Row(
           children: [
-            IconButton.filledTonal(
-              onPressed: _dec,
-              icon: const Icon(Icons.remove),
-            ),
+            IconButton.filledTonal(onPressed: _dec, icon: const Icon(Icons.remove)),
             const SizedBox(width: 8),
-            IconButton.filledTonal(
-              onPressed: _inc,
-              icon: const Icon(Icons.add),
-            ),
+            IconButton.filledTonal(onPressed: _inc, icon: const Icon(Icons.add)),
           ],
         ),
         const SizedBox(height: 8),
@@ -426,10 +380,7 @@ class _StrengthInputState extends State<StrengthInput> {
           ),
           child: Row(
             children: [
-              IconButton.filled(
-                onPressed: _dec,
-                icon: const Icon(Icons.remove),
-              ),
+              IconButton.filled(onPressed: _dec, icon: const Icon(Icons.remove)),
               const SizedBox(width: 8),
               _amountField(width: 100),
               const SizedBox(width: 8),
@@ -437,11 +388,7 @@ class _StrengthInputState extends State<StrengthInput> {
             ],
           ),
         ),
-        Positioned(
-          right: 8,
-          top: 8,
-          child: SizedBox(width: 120, child: _unitDropdown()),
-        ),
+        Positioned(right: 8, top: 8, child: SizedBox(width: 120, child: _unitDropdown())),
       ],
     );
   }
@@ -451,10 +398,7 @@ class _StrengthInputState extends State<StrengthInput> {
     final theme = Theme.of(context);
     final box = Container(
       padding: widget.padding ?? const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(12)),
       child: switch (widget.styleIndex) {
         0 => _variant1(),
         1 => _variant2(),

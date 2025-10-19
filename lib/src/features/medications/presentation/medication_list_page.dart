@@ -1,19 +1,23 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/utils/format.dart';
-import '../../../widgets/app_header.dart';
-import '../domain/medication.dart';
-import '../domain/enums.dart';
-import '../../../widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+// Project imports:
+import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 enum _MedView { list, compact, large }
 
@@ -21,7 +25,7 @@ enum _SortBy { name, stock, strength, expiry }
 
 enum _FilterBy { all, lowStock, expiringSoon, refrigerated }
 
-const double _kLargeCardHeight = 140.0;
+const double _kLargeCardHeight = 140;
 
 class MedicationListPage extends ConsumerStatefulWidget {
   const MedicationListPage({super.key});
@@ -48,10 +52,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final prefs = await SharedPreferences.getInstance();
     final savedView = prefs.getString('medication_list_view') ?? 'large';
     setState(() {
-      _view = _MedView.values.firstWhere(
-        (v) => v.name == savedView,
-        orElse: () => _MedView.large,
-      );
+      _view = _MedView.values.firstWhere((v) => v.name == savedView, orElse: () => _MedView.large);
     });
   }
 
@@ -76,7 +77,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       if (!isCountUnit) continue;
       final cur = m.stockValue;
       final init = m.initialStockValue;
-      double? nextInit = init;
+      var nextInit = init;
       if (init == null || init <= 0) {
         nextInit = cur;
       } else if (cur > init) {
@@ -98,9 +99,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Medication> b, _) {
-          var items = _getFilteredAndSortedMedications(
-            b.values.toList(growable: false),
-          );
+          final items = _getFilteredAndSortedMedications(b.values.toList(growable: false));
           // Ensure initial stock values so large cards can show current/initial remain
           _ensureInitialStockValues(items);
 
@@ -155,12 +154,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           return Stack(
             children: [
               _buildMedList(context, items),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _buildToolbar(context),
-              ),
+              Positioned(top: 0, left: 0, right: 0, child: _buildToolbar(context)),
             ],
           );
         },
@@ -190,7 +184,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     isDense: true,
                     filled: true,
                     fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
@@ -261,22 +255,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: _FilterBy.all,
-                  child: Text('All medications'),
-                ),
-                const PopupMenuItem(
-                  value: _FilterBy.lowStock,
-                  child: Text('Low stock'),
-                ),
-                const PopupMenuItem(
-                  value: _FilterBy.expiringSoon,
-                  child: Text('Expiring soon'),
-                ),
-                const PopupMenuItem(
-                  value: _FilterBy.refrigerated,
-                  child: Text('Refrigerated'),
-                ),
+                const PopupMenuItem(value: _FilterBy.all, child: Text('All medications')),
+                const PopupMenuItem(value: _FilterBy.lowStock, child: Text('Low stock')),
+                const PopupMenuItem(value: _FilterBy.expiringSoon, child: Text('Expiring soon')),
+                const PopupMenuItem(value: _FilterBy.refrigerated, child: Text('Refrigerated')),
               ],
             ),
 
@@ -293,22 +275,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 }
               }),
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: _SortBy.name,
-                  child: Text('Sort by name'),
-                ),
-                const PopupMenuItem(
-                  value: _SortBy.stock,
-                  child: Text('Sort by stock'),
-                ),
-                const PopupMenuItem(
-                  value: _SortBy.strength,
-                  child: Text('Sort by strength'),
-                ),
-                const PopupMenuItem(
-                  value: _SortBy.expiry,
-                  child: Text('Sort by expiry'),
-                ),
+                const PopupMenuItem(value: _SortBy.name, child: Text('Sort by name')),
+                const PopupMenuItem(value: _SortBy.stock, child: Text('Sort by stock')),
+                const PopupMenuItem(value: _SortBy.strength, child: Text('Sort by strength')),
+                const PopupMenuItem(value: _SortBy.expiry, child: Text('Sort by expiry')),
                 PopupMenuItem(
                   value: 'toggle_dir',
                   child: Row(
@@ -326,16 +296,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
-  List<Medication> _getFilteredAndSortedMedications(
-    List<Medication> medications,
-  ) {
+  List<Medication> _getFilteredAndSortedMedications(List<Medication> medications) {
     var items = List<Medication>.from(medications);
 
     // Apply search filter
     if (_query.isNotEmpty) {
-      items = items
-          .where((m) => m.name.toLowerCase().contains(_query.toLowerCase()))
-          .toList();
+      items = items.where((m) => m.name.toLowerCase().contains(_query.toLowerCase())).toList();
     }
 
     // Apply category filter
@@ -344,23 +310,14 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         break;
       case _FilterBy.lowStock:
         items = items
-            .where(
-              (m) =>
-                  m.lowStockEnabled &&
-                  m.stockValue <= (m.lowStockThreshold ?? 0),
-            )
+            .where((m) => m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0))
             .toList();
-        break;
       case _FilterBy.expiringSoon:
         final now = DateTime.now();
         final soon = now.add(const Duration(days: 30));
-        items = items
-            .where((m) => m.expiry != null && m.expiry!.isBefore(soon))
-            .toList();
-        break;
+        items = items.where((m) => m.expiry != null && m.expiry!.isBefore(soon)).toList();
       case _FilterBy.refrigerated:
         items = items.where((m) => m.requiresRefrigeration == true).toList();
-        break;
     }
 
     // Apply sorting
@@ -368,13 +325,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     switch (_sortBy) {
       case _SortBy.name:
         items.sort((a, b) => dir(a.name.compareTo(b.name)));
-        break;
       case _SortBy.stock:
         items.sort((a, b) => dir(a.stockValue.compareTo(b.stockValue)));
-        break;
       case _SortBy.strength:
         items.sort((a, b) => dir(a.strengthValue.compareTo(b.strengthValue)));
-        break;
       case _SortBy.expiry:
         items.sort((a, b) {
           if (a.expiry == null && b.expiry == null) return 0;
@@ -382,7 +336,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           if (b.expiry == null) return dir(-1);
           return dir(a.expiry!.compareTo(b.expiry!));
         });
-        break;
     }
 
     return items;
@@ -549,10 +502,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       children: [
         TextSpan(
           text: fmt2(m.stockValue),
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: _stockStatusColorFor(context, m),
-          ),
+          style: TextStyle(fontWeight: FontWeight.w800, color: _stockStatusColorFor(context, m)),
         ),
         TextSpan(text: ' ${_stockUnitLabel(m.stockUnit)}'),
       ],
@@ -569,22 +519,19 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final m = items[index];
-return ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
+            return ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               title: RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   text: m.name,
-style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   children: [
-                    if (m.manufacturer?.isNotEmpty == true)
+                    if (m.manufacturer?.isNotEmpty ?? false)
                       TextSpan(
                         text: '  •  ${m.manufacturer!}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -621,17 +568,12 @@ style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
                             _formatDateDdMm(m.expiry!),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color:
-                                      (m.expiry!.isBefore(
-                                        DateTime.now().add(
-                                          const Duration(days: 30),
-                                        ),
-                                      ))
-                                      ? Theme.of(context).colorScheme.error
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color:
+                                  (m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30))))
+                                  ? Theme.of(context).colorScheme.error
                                   : kTextLightGrey(context),
-                                ),
+                            ),
                           ),
                         ),
                     ],
@@ -695,10 +637,10 @@ class _MedCard extends StatelessWidget {
       final colored = _stockStatusColor(Theme.of(context));
       return TextSpan(
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              height: 1.0,
-              fontSize: 9,
-            ),
+          color: Theme.of(context).colorScheme.onSurface,
+          height: 1,
+          fontSize: 9,
+        ),
         children: [
           TextSpan(
             text: '$current',
@@ -710,10 +652,10 @@ class _MedCard extends StatelessWidget {
     }
     return TextSpan(
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-            height: 1.0,
-            fontSize: 9,
-          ),
+        color: Theme.of(context).colorScheme.onSurface,
+        height: 1,
+        fontSize: 9,
+      ),
       children: [
         TextSpan(
           text: fmt2(m.stockValue),
@@ -738,11 +680,9 @@ class _MedCard extends StatelessWidget {
 
     // Fallback: keep existing dense implementation
     final theme = Theme.of(context);
-    final isLowStock =
-        m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
+    final isLowStock = m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
     final isExpiringSoon =
-        m.expiry != null &&
-        m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
+        m.expiry != null && m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
     return Container(
       decoration: softWhiteCardDecoration(context),
@@ -759,7 +699,7 @@ class _MedCard extends StatelessWidget {
                 m.name,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  height: 1.0,
+                  height: 1,
                   fontSize: 12,
                   color: theme.colorScheme.primary,
                 ),
@@ -778,7 +718,7 @@ class _MedCard extends StatelessWidget {
                         color: isExpiringSoon
                             ? theme.colorScheme.error
                             : theme.colorScheme.onSurfaceVariant,
-                        height: 1.0,
+                        height: 1,
                         fontSize: 9,
                       ),
                       maxLines: 1,
@@ -793,18 +733,14 @@ class _MedCard extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.0,
+                  height: 1,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
               // Stock
-              RichText(
-                text: _stockSpan(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              RichText(text: _stockSpan(context), maxLines: 1, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),
@@ -943,12 +879,8 @@ class _MedCard extends StatelessWidget {
     // Next within 60 days
     for (final s in linked) {
       final times = s.timesOfDay ?? [s.minutesOfDay];
-      for (int d = 0; d < 60; d++) {
-        final date = DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).add(Duration(days: d));
+      for (var d = 0; d < 60; d++) {
+        final date = DateTime(now.year, now.month, now.day).add(Duration(days: d));
         final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
             ? (() {
                 final anchor = s.cycleAnchorDate ?? now;
@@ -960,15 +892,8 @@ class _MedCard extends StatelessWidget {
             : s.daysOfWeek.contains(date.weekday);
         if (onDay) {
           for (final minutes in times) {
-            final dt = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              minutes ~/ 60,
-              minutes % 60,
-            );
-            if (dt.isAfter(now) && (next == null || dt.isBefore(next!)))
-              next = dt;
+            final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+            if (dt.isAfter(now) && (next == null || dt.isBefore(next))) next = dt;
           }
         }
       }
@@ -976,12 +901,8 @@ class _MedCard extends StatelessWidget {
     // Last within previous 60 days
     for (final s in linked) {
       final times = s.timesOfDay ?? [s.minutesOfDay];
-      for (int d = 0; d < 60; d++) {
-        final date = DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(Duration(days: d));
+      for (var d = 0; d < 60; d++) {
+        final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: d));
         final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
             ? (() {
                 final anchor = s.cycleAnchorDate ?? now;
@@ -993,15 +914,8 @@ class _MedCard extends StatelessWidget {
             : s.daysOfWeek.contains(date.weekday);
         if (onDay) {
           for (final minutes in times) {
-            final dt = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              minutes ~/ 60,
-              minutes % 60,
-            );
-            if (dt.isBefore(now) && (last == null || dt.isAfter(last!)))
-              last = dt;
+            final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+            if (dt.isBefore(now) && (last == null || dt.isAfter(last))) last = dt;
           }
         }
       }
@@ -1011,9 +925,7 @@ class _MedCard extends StatelessWidget {
     if (linked.isNotEmpty) {
       double occPerWeek = 0;
       for (final s in linked) {
-        final times = (s.timesOfDay?.isNotEmpty == true)
-            ? s.timesOfDay!.length
-            : 1;
+        final times = (s.timesOfDay?.isNotEmpty ?? false) ? s.timesOfDay!.length : 1;
         if (s.cycleEveryNDays != null && s.cycleEveryNDays! > 0) {
           occPerWeek += (7 / s.cycleEveryNDays!) * times;
         } else {
@@ -1021,7 +933,7 @@ class _MedCard extends StatelessWidget {
         }
       }
       if (occPerWeek > 0) {
-        final dosePerOcc = 1.0; // heuristic for now (1 unit per occurrence)
+        const dosePerOcc = 1.0; // heuristic for now (1 unit per occurrence)
         final dailyUse = (occPerWeek * dosePerOcc) / 7.0;
         if (dailyUse > 0) {
           daysLeft = (m.stockValue / dailyUse).floor();
@@ -1041,15 +953,12 @@ class _MedCard extends StatelessWidget {
     }
 
     String fmtWhen(DateTime dt) {
-      final isToday =
-          dt.year == now.year && dt.month == now.month && dt.day == now.day;
+      final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
       final time = DateFormat('HH:mm').format(dt);
       if (isToday) return 'Today $time';
       final tomorrow = now.add(const Duration(days: 1));
       final isTomorrow =
-          dt.year == tomorrow.year &&
-          dt.month == tomorrow.month &&
-          dt.day == tomorrow.day;
+          dt.year == tomorrow.year && dt.month == tomorrow.month && dt.day == tomorrow.day;
       if (isTomorrow) return 'Tomorrow $time';
       return DateFormat('dd MMM, HH:mm').format(dt);
     }
@@ -1060,12 +969,12 @@ class _MedCard extends StatelessWidget {
       return '$w weeks';
     }
 
-    final lastStr = last != null ? fmtWhen(last!) : '—';
-    final nextStr = next != null ? fmtWhen(next!) : '—';
-    final lastsStr = daysLeft != null ? fmtDur(daysLeft!) : '—';
+    final lastStr = last != null ? fmtWhen(last) : '—';
+    final nextStr = next != null ? fmtWhen(next) : '—';
+    final lastsStr = daysLeft != null ? fmtDur(daysLeft) : '—';
 
     final runOutDate = daysLeft != null
-        ? DateFormat('dd MMM').format(now.add(Duration(days: daysLeft!)))
+        ? DateFormat('dd MMM').format(now.add(Duration(days: daysLeft)))
         : '—';
     final dosesStr = dosesLeft != null ? '~$dosesLeft left' : '~$lastsStr left';
     final summaryText = 'Last: $lastStr  •  Next: $nextStr';
@@ -1074,10 +983,7 @@ class _MedCard extends StatelessWidget {
       padding: const EdgeInsets.only(right: 8),
       child: Text(
         summaryText,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: kTextLightGrey(context),
-                  height: 1.0,
-                ),
+        style: theme.textTheme.bodySmall?.copyWith(color: kTextLightGrey(context), height: 1),
         overflow: TextOverflow.ellipsis,
       ),
     );
@@ -1090,7 +996,7 @@ class _MedCard extends StatelessWidget {
   // Stock status helpers
   String _stockStatusText() {
     // For count-based units, express as X out of Y remaining; Y = originally entered amount when available
-    String baseUnit = _getStockUnitLabel(m.stockUnit);
+    final baseUnit = _getStockUnitLabel(m.stockUnit);
     final isCountUnit =
         m.stockUnit == StockUnit.preFilledSyringes ||
         m.stockUnit == StockUnit.singleDoseVials ||
@@ -1127,7 +1033,7 @@ class _MedCard extends StatelessWidget {
 
   Color _stockStatusColor(ThemeData theme) {
     // Color by percentage of baseline when available
-    double? baseline = m.lowStockThreshold;
+    final baseline = m.lowStockThreshold;
     if (baseline != null && baseline > 0) {
       final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
       if (pct <= 0.2) return theme.colorScheme.error;
@@ -1150,7 +1056,7 @@ class _MedCard extends StatelessWidget {
         m.stockUnit == StockUnit.preFilledSyringes ||
         m.stockUnit == StockUnit.singleDoseVials ||
         m.stockUnit == StockUnit.multiDoseVials;
-    final dec = 1.0;
+    const dec = 1.0;
     final newValue = m.stockValue - dec;
     final updated = m.copyWith(stockValue: newValue < 0 ? 0 : newValue);
     await box.put(updated.id, updated);
@@ -1163,11 +1069,7 @@ class _MedCard extends StatelessWidget {
     );
   }
 
-  void _onDoseAction(
-    BuildContext context,
-    String action,
-    DateTime scheduledAt,
-  ) {
+  void _onDoseAction(BuildContext context, String action, DateTime scheduledAt) {
     // Placeholder: integrate with schedules/logging later
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

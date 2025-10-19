@@ -1,11 +1,16 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class AddTabletDebugPage extends StatefulWidget {
-  AddTabletDebugPage({super.key});
+  const AddTabletDebugPage({super.key});
 
   @override
   State<AddTabletDebugPage> createState() => _AddTabletDebugPageState();
@@ -25,7 +30,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
   final _stockValueCtrl = TextEditingController();
   String? _stockError;
   DateTime? _expiry;
-  bool _lowStockEnabled = false;
+  final bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
   // Storage
   final _batchCtrl = TextEditingController();
@@ -58,10 +63,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       constraints: const BoxConstraints(minHeight: 40),
       floatingLabelBehavior: FloatingLabelBehavior.never,
-      hintStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: 11,
-        color: cs.onSurfaceVariant,
-      ),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
       filled: true,
       fillColor: cs.surfaceContainerLowest,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -81,7 +83,6 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 120,
@@ -174,10 +175,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
   Widget build(BuildContext context) {
     debugPrint('[DEBUG TABLET] build() called');
     return Scaffold(
-      appBar: const GradientAppBar(
-        title: 'DEBUG TABLET PAGE – FORM v2',
-        forceBackButton: true,
-      ),
+      appBar: const GradientAppBar(title: 'DEBUG TABLET PAGE – FORM v2', forceBackButton: true),
       body: SingleChildScrollView(
         // Visible banner at very top to confirm new body
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 88),
@@ -194,10 +192,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                 color: Colors.green,
                 child: const Text(
                   'DEBUG: MINIMAL FORM BODY RENDERED',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
                 ),
               ),
               _section('General', [
@@ -207,8 +202,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                     controller: _nameCtrl,
                     textCapitalization: TextCapitalization.sentences,
                     decoration: _dec(hint: 'e.g., Panadol'),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
                 ),
                 _rowLabelField(
@@ -235,9 +229,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: Row(
                     children: [
                       _incBtn('−', () {
-                        final d = double.tryParse(
-                          _strengthValueCtrl.text.trim(),
-                        );
+                        final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
                         final nv = (base - 1).clamp(0, 1000000000);
                         setState(() => _strengthValueCtrl.text = nv.toString());
@@ -248,25 +240,19 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                         child: TextFormField(
                           controller: _strengthValueCtrl,
                           textAlign: TextAlign.center,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(
                               RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
                             ),
                           ],
                           decoration: _dec(hint: '0'),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required'
-                              : null,
+                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                         ),
                       ),
                       const SizedBox(width: 6),
                       _incBtn('+', () {
-                        final d = double.tryParse(
-                          _strengthValueCtrl.text.trim(),
-                        );
+                        final d = double.tryParse(_strengthValueCtrl.text.trim());
                         final base = d?.floor() ?? 0;
                         final nv = (base + 1).clamp(0, 1000000000);
                         setState(() => _strengthValueCtrl.text = nv.toString());
@@ -280,39 +266,28 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                     width: 120,
                     height: 40,
                     child: DropdownButtonFormField<Unit>(
-                      value: _strengthUnit,
-                      isExpanded: false,
+                      initialValue: _strengthUnit,
                       alignment: AlignmentDirectional.center,
                       menuMaxHeight: 320,
-                      selectedItemBuilder: (ctx) =>
-                          const [Unit.mcg, Unit.mg, Unit.g]
-                              .map(
-                                (u) => Center(
-                                  child: Text(
-                                    u == Unit.mcg
-                                        ? 'mcg'
-                                        : (u == Unit.mg ? 'mg' : 'g'),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                      selectedItemBuilder: (ctx) => const [Unit.mcg, Unit.mg, Unit.g]
+                          .map(
+                            (u) => Center(
+                              child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')),
+                            ),
+                          )
+                          .toList(),
                       items: const [Unit.mcg, Unit.mg, Unit.g]
                           .map(
                             (u) => DropdownMenuItem(
                               value: u,
                               alignment: AlignmentDirectional.center,
                               child: Center(
-                                child: Text(
-                                  u == Unit.mcg
-                                      ? 'mcg'
-                                      : (u == Unit.mg ? 'mg' : 'g'),
-                                ),
+                                child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')),
                               ),
                             ),
                           )
                           .toList(),
-                      onChanged: (u) =>
-                          setState(() => _strengthUnit = u ?? _strengthUnit),
+                      onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
                       decoration: _dec(),
                     ),
                   ),
@@ -328,13 +303,9 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                       Row(
                         children: [
                           _incBtn('−', () {
-                            final v =
-                                double.tryParse(_stockValueCtrl.text) ?? 0;
+                            final v = double.tryParse(_stockValueCtrl.text) ?? 0;
                             final nv = (v - 0.25).clamp(0, 1000000);
-                            setState(
-                              () =>
-                                  _stockValueCtrl.text = nv.toStringAsFixed(2),
-                            );
+                            setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
                           }),
                           const SizedBox(width: 6),
                           SizedBox(
@@ -342,24 +313,18 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                             child: TextFormField(
                               controller: _stockValueCtrl,
                               textAlign: TextAlign.center,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
                                 ),
                               ],
                               decoration: _dec(hint: '0.00'),
-                              validator: (v) => (v == null || v.trim().isEmpty)
-                                  ? 'Required'
-                                  : null,
+                              validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                               onChanged: (v) {
                                 final d = double.tryParse(v);
                                 setState(
-                                  () =>
-                                      _stockError = (d == null || _isQuarter(d))
+                                  () => _stockError = (d == null || _isQuarter(d))
                                       ? null
                                       : 'Stock should be .00, .25, .50 or .75',
                                 );
@@ -368,13 +333,9 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                           ),
                           const SizedBox(width: 6),
                           _incBtn('+', () {
-                            final v =
-                                double.tryParse(_stockValueCtrl.text) ?? 0;
+                            final v = double.tryParse(_stockValueCtrl.text) ?? 0;
                             final nv = (v + 0.25).clamp(0, 1000000);
-                            setState(
-                              () =>
-                                  _stockValueCtrl.text = nv.toStringAsFixed(2),
-                            );
+                            setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
                           }),
                         ],
                       ),
@@ -395,13 +356,10 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                 _rowLabelField(
                   label: 'Unit *',
                   field: DropdownButtonFormField<StockUnit>(
-                    value: StockUnit.tablets,
+                    initialValue: StockUnit.tablets,
                     isExpanded: true,
                     items: const [
-                      DropdownMenuItem(
-                        value: StockUnit.tablets,
-                        child: Text('tablets'),
-                      ),
+                      DropdownMenuItem(value: StockUnit.tablets, child: Text('tablets')),
                     ],
                     onChanged: null,
                     decoration: _dec(),
@@ -415,16 +373,12 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                       onPressed: _pickExpiry,
                       icon: const Icon(Icons.calendar_month, size: 18),
                       label: Text(
-                        _expiry == null
-                            ? 'Pick expiry date'
-                            : DateFormat.yMd().format(_expiry!),
+                        _expiry == null ? 'Pick expiry date' : DateFormat.yMd().format(_expiry!),
                       ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         minimumSize: const Size(0, 40),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
+                        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                     ),
                   ),
@@ -452,8 +406,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   title: const Text('Requires Refrigeration'),
                   subtitle: const Text('Must be stored in refrigerator'),
                   value: _requiresFridge,
-                  onChanged: (v) =>
-                      setState(() => _requiresFridge = v ?? false),
+                  onChanged: (v) => setState(() => _requiresFridge = v ?? false),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),

@@ -1,5 +1,8 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import '../domain/schedule.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 class ScheduleRepository {
   ScheduleRepository(this._box);

@@ -1,6 +1,6 @@
 String fmt2(num value) {
   // Format with up to 2 decimals. Remove only fractional trailing zeros, never integers.
-  String s = value.toStringAsFixed(2);
+  var s = value.toStringAsFixed(2);
   if (s.contains('.')) {
     // Remove trailing zeros in the fractional part
     s = s.replaceAll(RegExp(r'0+$'), '');

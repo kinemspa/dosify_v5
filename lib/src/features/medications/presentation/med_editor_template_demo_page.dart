@@ -1,11 +1,14 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class EditorTemplatePreviewPage extends StatefulWidget {
   const EditorTemplatePreviewPage({super.key});
@@ -61,7 +64,10 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
   Unit _strengthUnit = Unit.mg;
   final _perMl = TextEditingController(text: '1');
   bool get _isPerMl =>
-      _strengthUnit == Unit.mcgPerMl || _strengthUnit == Unit.mgPerMl || _strengthUnit == Unit.gPerMl || _strengthUnit == Unit.unitsPerMl;
+      _strengthUnit == Unit.mcgPerMl ||
+      _strengthUnit == Unit.mgPerMl ||
+      _strengthUnit == Unit.gPerMl ||
+      _strengthUnit == Unit.unitsPerMl;
 
   final _stock = TextEditingController(text: '0');
   StockUnit _stockUnit = StockUnit.preFilledSyringes;
@@ -86,7 +92,14 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Editor Template (Preview)', forceBackButton: true),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: SizedBox(width: 140, child: FilledButton.icon(onPressed: null, icon: const Icon(Icons.save), label: const Text('Save'))),
+      floatingActionButton: SizedBox(
+        width: 140,
+        child: FilledButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.save),
+          label: const Text('Save'),
+        ),
+      ),
       body: MedEditorTemplate(
         appBarTitle: 'Editor Template (Preview)',
         summaryBuilder: (key) {
@@ -112,7 +125,6 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             showDark: _lightSensitive,
             lowStockEnabled: _lowStockAlert,
             lowStockThreshold: double.tryParse(_lowStockThreshold.text.trim()),
-            includeNameInStrengthLine: false,
             perTabletLabel: false,
             formLabelPlural: 'pre filled syringes',
           );
@@ -183,14 +195,38 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           value: _strengthUnit,
           width: kSmallControlWidth,
           items: const [
-            DropdownMenuItem(value: Unit.mcg, child: Center(child: Text('mcg'))),
-            DropdownMenuItem(value: Unit.mg, child: Center(child: Text('mg'))),
-            DropdownMenuItem(value: Unit.g, child: Center(child: Text('g'))),
-            DropdownMenuItem(value: Unit.units, child: Center(child: Text('units'))),
-            DropdownMenuItem(value: Unit.mcgPerMl, child: Center(child: Text('mcg/mL'))),
-            DropdownMenuItem(value: Unit.mgPerMl, child: Center(child: Text('mg/mL'))),
-            DropdownMenuItem(value: Unit.gPerMl, child: Center(child: Text('g/mL'))),
-            DropdownMenuItem(value: Unit.unitsPerMl, child: Center(child: Text('units/mL'))),
+            DropdownMenuItem(
+              value: Unit.mcg,
+              child: Center(child: Text('mcg')),
+            ),
+            DropdownMenuItem(
+              value: Unit.mg,
+              child: Center(child: Text('mg')),
+            ),
+            DropdownMenuItem(
+              value: Unit.g,
+              child: Center(child: Text('g')),
+            ),
+            DropdownMenuItem(
+              value: Unit.units,
+              child: Center(child: Text('units')),
+            ),
+            DropdownMenuItem(
+              value: Unit.mcgPerMl,
+              child: Center(child: Text('mcg/mL')),
+            ),
+            DropdownMenuItem(
+              value: Unit.mgPerMl,
+              child: Center(child: Text('mg/mL')),
+            ),
+            DropdownMenuItem(
+              value: Unit.gPerMl,
+              child: Center(child: Text('g/mL')),
+            ),
+            DropdownMenuItem(
+              value: Unit.unitsPerMl,
+              child: Center(child: Text('units/mL')),
+            ),
           ],
           onChanged: (v) => setState(() {
             _strengthUnit = v ?? _strengthUnit;
@@ -244,7 +280,10 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         stockHelp: 'Enter the amount currently in stock',
         lowStockRow: Row(
           children: [
-            Checkbox(value: _lowStockAlert, onChanged: (v) => setState(() => _lowStockAlert = v ?? false)),
+            Checkbox(
+              value: _lowStockAlert,
+              onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
+            ),
             Expanded(
               child: Text(
                 'Enable alert when stock is low',
@@ -297,12 +336,17 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           value: _stockUnit,
           width: kSmallControlWidth,
           items: const [
-            DropdownMenuItem(value: StockUnit.preFilledSyringes, child: Center(child: Text('syringes'))),
+            DropdownMenuItem(
+              value: StockUnit.preFilledSyringes,
+              child: Center(child: Text('syringes')),
+            ),
           ],
           onChanged: (v) => setState(() => _stockUnit = v ?? _stockUnit),
         ),
         expiryDateButton: DateButton36(
-          label: _expiry == null ? 'Select date' : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
+          label: _expiry == null
+              ? 'Select date'
+              : MaterialLocalizations.of(context).formatCompactDate(_expiry!),
           onPressed: () async {
             final now = DateTime.now();
             final picked = await showDatePicker(
@@ -319,29 +363,70 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         expiryHelp: 'Enter the expiry date',
 
         // Storage
-        batchField: Field36(child: TextFormField(controller: _batch, textCapitalization: TextCapitalization.sentences, decoration: const InputDecoration(hintText: 'Enter batch number'))),
+        batchField: Field36(
+          child: TextFormField(
+            controller: _batch,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(hintText: 'Enter batch number'),
+          ),
+        ),
         batchHelp: 'Enter the printed batch or lot number',
-        locationField: Field36(child: TextFormField(controller: _location, textCapitalization: TextCapitalization.sentences, decoration: const InputDecoration(hintText: 'eg. Bathroom cabinet'))),
+        locationField: Field36(
+          child: TextFormField(
+            controller: _location,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(hintText: 'eg. Bathroom cabinet'),
+          ),
+        ),
         locationHelp: 'Where it’s stored (e.g., Bathroom cabinet)',
         refrigerateRow: Opacity(
           opacity: _keepFrozen ? 0.5 : 1.0,
-          child: Row(children: [
-            Checkbox(value: _refrigerate, onChanged: _keepFrozen ? null : (v) => setState(() => _refrigerate = v ?? false)),
-            Text('Refrigerate', style: _keepFrozen ? kMutedLabelStyle(context) : Theme.of(context).textTheme.bodyMedium),
-          ]),
+          child: Row(
+            children: [
+              Checkbox(
+                value: _refrigerate,
+                onChanged: _keepFrozen ? null : (v) => setState(() => _refrigerate = v ?? false),
+              ),
+              Text(
+                'Refrigerate',
+                style: _keepFrozen
+                    ? kMutedLabelStyle(context)
+                    : Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
         ),
         refrigerateHelp: 'Enable if this medication must be kept refrigerated',
-        freezeRow: Row(children: [
-          Checkbox(value: _keepFrozen, onChanged: (v) => setState(() { _keepFrozen = v ?? false; if (_keepFrozen) _refrigerate = false; })),
-          Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
-        ]),
+        freezeRow: Row(
+          children: [
+            Checkbox(
+              value: _keepFrozen,
+              onChanged: (v) => setState(() {
+                _keepFrozen = v ?? false;
+                if (_keepFrozen) _refrigerate = false;
+              }),
+            ),
+            Text('Freeze', style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
         freezeHelp: 'Enable if this medication must be kept frozen',
-        darkRow: Row(children: [
-          Checkbox(value: _lightSensitive, onChanged: (v) => setState(() => _lightSensitive = v ?? false)),
-          Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
-        ]),
+        darkRow: Row(
+          children: [
+            Checkbox(
+              value: _lightSensitive,
+              onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+            ),
+            Text('Dark storage', style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
         darkHelp: 'Enable if this medication must be protected from light',
-        storageInstructionsField: Field36(child: TextFormField(controller: _storageNotes, textCapitalization: TextCapitalization.sentences, decoration: const InputDecoration(hintText: 'Enter storage instructions'))),
+        storageInstructionsField: Field36(
+          child: TextFormField(
+            controller: _storageNotes,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(hintText: 'Enter storage instructions'),
+          ),
+        ),
         storageInstructionsHelp: 'Special handling notes (e.g., Keep upright)',
       ),
     );

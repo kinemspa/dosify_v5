@@ -1,9 +1,9 @@
 /// Helper functions and utilities for reconstitution calculator
-/// 
+///
 /// Extracted from reconstitution_calculator_widget.dart to reduce file size
 /// and improve maintainability.
+library;
 
-import 'dart:math';
 
 /// Round value to 2 decimal places
 double round2(double v) => (v * 100).round() / 100.0;
@@ -26,9 +26,9 @@ String formatDouble(double v) {
 }
 
 /// Convert mass units to base unit (mg)
-/// 
+///
 /// Used for unit consistency in calculations when mixing mcg, mg, g
-/// 
+///
 /// Examples:
 /// - toBaseMass(5, 'g') = 5000 mg
 /// - toBaseMass(250, 'mcg') = 0.25 mg
@@ -41,7 +41,7 @@ double toBaseMass(double value, String from) {
 }
 
 /// Get context-aware helper text for strength input based on unit type
-/// 
+///
 /// Provides guidance for different medication units:
 /// - IU: Explains IU vs syringe markings, provides HGH conversion
 /// - mg: Explains pre-filled vs powder vials
@@ -50,7 +50,8 @@ double toBaseMass(double value, String from) {
 String getStrengthHelperText(String unit) {
   switch (unit) {
     case 'units':
-      return '''Enter the total IU labeled on your vial (e.g., '10 IU' for HGH).
+      return '''
+Enter the total IU labeled on your vial (e.g., '10 IU' for HGH).
 
 Can't find IU on vial?
 • HGH: 1mg ≈ 3 IU (so 5mg ≈ 15 IU)
@@ -59,37 +60,40 @@ Can't find IU on vial?
 
 ⚠️ IU is medication potency, NOT syringe markings.
 Never guess - incorrect dosing can be dangerous.''';
-      
+
     case 'mg':
-      return '''Enter total mg in vial.
+      return '''
+Enter total mg in vial.
 
 For pre-filled vials labeled as 'mg/mL':
 Multiply concentration × volume (e.g., 200mg/mL × 10mL = 2000mg total)
 
 For powder vials:
 Enter amount shown on label (e.g., '5mg')''';
-      
+
     case 'mcg':
-      return '''Enter total micrograms (mcg) in vial.
+      return '''
+Enter total micrograms (mcg) in vial.
 
 ⚠️ Note: 1000mcg = 1mg
 Check vial label carefully for unit.''';
-      
+
     case 'g':
-      return '''Enter total grams in vial (typically antibiotics).
+      return '''
+Enter total grams in vial (typically antibiotics).
 
 Note: 1g = 1000mg''';
-      
+
     default:
       return 'Enter the total amount in your vial';
   }
 }
 
 /// HGH mg to IU conversion helper
-/// 
+///
 /// Approximate conversion: 1mg HGH ≈ 3 IU
 /// (varies by manufacturer: 2.6-3.3 IU per mg)
-/// 
+///
 /// Returns approximate IU value
 double convertHghMgToIU(double mg) {
   return mg * 3.0;

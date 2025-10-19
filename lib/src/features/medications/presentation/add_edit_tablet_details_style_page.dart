@@ -1,22 +1,25 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class AddEditTabletDetailsStylePage extends StatefulWidget {
   const AddEditTabletDetailsStylePage({super.key, this.initial});
   final Medication? initial;
 
   @override
-  State<AddEditTabletDetailsStylePage> createState() =>
-      _AddEditTabletDetailsStylePageState();
+  State<AddEditTabletDetailsStylePage> createState() => _AddEditTabletDetailsStylePageState();
 }
 
-class _AddEditTabletDetailsStylePageState
-    extends State<AddEditTabletDetailsStylePage> {
+class _AddEditTabletDetailsStylePageState extends State<AddEditTabletDetailsStylePage> {
   final _formKey = GlobalKey<FormState>();
 
   String _name = '';
@@ -64,9 +67,7 @@ class _AddEditTabletDetailsStylePageState
 
   Future<void> _save() async {
     if (_name.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Name is required')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name is required')));
       return;
     }
     if (_strengthValue == null || _strengthValue! <= 0) {
@@ -83,9 +84,7 @@ class _AddEditTabletDetailsStylePageState
     }
 
     final med = Medication(
-      id:
-          widget.initial?.id ??
-          DateTime.now().microsecondsSinceEpoch.toString(),
+      id: widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
       form: MedicationForm.tablet,
       name: _name.trim(),
       manufacturer: _manufacturer.trim().isEmpty ? null : _manufacturer.trim(),
@@ -93,20 +92,15 @@ class _AddEditTabletDetailsStylePageState
       notes: _notes.trim().isEmpty ? null : _notes.trim(),
       strengthValue: _strengthValue!,
       strengthUnit: _strengthUnit,
-      perMlValue: null,
       stockValue: _stockValue!,
       stockUnit: _stockUnit,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: _lowStockEnabled ? _lowStockThreshold : null,
       expiry: _expiry,
       batchNumber: _batch.trim().isEmpty ? null : _batch.trim(),
-      storageLocation: _storageLocation.trim().isEmpty
-          ? null
-          : _storageLocation.trim(),
+      storageLocation: _storageLocation.trim().isEmpty ? null : _storageLocation.trim(),
       requiresRefrigeration: _requiresFridge,
-      storageInstructions: _storageInstructions.trim().isEmpty
-          ? null
-          : _storageInstructions.trim(),
+      storageInstructions: _storageInstructions.trim().isEmpty ? null : _storageInstructions.trim(),
     );
 
     final box = Hive.box<Medication>('medications');
@@ -115,11 +109,7 @@ class _AddEditTabletDetailsStylePageState
     context.go('/medications');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          widget.initial == null
-              ? 'Added "${med.name}"'
-              : 'Updated "${med.name}"',
-        ),
+        content: Text(widget.initial == null ? 'Added "${med.name}"' : 'Updated "${med.name}"'),
       ),
     );
   }
@@ -140,7 +130,6 @@ class _AddEditTabletDetailsStylePageState
               controller: ctrl,
               keyboardType: keyboardType,
               autofocus: true,
-              decoration: const InputDecoration(),
             ),
             actions: [
               TextButton(
@@ -165,9 +154,7 @@ class _AddEditTabletDetailsStylePageState
   }) async {
     final ctrl = TextEditingController(
       text: initial != null
-          ? (initial == initial.roundToDouble()
-                ? initial.toStringAsFixed(0)
-                : initial.toString())
+          ? (initial == initial.roundToDouble() ? initial.toStringAsFixed(0) : initial.toString())
           : '',
     );
     final ok =
@@ -260,9 +247,7 @@ class _AddEditTabletDetailsStylePageState
             Expanded(
               child: Text(
                 value.isEmpty ? '-' : value,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
               ),
             ),
             if (onTap != null) const Icon(Icons.edit_outlined, size: 18),
@@ -277,9 +262,7 @@ class _AddEditTabletDetailsStylePageState
     final theme = Theme.of(context);
     String fmt2(double? v) {
       if (v == null) return '-';
-      return v == v.roundToDouble()
-          ? v.toStringAsFixed(0)
-          : v.toStringAsFixed(2);
+      return v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
     }
 
     return Scaffold(
@@ -294,29 +277,19 @@ class _AddEditTabletDetailsStylePageState
                 if (widget.initial == null) {
                   context.push('/medications/add/tablet');
                 } else {
-                  context.push(
-                    '/medications/edit/tablet/${widget.initial!.id}',
-                  );
+                  context.push('/medications/edit/tablet/${widget.initial!.id}');
                 }
               } else if (value == 'hybrid') {
                 if (widget.initial == null) {
                   context.push('/medications/add/tablet/hybrid');
                 } else {
-                  context.push(
-                    '/medications/edit/tablet/hybrid/${widget.initial!.id}',
-                  );
+                  context.push('/medications/edit/tablet/hybrid/${widget.initial!.id}');
                 }
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem<String>(
-                value: 'standard',
-                child: Text('Open standard editor'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'hybrid',
-                child: Text('Open hybrid editor'),
-              ),
+              const PopupMenuItem<String>(value: 'standard', child: Text('Open standard editor')),
+              const PopupMenuItem<String>(value: 'hybrid', child: Text('Open hybrid editor')),
             ],
           ),
           TextButton(onPressed: _save, child: const Text('Save')),
@@ -331,11 +304,7 @@ class _AddEditTabletDetailsStylePageState
               _row(
                 'Name',
                 _name,
-                onTap: () => _editText(
-                  title: 'Name',
-                  initial: _name,
-                  onSaved: (v) => _name = v,
-                ),
+                onTap: () => _editText(title: 'Name', initial: _name, onSaved: (v) => _name = v),
               ),
               _row('Medication Type', 'Tablet'),
               _row(
@@ -359,11 +328,7 @@ class _AddEditTabletDetailsStylePageState
               _row(
                 'Notes',
                 _notes,
-                onTap: () => _editText(
-                  title: 'Notes',
-                  initial: _notes,
-                  onSaved: (v) => _notes = v,
-                ),
+                onTap: () => _editText(title: 'Notes', initial: _notes, onSaved: (v) => _notes = v),
               ),
             ]),
             const SizedBox(height: 12),
@@ -392,11 +357,7 @@ class _AddEditTabletDetailsStylePageState
                 onTap: () => _editEnum<Unit>(
                   title: 'Strength Unit',
                   selected: _strengthUnit,
-                  options: const [
-                    (Unit.mcg, 'mcg'),
-                    (Unit.mg, 'mg'),
-                    (Unit.g, 'g'),
-                  ],
+                  options: const [(Unit.mcg, 'mcg'), (Unit.mg, 'mg'), (Unit.g, 'g')],
                   onSaved: (u) => _strengthUnit = u,
                 ),
               ),
@@ -458,20 +419,13 @@ class _AddEditTabletDetailsStylePageState
               _row(
                 'Expiry',
                 _expiry != null ? DateFormat('dd/MM/yy').format(_expiry!) : '-',
-                onTap: () => _pickDate(
-                  title: 'Expiry',
-                  initial: _expiry,
-                  onSaved: (d) => _expiry = d,
-                ),
+                onTap: () =>
+                    _pickDate(title: 'Expiry', initial: _expiry, onSaved: (d) => _expiry = d),
               ),
               _row(
                 'Batch',
                 _batch,
-                onTap: () => _editText(
-                  title: 'Batch',
-                  initial: _batch,
-                  onSaved: (v) => _batch = v,
-                ),
+                onTap: () => _editText(title: 'Batch', initial: _batch, onSaved: (v) => _batch = v),
               ),
               _row(
                 'Storage location',

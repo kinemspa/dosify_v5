@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/app/router.dart';
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 
@@ -11,11 +16,8 @@ class DosifiApp extends ConsumerWidget {
     const primarySeed = Color(0xFF09A8BD);
     // const secondary = Color(0xFFEC873F);
 
-    final schemeLight =
-        ColorScheme.fromSeed(
-          seedColor: primarySeed,
-          brightness: Brightness.light,
-        ).copyWith(
+    final schemeLight = ColorScheme.fromSeed(seedColor: primarySeed)
+        .copyWith(
           // Pin the primary color exactly to the brand seed to avoid tonal shifts
           primary: primarySeed,
         );
@@ -50,17 +52,13 @@ class DosifiApp extends ConsumerWidget {
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
-            color: states.contains(WidgetState.selected)
-                ? schemeLight.primary
-                : Colors.white70,
+            color: states.contains(WidgetState.selected) ? schemeLight.primary : Colors.white70,
             size: 22,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
-            color: states.contains(WidgetState.selected)
-                ? schemeLight.primary
-                : Colors.white70,
+            color: states.contains(WidgetState.selected) ? schemeLight.primary : Colors.white70,
             fontSize: 10,
           ),
         ),
@@ -83,10 +81,7 @@ class DosifiApp extends ConsumerWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: baseLight.colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: baseLight.colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -94,10 +89,7 @@ class DosifiApp extends ConsumerWidget {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: baseLight.colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: baseLight.colorScheme.primary, width: 2),
         ),
         errorStyle: const TextStyle(fontSize: 0, height: 0),
         filled: true,
@@ -144,20 +136,15 @@ class DosifiApp extends ConsumerWidget {
       checkboxTheme: CheckboxThemeData(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected))
-            return baseLight.colorScheme.primary;
+          if (states.contains(WidgetState.selected)) return baseLight.colorScheme.primary;
           return Colors.transparent; // no fill when unchecked
         }),
         checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseLight.colorScheme.onSurfaceVariant.withValues(
-            alpha: 0.50,
-          );
+          final color = baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
           return BorderSide(color: color, width: 1.5);
         }),
-        overlayColor: WidgetStatePropertyAll(
-          baseLight.colorScheme.primary.withValues(alpha: 0.08),
-        ),
+        overlayColor: WidgetStatePropertyAll(baseLight.colorScheme.primary.withValues(alpha: 0.08)),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseLight.colorScheme.primary,
@@ -200,17 +187,13 @@ class DosifiApp extends ConsumerWidget {
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
-            color: states.contains(WidgetState.selected)
-                ? schemeDark.primary
-                : Colors.white70,
+            color: states.contains(WidgetState.selected) ? schemeDark.primary : Colors.white70,
             size: 22,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
-            color: states.contains(WidgetState.selected)
-                ? schemeDark.primary
-                : Colors.white70,
+            color: states.contains(WidgetState.selected) ? schemeDark.primary : Colors.white70,
             fontSize: 10,
           ),
         ),
@@ -288,20 +271,15 @@ class DosifiApp extends ConsumerWidget {
       checkboxTheme: CheckboxThemeData(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected))
-            return baseDark.colorScheme.primary;
+          if (states.contains(WidgetState.selected)) return baseDark.colorScheme.primary;
           return Colors.transparent;
         }),
         checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseDark.colorScheme.onSurfaceVariant.withValues(
-            alpha: 0.50,
-          );
+          final color = baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
           return BorderSide(color: color, width: 1.5);
         }),
-        overlayColor: WidgetStatePropertyAll(
-          baseDark.colorScheme.primary.withValues(alpha: 0.12),
-        ),
+        overlayColor: WidgetStatePropertyAll(baseDark.colorScheme.primary.withValues(alpha: 0.12)),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseDark.colorScheme.primary,
@@ -322,8 +300,7 @@ class DosifiApp extends ConsumerWidget {
           onTap: () {
             // Unfocus any active input field
             final currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus &&
-                currentFocus.focusedChild != null) {
+            if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
               FocusManager.instance.primaryFocus?.unfocus();
             }
           },

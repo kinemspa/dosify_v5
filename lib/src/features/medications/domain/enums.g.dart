@@ -70,9 +70,7 @@ class UnitAdapter extends TypeAdapter<Unit> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UnitAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is UnitAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
 
 class StockUnitAdapter extends TypeAdapter<StockUnit> {
@@ -139,9 +137,7 @@ class StockUnitAdapter extends TypeAdapter<StockUnit> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StockUnitAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is StockUnitAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
 
 class MedicationFormAdapter extends TypeAdapter<MedicationForm> {
@@ -193,7 +189,5 @@ class MedicationFormAdapter extends TypeAdapter<MedicationForm> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MedicationFormAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+      other is MedicationFormAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
