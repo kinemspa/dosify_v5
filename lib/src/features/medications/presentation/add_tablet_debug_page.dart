@@ -30,7 +30,6 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
   final _stockValueCtrl = TextEditingController();
   String? _stockError;
   DateTime? _expiry;
-  final bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
   // Storage
   final _batchCtrl = TextEditingController();

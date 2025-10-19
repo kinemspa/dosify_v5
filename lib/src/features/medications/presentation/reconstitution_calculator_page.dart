@@ -33,8 +33,6 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
   late final TextEditingController _strengthCtrl;
   late final TextEditingController _medNameCtrl;
   late String _selectedUnit; // Track selected unit
-  ReconstitutionResult? _lastResult;
-  bool _canSubmit = false;
 
   @override
   void initState() {
@@ -69,10 +67,7 @@ class _ReconstitutionCalculatorPageState extends State<ReconstitutionCalculatorP
   }
 
   void _onCalculation(ReconstitutionResult result, bool isValid) {
-    setState(() {
-      _lastResult = result;
-      _canSubmit = isValid;
-    });
+    // Results handled by calculator widget
   }
 
   InputDecoration _fieldDecoration(BuildContext context, {String? hint}) {

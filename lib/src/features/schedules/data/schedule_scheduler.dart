@@ -1,6 +1,5 @@
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:timezone/timezone.dart' as tz;
 
 // Project imports:
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
@@ -38,24 +37,6 @@ class ScheduleScheduler {
   }) {
     final key = '$scheduleId|w:$weekday|m:$minutes|o:$occurrence';
     return _stableHash32(key);
-  }
-
-  static (int weekdayLocal, int minutesLocal) _utcToLocalSlot(int utcWeekday, int minutesOfDayUtc) {
-    final nowUtc = tz.TZDateTime.now(tz.getLocation('UTC'));
-    final hour = minutesOfDayUtc ~/ 60;
-    final minute = minutesOfDayUtc % 60;
-    var scheduledUtc = tz.TZDateTime(
-      tz.getLocation('UTC'),
-      nowUtc.year,
-      nowUtc.month,
-      nowUtc.day,
-      hour,
-      minute,
-    );
-    final daysUntil = (utcWeekday - scheduledUtc.weekday) % 7;
-    scheduledUtc = scheduledUtc.add(Duration(days: daysUntil));
-    final local = tz.TZDateTime.from(scheduledUtc, tz.local);
-    return (local.weekday, local.hour * 60 + local.minute);
   }
 
   static Future<void> scheduleFor(Schedule s) async {

@@ -62,7 +62,6 @@ class _StrengthInputCard extends StatefulWidget {
 }
 
 class _StrengthInputCardState extends State<_StrengthInputCard> {
-  final bool _selected = false;
   final _ctrl = TextEditingController(text: '250');
   int _value = 250;
   Unit _unit = Unit.mg;

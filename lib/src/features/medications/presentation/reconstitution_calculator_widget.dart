@@ -145,22 +145,6 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     );
   }
 
-  Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      shape: const StadiumBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const StadiumBorder(),
-        child: SizedBox(
-          width: 36,
-          height: kFieldHeight,
-          child: Center(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // Only show calculator content if strength is valid

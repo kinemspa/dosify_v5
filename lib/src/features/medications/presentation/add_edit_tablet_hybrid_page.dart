@@ -37,7 +37,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
 
   // Inventory
   final _stockValueCtrl = TextEditingController();
-  StockUnit _stockUnit = StockUnit.tablets;
   bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
 
@@ -48,8 +47,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
   final _storageCtrl = TextEditingController();
   bool _requiresFridge = false;
   final _storageNotesCtrl = TextEditingController();
-
-  String? _stockError;
 
   @override
   void initState() {
@@ -67,7 +64,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
       _stockValueCtrl.text = (m.stockValue == m.stockValue.roundToDouble())
           ? m.stockValue.toStringAsFixed(0)
           : m.stockValue.toString();
-      _stockUnit = m.stockUnit;
       _lowStockEnabled = m.lowStockEnabled;
       _lowStockCtrl.text = m.lowStockThreshold?.toString() ?? '';
       _expiry = m.expiry;
@@ -111,24 +107,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     Unit.mg => 'mg',
     Unit.g => 'g',
     _ => u.name,
-  };
-
-  String _unitFull(Unit u) => switch (u) {
-    Unit.mcg => 'micrograms',
-    Unit.mg => 'milligrams',
-    Unit.g => 'grams',
-    _ => u.name,
-  };
-
-  String _stockUnitLabel(StockUnit s) => switch (s) {
-    StockUnit.tablets => 'tablets',
-    StockUnit.capsules => 'capsules',
-    StockUnit.preFilledSyringes => 'pre filled syringes',
-    StockUnit.singleDoseVials => 'single dose vials',
-    StockUnit.multiDoseVials => 'multi dose vials',
-    StockUnit.mcg => 'mcg',
-    StockUnit.mg => 'mg',
-    StockUnit.g => 'g',
   };
 
   Future<void> _save() async {
@@ -574,11 +552,6 @@ String _formatQuarter(double v) {
   final rounded = (v * 4).round() / 4.0;
   if ((rounded % 1) == 0) return rounded.toStringAsFixed(0);
   return rounded.toStringAsFixed(2);
-}
-
-bool _isQuarter(double v) {
-  final x = (v * 4).roundToDouble() / 4.0;
-  return (v - x).abs() < 0.000001;
 }
 
 class _TwoDecimalTextInputFormatter extends TextInputFormatter {

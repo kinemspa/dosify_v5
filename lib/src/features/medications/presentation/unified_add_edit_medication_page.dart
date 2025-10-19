@@ -37,12 +37,6 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
   final _scrollCtrl = ScrollController();
   double _summaryHeight = 0;
 
-  // Validation state
-  bool _submitted = false;
-  bool _touchedName = false;
-  bool _touchedStrengthAmt = false;
-  bool _touchedStock = false;
-
   // General section
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();
@@ -71,7 +65,6 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
   final _perMlCtrl = TextEditingController();
   final _vialVolumeCtrl = TextEditingController(text: '0');
   ReconstitutionResult? _reconResult;
-  final bool _showCalculator = false;
 
   @override
   void initState() {
@@ -132,7 +125,6 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
 
   // Helper getters
   bool get _isMdv => widget.form == MedicationForm.injectionMultiDoseVial;
-  bool get _isInjection => widget.form.name.startsWith('injection');
 
   String get _formLabel => switch (widget.form) {
     MedicationForm.tablet => 'Tablet',
