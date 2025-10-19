@@ -12,7 +12,6 @@ warning - The declaration '_unitFull' isn't referenced - lib\src\features\medica
 warning - The declaration '_stockUnitLabel' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:123:10 - unused_element
 warning - The declaration '_isQuarter' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:579:6 - unused_element
 warning - The value of the field '_lowStockEnabled' isn't used - lib\src\features\medications\presentation\add_tablet_debug_page.dart:33:14 - unused_field
-warning - The value of the local variable 'theme' isn't used - lib\src\features\medications\presentation\medication_list_page.dart:586:11 - unused_local_variable
 warning - The value of the field '_lastResult' isn't used - lib\src\features\medications\presentation\reconstitution_calculator_page.dart:36:25 - unused_field
 warning - The value of the field '_canSubmit' isn't used - lib\src\features\medications\presentation\reconstitution_calculator_page.dart:37:8 - unused_field
 warning - The declaration '_pillBtn' isn't referenced - lib\src\features\medications\presentation\reconstitution_calculator_widget.dart:148:10 - unused_element
@@ -24,19 +23,13 @@ warning - The value of the field '_touchedStock' isn't used - lib\src\features\m
 warning - The value of the field '_showCalculator' isn't used - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:74:14 - unused_field
 warning - The declaration '_isInjection' isn't referenced - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:135:12 - unused_element
 warning - The declaration '_utcToLocalSlot' isn't referenced - lib\src\features\schedules\data\schedule_scheduler.dart:43:47 - unused_element
-warning - The declaration '_medStrengthLabel' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1179:10 - unused_element
-warning - The declaration '_DoseFormulaStrip' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1358:7 - unused_element
-warning - The declaration '_ScheduleSummaryCard' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1519:7 - unused_element
-warning - The value of the local variable 'doseFixed' isn't used - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1613:11 - unused_local_variable
-warning - The declaration '_formatStock' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1849:10 - unused_element
-warning - The declaration '_formatStrength' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1869:10 - unused_element
-warning - The declaration '_expiryLabel' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1967:10 - unused_element
-warning - The value of the local variable 'strengthUnit' isn't used - lib\src\features\settings\presentation\large_card_styles_page.dart:180:11 - unused_local_variable
-warning - The value of the local variable 'requiresFridge' isn't used - lib\src\features\settings\presentation\large_card_styles_page.dart:183:11 - unused_local_variable
-warning - The value of the local variable 'storageLocation' isn't used - lib\src\features\settings\presentation\large_card_styles_page.dart:184:11 - unused_local_variable
-warning - The value of the local variable 'strengthUnit' isn't used - lib\src\features\settings\presentation\strength_card_styles_page.dart:180:11 - unused_local_variable
+warning - The declaration '_unitShort' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1168:10 - unused_element
+warning - The declaration '_DoseFormulaStrip' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1346:7 - unused_element
+warning - The declaration '_ScheduleSummaryCard' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1507:7 - unused_element
+warning - The declaration '_formatStock' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1834:10 - unused_element
+warning - The declaration '_formatStrength' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1854:10 - unused_element
+warning - The declaration '_expiryLabel' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1952:10 - unused_element
+warning - Unused import: 'package:dosifi_v5/src/features/medications/domain/enums.dart' - lib\src\features\settings\presentation\large_card_styles_page.dart:9:8 - unused_import
+warning - Unused import: 'package:dosifi_v5/src/features/medications/domain/enums.dart' - lib\src\features\settings\presentation\strength_card_styles_page.dart:6:8 - unused_import
 warning - The value of the field '_selected' isn't used - lib\src\features\settings\presentation\strength_input_styles_page.dart:65:14 - unused_field
-warning - The value of the local variable 'minRatio' isn't used - lib\src\widgets\interactive_syringe_slider.dart:178:11 - unused_local_variable
-warning - The value of the local variable 'maxRatio' isn't used - lib\src\widgets\interactive_syringe_slider.dart:183:11 - unused_local_variable
-warning - The value of the local variable 'theme' isn't used - lib\src\widgets\strength_input.dart:398:11 - unused_local_variable
 

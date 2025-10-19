@@ -1165,29 +1165,6 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     return card;
   }
 
-  String _unitShort(Unit u) => switch (u) {
-    Unit.mcg => 'mcg',
-    Unit.mg => 'mg',
-    Unit.g => 'g',
-    Unit.units => 'units',
-    Unit.mcgPerMl => 'mcg/mL',
-    Unit.mgPerMl => 'mg/mL',
-    Unit.gPerMl => 'g/mL',
-    Unit.unitsPerMl => 'IU/mL',
-  };
-
-  String _medStrengthLabel(Medication m) {
-    final u = _unitShort(m.strengthUnit);
-    String trim(num n) {
-      final s = n.toStringAsFixed(n == n.roundToDouble() ? 0 : 2);
-      if (!s.contains('.')) return s;
-      return s.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
-    }
-
-    final v = trim(m.strengthValue);
-    return '$v $u';
-  }
-
   List<String> _doseUnitOptions() {
     final med = _selectedMed;
     if (med == null) {
@@ -1355,168 +1332,8 @@ String _modeLabel(ScheduleMode m) => switch (m) {
   ScheduleMode.daysOfMonth => 'Days of the month',
 };
 
-class _DoseFormulaStrip extends StatelessWidget {
-  const _DoseFormulaStrip({
-    required this.selectedMed,
-    required this.valueCtrl,
-    required this.unitCtrl,
-  });
-  final Medication? selectedMed;
-  final TextEditingController valueCtrl;
-  final TextEditingController unitCtrl;
-
-  String _fmt(double v, {int decimals = 2}) {
-    if (v == v.roundToDouble()) return v.toStringAsFixed(0);
-    return v.toStringAsFixed(decimals);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final med = selectedMed;
-    final v = double.tryParse(valueCtrl.text.trim());
-    final unit = unitCtrl.text.trim().toLowerCase();
-    if (med == null || v == null || v <= 0 || unit.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    String line;
-    switch (med.form) {
-      case MedicationForm.tablet:
-        if (unit == 'tablets') {
-          final quarters = (v * 4).round();
-          final perTabMcg = switch (med.strengthUnit) {
-            Unit.mcg => med.strengthValue,
-            Unit.mg => med.strengthValue * 1000,
-            Unit.g => med.strengthValue * 1e6,
-            Unit.units => med.strengthValue, // unusual but support
-            Unit.mcgPerMl => med.strengthValue, // treat as mcg/tab if mis-entered
-            Unit.mgPerMl => med.strengthValue * 1000,
-            Unit.gPerMl => med.strengthValue * 1e6,
-            Unit.unitsPerMl => med.strengthValue,
-          };
-          final totalMcg = perTabMcg * quarters / 4.0;
-          final mg = totalMcg / 1000.0;
-          line =
-              '${_fmt(v)} tab × ${_fmt(med.strengthValue)} ${med.strengthUnit.name} = ${_fmt(totalMcg)} mcg (${_fmt(mg)} mg)';
-        } else {
-          // mass entry; compute tablets eq
-          final desiredMcg = switch (unit) {
-            'mcg' => v,
-            'mg' => v * 1000,
-            'g' => v * 1e6,
-            _ => v,
-          };
-          final perTabMcg = switch (med.strengthUnit) {
-            Unit.mcg => med.strengthValue,
-            Unit.mg => med.strengthValue * 1000,
-            Unit.g => med.strengthValue * 1e6,
-            Unit.units => med.strengthValue,
-            Unit.mcgPerMl => med.strengthValue,
-            Unit.mgPerMl => med.strengthValue * 1000,
-            Unit.gPerMl => med.strengthValue * 1e6,
-            Unit.unitsPerMl => med.strengthValue,
-          };
-          final tabs = desiredMcg / perTabMcg;
-          final quarters = (tabs * 4).round() / 4.0;
-          line = '${_fmt(desiredMcg)} mcg = ~${_fmt(quarters)} tablets';
-        }
-      case MedicationForm.capsule:
-        if (unit == 'capsules') {
-          final perCapMcg = switch (med.strengthUnit) {
-            Unit.mcg => med.strengthValue,
-            Unit.mg => med.strengthValue * 1000,
-            Unit.g => med.strengthValue * 1e6,
-            Unit.units => med.strengthValue,
-            _ => med.strengthValue,
-          };
-          final totalMcg = perCapMcg * v;
-          final mg = totalMcg / 1000.0;
-          line =
-              '${_fmt(v)} cap × ${_fmt(med.strengthValue)} ${med.strengthUnit.name} = ${_fmt(totalMcg)} mcg (${_fmt(mg)} mg)';
-        } else {
-          final desiredMcg = switch (unit) {
-            'mcg' => v,
-            'mg' => v * 1000,
-            'g' => v * 1e6,
-            _ => v,
-          };
-          final perCapMcg = switch (med.strengthUnit) {
-            Unit.mcg => med.strengthValue,
-            Unit.mg => med.strengthValue * 1000,
-            Unit.g => med.strengthValue * 1e6,
-            Unit.units => med.strengthValue,
-            _ => med.strengthValue,
-          };
-          final caps = desiredMcg / perCapMcg;
-          line = '${_fmt(desiredMcg)} mcg = ~${_fmt(caps)} capsules';
-        }
-      case MedicationForm.injectionPreFilledSyringe:
-        line = '${_fmt(v)} syringe';
-      case MedicationForm.injectionSingleDoseVial:
-        line = '${_fmt(v)} vial';
-      case MedicationForm.injectionMultiDoseVial:
-        double? mgPerMl;
-        double? iuPerMl;
-        switch (med.strengthUnit) {
-          case Unit.mgPerMl:
-            mgPerMl = med.perMlValue ?? med.strengthValue;
-          case Unit.mcgPerMl:
-            mgPerMl = (med.perMlValue ?? med.strengthValue) / 1000.0;
-          case Unit.gPerMl:
-            mgPerMl = (med.perMlValue ?? med.strengthValue) * 1000.0;
-          case Unit.unitsPerMl:
-            iuPerMl = med.perMlValue ?? med.strengthValue;
-          default:
-            break;
-        }
-        if (unit == 'ml') {
-          final ml = v;
-          String rhs;
-          if (mgPerMl != null) {
-            rhs = '${_fmt(ml * mgPerMl)} mg';
-          } else if (iuPerMl != null) {
-            rhs = '${_fmt(ml * iuPerMl)} IU';
-          } else {
-            rhs = '';
-          }
-          line = '${_fmt(ml)} mL ${rhs.isEmpty ? '' : '= $rhs'}';
-        } else if (unit == 'iu' || unit == 'units') {
-          if (iuPerMl == null) return const SizedBox.shrink();
-          final ml = v / iuPerMl;
-          line = '${_fmt(v)} IU ÷ ${_fmt(iuPerMl)} IU/mL = ${_fmt(ml, decimals: 3)} mL';
-        } else {
-          // mg/mcg/g
-          if (mgPerMl == null) return const SizedBox.shrink();
-          final desiredMg = switch (unit) {
-            'mg' => v,
-            'mcg' => v / 1000.0,
-            'g' => v * 1000.0,
-            _ => v,
-          };
-          final ml = desiredMg / mgPerMl;
-          line = '${_fmt(desiredMg)} mg ÷ ${_fmt(mgPerMl)} mg/mL = ${_fmt(ml, decimals: 3)} mL';
-        }
-    }
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Text(
-        line,
-        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-      ),
-    );
-  }
-}
-
-// Schedule summary card similar to medication summary cards
-class _ScheduleSummaryCard extends StatelessWidget {
+// Widget to display selected medication inline
+class _MedicationSummaryDisplay extends StatelessWidget {
   const _ScheduleSummaryCard({
     required this.medication,
     required this.medicationName,
@@ -1843,43 +1660,6 @@ class _MedicationSummaryDisplay extends StatelessWidget {
   final VoidCallback onExpand;
   final bool isExpanded;
 
-  String _formatStock(Medication m) {
-    final stock = m.stockValue;
-    final s = stock == stock.roundToDouble()
-        ? stock.toStringAsFixed(0)
-        : stock
-              .toStringAsFixed(2)
-              .replaceFirst(RegExp(r'\.0+$'), '')
-              .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
-
-    final unit = switch (m.form) {
-      MedicationForm.tablet => 'tablets',
-      MedicationForm.capsule => 'capsules',
-      MedicationForm.injectionPreFilledSyringe => 'syringes',
-      MedicationForm.injectionSingleDoseVial => 'vials',
-      MedicationForm.injectionMultiDoseVial => 'vials',
-    };
-
-    return '$s $unit';
-  }
-
-  String _formatStrength(Medication m) {
-    final v = m.strengthValue;
-    final val = v == v.roundToDouble()
-        ? v.toStringAsFixed(0)
-        : v
-              .toStringAsFixed(2)
-              .replaceFirst(RegExp(r'\.0+$'), '')
-              .replaceFirst(RegExp(r'(\.\d*?)0+$'), r'$1');
-    final unitLabel = switch (m.strengthUnit) {
-      Unit.mcg || Unit.mcgPerMl => 'mcg',
-      Unit.mg || Unit.mgPerMl => 'mg',
-      Unit.g || Unit.gPerMl => 'g',
-      Unit.units || Unit.unitsPerMl => 'units',
-    };
-    return '$val $unitLabel';
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1960,18 +1740,6 @@ class _InlineMedicationSelector extends StatelessWidget {
     MedicationForm.injectionSingleDoseVial => 'SDV',
     MedicationForm.injectionMultiDoseVial => 'MDV',
   };
-
-  String _expiryLabel(Medication m) {
-    if (m.expiry == null) return 'No expiry';
-    final exp = m.expiry!;
-    final now = DateTime.now();
-    final diff = exp.difference(now).inDays;
-    if (diff < 0) return 'Expired';
-    if (diff == 0) return 'Expires today';
-    if (diff <= 30) return 'Expires in $diff days';
-    final expStr = '${exp.toLocal()}'.split(' ').first;
-    return 'Exp: $expStr';
-  }
 
   String _formatDateDdMm(DateTime d) {
     return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
