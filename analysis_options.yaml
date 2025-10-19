@@ -1,9 +1,49 @@
 include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    unused_import: warning
+    inference_failure_on_untyped_parameter: warning
+    inference_failure_on_uninitialized_variable: warning
+    inference_failure_on_instance_creation: warning
+    deprecated_member_use: info
+    unused_element: warning
+    unused_field: warning
+    unused_local_variable: warning
   exclude:
     - build/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
 
 linter:
   rules:
+    # Imports
+    directives_ordering: true
+    avoid_relative_lib_imports: true
+    always_use_package_imports: true
+    unnecessary_import: true
+    
+    # Safety
+    curly_braces_in_flow_control_structures: true
+    prefer_final_locals: true
+    prefer_final_in_for_each: true
+    avoid_print: true
+    
+    # Style
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_const_declarations: true
+    avoid_redundant_argument_values: true
+    prefer_single_quotes: true
+    prefer_interpolation_to_compose_strings: true
+    
+    # Organization
+    sort_constructors_first: true
+    sort_unnamed_constructors_first: true
+    
+    # Override from very_good_analysis
     public_member_api_docs: false
