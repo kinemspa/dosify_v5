@@ -523,30 +523,6 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     }
   }
 
-  Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    final radius = BorderRadius.circular(8);
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: radius),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: radius,
-        ),
-        child: InkWell(
-          customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(label, style: theme.textTheme.labelLarge),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _section(BuildContext context, String title, List<Widget> children, {Widget? trailing}) {
     return SectionFormCard(title: title, trailing: trailing, children: children);
   }
