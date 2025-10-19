@@ -505,8 +505,9 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       final d = double.tryParse(strengthTxt);
       if (d == null) {
         strengthAmtError = 'Invalid number';
-      } else if (d <= 0)
+      } else if (d <= 0) {
         strengthAmtError = 'Must be > 0';
+      }
     }
     String? stockError;
     final stockTxt = _stockValueCtrl.text.trim();
@@ -516,17 +517,18 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
       final d = double.tryParse(stockTxt);
       if (d == null) {
         stockError = 'Invalid number';
-      } else if (d < 0)
+      } else if (d < 0) {
         stockError = 'Must be ≥ 0';
+      }
     }
     String? thresholdError;
     if (_lowStockEnabled && _lowStockCtrl.text.trim().isNotEmpty) {
       final d = double.tryParse(_lowStockCtrl.text.trim());
       if (d == null) {
         thresholdError = 'Invalid number';
-      } else if (d < 0)
+      } else if (d < 0) {
         thresholdError = 'Must be ≥ 0';
-      else {
+      } else {
         final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
         if (d > stock) thresholdError = 'Threshold cannot exceed stock';
       }

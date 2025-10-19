@@ -392,8 +392,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       final d = double.tryParse(sTxt);
       if (d == null) {
         strengthAmtError = 'Invalid number';
-      } else if (d <= 0)
+      } else if (d <= 0) {
         strengthAmtError = 'Must be > 0';
+      }
     }
     // Stock rules: required, valid number, >= 0 and allow any .00/.25/.50/.75
     String? stockError;
