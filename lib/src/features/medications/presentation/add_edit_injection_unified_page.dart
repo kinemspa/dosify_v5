@@ -267,14 +267,6 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
       _strengthUnit == Unit.gPerMl ||
       _strengthUnit == Unit.unitsPerMl;
 
-  String _buildReconstitutionText(ReconstitutionResult result) {
-    final diluentText = result.diluentName?.isNotEmpty ?? false ? result.diluentName : 'diluent';
-    final syringeSize = result.syringeSizeMl.toStringAsFixed(1);
-    final volume = result.solventVolumeMl.toStringAsFixed(2);
-    final units = result.recommendedUnits.toStringAsFixed(0);
-    return 'Reconstitute with $volume mL $diluentText for $units IU on a $syringeSize mL syringe';
-  }
-
   double? _strengthForCalculator() {
     final s = double.tryParse(_strength.text);
     if (s == null || s <= 0) return null;
@@ -284,60 +276,6 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
       return s * v; // total quantity in vial
     }
     return s;
-  }
-
-  Future<void> _openReconstitutionDialog() async {
-    final unitLabel = _baseUnit(_strengthUnit);
-    final strengthForCalc = _strengthForCalculator() ?? 0;
-    final result = await showDialog<ReconstitutionResult>(
-      context: context,
-      builder: (ctx) => ReconstitutionCalculatorDialog(
-        initialStrengthValue: strengthForCalc,
-        unitLabel: unitLabel,
-        initialDoseValue: _lastCalcDose,
-        initialDoseUnit: _lastCalcDoseUnit,
-        initialSyringeSize: _lastCalcSyringe,
-        initialVialSize: _lastCalcVialSize ?? double.tryParse(_vialVolume.text),
-      ),
-    );
-    if (result != null && mounted) {
-      setState(() {
-        _perMl.text = fmt2(result.perMlConcentration);
-        _vialVolume.text = fmt2(result.solventVolumeMl);
-        _lastCalcDose = _lastCalcDose ?? double.tryParse(_strength.text);
-        _lastCalcDoseUnit = unitLabel;
-        _lastCalcSyringe = _lastCalcSyringe ?? SyringeSizeMl.ml1;
-        _lastCalcVialSize = result.solventVolumeMl;
-      });
-    }
-  }
-
-  double _round2(double v) => (v * 100).round() / 100.0;
-  double _toBaseMass(double value, String from) {
-    if (from == 'g') return value * 1000.0; // g->mg
-    if (from == 'mg') return value; // mg base
-    if (from == 'mcg') return value / 1000.0; // mcg->mg
-    return value; // units pass-through
-  }
-
-  ({double cPerMl, double vialVolume}) _compute({
-    required double S,
-    required double D,
-    required double U,
-  }) {
-    final c = (100 * D) / (U <= 0 ? 0.01 : U);
-    final v = S / (c <= 0 ? 0.000001 : c);
-    return (cPerMl: c, vialVolume: v);
-  }
-
-  (double, double, double) _presetUnitsRaw(SyringeSizeMl syringe) {
-    final total = syringe.totalUnits.toDouble();
-    var minU = (total * 0.05).ceil().toDouble();
-    if (minU < 1.0) minU = 1.0;
-    if (minU > total) minU = total;
-    final midU = _round2(total * 0.33);
-    final highU = _round2(total * 0.80);
-    return (minU, midU, highU);
   }
 
   @override

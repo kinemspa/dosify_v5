@@ -57,8 +57,6 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
   bool _requiresFridge = false;
   final _storageNotesCtrl = TextEditingController();
 
-  final bool _summaryExpanded = true;
-
   int _formStyleIndex = 0;
 
   Future<void> _loadStylePrefs() async {
@@ -206,44 +204,6 @@ class _AddEditInjectionMultiVialPageState extends ConsumerState<AddEditInjection
       initialDate: _expiry ?? now,
     );
     if (picked != null) setState(() => _expiry = picked);
-  }
-
-  Future<void> _openReconstitutionDialog() async {
-    final unitLabel = _baseUnit(_strengthUnit);
-    final strengthForCalc = _strengthForCalculator() ?? 0;
-
-    final result = await showDialog<ReconstitutionResult>(
-      context: context,
-      builder: (ctx) => ReconstitutionCalculatorDialog(
-        initialStrengthValue: strengthForCalc,
-        unitLabel: unitLabel,
-        initialDoseValue: _lastCalcDose,
-        initialDoseUnit: _lastCalcDoseUnit,
-        initialSyringeSize: _lastCalcSyringe,
-        initialVialSize: _lastCalcVialSize ?? double.tryParse(_vialVolumeCtrl.text),
-      ),
-    );
-
-    if (result != null) {
-      setState(() {
-        _perMlCtrl.text = fmt2(result.perMlConcentration);
-        _vialVolumeCtrl.text = fmt2(result.solventVolumeMl);
-        // remember
-        _lastCalcDose = _lastCalcDose ?? double.tryParse(_strengthValueCtrl.text);
-        _lastCalcDoseUnit = unitLabel;
-        _lastCalcSyringe = _lastCalcSyringe ?? SyringeSizeMl.ml1;
-        _lastCalcVialSize = result.solventVolumeMl;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Calculator updated: ${result.perMlConcentration.toStringAsFixed(2)} $unitLabel/mL concentration, add ${result.solventVolumeMl.toStringAsFixed(2)} mL fluid',
-            ),
-          ),
-        );
-      }
-    }
   }
 
   Future<void> _submit() async {
