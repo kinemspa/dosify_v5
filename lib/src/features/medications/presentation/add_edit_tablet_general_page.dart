@@ -43,7 +43,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Unit _strengthUnit = Unit.mg;
   // Inventory fields (next section)
   final _stockCtrl = TextEditingController();
-  final _batchCtrl = TextEditingController();
   bool _lowStockClampHint = false;
   bool _lowStockAlert = false;
   final _lowStockThresholdCtrl = TextEditingController();
@@ -107,7 +106,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     _stockCtrl.dispose();
     _lowStockThresholdCtrl.dispose();
     _storageLocationCtrl.dispose();
-    _batchNumberCtrl.dispose();
     _storageInstructionsCtrl.dispose();
     super.dispose();
   }
@@ -885,53 +883,6 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
-  Widget _generalSummary() {
-    final name = _nameCtrl.text.trim();
-    final mfr = _manufacturerCtrl.text.trim();
-    if (name.isEmpty && mfr.isEmpty) return const SizedBox.shrink();
-    final s = name.isEmpty ? mfr : (mfr.isEmpty ? name : '$name – $mfr');
-    return Text(s, overflow: TextOverflow.ellipsis);
-  }
-
-  Widget _strengthSummary() {
-    // Hide until user changes the default (0) value
-    if (!_touchedStrengthAmt) return const SizedBox.shrink();
-    final txt = _strengthValueCtrl.text.trim();
-    final d = double.tryParse(txt) ?? 0;
-    if (d <= 0) return const SizedBox.shrink();
-    final name = _nameCtrl.text.trim();
-    final unit = _strengthUnit == Unit.mcg
-        ? 'mcg'
-        : _strengthUnit == Unit.mg
-        ? 'mg'
-        : 'g';
-    final med = name.isEmpty ? '' : ' per $name tablet';
-    return Text('${d.toStringAsFixed(d == d.roundToDouble() ? 0 : 2)}$unit$med');
-  }
-
-  Widget _inventorySummary() {
-    // Hide until user changes the default (0) value
-    if (!_touchedStock) return const SizedBox.shrink();
-    final v = _stockCtrl.text.trim();
-    if (v.isEmpty) return const SizedBox.shrink();
-    final name = _nameCtrl.text.trim();
-    final tail = name.isEmpty ? ' tablets' : ' $name tablets';
-    return Text('$v$tail');
-  }
-
-  Widget _storageSummary() {
-    final parts = <String>[];
-    if (_keepRefrigerated) parts.add('Fridge');
-    if (_storageLocationCtrl.text.trim().isNotEmpty) parts.add(_storageLocationCtrl.text.trim());
-    if (parts.isEmpty) return const SizedBox.shrink();
-    return Text(parts.join(' · '));
-  }
-
-  Widget _expirySummary() {
-    if (_expiryDate == null) return const SizedBox.shrink();
-    return Text(_fmtDateLocal(context, _expiryDate!));
-  }
-
   String _fmtDateLocal(BuildContext ctx, DateTime d) {
     // Use platform/material localization for date formatting (locale-aware)
     final loc = MaterialLocalizations.of(ctx);
@@ -1116,33 +1067,5 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         if (_notesCtrl.text.trim().isNotEmpty) row('Notes', _notesCtrl.text.trim()),
       ],
     );
-  }
-
-  String _buildSummary() {
-    return [
-      'Name: ${_nameCtrl.text.trim().isEmpty ? '(empty)' : _nameCtrl.text.trim()}',
-      'Manufacturer: ${_manufacturerCtrl.text.trim().isEmpty ? '(empty)' : _manufacturerCtrl.text.trim()}',
-      'Description: ${_descriptionCtrl.text.trim().isEmpty ? '(empty)' : _descriptionCtrl.text.trim()}',
-      'Notes: ${_notesCtrl.text.trim().isEmpty ? '(empty)' : _notesCtrl.text.trim()}',
-      'Strength: ${_strengthValueCtrl.text.trim().isEmpty ? '(empty)' : _strengthValueCtrl.text.trim()} ${_strengthUnit == Unit.mcg
-              ? 'mcg'
-              : _strengthUnit == Unit.mg
-              ? 'mg'
-              : 'g'}',
-      'Stock: ${_stockCtrl.text.trim().isEmpty ? '(empty)' : _stockCtrl.text.trim()} tablets',
-      'Low stock alert: ${_lowStockAlert ? 'ON' : 'OFF'}',
-      if (_lowStockAlert)
-        'Threshold: ${_lowStockThresholdCtrl.text.trim().isEmpty
-                ? '(empty)'
-                : _lowStockThresholdCtrl.text.trim()}',
-      'Batch: ${_batchNumberCtrl.text.trim().isEmpty ? '(empty)' : _batchNumberCtrl.text.trim()}',
-      'Storage location: ${_storageLocationCtrl.text.trim().isEmpty ? '(empty)' : _storageLocationCtrl.text.trim()}',
-      'Cold storage: ${_keepRefrigerated ? 'Yes' : 'No'}',
-      'Light sensitive: ${_lightSensitive ? 'Yes' : 'No'}',
-      'Storage instructions: ${_storageInstructionsCtrl.text.trim().isEmpty
-              ? '(empty)'
-              : _storageInstructionsCtrl.text.trim()}',
-      'Expiry: ${_expiryDate == null ? '(none)' : _fmtDateLocal(context, _expiryDate!)}',
-    ].join('\n');
   }
 }

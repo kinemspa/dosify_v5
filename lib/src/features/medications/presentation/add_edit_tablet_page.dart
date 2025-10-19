@@ -15,7 +15,6 @@ import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class AddEditTabletPage extends ConsumerStatefulWidget {
@@ -29,23 +28,6 @@ class AddEditTabletPage extends ConsumerStatefulWidget {
 
 class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
     with TickerProviderStateMixin {
-  // Dynamically size the gradient header to match summary content
-  final GlobalKey _summaryAreaKey = GlobalKey();
-  double _headerHeight = kToolbarHeight + 84;
-
-  void _recalcHeaderHeight() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _summaryAreaKey.currentContext;
-      if (ctx == null) return;
-      final box = ctx.findRenderObject() as RenderBox?;
-      if (box == null) return;
-      final desired = kToolbarHeight + box.size.height;
-      if ((_headerHeight - desired).abs() > 1) {
-        setState(() => _headerHeight = desired);
-      }
-    });
-  }
-
   final _formKey = GlobalKey<FormState>();
 
   final _nameCtrl = TextEditingController();
@@ -61,7 +43,6 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
 
   bool _lowStockEnabled = false;
   final _lowStockCtrl = TextEditingController();
-  String? _stockError;
 
   DateTime? _expiry;
   final _batchCtrl = TextEditingController();
@@ -69,18 +50,9 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
   bool _requiresFridge = false;
   final _storageNotesCtrl = TextEditingController();
 
-  int _strengthStyleIndex = 0;
-  int _formStyleIndex = 0;
-
   Future<void> _loadStylePrefs() async {
-    final s = await UserPrefs.getStrengthInputStyle();
-    final f = await UserPrefs.getFormFieldStyle();
-    if (mounted) {
-      setState(() {
-        _strengthStyleIndex = s;
-        _formStyleIndex = f;
-      });
-    }
+    await UserPrefs.getStrengthInputStyle();
+    await UserPrefs.getFormFieldStyle();
   }
 
   @override
@@ -143,167 +115,6 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
     return parts.join('. ');
   }
 
-  Widget _buildStyledSummary() {
-    if (_nameCtrl.text.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(
-          'Fill in medication details to see summary',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: Colors.white70, fontStyle: FontStyle.italic),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Main info row with stock on right
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name and manufacturer
-                  RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
-                      children: [
-                        TextSpan(
-                          text: _nameCtrl.text,
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        if (_manufacturerCtrl.text.isNotEmpty)
-                          TextSpan(
-                            text: ' from ${_manufacturerCtrl.text}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Strength info
-                  if (_strengthValueCtrl.text.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        '${fmt2(double.tryParse(_strengthValueCtrl.text) ?? 0)} ${_unitLabel(_strengthUnit)} per tablet',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
-                      ),
-                    ),
-                  // Description
-                  if (_descriptionCtrl.text.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 1),
-                      child: Text(
-                        'For ${_descriptionCtrl.text.toLowerCase()}',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            // Right side with stock info and indicators
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (_stockValueCtrl.text.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${fmt2(double.tryParse(_stockValueCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                  ),
-                // Refrigeration and expiry indicators
-                if (_requiresFridge || _expiry != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (_requiresFridge)
-                          Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: Colors.lightBlue.shade100,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Icon(Icons.ac_unit, size: 12, color: Colors.blue.shade700),
-                          ),
-                        if (_expiry != null && _requiresFridge) const SizedBox(height: 2),
-                        if (_expiry != null)
-                          Text(
-                            DateFormat('MMM yy').format(_expiry!),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-        // Additional info if present
-        if (_notesCtrl.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              _notesCtrl.text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic, color: Colors.white60),
-            ),
-          ),
-        if (_lowStockEnabled && _lowStockCtrl.text.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              children: [
-                const Icon(Icons.warning_amber, size: 14, color: Colors.amber),
-                const SizedBox(width: 4),
-                Text(
-                  'Low stock alert at ${fmt2(double.tryParse(_lowStockCtrl.text) ?? 0)} ${_stockUnitLabel(_stockUnit)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.amber,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  Future<void> _pickExpiry() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      firstDate: DateTime(now.year - 1),
-      lastDate: DateTime(now.year + 20),
-      initialDate: _expiry ?? now,
-    );
-    if (picked != null) setState(() => _expiry = picked);
-  }
-
   Widget _detailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -350,18 +161,6 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
       default:
         return s.name;
     }
-  }
-
-  bool _isQuarter(double v) {
-    final frac = (v * 4).round() / 4.0;
-    return (v - frac).abs() < 1e-8;
-  }
-
-  bool _isExpiringSoon() {
-    if (_expiry == null) return false;
-    final now = DateTime.now();
-    final daysUntilExpiry = _expiry!.difference(now).inDays;
-    return daysUntilExpiry <= 30;
   }
 
   Future<void> _submit() async {
@@ -504,150 +303,6 @@ class _AddEditTabletPageState extends ConsumerState<AddEditTabletPage>
       if (!mounted) return;
       context.go('/medications');
     }
-  }
-
-  Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    final radius = BorderRadius.circular(8);
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: radius),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
-          borderRadius: radius,
-        ),
-        child: InkWell(
-          customBorder: RoundedRectangleBorder(borderRadius: radius),
-          overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.12)),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(label, style: theme.textTheme.labelLarge),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Hybrid styling helpers (from hybrid page)
-  InputDecoration _dec({String? hint}) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      hintText: hint,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      constraints: const BoxConstraints(minHeight: 40),
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      // keep error line from affecting height
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
-  }
-
-  Widget _rowLabelField({required String label, required Widget field}) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: field),
-        ],
-      ),
-    );
-  }
-
-  Widget _section(String title, List<Widget> children, {Widget? trailing}) {
-    final theme = Theme.of(context);
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    return Card(
-      elevation: 0,
-      color: isLight
-          ? theme.colorScheme.primary.withValues(alpha: 0.05)
-          : theme.colorScheme.surfaceContainerHigh,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 2, bottom: 4),
-                    child: Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ),
-                if (trailing != null) trailing,
-              ],
-            ),
-            const SizedBox(height: 6),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _incBtn(String symbol, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      height: 30,
-      width: 30,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-          minimumSize: const Size(30, 30),
-        ),
-        onPressed: onTap,
-        child: Text(symbol, style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14)),
-      ),
-    );
   }
 
   @override
