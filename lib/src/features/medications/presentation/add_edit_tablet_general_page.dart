@@ -379,10 +379,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   Widget build(BuildContext context) {
     debugPrint('[GENERAL] build() called');
     debugPrint('[GENERAL] step=hybrid-dec-no-bottom');
-    final mq = MediaQuery.of(context);
 
     // Derive validation messages for helper rows
-    final theme = Theme.of(context);
     final nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
     String? strengthAmtError;
     final sTxt = _strengthValueCtrl.text.trim();

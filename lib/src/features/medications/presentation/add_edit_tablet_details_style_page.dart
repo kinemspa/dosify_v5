@@ -259,7 +259,6 @@ class _AddEditTabletDetailsStylePageState extends State<AddEditTabletDetailsStyl
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     String fmt2(double? v) {
       if (v == null) return '-';
       return v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);

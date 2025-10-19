@@ -14,8 +14,6 @@ class SelectMedicationTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
     return Scaffold(
       appBar: const GradientAppBar(title: 'Medication Type', forceBackButton: true),
       body: ListView(
@@ -63,7 +61,6 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
     return Card(
       elevation: 2,
       color: theme.colorScheme.surface,
@@ -140,7 +137,6 @@ class _TypeTileState extends State<_TypeTile> {
     final primaryBg = cs.primary;
     final isPrimary = widget.primary;
     final tileBg = isPrimary ? primaryBg : cs.surfaceContainerLowest;
-    final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
     final titleColor = isPrimary ? onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
     final badgeBg = isPrimary

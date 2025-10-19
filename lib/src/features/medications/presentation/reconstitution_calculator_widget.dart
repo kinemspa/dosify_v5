@@ -658,12 +658,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     ({double cPerMl, double vialVolume}) calcResult,
     double units, {
     bool isValid = true,
-  }) {
+  ) {
     final selected = selectedValue == optionValue;
     final theme = Theme.of(context);
-    final diluentName = _diluentNameCtrl.text.trim().isNotEmpty
-        ? _diluentNameCtrl.text.trim()
-        : 'Diluent';
     final roundedVolume = roundToHalfMl(calcResult.vialVolume);
     // Calculate actual mL to draw for the dose
     final mlToDraw = (units / 100) * _syringe.ml;

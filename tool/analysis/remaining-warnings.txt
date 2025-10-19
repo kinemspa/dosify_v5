@@ -1,0 +1,71 @@
+
+warning - The value of the field '_summaryExpanded' isn't used - lib\src\features\medications\presentation\add_edit_injection_multi_vial_page.dart:60:14 - unused_field
+warning - The declaration '_openReconstitutionDialog' isn't referenced - lib\src\features\medications\presentation\add_edit_injection_multi_vial_page.dart:211:16 - unused_element
+warning - The declaration '_buildReconstitutionText' isn't referenced - lib\src\features\medications\presentation\add_edit_injection_unified_page.dart:270:10 - unused_element
+warning - The declaration '_openReconstitutionDialog' isn't referenced - lib\src\features\medications\presentation\add_edit_injection_unified_page.dart:289:16 - unused_element
+warning - The declaration '_toBaseMass' isn't referenced - lib\src\features\medications\presentation\add_edit_injection_unified_page.dart:316:10 - unused_element
+warning - The declaration '_compute' isn't referenced - lib\src\features\medications\presentation\add_edit_injection_unified_page.dart:323:40 - unused_element
+warning - The declaration '_presetUnitsRaw' isn't referenced - lib\src\features\medications\presentation\add_edit_injection_unified_page.dart:333:28 - unused_element
+warning - The value of the local variable 'theme' isn't used - lib\src\features\medications\presentation\add_edit_tablet_details_style_page.dart:262:11 - unused_local_variable
+warning - The value of the field '_batchCtrl' isn't used - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:46:9 - unused_field
+warning - The value of the local variable 'mq' isn't used - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:382:11 - unused_local_variable
+warning - The value of the local variable 'theme' isn't used - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:385:11 - unused_local_variable
+warning - The declaration '_generalSummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:890:10 - unused_element
+warning - The declaration '_strengthSummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:898:10 - unused_element
+warning - The declaration '_inventorySummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:914:10 - unused_element
+warning - The declaration '_storageSummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:924:10 - unused_element
+warning - The declaration '_expirySummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:932:10 - unused_element
+warning - The declaration '_buildSummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_general_page.dart:1123:10 - unused_element
+warning - The value of the field '_stockUnit' isn't used - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:40:13 - unused_field
+warning - The value of the field '_stockError' isn't used - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:52:11 - unused_field
+warning - The declaration '_unitFull' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:116:10 - unused_element
+warning - The declaration '_stockUnitLabel' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:123:10 - unused_element
+warning - The declaration '_isQuarter' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_hybrid_page.dart:579:6 - unused_element
+warning - The declaration '_recalcHeaderHeight' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:36:8 - unused_element
+warning - The value of the field '_stockError' isn't used - lib\src\features\medications\presentation\add_edit_tablet_page.dart:64:11 - unused_field
+warning - The value of the field '_strengthStyleIndex' isn't used - lib\src\features\medications\presentation\add_edit_tablet_page.dart:72:7 - unused_field
+warning - The value of the field '_formStyleIndex' isn't used - lib\src\features\medications\presentation\add_edit_tablet_page.dart:73:7 - unused_field
+warning - The declaration '_buildStyledSummary' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:146:10 - unused_element
+warning - The declaration '_pickExpiry' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:296:16 - unused_element
+warning - The declaration '_isQuarter' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:355:8 - unused_element
+warning - The declaration '_isExpiringSoon' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:360:8 - unused_element
+warning - The declaration '_pillBtn' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:509:10 - unused_element
+warning - The declaration '_dec' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:534:19 - unused_element
+warning - The declaration '_rowLabelField' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:569:10 - unused_element
+warning - The declaration '_section' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:593:10 - unused_element
+warning - The declaration '_incBtn' isn't referenced - lib\src\features\medications\presentation\add_edit_tablet_page.dart:636:10 - unused_element
+warning - The value of the field '_lowStockEnabled' isn't used - lib\src\features\medications\presentation\add_tablet_debug_page.dart:33:14 - unused_field
+warning - The value of the local variable 'theme' isn't used - lib\src\features\medications\presentation\medication_list_page.dart:586:11 - unused_local_variable
+warning - The value of the field '_lastResult' isn't used - lib\src\features\medications\presentation\reconstitution_calculator_page.dart:36:25 - unused_field
+warning - The value of the field '_canSubmit' isn't used - lib\src\features\medications\presentation\reconstitution_calculator_page.dart:37:8 - unused_field
+warning - The declaration '_pillBtn' isn't referenced - lib\src\features\medications\presentation\reconstitution_calculator_widget.dart:148:10 - unused_element
+warning - The value of the local variable 'diluentName' isn't used - lib\src\features\medications\presentation\reconstitution_calculator_widget.dart:664:11 - unused_local_variable
+warning - The value of the local variable 'cs' isn't used - lib\src\features\medications\presentation\select_injection_type_page.dart:16:11 - unused_local_variable
+warning - The value of the local variable 'tileBorder' isn't used - lib\src\features\medications\presentation\select_injection_type_page.dart:73:11 - unused_local_variable
+warning - The value of the local variable 'cs' isn't used - lib\src\features\medications\presentation\select_medication_type_page.dart:18:11 - unused_local_variable
+warning - The declaration '_Section' isn't referenced - lib\src\features\medications\presentation\select_medication_type_page.dart:59:7 - unused_element
+warning - The value of the local variable 'isLight' isn't used - lib\src\features\medications\presentation\select_medication_type_page.dart:66:11 - unused_local_variable
+warning - The value of the local variable 'tileBorder' isn't used - lib\src\features\medications\presentation\select_medication_type_page.dart:143:11 - unused_local_variable
+warning - The value of the field '_submitted' isn't used - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:41:8 - unused_field
+warning - The value of the field '_touchedName' isn't used - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:42:8 - unused_field
+warning - The value of the field '_touchedStrengthAmt' isn't used - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:43:8 - unused_field
+warning - The value of the field '_touchedStock' isn't used - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:44:8 - unused_field
+warning - The value of the field '_showCalculator' isn't used - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:74:14 - unused_field
+warning - The declaration '_isInjection' isn't referenced - lib\src\features\medications\presentation\unified_add_edit_medication_page.dart:135:12 - unused_element
+warning - The declaration '_utcToLocalSlot' isn't referenced - lib\src\features\schedules\data\schedule_scheduler.dart:43:47 - unused_element
+warning - The declaration '_medStrengthLabel' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1179:10 - unused_element
+warning - The declaration '_DoseFormulaStrip' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1358:7 - unused_element
+warning - The declaration '_ScheduleSummaryCard' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1519:7 - unused_element
+warning - The value of the local variable 'doseFixed' isn't used - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1613:11 - unused_local_variable
+warning - The declaration '_formatStock' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1849:10 - unused_element
+warning - The declaration '_formatStrength' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1869:10 - unused_element
+warning - The declaration '_expiryLabel' isn't referenced - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1967:10 - unused_element
+warning - The value of the local variable 'strengthUnit' isn't used - lib\src\features\settings\presentation\large_card_styles_page.dart:180:11 - unused_local_variable
+warning - The value of the local variable 'requiresFridge' isn't used - lib\src\features\settings\presentation\large_card_styles_page.dart:183:11 - unused_local_variable
+warning - The value of the local variable 'storageLocation' isn't used - lib\src\features\settings\presentation\large_card_styles_page.dart:184:11 - unused_local_variable
+warning - The value of the local variable 'strengthUnit' isn't used - lib\src\features\settings\presentation\strength_card_styles_page.dart:180:11 - unused_local_variable
+warning - The value of the field '_selected' isn't used - lib\src\features\settings\presentation\strength_input_styles_page.dart:65:14 - unused_field
+warning - The value of the local variable 'minRatio' isn't used - lib\src\widgets\interactive_syringe_slider.dart:178:11 - unused_local_variable
+warning - The value of the local variable 'maxRatio' isn't used - lib\src\widgets\interactive_syringe_slider.dart:183:11 - unused_local_variable
+warning - The value of the local variable 'theme' isn't used - lib\src\widgets\strength_input.dart:398:11 - unused_local_variable
+

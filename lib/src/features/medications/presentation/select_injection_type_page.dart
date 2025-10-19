@@ -13,7 +13,6 @@ class SelectInjectionTypePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: const GradientAppBar(title: 'Select Injection Type', forceBackButton: true),
       body: ListView(
@@ -70,7 +69,6 @@ class _Tile extends StatelessWidget {
     final cs = theme.colorScheme;
     final isPrimary = primary;
     final tileBg = isPrimary ? cs.primary : cs.surfaceContainerLowest;
-    final tileBorder = isPrimary ? null : Border.all(color: cs.outlineVariant);
     final titleColor = isPrimary ? cs.onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
     final badgeBg = isPrimary ? cs.onPrimary.withOpacity(0.15) : cs.primary.withOpacity(0.12);
