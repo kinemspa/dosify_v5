@@ -25,8 +25,6 @@ enum _SortBy { name, stock, strength, expiry }
 
 enum _FilterBy { all, lowStock, expiringSoon, refrigerated }
 
-const double _kLargeCardHeight = 140;
-
 class MedicationListPage extends ConsumerStatefulWidget {
   const MedicationListPage({super.key});
 
@@ -352,22 +350,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     }
   }
 
-  // Icon per medication form for list tiles
-  IconData _iconForForm(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return Icons.add_circle;
-      case MedicationForm.capsule:
-        return Icons.bubble_chart;
-      case MedicationForm.injectionPreFilledSyringe:
-        return Icons.colorize;
-      case MedicationForm.injectionSingleDoseVial:
-        return Icons.local_drink;
-      case MedicationForm.injectionMultiDoseVial:
-        return Icons.addchart;
-    }
-  }
-
   Future<void> _cycleView() async {
     final order = [_MedView.large, _MedView.compact, _MedView.list];
     final idx = order.indexOf(_view);
@@ -412,23 +394,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     }
   }
 
-  String _stockStatusShortTextFor(Medication m) {
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      return '$current/$total ${_stockUnitLabel(m.stockUnit)}';
-    }
-    return '${fmt2(m.stockValue)} ${_stockUnitLabel(m.stockUnit)}';
-  }
-
   String _stockUnitLabel(StockUnit unit) {
     switch (unit) {
       case StockUnit.tablets:
@@ -450,7 +415,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     }
   }
 
-  String _formatDateDdMmYy(DateTime d) => DateFormat('dd/MM/yy').format(d);
   String _formatDateDdMm(DateTime d) => DateFormat('dd/MM').format(d);
 
   Color _stockStatusColorFor(BuildContext context, Medication m) {
@@ -680,7 +644,6 @@ class _MedCard extends StatelessWidget {
 
     // Fallback: keep existing dense implementation
     final theme = Theme.of(context);
-    final isLowStock = m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
     final isExpiringSoon =
         m.expiry != null && m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
@@ -748,69 +711,6 @@ class _MedCard extends StatelessWidget {
     );
   }
 
-  String _getFormLabel(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablet';
-      case MedicationForm.capsule:
-        return 'Capsule';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'Pre-Filled Syringe';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'Single Dose Vial';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'Multi Dose Vial';
-    }
-  }
-
-  // Plural label for strength line
-  String _getFormLabelPlural(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablets';
-      case MedicationForm.capsule:
-        return 'Capsules';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'Pre-Filled Syringes';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'Single Dose Vials';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'Multi Dose Vials';
-    }
-  }
-
-  // Abbreviated form label for dense tiles
-  String _getFormAbbr(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tab';
-      case MedicationForm.capsule:
-        return 'Cap';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'PFS';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'SDV';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'MDV';
-    }
-  }
-
-  // Icon per medication form
-  IconData _getFormIcon(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return Icons.add_circle;
-      case MedicationForm.capsule:
-        return MdiIcons.pill;
-      case MedicationForm.injectionPreFilledSyringe:
-        return Icons.colorize;
-      case MedicationForm.injectionSingleDoseVial:
-        return Icons.local_drink;
-      case MedicationForm.injectionMultiDoseVial:
-        return Icons.addchart;
-    }
-  }
-
   String _getUnitLabel(Unit unit) {
     switch (unit) {
       case Unit.mcg:
@@ -853,183 +753,7 @@ class _MedCard extends StatelessWidget {
     }
   }
 
-  String _formatExpiryDate(DateTime expiry) {
-    final now = DateTime.now();
-    final difference = expiry.difference(now).inDays;
-    if (difference <= 0) return 'today';
-    if (difference == 1) return 'tomorrow';
-    if (difference <= 7) return 'in $difference days';
-    return '${expiry.month}/${expiry.day}';
-  }
-
-  // Schedule summary single line with actions (all forms)
-  Widget _buildScheduleLine(BuildContext context) {
-    final theme = Theme.of(context);
-    final box = Hive.box<Schedule>('schedules');
-    final linked = box.values
-        .where((s) => s.active && s.medicationId == m.id)
-        .toList(growable: false);
-
-    DateTime? next;
-    DateTime? last;
-    int? daysLeft;
-    int? dosesLeft;
-
-    final now = DateTime.now();
-    // Next within 60 days
-    for (final s in linked) {
-      final times = s.timesOfDay ?? [s.minutesOfDay];
-      for (var d = 0; d < 60; d++) {
-        final date = DateTime(now.year, now.month, now.day).add(Duration(days: d));
-        final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-            ? (() {
-                final anchor = s.cycleAnchorDate ?? now;
-                final a = DateTime(anchor.year, anchor.month, anchor.day);
-                final d0 = DateTime(date.year, date.month, date.day);
-                final diff = d0.difference(a).inDays;
-                return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-              })()
-            : s.daysOfWeek.contains(date.weekday);
-        if (onDay) {
-          for (final minutes in times) {
-            final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
-            if (dt.isAfter(now) && (next == null || dt.isBefore(next))) next = dt;
-          }
-        }
-      }
-    }
-    // Last within previous 60 days
-    for (final s in linked) {
-      final times = s.timesOfDay ?? [s.minutesOfDay];
-      for (var d = 0; d < 60; d++) {
-        final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: d));
-        final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-            ? (() {
-                final anchor = s.cycleAnchorDate ?? now;
-                final a = DateTime(anchor.year, anchor.month, anchor.day);
-                final d0 = DateTime(date.year, date.month, date.day);
-                final diff = d0.difference(a).inDays;
-                return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-              })()
-            : s.daysOfWeek.contains(date.weekday);
-        if (onDay) {
-          for (final minutes in times) {
-            final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
-            if (dt.isBefore(now) && (last == null || dt.isAfter(last))) last = dt;
-          }
-        }
-      }
-    }
-
-    // Estimate daysLeft
-    if (linked.isNotEmpty) {
-      double occPerWeek = 0;
-      for (final s in linked) {
-        final times = (s.timesOfDay?.isNotEmpty ?? false) ? s.timesOfDay!.length : 1;
-        if (s.cycleEveryNDays != null && s.cycleEveryNDays! > 0) {
-          occPerWeek += (7 / s.cycleEveryNDays!) * times;
-        } else {
-          occPerWeek += s.daysOfWeek.length * times;
-        }
-      }
-      if (occPerWeek > 0) {
-        const dosePerOcc = 1.0; // heuristic for now (1 unit per occurrence)
-        final dailyUse = (occPerWeek * dosePerOcc) / 7.0;
-        if (dailyUse > 0) {
-          daysLeft = (m.stockValue / dailyUse).floor();
-          if (daysLeft < 1) daysLeft = 1;
-          // For count-based units, estimate doses left ~ current stock
-          final isCountUnit =
-              m.stockUnit == StockUnit.tablets ||
-              m.stockUnit == StockUnit.capsules ||
-              m.stockUnit == StockUnit.preFilledSyringes ||
-              m.stockUnit == StockUnit.singleDoseVials ||
-              m.stockUnit == StockUnit.multiDoseVials;
-          if (isCountUnit) {
-            dosesLeft = m.stockValue.floor();
-          }
-        }
-      }
-    }
-
-    String fmtWhen(DateTime dt) {
-      final isToday = dt.year == now.year && dt.month == now.month && dt.day == now.day;
-      final time = DateFormat('HH:mm').format(dt);
-      if (isToday) return 'Today $time';
-      final tomorrow = now.add(const Duration(days: 1));
-      final isTomorrow =
-          dt.year == tomorrow.year && dt.month == tomorrow.month && dt.day == tomorrow.day;
-      if (isTomorrow) return 'Tomorrow $time';
-      return DateFormat('dd MMM, HH:mm').format(dt);
-    }
-
-    String fmtDur(int d) {
-      if (d < 14) return '$d days';
-      final w = (d / 7).toStringAsFixed(1);
-      return '$w weeks';
-    }
-
-    final lastStr = last != null ? fmtWhen(last) : '—';
-    final nextStr = next != null ? fmtWhen(next) : '—';
-    final lastsStr = daysLeft != null ? fmtDur(daysLeft) : '—';
-
-    final runOutDate = daysLeft != null
-        ? DateFormat('dd MMM').format(now.add(Duration(days: daysLeft)))
-        : '—';
-    final dosesStr = dosesLeft != null ? '~$dosesLeft left' : '~$lastsStr left';
-    final summaryText = 'Last: $lastStr  •  Next: $nextStr';
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Text(
-        summaryText,
-        style: theme.textTheme.bodySmall?.copyWith(color: kTextLightGrey(context), height: 1),
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-
-  // Date format helpers (TODO: read from Settings later)
-  String _formatDateDdMmYy(DateTime d) => DateFormat('dd/MM/yy').format(d);
   String _formatDateDayMonth(DateTime d) => DateFormat('d/M').format(d);
-
-  // Stock status helpers
-  String _stockStatusText() {
-    // For count-based units, express as X out of Y remaining; Y = originally entered amount when available
-    final baseUnit = _getStockUnitLabel(m.stockUnit);
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current; // fallback to current if unknown
-      return '$current/$total $baseUnit remaining';
-    }
-    return '${fmt2(m.stockValue)} $baseUnit remaining';
-  }
-
-  String _stockStatusShortText() {
-    // Shorter form for dense tiles; Y = originally entered amount when available
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      return '$current/$total ${_getStockUnitLabel(m.stockUnit)}';
-    }
-    return '${fmt2(m.stockValue)} ${_getStockUnitLabel(m.stockUnit)}';
-  }
 
   Color _stockStatusColor(ThemeData theme) {
     // Color by percentage of baseline when available
@@ -1045,38 +769,5 @@ class _MedCard extends StatelessWidget {
       return theme.colorScheme.error;
     }
     return theme.colorScheme.onSurface;
-  }
-
-  Future<void> _onTake(BuildContext context) async {
-    final box = Hive.box<Medication>('medications');
-    // Decrement by 1 for count-based units; otherwise decrement by 1.0 generically
-    final isCountUnit =
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules ||
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials;
-    const dec = 1.0;
-    final newValue = m.stockValue - dec;
-    final updated = m.copyWith(stockValue: newValue < 0 ? 0 : newValue);
-    await box.put(updated.id, updated);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Recorded dose. Stock: ${newValue < 0 ? 0 : newValue} ${_getStockUnitLabel(m.stockUnit)}',
-        ),
-      ),
-    );
-  }
-
-  void _onDoseAction(BuildContext context, String action, DateTime scheduledAt) {
-    // Placeholder: integrate with schedules/logging later
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${action[0].toUpperCase()}${action.substring(1)} dose @ ${DateFormat('dd MMM, HH:mm').format(scheduledAt)}',
-        ),
-      ),
-    );
   }
 }
