@@ -245,7 +245,7 @@ class NotificationService {
     // Best-effort backup banner after a short delay (useful for emulator/OEM diagnostics)
     final id = DateTime.now().millisecondsSinceEpoch % 100000000;
     _log('showDelayed in ${seconds}s, id=$id');
-    await Future.delayed(Duration(seconds: seconds));
+    await Future<void>.delayed(Duration(seconds: seconds));
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,

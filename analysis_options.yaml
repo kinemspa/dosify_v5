@@ -25,7 +25,6 @@ linter:
     directives_ordering: true
     avoid_relative_lib_imports: true
     always_use_package_imports: true
-    unnecessary_import: true
     
     # Safety
     curly_braces_in_flow_control_structures: true
