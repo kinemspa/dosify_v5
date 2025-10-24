@@ -1,7 +1,9 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
@@ -277,40 +279,57 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
           key: widget.vialVolumeKey,
           label: 'Vial Volume (mL)',
           labelWidth: _labelWidth(),
-          field: StepperRow36(
+          field: TextField(
             controller: widget.vialVolumeController,
             enabled: !isLocked,
-            onDec: () {
-              if (isLocked) return;
-              final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d - 0.5).clamp(0, 1000);
-              setState(() {
-                widget.vialVolumeController.text = nv.toStringAsFixed(1);
-              });
-            },
-            onInc: () {
-              if (isLocked) return;
-              final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d + 0.5).clamp(0, 1000);
-              setState(() {
-                widget.vialVolumeController.text = nv.toStringAsFixed(1);
-              });
-            },
-            decoration: InputDecoration(
-              hintText: '0.0',
-              errorStyle: const TextStyle(fontSize: 0, height: 0),
-              isDense: false,
-              isCollapsed: false,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              constraints: const BoxConstraints(minHeight: kFieldHeight),
-              hintStyle: theme.textTheme.bodySmall?.copyWith(
-                fontSize: kHintFontSize,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              filled: true,
+            textAlign: TextAlign.center,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              // Allow numbers with up to 2 decimal places
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+            ],
+            style: bodyTextStyle(context),
+            decoration: buildCompactFieldDecoration(
+              context: context,
+              hint: '0.0',
+            ).copyWith(
               fillColor: isLocked
                   ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
                   : theme.colorScheme.surfaceContainerLowest,
+              // Add increment buttons
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: isLocked
+                        ? null
+                        : () {
+                            final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+                            final nv = (d - 0.5).clamp(0, 1000);
+                            setState(() {
+                              widget.vialVolumeController.text = nv.toStringAsFixed(1);
+                            });
+                          },
+                    icon: const Icon(Icons.remove, size: 18),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
+                  IconButton(
+                    onPressed: isLocked
+                        ? null
+                        : () {
+                            final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+                            final nv = (d + 0.5).clamp(0, 1000);
+                            setState(() {
+                              widget.vialVolumeController.text = nv.toStringAsFixed(1);
+                            });
+                          },
+                    icon: const Icon(Icons.add, size: 18),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
