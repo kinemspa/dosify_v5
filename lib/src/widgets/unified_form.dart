@@ -158,11 +158,11 @@ class DateButton36 extends StatelessWidget {
     if (width == null) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          // Use all available width up to max constraint
-          final width = constraints.maxWidth.clamp(
-            kMinCompactControlWidth,
-            kMaxCompactControlWidth,
-          );
+          // Match dropdown calculation: account for stepper buttons width
+          // This makes date button align perfectly with dropdown and stepper
+          const stepperButtonsWidth = 64.0;
+          final adjustedMax = constraints.maxWidth - stepperButtonsWidth;
+          final width = adjustedMax.clamp(kMinCompactControlWidth, kMaxCompactControlWidth);
           return Align(
             child: SizedBox(height: kFieldHeight, width: width, child: btn),
           );

@@ -86,8 +86,9 @@ class _TypeTileState extends State<_TypeTile> {
     final primaryBg = cs.primary;
     final isPrimary = widget.primary;
     final tileBg = isPrimary ? primaryBg : cs.surfaceContainerLowest;
-    final titleColor = isPrimary ? onPrimary : cs.onSurface;
-    final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant;
+    // Use consistent colors with proper opacity for readability
+    final titleColor = isPrimary ? onPrimary : cs.onSurface.withValues(alpha: kOpacityHigh);
+    final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
     final badgeBg = isPrimary
         ? onPrimary.withValues(alpha: 0.15)
         : primaryBg.withValues(alpha: 0.12);
