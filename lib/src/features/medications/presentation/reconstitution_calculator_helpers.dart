@@ -43,7 +43,7 @@ double toBaseMass(double value, String from) {
 /// Get context-aware helper text for strength input based on unit type
 ///
 /// Provides guidance for different medication units:
-/// - IU: Explains IU vs syringe markings, provides HGH conversion
+/// - units: Explains units vs syringe markings, provides HGH conversion
 /// - mg: Explains pre-filled vs powder vials
 /// - mcg: Warns about unit confusion with mg
 /// - g: Simple guidance for large-dose medications
@@ -51,14 +51,14 @@ String getStrengthHelperText(String unit) {
   switch (unit) {
     case 'units':
       return '''
-Enter the total IU labeled on your vial (e.g., '10 IU' for HGH).
+Enter the total units labeled on your vial (e.g., '10 units' for HGH).
 
-Can't find IU on vial?
-• HGH: 1mg ≈ 3 IU (so 5mg ≈ 15 IU)
-• Insulin: Usually labeled in IU (check for U-100, U-200, etc.)
+Can't find units on vial?
+• HGH: 1mg ≈ 3 units (so 5mg ≈ 15 units)
+• Insulin: Usually labeled in units (check for U-100, U-200, etc.)
 • Other biologics: Check manufacturer documentation
 
-⚠️ IU is medication potency, NOT syringe markings.
+⚠️ Units are medication potency, NOT syringe markings.
 Never guess - incorrect dosing can be dangerous.''';
 
     case 'mg':
@@ -89,13 +89,13 @@ Note: 1g = 1000mg''';
   }
 }
 
-/// HGH mg to IU conversion helper
+/// HGH mg to units conversion helper
 ///
-/// Approximate conversion: 1mg HGH ≈ 3 IU
-/// (varies by manufacturer: 2.6-3.3 IU per mg)
+/// Approximate conversion: 1mg HGH ≈ 3 units
+/// (varies by manufacturer: 2.6-3.3 units per mg)
 ///
-/// Returns approximate IU value
-double convertHghMgToIU(double mg) {
+/// Returns approximate units value
+double convertHghMgToUnits(double mg) {
   return mg * 3.0;
 }
 

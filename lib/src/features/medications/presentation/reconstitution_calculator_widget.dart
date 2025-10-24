@@ -64,7 +64,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
           ? defaultDose.toInt().toString()
           : defaultDose.toStringAsFixed(2),
     );
-    // Set dose unit to match vial unit for IU medications, otherwise default to mcg
+    // Set dose unit to match vial unit for units-based medications, otherwise default to mcg
     _doseUnit = widget.initialDoseUnit ?? (widget.unitLabel == 'units' ? 'units' : 'mcg');
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
@@ -94,7 +94,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
   }) {
     // S = total strength in vial (mg)
     // D = desired dose per injection (mg)
-    // U = IU units to draw from syringe
+    // U = insulin syringe units to draw from syringe
     // Formula: V = (S / D) × (U / 100)
     // Concentration: C = D × (100 / U)
     final c = (100 * D) / max(U, 0.01);
@@ -193,7 +193,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     var iuMax = totalIU;
     if (vialMax != null && S > 0 && D > 0) {
       final uMaxAllowed = (100 * D * vialMax) / S;
-      iuMax = uMaxAllowed.clamp(0, totalIU).toDouble();
+      iuMax = uMaxAllowed.clamp(0, totalUnits).toDouble();
       if (iuMax < iuMin) iuMin = iuMax;
     }
 
@@ -433,7 +433,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
         ),
         // Range limit warning removed - using snackbar only for cleaner UI
         const SizedBox(height: 8),
-        // Live syringe gauge preview (interactive)
+          // Live syringe gauge preview (interactive)
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -441,8 +441,8 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
               clipBehavior: Clip.none,
               children: [
                 WhiteSyringeGauge(
-                  totalIU: _syringe.totalUnits.toDouble(),
-                  fillIU: _selectedUnits,
+                  totalUnits: _syringe.totalUnits.toDouble(),
+                  fillUnits: _selectedUnits,
                   interactive: true,
                   maxConstraint: sliderMax,
                   onMaxConstraintHit: () {
@@ -534,7 +534,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                     children: [
                       const TextSpan(text: 'Draw '),
                       TextSpan(
-                        text: '${_selectedUnits.toStringAsFixed(1)} IU',
+                        text: '${_selectedUnits.toStringAsFixed(1)} U',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -601,7 +601,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Warning: Computed solvent volume (${currentV.toStringAsFixed(2)} mL) exceeds vial size. Try a more concentrated preset (lower IU).',
+              'Warning: Computed solvent volume (${currentV.toStringAsFixed(2)} mL) exceeds vial size. Try a more concentrated preset (lower units).',
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
@@ -759,7 +759,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                           children: [
                             TextSpan(text: 'Syringe (${_syringe.label}): '),
                             TextSpan(
-                              text: '${formatDouble(units)} IU / ${formatDouble(mlToDraw)} mL',
+                              text: '${formatDouble(units)} U / ${formatDouble(mlToDraw)} mL',
                               style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
                           ],

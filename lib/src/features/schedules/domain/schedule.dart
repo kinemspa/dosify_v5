@@ -98,7 +98,7 @@ class Schedule {
   @HiveField(22)
   final int? doseVials; // whole vials (single-dose)
   @HiveField(23)
-  final int? doseIU; // IU/units
+  final int? doseIU; // units (medication potency)
   @HiveField(24)
   final int? displayUnitCode; // maps to DoseUnit index for display preference
   @HiveField(25)
@@ -123,8 +123,8 @@ enum DoseUnit {
   mg,
   g,
   ml,
-  iu, // International Units
-  units, // alias for IU if needed in UI
+  iu, // units (medication potency)
+  units, // alias for iu if needed in UI
   tablets,
   capsules,
   syringes,

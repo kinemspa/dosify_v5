@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 
 /// Syringe gauge widget used for reconstitution visualization
-/// Shows a horizontal line with IU markers and thick fill line
+/// Shows a horizontal line with unit markers and thick fill line
 /// Can be interactive - drag the fill line to adjust value
 class WhiteSyringeGauge extends StatefulWidget {
   const WhiteSyringeGauge({
-    required this.totalIU, required this.fillIU, super.key,
+    required this.totalUnits, required this.fillUnits, super.key,
     this.color,
     this.onChanged,
     this.interactive = false,
@@ -14,8 +14,8 @@ class WhiteSyringeGauge extends StatefulWidget {
     this.onMaxConstraintHit,
   });
 
-  final double totalIU;
-  final double fillIU;
+  final double totalUnits;
+  final double fillUnits;
   final Color? color;
   final ValueChanged<double>? onChanged;
   final bool interactive;
@@ -33,7 +33,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
   @override
   Widget build(BuildContext context) {
     final effectiveColor = widget.color ?? Theme.of(context).colorScheme.primary;
-    final currentFill = _dragValue ?? widget.fillIU;
+    final currentFill = _dragValue ?? widget.fillUnits;
 
     return GestureDetector(
       onHorizontalDragUpdate: widget.interactive
@@ -43,11 +43,11 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               final localPosition = box.globalToLocal(details.globalPosition);
               final width = box.size.width;
               final fillRatio = (localPosition.dx / width).clamp(0.0, 1.0);
-              var newFillIU = fillRatio * widget.totalIU;
+              var newFillUnits = fillRatio * widget.totalUnits;
 
               // Check max constraint
-              if (widget.maxConstraint != null && newFillIU > widget.maxConstraint!) {
-                newFillIU = widget.maxConstraint!;
+              if (widget.maxConstraint != null && newFillUnits > widget.maxConstraint!) {
+                newFillUnits = widget.maxConstraint!;
                 if (!_hitConstraint) {
                   _hitConstraint = true;
                   widget.onMaxConstraintHit?.call();
@@ -57,7 +57,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               }
 
               setState(() {
-                _dragValue = newFillIU;
+                _dragValue = newFillUnits;
               });
             }
           : null,
@@ -79,24 +79,24 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               final localPosition = box.globalToLocal(details.globalPosition);
               final width = box.size.width;
               final fillRatio = (localPosition.dx / width).clamp(0.0, 1.0);
-              var newFillIU = fillRatio * widget.totalIU;
+              var newFillUnits = fillRatio * widget.totalUnits;
 
               // Check max constraint
-              if (widget.maxConstraint != null && newFillIU > widget.maxConstraint!) {
-                newFillIU = widget.maxConstraint!;
+              if (widget.maxConstraint != null && newFillUnits > widget.maxConstraint!) {
+                newFillUnits = widget.maxConstraint!;
                 widget.onMaxConstraintHit?.call();
               }
 
               if (widget.onChanged != null) {
-                widget.onChanged!(newFillIU);
+                widget.onChanged!(newFillUnits);
               }
             }
           : null,
       child: CustomPaint(
         size: const Size(double.infinity, 44),
         painter: _WhiteSyringePainter(
-          totalIU: widget.totalIU,
-          fillIU: currentFill,
+          totalUnits: widget.totalUnits,
+          fillUnits: currentFill,
           color: effectiveColor,
           interactive: widget.interactive,
         ),
@@ -107,14 +107,14 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
 
 class _WhiteSyringePainter extends CustomPainter {
   _WhiteSyringePainter({
-    required this.totalIU,
-    required this.fillIU,
+    required this.totalUnits,
+    required this.fillUnits,
     required this.color,
     this.interactive = false,
   });
 
-  final double totalIU;
-  final double fillIU;
+  final double totalUnits;
+  final double fillUnits;
   final Color color;
   final bool interactive;
 
@@ -132,17 +132,17 @@ class _WhiteSyringePainter extends CustomPainter {
 
     canvas.drawLine(Offset(0, baselineY), Offset(size.width, baselineY), baselinePaint);
 
-    // Draw IU marker ticks and labels
+    // Draw unit marker ticks and labels
     final tickPaint = Paint()
       ..color = color
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
 
-    // Draw ticks: every 5 IU (half tick), every 10 IU (minor), every 50 IU (major)
-    for (double iu = 0; iu <= totalIU; iu += 5) {
-      final x = totalIU <= 0 ? 0.0 : (iu / totalIU) * size.width;
-      final isMajor = iu % 50 == 0;
-      final isMinor = iu % 10 == 0 && !isMajor;
+    // Draw ticks: every 5 units (half tick), every 10 units (minor), every 50 units (major)
+    for (double units = 0; units <= totalUnits; units += 5) {
+      final x = totalUnits <= 0 ? 0.0 : (units / totalUnits) * size.width;
+      final isMajor = units % 50 == 0;
+      final isMinor = units % 10 == 0 && !isMajor;
 
       // All ticks end at baseline, start above it
       final tickHeight = isMajor ? 20.0 : (isMinor ? 12.0 : 6.0);
@@ -154,7 +154,7 @@ class _WhiteSyringePainter extends CustomPainter {
       if (isMajor || isMinor) {
         final tp = TextPainter(
           text: TextSpan(
-            text: iu.toStringAsFixed(0),
+            text: units.toStringAsFixed(0),
             style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600),
           ),
           textDirection: TextDirection.ltr,
@@ -165,7 +165,7 @@ class _WhiteSyringePainter extends CustomPainter {
     }
 
     // Draw thick fill line representing the amount in syringe
-    final ratio = totalIU <= 0 ? 0.0 : (fillIU / totalIU).clamp(0.0, 1.0);
+    final ratio = totalUnits <= 0 ? 0.0 : (fillUnits / totalUnits).clamp(0.0, 1.0);
     if (ratio > 0 && !ratio.isNaN) {
       final fillPaint = Paint()
         ..color = color
@@ -196,8 +196,8 @@ class _WhiteSyringePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WhiteSyringePainter oldDelegate) {
-    return oldDelegate.totalIU != totalIU ||
-        oldDelegate.fillIU != fillIU ||
+    return oldDelegate.totalUnits != totalUnits ||
+        oldDelegate.fillUnits != fillUnits ||
         oldDelegate.color != color ||
         oldDelegate.interactive != interactive;
   }

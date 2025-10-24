@@ -15,7 +15,7 @@ extension SyringeSizeX on SyringeSizeMl {
     SyringeSizeMl.ml5 => 5.0,
   };
 
-  int get totalUnits => (ml * 100).round(); // assume 100 IU per mL mapping
+  int get totalUnits => (ml * 100).round(); // assume 100 units per mL mapping
 
   String get label => '${ml.toStringAsFixed(1)} mL';
 }
@@ -34,7 +34,7 @@ class ReconstitutionResult {
 
   final double perMlConcentration; // same base unit as dose/strength (per mL)
   final double solventVolumeMl; // mL to add to vial
-  final double recommendedUnits; // IU fill for the dose
+  final double recommendedUnits; // syringe units fill for the dose
   final double syringeSizeMl; // chosen syringe size mL
   final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
   final double? recommendedDose; // desired dose value for reopening calculator

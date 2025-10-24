@@ -296,7 +296,7 @@ class PrimaryChoiceChip extends StatelessWidget {
   }
 }
 
-/// Visual insulin syringe gauge with tick markers
+/// Visual syringe gauge with tick markers
 /// Reusable soft white card decoration used across selection tiles and neutral form sections
 BoxDecoration softWhiteCardDecoration(BuildContext context) {
   final theme = Theme.of(context);
@@ -311,16 +311,16 @@ BoxDecoration softWhiteCardDecoration(BuildContext context) {
 }
 
 class SyringeGauge extends StatelessWidget {
-  const SyringeGauge({required this.totalIU, required this.fillIU, super.key});
-  final double totalIU;
-  final double fillIU;
+  const SyringeGauge({required this.totalUnits, required this.fillUnits, super.key});
+  final double totalUnits;
+  final double fillUnits;
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: const Size(double.infinity, 26),
       painter: _SyringePainter(
-        totalIU: totalIU,
-        fillIU: fillIU,
+        totalUnits: totalUnits,
+        fillUnits: fillUnits,
         fillColor: Theme.of(context).colorScheme.primary,
         tickColor: Theme.of(context).colorScheme.onSurfaceVariant,
         labelColor: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -331,14 +331,14 @@ class SyringeGauge extends StatelessWidget {
 
 class _SyringePainter extends CustomPainter {
   _SyringePainter({
-    required this.totalIU,
-    required this.fillIU,
+    required this.totalUnits,
+    required this.fillUnits,
     required this.fillColor,
     required this.tickColor,
     required this.labelColor,
   });
-  final double totalIU;
-  final double fillIU;
+  final double totalUnits;
+  final double fillUnits;
   final Color fillColor;
   final Color tickColor;
   final Color labelColor;
@@ -355,26 +355,26 @@ class _SyringePainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(r, radius), bg);
     canvas.drawRRect(RRect.fromRectAndRadius(r, radius), outline);
     // Fill
-    final ratio = totalIU <= 0 ? 0.0 : (fillIU / totalIU).clamp(0.0, 1.0);
+    final ratio = totalUnits <= 0 ? 0.0 : (fillUnits / totalUnits).clamp(0.0, 1.0);
     final fillRect = Rect.fromLTWH(0, 6, size.width * (ratio.isNaN ? 0 : ratio), 14);
     final fillPaint = Paint()..color = fillColor;
     canvas.drawRRect(RRect.fromRectAndRadius(fillRect, radius), fillPaint);
-    // Tick marks every 10 IU, major every 50 IU
+    // Tick marks every 10 units, major every 50 units
     final tickPaint = Paint()
       ..color = tickColor
       ..strokeWidth = 1;
-    // Draw minor half ticks every 5 IU, full minor every 10 IU, major every 50 IU
-    for (double iu = 0; iu <= totalIU; iu += 5) {
-      final x = (iu / totalIU) * size.width;
-      final isMajor = iu % 50 == 0;
-      final isMinor = iu % 10 == 0 && !isMajor;
+    // Draw minor half ticks every 5 units, full minor every 10 units, major every 50 units
+    for (double units = 0; units <= totalUnits; units += 5) {
+      final x = (units / totalUnits) * size.width;
+      final isMajor = units % 50 == 0;
+      final isMinor = units % 10 == 0 && !isMajor;
       final tickTop = isMajor ? 1.0 : (isMinor ? 3.0 : 6.0);
       final tickBottom = isMajor ? 25.0 : (isMinor ? 22.0 : 18.0);
       canvas.drawLine(Offset(x, tickTop), Offset(x, tickBottom), tickPaint);
       if (isMajor) {
         final tp = TextPainter(
           text: TextSpan(
-            text: iu.toStringAsFixed(0),
+            text: units.toStringAsFixed(0),
             style: TextStyle(fontSize: 9, color: labelColor),
           ),
           textDirection: TextDirection.ltr,
@@ -386,7 +386,7 @@ class _SyringePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SyringePainter oldDelegate) {
-    return oldDelegate.totalIU != totalIU || oldDelegate.fillIU != fillIU;
+    return oldDelegate.totalUnits != totalUnits || oldDelegate.fillUnits != fillUnits;
   }
 }
 

@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 /// User can drag the syringe fill level directly on the graphic
 class InteractiveSyringeSlider extends StatefulWidget {
   const InteractiveSyringeSlider({
-    required this.totalIU, required this.fillIU, required this.minIU, required this.maxIU, required this.onChanged, super.key,
+    required this.totalUnits, required this.fillUnits, required this.minUnits, required this.maxUnits, required this.onChanged, super.key,
     this.divisions,
     this.color,
   });
 
-  final double totalIU;
-  final double fillIU;
-  final double minIU;
-  final double maxIU;
+  final double totalUnits;
+  final double fillUnits;
+  final double minUnits;
+  final double maxUnits;
   final ValueChanged<double> onChanged;
   final int? divisions;
   final Color? color;
@@ -28,7 +28,7 @@ class _InteractiveSyringeSliderState extends State<InteractiveSyringeSlider> {
   @override
   Widget build(BuildContext context) {
     final effectiveColor = widget.color ?? Theme.of(context).colorScheme.primary;
-    final currentValue = _dragValue ?? widget.fillIU;
+    final currentValue = _dragValue ?? widget.fillUnits;
 
     return GestureDetector(
       onVerticalDragUpdate: (details) {
@@ -37,14 +37,14 @@ class _InteractiveSyringeSliderState extends State<InteractiveSyringeSlider> {
         final height = box.size.height;
 
         // Calculate fill percentage from bottom (inverted Y axis)
-        // Top of widget = maxIU, bottom = minIU
+        // Top of widget = maxUnits, bottom = minUnits
         final fillPercentage = 1.0 - (localPosition.dy / height).clamp(0.0, 1.0);
 
-        // Convert to IU value within min/max range
-        final newValue = widget.minIU + (fillPercentage * (widget.maxIU - widget.minIU));
+        // Convert to units value within min/max range
+        final newValue = widget.minUnits + (fillPercentage * (widget.maxUnits - widget.minUnits));
 
         setState(() {
-          _dragValue = newValue.clamp(widget.minIU, widget.maxIU);
+          _dragValue = newValue.clamp(widget.minUnits, widget.maxUnits);
         });
       },
       onVerticalDragEnd: (details) {
@@ -68,17 +68,17 @@ class _InteractiveSyringeSliderState extends State<InteractiveSyringeSlider> {
 
         // Calculate fill from tap position
         final fillPercentage = 1.0 - (tapLocal.dy / height).clamp(0.0, 1.0);
-        final newValue = widget.minIU + (fillPercentage * (widget.maxIU - widget.minIU));
+        final newValue = widget.minUnits + (fillPercentage * (widget.maxUnits - widget.minUnits));
 
-        widget.onChanged(newValue.clamp(widget.minIU, widget.maxIU));
+        widget.onChanged(newValue.clamp(widget.minUnits, widget.maxUnits));
       },
       child: CustomPaint(
         size: const Size(double.infinity, 60),
         painter: _InteractiveSyringePainter(
-          totalIU: widget.totalIU,
-          fillIU: currentValue,
-          minIU: widget.minIU,
-          maxIU: widget.maxIU,
+          totalUnits: widget.totalUnits,
+          fillUnits: currentValue,
+          minUnits: widget.minUnits,
+          maxUnits: widget.maxUnits,
           color: effectiveColor,
         ),
       ),
@@ -88,17 +88,17 @@ class _InteractiveSyringeSliderState extends State<InteractiveSyringeSlider> {
 
 class _InteractiveSyringePainter extends CustomPainter {
   _InteractiveSyringePainter({
-    required this.totalIU,
-    required this.fillIU,
-    required this.minIU,
-    required this.maxIU,
+    required this.totalUnits,
+    required this.fillUnits,
+    required this.minUnits,
+    required this.maxUnits,
     required this.color,
   });
 
-  final double totalIU;
-  final double fillIU;
-  final double minIU;
-  final double maxIU;
+  final double totalUnits;
+  final double fillUnits;
+  final double minUnits;
+  final double maxUnits;
   final Color color;
 
   @override
@@ -156,7 +156,7 @@ class _InteractiveSyringePainter extends CustomPainter {
     );
 
     // Calculate fill position within the allowed range
-    final fillRatio = (fillIU - minIU) / (maxIU - minIU).clamp(0.001, double.infinity);
+    final fillRatio = (fillUnits - minUnits) / (maxUnits - minUnits).clamp(0.001, double.infinity);
     final fillHeight = fillRatio * barrelHeight;
     final fillTop = barrelBottom - fillHeight;
 
@@ -182,16 +182,16 @@ class _InteractiveSyringePainter extends CustomPainter {
     final maxY = barrelTop;
     canvas.drawLine(Offset(barrelLeft - 4, maxY), Offset(barrelRight + 4, maxY), rangePaint);
 
-    // Draw IU labels on major intervals (every 50 IU or adjusted for range)
-    final range = maxIU - minIU;
+    // Draw unit labels on major intervals (every 50 units or adjusted for range)
+    final range = maxUnits - minUnits;
     final labelInterval = range <= 50 ? 10.0 : 50.0;
 
     for (
-      var iu = (minIU / labelInterval).ceil() * labelInterval;
-      iu <= maxIU;
-      iu += labelInterval
+      var units = (minUnits / labelInterval).ceil() * labelInterval;
+      units <= maxUnits;
+      units += labelInterval
     ) {
-      final ratio = (iu - minIU) / (maxIU - minIU);
+      final ratio = (units - minUnits) / (maxUnits - minUnits);
       final y = barrelBottom - (ratio * barrelHeight);
 
       // Draw tick
@@ -199,7 +199,7 @@ class _InteractiveSyringePainter extends CustomPainter {
 
       // Draw label
       textPainter.text = TextSpan(
-        text: iu.toInt().toString(),
+        text: units.toInt().toString(),
         style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w500),
       );
       textPainter.layout();
@@ -208,7 +208,7 @@ class _InteractiveSyringePainter extends CustomPainter {
 
     // Draw current fill value
     textPainter.text = TextSpan(
-      text: '${fillIU.toStringAsFixed(fillIU == fillIU.roundToDouble() ? 0 : 1)} IU',
+      text: '${fillUnits.toStringAsFixed(fillUnits == fillUnits.roundToDouble() ? 0 : 1)} U',
       style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
     );
     textPainter.layout();
@@ -220,10 +220,10 @@ class _InteractiveSyringePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_InteractiveSyringePainter oldDelegate) {
-    return oldDelegate.fillIU != fillIU ||
-        oldDelegate.totalIU != totalIU ||
-        oldDelegate.minIU != minIU ||
-        oldDelegate.maxIU != maxIU ||
+    return oldDelegate.fillUnits != fillUnits ||
+        oldDelegate.totalUnits != totalUnits ||
+        oldDelegate.minUnits != minUnits ||
+        oldDelegate.maxUnits != maxUnits ||
         oldDelegate.color != color;
   }
 }

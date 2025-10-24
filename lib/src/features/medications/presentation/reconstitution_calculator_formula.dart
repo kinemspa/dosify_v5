@@ -3,7 +3,7 @@
 /// ⚠️ CRITICAL MEDICAL CALCULATION
 ///
 /// This file implements the medically accurate reconstitution formula for ALL
-/// medication units (mg, mcg, g, IU).
+/// medication units (mg, mcg, g, units).
 ///
 /// **See docs/RECONSTITUTION_CALCULATOR_FORMULA.md for full documentation**
 ///
@@ -13,7 +13,7 @@
 /// 3. Medical review
 ///
 /// Last Updated: 2025-01-10
-/// Version: 2.0 (Proper IU Support)
+/// Version: 2.0 (Proper Units Support)
 library;
 
 // Project imports:
@@ -31,7 +31,7 @@ class ReconstitutionCalculation {
   });
 
   /// Concentration after reconstitution (in same unit/mL as input)
-  /// Examples: 10 IU/mL, 2.5 mg/mL, 1000 mcg/mL
+  /// Examples: 10 units/mL, 2.5 mg/mL, 1000 mcg/mL
   final double concentration;
 
   /// Volume to draw per dose (mL)
@@ -61,25 +61,25 @@ class ReconstitutionCalculation {
 ///
 /// **CRITICAL RULES:**
 /// 1. Strength and Dose MUST be in the same unit
-/// 2. IU (International Units) is medication potency, NOT syringe markings
-/// 3. Works for mg, mcg, g, and IU identically
+/// 2. Units are medication potency, NOT syringe markings
+/// 3. Works for mg, mcg, g, and units identically
 ///
 /// **Parameters:**
-/// - [totalStrength]: Total amount in vial (e.g., 10 IU, 5mg, 2000mcg)
-/// - [desiredDose]: Amount per injection (e.g., 2 IU, 0.25mg, 250mcg)
+/// - [totalStrength]: Total amount in vial (e.g., 10 units, 5mg, 2000mcg)
+/// - [desiredDose]: Amount per injection (e.g., 2 units, 0.25mg, 250mcg)
 /// - [diluentVolume]: mL of water/diluent to add to vial
 /// - [unitLabel]: Unit name for validation ('mg', 'mcg', 'g', 'units')
 ///
 /// **Example 1: HGH**
 /// ```dart
 /// calculate(
-///   totalStrength: 10,     // 10 IU in vial
-///   desiredDose: 2,        // 2 IU per injection
+///   totalStrength: 10,     // 10 units in vial
+///   desiredDose: 2,        // 2 units per injection
 ///   diluentVolume: 1.0,    // Add 1mL water
 ///   unitLabel: 'units',
 /// )
 /// // Returns:
-/// // - concentration: 10 IU/mL
+/// // - concentration: 10 units/mL
 /// // - volumePerDose: 0.2 mL
 /// // - syringeMarkings: 20 (on 1mL syringe)
 /// ```
@@ -174,10 +174,10 @@ ReconstitutionCalculation calculateReconstitution({
 /// ```dart
 /// calculateDoseFromVolume(
 ///   volumeMl: 0.2,         // User dragged slider to 0.2mL
-///   totalStrength: 10,     // 10 IU in vial
+///   totalStrength: 10,     // 10 units in vial
 ///   diluentVolume: 1.0,    // Added 1mL water
 /// )
-/// // Returns: 2.0 IU
+/// // Returns: 2.0 units
 /// ```
 double calculateDoseFromVolume({
   required double volumeMl,
