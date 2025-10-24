@@ -149,11 +149,11 @@ class _WhiteSyringePainter extends CustomPainter {
 
     // For 0.3ml (30U) and 0.5ml (50U) syringes, use finer 1-unit increments
     // For 1ml (100U), use 5-unit increments
-    // For 3ml (300U) and 5ml (500U), use 50-unit increments
+    // For 3ml (300U) and 5ml (500U), use 10-unit increments (label every 50U)
     final isSmallSyringe = totalUnits <= 50;
     final isMediumSyringe = totalUnits > 50 && totalUnits <= 100;
     final isLargeSyringe = totalUnits > 100;
-    final tickInterval = isSmallSyringe ? 1.0 : (isMediumSyringe ? 5.0 : 50.0);
+    final tickInterval = isSmallSyringe ? 1.0 : (isMediumSyringe ? 5.0 : 10.0);
 
     // Draw ticks with appropriate intervals
     for (double units = 0; units <= totalUnits; units += tickInterval) {
@@ -184,14 +184,21 @@ class _WhiteSyringePainter extends CustomPainter {
 
       canvas.drawLine(Offset(x, tickTop), Offset(x, baselineY), tickPaint);
 
-      // Draw labels: ONLY major (50U/100U) and minor (10U) ticks
-      // This prevents overlap on all syringes
-      if (isMajor || isMinor) {
+      // Draw labels:
+      // - 0.3ml/0.5ml: label every 5U (5, 10, 15, 20, 25, 30...)
+      // - 1ml: label every 10U (10, 20, 30, 40, 50...)
+      // - 3ml/5ml: label only 50U marks (50, 100, 150...)
+      final isFiveUnit =
+          isSmallSyringe && units % 5 == 0 && !isMinor && !isMajor;
+      final shouldLabel = isMajor || isMinor || (isSmallSyringe && isFiveUnit);
+
+      if (shouldLabel) {
         final tp = TextPainter(
           text: TextSpan(
             text: units.toStringAsFixed(0),
             style: TextStyle(
-              fontSize: isMajor ? 10 : (isMinor ? 9 : 8),
+              // Smaller font for 5U marks on small syringes
+              fontSize: isMajor ? 10 : (isMinor ? 9 : 7),
               color: color,
               fontWeight: FontWeight.w600,
             ),

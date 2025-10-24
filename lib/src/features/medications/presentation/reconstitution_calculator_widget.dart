@@ -264,7 +264,7 @@ class _ReconstitutionCalculatorWidgetState
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A), // Dark background for entire calculator
+        color: const Color(0xFF0A0E27), // Dark blue-black background
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
@@ -530,6 +530,7 @@ class _ReconstitutionCalculatorWidgetState
             // Fine-tune buttons with syringe gauge
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 // Decrement button - small, matches other steppers
                 SizedBox(
@@ -651,8 +652,10 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
             const SizedBox(height: 24),
-            // Reconstitution summary - no card background
+            // Reconstitution summary - no card background, properly centered
             Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // First line: Reconstitute X of MEDNAME
                 RichText(
