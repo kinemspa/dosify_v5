@@ -147,25 +147,45 @@ class _WhiteSyringePainter extends CustomPainter {
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
 
-    // Draw ticks: every 5 units (half tick), every 10 units (minor), every 50 units (major)
-    for (double units = 0; units <= totalUnits; units += 5) {
+    // For 0.3ml (30U) and 0.5ml (50U) syringes, use finer 1-unit increments
+    // For larger syringes, use 5-unit increments
+    final isSmallSyringe = totalUnits <= 50;
+    final tickInterval = isSmallSyringe ? 1.0 : 5.0;
+
+    // Draw ticks with appropriate intervals
+    for (double units = 0; units <= totalUnits; units += tickInterval) {
       final x = totalUnits <= 0 ? 0.0 : (units / totalUnits) * size.width;
       final isMajor = units % 50 == 0;
       final isMinor = units % 10 == 0 && !isMajor;
+      // For small syringes, 5-unit marks are special
+      final isFiveUnit =
+          isSmallSyringe && units % 5 == 0 && !isMinor && !isMajor;
 
       // All ticks end at baseline, start above it
-      final tickHeight = isMajor ? 20.0 : (isMinor ? 12.0 : 6.0);
+      double tickHeight;
+      if (isMajor) {
+        tickHeight = 20.0;
+      } else if (isMinor) {
+        tickHeight = 12.0;
+      } else if (isFiveUnit) {
+        tickHeight = 8.0; // Medium tick for 5-unit marks on small syringes
+      } else {
+        tickHeight = isSmallSyringe
+            ? 4.0
+            : 6.0; // Smaller ticks for 1-unit on small syringes
+      }
       final tickTop = baselineY - tickHeight;
 
       canvas.drawLine(Offset(x, tickTop), Offset(x, baselineY), tickPaint);
 
       // Draw labels for major and minor ticks below baseline
-      if (isMajor || isMinor) {
+      // For small syringes, also label 5-unit marks
+      if (isMajor || isMinor || (isSmallSyringe && isFiveUnit)) {
         final tp = TextPainter(
           text: TextSpan(
             text: units.toStringAsFixed(0),
             style: TextStyle(
-              fontSize: 10,
+              fontSize: isMajor ? 10 : (isMinor ? 9 : 8),
               color: color,
               fontWeight: FontWeight.w600,
             ),

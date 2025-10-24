@@ -154,7 +154,15 @@ class _ReconstitutionCalculatorWidgetState
   Widget _helperText(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
-      child: Text(text, style: kMutedLabelStyle(context)),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          fontStyle: FontStyle.italic,
+        ),
+      ),
     );
   }
 
@@ -250,30 +258,49 @@ class _ReconstitutionCalculatorWidgetState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        Text(
-          'Reconstitution Calculator',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurfaceVariant.withOpacity(0.8),
+        // Center-aligned calculator title
+        Center(
+          child: Text(
+            'Reconstitution Calculator',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
+        // Strength value made prominent with larger font and bold
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            'Using vial strength: ${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-            style: kMutedLabelStyle(
-              context,
-            ).copyWith(fontWeight: FontWeight.w600),
+          child: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              children: [
+                const TextSpan(text: 'Using vial strength: '),
+                TextSpan(
+                  text:
+                      '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
             'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
-            style: kMutedLabelStyle(context),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+            ),
           ),
         ),
         _rowLabelField(
@@ -408,7 +435,10 @@ class _ReconstitutionCalculatorWidgetState
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               'Select a reconstitution option',
-              style: kMutedLabelStyle(context),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ),
           _buildOptionRow(
@@ -455,16 +485,23 @@ class _ReconstitutionCalculatorWidgetState
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               'No valid options — Check strength, dose, or syringe size',
-              style: kMutedLabelStyle(context),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         const SizedBox(height: 12),
-        // Support text above syringe
+        // Support text above syringe with U = Units explanation
         Padding(
           padding: const EdgeInsets.symmetric(),
           child: Text(
-            'Drag the fill line or tap on the syringe to adjust diluent amount',
-            style: kMutedLabelStyle(context),
+            'Drag the fill line or tap on the syringe to adjust diluent amount (U = Units)',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ),
         // Range limit warning removed - using snackbar only for cleaner UI
@@ -573,7 +610,7 @@ class _ReconstitutionCalculatorWidgetState
                 RichText(
                   textAlign: TextAlign.left,
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     children: [
@@ -581,8 +618,9 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: '${_selectedUnits.toStringAsFixed(1)} U',
                         style: TextStyle(
+                          fontSize: 16,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const TextSpan(text: ' ('),
@@ -590,8 +628,9 @@ class _ReconstitutionCalculatorWidgetState
                         text:
                             '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
                         style: TextStyle(
+                          fontSize: 16,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const TextSpan(text: ')'),
@@ -602,7 +641,7 @@ class _ReconstitutionCalculatorWidgetState
                 RichText(
                   textAlign: TextAlign.left,
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     children: [
@@ -610,8 +649,9 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: _syringe.label,
                         style: TextStyle(
+                          fontSize: 16,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const TextSpan(text: ' syringe'),
@@ -622,7 +662,7 @@ class _ReconstitutionCalculatorWidgetState
                 RichText(
                   textAlign: TextAlign.left,
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     children: [
@@ -630,8 +670,9 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: '${formatDouble(Draw)} $_doseUnit',
                         style: TextStyle(
+                          fontSize: 16,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const TextSpan(text: ' dose'),
