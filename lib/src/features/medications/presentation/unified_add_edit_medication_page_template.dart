@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -155,37 +156,6 @@ class _UnifiedAddEditMedicationPageTemplateState
     _ => u.name,
   };
 
-  InputDecoration _dec(BuildContext context, {String? hint}) {
-    final cs = Theme.of(context).colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +183,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. DosifiTab-500'),
+            decoration: buildFieldDecoration(context, hint: 'eg. DosifiTab-500'),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -222,7 +192,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             controller: _manufacturerCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Dosifi Labs'),
+            decoration: buildFieldDecoration(context, hint: 'eg. Dosifi Labs'),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -231,7 +201,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             controller: _descriptionCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Pain relief'),
+            decoration: buildFieldDecoration(context, hint: 'eg. Pain relief'),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -242,7 +212,7 @@ class _UnifiedAddEditMedicationPageTemplateState
           minLines: 2,
           maxLines: null,
           style: Theme.of(context).textTheme.bodyMedium,
-          decoration: _dec(context, hint: 'eg. Take with water'),
+          decoration: buildFieldDecoration(context, hint: 'eg. Take with water'),
           onChanged: (_) => setState(() {}),
         ),
         nameHelp: 'Enter the medication name',
@@ -261,13 +231,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
             setState(() => _strengthValueCtrl.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: const InputDecoration(
-            hintText: '0',
-            isDense: false,
-            isCollapsed: false,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            constraints: BoxConstraints(minHeight: kFieldHeight),
-          ),
+          decoration: buildCompactFieldDecoration(hint: '0'),
         ),
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
@@ -341,13 +305,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
             setState(() => _stockValueCtrl.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: const InputDecoration(
-            hintText: '0',
-            isDense: false,
-            isCollapsed: false,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            constraints: BoxConstraints(minHeight: kFieldHeight),
-          ),
+          decoration: buildCompactFieldDecoration(hint: '0'),
         ),
         stockHelp: _isMdv
             ? 'Track the number of unreconstituted sealed vials you have in storage'
@@ -380,13 +338,7 @@ class _UnifiedAddEditMedicationPageTemplateState
                   final maxStock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                   setState(() => _lowStockCtrl.text = (v + 1).clamp(0, maxStock).toString());
                 },
-                decoration: const InputDecoration(
-                  hintText: '0',
-                  isDense: false,
-                  isCollapsed: false,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  constraints: BoxConstraints(minHeight: kFieldHeight),
-                ),
+                decoration: buildCompactFieldDecoration(hint: '0'),
                 compact: true,
               )
             : null,
@@ -431,7 +383,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             controller: _batchCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'Enter batch number'),
+            decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
           ),
         ),
         batchHelp: 'Enter the printed batch or lot number',
@@ -440,7 +392,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             controller: _storageCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Bathroom cabinet'),
+            decoration: buildFieldDecoration(context, hint: 'eg. Bathroom cabinet'),
           ),
         ),
         locationHelp: "Where it's stored (e.g., Bathroom cabinet)",
@@ -490,7 +442,7 @@ class _UnifiedAddEditMedicationPageTemplateState
             controller: _storageNotesCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'Enter storage instructions'),
+            decoration: buildFieldDecoration(context, hint: 'Enter storage instructions'),
           ),
         ),
         storageInstructionsHelp: 'Special handling notes (e.g., Keep upright)',
