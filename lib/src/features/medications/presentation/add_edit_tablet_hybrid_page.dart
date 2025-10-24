@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
@@ -227,41 +228,6 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
     );
   }
 
-  InputDecoration _dec({String? hint}) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    // Enforce a full 36 px input decorator height using kFieldHeight
-    return InputDecoration(
-      hintText: hint,
-      // Use global InputDecorationTheme for density/collapsed/height
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      // keep error line from affecting height
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: kHintFontSize,
-        color: cs.onSurfaceVariant,
-      ),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant, width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kFocusedOutlineWidth),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +268,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _nameCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'eg. Panadol'),
+                      decoration: buildFieldDecoration(context, hint: 'eg. Panadol'),
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
@@ -311,7 +277,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _manufacturerCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'eg. GSK'),
+                      decoration: buildFieldDecoration(context, hint: 'eg. GSK'),
                     ),
                   ),
                   _rowLabelField(
@@ -319,7 +285,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _descriptionCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'eg. Pain relief'),
+                      decoration: buildFieldDecoration(context, hint: 'eg. Pain relief'),
                     ),
                   ),
                   _rowLabelField(
@@ -327,7 +293,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _notesCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'eg. Take with food'),
+                      decoration: buildFieldDecoration(context, hint: 'eg. Take with food'),
                     ),
                   ),
                 ]),
@@ -352,7 +318,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                         final nv = (base + 1).clamp(0, 1000000000);
                         setState(() => _strengthValueCtrl.text = nv.toString());
                       },
-                      decoration: _dec(hint: '0'),
+                      decoration: buildCompactFieldDecoration(hint: '0'),
                     ),
                   ),
                   _rowLabelField(
@@ -371,7 +337,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                           )
                           .toList(),
                       onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                      decoration: _dec(),
+                      decoration: buildCompactFieldDecoration(),
                     ),
                   ),
                 ]),
@@ -394,7 +360,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                         final nv = (v + 0.25).clamp(0, 1000000);
                         setState(() => _stockValueCtrl.text = nv.toStringAsFixed(2));
                       },
-                      decoration: _dec(hint: '0.00'),
+                      decoration: buildCompactFieldDecoration(hint: '0.00'),
                     ),
                   ),
                   _rowLabelField(
@@ -402,7 +368,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: Text(
                       'tablets',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -449,7 +415,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                                     decimal: true,
                                   ),
                                   inputFormatters: const [_TwoDecimalTextInputFormatter()],
-                                  decoration: _dec(hint: '0'),
+                                  decoration: buildFieldDecoration(context, hint: '0'),
                                 ),
                               )
                             : const SizedBox(key: ValueKey('lowStockOff'), width: 120),
@@ -467,7 +433,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _batchCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'Enter batch number'),
+                      decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
                     ),
                   ),
                   _rowLabelField(
@@ -475,7 +441,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _storageCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'eg. Bathroom cabinet'),
+                      decoration: buildFieldDecoration(context, hint: 'eg. Bathroom cabinet'),
                     ),
                   ),
                   CheckboxListTile(
@@ -491,7 +457,7 @@ class _AddEditTabletHybridPageState extends State<AddEditTabletHybridPage> {
                     field: TextFormField(
                       controller: _storageNotesCtrl,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: _dec(hint: 'Enter storage instructions'),
+                      decoration: buildFieldDecoration(context, hint: 'Enter storage instructions'),
                     ),
                   ),
                 ]),
