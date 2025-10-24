@@ -7,11 +7,13 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 
 class MedicationDetailPage extends StatelessWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
@@ -31,22 +33,35 @@ class MedicationDetailPage extends StatelessWidget {
     }
 
     final cs = Theme.of(context).colorScheme;
-    final labelStyle = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700, color: cs.onSurfaceVariant);
-    final valueStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurface);
+    final theme = Theme.of(context);
 
-    Widget row(String label, String? value) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 160, child: Text(label, style: labelStyle)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value ?? '-', style: valueStyle)),
-        ],
-      ),
-    );
+    Widget detailRow(String label, String? value) {
+      if (value == null || value.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: cs.onSurface,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: GradientAppBar(
@@ -124,100 +139,188 @@ class MedicationDetailPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _section(context, 'General', [
-            row('Name', med.name),
-            row('Medication Type', switch (med.form) {
-              MedicationForm.tablet => 'Tablet',
-              MedicationForm.capsule => 'Capsule',
-              MedicationForm.injectionPreFilledSyringe => 'Pre-Filled Syringe',
-              MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
-              MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial',
-            }),
-            row('Manufacturer', med.manufacturer),
-            row('Batch', med.batchNumber),
-          ]),
+          // Summary Card
+          SummaryHeaderCard(
+            title: med.name,
+            subtitle: med.manufacturer,
+            metadata: [
+              if (med.strengthValue > 0)
+                '${med.strengthValue} ${_unitLabel(med.strengthUnit)}',
+              '${med.stockValue} ${_stockUnitLabel(med.stockUnit)}',
+            ].join(' • '),
+          ),
+          const SizedBox(height: 16),
+
+          // General Info
+          _modernSection(
+            context,
+            'General',
+            Icons.medication_outlined,
+            [
+              detailRow('Medication Name', med.name),
+              detailRow('Type', _formLabel(med.form)),
+              detailRow('Manufacturer', med.manufacturer),
+              detailRow('Batch Number', med.batchNumber),
+              detailRow('Description', med.description),
+            ],
+          ),
           const SizedBox(height: 12),
-          _section(context, 'Strength & Composition', [
-            row('Strength', '${med.strengthValue} ${med.strengthUnit.name}'),
-            if (med.perMlValue != null)
-              row(
-                'Per mL',
-                '${med.perMlValue} ${switch (med.strengthUnit) {
-                  Unit.mg => 'mg/mL',
-                  Unit.mcg => 'mcg/mL',
-                  Unit.g => 'g/mL',
-                  Unit.units => 'units/mL',
-                  Unit.mgPerMl => 'mg/mL',
-                  Unit.mcgPerMl => 'mcg/mL',
-                  Unit.gPerMl => 'g/mL',
-                  Unit.unitsPerMl => 'units/mL',
-                }}',
+
+          // Strength & Composition
+          _modernSection(
+            context,
+            'Strength & Composition',
+            Icons.science_outlined,
+            [
+              detailRow(
+                'Strength',
+                '${med.strengthValue} ${_unitLabel(med.strengthUnit)}',
               ),
-          ]),
+              if (med.perMlValue != null)
+                detailRow(
+                  'Concentration',
+                  '${med.perMlValue} ${_concentrationLabel(med.strengthUnit)}',
+                ),
+              if (med.containerVolumeMl != null)
+                detailRow('Vial Volume', '${med.containerVolumeMl} mL'),
+            ],
+          ),
           const SizedBox(height: 12),
-          _section(context, 'Inventory', [
-            row('Stock', '${med.stockValue} ${med.stockUnit.name}'),
-            row('Low stock enabled', med.lowStockEnabled ? 'Yes' : 'No'),
-            if (med.lowStockThreshold != null)
-              row('Low stock threshold', '${med.lowStockThreshold}'),
-          ]),
+
+          // Inventory
+          _modernSection(
+            context,
+            'Inventory',
+            Icons.inventory_2_outlined,
+            [
+              detailRow(
+                'Current Stock',
+                '${med.stockValue} ${_stockUnitLabel(med.stockUnit)}',
+              ),
+              if (med.lowStockEnabled)
+                detailRow(
+                  'Low Stock Alert',
+                  'Enabled at ${med.lowStockThreshold ?? 0} ${_stockUnitLabel(med.stockUnit)}',
+                )
+              else
+                detailRow('Low Stock Alert', 'Disabled'),
+            ],
+          ),
           const SizedBox(height: 12),
-          _section(context, 'Storage', [
-            row('Expiry', med.expiry != null ? _fmtDate(med.expiry!) : null),
-            row('Storage location', med.storageLocation),
-            row('Requires refrigeration', med.requiresRefrigeration ? 'Yes' : 'No'),
-            row('Storage instructions', med.storageInstructions),
-          ]),
+
+          // Storage
+          _modernSection(
+            context,
+            'Storage',
+            Icons.kitchen_outlined,
+            [
+              if (med.expiry != null)
+                detailRow('Expiry Date', _fmtDate(med.expiry!)),
+              detailRow('Storage Location', med.storageLocation),
+              if (med.requiresRefrigeration)
+                detailRow('Storage Requirements', 'Requires Refrigeration'),
+              detailRow('Storage Instructions', med.storageInstructions),
+            ],
+          ),
           const SizedBox(height: 12),
-          _section(context, 'Notes', [
-            row('Description', med.description),
-            row('Notes', med.notes),
-          ]),
+
+          // Notes
+          if (med.notes != null && med.notes!.isNotEmpty)
+            _modernSection(
+              context,
+              'Notes',
+              Icons.notes_outlined,
+              [
+                detailRow('Additional Notes', med.notes),
+              ],
+            ),
+
+          const SizedBox(height: 80), // Space for FAB if needed
         ],
       ),
     );
   }
 }
 
+// Helper functions
 String _twoDigits(int n) => n.toString().padLeft(2, '0');
-String _fmtDate(DateTime d) => '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
+String _fmtDate(DateTime d) =>
+    '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
 
-Widget _section(BuildContext context, String title, List<Widget> children) {
+String _formLabel(MedicationForm form) => switch (form) {
+      MedicationForm.tablet => 'Tablet',
+      MedicationForm.capsule => 'Capsule',
+      MedicationForm.injectionPreFilledSyringe => 'Pre-Filled Syringe',
+      MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
+      MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial',
+    };
+
+String _unitLabel(Unit u) => switch (u) {
+      Unit.mcg => 'mcg',
+      Unit.mg => 'mg',
+      Unit.g => 'g',
+      Unit.units => 'units',
+      Unit.mcgPerMl => 'mcg/mL',
+      Unit.mgPerMl => 'mg/mL',
+      Unit.gPerMl => 'g/mL',
+      Unit.unitsPerMl => 'units/mL',
+    };
+
+String _concentrationLabel(Unit u) => switch (u) {
+      Unit.mg || Unit.mgPerMl => 'mg/mL',
+      Unit.mcg || Unit.mcgPerMl => 'mcg/mL',
+      Unit.g || Unit.gPerMl => 'g/mL',
+      Unit.units || Unit.unitsPerMl => 'units/mL',
+    };
+
+String _stockUnitLabel(StockUnit u) => switch (u) {
+      StockUnit.tablets => 'tablets',
+      StockUnit.capsules => 'capsules',
+      StockUnit.preFilledSyringes => 'syringes',
+      StockUnit.singleDoseVials => 'vials',
+      StockUnit.multiDoseVials => 'vials',
+    };
+
+// Modern section widget with icon
+Widget _modernSection(
+  BuildContext context,
+  String title,
+  IconData icon,
+  List<Widget> children,
+) {
   final theme = Theme.of(context);
-  return Card(
-    elevation: 0,
-    color: theme.colorScheme.surfaceContainerLowest,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(color: theme.colorScheme.outlineVariant),
-    ),
+  final cs = theme.colorScheme;
+
+  // Filter out empty widgets
+  final visibleChildren = children.where((w) => w is! SizedBox || w.key != null).toList();
+  if (visibleChildren.isEmpty) return const SizedBox.shrink();
+
+  return Container(
+    decoration: buildCardDecoration(context),
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+              Icon(
+                icon,
+                size: 20,
+                color: cs.primary,
               ),
               const SizedBox(width: 8),
               Text(
                 title,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.primary,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          ...children,
+          const SizedBox(height: 16),
+          ...visibleChildren,
         ],
       ),
     ),

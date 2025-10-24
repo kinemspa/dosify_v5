@@ -19,22 +19,19 @@ import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
-/// Template-based unified page for adding/editing medications.
-/// Phase 1: Supports tablet, capsule, PFS, and single-dose vial.
-/// MDV support coming in Phase 2.
-class UnifiedAddEditMedicationPageTemplate extends ConsumerStatefulWidget {
-  const UnifiedAddEditMedicationPageTemplate({required this.form, super.key, this.initial});
+/// Unified page for adding/editing all medication types.
+/// Supports tablet, capsule, pre-filled syringe, single-dose vial, and multi-dose vial.
+class AddEditMedicationPage extends ConsumerStatefulWidget {
+  const AddEditMedicationPage({required this.form, super.key, this.initial});
 
   final MedicationForm form;
   final Medication? initial;
 
   @override
-  ConsumerState<UnifiedAddEditMedicationPageTemplate> createState() =>
-      _UnifiedAddEditMedicationPageTemplateState();
+  ConsumerState<AddEditMedicationPage> createState() => _AddEditMedicationPageState();
 }
 
-class _UnifiedAddEditMedicationPageTemplateState
-    extends ConsumerState<UnifiedAddEditMedicationPageTemplate> {
+class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   // General section
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();

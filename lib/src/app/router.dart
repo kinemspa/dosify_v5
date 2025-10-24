@@ -19,7 +19,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/select_injection_type_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/select_medication_type_page.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/unified_add_edit_medication_page_template.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_edit_medication_page.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
@@ -136,35 +136,30 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          builder: (context, state) =>
-              const UnifiedAddEditMedicationPageTemplate(form: MedicationForm.tablet),
+          builder: (context, state) => const AddEditMedicationPage(form: MedicationForm.tablet),
         ),
         GoRoute(
           path: '/medications/add/capsule',
           name: 'addCapsule',
-          builder: (context, state) =>
-              const UnifiedAddEditMedicationPageTemplate(form: MedicationForm.capsule),
+          builder: (context, state) => const AddEditMedicationPage(form: MedicationForm.capsule),
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
-            form: MedicationForm.injectionPreFilledSyringe,
-          ),
+          builder: (context, state) =>
+              const AddEditMedicationPage(form: MedicationForm.injectionPreFilledSyringe),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
-            form: MedicationForm.injectionSingleDoseVial,
-          ),
+          builder: (context, state) =>
+              const AddEditMedicationPage(form: MedicationForm.injectionSingleDoseVial),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
-          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
-            form: MedicationForm.injectionMultiDoseVial,
-          ),
+          builder: (context, state) =>
+              const AddEditMedicationPage(form: MedicationForm.injectionMultiDoseVial),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
         GoRoute(
@@ -174,7 +169,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(form: MedicationForm.tablet, initial: med);
+            return AddEditMedicationPage(form: MedicationForm.tablet, initial: med);
           },
         ),
         GoRoute(
@@ -184,7 +179,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(form: MedicationForm.capsule, initial: med);
+            return AddEditMedicationPage(form: MedicationForm.capsule, initial: med);
           },
         ),
         GoRoute(
@@ -194,7 +189,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
+            return AddEditMedicationPage(
               form: MedicationForm.injectionPreFilledSyringe,
               initial: med,
             );
@@ -207,7 +202,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
+            return AddEditMedicationPage(
               form: MedicationForm.injectionSingleDoseVial,
               initial: med,
             );
@@ -220,7 +215,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
+            return AddEditMedicationPage(
               form: MedicationForm.injectionMultiDoseVial,
               initial: med,
             );
