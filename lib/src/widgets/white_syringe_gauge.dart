@@ -148,9 +148,11 @@ class _WhiteSyringePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // For 0.3ml (30U) and 0.5ml (50U) syringes, use finer 1-unit increments
-    // For larger syringes, use 5-unit increments
+    // For 1ml (100U), use 5-unit increments
+    // For 3ml (300U) and 5ml (500U), use 10-unit increments
     final isSmallSyringe = totalUnits <= 50;
-    final tickInterval = isSmallSyringe ? 1.0 : 5.0;
+    final isMediumSyringe = totalUnits > 50 && totalUnits <= 100;
+    final tickInterval = isSmallSyringe ? 1.0 : (isMediumSyringe ? 5.0 : 10.0);
 
     // Draw ticks with appropriate intervals
     for (double units = 0; units <= totalUnits; units += tickInterval) {

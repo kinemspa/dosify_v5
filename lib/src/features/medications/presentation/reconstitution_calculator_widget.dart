@@ -557,19 +557,41 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
           ),
-          const SizedBox(height: 28),
-          // Conversational explanation
-          Padding(
-            padding: const EdgeInsets.symmetric(),
+          const SizedBox(height: 24),
+          // Center-aligned reconstitution summary with massive visual flair
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.3),
+                width: 2,
+              ),
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Main reconstitution instruction - centered with huge values
                 RichText(
-                  textAlign: TextAlign.left,
+                  textAlign: TextAlign.center,
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
+                      height: 1.4,
                     ),
                     children: [
                       const TextSpan(text: 'Reconstitute '),
@@ -577,16 +599,20 @@ class _ReconstitutionCalculatorWidgetState
                         text:
                             '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
                         style: TextStyle(
+                          fontSize: 24,
                           color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       if (widget.medicationName != null &&
                           widget.medicationName!.isNotEmpty) ...[
-                        const TextSpan(text: ' '),
+                        const TextSpan(text: ' of '),
                         TextSpan(
                           text: widget.medicationName,
                           style: TextStyle(
+                            fontSize: 22,
                             color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ],
@@ -594,33 +620,49 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: '${currentV.toStringAsFixed(2)} mL',
                         style: TextStyle(
+                          fontSize: 24,
                           color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       TextSpan(
                         text: _diluentNameCtrl.text.trim().isNotEmpty
-                            ? ' ${_diluentNameCtrl.text.trim()}'
-                            : ' diluent',
+                            ? ' of ${_diluentNameCtrl.text.trim()}'
+                            : ' of diluent',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 6),
-                // Split into 3 lines to prevent shifting
+                const SizedBox(height: 20),
+                Divider(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                  thickness: 2,
+                ),
+                const SizedBox(height: 16),
+                // Draw instruction - centered with large values
                 RichText(
-                  textAlign: TextAlign.left,
+                  textAlign: TextAlign.center,
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
                     ),
                     children: [
                       const TextSpan(text: 'Draw '),
                       TextSpan(
-                        text: '${_selectedUnits.toStringAsFixed(1)} U',
+                        text: '${_selectedUnits.toStringAsFixed(1)} Units',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 26,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       const TextSpan(text: ' ('),
@@ -628,55 +670,54 @@ class _ReconstitutionCalculatorWidgetState
                         text:
                             '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 22,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const TextSpan(text: ')'),
                     ],
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 12),
                 RichText(
-                  textAlign: TextAlign.left,
+                  textAlign: TextAlign.center,
                   text: TextSpan(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
                     ),
                     children: [
                       const TextSpan(text: 'into a '),
                       TextSpan(
                         text: _syringe.label,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 22,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const TextSpan(text: ' syringe'),
                     ],
                   ),
                 ),
-                const SizedBox(height: 2),
-                RichText(
-                  textAlign: TextAlign.left,
-                  text: TextSpan(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                const SizedBox(height: 16),
+                // Clarification text
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'This calculates reconstitution volume only.\nSet actual dose amounts in the scheduling screen.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                      height: 1.3,
                     ),
-                    children: [
-                      const TextSpan(text: 'for your '),
-                      TextSpan(
-                        text: '${formatDouble(Draw)} $_doseUnit',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const TextSpan(text: ' dose'),
-                    ],
                   ),
                 ),
               ],
