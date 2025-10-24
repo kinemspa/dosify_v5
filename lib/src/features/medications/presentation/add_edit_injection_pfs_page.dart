@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -114,38 +115,6 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
     if (u == Unit.mg || u == Unit.mgPerMl) return 'mg';
     if (u == Unit.g || u == Unit.gPerMl) return 'g';
     return 'units';
-  }
-
-  InputDecoration _dec(BuildContext context, {String? hint}) {
-    final cs = Theme.of(context).colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
   }
 
   Future<void> _submit() async {
@@ -271,7 +240,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _name,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'eg. MedX Rapid'),
+              decoration: buildFieldDecoration(context, hint: 'eg. MedX Rapid'),
               validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
               onChanged: (_) => setState(() {}),
             ),
@@ -281,7 +250,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _manufacturer,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'eg. PharmaCorp'),
+              decoration: buildFieldDecoration(context, hint: 'eg. PharmaCorp'),
               onChanged: (_) => setState(() {}),
             ),
           ),
@@ -290,7 +259,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _description,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'eg. Fast-acting formula'),
+              decoration: buildFieldDecoration(context, hint: 'eg. Fast-acting formula'),
               onChanged: (_) => setState(() {}),
             ),
           ),
@@ -299,7 +268,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _notes,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'eg. Inject before meals'),
+              decoration: buildFieldDecoration(context, hint: 'eg. Inject before meals'),
               onChanged: (_) => setState(() {}),
             ),
           ),
@@ -319,13 +288,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               final v = int.tryParse(_strength.text.trim()) ?? 0;
               setState(() => _strength.text = (v + 1).clamp(0, 1000000).toString());
             },
-            decoration: const InputDecoration(
-              hintText: '0',
-              isDense: false,
-              isCollapsed: false,
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              constraints: BoxConstraints(minHeight: kFieldHeight),
-            ),
+            decoration: buildCompactFieldDecoration(hint: '0'),
           ),
           unitDropdown: SmallDropdown36<Unit>(
             value: _strengthUnit,
@@ -382,13 +345,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
                     final v = double.tryParse(_perMl.text.trim()) ?? 1;
                     setState(() => _perMl.text = (v + 1).clamp(1, 1000000).toStringAsFixed(0));
                   },
-                  decoration: const InputDecoration(
-                    hintText: '1',
-                    isDense: false,
-                    isCollapsed: false,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    constraints: BoxConstraints(minHeight: kFieldHeight),
-                  ),
+                  decoration: buildCompactFieldDecoration(hint: '1'),
                 )
               : null,
           strengthHelp: 'Specify the amount per dose and its unit of measurement.',
@@ -442,13 +399,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
                     final maxStock = int.tryParse(_stock.text.trim()) ?? 0;
                     setState(() => _lowStockThreshold.text = (v + 1).clamp(0, maxStock).toString());
                   },
-                  decoration: const InputDecoration(
-                    hintText: '0',
-                    isDense: false,
-                    isCollapsed: false,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    constraints: BoxConstraints(minHeight: kFieldHeight),
-                  ),
+                  decoration: buildCompactFieldDecoration(hint: '0'),
                   compact: true,
                 )
               : null,
@@ -504,7 +455,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _batch,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'Enter batch number'),
+              decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
             ),
           ),
           batchHelp: 'Enter the printed batch or lot number',
@@ -513,7 +464,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _location,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'eg. Medicine Cabinet'),
+              decoration: buildFieldDecoration(context, hint: 'eg. Medicine Cabinet'),
             ),
           ),
           locationHelp: 'Storage location (e.g., Medicine Cabinet, Shelf 2)',
@@ -563,7 +514,7 @@ class _AddEditInjectionPfsPageState extends ConsumerState<AddEditInjectionPfsPag
               controller: _storageNotes,
               textCapitalization: TextCapitalization.sentences,
               style: Theme.of(context).textTheme.bodyMedium,
-              decoration: _dec(context, hint: 'Enter storage instructions'),
+              decoration: buildFieldDecoration(context, hint: 'Enter storage instructions'),
             ),
           ),
           storageInstructionsHelp: 'Special handling notes (e.g., Keep upright)',
