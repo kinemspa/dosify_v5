@@ -93,6 +93,15 @@ class _ReconstitutionCalculatorWidgetState
   // - formatDouble() - Format for display (was _fmt)
   // - toBaseMass() - Convert units to mg (was _toBaseMass)
 
+  // Format number removing trailing zeros
+  String _formatNoTrailing(double value) {
+    final str = value.toStringAsFixed(2);
+    if (str.contains('.')) {
+      return str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return str;
+  }
+
   ({double cPerMl, double vialVolume}) _computeForUnits({
     required double S,
     required double D,
@@ -557,133 +566,298 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          // Center-aligned reconstitution summary with styled text only
-          Column(
+          const SizedBox(height: 16),
+          // Fine-tune buttons with syringe gauge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Main reconstitution instruction - centered with huge values
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                  ),
-                  children: [
-                    const TextSpan(text: 'Reconstitute '),
-                    TextSpan(
-                      text:
-                          '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w900,
+              // Decrement button
+              IconButton(
+                onPressed: () {
+                  final newValue = (_selectedUnits - 0.1).clamp(
+                    sliderMin,
+                    sliderMax,
+                  );
+                  setState(() {
+                    _selectedUnits = newValue;
+                    _selectedOption = null;
+                  });
+                },
+                icon: Icon(
+                  Icons.remove_circle_outline,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                tooltip: 'Decrease by 0.1 Units',
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      WhiteSyringeGauge(
+                        totalUnits: _syringe.totalUnits.toDouble(),
+                        fillUnits: _selectedUnits,
+                        interactive: true,
+                        maxConstraint: sliderMax,
+                        onMaxConstraintHit: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                vialMax != null
+                                    ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                    : 'Limited by syringe capacity',
+                              ),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        onChanged: (newValue) {
+                          final clampedValue = newValue.clamp(
+                            sliderMin,
+                            sliderMax,
+                          );
+                          setState(() {
+                            _selectedUnits = clampedValue;
+                            _selectedOption = null;
+                          });
+                        },
                       ),
+                      Positioned(
+                        top: -2,
+                        right: 0,
+                        child: Text(
+                          '${_syringe.label} Syringe',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontStyle: FontStyle.italic,
+                                fontSize: 11,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Increment button
+              IconButton(
+                onPressed: () {
+                  final newValue = (_selectedUnits + 0.1).clamp(
+                    sliderMin,
+                    sliderMax,
+                  );
+                  setState(() {
+                    _selectedUnits = newValue;
+                    _selectedOption = null;
+                  });
+                },
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                tooltip: 'Increase by 0.1 Units',
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Dark background reconstitution summary with text shadows
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                // First line: Reconstitute X of MEDNAME
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                    if (widget.medicationName != null &&
-                        widget.medicationName!.isNotEmpty) ...[
-                      const TextSpan(text: ' of '),
+                    children: [
+                      const TextSpan(text: 'Reconstitute '),
                       TextSpan(
-                        text: widget.medicationName,
+                        text:
+                            '${_formatNoTrailing(widget.initialStrengthValue)} ${widget.unitLabel}',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (widget.medicationName != null &&
+                          widget.medicationName!.isNotEmpty) ...[
+                        TextSpan(
+                          text: ' of ',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        TextSpan(
+                          text: widget.medicationName,
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Second line: with X mL of DILUENT
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    children: [
+                      const TextSpan(text: 'with '),
+                      TextSpan(
+                        text: '${_formatNoTrailing(currentV)} mL',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' of ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      TextSpan(
+                        text: _diluentNameCtrl.text.trim().isNotEmpty
+                            ? _diluentNameCtrl.text.trim()
+                            : 'diluent',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Draw instruction
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    children: [
+                      const TextSpan(text: 'Draw '),
+                      TextSpan(
+                        text: '${_formatNoTrailing(_selectedUnits)} Units',
+                        style: TextStyle(
+                          fontSize: 26,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const TextSpan(text: ' ('),
+                      TextSpan(
+                        text:
+                            '${_formatNoTrailing((_selectedUnits / 100) * _syringe.ml)} mL',
                         style: TextStyle(
                           fontSize: 22,
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
+                      const TextSpan(text: ')'),
                     ],
-                    const TextSpan(text: ' with '),
-                    TextSpan(
-                      text: '${currentV.toStringAsFixed(2)} mL',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    TextSpan(
-                      text: _diluentNameCtrl.text.trim().isNotEmpty
-                          ? ' of ${_diluentNameCtrl.text.trim()}'
-                          : ' of diluent',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 12),
+                // Syringe instruction
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    children: [
+                      const TextSpan(text: 'into a '),
+                      TextSpan(
+                        text: _syringe.label,
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const TextSpan(text: ' syringe'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Clarification text
+                Text(
+                  'This calculates reconstitution volume only.\nSet actual dose amounts in the scheduling screen.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.65),
+                    fontStyle: FontStyle.italic,
                     height: 1.4,
                   ),
-                  children: [
-                    const TextSpan(text: 'Draw '),
-                    TextSpan(
-                      text: '${_selectedUnits.toStringAsFixed(1)} Units',
-                      style: TextStyle(
-                        fontSize: 26,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const TextSpan(text: ' ('),
-                    TextSpan(
-                      text:
-                          '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const TextSpan(text: ')'),
-                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  children: [
-                    const TextSpan(text: 'into a '),
-                    TextSpan(
-                      text: _syringe.label,
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const TextSpan(text: ' syringe'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Clarification text
-              Text(
-                'This calculates reconstitution volume only.\nSet actual dose amounts in the scheduling screen.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.65),
-                  fontStyle: FontStyle.italic,
-                  height: 1.4,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 4),
         ],
