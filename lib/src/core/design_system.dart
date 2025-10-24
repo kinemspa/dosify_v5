@@ -1,11 +1,29 @@
-/// Design System - Dosifi v5
+/// ============================================================================
+/// DOSIFI V5 - UNIVERSAL DESIGN SYSTEM
+/// ============================================================================
 ///
-/// This file defines ALL UI styling standards for the entire app.
-/// Every screen MUST use these constants and helpers to ensure consistency.
+/// This is the SINGLE SOURCE OF TRUTH for ALL styling in the entire app.
 ///
-/// DO NOT create custom styling in individual pages - use these helpers instead.
+/// RULES:
+/// 1. NEVER create inline styles in pages/widgets
+/// 2. NEVER hardcode sizes, colors, fonts, spacing, opacity
+/// 3. ALWAYS use constants and builders from this file
+/// 4. ALWAYS import this file when creating UI
+///
+/// COVERAGE:
+/// - Sizing (heights, widths, constraints)
+/// - Spacing (padding, margins, gaps)
+/// - Typography (fonts, sizes, weights, line heights)
+/// - Colors (all semantic colors and opacity levels)
+/// - Borders (widths, radius, styles)
+/// - Decorations (input fields, containers, cards)
+/// - Buttons (all variants with consistent sizing)
+/// - Animations (durations, curves)
+/// - Alignment (all standard alignments)
 ///
 /// Reference implementation: med_editor_template_demo_page.dart
+///
+/// ============================================================================
 
 // Flutter imports:
 import 'package:flutter/material.dart';
@@ -14,39 +32,194 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 
 // ============================================================================
-// SPACING & SIZING CONSTANTS
+// SIZING CONSTANTS
 // ============================================================================
 
-/// Standard padding around page content
+/// Standard field height (ALL text fields, dropdowns, buttons)
+const double kStandardFieldHeight = kFieldHeight; // 36px
+
+/// Compact control width (date buttons, small dropdowns)
+const double kCompactControlWidth = 120;
+const double kCompactControlMinWidth = 120;
+const double kCompactControlMaxWidth = 240;
+
+/// Label column width in label-field rows
+const double kLabelColumnWidth = 120;
+
+/// Button sizing
+const double kStepperButtonSize = 28; // +/- buttons
+const double kIconButtonSize = 24;
+const double kStandardButtonHeight = 36;
+const double kLargeButtonHeight = 44;
+
+/// Icon sizes
+const double kIconSizeSmall = 16;
+const double kIconSizeMedium = 20;
+const double kIconSizeLarge = 24;
+
+/// Card/Container constraints
+const double kCardMinHeight = 48;
+const double kCardMaxWidth = 800;
+
+// ============================================================================
+// SPACING CONSTANTS
+// ============================================================================
+
+/// Page-level spacing
 const EdgeInsets kPagePadding = EdgeInsets.fromLTRB(16, 16, 16, 100);
+const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(16, 16, 16, 16);
+const double kPageHorizontalPadding = 16;
+const double kPageVerticalPadding = 16;
 
-/// Spacing between sections
+/// Section/card spacing
 const double kSectionSpacing = 12;
+const double kCardPadding = 12;
+const double kCardInnerSpacing = 8;
 
-/// Spacing between form rows
-const double kRowSpacing = 0; // Handled by LabelFieldRow
+/// Field spacing
+const double kFieldSpacing = 6; // Between label-field rows
+const double kFieldGroupSpacing = 12; // Between field groups
+const double kLabelFieldGap = 8; // Between label and field
 
-/// Helper text left padding (aligns with field start after label)
-const double kHelperTextLeftPadding = kLabelColWidth + 8;
-
-/// Helper text top padding
+/// Helper text spacing
+const double kHelperTextLeftPadding = kLabelColumnWidth + kLabelFieldGap;
 const double kHelperTextTopPadding = 2;
-
-/// Helper text bottom padding
 const double kHelperTextBottomPadding = 6;
+
+/// Button spacing
+const double kButtonSpacing = 8;
+const double kStepperButtonSpacing = 4; // Between stepper buttons
+
+/// List item spacing
+const double kListItemSpacing = 4;
+const double kListItemPadding = 8;
+
+/// Content padding (inside fields, buttons)
+const EdgeInsets kFieldContentPadding = EdgeInsets.symmetric(
+  horizontal: 12,
+  vertical: 8,
+);
+const EdgeInsets kButtonContentPadding = EdgeInsets.symmetric(
+  horizontal: 12,
+  vertical: 10,
+);
+const EdgeInsets kCompactButtonPadding = EdgeInsets.zero;
+
+// ============================================================================
+// BORDER CONSTANTS
+// ============================================================================
+
+/// Border widths
+const double kBorderWidthThin = kOutlineWidth; // 0.75px
+const double kBorderWidthMedium = 1.0;
+const double kBorderWidthThick = kFocusedOutlineWidth; // 2px
+
+/// Border radius
+const double kBorderRadiusSmall = 8;
+const double kBorderRadiusMedium = 12;
+const double kBorderRadiusLarge = 16;
+const double kBorderRadiusFull = 999; // Pill shape
+
+/// Standard border radius for fields, buttons, cards
+const Radius kStandardRadius = Radius.circular(kBorderRadiusMedium);
+const BorderRadius kStandardBorderRadius = BorderRadius.all(kStandardRadius);
 
 // ============================================================================
 // COLOR & OPACITY CONSTANTS
 // ============================================================================
 
-/// Helper text opacity
-const double kHelperTextOpacity = 0.75;
+/// Text opacity levels
+const double kOpacityFull = 1.0;
+const double kOpacityHigh = 0.87; // Primary text
+const double kOpacityMediumHigh = 0.85;
+const double kOpacityMedium = 0.75; // Helper text
+const double kOpacityMediumLow = 0.60; // Placeholder/hint
+const double kOpacityLow = 0.50; // Disabled text
+const double kOpacityVeryLow = 0.45; // Very muted
+const double kOpacityMinimal = 0.30; // Borders, dividers
 
-/// Disabled field opacity
-const double kDisabledOpacity = 0.5;
+/// Specific use case opacity
+const double kHelperTextOpacity = kOpacityMedium;
+const double kDisabledOpacity = kOpacityLow;
+const double kCardBorderOpacity = kOpacityLow;
+const double kHintTextOpacity = kOpacityMediumLow;
 
-/// Section card border opacity
-const double kCardBorderOpacity = 0.5;
+/// Color helper functions (NEVER use these - use theme colors)
+/// These are kept only for backward compatibility during migration
+@Deprecated('Use Theme.of(context).colorScheme instead')
+Color kTextPrimary(BuildContext c) => Theme.of(c).colorScheme.primary;
+@Deprecated('Use Theme.of(context).colorScheme instead')
+Color kTextDark(BuildContext c) => Theme.of(c).colorScheme.onSurface;
+@Deprecated('Use Theme.of(context).colorScheme instead')
+Color kTextError(BuildContext c) => Theme.of(c).colorScheme.error;
+
+// ============================================================================
+// TYPOGRAPHY CONSTANTS
+// ============================================================================
+
+/// Font sizes
+const double kFontSizeSmall = 11;
+const double kFontSizeMedium = 13;
+const double kFontSizeLarge = 15;
+const double kFontSizeXLarge = 17;
+
+/// Specific component font sizes
+const double kFontSizeInput = kInputFontSize; // 13
+const double kFontSizeHint = kHintFontSize; // 10.5
+const double kFontSizeHelper = kFontSizeSmall; // 11
+const double kFontSizeLabel = kFontSizeMedium; // 13
+const double kFontSizeTitle = kFontSizeLarge; // 15
+
+/// Font weights
+const FontWeight kFontWeightLight = FontWeight.w300;
+const FontWeight kFontWeightNormal = FontWeight.w400;
+const FontWeight kFontWeightMedium = FontWeight.w500;
+const FontWeight kFontWeightSemiBold = FontWeight.w600;
+const FontWeight kFontWeightBold = FontWeight.w700;
+const FontWeight kFontWeightExtraBold = FontWeight.w800;
+
+/// Line heights
+const double kLineHeightTight = 1.2;
+const double kLineHeightNormal = 1.4;
+const double kLineHeightRelaxed = 1.6;
+
+// ============================================================================
+// ANIMATION CONSTANTS
+// ============================================================================
+
+/// Animation durations
+const Duration kAnimationFast = Duration(milliseconds: 150);
+const Duration kAnimationNormal = Duration(milliseconds: 250);
+const Duration kAnimationSlow = Duration(milliseconds: 350);
+const Duration kAnimationVerySlow = Duration(milliseconds: 500);
+
+/// Animation curves
+const Curve kCurveDefault = Curves.easeInOut;
+const Curve kCurveEmphasized = Curves.easeInOutCubic;
+const Curve kCurveSnappy = Curves.easeOut;
+
+// ============================================================================
+// ELEVATION & SHADOW CONSTANTS
+// ============================================================================
+
+const double kElevationNone = 0;
+const double kElevationLow = 2;
+const double kElevationMedium = 4;
+const double kElevationHigh = 8;
+
+// ============================================================================
+// ALIGNMENT CONSTANTS
+// ============================================================================
+
+const Alignment kAlignTopLeft = Alignment.topLeft;
+const Alignment kAlignTopCenter = Alignment.topCenter;
+const Alignment kAlignTopRight = Alignment.topRight;
+const Alignment kAlignCenterLeft = Alignment.centerLeft;
+const Alignment kAlignCenter = Alignment.center;
+const Alignment kAlignCenterRight = Alignment.centerRight;
+const Alignment kAlignBottomLeft = Alignment.bottomLeft;
+const Alignment kAlignBottomCenter = Alignment.bottomCenter;
+const Alignment kAlignBottomRight = Alignment.bottomRight;
 
 // ============================================================================
 // FIELD DECORATION BUILDER
@@ -132,32 +305,119 @@ InputDecoration buildCompactFieldDecoration({
 /// Helper/support text style (used under form fields)
 TextStyle? helperTextStyle(BuildContext context, {Color? color}) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: color ??
-            Theme.of(context)
-                .colorScheme
-                .onSurfaceVariant
-                .withOpacity(kHelperTextOpacity),
-      );
+    color:
+        color ??
+        Theme.of(
+          context,
+        ).colorScheme.onSurfaceVariant.withOpacity(kHelperTextOpacity),
+  );
 }
 
 /// Checkbox label style
 TextStyle? checkboxLabelStyle(BuildContext context) {
-  return Theme.of(context).textTheme.bodyMedium;
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightNormal,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
+  );
 }
 
 /// Section title style
 TextStyle? sectionTitleStyle(BuildContext context) {
   return Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-      );
+    fontSize: kFontSizeLarge,
+    fontWeight: kFontWeightBold,
+    color: Theme.of(context).colorScheme.primary,
+  );
 }
 
 /// Field label style (in LabelFieldRow)
 TextStyle? fieldLabelStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
-        fontWeight: FontWeight.w500,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightBold,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMedium),
+  );
+}
+
+/// Input text style (typed text in fields)
+TextStyle? inputTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    fontSize: kFontSizeInput,
+    fontWeight: kFontWeightNormal,
+    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityHigh),
+  );
+}
+
+/// Hint text style (placeholder in empty fields)
+TextStyle? hintTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    fontSize: kFontSizeHint,
+    fontWeight: kFontWeightNormal,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withOpacity(kHintTextOpacity),
+  );
+}
+
+/// Button text style (text in buttons)
+TextStyle? buttonTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.labelLarge?.copyWith(
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightMedium,
+  );
+}
+
+/// Card title style
+TextStyle? cardTitleStyle(BuildContext context) {
+  return Theme.of(context).textTheme.titleSmall?.copyWith(
+    fontSize: kFontSizeLarge,
+    fontWeight: kFontWeightSemiBold,
+    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityHigh),
+  );
+}
+
+/// Body text style (general content)
+TextStyle? bodyTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightNormal,
+    height: kLineHeightNormal,
+    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityHigh),
+  );
+}
+
+/// Muted text style (secondary/disabled text)
+TextStyle? mutedTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    fontSize: kFontSizeSmall,
+    fontWeight: kFontWeightNormal,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withOpacity(kDisabledOpacity),
+  );
+}
+
+/// Error text style
+TextStyle? errorTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    fontSize: kFontSizeSmall,
+    fontWeight: kFontWeightMedium,
+    color: Theme.of(context).colorScheme.error,
+  );
+}
+
+/// Warning text style
+TextStyle? warningTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    fontSize: kFontSizeSmall,
+    fontWeight: kFontWeightMedium,
+    color: Colors.orange,
+  );
 }
 
 // ============================================================================
