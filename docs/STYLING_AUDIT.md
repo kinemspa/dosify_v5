@@ -29,8 +29,8 @@ The app has a design system (`lib/src/core/design_system.dart`) with centralized
 ## Files with Inline InputDecoration (25+ files)
 
 ### HIGH PRIORITY (User-facing forms)
-1. ✅ `med_editor_template_demo_page.dart` - **REFERENCE IMPLEMENTATION** (MUST FIX FIRST)
-2. ❌ `add_edit_tablet_general_page.dart` - Tablet form
+1. ✅ `med_editor_template_demo_page.dart` - **REFERENCE IMPLEMENTATION** ✅ COMPLETE
+2. ✅ `add_edit_tablet_general_page.dart` - Tablet form ✅ COMPLETE (1eee055)
 3. ❌ `add_edit_capsule_page.dart` - Capsule form
 4. ❌ `add_edit_injection_pfs_page.dart` - Pre-filled syringe form
 5. ❌ `add_edit_injection_single_vial_page.dart` - Single dose vial form
