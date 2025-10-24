@@ -228,7 +228,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
             setState(() => _strengthValueCtrl.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: buildCompactFieldDecoration(hint: '0'),
+          decoration: buildCompactFieldDecoration(context: context, hint: '0'),
         ),
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
@@ -302,7 +302,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
             setState(() => _stockValueCtrl.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: buildCompactFieldDecoration(hint: '0'),
+          decoration: buildCompactFieldDecoration(context: context, hint: '0'),
         ),
         stockHelp: _isMdv
             ? 'Track the number of unreconstituted sealed vials you have in storage'
@@ -335,7 +335,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
                   final maxStock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                   setState(() => _lowStockCtrl.text = (v + 1).clamp(0, maxStock).toString());
                 },
-                decoration: buildCompactFieldDecoration(hint: '0'),
+                decoration: buildCompactFieldDecoration(context: context, hint: '0'),
                 compact: true,
               )
             : null,

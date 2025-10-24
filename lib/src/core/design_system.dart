@@ -284,10 +284,27 @@ InputDecoration buildFieldDecoration(
 
 /// Simplified field decoration for compact controls (steppers, dropdowns)
 /// Used inside StepperRow36, SmallDropdown36, etc.
+/// 
+/// IMPORTANT: This MUST match buildFieldDecoration() borders exactly.
 InputDecoration buildCompactFieldDecoration({
+  BuildContext? context,
   String? hint,
   bool suppressError = true,
 }) {
+  // If no context provided, return minimal decoration (for backwards compatibility)
+  if (context == null) {
+    return InputDecoration(
+      hintText: hint,
+      isDense: false,
+      isCollapsed: false,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: kFieldHeight),
+      errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
+    );
+  }
+
+  // WITH context: use EXACT same borders as buildFieldDecoration()
+  final cs = Theme.of(context).colorScheme;
   return InputDecoration(
     hintText: hint,
     isDense: false,
@@ -295,6 +312,28 @@ InputDecoration buildCompactFieldDecoration({
     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     constraints: const BoxConstraints(minHeight: kFieldHeight),
     errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
+    filled: true,
+    fillColor: cs.surfaceContainerLowest,
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(
+        color: cs.outlineVariant.withOpacity(kCardBorderOpacity),
+        width: kOutlineWidth,
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
+    ),
   );
 }
 

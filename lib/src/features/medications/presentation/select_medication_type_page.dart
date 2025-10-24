@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -136,15 +137,15 @@ class _TypeTileState extends State<_TypeTile> {
                     children: [
                       Text(
                         widget.title,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
+                        style: bodyTextStyle(context)?.copyWith(
+                          fontWeight: kFontWeightBold,
                           color: titleColor,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         widget.subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(color: subtitleColor),
+                        style: mutedTextStyle(context)?.copyWith(color: subtitleColor),
                       ),
                     ],
                   ),
@@ -190,13 +191,16 @@ class _ScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
+                  style: bodyTextStyle(context)?.copyWith(
+                    fontWeight: kFontWeightBold,
                     color: cs.onPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: cs.onPrimary)),
+                Text(
+                  subtitle,
+                  style: mutedTextStyle(context)?.copyWith(color: cs.onPrimary),
+                ),
               ],
             ),
           ),
