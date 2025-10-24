@@ -447,7 +447,7 @@ After migrating a page, verify:
 ## Priority Pages to Migrate
 
 1. **High Priority:**
-   - add_edit_schedule_page.dart
+   - ✅ ~~add_edit_schedule_page.dart~~ (COMPLETED 2025-01-24)
    - schedule_summary_card.dart
    - Any user-facing form pages
 
@@ -458,6 +458,31 @@ After migrating a page, verify:
 3. **Low Priority:**
    - Debug pages
    - Internal tool pages
+
+---
+
+## Migration Log
+
+### add_edit_schedule_page.dart (2025-01-24)
+
+**Changes Made:**
+- Replaced custom `_rowLabelField()` method with standard `LabelFieldRow` from `unified_form.dart`
+- Updated increment button styling in `_incBtn()` to match `StepperRow36` pattern:
+  - Changed button size from 30x30 to 28x28
+  - Added standard outline border style with theme colors
+  - Updated font size to 13px (matching design system)
+- Updated button spacing from 6px to 4px (matching StepperRow36 pattern)
+- Kept custom `_helperBelowLeft()` method (no direct design system replacement for positioned helper text)
+- All existing `Field36` wrappers and `InputDecoration` patterns remain consistent
+- `SectionFormCard` usage already correct
+
+**Result:**
+- All label-field rows now use unified styling
+- Increment buttons match design system dimensions and styling
+- Consistent spacing throughout the form
+- No breaking changes to functionality
+
+**Commit:** `6eddb14`
 
 ---
 
