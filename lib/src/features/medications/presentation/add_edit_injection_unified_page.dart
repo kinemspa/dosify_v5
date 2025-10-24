@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -197,63 +198,6 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
     }
   }
 
-  InputDecoration _dec(BuildContext context, String label, String? hint) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
-      // Keep height stable when error by suppressing the default error line
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
-  }
-
-  InputDecoration _decDrop(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
-      ),
-    );
-  }
-
   String _baseUnit(Unit u) {
     if (u == Unit.mcg || u == Unit.mcgPerMl) return 'mcg';
     if (u == Unit.mg || u == Unit.mgPerMl) return 'mg';
@@ -335,7 +279,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           child: TextFormField(
                             controller: _name,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(context, 'Name *', 'eg. AcmeTab-500'),
+                            decoration: buildFieldDecoration(context, hint: 'eg. AcmeTab-500'),
                           ),
                         ),
                       ),
@@ -354,7 +298,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           child: TextFormField(
                             controller: _manufacturer,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(context, 'Manufacturer', 'eg. Contoso Pharma'),
+                            decoration: buildFieldDecoration(context, hint: 'eg. Contoso Pharma'),
                           ),
                         ),
                       ),
@@ -373,7 +317,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           child: TextFormField(
                             controller: _description,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(context, 'Description', 'eg. Pain relief'),
+                            decoration: buildFieldDecoration(context, hint: 'eg. Pain relief'),
                           ),
                         ),
                       ),
@@ -394,7 +338,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           minLines: 2,
                           maxLines: null,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(context, 'Notes', 'eg. Take with food'),
+                          decoration: buildFieldDecoration(context, hint: 'eg. Take with food'),
                         ),
                       ),
                       Padding(
@@ -427,7 +371,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                             _strength.text = (v + 1).clamp(0, 1000000).toString();
                             setState(() {});
                           },
-                          decoration: _dec(context, 'Strength *', '0'),
+                          decoration: buildCompactFieldDecoration(hint: '0'),
                         ),
                       ),
                       LabelFieldRow(
@@ -470,7 +414,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                             ),
                           ],
                           onChanged: (v) => setState(() => _strengthUnit = v ?? Unit.mg),
-                          decoration: _decDrop(context),
+                          decoration: buildCompactFieldDecoration(),
                         ),
                       ),
                       if (_isPerMl)
@@ -488,7 +432,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                               _perMl.text = (v + 1).clamp(0, 1000000).toStringAsFixed(0);
                               setState(() {});
                             },
-                            decoration: _dec(context, 'Per mL', '0'),
+                            decoration: buildCompactFieldDecoration(hint: '0'),
                           ),
                         ),
                       if (_isPerMl)
@@ -801,7 +745,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                                       () => _vialVolume.text = (v + 1).clamp(0, 1000000).toString(),
                                     );
                                   },
-                                  decoration: _dec(context, 'Vial volume (mL)', '0'),
+                                  decoration: buildCompactFieldDecoration(hint: '0'),
                                 ),
                               ),
                               Padding(
@@ -860,7 +804,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                             _stock.text = (v + 1).clamp(0, 1000000).toString();
                             setState(() {});
                           },
-                          decoration: _dec(context, 'Stock quantity *', '0'),
+                          decoration: buildCompactFieldDecoration(hint: '0'),
                         ),
                       ),
                       Padding(
@@ -920,7 +864,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           child: TextFormField(
                             controller: _batch,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(context, 'Batch No.', 'Enter batch number'),
+                            decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
                           ),
                         ),
                       ),
@@ -939,7 +883,7 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           child: TextFormField(
                             controller: _location,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(context, 'Location', 'eg. Bathroom cabinet'),
+                            decoration: buildFieldDecoration(context, hint: 'eg. Bathroom cabinet'),
                           ),
                         ),
                       ),
@@ -1034,10 +978,9 @@ class _AddEditInjectionUnifiedPageState extends ConsumerState<AddEditInjectionUn
                           child: TextFormField(
                             controller: _storageNotes,
                             style: Theme.of(context).textTheme.bodyMedium,
-                            decoration: _dec(
+                            decoration: buildFieldDecoration(
                               context,
-                              'Storage instructions',
-                              'Enter storage instructions',
+                              hint: 'Enter storage instructions',
                             ),
                           ),
                         ),
