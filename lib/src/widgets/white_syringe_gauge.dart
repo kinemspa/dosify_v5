@@ -184,8 +184,9 @@ class _WhiteSyringePainter extends CustomPainter {
 
       canvas.drawLine(Offset(x, tickTop), Offset(x, baselineY), tickPaint);
 
-      // Draw labels - all ticks get labels (already properly spaced by tickInterval)
-      if (true) {
+      // Draw labels: ONLY major (50U/100U) and minor (10U) ticks
+      // This prevents overlap on all syringes
+      if (isMajor || isMinor) {
         final tp = TextPainter(
           text: TextSpan(
             text: units.toStringAsFixed(0),
