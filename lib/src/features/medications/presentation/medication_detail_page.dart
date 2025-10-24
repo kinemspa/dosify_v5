@@ -45,18 +45,16 @@ class MedicationDetailPage extends StatelessWidget {
           children: [
             Text(
               label,
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: fieldLabelStyle(context)?.copyWith(
                 color: cs.primary,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: bodyTextStyle(context)?.copyWith(
                 color: cs.onSurface,
-                height: 1.4,
+                height: kLineHeightNormal,
               ),
             ),
           ],
@@ -320,10 +318,7 @@ Widget _modernSection(
               const SizedBox(width: 8),
               Text(
                 title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: cs.primary,
-                ),
+                style: sectionTitleStyle(context),
               ),
             ],
           ),
