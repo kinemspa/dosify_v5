@@ -61,7 +61,7 @@ class _Tile extends StatelessWidget {
   final String title;
   final String subtitle;
   final String route;
-  final bool primary;
+  final bool primary = false;
 
   @override
   Widget build(BuildContext context) {

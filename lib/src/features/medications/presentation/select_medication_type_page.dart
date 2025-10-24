@@ -63,7 +63,7 @@ class _TypeTile extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool primary;
+  final bool primary = false;
 
   @override
   State<_TypeTile> createState() => _TypeTileState();

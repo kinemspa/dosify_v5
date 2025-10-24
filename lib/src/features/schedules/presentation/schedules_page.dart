@@ -588,7 +588,7 @@ Future<bool> _applyStockDecrement(BuildContext context, Schedule s) async {
     return false;
   }
 
-  var delta = 0; // amount to subtract from stockValue
+  var delta = 0.0; // amount to subtract from stockValue
 
   switch (med.stockUnit) {
     case StockUnit.tablets:
@@ -628,7 +628,7 @@ Future<bool> _applyStockDecrement(BuildContext context, Schedule s) async {
     case StockUnit.multiDoseVials:
       // Subtract as a fraction of a vial based on volume vs containerVolumeMl if we know volume
       final containerMl = med.containerVolumeMl ?? 0;
-      var usedMl = 0;
+      var usedMl = 0.0;
       if (s.doseVolumeMicroliter != null) {
         usedMl = s.doseVolumeMicroliter! / 1000.0;
       } else if (s.doseMassMcg != null) {
