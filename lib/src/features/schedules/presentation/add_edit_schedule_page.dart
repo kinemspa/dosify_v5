@@ -93,7 +93,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         ? ScheduleMode.daysOnOff
         : (_daysOfMonth.isNotEmpty
               ? ScheduleMode.daysOfMonth
-              : (_days.length == 7 ? ScheduleMode.everyDay : ScheduleMode.daysOfWeek));
+              : (_days.length == 7
+                    ? ScheduleMode.everyDay
+                    : ScheduleMode.daysOfWeek));
 
     _name.addListener(() {
       // If user edits name manually, stop auto-updating
@@ -113,7 +115,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   }
 
   Future<void> _pickTimeAt(int index) async {
-    final picked = await showTimePicker(context: context, initialTime: _times[index]);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _times[index],
+    );
     if (picked != null) setState(() => _times[index] = picked);
   }
 
@@ -193,7 +198,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       }
     }
 
-    final id = widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
+    final id =
+        widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
     final minutesList = _times.map((t) => t.hour * 60 + t.minute).toList();
 
     // Compute UTC fields from the first time and days as legacy, plus per-time UTC list
@@ -421,7 +427,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       cycleAnchorDate: _useCycle
           ? DateTime(_cycleAnchor.year, _cycleAnchor.month, _cycleAnchor.day)
           : null,
-      daysOfMonth: _daysOfMonth.isNotEmpty ? (_daysOfMonth.toList()..sort()) : null,
+      daysOfMonth: _daysOfMonth.isNotEmpty
+          ? (_daysOfMonth.toList()..sort())
+          : null,
       doseUnitCode: doseUnitCode,
       doseMassMcg: doseMassMcg,
       doseVolumeMicroliter: doseVolumeMicroliter,
@@ -440,7 +448,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     final granted = await NotificationService.ensurePermissionGranted();
     if (!granted && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enable notifications to receive schedule alerts.')),
+        const SnackBar(
+          content: Text('Enable notifications to receive schedule alerts.'),
+        ),
       );
     }
 
@@ -459,12 +469,17 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Later')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Later'),
+            ),
             FilledButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 if (!enabled) {
-                  await NotificationService.openChannelSettings('upcoming_dose');
+                  await NotificationService.openChannelSettings(
+                    'upcoming_dose',
+                  );
                 }
                 if (!canExact) {
                   await NotificationService.openExactAlarmsSettings();
@@ -493,7 +508,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               'To schedule exact reminders, enable Alarms & reminders permission for Dosifi.',
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
               FilledButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
@@ -513,7 +531,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         title: const Text('Schedule saved'),
         content: const Text('Your reminder has been saved.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
@@ -523,36 +544,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     }
   }
 
-  Widget _section(BuildContext context, String title, List<Widget> children, {Widget? trailing}) {
-    return SectionFormCard(title: title, trailing: trailing, children: children);
-  }
-
-  Widget _rowLabelField(BuildContext context, {required String label, required Widget field}) {
-    final width = MediaQuery.of(context).size.width;
-    final labelWidth = width >= 400 ? 120.0 : 110.0;
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          SizedBox(
-            width: labelWidth,
-            height: 36,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: field),
-        ],
-      ),
+  Widget _section(
+    BuildContext context,
+    String title,
+    List<Widget> children, {
+    Widget? trailing,
+  }) {
+    return SectionFormCard(
+      title: title,
+      trailing: trailing,
+      children: children,
     );
   }
 
@@ -564,24 +565,31 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
         ),
       ),
     );
   }
 
   Widget _incBtn(String symbol, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return SizedBox(
-      height: 30,
-      width: 30,
+      height: 28,
+      width: 28,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
-          minimumSize: const Size(30, 30),
+          minimumSize: const Size(28, 28),
+          side: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
         onPressed: onTap,
-        child: Text(symbol),
+        child: Text(
+          symbol,
+          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+        ),
       ),
     );
   }
@@ -624,9 +632,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 await box.delete(widget.initial!.id);
                 if (!mounted) return;
                 context.go('/schedules');
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Deleted "${widget.initial!.name}"')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Deleted "${widget.initial!.name}"')),
+                );
               },
               icon: const Icon(Icons.delete_outline),
             ),
@@ -647,8 +655,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
               children: [
                 _section(context, 'Medication', [
                   // Medication row with label
-                  _rowLabelField(
-                    context,
+                  LabelFieldRow(
                     label: 'Medication',
                     field: _selectedMed != null
                         ? _MedicationSummaryDisplay(
@@ -658,14 +665,20 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               _medicationId = null;
                               _medicationName.clear();
                             }),
-                            onExpand: () => setState(() => _showMedSelector = !_showMedSelector),
+                            onExpand: () => setState(
+                              () => _showMedSelector = !_showMedSelector,
+                            ),
                             isExpanded: _showMedSelector,
                           )
                         : OutlinedButton(
-                            onPressed: () => setState(() => _showMedSelector = true),
+                            onPressed: () =>
+                                setState(() => _showMedSelector = true),
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size.fromHeight(36),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                             ),
                             child: Text(
                               'Select Medication',
@@ -694,8 +707,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                 // Dose controls (Typed) in a card with summary
                 if (_selectedMed != null)
                   _section(context, 'Dose', [
-                    _rowLabelField(
-                      context,
+                    LabelFieldRow(
                       label: 'Dose value',
                       field: SizedBox(
                         height: 36,
@@ -706,7 +718,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               final unit = _doseUnit.text.trim().toLowerCase();
                               // Smart step: 0.25 for tablets, 1.0 for everything else
                               final step = unit == 'tablets' ? 0.25 : 1.0;
-                              final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                              final v =
+                                  double.tryParse(_doseValue.text.trim()) ??
+                                  0.0;
                               final nv = (v - step).clamp(0, 1e12);
                               setState(() {
                                 _doseValue.text = (unit == 'tablets')
@@ -716,16 +730,22 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                 _maybeAutoName();
                               });
                             }),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 4),
                             SizedBox(
                               width: 120,
                               child: Field36(
                                 child: TextFormField(
                                   controller: _doseValue,
                                   textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(labelText: ''),
-                                  keyboardType: (_doseUnit.text.trim().toLowerCase() == 'tablets')
-                                      ? const TextInputType.numberWithOptions(decimal: true)
+                                  decoration: const InputDecoration(
+                                    labelText: '',
+                                  ),
+                                  keyboardType:
+                                      (_doseUnit.text.trim().toLowerCase() ==
+                                          'tablets')
+                                      ? const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        )
                                       : TextInputType.number,
                                   onChanged: (_) {
                                     _coerceDoseValueForUnit();
@@ -734,14 +754,23 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                   },
                                   validator: (v) {
                                     final d = double.tryParse(v?.trim() ?? '');
-                                    if (d == null || d <= 0) return 'Enter a positive number';
-                                    final unit = _doseUnit.text.trim().toLowerCase();
-                                    if (['capsules', 'syringes', 'vials'].contains(unit)) {
-                                      if (d % 1 != 0) return 'Whole numbers only';
+                                    if (d == null || d <= 0)
+                                      return 'Enter a positive number';
+                                    final unit = _doseUnit.text
+                                        .trim()
+                                        .toLowerCase();
+                                    if ([
+                                      'capsules',
+                                      'syringes',
+                                      'vials',
+                                    ].contains(unit)) {
+                                      if (d % 1 != 0)
+                                        return 'Whole numbers only';
                                     }
                                     if (unit == 'tablets') {
                                       final q = (d * 4).roundToDouble();
-                                      if ((q - d * 4).abs() > 1e-6 && d % 0.25 != 0) {
+                                      if ((q - d * 4).abs() > 1e-6 &&
+                                          d % 0.25 != 0) {
                                         return 'Use quarter-tablet steps (0.25)';
                                       }
                                     }
@@ -750,12 +779,14 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 4),
                             _incBtn('+', () {
                               final unit = _doseUnit.text.trim().toLowerCase();
                               // Smart step: 0.25 for tablets, 1.0 for everything else
                               final step = unit == 'tablets' ? 0.25 : 1.0;
-                              final v = double.tryParse(_doseValue.text.trim()) ?? 0.0;
+                              final v =
+                                  double.tryParse(_doseValue.text.trim()) ??
+                                  0.0;
                               final nv = (v + step).clamp(0, 1e12);
                               setState(() {
                                 _doseValue.text = (unit == 'tablets')
@@ -769,15 +800,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         ),
                       ),
                     ),
-                    _rowLabelField(
-                      context,
+                    LabelFieldRow(
                       label: 'Unit',
                       field: Align(
                         child: SizedBox(
                           height: kFieldHeight,
                           width: 120,
                           child: DropdownButtonFormField<String>(
-                            initialValue: _doseUnit.text.isEmpty ? null : _doseUnit.text,
+                            initialValue: _doseUnit.text.isEmpty
+                                ? null
+                                : _doseUnit.text,
                             alignment: AlignmentDirectional.center,
                             decoration: const InputDecoration(labelText: ''),
                             items: _doseUnitOptions()
@@ -786,7 +818,12 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                     value: e,
                                     alignment: AlignmentDirectional.center,
                                     child: Center(
-                                      child: Text(e, style: Theme.of(context).textTheme.bodyMedium),
+                                      child: Text(
+                                        e,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
                                     ),
                                   ),
                                 )
@@ -798,12 +835,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                 _maybeAutoName();
                               });
                             },
-                            validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Required'
+                                : null,
                           ),
                         ),
                       ),
                     ),
-                    _helperBelowLeft('Enter dose amount and unit (tablets allow 0.25 steps)'),
+                    _helperBelowLeft(
+                      'Enter dose amount and unit (tablets allow 0.25 steps)',
+                    ),
                   ]),
                 const SizedBox(height: 10),
                 if (_selectedMed != null)
@@ -811,15 +852,19 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                     Column(
                       children: [
                         // 1. Choose schedule type
-                        _rowLabelField(
-                          context,
+                        LabelFieldRow(
                           label: 'Schedule type',
                           field: DropdownButtonFormField<ScheduleMode>(
                             initialValue: _mode,
                             isExpanded: true,
                             decoration: const InputDecoration(labelText: ''),
                             items: ScheduleMode.values
-                                .map((m) => DropdownMenuItem(value: m, child: Text(_modeLabel(m))))
+                                .map(
+                                  (m) => DropdownMenuItem(
+                                    value: m,
+                                    child: Text(_modeLabel(m)),
+                                  ),
+                                )
                                 .toList(),
                             onChanged: (m) {
                               if (m == null) return;
@@ -843,7 +888,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                 } else if (_mode == ScheduleMode.daysOfMonth) {
                                   _useCycle = false;
                                   if (_daysOfMonth.isEmpty) {
-                                    _daysOfMonth.addAll([1]); // Default to 1st of month
+                                    _daysOfMonth.addAll([
+                                      1,
+                                    ]); // Default to 1st of month
                                   }
                                 }
                               });
@@ -852,8 +899,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         ),
                         _helperBelowLeft(_getScheduleModeDescription(_mode)),
                         // 2. Select start date
-                        _rowLabelField(
-                          context,
+                        LabelFieldRow(
                           label: 'Start date',
                           field: Field36(
                             width: 120,
@@ -866,17 +912,22 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                   lastDate: DateTime(now.year + 10),
                                   initialDate: _startDate,
                                 );
-                                if (picked != null) setState(() => _startDate = picked);
+                                if (picked != null)
+                                  setState(() => _startDate = picked);
                               },
                               icon: const Icon(Icons.calendar_today, size: 18),
-                              label: Text('${_startDate.toLocal()}'.split(' ').first),
+                              label: Text(
+                                '${_startDate.toLocal()}'.split(' ').first,
+                              ),
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(120, kFieldHeight),
                               ),
                             ),
                           ),
                         ),
-                        _helperBelowLeft('Select when this schedule should start'),
+                        _helperBelowLeft(
+                          'Select when this schedule should start',
+                        ),
                         // 3. Select days/months based on mode
                         // Days/months selection section
                         if (_mode == ScheduleMode.daysOfWeek) ...[
@@ -888,20 +939,34 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               runSpacing: 8,
                               children: List.generate(7, (i) {
                                 final dayIndex = i + 1; // 1..7
-                                const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                const labels = [
+                                  'Mon',
+                                  'Tue',
+                                  'Wed',
+                                  'Thu',
+                                  'Fri',
+                                  'Sat',
+                                  'Sun',
+                                ];
                                 final selected = _days.contains(dayIndex);
                                 return FilterChip(
                                   label: Text(
                                     labels[i],
                                     style: TextStyle(
-                                      color: selected ? theme.colorScheme.onPrimary : null,
+                                      color: selected
+                                          ? theme.colorScheme.onPrimary
+                                          : null,
                                     ),
                                   ),
                                   showCheckmark: false,
                                   selectedColor: theme.colorScheme.primary,
                                   visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   selected: selected,
                                   onSelected: (sel) {
                                     setState(() {
@@ -918,8 +983,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                           ),
                         ],
                         if (_mode == ScheduleMode.daysOnOff) ...[
-                          _rowLabelField(
-                            context,
+                          LabelFieldRow(
                             label: 'Days on',
                             field: SizedBox(
                               width: 120,
@@ -928,13 +992,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                 child: TextFormField(
                                   controller: _daysOn,
                                   textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(labelText: ''),
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                    
+                                  decoration: const InputDecoration(
+                                    labelText: '',
                                   ),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(),
                                   validator: (v) {
                                     final n = int.tryParse(v?.trim() ?? '');
-                                    if (_mode == ScheduleMode.daysOnOff && (n == null || n < 1)) {
+                                    if (_mode == ScheduleMode.daysOnOff &&
+                                        (n == null || n < 1)) {
                                       return '>= 1';
                                     }
                                     return null;
@@ -944,8 +1010,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               ),
                             ),
                           ),
-                          _rowLabelField(
-                            context,
+                          LabelFieldRow(
                             label: 'Days off',
                             field: SizedBox(
                               width: 120,
@@ -954,13 +1019,15 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                 child: TextFormField(
                                   controller: _daysOff,
                                   textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(labelText: ''),
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                    
+                                  decoration: const InputDecoration(
+                                    labelText: '',
                                   ),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(),
                                   validator: (v) {
                                     final n = int.tryParse(v?.trim() ?? '');
-                                    if (_mode == ScheduleMode.daysOnOff && (n == null || n < 1)) {
+                                    if (_mode == ScheduleMode.daysOnOff &&
+                                        (n == null || n < 1)) {
                                       return '>= 1';
                                     }
                                     return null;
@@ -988,15 +1055,21 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                   label: Text(
                                     '$day',
                                     style: TextStyle(
-                                      color: selected ? theme.colorScheme.onPrimary : null,
+                                      color: selected
+                                          ? theme.colorScheme.onPrimary
+                                          : null,
                                       fontSize: 12,
                                     ),
                                   ),
                                   showCheckmark: false,
                                   selectedColor: theme.colorScheme.primary,
                                   visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 2,
+                                  ),
                                   selected: selected,
                                   onSelected: (sel) {
                                     setState(() {
@@ -1014,8 +1087,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         ],
                         // 4. Add dosing times
                         const SizedBox(height: 8),
-                        _rowLabelField(
-                          context,
+                        LabelFieldRow(
                           label: 'Time 1',
                           field: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1031,10 +1103,18 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                         width: 120,
                                         child: FilledButton.icon(
                                           onPressed: () => _pickTimeAt(i),
-                                          icon: const Icon(Icons.schedule, size: 18),
-                                          label: Text(_times[i].format(context)),
+                                          icon: const Icon(
+                                            Icons.schedule,
+                                            size: 18,
+                                          ),
+                                          label: Text(
+                                            _times[i].format(context),
+                                          ),
                                           style: FilledButton.styleFrom(
-                                            minimumSize: const Size(120, kFieldHeight),
+                                            minimumSize: const Size(
+                                              120,
+                                              kFieldHeight,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -1042,9 +1122,14 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                       if (_times.length > 1)
                                         IconButton(
                                           tooltip: 'Remove',
-                                          onPressed: () => setState(() => _times.removeAt(i)),
+                                          onPressed: () => setState(
+                                            () => _times.removeAt(i),
+                                          ),
                                           visualDensity: VisualDensity.compact,
-                                          icon: const Icon(Icons.remove_circle_outline, size: 18),
+                                          icon: const Icon(
+                                            Icons.remove_circle_outline,
+                                            size: 18,
+                                          ),
                                         ),
                                     ],
                                   );
@@ -1052,7 +1137,8 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                               ),
                               const SizedBox(height: 8),
                               OutlinedButton.icon(
-                                onPressed: () => setState(() => _times.add(_times.last)),
+                                onPressed: () =>
+                                    setState(() => _times.add(_times.last)),
                                 icon: const Icon(Icons.add),
                                 label: const Text('Add time'),
                               ),
@@ -1061,8 +1147,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                         ),
                         _helperBelowLeft('Add one or more dosing times'),
                         // 5. Select end date
-                        _rowLabelField(
-                          context,
+                        LabelFieldRow(
                           label: 'End date',
                           field: Row(
                             children: [
@@ -1090,7 +1175,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                                   label: Text(
                                     _noEnd || _endDate == null
                                         ? 'No end'
-                                        : '${_endDate!.toLocal()}'.split(' ').first,
+                                        : '${_endDate!.toLocal()}'
+                                              .split(' ')
+                                              .first,
                                   ),
                                   style: FilledButton.styleFrom(
                                     minimumSize: const Size(120, kFieldHeight),
@@ -1109,7 +1196,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                             ],
                           ),
                         ),
-                        _helperBelowLeft('Optional end date (or leave as No end)'),
+                        _helperBelowLeft(
+                          'Optional end date (or leave as No end)',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -1168,7 +1257,16 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   List<String> _doseUnitOptions() {
     final med = _selectedMed;
     if (med == null) {
-      return const ['mg', 'mcg', 'g', 'tablets', 'capsules', 'syringes', 'vials', 'IU'];
+      return const [
+        'mg',
+        'mcg',
+        'g',
+        'tablets',
+        'capsules',
+        'syringes',
+        'vials',
+        'IU',
+      ];
     }
     switch (med.form) {
       case MedicationForm.tablet:
@@ -1191,7 +1289,9 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     if (unit == 'tablets') {
       // Round to nearest quarter tablet
       final q = (val * 4).round() / 4.0;
-      _doseValue.text = q.toStringAsFixed(q % 1 == 0 ? 0 : (q * 4 % 1 == 0 ? 2 : 2));
+      _doseValue.text = q.toStringAsFixed(
+        q % 1 == 0 ? 0 : (q * 4 % 1 == 0 ? 2 : 2),
+      );
     } else if (['capsules', 'syringes', 'vials'].contains(unit)) {
       _doseValue.text = val.round().toString();
     }
@@ -1223,7 +1323,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     final doseVal = double.tryParse(_doseValue.text.trim());
     final doseUnitText = _doseUnit.text.trim();
 
-    if (doseVal == null || doseVal <= 0 || doseUnitText.isEmpty || _times.isEmpty) {
+    if (doseVal == null ||
+        doseVal <= 0 ||
+        doseUnitText.isEmpty ||
+        _times.isEmpty) {
       return null;
     }
 
@@ -1386,7 +1489,10 @@ class _MedicationSummaryDisplay extends StatelessWidget {
 
 // Inline medication selector showing all medications in a scrollable list
 class _InlineMedicationSelector extends StatelessWidget {
-  const _InlineMedicationSelector({required this.onSelect, required this.onCancel});
+  const _InlineMedicationSelector({
+    required this.onSelect,
+    required this.onCancel,
+  });
 
   final void Function(Medication) onSelect;
   final VoidCallback onCancel;
@@ -1458,11 +1564,17 @@ class _InlineMedicationSelector extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(Icons.inbox_outlined, size: 48, color: cs.onSurfaceVariant.withValues(alpha: 0.5)),
+            Icon(
+              Icons.inbox_outlined,
+              size: 48,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 12),
             Text(
               'No medications saved yet',
-              style: theme.textTheme.titleMedium?.copyWith(color: cs.onSurfaceVariant),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1511,14 +1623,18 @@ class _InlineMedicationSelector extends StatelessWidget {
             } else {
               stockColor = cs.primary;
             }
-          } else if (med.lowStockEnabled && med.stockValue <= (med.lowStockThreshold ?? 0)) {
+          } else if (med.lowStockEnabled &&
+              med.stockValue <= (med.lowStockThreshold ?? 0)) {
             stockColor = cs.error;
           } else {
             stockColor = cs.onSurface;
           }
 
           return ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 4,
+            ),
             title: RichText(
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1532,7 +1648,9 @@ class _InlineMedicationSelector extends StatelessWidget {
                   if (med.manufacturer != null && med.manufacturer!.isNotEmpty)
                     TextSpan(
                       text: '  •  ${med.manufacturer!}',
-                      style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                 ],
               ),
@@ -1562,9 +1680,15 @@ class _InlineMedicationSelector extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: _formatStock(med),
-                              style: TextStyle(fontWeight: FontWeight.w800, color: stockColor),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: stockColor,
+                              ),
                             ),
-                            TextSpan(text: '/${_formatStock(med)} ${_getUnitName(med.form)}'),
+                            TextSpan(
+                              text:
+                                  '/${_formatStock(med)} ${_getUnitName(med.form)}',
+                            ),
                           ],
                         ),
                         maxLines: 1,
@@ -1578,7 +1702,9 @@ class _InlineMedicationSelector extends StatelessWidget {
                           _formatDateDdMm(med.expiry!),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color:
-                                med.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)))
+                                med.expiry!.isBefore(
+                                  DateTime.now().add(const Duration(days: 30)),
+                                )
                                 ? cs.error
                                 : cs.onSurfaceVariant.withValues(alpha: 0.75),
                           ),
