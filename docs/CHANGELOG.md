@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- Multi-dose vial: Vial volume field now restricts manual input to 2 decimal places while maintaining 0.5 increment/decrement steps via +/- buttons (improved validation without breaking user workflow)
 - Schedules: Enhanced Add/Edit Schedule screen with custom floating summary card
   - Created custom ScheduleSummaryCard widget specifically for schedules (doesn't affect medication screens)
   - Card floats at top of screen using Stack/Positioned layout
