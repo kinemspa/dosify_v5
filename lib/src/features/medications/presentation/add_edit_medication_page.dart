@@ -153,6 +153,21 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
     _ => u.name,
   };
 
+  String _getStrengthHelp() {
+    return switch (widget.form) {
+      MedicationForm.tablet =>
+        'Enter the active ingredient amount per tablet (e.g., 500 mg). This is usually printed on the packaging.',
+      MedicationForm.capsule =>
+        'Enter the active ingredient amount per capsule (e.g., 250 mg). Check the label or packaging.',
+      MedicationForm.injectionPreFilledSyringe =>
+        'Enter the total drug concentration (e.g., 100 mg/mL). For ready-to-use syringes, use mg/mL units.',
+      MedicationForm.injectionSingleDoseVial =>
+        'Enter the total amount in the vial (e.g., 50 mg) or concentration (e.g., 10 mg/mL) as printed on the label.',
+      MedicationForm.injectionMultiDoseVial =>
+        'Enter the total drug amount in the vial (e.g., 1000 mg). This is the amount BEFORE reconstitution.',
+    };
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -272,8 +287,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           ],
           onChanged: (v) => setState(() => _strengthUnit = v ?? _strengthUnit),
         ),
-        strengthHelp:
-            'Specify the amount per ${_formLabel.toLowerCase()} and its unit of measurement.',
+        strengthHelp: _getStrengthHelp(),
 
         // MDV Volume & Reconstitution section (only for multi-dose vials)
         mdvSection: _isMdv
