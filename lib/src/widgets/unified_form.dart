@@ -78,10 +78,7 @@ class SectionFormCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.primary,
-                  ),
+                  style: sectionTitleStyle(context),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -117,11 +114,7 @@ class LabelFieldRow extends StatelessWidget {
             width: labelWidth,
             child: Text(
               label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-              ),
+              style: fieldLabelStyle(context),
             ),
           ),
           const SizedBox(width: 8),
@@ -217,7 +210,7 @@ class SmallDropdown36<T> extends StatelessWidget {
                 initialValue: value,
                 isExpanded: true,
                 alignment: AlignmentDirectional.center,
-                style: theme.textTheme.bodyMedium,
+                style: bodyTextStyle(context),
                 items: items,
                 onChanged: onChanged,
                 icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
@@ -238,7 +231,7 @@ class SmallDropdown36<T> extends StatelessWidget {
           initialValue: value,
           isExpanded: true,
           alignment: AlignmentDirectional.center,
-          style: theme.textTheme.bodyMedium,
+          style: bodyTextStyle(context),
           items: items,
           onChanged: onChanged,
           icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
@@ -416,9 +409,7 @@ class StepperRow36 extends StatelessWidget {
               child: Field36(
                 child: Builder(
                   builder: (context) {
-                    final theme = Theme.of(context);
-                    final base = theme.textTheme.bodyMedium;
-                    final style = compact ? base?.copyWith(fontSize: kInputFontSize) : base;
+                    final style = compact ? inputTextStyle(context) : bodyTextStyle(context);
                     return TextFormField(
                       controller: controller,
                       textAlign: TextAlign.center,
