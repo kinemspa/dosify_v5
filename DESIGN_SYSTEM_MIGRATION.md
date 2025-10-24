@@ -58,10 +58,19 @@ Migration of all medication form pages to use centralized design system (`design
   - Unified page for PFS, single, and multi-dose vials
   - **Note**: File has pre-existing errors (unrelated to styling refactoring)
 
+### 7. unified_add_edit_medication_page.dart
+- **Status**: ✅ Complete
+- **Commit**: `0d59036`
+- **Changes**:
+  - Replaced custom `_dec()` and `_decDrop()` methods
+  - All fields migrated to design system decorations
+  - Removed 42 lines of duplicate code
+  - Removed references to undefined `_touched*` variables
+  - **Note**: File has pre-existing error with undefined `_submitted` variable
+
 ## Remaining Pages 🔄
 
-### High Priority
-- `unified_add_edit_medication_page.dart` - 11 `_dec()` usages
+### Medium Priority
 - `add_tablet_debug_page.dart` - 11 `_dec()` usages
 
 ### Medium Priority
@@ -91,10 +100,11 @@ decoration: buildCompactFieldDecoration(hint: '0'),
 ```
 
 ## Quality Metrics
-- **Files Migrated**: 6
-- **Lines Removed**: ~291 lines of duplicate code
+- **Files Migrated**: 7
+- **Lines Removed**: ~333 lines of duplicate code
 - **Errors Fixed**: 3 (syntax error, 2x deprecated API)
-- **Test Coverage**: All migrated pages compile successfully
+- **Code Quality**: Removed undefined variable references
+- **Consistency**: All medication forms now use unified styling
 
 ## Next Steps
 1. Continue migrating remaining pages in priority order
@@ -103,9 +113,12 @@ decoration: buildCompactFieldDecoration(hint: '0'),
 4. Update style guide documentation
 
 ## Notes
-- `add_edit_injection_unified_page.dart` has pre-existing errors related to `WhiteSyringeGauge` widget
-- These errors exist in the original code and are unrelated to the styling refactoring
+- Some pages have pre-existing errors unrelated to styling refactoring:
+  - `add_edit_injection_unified_page.dart`: WhiteSyringeGauge widget errors
+  - `unified_add_edit_medication_page.dart`: undefined `_submitted` variable
+- These errors existed before the migration and are unrelated to decoration changes
 - All decoration-related code has been successfully migrated to design system
+- Undefined variable references were cleaned up during migration
 
 ---
 **Last Updated**: 2025-01-24
