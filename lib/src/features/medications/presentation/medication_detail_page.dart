@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class MedicationDetailPage extends StatelessWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
@@ -142,12 +143,16 @@ class MedicationDetailPage extends StatelessWidget {
           // Summary Card
           SummaryHeaderCard(
             title: med.name,
-            subtitle: med.manufacturer,
-            metadata: [
-              if (med.strengthValue > 0)
-                '${med.strengthValue} ${_unitLabel(med.strengthUnit)}',
-              '${med.stockValue} ${_stockUnitLabel(med.stockUnit)}',
-            ].join(' • '),
+            manufacturer: med.manufacturer,
+            strengthValue: med.strengthValue,
+            strengthUnitLabel: _unitLabel(med.strengthUnit),
+            stockCurrent: med.stockValue,
+            stockUnitLabel: _stockUnitLabel(med.stockUnit),
+            lowStockEnabled: med.lowStockEnabled,
+            lowStockThreshold: med.lowStockThreshold,
+            showRefrigerate: med.requiresRefrigeration,
+            expiryDate: med.expiry,
+            neutral: true,
           ),
           const SizedBox(height: 16),
 
@@ -279,6 +284,7 @@ String _stockUnitLabel(StockUnit u) => switch (u) {
       StockUnit.preFilledSyringes => 'syringes',
       StockUnit.singleDoseVials => 'vials',
       StockUnit.multiDoseVials => 'vials',
+      StockUnit.mcg => 'mcg', // Handle if mcg is a stock unit
     };
 
 // Modern section widget with icon
@@ -296,7 +302,7 @@ Widget _modernSection(
   if (visibleChildren.isEmpty) return const SizedBox.shrink();
 
   return Container(
-    decoration: buildCardDecoration(context),
+    decoration: softWhiteCardDecoration(context),
     child: Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
