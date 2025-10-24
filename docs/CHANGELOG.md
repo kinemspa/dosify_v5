@@ -4,19 +4,22 @@ All notable changes to this project will be documented in this file. Dates in UT
 
 ## Unreleased
 - Reconstitution Calculator: Major UX overhaul with visual polish and precision controls
+  - **Dark blue-black background** (0xFF0A0E27) for entire calculator with excellent contrast
   - **Split line layout**: 'Reconstitute X of MEDNAME' on line 1, 'with X mL of DILUENT' on line 2
   - **Typography hierarchy**: 'of' text smaller (14px) and black vs. huge bold colored values (22-26px)
-  - **Text effects**: Drop shadows on all text (2px offset, 4px blur, 30% opacity) for depth
-  - **Dark background**: Subtle surfaceContainerHighest at 60% alpha makes summary stand out
   - **No trailing zeros**: All numbers formatted cleanly (10.5 not 10.50, 5 not 5.0)
-  - **Fine-tune controls**: +/- 0.1 Units buttons flanking syringe for precise 2-decimal adjustments
-  - **Preserved slider**: Original drag/tap syringe functionality unchanged
+  - **Fine-tune controls**: Small +/- 0.01 Units buttons (28x28) flanking syringe, aligned to bottom
+  - **Single syringe**: One interactive gauge with buttons, drag/tap/click functionality preserved
+  - **Perfect syringe markers**:
+    - 0.3ml/0.5ml: 1U intervals, label every 5U (5, 10, 15...) with smaller 7px font
+    - 1ml: 5U intervals, label every 10U (10, 20, 30, 40, 50, 100)
+    - 3ml/5ml: 10U intervals, label only 50U marks (unlabeled ticks between for precision)
+  - **No text jumping**: Summary properly centered with Column crossAxisAlignment
   - **Clarification added**: "This calculates reconstitution volume only. Set actual dose amounts in the scheduling screen."
   - Calculator title center-aligned with bold primary color (titleMedium)
   - Vial strength value made prominent (16px, bold, primary color)
   - All text uses design system theme styles consistently
   - Added "U = Units" explanation in syringe instruction text
-  - **Fixed syringe tick intervals**: 1U for 0.3ml/0.5ml, 5U for 1ml, 50U for 3ml/5ml (prevents marker clutter)
 - Multi-dose vial: Vial volume field now restricts manual input to 2 decimal places while maintaining 0.5 increment/decrement steps via +/- buttons (improved validation without breaking user workflow)
 - Schedules: Enhanced Add/Edit Schedule screen with custom floating summary card
   - Created custom ScheduleSummaryCard widget specifically for schedules (doesn't affect medication screens)
