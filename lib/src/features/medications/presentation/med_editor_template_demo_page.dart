@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -14,7 +15,8 @@ class EditorTemplatePreviewPage extends StatefulWidget {
   const EditorTemplatePreviewPage({super.key});
 
   @override
-  State<EditorTemplatePreviewPage> createState() => _EditorTemplatePreviewPageState();
+  State<EditorTemplatePreviewPage> createState() =>
+      _EditorTemplatePreviewPageState();
 }
 
 class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
@@ -25,40 +27,6 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
   final _manufacturer = TextEditingController();
   final _description = TextEditingController();
   final _notes = TextEditingController();
-
-  // Match Add Tablet input decoration (size, fill, borders, padding)
-  InputDecoration _dec(BuildContext context, {String? hint}) {
-    final cs = Theme.of(context).colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
-      // suppress default error line to keep height stable
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
-  }
 
   final _strength = TextEditingController(text: '0');
   Unit _strengthUnit = Unit.mg;
@@ -90,7 +58,10 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Editor Template (Preview)', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Editor Template (Preview)',
+        forceBackButton: true,
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox(
         width: 140,
@@ -108,7 +79,9 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           final strengthVal = double.tryParse(_strength.text.trim());
           final stockVal = double.tryParse(_stock.text.trim());
           final unitLabel = _unitLabel(_strengthUnit);
-          final perMlVal = _isPerMl ? double.tryParse(_perMl.text.trim()) : null;
+          final perMlVal = _isPerMl
+              ? double.tryParse(_perMl.text.trim())
+              : null;
           return SummaryHeaderCard(
             key: key,
             title: name.isEmpty ? 'Pre‑Filled Syringes' : name,
@@ -136,7 +109,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _name,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. DosifiTab-500'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. DosifiTab-500',
+              suppressError: true,
+            ),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -145,7 +122,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _manufacturer,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Dosifi Labs'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. Dosifi Labs',
+              suppressError: true,
+            ),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -154,7 +135,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _description,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Pain relief'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. Pain relief',
+              suppressError: true,
+            ),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -163,7 +148,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             controller: _notes,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: _dec(context, hint: 'eg. Take with water'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. Take with water',
+              suppressError: true,
+            ),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -177,19 +166,17 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           controller: _strength,
           onDec: () {
             final v = int.tryParse(_strength.text.trim()) ?? 0;
-            setState(() => _strength.text = (v - 1).clamp(0, 1000000).toString());
+            setState(
+              () => _strength.text = (v - 1).clamp(0, 1000000).toString(),
+            );
           },
           onInc: () {
             final v = int.tryParse(_strength.text.trim()) ?? 0;
-            setState(() => _strength.text = (v + 1).clamp(0, 1000000).toString());
+            setState(
+              () => _strength.text = (v + 1).clamp(0, 1000000).toString(),
+            );
           },
-          decoration: const InputDecoration(
-            hintText: '0',
-            isDense: false,
-            isCollapsed: false,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            constraints: BoxConstraints(minHeight: kFieldHeight),
-          ),
+          decoration: buildCompactFieldDecoration(hint: '0'),
         ),
         unitDropdown: SmallDropdown36<Unit>(
           value: _strengthUnit,
@@ -240,23 +227,28 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                 controller: _perMl,
                 onDec: () {
                   final v = double.tryParse(_perMl.text.trim()) ?? 1;
-                  setState(() => _perMl.text = (v - 1).clamp(1, 1000000).toStringAsFixed(0));
+                  setState(
+                    () => _perMl.text = (v - 1)
+                        .clamp(1, 1000000)
+                        .toStringAsFixed(0),
+                  );
                 },
                 onInc: () {
                   final v = double.tryParse(_perMl.text.trim()) ?? 1;
-                  setState(() => _perMl.text = (v + 1).clamp(1, 1000000).toStringAsFixed(0));
+                  setState(
+                    () => _perMl.text = (v + 1)
+                        .clamp(1, 1000000)
+                        .toStringAsFixed(0),
+                  );
                 },
-                decoration: const InputDecoration(
-                  hintText: '1',
-                  isDense: false,
-                  isCollapsed: false,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  constraints: BoxConstraints(minHeight: kFieldHeight),
-                ),
+                decoration: buildCompactFieldDecoration(hint: '1'),
               )
             : null,
-        strengthHelp: 'Specify the amount per dose and its unit of measurement.',
-        perMlHelp: _isPerMl ? 'Volume (mL) for the concentration; defaults to 1 mL.' : null,
+        strengthHelp:
+            'Specify the amount per dose and its unit of measurement.',
+        perMlHelp: _isPerMl
+            ? 'Volume (mL) for the concentration; defaults to 1 mL.'
+            : null,
 
         // Inventory
         stockStepper: StepperRow36(
@@ -269,13 +261,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             final v = int.tryParse(_stock.text.trim()) ?? 0;
             setState(() => _stock.text = (v + 1).clamp(0, 1000000).toString());
           },
-          decoration: const InputDecoration(
-            hintText: '0',
-            isDense: false,
-            isCollapsed: false,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            constraints: BoxConstraints(minHeight: kFieldHeight),
-          ),
+          decoration: buildCompactFieldDecoration(hint: '0'),
         ),
         stockHelp: 'Enter the amount currently in stock',
         lowStockRow: Row(
@@ -299,20 +285,22 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
                 controller: _lowStockThreshold,
                 onDec: () {
                   final v = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
-                  setState(() => _lowStockThreshold.text = (v - 1).clamp(0, 1000000).toString());
+                  setState(
+                    () => _lowStockThreshold.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString(),
+                  );
                 },
                 onInc: () {
                   final v = int.tryParse(_lowStockThreshold.text.trim()) ?? 0;
                   final maxStock = int.tryParse(_stock.text.trim()) ?? 0;
-                  setState(() => _lowStockThreshold.text = (v + 1).clamp(0, maxStock).toString());
+                  setState(
+                    () => _lowStockThreshold.text = (v + 1)
+                        .clamp(0, maxStock)
+                        .toString(),
+                  );
                 },
-                decoration: const InputDecoration(
-                  hintText: '0',
-                  isDense: false,
-                  isCollapsed: false,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  constraints: BoxConstraints(minHeight: kFieldHeight),
-                ),
+                decoration: buildCompactFieldDecoration(hint: '0'),
                 compact: true,
               )
             : null,
@@ -367,7 +355,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _batch,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(hintText: 'Enter batch number'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'Enter batch number',
+              suppressError: true,
+            ),
           ),
         ),
         batchHelp: 'Enter the printed batch or lot number',
@@ -375,7 +367,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _location,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(hintText: 'eg. Bathroom cabinet'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. Bathroom cabinet',
+              suppressError: true,
+            ),
           ),
         ),
         locationHelp: 'Where it’s stored (e.g., Bathroom cabinet)',
@@ -385,7 +381,9 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             children: [
               Checkbox(
                 value: _refrigerate,
-                onChanged: _keepFrozen ? null : (v) => setState(() => _refrigerate = v ?? false),
+                onChanged: _keepFrozen
+                    ? null
+                    : (v) => setState(() => _refrigerate = v ?? false),
               ),
               Text(
                 'Refrigerate',
@@ -424,7 +422,11 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
           child: TextFormField(
             controller: _storageNotes,
             textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(hintText: 'Enter storage instructions'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'Enter storage instructions',
+              suppressError: true,
+            ),
           ),
         ),
         storageInstructionsHelp: 'Special handling notes (e.g., Keep upright)',
