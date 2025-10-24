@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- Reconstitution Calculator: Enhanced visual hierarchy and precision
+  - Calculator title center-aligned with bold primary color (titleMedium)
+  - Vial strength value made prominent (16px, bold, primary color)
+  - Final dose instruction values increased to 16px bold for better readability
+  - All text now uses design system theme styles consistently
+  - Added "U = Units" explanation in syringe instruction text
+  - Fine 1-unit tick marks for 0.3ml and 0.5ml syringes (every 1U with 5U labels)
+  - Larger syringes (1ml+) retain 5-unit intervals
 - Multi-dose vial: Vial volume field now restricts manual input to 2 decimal places while maintaining 0.5 increment/decrement steps via +/- buttons (improved validation without breaking user workflow)
 - Schedules: Enhanced Add/Edit Schedule screen with custom floating summary card
   - Created custom ScheduleSummaryCard widget specifically for schedules (doesn't affect medication screens)
