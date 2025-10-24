@@ -148,16 +148,18 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   }
 
   Widget _helperBelowCenter(String text) {
-    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+      padding: const EdgeInsets.fromLTRB(
+        kLabelFieldGap,
+        kHelperTextTopPadding,
+        kLabelFieldGap,
+        kHelperTextBottomPadding + 6,
+      ),
       child: Center(
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-          ),
+          style: helperTextStyle(context),
         ),
       ),
     );
@@ -171,7 +173,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     Color? color,
   }) {
     final theme = Theme.of(context);
-    final left = _labelWidth() + 8;
+    const left = kHelperTextLeftPadding;
     final text = error ?? help ?? '';
     final style = theme.textTheme.bodySmall?.copyWith(
       color: error != null
@@ -225,81 +227,27 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     );
   }
 
-  InputDecoration _decDrop({
-    required String label,
-    String? hint,
-    String? helper,
-  }) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
-      helperText: helper,
-      // Keep height stable when error by suppressing the default error line
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: 12,
-        color: cs.onSurfaceVariant,
-      ),
-      helperStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: 11,
-        color: cs.onSurfaceVariant.withOpacity(0.60),
-      ),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: kOutlineWidth,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      labelText: label,
-    );
-  }
+  // REMOVED: Custom _decDrop() method - SmallDropdown36 handles its own decoration
 
+  // Use LabelFieldRow from unified_form.dart instead
   Widget _rowLabelField({required String label, required Widget field}) {
-    final width = MediaQuery.of(context).size.width;
-    final labelWidth = width >= 400 ? 120.0 : 110.0;
-    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: kFieldSpacing),
       child: Row(
         children: [
           SizedBox(
-            width: labelWidth,
-            height: 36,
+            width: kLabelColumnWidth,
+            height: kStandardFieldHeight,
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: kAlignCenterLeft,
               child: Text(
                 label,
                 textAlign: TextAlign.left,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-                ),
+                style: fieldLabelStyle(context),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: kLabelFieldGap),
           Expanded(child: field),
         ],
       ),
@@ -454,30 +402,31 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           decoration:
-                              _dec(
-                                label: 'Name *',
+                              buildFieldDecoration(
+                                context,
                                 hint: 'eg. DosifiTab-500',
+                                suppressError: true,
                               ).copyWith(
                                 enabledBorder: gNameError == null
                                     ? null
                                     : OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: kStandardBorderRadius,
                                         borderSide: BorderSide(
                                           color: Theme.of(
                                             context,
                                           ).colorScheme.error,
-                                          width: kOutlineWidth,
+                                          width: kBorderWidthThin,
                                         ),
                                       ),
                                 focusedBorder: gNameError == null
                                     ? null
                                     : OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: kStandardBorderRadius,
                                         borderSide: BorderSide(
                                           color: Theme.of(
                                             context,
                                           ).colorScheme.error,
-                                          width: kOutlineWidth,
+                                          width: kBorderWidthThin,
                                         ),
                                       ),
                               ),
@@ -501,9 +450,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(
-                            label: 'Manufacturer',
+                          decoration: buildFieldDecoration(
+                            context,
                             hint: 'eg. Dosifi Labs',
+                            suppressError: true,
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -519,9 +469,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(
-                            label: 'Description',
+                          decoration: buildFieldDecoration(
+                            context,
                             hint: 'eg. Pain relief',
+                            suppressError: true,
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
@@ -538,9 +489,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         minLines: 2,
                         maxLines: null,
                         style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(
-                          label: 'Notes',
+                        decoration: buildFieldDecoration(
+                          context,
                           hint: 'eg. Take with water',
+                          suppressError: true,
                         ),
                         onChanged: (_) => setState(() {}),
                       ),
@@ -575,26 +527,31 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             _touchedStrengthAmt = true;
                           });
                         },
-                        decoration: _dec(label: 'Amount *', hint: '0').copyWith(
-                          enabledBorder: gStrengthAmtError == null
-                              ? null
-                              : OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: kOutlineWidth,
-                                  ),
-                                ),
-                          focusedBorder: gStrengthAmtError == null
-                              ? null
-                              : OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: kOutlineWidth,
-                                  ),
-                                ),
-                        ),
+                        decoration: buildCompactFieldDecoration(hint: '0')
+                            .copyWith(
+                              enabledBorder: gStrengthAmtError == null
+                                  ? null
+                                  : OutlineInputBorder(
+                                      borderRadius: kStandardBorderRadius,
+                                      borderSide: BorderSide(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                        width: kBorderWidthThin,
+                                      ),
+                                    ),
+                              focusedBorder: gStrengthAmtError == null
+                                  ? null
+                                  : OutlineInputBorder(
+                                      borderRadius: kStandardBorderRadius,
+                                      borderSide: BorderSide(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                        width: kBorderWidthThin,
+                                      ),
+                                    ),
+                            ),
                       ),
                     ),
                     _rowLabelField(
@@ -618,7 +575,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             .toList(),
                         onChanged: (u) =>
                             setState(() => _strengthUnit = u ?? _strengthUnit),
-                        decoration: _decDrop(label: ''),
+                        // SmallDropdown36 handles decoration internally
                       ),
                     ),
                     if (gStrengthAmtError != null)
@@ -656,7 +613,7 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             _touchedStock = true;
                           });
                         },
-                        decoration: _dec(label: 'Stock quantity *', hint: '0'),
+                        decoration: buildCompactFieldDecoration(hint: '0'),
                       ),
                     ),
                     _supportBelowLeftFixed(
@@ -714,28 +671,28 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                               _lowStockClampHint = nv == v;
                             });
                           },
-                          decoration: _dec(label: 'Threshold', hint: '0')
+                          decoration: buildCompactFieldDecoration(hint: '0')
                               .copyWith(
                                 enabledBorder: thresholdError == null
                                     ? null
                                     : OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: kStandardBorderRadius,
                                         borderSide: BorderSide(
                                           color: Theme.of(
                                             context,
                                           ).colorScheme.error,
-                                          width: kOutlineWidth,
+                                          width: kBorderWidthThin,
                                         ),
                                       ),
                                 focusedBorder: thresholdError == null
                                     ? null
                                     : OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: kStandardBorderRadius,
                                         borderSide: BorderSide(
                                           color: Theme.of(
                                             context,
                                           ).colorScheme.error,
-                                          width: kOutlineWidth,
+                                          width: kBorderWidthThin,
                                         ),
                                       ),
                               ),
@@ -787,9 +744,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.left,
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(
-                            label: 'Batch No.',
+                          decoration: buildFieldDecoration(
+                            context,
                             hint: 'Enter batch number',
+                            suppressError: true,
                           ),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
@@ -808,9 +766,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.left,
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(
-                            label: 'Location',
+                          decoration: buildFieldDecoration(
+                            context,
                             hint: 'eg. Bathroom cabinet',
+                            suppressError: true,
                           ),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
@@ -896,9 +855,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.left,
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(
-                            label: 'Storage instructions',
+                          decoration: buildFieldDecoration(
+                            context,
                             hint: 'Enter storage instructions',
+                            suppressError: true,
                           ),
                           onChanged: (_) => setState(() {}),
                         ),
