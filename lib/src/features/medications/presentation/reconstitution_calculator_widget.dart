@@ -188,9 +188,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     final vialMax = double.tryParse(_vialSizeCtrl.text);
     final (minURaw, midURaw, highURaw) = _presetUnitsRaw();
 
-    final var totalIU = _syringe.totalUnits.toDouble();
+    final totalUnits = _syringe.totalUnits.toDouble();
     var iuMin = minURaw;
-    var iuMax = totalIU;
+    var iuMax = totalUnits;
     if (vialMax != null && S > 0 && D > 0) {
       final uMaxAllowed = (100 * D * vialMax) / S;
       iuMax = uMaxAllowed.clamp(0, totalUnits).toDouble();
@@ -220,9 +220,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
       widget.onCalculate?.call(result, isValid);
     });
 
-    final var u1 = sliderMin;
-    final var u3 = sliderMax;
-    final var u2 = sliderMin + (sliderMax - sliderMin) / 2.0;
+    final u1 = sliderMin;
+    final u3 = sliderMax;
+    final u2 = sliderMin + (sliderMax - sliderMin) / 2.0;
 
     final conc = _computeForUnits(S: S, D: D, U: u1);
     final std = _computeForUnits(S: S, D: D, U: u2);
@@ -642,7 +642,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     ({double cPerMl, double vialVolume}) calcResult,
     double units, {
     bool isValid = true,
-  ) {
+  }) {
     final selected = selectedValue == optionValue;
     final theme = Theme.of(context);
     final roundedVolume = roundToHalfMl(calcResult.vialVolume);

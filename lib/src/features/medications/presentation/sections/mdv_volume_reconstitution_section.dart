@@ -205,8 +205,8 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
       children: [
         // Syringe gauge spans full width
         WhiteSyringeGauge(
-          totalIU: result.syringeSizeMl * 100,
-          fillIU: result.recommendedUnits,
+          totalUnits: result.syringeSizeMl * 100,
+          fillUnits: result.recommendedUnits,
         ),
         const SizedBox(height: 12),
         // Main instruction text spans full width
@@ -243,7 +243,7 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
             children: [
               const TextSpan(text: 'Draw '),
               TextSpan(
-                text: '$drawStr IU',
+                text: '$drawStr U',
                 style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
               ),
               const TextSpan(text: ' ('),

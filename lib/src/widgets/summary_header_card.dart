@@ -480,7 +480,7 @@ class SummaryHeaderCard extends StatelessWidget {
                     ),
                     const TextSpan(text: 'Draw '),
                     TextSpan(
-                      text: '${reconFillIU!.toStringAsFixed(1)} IU',
+                      text: '${reconFillIU!.toStringAsFixed(1)} U',
                       style: TextStyle(
                         color: neutral ? cs.primary : fg,
                         fontWeight: FontWeight.w700,
@@ -501,7 +501,7 @@ class SummaryHeaderCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            WhiteSyringeGauge(totalIU: reconTotalIU!, fillIU: reconFillIU!),
+            WhiteSyringeGauge(totalUnits: reconTotalIU!, fillUnits: reconFillIU!),
           ],
         ],
       ),
