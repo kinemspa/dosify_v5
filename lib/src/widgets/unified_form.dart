@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 
@@ -220,15 +221,7 @@ class SmallDropdown36<T> extends StatelessWidget {
                 items: items,
                 onChanged: onChanged,
                 icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
-                decoration:
-                    decoration ??
-                    InputDecoration(
-                      isDense: true,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
-                      ),
-                    ),
+                decoration: decoration ?? buildCompactFieldDecoration(context: context),
                 menuMaxHeight: 480,
               ),
             ),
@@ -249,15 +242,7 @@ class SmallDropdown36<T> extends StatelessWidget {
           items: items,
           onChanged: onChanged,
           icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
-          decoration:
-              decoration ??
-              InputDecoration(
-                isDense: true,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
-                ),
-              ),
+          decoration: decoration ?? buildCompactFieldDecoration(context: context),
           menuMaxHeight: 480,
         ),
       ),
@@ -463,10 +448,13 @@ class StepperRow36 extends StatelessWidget {
           padding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,
           minimumSize: const Size(28, 28),
-          side: BorderSide(color: theme.colorScheme.outlineVariant),
+          side: BorderSide(
+            color: theme.colorScheme.outlineVariant.withOpacity(kCardBorderOpacity),
+            width: kBorderWidthThin,
+          ),
         ),
         onPressed: enabled ? onTap : null,
-        child: Text(symbol, style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13)),
+        child: Text(symbol, style: bodyTextStyle(context)),
       ),
     );
   }
