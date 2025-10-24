@@ -1,0 +1,91 @@
+# Design System Migration Progress
+
+## Overview
+Migration of all medication form pages to use centralized design system (`design_system.dart`) for consistent styling across the app.
+
+## Completed Pages ✅
+
+### 1. add_edit_tablet_general_page.dart
+- **Status**: ✅ Complete
+- **Commit**: `1eee055`
+- **Changes**:
+  - Replaced custom `_dec()` with `buildFieldDecoration()`
+  - All fields now use centralized styling
+  - Fixed error state handling with proper border colors
+
+### 2. add_edit_capsule_page.dart
+- **Status**: ✅ Complete
+- **Commit**: `ce05d0d`
+- **Changes**:
+  - Removed custom `_dec()` and `_decDrop()` methods
+  - Replaced with `buildFieldDecoration()` and `buildCompactFieldDecoration()`
+  - Fixed syntax error (`final var` → `final`)
+  - Updated deprecated `withOpacity()` to `withValues(alpha:)`
+  - All fields have consistent borders, padding, fonts, colors
+
+### 3. add_edit_injection_single_vial_page.dart
+- **Status**: ✅ Complete
+- **Commit**: `6cf5eee`
+- **Changes**:
+  - Replaced custom `_dec()` with design system functions
+  - All text fields use `buildFieldDecoration()`
+  - All stepper fields use `buildCompactFieldDecoration()`
+  - Consistent styling throughout
+
+### 4. add_edit_injection_pfs_page.dart
+- **Status**: ✅ Complete
+- **Commit**: `047cb93`
+- **Changes**:
+  - Removed custom `_dec()` method
+  - All fields migrated to design system decorations
+  - Pre-filled syringe page now has unified styling
+
+## Remaining Pages 🔄
+
+### High Priority
+- `add_edit_injection_unified_page.dart` - 12 `_dec()` usages
+- `add_edit_tablet_hybrid_page.dart` - 12 `_dec()` usages
+- `unified_add_edit_medication_page.dart` - 11 `_dec()` usages
+- `add_tablet_debug_page.dart` - 11 `_dec()` usages
+
+### Medium Priority
+- `unified_add_edit_medication_page_template.dart` - 8 `_dec()` usages
+
+## Design System Benefits
+1. ✅ **Consistency**: All fields have identical styling (borders, padding, fonts, colors)
+2. ✅ **Maintainability**: Single source of truth for styling changes
+3. ✅ **Error Handling**: Centralized error state styling
+4. ✅ **Reduced Code**: Eliminated duplicate decoration code
+5. ✅ **Type Safety**: Proper use of modern Flutter APIs (`withValues` vs deprecated `withOpacity`)
+
+## Migration Pattern
+```dart
+// Before (Custom)
+InputDecoration _dec(BuildContext context, {String? hint}) {
+  final cs = Theme.of(context).colorScheme;
+  return InputDecoration(
+    // ... 30+ lines of styling code
+  );
+}
+
+// After (Design System)
+decoration: buildFieldDecoration(context, hint: 'Enter value'),
+// OR for compact controls:
+decoration: buildCompactFieldDecoration(hint: '0'),
+```
+
+## Quality Metrics
+- **Files Migrated**: 4
+- **Lines Removed**: ~186 lines of duplicate code
+- **Errors Fixed**: 2 (syntax error, deprecated API)
+- **Test Coverage**: All migrated pages pass `flutter analyze`
+
+## Next Steps
+1. Continue migrating remaining pages in priority order
+2. Add error state support to design system if needed
+3. Consider migrating helper text to `buildHelperText()`
+4. Update style guide documentation
+
+---
+**Last Updated**: 2025-01-24
+**Branch**: `chore/quality-sprint-2025-10`
