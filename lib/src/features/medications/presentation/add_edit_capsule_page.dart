@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -251,46 +252,6 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
     }
   }
 
-  InputDecoration _dec({required String label, String? hint, String? helper}) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      // Restore hint; labels are rendered in the left column
-      hintText: hint,
-      helperText: helper,
-      // Render errors in helper area; suppress default error line to avoid squashing Field36
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
-  }
-
-  InputDecoration _decDrop({required String label, String? hint, String? helper}) {
-    return _dec(label: label, hint: hint, helper: helper);
-  }
 
   Widget _section(String title, List<Widget> children, {Widget? trailing}) {
     return SectionFormCard(title: title, neutral: true, trailing: trailing, children: children);
@@ -311,8 +272,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                 label,
                 textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
                 ),
               ),
             ),
@@ -496,7 +457,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
   @override
   Widget build(BuildContext context) {
     // Derive validation messages to surface in helper rows
-    final var nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
+    final nameError = _nameCtrl.text.trim().isEmpty ? 'Required' : null;
     String? strengthAmtError;
     final strengthTxt = _strengthValueCtrl.text.trim();
     if (strengthTxt.isEmpty) {
@@ -578,26 +539,28 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Name *', hint: 'eg. DosifiCaps-500').copyWith(
-                            enabledBorder: gNameError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
+                          decoration: (() {
+                            final dec = buildFieldDecoration(context, hint: 'eg. DosifiCaps-500');
+                            if (gNameError != null) {
+                              return dec.copyWith(
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
                                   ),
-                            focusedBorder: gNameError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
                                   ),
-                          ),
+                                ),
+                              );
+                            }
+                            return dec;
+                          })(),
                           validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                           onChanged: (_) => setState(() {
                             _touchedName = true;
@@ -618,7 +581,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Manufacturer', hint: 'eg. Dosifi Labs'),
+                          decoration: buildFieldDecoration(context, hint: 'eg. Dosifi Labs'),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -633,7 +596,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
+                          decoration: buildFieldDecoration(context, hint: 'eg. Pain relief'),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -650,7 +613,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                         maxLines: null,
                         style: Theme.of(context).textTheme.bodyMedium,
                         textAlignVertical: TextAlignVertical.center,
-                        decoration: _dec(label: 'Notes', hint: 'eg. Take with water'),
+                        decoration: buildFieldDecoration(context, hint: 'eg. Take with water'),
                         onChanged: (_) => setState(() {}),
                       ),
                     ),
@@ -680,26 +643,28 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                             _touchedStrengthAmt = true;
                           });
                         },
-                        decoration: _dec(label: 'Amount *', hint: '0').copyWith(
-                          enabledBorder: gStrengthAmtError == null
-                              ? null
-                              : OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: kOutlineWidth,
-                                  ),
+                        decoration: (() {
+                          final dec = buildFieldDecoration(context, hint: '0');
+                          if (gStrengthAmtError != null) {
+                            return dec.copyWith(
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.error,
+                                  width: kOutlineWidth,
                                 ),
-                          focusedBorder: gStrengthAmtError == null
-                              ? null
-                              : OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: kOutlineWidth,
-                                  ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.error,
+                                  width: kOutlineWidth,
                                 ),
-                        ),
+                              ),
+                            );
+                          }
+                          return dec;
+                        })(),
                       ),
                     ),
                     _rowLabelField(
@@ -718,7 +683,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                             )
                             .toList(),
                         onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                        decoration: _decDrop(label: ''),
+                        decoration: buildCompactFieldDecoration(),
                       ),
                     ),
                     if (gStrengthAmtError != null)
@@ -751,7 +716,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                             _touchedStock = true;
                           });
                         },
-                        decoration: _dec(label: 'Stock quantity *', hint: '0'),
+                        decoration: buildFieldDecoration(context, hint: '0'),
                       ),
                     ),
                     if (gStockError != null)
@@ -798,26 +763,28 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                               _touchedThreshold = true;
                             });
                           },
-                          decoration: _dec(label: 'Threshold', hint: '0').copyWith(
-                            enabledBorder: gThresholdError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
+                          decoration: (() {
+                            final dec = buildFieldDecoration(context, hint: '0');
+                            if (gThresholdError != null) {
+                              return dec.copyWith(
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
                                   ),
-                            focusedBorder: gThresholdError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: kOutlineWidth,
                                   ),
-                          ),
+                                ),
+                              );
+                            }
+                            return dec;
+                          })(),
                         ),
                       ),
                       if (gThresholdError != null)
@@ -860,7 +827,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
+                          decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
                         ),
                       ),
                     ),
@@ -874,7 +841,7 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
+                          decoration: buildFieldDecoration(context, hint: 'eg. Bathroom cabinet'),
                         ),
                       ),
                     ),
@@ -949,8 +916,8 @@ class _AddEditCapsulePageState extends ConsumerState<AddEditCapsulePage> {
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlignVertical: TextAlignVertical.center,
-                          decoration: _dec(
-                            label: 'Storage instructions',
+                          decoration: buildFieldDecoration(
+                            context,
                             hint: 'Enter storage instructions',
                           ),
                         ),
