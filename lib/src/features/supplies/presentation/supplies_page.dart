@@ -59,7 +59,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
   }
 
   void _cycleView() {
-    final order = [_SuppliesView.large, _SuppliesView.compact, _SuppliesView.list];
+    final order = [
+      _SuppliesView.large,
+      _SuppliesView.compact,
+      _SuppliesView.list,
+    ];
     final idx = order.indexOf(_view);
     final next = order[(idx + 1) % order.length];
     _saveView(next);
@@ -68,7 +72,9 @@ class _SuppliesPageState extends State<SuppliesPage> {
   @override
   Widget build(BuildContext context) {
     final suppliesBox = Hive.box<Supply>(SupplyRepository.suppliesBoxName);
-    final movementsBox = Hive.box<StockMovement>(SupplyRepository.movementsBoxName);
+    final movementsBox = Hive.box<StockMovement>(
+      SupplyRepository.movementsBoxName,
+    );
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Supplies', forceBackButton: true),
@@ -84,7 +90,10 @@ class _SuppliesPageState extends State<SuppliesPage> {
               // Search
               if (_query.isNotEmpty) {
                 items = items
-                    .where((s) => s.name.toLowerCase().contains(_query.toLowerCase()))
+                    .where(
+                      (s) =>
+                          s.name.toLowerCase().contains(_query.toLowerCase()),
+                    )
                     .toList();
               }
               // Filter
@@ -95,7 +104,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
                   items = items.where(repo.isLowStock).toList();
                 case _SuppliesFilterBy.expiringSoon:
                   final soon = DateTime.now().add(const Duration(days: 30));
-                  items = items.where((s) => s.expiry != null && s.expiry!.isBefore(soon)).toList();
+                  items = items
+                      .where(
+                        (s) => s.expiry != null && s.expiry!.isBefore(soon),
+                      )
+                      .toList();
               }
               // Sort
               items.sort((a, b) {
@@ -124,7 +137,9 @@ class _SuppliesPageState extends State<SuppliesPage> {
                           children: [
                             const Icon(Icons.inventory_2, size: 48),
                             const SizedBox(height: 12),
-                            const Text('Add your first supply to begin tracking'),
+                            const Text(
+                              'Add your first supply to begin tracking',
+                            ),
                             const SizedBox(height: 12),
                             FilledButton(
                               onPressed: () => context.push('/supplies/add'),
@@ -214,9 +229,18 @@ class _SuppliesPageState extends State<SuppliesPage> {
               tooltip: 'Filter supplies',
               onSelected: (f) => setState(() => _filterBy = f),
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _SuppliesFilterBy.all, child: Text('All supplies')),
-                PopupMenuItem(value: _SuppliesFilterBy.lowStock, child: Text('Low stock')),
-                PopupMenuItem(value: _SuppliesFilterBy.expiringSoon, child: Text('Expiring soon')),
+                PopupMenuItem(
+                  value: _SuppliesFilterBy.all,
+                  child: Text('All supplies'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesFilterBy.lowStock,
+                  child: Text('Low stock'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesFilterBy.expiringSoon,
+                  child: Text('Expiring soon'),
+                ),
               ],
             ),
 
@@ -226,9 +250,18 @@ class _SuppliesPageState extends State<SuppliesPage> {
               tooltip: 'Sort supplies',
               onSelected: (s) => setState(() => _sortBy = s),
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _SuppliesSortBy.name, child: Text('Sort by name')),
-                PopupMenuItem(value: _SuppliesSortBy.stock, child: Text('Sort by stock')),
-                PopupMenuItem(value: _SuppliesSortBy.expiry, child: Text('Sort by expiry')),
+                PopupMenuItem(
+                  value: _SuppliesSortBy.name,
+                  child: Text('Sort by name'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesSortBy.stock,
+                  child: Text('Sort by stock'),
+                ),
+                PopupMenuItem(
+                  value: _SuppliesSortBy.expiry,
+                  child: Text('Sort by expiry'),
+                ),
               ],
             ),
         ],
@@ -247,7 +280,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
     }
   }
 
-  Widget _buildSupplyList(BuildContext context, List<Supply> items, SupplyRepository repo) {
+  Widget _buildSupplyList(
+    BuildContext context,
+    List<Supply> items,
+    SupplyRepository repo,
+  ) {
     switch (_view) {
       case _SuppliesView.list:
         return ListView.separated(
@@ -321,7 +358,8 @@ class _SuppliesPageState extends State<SuppliesPage> {
             mainAxisSpacing: 8,
           ),
           itemCount: items.length,
-          itemBuilder: (context, i) => _SupplyCard(s: items[i], repo: repo, dense: true),
+          itemBuilder: (context, i) =>
+              _SupplyCard(s: items[i], repo: repo, dense: true),
         );
       case _SuppliesView.large:
         return GridView.builder(
@@ -333,7 +371,8 @@ class _SuppliesPageState extends State<SuppliesPage> {
             mainAxisSpacing: 12,
           ),
           itemCount: items.length,
-          itemBuilder: (context, i) => _SupplyCard(s: items[i], repo: repo, dense: false),
+          itemBuilder: (context, i) =>
+              _SupplyCard(s: items[i], repo: repo, dense: false),
         );
     }
   }
@@ -418,7 +457,10 @@ class _SupplyCard extends StatelessWidget {
                             ),
                             borderRadius: BorderRadius.circular(dense ? 8 : 12),
                           ),
-                          child: const Icon(Icons.inventory_2, color: Colors.white),
+                          child: const Icon(
+                            Icons.inventory_2,
+                            color: Colors.white,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -437,7 +479,8 @@ class _SupplyCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              if (!dense && (s.category?.isNotEmpty ?? false)) ...[
+                              if (!dense &&
+                                  (s.category?.isNotEmpty ?? false)) ...[
                                 const SizedBox(height: 2),
                                 Text(
                                   s.category!,
@@ -550,7 +593,10 @@ class _SupplyCard extends StatelessWidget {
                     );
                   },
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     minimumSize: const Size(0, 0),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -686,7 +732,9 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
           ? null
           : double.parse(_threshold.text.trim()),
       expiry: _expiry,
-      storageLocation: _storage.text.trim().isEmpty ? null : _storage.text.trim(),
+      storageLocation: _storage.text.trim().isEmpty
+          ? null
+          : _storage.text.trim(),
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
     );
     final repo = SupplyRepository();
@@ -732,10 +780,14 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
             // General card
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.06),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -751,22 +803,29 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                 children: [
                   Text(
                     'General',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _name,
                     decoration: const InputDecoration(labelText: 'Name *'),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<SupplyType>(
                     initialValue: _type,
                     items: const [
-                      DropdownMenuItem(value: SupplyType.item, child: Text('Item')),
-                      DropdownMenuItem(value: SupplyType.fluid, child: Text('Fluid')),
+                      DropdownMenuItem(
+                        value: SupplyType.item,
+                        child: Text('Item'),
+                      ),
+                      DropdownMenuItem(
+                        value: SupplyType.fluid,
+                        child: Text('Fluid'),
+                      ),
                     ],
                     onChanged: (v) => setState(() => _type = v!),
                     decoration: const InputDecoration(labelText: 'Type *'),
@@ -774,7 +833,9 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _category,
-                    decoration: const InputDecoration(labelText: 'Category (optional)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Category (optional)',
+                    ),
                   ),
                 ],
               ),
@@ -783,10 +844,14 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
             // Inventory card
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.06),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -802,9 +867,9 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                 children: [
                   Text(
                     'Inventory',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -813,12 +878,23 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                         child: DropdownButtonFormField<SupplyUnit>(
                           initialValue: _unit,
                           items: const [
-                            DropdownMenuItem(value: SupplyUnit.pcs, child: Text('pcs')),
-                            DropdownMenuItem(value: SupplyUnit.ml, child: Text('mL')),
-                            DropdownMenuItem(value: SupplyUnit.l, child: Text('L')),
+                            DropdownMenuItem(
+                              value: SupplyUnit.pcs,
+                              child: Text('pcs'),
+                            ),
+                            DropdownMenuItem(
+                              value: SupplyUnit.ml,
+                              child: Text('mL'),
+                            ),
+                            DropdownMenuItem(
+                              value: SupplyUnit.l,
+                              child: Text('L'),
+                            ),
                           ],
                           onChanged: (v) => setState(() => _unit = v!),
-                          decoration: const InputDecoration(labelText: 'Unit *'),
+                          decoration: const InputDecoration(
+                            labelText: 'Unit *',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -828,7 +904,9 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                             _qtyBtn(context, '−', () {
                               final v = double.tryParse(_initialQty.text) ?? 0;
                               final nv = (v - 1).clamp(0, 1e12);
-                              setState(() => _initialQty.text = nv.toStringAsFixed(0));
+                              setState(
+                                () => _initialQty.text = nv.toStringAsFixed(0),
+                              );
                             }),
                             const SizedBox(width: 6),
                             SizedBox(
@@ -836,15 +914,22 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                               child: TextFormField(
                                 controller: _initialQty,
                                 textAlign: TextAlign.center,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                decoration: const InputDecoration(labelText: 'Initial qty'),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Initial qty',
+                                ),
                               ),
                             ),
                             const SizedBox(width: 6),
                             _qtyBtn(context, '+', () {
                               final v = double.tryParse(_initialQty.text) ?? 0;
                               final nv = v + 1;
-                              setState(() => _initialQty.text = nv.toStringAsFixed(0));
+                              setState(
+                                () => _initialQty.text = nv.toStringAsFixed(0),
+                              );
                             }),
                           ],
                         ),
@@ -853,8 +938,12 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _threshold,
-                    decoration: const InputDecoration(labelText: 'Low stock threshold (optional)'),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Low stock threshold (optional)',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),
@@ -863,10 +952,14 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
             // Storage/Notes card
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.03),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.06),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -882,24 +975,35 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                 children: [
                   Text(
                     'Storage / Notes',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Expiry'),
-                    subtitle: Text(_expiry == null ? 'No expiry' : _expiry!.toLocal().toString()),
-                    trailing: TextButton(onPressed: _pickExpiry, child: const Text('Pick')),
+                    subtitle: Text(
+                      _expiry == null
+                          ? 'No expiry'
+                          : _expiry!.toLocal().toString(),
+                    ),
+                    trailing: TextButton(
+                      onPressed: _pickExpiry,
+                      child: const Text('Pick'),
+                    ),
                   ),
                   TextFormField(
                     controller: _storage,
-                    decoration: const InputDecoration(labelText: 'Storage / Lot (optional)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Storage / Lot (optional)',
+                    ),
                   ),
                   TextFormField(
                     controller: _notes,
-                    decoration: const InputDecoration(labelText: 'Notes (optional)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Notes (optional)',
+                    ),
                     maxLines: 3,
                   ),
                 ],
@@ -1004,7 +1108,9 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
                   controller: _amount,
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(labelText: 'Amount'),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
@@ -1025,10 +1131,22 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   items: const [
-                    DropdownMenuItem(value: MovementReason.used, child: Text('Used')),
-                    DropdownMenuItem(value: MovementReason.purchase, child: Text('Purchase/Add')),
-                    DropdownMenuItem(value: MovementReason.correction, child: Text('Correction')),
-                    DropdownMenuItem(value: MovementReason.other, child: Text('Other')),
+                    DropdownMenuItem(
+                      value: MovementReason.used,
+                      child: Text('Used'),
+                    ),
+                    DropdownMenuItem(
+                      value: MovementReason.purchase,
+                      child: Text('Purchase/Add'),
+                    ),
+                    DropdownMenuItem(
+                      value: MovementReason.correction,
+                      child: Text('Correction'),
+                    ),
+                    DropdownMenuItem(
+                      value: MovementReason.other,
+                      child: Text('Other'),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _reason = v!),
                   decoration: const InputDecoration(labelText: 'Reason'),
@@ -1045,7 +1163,10 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
           Row(
             children: [
               Expanded(
-                child: FilledButton(onPressed: _apply, child: const Text('Apply')),
+                child: FilledButton(
+                  onPressed: _apply,
+                  child: const Text('Apply'),
+                ),
               ),
             ],
           ),

@@ -284,7 +284,7 @@ InputDecoration buildFieldDecoration(
 
 /// Simplified field decoration for compact controls (steppers, dropdowns)
 /// Used inside StepperRow36, SmallDropdown36, etc.
-/// 
+///
 /// IMPORTANT: This MUST match buildFieldDecoration() borders exactly.
 InputDecoration buildCompactFieldDecoration({
   BuildContext? context,
@@ -299,7 +299,9 @@ InputDecoration buildCompactFieldDecoration({
       isCollapsed: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
-      errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
+      errorStyle: suppressError
+          ? const TextStyle(fontSize: 0, height: 0)
+          : null,
     );
   }
 

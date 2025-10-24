@@ -39,11 +39,15 @@ class ReconstitutionResult {
   final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
   final double? recommendedDose; // desired dose value for reopening calculator
   final String? doseUnit; // dose unit (mcg/mg/g) for reopening calculator
-  final double? maxVialSizeMl; // max vial size constraint for reopening calculator
+  final double?
+  maxVialSizeMl; // max vial size constraint for reopening calculator
 }
 
 class ReconstitutionCalculatorDialog extends StatefulWidget {
-  const ReconstitutionCalculatorDialog({super.key, required this.initialStrengthValue, required this.unitLabel, // e.g., mg, mcg, g, units, super.key,, super.key,
+  const ReconstitutionCalculatorDialog({
+    super.key,
+    required this.initialStrengthValue,
+    required this.unitLabel, // e.g., mg, mcg, g, units, super.key,, super.key,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -58,10 +62,12 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
   final double? initialVialSize; // mL
 
   @override
-  State<ReconstitutionCalculatorDialog> createState() => _ReconstitutionCalculatorDialogState();
+  State<ReconstitutionCalculatorDialog> createState() =>
+      _ReconstitutionCalculatorDialogState();
 }
 
-class _ReconstitutionCalculatorDialogState extends State<ReconstitutionCalculatorDialog> {
+class _ReconstitutionCalculatorDialogState
+    extends State<ReconstitutionCalculatorDialog> {
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
 

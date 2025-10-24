@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -31,7 +32,9 @@ const double kMaxCompactControlWidth = 240;
 /// A section card with identical decoration to the Tablet/Capsule screens.
 class SectionFormCard extends StatelessWidget {
   const SectionFormCard({
-    required this.title, required this.children, super.key,
+    required this.title,
+    required this.children,
+    super.key,
     this.trailing,
     this.neutral = false,
   });
@@ -51,8 +54,13 @@ class SectionFormCard extends StatelessWidget {
             : theme.colorScheme.primary.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
         border: neutral
-            ? Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.5), width: 0.75)
-            : Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.06)),
+            ? Border.all(
+                color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                width: 0.75,
+              )
+            : Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.06),
+              ),
         boxShadow: neutral
             ? [
                 BoxShadow(
@@ -75,12 +83,7 @@ class SectionFormCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: sectionTitleStyle(context),
-                ),
-              ),
+              Expanded(child: Text(title, style: sectionTitleStyle(context))),
               if (trailing != null) trailing!,
             ],
           ),
@@ -95,7 +98,9 @@ class SectionFormCard extends StatelessWidget {
 /// A left-label / right-field row. Label has fixed width and unified style.
 class LabelFieldRow extends StatelessWidget {
   const LabelFieldRow({
-    required this.label, required this.field, super.key,
+    required this.label,
+    required this.field,
+    super.key,
     this.labelWidth = kLabelColWidth,
   });
 
@@ -112,10 +117,7 @@ class LabelFieldRow extends StatelessWidget {
         children: [
           SizedBox(
             width: labelWidth,
-            child: Text(
-              label,
-              style: fieldLabelStyle(context),
-            ),
+            child: Text(label, style: fieldLabelStyle(context)),
           ),
           const SizedBox(width: 8),
           Expanded(child: field),
@@ -128,7 +130,9 @@ class LabelFieldRow extends StatelessWidget {
 /// A 120x36 OutlinedButton with a calendar icon, matching Tablet/Capsule date picker button.
 class DateButton36 extends StatelessWidget {
   const DateButton36({
-    required this.label, required this.onPressed, super.key,
+    required this.label,
+    required this.onPressed,
+    super.key,
     this.width,
     this.selected = false,
   });
@@ -162,7 +166,10 @@ class DateButton36 extends StatelessWidget {
           // This makes date button align perfectly with dropdown and stepper
           const stepperButtonsWidth = 64.0;
           final adjustedMax = constraints.maxWidth - stepperButtonsWidth;
-          final width = adjustedMax.clamp(kMinCompactControlWidth, kMaxCompactControlWidth);
+          final width = adjustedMax.clamp(
+            kMinCompactControlWidth,
+            kMaxCompactControlWidth,
+          );
           return Align(
             child: SizedBox(height: kFieldHeight, width: width, child: btn),
           );
@@ -179,7 +186,10 @@ class DateButton36 extends StatelessWidget {
 /// A 120x36 Dropdown wrapper matching Tablet/Capsule sizing.
 class SmallDropdown36<T> extends StatelessWidget {
   const SmallDropdown36({
-    required this.value, required this.items, required this.onChanged, super.key,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    super.key,
     this.decoration,
     this.width,
   });
@@ -201,7 +211,10 @@ class SmallDropdown36<T> extends StatelessWidget {
           // This makes dropdown match the width of the stepper field (excluding buttons)
           const stepperButtonsWidth = 64.0;
           final adjustedMax = constraints.maxWidth - stepperButtonsWidth;
-          final width = adjustedMax.clamp(kMinCompactControlWidth, kMaxCompactControlWidth);
+          final width = adjustedMax.clamp(
+            kMinCompactControlWidth,
+            kMaxCompactControlWidth,
+          );
           return Align(
             child: SizedBox(
               height: kFieldHeight,
@@ -213,8 +226,12 @@ class SmallDropdown36<T> extends StatelessWidget {
                 style: bodyTextStyle(context),
                 items: items,
                 onChanged: onChanged,
-                icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
-                decoration: decoration ?? buildCompactFieldDecoration(context: context),
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                decoration:
+                    decoration ?? buildCompactFieldDecoration(context: context),
                 menuMaxHeight: 480,
               ),
             ),
@@ -234,8 +251,12 @@ class SmallDropdown36<T> extends StatelessWidget {
           style: bodyTextStyle(context),
           items: items,
           onChanged: onChanged,
-          icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurfaceVariant),
-          decoration: decoration ?? buildCompactFieldDecoration(context: context),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          decoration:
+              decoration ?? buildCompactFieldDecoration(context: context),
           menuMaxHeight: 480,
         ),
       ),
@@ -246,7 +267,10 @@ class SmallDropdown36<T> extends StatelessWidget {
 /// Primary-styled choice chip (selected = primary bg + white text)
 class PrimaryChoiceChip extends StatelessWidget {
   const PrimaryChoiceChip({
-    required this.label, required this.selected, required this.onSelected, super.key,
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+    super.key,
   });
   final Widget label;
   final bool selected;
@@ -260,7 +284,10 @@ class PrimaryChoiceChip extends StatelessWidget {
     return ChoiceChip(
       label: DefaultTextStyle(
         style:
-            theme.textTheme.labelLarge?.copyWith(color: labelColor, fontWeight: FontWeight.w600) ??
+            theme.textTheme.labelLarge?.copyWith(
+              color: labelColor,
+              fontWeight: FontWeight.w600,
+            ) ??
             TextStyle(color: labelColor),
         child: label,
       ),
@@ -281,15 +308,26 @@ BoxDecoration softWhiteCardDecoration(BuildContext context) {
   return BoxDecoration(
     color: theme.colorScheme.surfaceContainerLowest,
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.5), width: 0.75),
+    border: Border.all(
+      color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+      width: 0.75,
+    ),
     boxShadow: [
-      BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: const Offset(0, 2)),
+      BoxShadow(
+        color: Colors.black.withOpacity(0.02),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
     ],
   );
 }
 
 class SyringeGauge extends StatelessWidget {
-  const SyringeGauge({required this.totalUnits, required this.fillUnits, super.key});
+  const SyringeGauge({
+    required this.totalUnits,
+    required this.fillUnits,
+    super.key,
+  });
   final double totalUnits;
   final double fillUnits;
   @override
@@ -333,8 +371,15 @@ class _SyringePainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(r, radius), bg);
     canvas.drawRRect(RRect.fromRectAndRadius(r, radius), outline);
     // Fill
-    final ratio = totalUnits <= 0 ? 0.0 : (fillUnits / totalUnits).clamp(0.0, 1.0);
-    final fillRect = Rect.fromLTWH(0, 6, size.width * (ratio.isNaN ? 0 : ratio), 14);
+    final ratio = totalUnits <= 0
+        ? 0.0
+        : (fillUnits / totalUnits).clamp(0.0, 1.0);
+    final fillRect = Rect.fromLTWH(
+      0,
+      6,
+      size.width * (ratio.isNaN ? 0 : ratio),
+      14,
+    );
     final fillPaint = Paint()..color = fillColor;
     canvas.drawRRect(RRect.fromRectAndRadius(fillRect, radius), fillPaint);
     // Tick marks every 10 units, major every 50 units
@@ -364,16 +409,22 @@ class _SyringePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SyringePainter oldDelegate) {
-    return oldDelegate.totalUnits != totalUnits || oldDelegate.fillUnits != fillUnits;
+    return oldDelegate.totalUnits != totalUnits ||
+        oldDelegate.fillUnits != fillUnits;
   }
 }
 
 /// A [-] [ 120x36 Field36 TextField ] [+] row used for numeric steppers.
 class StepperRow36 extends StatelessWidget {
   const StepperRow36({
-    required this.controller, required this.onDec, required this.onInc, required this.decoration, super.key,
+    required this.controller,
+    required this.onDec,
+    required this.onInc,
+    required this.decoration,
+    super.key,
     this.compact = false,
     this.enabled = true,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -382,6 +433,7 @@ class StepperRow36 extends StatelessWidget {
   final InputDecoration decoration;
   final bool compact;
   final bool enabled;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -409,13 +461,16 @@ class StepperRow36 extends StatelessWidget {
               child: Field36(
                 child: Builder(
                   builder: (context) {
-                    final style = compact ? inputTextStyle(context) : bodyTextStyle(context);
+                    final style = compact
+                        ? inputTextStyle(context)
+                        : bodyTextStyle(context);
                     return TextFormField(
                       controller: controller,
                       textAlign: TextAlign.center,
                       style: style,
                       decoration: decoration,
                       enabled: enabled,
+                      inputFormatters: inputFormatters,
                     );
                   },
                 ),
@@ -440,7 +495,9 @@ class StepperRow36 extends StatelessWidget {
           visualDensity: VisualDensity.compact,
           minimumSize: const Size(28, 28),
           side: BorderSide(
-            color: theme.colorScheme.outlineVariant.withOpacity(kCardBorderOpacity),
+            color: theme.colorScheme.outlineVariant.withOpacity(
+              kCardBorderOpacity,
+            ),
             width: kBorderWidthThin,
           ),
         ),

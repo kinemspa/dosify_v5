@@ -31,15 +31,18 @@ class _FormFieldStylesPageState extends State<FormFieldStylesPage> {
     await UserPrefs.setFormFieldStyle(i);
     if (!mounted) return;
     setState(() => _selected = i);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Selected form field style #${i + 1}')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Selected form field style #${i + 1}')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Form Field Styles', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Form Field Styles',
+        forceBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: GridView.builder(
@@ -50,8 +53,11 @@ class _FormFieldStylesPageState extends State<FormFieldStylesPage> {
             crossAxisSpacing: 12,
           ),
           itemCount: 10,
-          itemBuilder: (context, i) =>
-              _StyleCard(index: i, selected: _selected == i, onSelect: () => _select(i)),
+          itemBuilder: (context, i) => _StyleCard(
+            index: i,
+            selected: _selected == i,
+            onSelect: () => _select(i),
+          ),
         ),
       ),
     );
@@ -59,7 +65,11 @@ class _FormFieldStylesPageState extends State<FormFieldStylesPage> {
 }
 
 class _StyleCard extends StatelessWidget {
-  const _StyleCard({required this.index, required this.selected, required this.onSelect});
+  const _StyleCard({
+    required this.index,
+    required this.selected,
+    required this.onSelect,
+  });
   final int index;
   final bool selected;
   final VoidCallback onSelect;
@@ -87,9 +97,9 @@ class _StyleCard extends StatelessWidget {
                 children: [
                   Text(
                     'Style #${index + 1}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const Spacer(),
                   if (selected)
@@ -131,7 +141,10 @@ class _StyleCard extends StatelessWidget {
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
-                child: FilledButton.tonal(onPressed: onSelect, child: const Text('Select')),
+                child: FilledButton.tonal(
+                  onPressed: onSelect,
+                  child: const Text('Select'),
+                ),
               ),
             ],
           ),

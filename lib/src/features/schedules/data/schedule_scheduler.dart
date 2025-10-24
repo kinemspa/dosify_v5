@@ -58,9 +58,25 @@ class ScheduleScheduler {
       }
       for (var i = 0; i < 30; i++) {
         for (final minutes in times) {
-          final dt = DateTime(day.year, day.month, day.day, minutes ~/ 60, minutes % 60);
-          final id = _slotId(s.id, weekday: dt.weekday, minutes: minutes, occurrence: i);
-          await NotificationService.scheduleAtAlarmClock(id, dt, title: title, body: body);
+          final dt = DateTime(
+            day.year,
+            day.month,
+            day.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
+          final id = _slotId(
+            s.id,
+            weekday: dt.weekday,
+            minutes: minutes,
+            occurrence: i,
+          );
+          await NotificationService.scheduleAtAlarmClock(
+            id,
+            dt,
+            title: title,
+            body: body,
+          );
         }
         day = day.add(Duration(days: n));
       }
@@ -85,11 +101,27 @@ class ScheduleScheduler {
         final utcWeekday = date.toUtc().weekday; // 1..7
         if (daysUtc.contains(utcWeekday)) {
           for (final mUtc in timesUtc) {
-            final dtUtc = DateTime.utc(date.year, date.month, date.day, mUtc ~/ 60, mUtc % 60);
+            final dtUtc = DateTime.utc(
+              date.year,
+              date.month,
+              date.day,
+              mUtc ~/ 60,
+              mUtc % 60,
+            );
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now)) {
-              final id = _slotId(s.id, weekday: date.weekday, minutes: mUtc, occurrence: dayOffset);
-              await NotificationService.scheduleAtAlarmClock(id, dtLocal, title: title, body: body);
+              final id = _slotId(
+                s.id,
+                weekday: date.weekday,
+                minutes: mUtc,
+                occurrence: dayOffset,
+              );
+              await NotificationService.scheduleAtAlarmClock(
+                id,
+                dtLocal,
+                title: title,
+                body: body,
+              );
             }
           }
         }
@@ -97,7 +129,13 @@ class ScheduleScheduler {
         // Local weekly pattern
         if (daysLocal.contains(date.weekday)) {
           for (final mLocal in timesLocal) {
-            final dt = DateTime(date.year, date.month, date.day, mLocal ~/ 60, mLocal % 60);
+            final dt = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              mLocal ~/ 60,
+              mLocal % 60,
+            );
             if (dt.isAfter(now)) {
               final id = _slotId(
                 s.id,
@@ -105,7 +143,12 @@ class ScheduleScheduler {
                 minutes: mLocal,
                 occurrence: dayOffset,
               );
-              await NotificationService.scheduleAtAlarmClock(id, dt, title: title, body: body);
+              await NotificationService.scheduleAtAlarmClock(
+                id,
+                dt,
+                title: title,
+                body: body,
+              );
             }
           }
         }
@@ -113,7 +156,10 @@ class ScheduleScheduler {
     }
   }
 
-  static Future<void> cancelFor(String scheduleId, {Iterable<int>? days}) async {
+  static Future<void> cancelFor(
+    String scheduleId, {
+    Iterable<int>? days,
+  }) async {
     // Best-effort cancel that supports both legacy and new ID schemes without exceeding 32-bit range.
     final box = Hive.box<Schedule>('schedules');
     final existing = box.get(scheduleId); // may be null for brand-new schedules
@@ -128,8 +174,19 @@ class ScheduleScheduler {
         // cancel ~30 occurrences ahead
         for (var i = 0; i < 30; i++) {
           for (final minutes in times) {
-            final dt = DateTime(day.year, day.month, day.day, minutes ~/ 60, minutes % 60);
-            final id = _slotId(existing.id, weekday: dt.weekday, minutes: minutes, occurrence: i);
+            final dt = DateTime(
+              day.year,
+              day.month,
+              day.day,
+              minutes ~/ 60,
+              minutes % 60,
+            );
+            final id = _slotId(
+              existing.id,
+              weekday: dt.weekday,
+              minutes: minutes,
+              occurrence: i,
+            );
             await NotificationService.cancel(id);
           }
           day = day.add(Duration(days: n));
@@ -141,7 +198,8 @@ class ScheduleScheduler {
         final start = DateTime(now.year, now.month, now.day);
         final timesLocal = existing.timesOfDay ?? [existing.minutesOfDay];
         final timesUtc =
-            existing.timesOfDayUtc ?? [existing.minutesOfDayUtc ?? existing.minutesOfDay];
+            existing.timesOfDayUtc ??
+            [existing.minutesOfDayUtc ?? existing.minutesOfDay];
         final daysLocal = existing.daysOfWeek;
         final daysUtc = existing.daysOfWeekUtc ?? const <int>[];
         for (var dayOffset = 0; dayOffset < 60; dayOffset++) {

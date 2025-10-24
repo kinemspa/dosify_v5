@@ -12,13 +12,17 @@ class StrengthInputStylesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Strength Input Styles', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Strength Input Styles',
+        forceBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView.separated(
           itemCount: StrengthInputStyle.values.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _StrengthInputCard(style: StrengthInputStyle.values[i]),
+          itemBuilder: (context, i) =>
+              _StrengthInputCard(style: StrengthInputStyle.values[i]),
         ),
       ),
     );
@@ -49,7 +53,8 @@ extension StrengthInputStyleX on StrengthInputStyle {
     StrengthInputStyle.chipPillsGroup => 'Pill group',
     StrengthInputStyle.chipTwoRow => 'Two-row controls',
     StrengthInputStyle.chipMinimalInline => 'Minimal inline',
-    StrengthInputStyle.chipCardTopRightDropdown => 'Card with top-right dropdown',
+    StrengthInputStyle.chipCardTopRightDropdown =>
+      'Card with top-right dropdown',
   };
 }
 
@@ -104,7 +109,8 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                 }),
               ),
             ),
-            onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+            onChanged: (v) =>
+                setState(() => _value = int.tryParse(v) ?? _value),
           ),
         ),
         const SizedBox(width: 12),
@@ -162,7 +168,10 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                     }),
                     visualDensity: VisualDensity.compact,
                   ),
-                  Text('$_value', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$_value',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
                     onPressed: () => setState(() {
@@ -230,7 +239,10 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                     }),
                     visualDensity: VisualDensity.compact,
                   ),
-                  Text('$_value', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    '$_value',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
                     onPressed: () => setState(() {
@@ -298,7 +310,8 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                     controller: _ctrl,
                     textAlign: TextAlign.center,
                     keyboardType: const TextInputType.numberWithOptions(),
-                    onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                    onChanged: (v) =>
+                        setState(() => _value = int.tryParse(v) ?? _value),
                     decoration: const InputDecoration(labelText: 'Amount'),
                   ),
                 ),
@@ -360,7 +373,8 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                     ],
                   ),
                 ),
-                onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                onChanged: (v) =>
+                    setState(() => _value = int.tryParse(v) ?? _value),
               ),
             ),
             const SizedBox(width: 12),
@@ -405,7 +419,8 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                     textAlign: TextAlign.center,
                     keyboardType: const TextInputType.numberWithOptions(),
                     decoration: const InputDecoration(labelText: 'Amount'),
-                    onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                    onChanged: (v) =>
+                        setState(() => _value = int.tryParse(v) ?? _value),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -500,7 +515,8 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                       controller: _ctrl,
                       textAlign: TextAlign.center,
                       keyboardType: const TextInputType.numberWithOptions(),
-                      onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                      onChanged: (v) =>
+                          setState(() => _value = int.tryParse(v) ?? _value),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -536,7 +552,10 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
 
       case StrengthInputStyle.chipPillsGroup:
         // Use a subtle primary-tinted background with no outline
-        deco = BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(12));
+        deco = BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        );
         // Local helper to get primary-colour overlay animation on tap with visible ripple
         Widget pillBtn(String label, VoidCallback onTap) {
           final theme = Theme.of(context);
@@ -550,10 +569,15 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
               ),
               child: InkWell(
                 customBorder: const StadiumBorder(),
-                overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withOpacity(0.12)),
+                overlayColor: WidgetStatePropertyAll(
+                  theme.colorScheme.primary.withOpacity(0.12),
+                ),
                 onTap: onTap,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Text(label, style: theme.textTheme.labelLarge),
                 ),
               ),
@@ -576,18 +600,29 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                 controller: _ctrl,
                 textAlign: TextAlign.center,
                 keyboardType: const TextInputType.numberWithOptions(),
-                onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                onChanged: (v) =>
+                    setState(() => _value = int.tryParse(v) ?? _value),
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surface,
@@ -613,17 +648,23 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                   DropdownMenuItem(
                     value: Unit.mcg,
                     alignment: AlignmentDirectional.center,
-                    child: Center(child: Text('mcg', textAlign: TextAlign.center)),
+                    child: Center(
+                      child: Text('mcg', textAlign: TextAlign.center),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: Unit.mg,
                     alignment: AlignmentDirectional.center,
-                    child: Center(child: Text('mg', textAlign: TextAlign.center)),
+                    child: Center(
+                      child: Text('mg', textAlign: TextAlign.center),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: Unit.g,
                     alignment: AlignmentDirectional.center,
-                    child: Center(child: Text('g', textAlign: TextAlign.center)),
+                    child: Center(
+                      child: Text('g', textAlign: TextAlign.center),
+                    ),
                   ),
                 ],
                 onChanged: (v) => setState(() => _unit = v ?? _unit),
@@ -634,15 +675,25 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surface,
@@ -676,7 +727,8 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                 controller: _ctrl,
                 textAlign: TextAlign.center,
                 keyboardType: const TextInputType.numberWithOptions(),
-                onChanged: (v) => setState(() => _value = int.tryParse(v) ?? _value),
+                onChanged: (v) =>
+                    setState(() => _value = int.tryParse(v) ?? _value),
               ),
             ),
             const SizedBox(width: 6),
@@ -715,7 +767,9 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
               children: [
                 Text(
                   widget.style.displayName,
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const Spacer(),
                 FilledButton.tonal(
@@ -724,7 +778,11 @@ class _StrengthInputCardState extends State<_StrengthInputCard> {
                     await UserPrefs.setStrengthInputStyle(idx);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Selected: ${widget.style.displayName}')),
+                        SnackBar(
+                          content: Text(
+                            'Selected: ${widget.style.displayName}',
+                          ),
+                        ),
                       );
                     }
                   },

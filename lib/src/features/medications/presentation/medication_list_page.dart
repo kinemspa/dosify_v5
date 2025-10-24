@@ -48,7 +48,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final prefs = await SharedPreferences.getInstance();
     final savedView = prefs.getString('medication_list_view') ?? 'large';
     setState(() {
-      _view = _MedView.values.firstWhere((v) => v.name == savedView, orElse: () => _MedView.large);
+      _view = _MedView.values.firstWhere(
+        (v) => v.name == savedView,
+        orElse: () => _MedView.large,
+      );
     });
   }
 
@@ -95,7 +98,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Medication> b, _) {
-          final items = _getFilteredAndSortedMedications(b.values.toList(growable: false));
+          final items = _getFilteredAndSortedMedications(
+            b.values.toList(growable: false),
+          );
           // Ensure initial stock values so large cards can show current/initial remain
           _ensureInitialStockValues(items);
 
@@ -150,7 +155,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           return Stack(
             children: [
               _buildMedList(context, items),
-              Positioned(top: 0, left: 0, right: 0, child: _buildToolbar(context)),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _buildToolbar(context),
+              ),
             ],
           );
         },
@@ -175,22 +185,32 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 child: TextField(
                   autofocus: true,
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, size: 20, color: kTextLighterGrey(context)),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 20,
+                      color: kTextLighterGrey(context),
+                    ),
                     hintText: 'Search medications',
                     isDense: true,
                     filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLowest,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -251,10 +271,22 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
               itemBuilder: (context) => [
-                const PopupMenuItem(value: _FilterBy.all, child: Text('All medications')),
-                const PopupMenuItem(value: _FilterBy.lowStock, child: Text('Low stock')),
-                const PopupMenuItem(value: _FilterBy.expiringSoon, child: Text('Expiring soon')),
-                const PopupMenuItem(value: _FilterBy.refrigerated, child: Text('Refrigerated')),
+                const PopupMenuItem(
+                  value: _FilterBy.all,
+                  child: Text('All medications'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.lowStock,
+                  child: Text('Low stock'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.expiringSoon,
+                  child: Text('Expiring soon'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.refrigerated,
+                  child: Text('Refrigerated'),
+                ),
               ],
             ),
 
@@ -271,15 +303,30 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 }
               }),
               itemBuilder: (context) => [
-                const PopupMenuItem(value: _SortBy.name, child: Text('Sort by name')),
-                const PopupMenuItem(value: _SortBy.stock, child: Text('Sort by stock')),
-                const PopupMenuItem(value: _SortBy.strength, child: Text('Sort by strength')),
-                const PopupMenuItem(value: _SortBy.expiry, child: Text('Sort by expiry')),
+                const PopupMenuItem(
+                  value: _SortBy.name,
+                  child: Text('Sort by name'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.stock,
+                  child: Text('Sort by stock'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.strength,
+                  child: Text('Sort by strength'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.expiry,
+                  child: Text('Sort by expiry'),
+                ),
                 PopupMenuItem(
                   value: 'toggle_dir',
                   child: Row(
                     children: [
-                      Icon(_sortAsc ? Icons.arrow_upward : Icons.arrow_downward, size: 18),
+                      Icon(
+                        _sortAsc ? Icons.arrow_upward : Icons.arrow_downward,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Text(_sortAsc ? 'Ascending' : 'Descending'),
                     ],
@@ -292,12 +339,16 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
-  List<Medication> _getFilteredAndSortedMedications(List<Medication> medications) {
+  List<Medication> _getFilteredAndSortedMedications(
+    List<Medication> medications,
+  ) {
     var items = List<Medication>.from(medications);
 
     // Apply search filter
     if (_query.isNotEmpty) {
-      items = items.where((m) => m.name.toLowerCase().contains(_query.toLowerCase())).toList();
+      items = items
+          .where((m) => m.name.toLowerCase().contains(_query.toLowerCase()))
+          .toList();
     }
 
     // Apply category filter
@@ -306,12 +357,18 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         break;
       case _FilterBy.lowStock:
         items = items
-            .where((m) => m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0))
+            .where(
+              (m) =>
+                  m.lowStockEnabled &&
+                  m.stockValue <= (m.lowStockThreshold ?? 0),
+            )
             .toList();
       case _FilterBy.expiringSoon:
         final now = DateTime.now();
         final soon = now.add(const Duration(days: 30));
-        items = items.where((m) => m.expiry != null && m.expiry!.isBefore(soon)).toList();
+        items = items
+            .where((m) => m.expiry != null && m.expiry!.isBefore(soon))
+            .toList();
       case _FilterBy.refrigerated:
         items = items.where((m) => m.requiresRefrigeration == true).toList();
     }
@@ -464,7 +521,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       children: [
         TextSpan(
           text: fmt2(m.stockValue),
-          style: TextStyle(fontWeight: FontWeight.w800, color: _stockStatusColorFor(context, m)),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: _stockStatusColorFor(context, m),
+          ),
         ),
         TextSpan(text: ' ${_stockUnitLabel(m.stockUnit)}'),
       ],
@@ -482,7 +542,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, index) {
             final m = items[index];
             return ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
               title: RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -530,12 +593,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
                             _formatDateDdMm(m.expiry!),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  (m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30))))
-                                  ? Theme.of(context).colorScheme.error
-                                  : kTextLightGrey(context),
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color:
+                                      (m.expiry!.isBefore(
+                                        DateTime.now().add(
+                                          const Duration(days: 30),
+                                        ),
+                                      ))
+                                      ? Theme.of(context).colorScheme.error
+                                      : kTextLightGrey(context),
+                                ),
                           ),
                         ),
                     ],
@@ -635,14 +703,19 @@ class _MedCard extends StatelessWidget {
     if (!dense) {
       return GestureDetector(
         onTap: () => context.push('/medications/${m.id}'),
-        child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
+        child: SummaryHeaderCard.fromMedication(
+          m,
+          neutral: true,
+          outlined: true,
+        ),
       );
     }
 
     // Fallback: keep existing dense implementation
     final theme = Theme.of(context);
     final isExpiringSoon =
-        m.expiry != null && m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
+        m.expiry != null &&
+        m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
     return Container(
       decoration: softWhiteCardDecoration(context),
@@ -700,7 +773,11 @@ class _MedCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               // Stock
-              RichText(text: _stockSpan(context), maxLines: 1, overflow: TextOverflow.ellipsis),
+              RichText(
+                text: _stockSpan(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),

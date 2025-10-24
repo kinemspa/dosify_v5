@@ -36,12 +36,13 @@ class FormFieldStyler {
         return base.copyWith(
           filled: true,
           fillColor: Theme.of(context).colorScheme.surfaceContainer,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 16,
+          ),
         );
       case 1: // Outlined sharp
-        return base.copyWith(
-          border: const OutlineInputBorder(),
-        );
+        return base.copyWith(border: const OutlineInputBorder());
       case 2: // Outline minimal (no underlines globally)
         return base.copyWith(border: const OutlineInputBorder());
       case 3: // Elevated card-like
@@ -54,17 +55,25 @@ class FormFieldStyler {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         );
       case 4: // Left accent
         return base.copyWith(
           border: const OutlineInputBorder(),
-          prefixIcon: Container(width: 6, color: Theme.of(context).colorScheme.primary),
+          prefixIcon: Container(
+            width: 6,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         );
       case 5: // Dense compact (still respect min 40px height)
         return base.copyWith(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
         );
       case 6: // Borderless + bottom divider style
         return base.copyWith(border: InputBorder.none);
@@ -88,13 +97,19 @@ class FormFieldStyler {
         );
       case 8: // Large stacked label
         return base.copyWith(
-          labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          labelStyle: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           floatingLabelBehavior: FloatingLabelBehavior.always,
         );
       default: // Monochrome minimal
         return base.copyWith(
-          border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black87),
+          ),
         );
     }
   }
@@ -130,7 +145,12 @@ class FormFieldStyler {
         return BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border(left: BorderSide(color: Theme.of(context).colorScheme.primary, width: 3)),
+          border: Border(
+            left: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+              width: 3,
+            ),
+          ),
         );
       case 5: // dense compact
         return BoxDecoration(
@@ -153,7 +173,9 @@ class FormFieldStyler {
         return BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
         );
     }
   }

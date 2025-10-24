@@ -9,9 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/nav_items.dart';
 
-final bottomNavIdsProvider = StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
-  return BottomNavIdsController()..load();
-});
+final bottomNavIdsProvider =
+    StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
+      return BottomNavIdsController()..load();
+    });
 
 class BottomNavIdsController extends StateNotifier<List<String>> {
   BottomNavIdsController() : super(const []);
@@ -64,7 +65,9 @@ class ShellScaffold extends ConsumerWidget {
           }
         },
         destinations: items
-            .map((e) => NavigationDestination(icon: Icon(e.icon), label: e.label))
+            .map(
+              (e) => NavigationDestination(icon: Icon(e.icon), label: e.label),
+            )
             .toList(),
       ),
     );

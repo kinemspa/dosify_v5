@@ -15,11 +15,23 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 /// Usage: provide the exact field widgets used in Add Tablet for perfect visual parity.
 class MedEditorTemplate extends StatefulWidget {
   const MedEditorTemplate({
-    required this.appBarTitle, required this.summaryBuilder, // General
-    required this.nameField, required this.manufacturerField, required this.descriptionField, required this.notesField, // Strength
-    required this.strengthStepper, required this.unitDropdown, // Inventory
-    required this.stockStepper, required this.expiryDateButton, // Storage
-    required this.batchField, required this.locationField, required this.refrigerateRow, required this.freezeRow, required this.darkRow, required this.storageInstructionsField, super.key,
+    required this.appBarTitle,
+    required this.summaryBuilder, // General
+    required this.nameField,
+    required this.manufacturerField,
+    required this.descriptionField,
+    required this.notesField, // Strength
+    required this.strengthStepper,
+    required this.unitDropdown, // Inventory
+    required this.stockStepper,
+    required this.expiryDateButton, // Storage
+    required this.batchField,
+    required this.locationField,
+    required this.refrigerateRow,
+    required this.freezeRow,
+    required this.darkRow,
+    required this.storageInstructionsField,
+    super.key,
     this.nameHelp,
     this.manufacturerHelp,
     this.descriptionHelp,
@@ -137,7 +149,11 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 children: [
                   if (widget.generalIntro != null)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8, right: 8, bottom: 6),
+                      padding: const EdgeInsets.only(
+                        left: 8,
+                        right: 8,
+                        bottom: 6,
+                      ),
                       child: Text(
                         widget.generalIntro!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -147,9 +163,15 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                     ),
                   LabelFieldRow(label: 'Name *', field: widget.nameField),
                   _support(widget.nameHelp),
-                  LabelFieldRow(label: 'Manufacturer', field: widget.manufacturerField),
+                  LabelFieldRow(
+                    label: 'Manufacturer',
+                    field: widget.manufacturerField,
+                  ),
                   _support(widget.manufacturerHelp),
-                  LabelFieldRow(label: 'Description', field: widget.descriptionField),
+                  LabelFieldRow(
+                    label: 'Description',
+                    field: widget.descriptionField,
+                  ),
                   _support(widget.descriptionHelp),
                   LabelFieldRow(label: 'Notes', field: widget.notesField),
                   _support(widget.notesHelp),
@@ -162,7 +184,10 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 title: 'Strength',
                 neutral: true,
                 children: [
-                  LabelFieldRow(label: 'Strength *', field: widget.strengthStepper),
+                  LabelFieldRow(
+                    label: 'Strength *',
+                    field: widget.strengthStepper,
+                  ),
                   LabelFieldRow(label: 'Unit *', field: widget.unitDropdown),
                   // Show strength help first, then perMl section when applicable
                   _support(widget.strengthHelp),
@@ -174,25 +199,46 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
               const SizedBox(height: 12),
 
               // MDV Volume & Reconstitution section (optional, only for multi-dose vials)
-              if (widget.mdvSection != null) ...[widget.mdvSection!, const SizedBox(height: 12)],
+              if (widget.mdvSection != null) ...[
+                widget.mdvSection!,
+                const SizedBox(height: 12),
+              ],
 
               // Inventory
               SectionFormCard(
                 title: 'Inventory',
                 neutral: true,
                 children: [
-                  LabelFieldRow(label: 'Stock quantity *', field: widget.stockStepper),
+                  LabelFieldRow(
+                    label: 'Stock quantity *',
+                    field: widget.stockStepper,
+                  ),
                   _support(widget.stockHelp),
                   // Show Quantity unit only if provided (optional for auto-determined stock units)
                   if (widget.quantityDropdown != null)
-                    LabelFieldRow(label: 'Quantity unit', field: widget.quantityDropdown!),
+                    LabelFieldRow(
+                      label: 'Quantity unit',
+                      field: widget.quantityDropdown!,
+                    ),
                   if (widget.lowStockRow != null)
-                    LabelFieldRow(label: 'Low stock alert', field: widget.lowStockRow!),
+                    LabelFieldRow(
+                      label: 'Low stock alert',
+                      field: widget.lowStockRow!,
+                    ),
                   if (widget.lowStockThresholdField != null)
-                    LabelFieldRow(label: 'Threshold', field: widget.lowStockThresholdField!),
+                    LabelFieldRow(
+                      label: 'Threshold',
+                      field: widget.lowStockThresholdField!,
+                    ),
                   if (widget.lowStockHelp != null)
-                    _supportColored(widget.lowStockHelp, widget.lowStockHelpColor),
-                  LabelFieldRow(label: 'Expiry date', field: widget.expiryDateButton),
+                    _supportColored(
+                      widget.lowStockHelp,
+                      widget.lowStockHelpColor,
+                    ),
+                  LabelFieldRow(
+                    label: 'Expiry date',
+                    field: widget.expiryDateButton,
+                  ),
                   _support(widget.expiryHelp),
                 ],
               ),
@@ -207,7 +253,10 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                   _support(widget.batchHelp),
                   LabelFieldRow(label: 'Location', field: widget.locationField),
                   _support(widget.locationHelp),
-                  LabelFieldRow(label: 'Keep refrigerated', field: widget.refrigerateRow),
+                  LabelFieldRow(
+                    label: 'Keep refrigerated',
+                    field: widget.refrigerateRow,
+                  ),
                   _support(widget.refrigerateHelp),
                   LabelFieldRow(label: 'Keep frozen', field: widget.freezeRow),
                   _support(widget.freezeHelp),
@@ -237,11 +286,17 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
   Widget _support(String? text) {
     if (text == null || text.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+      padding: const EdgeInsets.only(
+        left: kLabelColWidth + 8,
+        top: 2,
+        bottom: 6,
+      ),
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.75),
         ),
       ),
     );
@@ -250,11 +305,17 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
   Widget _supportColored(String? text, Color? color) {
     if (text == null || text.isEmpty) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: kLabelColWidth + 8, top: 2, bottom: 6),
+      padding: const EdgeInsets.only(
+        left: kLabelColWidth + 8,
+        top: 2,
+        bottom: 6,
+      ),
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: color ?? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
+          color:
+              color ??
+              Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.75),
         ),
       ),
     );

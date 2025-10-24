@@ -7,7 +7,10 @@ import 'package:dosifi_v5/src/features/calendar/data/calendar_event.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 class CalendarUtils {
-  static List<CalendarEvent> eventsForMonth(DateTime monthLocal, Box<Schedule> box) {
+  static List<CalendarEvent> eventsForMonth(
+    DateTime monthLocal,
+    Box<Schedule> box,
+  ) {
     // monthLocal is any date in the month (local)
     final year = monthLocal.year;
     final month = monthLocal.month;
@@ -16,13 +19,23 @@ class CalendarUtils {
     return _eventsForRange(firstLocal, lastLocal, box);
   }
 
-  static List<CalendarEvent> eventsForWeek(DateTime weekStartLocal, Box<Schedule> box) {
-    final start = DateTime(weekStartLocal.year, weekStartLocal.month, weekStartLocal.day);
+  static List<CalendarEvent> eventsForWeek(
+    DateTime weekStartLocal,
+    Box<Schedule> box,
+  ) {
+    final start = DateTime(
+      weekStartLocal.year,
+      weekStartLocal.month,
+      weekStartLocal.day,
+    );
     final end = start.add(const Duration(days: 6));
     return _eventsForRange(start, end, box);
   }
 
-  static List<CalendarEvent> eventsForDay(DateTime dayLocal, Box<Schedule> box) {
+  static List<CalendarEvent> eventsForDay(
+    DateTime dayLocal,
+    Box<Schedule> box,
+  ) {
     final start = DateTime(dayLocal.year, dayLocal.month, dayLocal.day);
     final end = start;
     return _eventsForRange(start, end, box);
@@ -36,7 +49,11 @@ class CalendarUtils {
     final out = <CalendarEvent>[];
     final schedules = box.values.where((s) => s.active).toList(growable: false);
 
-    for (var d = startLocal; !d.isAfter(endLocal); d = d.add(const Duration(days: 1))) {
+    for (
+      var d = startLocal;
+      !d.isAfter(endLocal);
+      d = d.add(const Duration(days: 1))
+    ) {
       final dUtcMidnight = DateTime(d.year, d.month, d.day).toUtc();
       final utcWeekday = dUtcMidnight.weekday; // 1..7 UTC weekday
       for (final s in schedules) {
@@ -62,7 +79,13 @@ class CalendarUtils {
             mUtc,
           );
           final whenLocal = eventUtc.toLocal();
-          out.add(CalendarEvent(scheduleId: s.id, title: _titleFor(s), when: whenLocal));
+          out.add(
+            CalendarEvent(
+              scheduleId: s.id,
+              title: _titleFor(s),
+              when: whenLocal,
+            ),
+          );
         }
       }
     }

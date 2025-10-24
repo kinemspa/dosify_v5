@@ -16,7 +16,13 @@ import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 /// vial volume input, and dynamic summary display.
 class MdvVolumeReconstitutionSection extends StatefulWidget {
   const MdvVolumeReconstitutionSection({
-    required this.strengthController, required this.strengthUnit, required this.perMlController, required this.vialVolumeController, required this.medicationNameController, required this.onReconstitutionChanged, super.key,
+    required this.strengthController,
+    required this.strengthUnit,
+    required this.perMlController,
+    required this.vialVolumeController,
+    required this.medicationNameController,
+    required this.onReconstitutionChanged,
+    super.key,
     this.initialReconResult,
     this.vialVolumeKey,
   });
@@ -31,10 +37,12 @@ class MdvVolumeReconstitutionSection extends StatefulWidget {
   final GlobalKey? vialVolumeKey;
 
   @override
-  State<MdvVolumeReconstitutionSection> createState() => _MdvVolumeReconstitutionSectionState();
+  State<MdvVolumeReconstitutionSection> createState() =>
+      _MdvVolumeReconstitutionSectionState();
 }
 
-class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitutionSection> {
+class _MdvVolumeReconstitutionSectionState
+    extends State<MdvVolumeReconstitutionSection> {
   ReconstitutionResult? _reconResult;
   bool _showCalculator = false;
 
@@ -115,17 +123,22 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
               label: const Text('Close Calculator'),
             )
           : OutlinedButton.icon(
-              onPressed: hasStrength ? () => setState(() => _showCalculator = true) : null,
+              onPressed: hasStrength
+                  ? () => setState(() => _showCalculator = true)
+                  : null,
               icon: const Icon(Icons.calculate, size: 18),
               label: Text(
-                _reconResult == null ? 'Reconstitution Calculator' : 'Edit Reconstitution',
+                _reconResult == null
+                    ? 'Reconstitution Calculator'
+                    : 'Edit Reconstitution',
               ),
             ),
     );
   }
 
   Widget _buildCalculatorWidget() {
-    final strengthVal = double.tryParse(widget.strengthController.text.trim()) ?? 0;
+    final strengthVal =
+        double.tryParse(widget.strengthController.text.trim()) ?? 0;
     final medName = widget.medicationNameController.text.trim();
 
     return ReconstitutionCalculatorWidget(
@@ -141,9 +154,12 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
         // Update vial volume dynamically as user adjusts calculator
         // Only update the field, don't save the result yet
         if (mounted) {
-          widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(
-            result.solventVolumeMl == result.solventVolumeMl.roundToDouble() ? 0 : 1,
-          );
+          widget.vialVolumeController.text = result.solventVolumeMl
+              .toStringAsFixed(
+                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
+                    ? 0
+                    : 1,
+              );
         }
       },
       onApply: (result) {
@@ -152,14 +168,21 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
           _showCalculator = false;
 
           // Update vial volume with calculated value
-          widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(
-            result.solventVolumeMl == result.solventVolumeMl.roundToDouble() ? 0 : 1,
-          );
+          widget.vialVolumeController.text = result.solventVolumeMl
+              .toStringAsFixed(
+                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
+                    ? 0
+                    : 1,
+              );
 
           // Update perMl concentration
-          widget.perMlController.text = result.perMlConcentration.toStringAsFixed(
-            result.perMlConcentration == result.perMlConcentration.roundToDouble() ? 0 : 2,
-          );
+          widget.perMlController.text = result.perMlConcentration
+              .toStringAsFixed(
+                result.perMlConcentration ==
+                        result.perMlConcentration.roundToDouble()
+                    ? 0
+                    : 2,
+              );
         });
         widget.onReconstitutionChanged(result);
 
@@ -183,7 +206,8 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
     final theme = Theme.of(context);
     final result = _reconResult!;
     final medName = widget.medicationNameController.text.trim();
-    final strengthVal = double.tryParse(widget.strengthController.text.trim()) ?? 0;
+    final strengthVal =
+        double.tryParse(widget.strengthController.text.trim()) ?? 0;
     final unitLabel = _baseUnit(widget.strengthUnit);
     final diluentName = result.diluentName ?? 'diluent';
 
@@ -191,14 +215,17 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
     final strengthStr = strengthVal == strengthVal.roundToDouble()
         ? strengthVal.toStringAsFixed(0)
         : strengthVal.toString();
-    final volumeStr = result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
+    final volumeStr =
+        result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
         ? result.solventVolumeMl.toStringAsFixed(0)
         : result.solventVolumeMl.toStringAsFixed(1);
-    final drawStr = result.recommendedUnits == result.recommendedUnits.roundToDouble()
+    final drawStr =
+        result.recommendedUnits == result.recommendedUnits.roundToDouble()
         ? result.recommendedUnits.toStringAsFixed(0)
         : result.recommendedUnits.toStringAsFixed(1);
     final mlDrawStr = (result.recommendedUnits / 100).toStringAsFixed(2);
-    final syringeStr = result.syringeSizeMl == result.syringeSizeMl.roundToDouble()
+    final syringeStr =
+        result.syringeSizeMl == result.syringeSizeMl.roundToDouble()
         ? result.syringeSizeMl.toStringAsFixed(1)
         : result.syringeSizeMl.toString();
 
@@ -222,13 +249,19 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
               const TextSpan(text: 'Reconstitute '),
               TextSpan(
                 text: '$strengthStr$unitLabel',
-                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               if (medName.isNotEmpty) TextSpan(text: ' $medName'),
               const TextSpan(text: ' with '),
               TextSpan(
                 text: '$volumeStr mL',
-                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               TextSpan(text: ' $diluentName'),
             ],
@@ -246,17 +279,26 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
               const TextSpan(text: 'Draw '),
               TextSpan(
                 text: '$drawStr U',
-                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const TextSpan(text: ' ('),
               TextSpan(
                 text: '$mlDrawStr mL',
-                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const TextSpan(text: ') into a '),
               TextSpan(
                 text: '$syringeStr mL',
-                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const TextSpan(text: ' syringe'),
             ],
@@ -279,58 +321,43 @@ class _MdvVolumeReconstitutionSectionState extends State<MdvVolumeReconstitution
           key: widget.vialVolumeKey,
           label: 'Vial Volume (mL)',
           labelWidth: _labelWidth(),
-          field: TextField(
+          field: StepperRow36(
             controller: widget.vialVolumeController,
             enabled: !isLocked,
-            textAlign: TextAlign.center,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onDec: () {
+              if (isLocked) return;
+              final d =
+                  double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+              final nv = (d - 0.5).clamp(0, 1000);
+              setState(() {
+                widget.vialVolumeController.text = nv.toStringAsFixed(1);
+              });
+            },
+            onInc: () {
+              if (isLocked) return;
+              final d =
+                  double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+              final nv = (d + 0.5).clamp(0, 1000);
+              setState(() {
+                widget.vialVolumeController.text = nv.toStringAsFixed(1);
+              });
+            },
+            decoration:
+                buildCompactFieldDecoration(
+                  context: context,
+                  hint: '0.0',
+                ).copyWith(
+                  fillColor: isLocked
+                      ? theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.5,
+                        )
+                      : theme.colorScheme.surfaceContainerLowest,
+                ),
+            // Restrict manual input to 2 decimal places
             inputFormatters: [
-              // Allow numbers with up to 2 decimal places
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
-            style: bodyTextStyle(context),
-            decoration: buildCompactFieldDecoration(
-              context: context,
-              hint: '0.0',
-            ).copyWith(
-              fillColor: isLocked
-                  ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-                  : theme.colorScheme.surfaceContainerLowest,
-              // Add increment buttons
-              suffixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: isLocked
-                        ? null
-                        : () {
-                            final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-                            final nv = (d - 0.5).clamp(0, 1000);
-                            setState(() {
-                              widget.vialVolumeController.text = nv.toStringAsFixed(1);
-                            });
-                          },
-                    icon: const Icon(Icons.remove, size: 18),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                  ),
-                  IconButton(
-                    onPressed: isLocked
-                        ? null
-                        : () {
-                            final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-                            final nv = (d + 0.5).clamp(0, 1000);
-                            setState(() {
-                              widget.vialVolumeController.text = nv.toStringAsFixed(1);
-                            });
-                          },
-                    icon: const Icon(Icons.add, size: 18),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                  ),
-                ],
-              ),
-            ),
+            compact: true,
           ),
         ),
         Padding(

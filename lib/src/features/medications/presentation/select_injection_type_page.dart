@@ -15,7 +15,10 @@ class SelectInjectionTypePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Select Injection Type', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Select Injection Type',
+        forceBackButton: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: const [
@@ -72,7 +75,9 @@ class _Tile extends StatelessWidget {
     final tileBg = isPrimary ? cs.primary : cs.surfaceContainerLowest;
     final titleColor = isPrimary ? cs.onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
-    final badgeBg = isPrimary ? cs.onPrimary.withOpacity(0.15) : cs.primary.withOpacity(0.12);
+    final badgeBg = isPrimary
+        ? cs.onPrimary.withOpacity(0.15)
+        : cs.primary.withOpacity(0.12);
     final badgeIconColor = isPrimary ? cs.onPrimary : cs.primary;
     final chevronColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
 
@@ -90,14 +95,20 @@ class _Tile extends StatelessWidget {
             curve: Curves.easeOutCubic,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: isPrimary
-                ? BoxDecoration(color: tileBg, borderRadius: BorderRadius.circular(12))
+                ? BoxDecoration(
+                    color: tileBg,
+                    borderRadius: BorderRadius.circular(12),
+                  )
                 : softWhiteCardDecoration(context),
             child: Row(
               children: [
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(
+                    color: badgeBg,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Icon(icon, color: badgeIconColor, size: 20),
                 ),
                 const SizedBox(width: 12),
@@ -115,7 +126,9 @@ class _Tile extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: mutedTextStyle(context)?.copyWith(color: subtitleColor),
+                        style: mutedTextStyle(
+                          context,
+                        )?.copyWith(color: subtitleColor),
                       ),
                     ],
                   ),
@@ -131,7 +144,11 @@ class _Tile extends StatelessWidget {
 }
 
 class _ScreenHeader extends StatelessWidget {
-  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
+  const _ScreenHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -141,7 +158,10 @@ class _ScreenHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return Container(
-      decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
@@ -161,13 +181,15 @@ class _ScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: bodyTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightBold,
-                    color: cs.onPrimary,
-                  ),
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightBold, color: cs.onPrimary),
                 ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: mutedTextStyle(context)?.copyWith(color: cs.onPrimary)),
+                Text(
+                  subtitle,
+                  style: mutedTextStyle(context)?.copyWith(color: cs.onPrimary),
+                ),
               ],
             ),
           ),

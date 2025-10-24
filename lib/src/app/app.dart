@@ -16,11 +16,10 @@ class DosifiApp extends ConsumerWidget {
     const primarySeed = Color(0xFF09A8BD);
     // const secondary = Color(0xFFEC873F);
 
-    final schemeLight = ColorScheme.fromSeed(seedColor: primarySeed)
-        .copyWith(
-          // Pin the primary color exactly to the brand seed to avoid tonal shifts
-          primary: primarySeed,
-        );
+    final schemeLight = ColorScheme.fromSeed(seedColor: primarySeed).copyWith(
+      // Pin the primary color exactly to the brand seed to avoid tonal shifts
+      primary: primarySeed,
+    );
     final baseLight = ThemeData(
       colorScheme: schemeLight,
       useMaterial3: true,
@@ -52,13 +51,17 @@ class DosifiApp extends ConsumerWidget {
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
-            color: states.contains(WidgetState.selected) ? schemeLight.primary : Colors.white70,
+            color: states.contains(WidgetState.selected)
+                ? schemeLight.primary
+                : Colors.white70,
             size: 22,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
-            color: states.contains(WidgetState.selected) ? schemeLight.primary : Colors.white70,
+            color: states.contains(WidgetState.selected)
+                ? schemeLight.primary
+                : Colors.white70,
             fontSize: 10,
           ),
         ),
@@ -81,7 +84,10 @@ class DosifiApp extends ConsumerWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: baseLight.colorScheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: baseLight.colorScheme.primary,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -89,7 +95,10 @@ class DosifiApp extends ConsumerWidget {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: baseLight.colorScheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: baseLight.colorScheme.primary,
+            width: 2,
+          ),
         ),
         errorStyle: const TextStyle(fontSize: 0, height: 0),
         filled: true,
@@ -113,7 +122,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -123,7 +134,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -133,22 +146,29 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return baseLight.colorScheme.primary;
+          if (states.contains(WidgetState.selected))
+            return baseLight.colorScheme.primary;
           return Colors.transparent; // no fill when unchecked
         }),
         checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
           // Match design system border width (0.75px) for consistency with text fields
-          final color = baseLight.colorScheme.outlineVariant.withValues(alpha: 0.50);
+          final color = baseLight.colorScheme.outlineVariant.withValues(
+            alpha: 0.50,
+          );
           return BorderSide(color: color, width: 0.75);
         }),
-        overlayColor: WidgetStatePropertyAll(baseLight.colorScheme.primary.withValues(alpha: 0.08)),
+        overlayColor: WidgetStatePropertyAll(
+          baseLight.colorScheme.primary.withValues(alpha: 0.08),
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseLight.colorScheme.primary,
@@ -191,13 +211,17 @@ class DosifiApp extends ConsumerWidget {
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
-            color: states.contains(WidgetState.selected) ? schemeDark.primary : Colors.white70,
+            color: states.contains(WidgetState.selected)
+                ? schemeDark.primary
+                : Colors.white70,
             size: 22,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
-            color: states.contains(WidgetState.selected) ? schemeDark.primary : Colors.white70,
+            color: states.contains(WidgetState.selected)
+                ? schemeDark.primary
+                : Colors.white70,
             fontSize: 10,
           ),
         ),
@@ -252,7 +276,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -262,7 +288,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -272,22 +300,29 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return baseDark.colorScheme.primary;
+          if (states.contains(WidgetState.selected))
+            return baseDark.colorScheme.primary;
           return Colors.transparent;
         }),
         checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
           // Match design system border width (0.75px) for consistency with text fields
-          final color = baseDark.colorScheme.outlineVariant.withValues(alpha: 0.50);
+          final color = baseDark.colorScheme.outlineVariant.withValues(
+            alpha: 0.50,
+          );
           return BorderSide(color: color, width: 0.75);
         }),
-        overlayColor: WidgetStatePropertyAll(baseDark.colorScheme.primary.withValues(alpha: 0.12)),
+        overlayColor: WidgetStatePropertyAll(
+          baseDark.colorScheme.primary.withValues(alpha: 0.12),
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseDark.colorScheme.primary,
@@ -308,7 +343,8 @@ class DosifiApp extends ConsumerWidget {
           onTap: () {
             // Unfocus any active input field
             final currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+            if (!currentFocus.hasPrimaryFocus &&
+                currentFocus.focusedChild != null) {
               FocusManager.instance.primaryFocus?.unfocus();
             }
           },

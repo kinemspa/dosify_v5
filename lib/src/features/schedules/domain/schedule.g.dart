@@ -113,5 +113,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ScheduleAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
+      other is ScheduleAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }

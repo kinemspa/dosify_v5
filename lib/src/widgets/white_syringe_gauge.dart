@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 /// Can be interactive - drag the fill line to adjust value
 class WhiteSyringeGauge extends StatefulWidget {
   const WhiteSyringeGauge({
-    required this.totalUnits, required this.fillUnits, super.key,
+    required this.totalUnits,
+    required this.fillUnits,
+    super.key,
     this.color,
     this.onChanged,
     this.interactive = false,
@@ -32,7 +34,8 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = widget.color ?? Theme.of(context).colorScheme.primary;
+    final effectiveColor =
+        widget.color ?? Theme.of(context).colorScheme.primary;
     final currentFill = _dragValue ?? widget.fillUnits;
 
     return GestureDetector(
@@ -46,7 +49,8 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               var newFillUnits = fillRatio * widget.totalUnits;
 
               // Check max constraint
-              if (widget.maxConstraint != null && newFillUnits > widget.maxConstraint!) {
+              if (widget.maxConstraint != null &&
+                  newFillUnits > widget.maxConstraint!) {
                 newFillUnits = widget.maxConstraint!;
                 if (!_hitConstraint) {
                   _hitConstraint = true;
@@ -82,7 +86,8 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               var newFillUnits = fillRatio * widget.totalUnits;
 
               // Check max constraint
-              if (widget.maxConstraint != null && newFillUnits > widget.maxConstraint!) {
+              if (widget.maxConstraint != null &&
+                  newFillUnits > widget.maxConstraint!) {
                 newFillUnits = widget.maxConstraint!;
                 widget.onMaxConstraintHit?.call();
               }
@@ -130,7 +135,11 @@ class _WhiteSyringePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    canvas.drawLine(Offset(0, baselineY), Offset(size.width, baselineY), baselinePaint);
+    canvas.drawLine(
+      Offset(0, baselineY),
+      Offset(size.width, baselineY),
+      baselinePaint,
+    );
 
     // Draw unit marker ticks and labels
     final tickPaint = Paint()
@@ -155,7 +164,11 @@ class _WhiteSyringePainter extends CustomPainter {
         final tp = TextPainter(
           text: TextSpan(
             text: units.toStringAsFixed(0),
-            style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 10,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           textDirection: TextDirection.ltr,
         )..layout();
@@ -165,7 +178,9 @@ class _WhiteSyringePainter extends CustomPainter {
     }
 
     // Draw thick fill line representing the amount in syringe
-    final ratio = totalUnits <= 0 ? 0.0 : (fillUnits / totalUnits).clamp(0.0, 1.0);
+    final ratio = totalUnits <= 0
+        ? 0.0
+        : (fillUnits / totalUnits).clamp(0.0, 1.0);
     if (ratio > 0 && !ratio.isNaN) {
       final fillPaint = Paint()
         ..color = color
@@ -174,7 +189,11 @@ class _WhiteSyringePainter extends CustomPainter {
         ..style = PaintingStyle.stroke;
 
       final fillEndX = size.width * ratio;
-      canvas.drawLine(Offset(0, baselineY), Offset(fillEndX, baselineY), fillPaint);
+      canvas.drawLine(
+        Offset(0, baselineY),
+        Offset(fillEndX, baselineY),
+        fillPaint,
+      );
 
       // Draw draggable handle indicator if interactive
       if (interactive && fillEndX > 0) {

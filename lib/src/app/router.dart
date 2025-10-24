@@ -45,7 +45,11 @@ final router = GoRouter(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => ShellScaffold(child: child),
       routes: [
-        GoRoute(path: '/', name: 'home', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/',
+          name: 'home',
+          builder: (context, state) => const HomePage(),
+        ),
         GoRoute(
           path: '/medications',
           name: 'medications',
@@ -136,30 +140,35 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          builder: (context, state) => const AddEditMedicationPage(form: MedicationForm.tablet),
+          builder: (context, state) =>
+              const AddEditMedicationPage(form: MedicationForm.tablet),
         ),
         GoRoute(
           path: '/medications/add/capsule',
           name: 'addCapsule',
-          builder: (context, state) => const AddEditMedicationPage(form: MedicationForm.capsule),
+          builder: (context, state) =>
+              const AddEditMedicationPage(form: MedicationForm.capsule),
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) =>
-              const AddEditMedicationPage(form: MedicationForm.injectionPreFilledSyringe),
+          builder: (context, state) => const AddEditMedicationPage(
+            form: MedicationForm.injectionPreFilledSyringe,
+          ),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) =>
-              const AddEditMedicationPage(form: MedicationForm.injectionSingleDoseVial),
+          builder: (context, state) => const AddEditMedicationPage(
+            form: MedicationForm.injectionSingleDoseVial,
+          ),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
-          builder: (context, state) =>
-              const AddEditMedicationPage(form: MedicationForm.injectionMultiDoseVial),
+          builder: (context, state) => const AddEditMedicationPage(
+            form: MedicationForm.injectionMultiDoseVial,
+          ),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
         GoRoute(
@@ -169,7 +178,10 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(form: MedicationForm.tablet, initial: med);
+            return AddEditMedicationPage(
+              form: MedicationForm.tablet,
+              initial: med,
+            );
           },
         ),
         GoRoute(
@@ -179,7 +191,10 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(form: MedicationForm.capsule, initial: med);
+            return AddEditMedicationPage(
+              form: MedicationForm.capsule,
+              initial: med,
+            );
           },
         ),
         GoRoute(

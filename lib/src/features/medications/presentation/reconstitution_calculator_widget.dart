@@ -17,7 +17,9 @@ import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 /// Reusable reconstitution calculator widget used in both dialog and inline contexts
 class ReconstitutionCalculatorWidget extends StatefulWidget {
   const ReconstitutionCalculatorWidget({
-    required this.initialStrengthValue, required this.unitLabel, super.key,
+    required this.initialStrengthValue,
+    required this.unitLabel,
+    super.key,
     this.medicationName,
     this.initialDoseValue,
     this.initialDoseUnit,
@@ -42,10 +44,12 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
   final bool showApplyButton;
 
   @override
-  State<ReconstitutionCalculatorWidget> createState() => _ReconstitutionCalculatorWidgetState();
+  State<ReconstitutionCalculatorWidget> createState() =>
+      _ReconstitutionCalculatorWidgetState();
 }
 
-class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculatorWidget> {
+class _ReconstitutionCalculatorWidgetState
+    extends State<ReconstitutionCalculatorWidget> {
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
   final TextEditingController _diluentNameCtrl = TextEditingController();
@@ -65,7 +69,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
           : defaultDose.toStringAsFixed(2),
     );
     // Set dose unit to match vial unit for units-based medications, otherwise default to mcg
-    _doseUnit = widget.initialDoseUnit ?? (widget.unitLabel == 'units' ? 'units' : 'mcg');
+    _doseUnit =
+        widget.initialDoseUnit ??
+        (widget.unitLabel == 'units' ? 'units' : 'mcg');
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
@@ -124,7 +130,10 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: 0.75),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: 0.75,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -133,7 +142,11 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     );
   }
 
-  Widget _rowLabelField(BuildContext context, {required String label, required Widget field}) {
+  Widget _rowLabelField(
+    BuildContext context, {
+    required String label,
+    required Widget field,
+  }) {
     // Use unified row to ensure consistent label styling and spacing.
     return LabelFieldRow(label: label, field: field);
   }
@@ -204,7 +217,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
     final currentC = round2(current.cPerMl);
     final currentV = current.vialVolume; // Use precise value for live display
-    final currentVRounded = roundToHalfMl(current.vialVolume); // Rounded for saving
+    final currentVRounded = roundToHalfMl(
+      current.vialVolume,
+    ); // Rounded for saving
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
     // Notify parent of calculation result (use rounded value for saving)
@@ -213,7 +228,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
       solventVolumeMl: currentVRounded,
       recommendedUnits: round2(_selectedUnits),
       syringeSizeMl: _syringe.ml,
-      diluentName: _diluentNameCtrl.text.trim().isNotEmpty ? _diluentNameCtrl.text.trim() : null,
+      diluentName: _diluentNameCtrl.text.trim().isNotEmpty
+          ? _diluentNameCtrl.text.trim()
+          : null,
     );
     final isValid = S > 0 && D > 0 && fitsVial;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -237,7 +254,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
           'Reconstitution Calculator',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.8),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withOpacity(0.8),
           ),
         ),
         const SizedBox(height: 4),
@@ -245,7 +264,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             'Using vial strength: ${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-            style: kMutedLabelStyle(context).copyWith(fontWeight: FontWeight.w600),
+            style: kMutedLabelStyle(
+              context,
+            ).copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         Padding(
@@ -261,7 +282,10 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
           field: Field36(
             child: TextField(
               controller: _diluentNameCtrl,
-              decoration: _fieldDecoration(context, hint: 'e.g., Sterile Water'),
+              decoration: _fieldDecoration(
+                context,
+                hint: 'e.g., Sterile Water',
+              ),
               onChanged: (_) => setState(() {}),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -345,7 +369,10 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
             onChanged: (v) => setState(() {
               _syringe = v!;
               final total = _syringe.totalUnits.toDouble();
-              _selectedUnits = max(_selectedUnits, max(5, (0.05 * total).ceil()).toDouble());
+              _selectedUnits = max(
+                _selectedUnits,
+                max(5, (0.05 * total).ceil()).toDouble(),
+              );
             }),
             decoration: _fieldDecoration(context),
           ),
@@ -358,22 +385,31 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
             controller: _vialSizeCtrl,
             onDec: () {
               final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-              setState(() => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString());
+              setState(
+                () => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString(),
+              );
             },
             onInc: () {
               final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-              setState(() => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString());
+              setState(
+                () => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString(),
+              );
             },
             decoration: _fieldDecoration(context, hint: 'mL'),
           ),
         ),
         _helperText('Maximum capacity in mL of the vial (optional constraint)'),
-        Divider(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+        Divider(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+        ),
         const SizedBox(height: 12),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text('Select a reconstitution option', style: kMutedLabelStyle(context)),
+            child: Text(
+              'Select a reconstitution option',
+              style: kMutedLabelStyle(context),
+            ),
           ),
           _buildOptionRow(
             context,
@@ -433,7 +469,7 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
         ),
         // Range limit warning removed - using snackbar only for cleaner UI
         const SizedBox(height: 8),
-          // Live syringe gauge preview (interactive)
+        // Live syringe gauge preview (interactive)
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -464,7 +500,8 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                     final clampedValue = newValue.clamp(sliderMin, sliderMax);
                     setState(() {
                       _selectedUnits = clampedValue;
-                      _selectedOption = null; // Clear option selection on manual adjust
+                      _selectedOption =
+                          null; // Clear option selection on manual adjust
                     });
                   },
                 ),
@@ -500,20 +537,28 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                     children: [
                       const TextSpan(text: 'Reconstitute '),
                       TextSpan(
-                        text: '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-                        style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                        text:
+                            '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
-                      if (widget.medicationName != null && widget.medicationName!.isNotEmpty) ...[
+                      if (widget.medicationName != null &&
+                          widget.medicationName!.isNotEmpty) ...[
                         const TextSpan(text: ' '),
                         TextSpan(
                           text: widget.medicationName,
-                          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ],
                       const TextSpan(text: ' with '),
                       TextSpan(
                         text: '${currentV.toStringAsFixed(2)} mL',
-                        style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       TextSpan(
                         text: _diluentNameCtrl.text.trim().isNotEmpty
@@ -542,7 +587,8 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                       ),
                       const TextSpan(text: ' ('),
                       TextSpan(
-                        text: '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
+                        text:
+                            '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -602,9 +648,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               'Warning: Computed solvent volume (${currentV.toStringAsFixed(2)} mL) exceeds vial size. Try a more concentrated preset (lower units).',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.error),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         if (widget.showApplyButton) ...[
@@ -675,7 +721,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                   ? theme.colorScheme.primaryContainer.withOpacity(0.3)
                   : Colors.transparent,
               border: Border.all(
-                color: selected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outlineVariant,
                 width: 2, // Consistent width to prevent nudging
               ),
               borderRadius: BorderRadius.circular(8),
@@ -699,7 +747,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                           fontWeight: FontWeight.w600,
                           color: selected
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                                  0.5,
+                                ),
                         ),
                       ),
                       if (explainerText.isNotEmpty) ...[
@@ -719,7 +769,8 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
                                 ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                : theme.colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
                           ),
                           children: [
                             TextSpan(
@@ -728,7 +779,9 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                             ),
                             TextSpan(
                               text: '${formatDouble(roundedVolume)} mL',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -738,13 +791,17 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
                                 ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                : theme.colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
                           ),
                           children: [
                             const TextSpan(text: 'Concentration: '),
                             TextSpan(
-                              text: '${formatDouble(calcResult.cPerMl)} ${widget.unitLabel}/mL',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              text:
+                                  '${formatDouble(calcResult.cPerMl)} ${widget.unitLabel}/mL',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -754,13 +811,17 @@ class _ReconstitutionCalculatorWidgetState extends State<ReconstitutionCalculato
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
                                 ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                : theme.colorScheme.onSurfaceVariant
+                                      .withOpacity(0.5),
                           ),
                           children: [
                             TextSpan(text: 'Syringe (${_syringe.label}): '),
                             TextSpan(
-                              text: '${formatDouble(units)} U / ${formatDouble(mlToDraw)} mL',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              text:
+                                  '${formatDouble(units)} U / ${formatDouble(mlToDraw)} mL',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),

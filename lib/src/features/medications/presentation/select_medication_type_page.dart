@@ -16,7 +16,10 @@ class SelectMedicationTypePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Medication Type', forceBackButton: true),
+      appBar: const GradientAppBar(
+        title: 'Medication Type',
+        forceBackButton: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 28),
         children: const [
@@ -33,7 +36,8 @@ class SelectMedicationTypePage extends StatelessWidget {
           ),
           SizedBox(height: 16),
           _TypeTile(
-            icon: Icons.medication, // placeholder, overridden in widget with MDI when available
+            icon: Icons
+                .medication, // placeholder, overridden in widget with MDI when available
             title: 'Capsule',
             subtitle: 'Powder or pellets in a gelatin shell',
           ),
@@ -87,8 +91,12 @@ class _TypeTileState extends State<_TypeTile> {
     final isPrimary = widget.primary;
     final tileBg = isPrimary ? primaryBg : cs.surfaceContainerLowest;
     // Use consistent colors with proper opacity for readability
-    final titleColor = isPrimary ? onPrimary : cs.onSurface.withValues(alpha: kOpacityHigh);
-    final subtitleColor = isPrimary ? onPrimary : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+    final titleColor = isPrimary
+        ? onPrimary
+        : cs.onSurface.withValues(alpha: kOpacityHigh);
+    final subtitleColor = isPrimary
+        ? onPrimary
+        : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
     final badgeBg = isPrimary
         ? onPrimary.withValues(alpha: 0.15)
         : primaryBg.withValues(alpha: 0.12);
@@ -119,7 +127,10 @@ class _TypeTileState extends State<_TypeTile> {
             duration: const Duration(milliseconds: 120),
             curve: Curves.easeOutCubic,
             decoration: isPrimary
-                ? BoxDecoration(color: tileBg, borderRadius: BorderRadius.circular(12))
+                ? BoxDecoration(
+                    color: tileBg,
+                    borderRadius: BorderRadius.circular(12),
+                  )
                 : softWhiteCardDecoration(context),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             child: Row(
@@ -128,8 +139,15 @@ class _TypeTileState extends State<_TypeTile> {
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
-                  child: Icon(_effectiveIcon(), color: badgeIconColor, size: 20),
+                  decoration: BoxDecoration(
+                    color: badgeBg,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    _effectiveIcon(),
+                    color: badgeIconColor,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -146,7 +164,9 @@ class _TypeTileState extends State<_TypeTile> {
                       const SizedBox(height: 2),
                       Text(
                         widget.subtitle,
-                        style: mutedTextStyle(context)?.copyWith(color: subtitleColor),
+                        style: mutedTextStyle(
+                          context,
+                        )?.copyWith(color: subtitleColor),
                       ),
                     ],
                   ),
@@ -162,7 +182,11 @@ class _TypeTileState extends State<_TypeTile> {
 }
 
 class _ScreenHeader extends StatelessWidget {
-  const _ScreenHeader({required this.icon, required this.title, required this.subtitle});
+  const _ScreenHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -172,7 +196,10 @@ class _ScreenHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return Container(
-      decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
@@ -192,10 +219,9 @@ class _ScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: bodyTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightBold,
-                    color: cs.onPrimary,
-                  ),
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightBold, color: cs.onPrimary),
                 ),
                 const SizedBox(height: 2),
                 Text(

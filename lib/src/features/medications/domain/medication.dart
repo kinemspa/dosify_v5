@@ -12,7 +12,11 @@ class Medication {
     required this.id,
     required this.form,
     required this.name,
-    required this.strengthValue, required this.strengthUnit, required this.stockValue, required this.stockUnit, this.manufacturer,
+    required this.strengthValue,
+    required this.strengthUnit,
+    required this.stockValue,
+    required this.stockUnit,
+    this.manufacturer,
     this.description,
     this.notes,
     this.perMlValue,
@@ -165,16 +169,20 @@ class Medication {
       expiry: expiry ?? this.expiry,
       batchNumber: batchNumber ?? this.batchNumber,
       storageLocation: storageLocation ?? this.storageLocation,
-      requiresRefrigeration: requiresRefrigeration ?? this.requiresRefrigeration,
+      requiresRefrigeration:
+          requiresRefrigeration ?? this.requiresRefrigeration,
       storageInstructions: storageInstructions ?? this.storageInstructions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       containerVolumeMl: containerVolumeMl ?? this.containerVolumeMl,
       lowStockVialVolumeThresholdMl:
           lowStockVialVolumeThresholdMl ?? this.lowStockVialVolumeThresholdMl,
-      lowStockVialsThresholdCount: lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
+      lowStockVialsThresholdCount:
+          lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
       initialStockValue: initialStockValue ?? this.initialStockValue,
-      reconstitutedAt: clearReconstitution ? null : (reconstitutedAt ?? this.reconstitutedAt),
+      reconstitutedAt: clearReconstitution
+          ? null
+          : (reconstitutedAt ?? this.reconstitutedAt),
       reconstitutedVialExpiry: clearReconstitution
           ? null
           : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),

@@ -110,7 +110,8 @@ class Schedule {
   bool get hasDaysOfMonth => daysOfMonth != null && daysOfMonth!.isNotEmpty;
 
   // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
-  DoseUnit? get doseUnitEnum => doseUnitCode != null ? DoseUnit.values[doseUnitCode!] : null;
+  DoseUnit? get doseUnitEnum =>
+      doseUnitCode != null ? DoseUnit.values[doseUnitCode!] : null;
   DoseUnit? get displayUnitEnum =>
       displayUnitCode != null ? DoseUnit.values[displayUnitCode!] : null;
   DoseInputMode? get inputModeEnum =>

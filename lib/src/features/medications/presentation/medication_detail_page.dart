@@ -24,7 +24,8 @@ class MedicationDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<Medication>('medications');
-    final med = initial ?? (medicationId != null ? box.get(medicationId) : null);
+    final med =
+        initial ?? (medicationId != null ? box.get(medicationId) : null);
 
     if (med == null) {
       return const Scaffold(
@@ -45,17 +46,14 @@ class MedicationDetailPage extends StatelessWidget {
           children: [
             Text(
               label,
-              style: fieldLabelStyle(context)?.copyWith(
-                color: cs.primary,
-              ),
+              style: fieldLabelStyle(context)?.copyWith(color: cs.primary),
             ),
             const SizedBox(height: 4),
             Text(
               value,
-              style: bodyTextStyle(context)?.copyWith(
-                color: cs.onSurface,
-                height: kLineHeightNormal,
-              ),
+              style: bodyTextStyle(
+                context,
+              )?.copyWith(color: cs.onSurface, height: kLineHeightNormal),
             ),
           ],
         ),
@@ -126,7 +124,9 @@ class MedicationDetailPage extends StatelessWidget {
                 context.go('/medications');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Deleted "${med.name}" — removed $removed linked schedule(s)'),
+                    content: Text(
+                      'Deleted "${med.name}" — removed $removed linked schedule(s)',
+                    ),
                   ),
                 );
               }
@@ -155,18 +155,13 @@ class MedicationDetailPage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // General Info
-          _modernSection(
-            context,
-            'General',
-            Icons.medication_outlined,
-            [
-              detailRow('Medication Name', med.name),
-              detailRow('Type', _formLabel(med.form)),
-              detailRow('Manufacturer', med.manufacturer),
-              detailRow('Batch Number', med.batchNumber),
-              detailRow('Description', med.description),
-            ],
-          ),
+          _modernSection(context, 'General', Icons.medication_outlined, [
+            detailRow('Medication Name', med.name),
+            detailRow('Type', _formLabel(med.form)),
+            detailRow('Manufacturer', med.manufacturer),
+            detailRow('Batch Number', med.batchNumber),
+            detailRow('Description', med.description),
+          ]),
           const SizedBox(height: 12),
 
           // Strength & Composition
@@ -191,52 +186,37 @@ class MedicationDetailPage extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Inventory
-          _modernSection(
-            context,
-            'Inventory',
-            Icons.inventory_2_outlined,
-            [
+          _modernSection(context, 'Inventory', Icons.inventory_2_outlined, [
+            detailRow(
+              'Current Stock',
+              '${med.stockValue} ${_stockUnitLabel(med.stockUnit)}',
+            ),
+            if (med.lowStockEnabled)
               detailRow(
-                'Current Stock',
-                '${med.stockValue} ${_stockUnitLabel(med.stockUnit)}',
-              ),
-              if (med.lowStockEnabled)
-                detailRow(
-                  'Low Stock Alert',
-                  'Enabled at ${med.lowStockThreshold ?? 0} ${_stockUnitLabel(med.stockUnit)}',
-                )
-              else
-                detailRow('Low Stock Alert', 'Disabled'),
-            ],
-          ),
+                'Low Stock Alert',
+                'Enabled at ${med.lowStockThreshold ?? 0} ${_stockUnitLabel(med.stockUnit)}',
+              )
+            else
+              detailRow('Low Stock Alert', 'Disabled'),
+          ]),
           const SizedBox(height: 12),
 
           // Storage
-          _modernSection(
-            context,
-            'Storage',
-            Icons.kitchen_outlined,
-            [
-              if (med.expiry != null)
-                detailRow('Expiry Date', _fmtDate(med.expiry!)),
-              detailRow('Storage Location', med.storageLocation),
-              if (med.requiresRefrigeration)
-                detailRow('Storage Requirements', 'Requires Refrigeration'),
-              detailRow('Storage Instructions', med.storageInstructions),
-            ],
-          ),
+          _modernSection(context, 'Storage', Icons.kitchen_outlined, [
+            if (med.expiry != null)
+              detailRow('Expiry Date', _fmtDate(med.expiry!)),
+            detailRow('Storage Location', med.storageLocation),
+            if (med.requiresRefrigeration)
+              detailRow('Storage Requirements', 'Requires Refrigeration'),
+            detailRow('Storage Instructions', med.storageInstructions),
+          ]),
           const SizedBox(height: 12),
 
           // Notes
           if (med.notes != null && med.notes!.isNotEmpty)
-            _modernSection(
-              context,
-              'Notes',
-              Icons.notes_outlined,
-              [
-                detailRow('Additional Notes', med.notes),
-              ],
-            ),
+            _modernSection(context, 'Notes', Icons.notes_outlined, [
+              detailRow('Additional Notes', med.notes),
+            ]),
 
           const SizedBox(height: 80), // Space for FAB if needed
         ],
@@ -251,41 +231,41 @@ String _fmtDate(DateTime d) =>
     '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
 
 String _formLabel(MedicationForm form) => switch (form) {
-      MedicationForm.tablet => 'Tablet',
-      MedicationForm.capsule => 'Capsule',
-      MedicationForm.injectionPreFilledSyringe => 'Pre-Filled Syringe',
-      MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
-      MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial',
-    };
+  MedicationForm.tablet => 'Tablet',
+  MedicationForm.capsule => 'Capsule',
+  MedicationForm.injectionPreFilledSyringe => 'Pre-Filled Syringe',
+  MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
+  MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial',
+};
 
 String _unitLabel(Unit u) => switch (u) {
-      Unit.mcg => 'mcg',
-      Unit.mg => 'mg',
-      Unit.g => 'g',
-      Unit.units => 'units',
-      Unit.mcgPerMl => 'mcg/mL',
-      Unit.mgPerMl => 'mg/mL',
-      Unit.gPerMl => 'g/mL',
-      Unit.unitsPerMl => 'units/mL',
-    };
+  Unit.mcg => 'mcg',
+  Unit.mg => 'mg',
+  Unit.g => 'g',
+  Unit.units => 'units',
+  Unit.mcgPerMl => 'mcg/mL',
+  Unit.mgPerMl => 'mg/mL',
+  Unit.gPerMl => 'g/mL',
+  Unit.unitsPerMl => 'units/mL',
+};
 
 String _concentrationLabel(Unit u) => switch (u) {
-      Unit.mg || Unit.mgPerMl => 'mg/mL',
-      Unit.mcg || Unit.mcgPerMl => 'mcg/mL',
-      Unit.g || Unit.gPerMl => 'g/mL',
-      Unit.units || Unit.unitsPerMl => 'units/mL',
-    };
+  Unit.mg || Unit.mgPerMl => 'mg/mL',
+  Unit.mcg || Unit.mcgPerMl => 'mcg/mL',
+  Unit.g || Unit.gPerMl => 'g/mL',
+  Unit.units || Unit.unitsPerMl => 'units/mL',
+};
 
 String _stockUnitLabel(StockUnit u) => switch (u) {
-      StockUnit.tablets => 'tablets',
-      StockUnit.capsules => 'capsules',
-      StockUnit.preFilledSyringes => 'syringes',
-      StockUnit.singleDoseVials => 'vials',
-      StockUnit.multiDoseVials => 'vials',
-      StockUnit.mcg => 'mcg',
-      StockUnit.mg => 'mg',
-      StockUnit.g => 'g',
-    };
+  StockUnit.tablets => 'tablets',
+  StockUnit.capsules => 'capsules',
+  StockUnit.preFilledSyringes => 'syringes',
+  StockUnit.singleDoseVials => 'vials',
+  StockUnit.multiDoseVials => 'vials',
+  StockUnit.mcg => 'mcg',
+  StockUnit.mg => 'mg',
+  StockUnit.g => 'g',
+};
 
 // Modern section widget with icon
 Widget _modernSection(
@@ -298,7 +278,9 @@ Widget _modernSection(
   final cs = theme.colorScheme;
 
   // Filter out empty widgets
-  final visibleChildren = children.where((w) => w is! SizedBox || w.key != null).toList();
+  final visibleChildren = children
+      .where((w) => w is! SizedBox || w.key != null)
+      .toList();
   if (visibleChildren.isEmpty) return const SizedBox.shrink();
 
   return Container(
@@ -310,16 +292,9 @@ Widget _modernSection(
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: cs.primary,
-              ),
+              Icon(icon, size: 20, color: cs.primary),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: sectionTitleStyle(context),
-              ),
+              Text(title, style: sectionTitleStyle(context)),
             ],
           ),
           const SizedBox(height: 16),

@@ -28,7 +28,8 @@ class AddEditMedicationPage extends ConsumerStatefulWidget {
   final Medication? initial;
 
   @override
-  ConsumerState<AddEditMedicationPage> createState() => _AddEditMedicationPageState();
+  ConsumerState<AddEditMedicationPage> createState() =>
+      _AddEditMedicationPageState();
 }
 
 class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
@@ -168,7 +169,6 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
     };
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,7 +186,9 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
         ),
       ),
       body: MedEditorTemplate(
-        appBarTitle: widget.initial == null ? 'Add $_formLabel' : 'Edit $_formLabel',
+        appBarTitle: widget.initial == null
+            ? 'Add $_formLabel'
+            : 'Edit $_formLabel',
         summaryBuilder: _buildSummaryCard,
 
         // General
@@ -195,7 +197,10 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: buildFieldDecoration(context, hint: 'eg. DosifiTab-500'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. DosifiTab-500',
+            ),
             onChanged: (_) => setState(() {}),
           ),
         ),
@@ -224,7 +229,10 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           minLines: 2,
           maxLines: null,
           style: Theme.of(context).textTheme.bodyMedium,
-          decoration: buildFieldDecoration(context, hint: 'eg. Take with water'),
+          decoration: buildFieldDecoration(
+            context,
+            hint: 'eg. Take with water',
+          ),
           onChanged: (_) => setState(() {}),
         ),
         nameHelp: 'Enter the medication name',
@@ -237,11 +245,19 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           controller: _strengthValueCtrl,
           onDec: () {
             final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
-            setState(() => _strengthValueCtrl.text = (v - 1).clamp(0, 1000000).toString());
+            setState(
+              () => _strengthValueCtrl.text = (v - 1)
+                  .clamp(0, 1000000)
+                  .toString(),
+            );
           },
           onInc: () {
             final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
-            setState(() => _strengthValueCtrl.text = (v + 1).clamp(0, 1000000).toString());
+            setState(
+              () => _strengthValueCtrl.text = (v + 1)
+                  .clamp(0, 1000000)
+                  .toString(),
+            );
           },
           decoration: buildCompactFieldDecoration(context: context, hint: '0'),
         ),
@@ -310,11 +326,15 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           controller: _stockValueCtrl,
           onDec: () {
             final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-            setState(() => _stockValueCtrl.text = (v - 1).clamp(0, 1000000).toString());
+            setState(
+              () => _stockValueCtrl.text = (v - 1).clamp(0, 1000000).toString(),
+            );
           },
           onInc: () {
             final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-            setState(() => _stockValueCtrl.text = (v + 1).clamp(0, 1000000).toString());
+            setState(
+              () => _stockValueCtrl.text = (v + 1).clamp(0, 1000000).toString(),
+            );
           },
           decoration: buildCompactFieldDecoration(context: context, hint: '0'),
         ),
@@ -342,14 +362,26 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
                 controller: _lowStockCtrl,
                 onDec: () {
                   final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
-                  setState(() => _lowStockCtrl.text = (v - 1).clamp(0, 1000000).toString());
+                  setState(
+                    () => _lowStockCtrl.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString(),
+                  );
                 },
                 onInc: () {
                   final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
-                  final maxStock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-                  setState(() => _lowStockCtrl.text = (v + 1).clamp(0, maxStock).toString());
+                  final maxStock =
+                      int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                  setState(
+                    () => _lowStockCtrl.text = (v + 1)
+                        .clamp(0, maxStock)
+                        .toString(),
+                  );
                 },
-                decoration: buildCompactFieldDecoration(context: context, hint: '0'),
+                decoration: buildCompactFieldDecoration(
+                  context: context,
+                  hint: '0',
+                ),
                 compact: true,
               )
             : null,
@@ -394,7 +426,10 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             controller: _batchCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'Enter batch number',
+            ),
           ),
         ),
         batchHelp: 'Enter the printed batch or lot number',
@@ -403,7 +438,10 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             controller: _storageCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: buildFieldDecoration(context, hint: 'eg. Bathroom cabinet'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'eg. Bathroom cabinet',
+            ),
           ),
         ),
         locationHelp: "Where it's stored (e.g., Bathroom cabinet)",
@@ -413,7 +451,9 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             children: [
               Checkbox(
                 value: _requiresFridge,
-                onChanged: _keepFrozen ? null : (v) => setState(() => _requiresFridge = v ?? false),
+                onChanged: _keepFrozen
+                    ? null
+                    : (v) => setState(() => _requiresFridge = v ?? false),
               ),
               Text(
                 'Refrigerate',
@@ -453,7 +493,10 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
             controller: _storageNotesCtrl,
             textCapitalization: TextCapitalization.sentences,
             style: Theme.of(context).textTheme.bodyMedium,
-            decoration: buildFieldDecoration(context, hint: 'Enter storage instructions'),
+            decoration: buildFieldDecoration(
+              context,
+              hint: 'Enter storage instructions',
+            ),
           ),
         ),
         storageInstructionsHelp: 'Special handling notes (e.g., Keep upright)',
@@ -491,11 +534,16 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
       lowStockThreshold: threshold,
       perTabletLabel:
           name.isNotEmpty &&
-          (widget.form == MedicationForm.tablet || widget.form == MedicationForm.capsule),
+          (widget.form == MedicationForm.tablet ||
+              widget.form == MedicationForm.capsule),
       formLabelPlural: _formLabelPlural,
       // MDV reconstitution gauge data
-      reconTotalIU: _isMdv && _reconResult != null ? _reconResult!.syringeSizeMl * 100 : null,
-      reconFillIU: _isMdv && _reconResult != null ? _reconResult!.recommendedUnits : null,
+      reconTotalIU: _isMdv && _reconResult != null
+          ? _reconResult!.syringeSizeMl * 100
+          : null,
+      reconFillIU: _isMdv && _reconResult != null
+          ? _reconResult!.recommendedUnits
+          : null,
     );
   }
 
@@ -515,8 +563,12 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
       id: id,
       form: widget.form,
       name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
+      manufacturer: _manufacturerCtrl.text.trim().isEmpty
+          ? null
+          : _manufacturerCtrl.text.trim(),
+      description: _descriptionCtrl.text.trim().isEmpty
+          ? null
+          : _descriptionCtrl.text.trim(),
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
       strengthValue: strength,
       strengthUnit: _strengthUnit,
@@ -531,8 +583,12 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           ? double.tryParse(_lowStockCtrl.text.trim())
           : null,
       expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty ? null : _storageCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty
+          ? null
+          : _batchCtrl.text.trim(),
+      storageLocation: _storageCtrl.text.trim().isEmpty
+          ? null
+          : _storageCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
       storageInstructions: _buildStorageInstructions(),
       // MDV-specific: vial volume (total volume after reconstitution)
@@ -545,7 +601,9 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
     await repo.upsert(med);
     if (!mounted) return;
     context.go('/medications');
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Medication saved')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Medication saved')));
   }
 
   String? _buildStorageInstructions() {
@@ -555,7 +613,8 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
     if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
       parts.add('Keep frozen');
     }
-    if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
+    if (_lightSensitive &&
+        !parts.any((p) => p.toLowerCase().contains('light'))) {
       parts.add('Protect from light');
     }
     return parts.isEmpty ? null : parts.join('. ');

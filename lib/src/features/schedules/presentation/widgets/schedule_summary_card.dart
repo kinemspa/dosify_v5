@@ -85,7 +85,10 @@ class ScheduleSummaryCard extends StatelessWidget {
     // Info-only mode (when no medication selected)
     if (showInfoOnly || medication == null) {
       return Container(
-        decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: cs.primary,
+          borderRadius: BorderRadius.circular(12),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           children: [
@@ -130,11 +133,16 @@ class ScheduleSummaryCard extends StatelessWidget {
     // Resolve expiry text
     String? expDisplay;
     if (med.expiry != null) {
-      expDisplay = MaterialLocalizations.of(context).formatCompactDate(med.expiry!);
+      expDisplay = MaterialLocalizations.of(
+        context,
+      ).formatCompactDate(med.expiry!);
     }
 
     return Container(
-      decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: cs.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +176,8 @@ class ScheduleSummaryCard extends StatelessWidget {
                         color: fg,
                       ),
                     ),
-                    if (med.manufacturer != null && med.manufacturer!.isNotEmpty) ...{
+                    if (med.manufacturer != null &&
+                        med.manufacturer!.isNotEmpty) ...{
                       const SizedBox(height: 2),
                       Text(
                         med.manufacturer!,
@@ -189,7 +198,10 @@ class ScheduleSummaryCard extends StatelessWidget {
                 children: [
                   // Expiry
                   if (expDisplay != null && expDisplay.isNotEmpty)
-                    Text('Exp: $expDisplay', style: theme.textTheme.bodySmall?.copyWith(color: fg)),
+                    Text(
+                      'Exp: $expDisplay',
+                      style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                    ),
                   const SizedBox(height: 4),
                   // Strength
                   Text(
@@ -203,16 +215,23 @@ class ScheduleSummaryCard extends StatelessWidget {
                   // Remaining tablets/stock
                   Text(
                     '${_fmt2(med.stockValue)} $stockLabel remaining',
-                    style: theme.textTheme.bodySmall?.copyWith(color: fg.withValues(alpha: 0.85)),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: fg.withValues(alpha: 0.85),
+                    ),
                   ),
                 ],
               ),
             ],
           ),
           // Divider between med info and instructions
-          if (scheduleDescription != null && scheduleDescription!.isNotEmpty) ...[
+          if (scheduleDescription != null &&
+              scheduleDescription!.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Divider(height: 1, thickness: 0.5, color: fg.withValues(alpha: 0.2)),
+            Divider(
+              height: 1,
+              thickness: 0.5,
+              color: fg.withValues(alpha: 0.2),
+            ),
             const SizedBox(height: 8),
             _buildCompactInstructions(context, scheduleDescription!, fg),
           ],
@@ -226,7 +245,11 @@ class ScheduleSummaryCard extends StatelessWidget {
   /// Line 2: Frequency
   /// Line 3: At times
   /// Line 4: Dates with Total per Dose on right
-  Widget _buildCompactInstructions(BuildContext context, String description, Color fg) {
+  Widget _buildCompactInstructions(
+    BuildContext context,
+    String description,
+    Color fg,
+  ) {
     final theme = Theme.of(context);
 
     // Parse description to extract components
@@ -412,13 +435,17 @@ class ScheduleSummaryCard extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final startStr = MaterialLocalizations.of(context).formatCompactDate(startDate!);
+    final startStr = MaterialLocalizations.of(
+      context,
+    ).formatCompactDate(startDate!);
     final endStr = endDate != null
         ? MaterialLocalizations.of(context).formatCompactDate(endDate!)
         : null;
 
     return Text(
-      endStr != null ? 'Start Date $startStr End $endStr' : 'Start Date $startStr No End',
+      endStr != null
+          ? 'Start Date $startStr End $endStr'
+          : 'Start Date $startStr No End',
       style: theme.textTheme.bodySmall?.copyWith(
         color: fg.withValues(alpha: 0.95),
         fontWeight: FontWeight.w500,

@@ -4,7 +4,6 @@
 /// and improve maintainability.
 library;
 
-
 /// Round value to 2 decimal places
 double round2(double v) => (v * 100).round() / 100.0;
 

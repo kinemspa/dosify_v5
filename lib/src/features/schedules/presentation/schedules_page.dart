@@ -46,7 +46,8 @@ class _SchedulesPageState extends State<SchedulesPage> {
           items = switch (_filter) {
             _SchedFilter.all => items,
             _SchedFilter.activeOnly => items.where((s) => s.active).toList(),
-            _SchedFilter.linkedOnly => items.where((s) => s.medicationId != null).toList(),
+            _SchedFilter.linkedOnly =>
+              items.where((s) => s.medicationId != null).toList(),
           };
           // Search
           if (_query.isNotEmpty) {
@@ -65,7 +66,9 @@ class _SchedulesPageState extends State<SchedulesPage> {
               case _SchedSort.name:
                 return a.name.toLowerCase().compareTo(b.name.toLowerCase());
               case _SchedSort.med:
-                return a.medicationName.toLowerCase().compareTo(b.medicationName.toLowerCase());
+                return a.medicationName.toLowerCase().compareTo(
+                  b.medicationName.toLowerCase(),
+                );
               case _SchedSort.created:
                 return a.createdAt.compareTo(b.createdAt);
               case _SchedSort.next:
@@ -79,7 +82,9 @@ class _SchedulesPageState extends State<SchedulesPage> {
             return Column(
               children: [
                 _buildToolbar(context),
-                const Expanded(child: Center(child: Text('No schedules match your query'))),
+                const Expanded(
+                  child: Center(child: Text('No schedules match your query')),
+                ),
               ],
             );
           }
@@ -155,9 +160,18 @@ class _SchedulesPageState extends State<SchedulesPage> {
               tooltip: 'Filter schedules',
               onSelected: (f) => setState(() => _filter = f),
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _SchedFilter.all, child: Text('All schedules')),
-                PopupMenuItem(value: _SchedFilter.activeOnly, child: Text('Active only')),
-                PopupMenuItem(value: _SchedFilter.linkedOnly, child: Text('Linked to medication')),
+                PopupMenuItem(
+                  value: _SchedFilter.all,
+                  child: Text('All schedules'),
+                ),
+                PopupMenuItem(
+                  value: _SchedFilter.activeOnly,
+                  child: Text('Active only'),
+                ),
+                PopupMenuItem(
+                  value: _SchedFilter.linkedOnly,
+                  child: Text('Linked to medication'),
+                ),
               ],
             ),
           if (!_searchExpanded)
@@ -166,10 +180,22 @@ class _SchedulesPageState extends State<SchedulesPage> {
               tooltip: 'Sort schedules',
               onSelected: (s) => setState(() => _sort = s),
               itemBuilder: (context) => const [
-                PopupMenuItem(value: _SchedSort.next, child: Text('Sort by next time')),
-                PopupMenuItem(value: _SchedSort.name, child: Text('Sort by name')),
-                PopupMenuItem(value: _SchedSort.med, child: Text('Sort by medication')),
-                PopupMenuItem(value: _SchedSort.created, child: Text('Sort by created')),
+                PopupMenuItem(
+                  value: _SchedSort.next,
+                  child: Text('Sort by next time'),
+                ),
+                PopupMenuItem(
+                  value: _SchedSort.name,
+                  child: Text('Sort by name'),
+                ),
+                PopupMenuItem(
+                  value: _SchedSort.med,
+                  child: Text('Sort by medication'),
+                ),
+                PopupMenuItem(
+                  value: _SchedSort.created,
+                  child: Text('Sort by created'),
+                ),
               ],
             ),
         ],
@@ -227,8 +253,13 @@ class _SchedulesPageState extends State<SchedulesPage> {
     final now = DateTime.now();
     final times = s.timesOfDay ?? [s.minutesOfDay];
     for (var d = 0; d < 60; d++) {
-      final date = DateTime(now.year, now.month, now.day).add(Duration(days: d));
-      final onDay = s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(Duration(days: d));
+      final onDay =
+          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
           ? (() {
               final anchor = s.cycleAnchorDate ?? now;
               final a = DateTime(anchor.year, anchor.month, anchor.day);
@@ -239,7 +270,13 @@ class _SchedulesPageState extends State<SchedulesPage> {
           : s.daysOfWeek.contains(date.weekday);
       if (onDay) {
         for (final minutes in times) {
-          final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+          final dt = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
           if (dt.isAfter(now)) return dt;
         }
       }
@@ -261,7 +298,9 @@ class _ScheduleTile extends StatelessWidget {
     return ListTile(
       title: Text(
         s.name,
-        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
       ),
       subtitle: Text(subtitle),
       trailing: IconButton(
@@ -286,8 +325,13 @@ class _ScheduleTile extends StatelessWidget {
     final now = DateTime.now();
     final times = s.timesOfDay ?? [s.minutesOfDay];
     for (var d = 0; d < 60; d++) {
-      final date = DateTime(now.year, now.month, now.day).add(Duration(days: d));
-      final onDay = s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(Duration(days: d));
+      final onDay =
+          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
           ? (() {
               final anchor = s.cycleAnchorDate ?? now;
               final a = DateTime(anchor.year, anchor.month, anchor.day);
@@ -298,7 +342,13 @@ class _ScheduleTile extends StatelessWidget {
           : s.daysOfWeek.contains(date.weekday);
       if (onDay) {
         for (final minutes in times) {
-          final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+          final dt = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
           if (dt.isAfter(now)) return dt;
         }
       }
@@ -324,7 +374,9 @@ class _ScheduleCard extends StatelessWidget {
         child: Stack(
           children: [
             Padding(
-              padding: dense ? const EdgeInsets.all(6) : const EdgeInsets.fromLTRB(8, 8, 8, 8),
+              padding: dense
+                  ? const EdgeInsets.all(6)
+                  : const EdgeInsets.fromLTRB(8, 8, 8, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -343,7 +395,11 @@ class _ScheduleCard extends StatelessWidget {
                           ),
                           borderRadius: BorderRadius.circular(dense ? 8 : 12),
                         ),
-                        child: const Icon(Icons.alarm, color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.alarm,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -383,9 +439,9 @@ class _ScheduleCard extends StatelessWidget {
                           await ScheduleScheduler.cancelFor(s.id);
                           await Hive.box<Schedule>('schedules').delete(s.id);
                           if (context.mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text('Deleted "${s.name}"')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Deleted "${s.name}"')),
+                            );
                           }
                         },
                       ),
@@ -424,11 +480,16 @@ class _ScheduleCard extends StatelessWidget {
                         onPressed: () async {
                           final ok = await _confirmTake(context, s);
                           if (!ok) return;
-                          final success = await _applyStockDecrement(context, s);
+                          final success = await _applyStockDecrement(
+                            context,
+                            s,
+                          );
                           if (success && context.mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text('Marked as taken: ${s.name}')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Marked as taken: ${s.name}'),
+                              ),
+                            );
                           }
                         },
                         icon: const Icon(Icons.check_circle_outline),
@@ -446,7 +507,9 @@ class _ScheduleCard extends StatelessWidget {
 
   String _doseLine(Schedule s) {
     final v = s.doseValue;
-    final vf = (v == v.roundToDouble()) ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
+    final vf = (v == v.roundToDouble())
+        ? v.toStringAsFixed(0)
+        : v.toStringAsFixed(2);
     return '$vf ${s.doseUnit}';
   }
 
@@ -468,11 +531,14 @@ class _ScheduleCard extends StatelessWidget {
   String _fmtWhen(BuildContext context, DateTime dt) {
     final now = DateTime.now();
     final time = TimeOfDay.fromDateTime(dt).format(context);
-    final sameDay = dt.year == now.year && dt.month == now.month && dt.day == now.day;
+    final sameDay =
+        dt.year == now.year && dt.month == now.month && dt.day == now.day;
     if (sameDay) return 'Today $time';
     final tomorrow = now.add(const Duration(days: 1));
     final isTomorrow =
-        dt.year == tomorrow.year && dt.month == tomorrow.month && dt.day == tomorrow.day;
+        dt.year == tomorrow.year &&
+        dt.month == tomorrow.month &&
+        dt.day == tomorrow.day;
     if (isTomorrow) return 'Tomorrow $time';
     return '${dt.day}/${dt.month} $time';
   }
@@ -481,8 +547,13 @@ class _ScheduleCard extends StatelessWidget {
     final now = DateTime.now();
     final times = s.timesOfDay ?? [s.minutesOfDay];
     for (var d = 0; d < 60; d++) {
-      final date = DateTime(now.year, now.month, now.day).add(Duration(days: d));
-      final onDay = s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(Duration(days: d));
+      final onDay =
+          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
           ? (() {
               final anchor = s.cycleAnchorDate ?? now;
               final a = DateTime(anchor.year, anchor.month, anchor.day);
@@ -493,7 +564,13 @@ class _ScheduleCard extends StatelessWidget {
           : s.daysOfWeek.contains(date.weekday);
       if (onDay) {
         for (final minutes in times) {
-          final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+          final dt = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
           if (dt.isAfter(now)) return dt;
         }
       }
@@ -505,8 +582,13 @@ class _ScheduleCard extends StatelessWidget {
     final now = DateTime.now();
     final times = s.timesOfDay ?? [s.minutesOfDay];
     for (var d = 0; d < 60; d++) {
-      final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: d));
-      final onDay = s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: d));
+      final onDay =
+          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
           ? (() {
               final anchor = s.cycleAnchorDate ?? now;
               final a = DateTime(anchor.year, anchor.month, anchor.day);
@@ -517,7 +599,13 @@ class _ScheduleCard extends StatelessWidget {
           : s.daysOfWeek.contains(date.weekday);
       if (onDay) {
         for (final minutes in times) {
-          final dt = DateTime(date.year, date.month, date.day, minutes ~/ 60, minutes % 60);
+          final dt = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
           if (dt.isBefore(now)) return dt;
         }
       }
@@ -531,7 +619,9 @@ Future<bool> _confirmDelete(BuildContext context, Schedule s) async {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Delete schedule?'),
-          content: Text('Delete "${s.name}"? This will cancel its notifications.'),
+          content: Text(
+            'Delete "${s.name}"? This will cancel its notifications.',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -583,7 +673,9 @@ Future<bool> _applyStockDecrement(BuildContext context, Schedule s) async {
   final med = medsBox.get(s.medicationId);
   if (med == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Linked medication not found. It may have been deleted.')),
+      const SnackBar(
+        content: Text('Linked medication not found. It may have been deleted.'),
+      ),
     );
     return false;
   }
