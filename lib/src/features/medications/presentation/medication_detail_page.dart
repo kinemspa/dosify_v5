@@ -284,7 +284,9 @@ String _stockUnitLabel(StockUnit u) => switch (u) {
       StockUnit.preFilledSyringes => 'syringes',
       StockUnit.singleDoseVials => 'vials',
       StockUnit.multiDoseVials => 'vials',
-      StockUnit.mcg => 'mcg', // Handle if mcg is a stock unit
+      StockUnit.mcg => 'mcg',
+      StockUnit.mg => 'mg',
+      StockUnit.g => 'g',
     };
 
 // Modern section widget with icon
