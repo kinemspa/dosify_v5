@@ -141,8 +141,9 @@ class DosifiApp extends ConsumerWidget {
         }),
         checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseLight.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
-          return BorderSide(color: color, width: 1.5);
+          // Match design system border width (0.75px) for consistency with text fields
+          final color = baseLight.colorScheme.outlineVariant.withValues(alpha: 0.50);
+          return BorderSide(color: color, width: 0.75);
         }),
         overlayColor: WidgetStatePropertyAll(baseLight.colorScheme.primary.withValues(alpha: 0.08)),
       ),
@@ -276,8 +277,9 @@ class DosifiApp extends ConsumerWidget {
         }),
         checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseDark.colorScheme.onSurfaceVariant.withValues(alpha: 0.50);
-          return BorderSide(color: color, width: 1.5);
+          // Match design system border width (0.75px) for consistency with text fields
+          final color = baseDark.colorScheme.outlineVariant.withValues(alpha: 0.50);
+          return BorderSide(color: color, width: 0.75);
         }),
         overlayColor: WidgetStatePropertyAll(baseDark.colorScheme.primary.withValues(alpha: 0.12)),
       ),
