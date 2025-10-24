@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -23,7 +24,8 @@ class AddEditTabletGeneralPage extends StatefulWidget {
   final Medication? initial;
 
   @override
-  State<AddEditTabletGeneralPage> createState() => _AddEditTabletGeneralPageState();
+  State<AddEditTabletGeneralPage> createState() =>
+      _AddEditTabletGeneralPageState();
 }
 
 class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
@@ -73,7 +75,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       _manufacturerCtrl.text = m.manufacturer ?? '';
       _descriptionCtrl.text = m.description ?? '';
       _notesCtrl.text = m.notes ?? '';
-      _strengthValueCtrl.text = (m.strengthValue == m.strengthValue.roundToDouble())
+      _strengthValueCtrl.text =
+          (m.strengthValue == m.strengthValue.roundToDouble())
           ? m.strengthValue.toStringAsFixed(0)
           : m.strengthValue.toString();
       _strengthUnit = m.strengthUnit;
@@ -86,7 +89,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       _batchNumberCtrl.text = m.batchNumber ?? '';
       _storageLocationCtrl.text = m.storageLocation ?? '';
       _keepRefrigerated = m.requiresRefrigeration;
-      _lightSensitive = m.storageInstructions?.toLowerCase().contains('light') ?? false;
+      _lightSensitive =
+          m.storageInstructions?.toLowerCase().contains('light') ?? false;
       _storageInstructionsCtrl.text = m.storageInstructions ?? '';
     }
     // Defaults for integer fields when adding new entries
@@ -110,82 +114,35 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     super.dispose();
   }
 
-  InputDecoration _dec({required String label, String? hint, String? helper}) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      // No floating label; we render labels in the left column
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      hintText: hint,
-      helperText: helper,
-      // Render errors in helper area; suppress default error line to avoid squashing Field36
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      // hintStyle and helperStyle come from ThemeData.inputDecorationTheme
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: kOutlineWidth),
-      ),
-    );
-  }
+  // REMOVED: Custom _dec() method - now using buildFieldDecoration() from design_system
+  // REMOVED: Custom _labelWidth() - now using kLabelColumnWidth from design_system
 
-  double _labelWidth() {
-    final width = MediaQuery.of(context).size.width;
-    return width >= 400 ? 120.0 : 110.0;
-  }
-
-  Widget _helperBelowLeft(String text) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4, bottom: 12),
-      child: Text(
-        text,
-        textAlign: TextAlign.left,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-        ),
-      ),
-    );
-  }
+  // Use buildHelperText() from design_system instead
+  Widget _helperBelowLeft(String text) => buildHelperText(context, text);
 
   // Error under left label (keeps helper/support under field)
   Widget _errorUnderLabel(String text) {
-    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 2, top: 2, bottom: 4),
-      child: Text(text, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error)),
+      padding: const EdgeInsets.only(
+        left: 2,
+        top: kHelperTextTopPadding,
+        bottom: 4,
+      ),
+      child: Text(text, style: errorTextStyle(context)),
     );
   }
 
   Widget _helperBelowLeftCompact(String text) {
-    final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.only(left: _labelWidth() + 8, top: 1, bottom: 4),
+      padding: const EdgeInsets.only(
+        left: kHelperTextLeftPadding,
+        top: 1,
+        bottom: 4,
+      ),
       child: Text(
         text,
         textAlign: TextAlign.left,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontSize: 11,
-          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.75),
-        ),
+        style: helperTextStyle(context),
       ),
     );
   }
@@ -207,7 +164,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
   }
 
   // Unified support line (error/help) under a field with fixed height and alignment
-  Widget _supportBelowLeftFixed({String? error, String? help, bool compact = false, Color? color}) {
+  Widget _supportBelowLeftFixed({
+    String? error,
+    String? help,
+    bool compact = false,
+    Color? color,
+  }) {
     final theme = Theme.of(context);
     final left = _labelWidth() + 8;
     final text = error ?? help ?? '';
@@ -223,7 +185,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         height: 18,
         child: Align(
           alignment: Alignment.centerLeft,
-          child: Text(text, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+          child: Text(
+            text,
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
     );
@@ -250,10 +217,19 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
 
   Widget _section(String title, List<Widget> children, {Widget? trailing}) {
     // Use unified soft white card style for visual consistency with injection and selection screens
-    return SectionFormCard(title: title, neutral: true, trailing: trailing, children: children);
+    return SectionFormCard(
+      title: title,
+      neutral: true,
+      trailing: trailing,
+      children: children,
+    );
   }
 
-  InputDecoration _decDrop({required String label, String? hint, String? helper}) {
+  InputDecoration _decDrop({
+    required String label,
+    String? hint,
+    String? helper,
+  }) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     return InputDecoration(
@@ -266,7 +242,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       helperText: helper,
       // Keep height stable when error by suppressing the default error line
       errorStyle: const TextStyle(fontSize: 0, height: 0),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodySmall?.copyWith(
+        fontSize: 12,
+        color: cs.onSurfaceVariant,
+      ),
       helperStyle: theme.textTheme.bodySmall?.copyWith(
         fontSize: 11,
         color: cs.onSurfaceVariant.withOpacity(0.60),
@@ -276,7 +255,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant.withOpacity(0.5), width: kOutlineWidth),
+        borderSide: BorderSide(
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: kOutlineWidth,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -422,8 +404,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     }
     // Gate errors until the field is touched or the form has been submitted
     final gNameError = (_submitted || _touchedName) ? nameError : null;
-    final gStrengthAmtError = (_submitted || _touchedStrengthAmt) ? strengthAmtError : null;
-    final gStockError = (_submitted || _touchedStock) ? (stockError ?? _stockError) : null;
+    final gStrengthAmtError = (_submitted || _touchedStrengthAmt)
+        ? strengthAmtError
+        : null;
+    final gStockError = (_submitted || _touchedStock)
+        ? (stockError ?? _stockError)
+        : null;
 
     // Determine if required fields are valid (for Save button state)
     final requiredOk = (() {
@@ -442,7 +428,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     })();
 
     return Scaffold(
-      appBar: GradientAppBar(title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet'),
+      appBar: GradientAppBar(
+        title: widget.initial == null ? 'Add Tablet' : 'Edit Tablet',
+      ),
       body: Stack(
         children: [
           // Scrollable content first
@@ -465,27 +453,37 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(label: 'Name *', hint: 'eg. DosifiTab-500').copyWith(
-                            enabledBorder: gNameError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
-                                  ),
-                            focusedBorder: gNameError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
-                                  ),
-                          ),
-                          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                          decoration:
+                              _dec(
+                                label: 'Name *',
+                                hint: 'eg. DosifiTab-500',
+                              ).copyWith(
+                                enabledBorder: gNameError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
+                                          width: kOutlineWidth,
+                                        ),
+                                      ),
+                                focusedBorder: gNameError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
+                                          width: kOutlineWidth,
+                                        ),
+                                      ),
+                              ),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Required'
+                              : null,
                           onChanged: (_) => setState(() {
                             _touchedName = true;
                           }),
@@ -503,7 +501,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(label: 'Manufacturer', hint: 'eg. Dosifi Labs'),
+                          decoration: _dec(
+                            label: 'Manufacturer',
+                            hint: 'eg. Dosifi Labs',
+                          ),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -518,7 +519,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
                           style: Theme.of(context).textTheme.bodyMedium,
-                          decoration: _dec(label: 'Description', hint: 'eg. Pain relief'),
+                          decoration: _dec(
+                            label: 'Description',
+                            hint: 'eg. Pain relief',
+                          ),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -534,7 +538,10 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         minLines: 2,
                         maxLines: null,
                         style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: _dec(label: 'Notes', hint: 'eg. Take with water'),
+                        decoration: _dec(
+                          label: 'Notes',
+                          hint: 'eg. Take with water',
+                        ),
                         onChanged: (_) => setState(() {}),
                       ),
                     ),
@@ -547,7 +554,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       field: StepperRow36(
                         controller: _strengthValueCtrl,
                         onDec: () {
-                          final d = double.tryParse(_strengthValueCtrl.text.trim());
+                          final d = double.tryParse(
+                            _strengthValueCtrl.text.trim(),
+                          );
                           final base = d?.floor() ?? 0;
                           final nv = (base - 1).clamp(0, 1000000000);
                           setState(() {
@@ -556,7 +565,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           });
                         },
                         onInc: () {
-                          final d = double.tryParse(_strengthValueCtrl.text.trim());
+                          final d = double.tryParse(
+                            _strengthValueCtrl.text.trim(),
+                          );
                           final base = d?.floor() ?? 0;
                           final nv = (base + 1).clamp(0, 1000000000);
                           setState(() {
@@ -596,16 +607,22 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                                 value: u,
                                 alignment: AlignmentDirectional.center,
                                 child: Center(
-                                  child: Text(u == Unit.mcg ? 'mcg' : (u == Unit.mg ? 'mg' : 'g')),
+                                  child: Text(
+                                    u == Unit.mcg
+                                        ? 'mcg'
+                                        : (u == Unit.mg ? 'mg' : 'g'),
+                                  ),
                                 ),
                               ),
                             )
                             .toList(),
-                        onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
+                        onChanged: (u) =>
+                            setState(() => _strengthUnit = u ?? _strengthUnit),
                         decoration: _decDrop(label: ''),
                       ),
                     ),
-                    if (gStrengthAmtError != null) _errorUnderLabel(gStrengthAmtError),
+                    if (gStrengthAmtError != null)
+                      _errorUnderLabel(gStrengthAmtError),
                     _helperBelowCenter(
                       'Specify the amount per tablet and its unit of measurement.',
                     ),
@@ -618,16 +635,22 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                       field: StepperRow36(
                         controller: _stockCtrl,
                         onDec: () {
-                          final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
-                          final nv = (d - 1).clamp(0, 1000000000).toStringAsFixed(0);
+                          final d =
+                              double.tryParse(_stockCtrl.text.trim()) ?? 0;
+                          final nv = (d - 1)
+                              .clamp(0, 1000000000)
+                              .toStringAsFixed(0);
                           setState(() {
                             _stockCtrl.text = nv;
                             _touchedStock = true;
                           });
                         },
                         onInc: () {
-                          final d = double.tryParse(_stockCtrl.text.trim()) ?? 0;
-                          final nv = (d + 1).clamp(0, 1000000000).toStringAsFixed(0);
+                          final d =
+                              double.tryParse(_stockCtrl.text.trim()) ?? 0;
+                          final nv = (d + 1)
+                              .clamp(0, 1000000000)
+                              .toStringAsFixed(0);
                           setState(() {
                             _stockCtrl.text = nv;
                             _touchedStock = true;
@@ -648,7 +671,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         children: [
                           Checkbox(
                             value: _lowStockAlert,
-                            onChanged: (v) => setState(() => _lowStockAlert = v ?? false),
+                            onChanged: (v) =>
+                                setState(() => _lowStockAlert = v ?? false),
                           ),
                           Expanded(
                             child: Text(
@@ -667,7 +691,11 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         field: StepperRow36(
                           controller: _lowStockThresholdCtrl,
                           onDec: () {
-                            final v = int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
+                            final v =
+                                int.tryParse(
+                                  _lowStockThresholdCtrl.text.trim(),
+                                ) ??
+                                0;
                             final nv = (v - 1).clamp(0, stockVal.floor());
                             setState(() {
                               _lowStockThresholdCtrl.text = nv.toString();
@@ -675,33 +703,42 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             });
                           },
                           onInc: () {
-                            final v = int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
+                            final v =
+                                int.tryParse(
+                                  _lowStockThresholdCtrl.text.trim(),
+                                ) ??
+                                0;
                             final nv = (v + 1).clamp(0, stockVal.floor());
                             setState(() {
                               _lowStockThresholdCtrl.text = nv.toString();
                               _lowStockClampHint = nv == v;
                             });
                           },
-                          decoration: _dec(label: 'Threshold', hint: '0').copyWith(
-                            enabledBorder: thresholdError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
-                                  ),
-                            focusedBorder: thresholdError == null
-                                ? null
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(
-                                      color: Theme.of(context).colorScheme.error,
-                                      width: kOutlineWidth,
-                                    ),
-                                  ),
-                          ),
+                          decoration: _dec(label: 'Threshold', hint: '0')
+                              .copyWith(
+                                enabledBorder: thresholdError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
+                                          width: kOutlineWidth,
+                                        ),
+                                      ),
+                                focusedBorder: thresholdError == null
+                                    ? null
+                                    : OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
+                                          width: kOutlineWidth,
+                                        ),
+                                      ),
+                              ),
                         ),
                       ),
                       _supportBelowLeftFixed(
@@ -730,7 +767,8 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                             lastDate: DateTime(now.year + 10),
                             initialDate: _expiryDate ?? now,
                           );
-                          if (picked != null) setState(() => _expiryDate = picked);
+                          if (picked != null)
+                            setState(() => _expiryDate = picked);
                         },
                         selected: _expiryDate != null,
                       ),
@@ -749,10 +787,14 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.left,
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(label: 'Batch No.', hint: 'Enter batch number'),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
+                          decoration: _dec(
+                            label: 'Batch No.',
+                            hint: 'Enter batch number',
                           ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
@@ -766,15 +808,21 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                           textAlign: TextAlign.left,
                           textAlignVertical: TextAlignVertical.center,
                           textCapitalization: TextCapitalization.sentences,
-                          decoration: _dec(label: 'Location', hint: 'eg. Bathroom cabinet'),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
+                          decoration: _dec(
+                            label: 'Location',
+                            hint: 'eg. Bathroom cabinet',
                           ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
                     ),
-                    _helperBelowLeft('Where it’s stored (e.g., Bathroom cabinet)'),
+                    _helperBelowLeft(
+                      'Where it’s stored (e.g., Bathroom cabinet)',
+                    ),
                     // Removed 'Store below (°C)' per requirements
                     _rowLabelField(
                       label: 'Keep refrigerated',
@@ -786,7 +834,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                               value: _keepRefrigerated,
                               onChanged: _keepFrozen
                                   ? null
-                                  : (v) => setState(() => _keepRefrigerated = v ?? false),
+                                  : (v) => setState(
+                                      () => _keepRefrigerated = v ?? false,
+                                    ),
                             ),
                             Text(
                               'Refrigerate',
@@ -798,7 +848,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         ),
                       ),
                     ),
-                    _helperBelowLeftCompact('Enable if this medication must be kept refrigerated'),
+                    _helperBelowLeftCompact(
+                      'Enable if this medication must be kept refrigerated',
+                    ),
                     _rowLabelField(
                       label: 'Keep frozen',
                       field: Row(
@@ -814,16 +866,22 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         ],
                       ),
                     ),
-                    _helperBelowLeftCompact('Enable if this medication must be kept frozen'),
+                    _helperBelowLeftCompact(
+                      'Enable if this medication must be kept frozen',
+                    ),
                     _rowLabelField(
                       label: 'Keep in dark',
                       field: Row(
                         children: [
                           Checkbox(
                             value: _lightSensitive,
-                            onChanged: (v) => setState(() => _lightSensitive = v ?? false),
+                            onChanged: (v) =>
+                                setState(() => _lightSensitive = v ?? false),
                           ),
-                          Text('Dark storage', style: kCheckboxLabelStyle(context)),
+                          Text(
+                            'Dark storage',
+                            style: kCheckboxLabelStyle(context),
+                          ),
                         ],
                       ),
                     ),
@@ -846,7 +904,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
                         ),
                       ),
                     ),
-                    _helperBelowLeft('Special handling notes (e.g., Keep upright)'),
+                    _helperBelowLeft(
+                      'Special handling notes (e.g., Keep upright)',
+                    ),
                   ]),
                 ],
               ),
@@ -866,7 +926,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         width: 120,
         child: FilledButton(
           style: FilledButton.styleFrom(
-            backgroundColor: requiredOk ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor: requiredOk
+                ? null
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
             foregroundColor: requiredOk
                 ? null
                 : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
@@ -896,26 +958,36 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         final theme = Theme.of(ctx);
         final cs = theme.colorScheme;
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: cs.primaryContainer, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
                 child: Icon(Icons.add_circle, color: cs.primary, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Confirm Medication',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
           ),
           content: SingleChildScrollView(child: _buildConfirmContent(ctx)),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
             FilledButton(
               onPressed: () async {
                 Navigator.of(ctx).pop();
@@ -947,8 +1019,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         id: id,
         form: MedicationForm.tablet,
         name: _nameCtrl.text.trim(),
-        manufacturer: _manufacturerCtrl.text.trim().isEmpty ? null : _manufacturerCtrl.text.trim(),
-        description: _descriptionCtrl.text.trim().isEmpty ? null : _descriptionCtrl.text.trim(),
+        manufacturer: _manufacturerCtrl.text.trim().isEmpty
+            ? null
+            : _manufacturerCtrl.text.trim(),
+        description: _descriptionCtrl.text.trim().isEmpty
+            ? null
+            : _descriptionCtrl.text.trim(),
         notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
         strengthValue: strength,
         strengthUnit: _strengthUnit,
@@ -957,7 +1033,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         lowStockEnabled: _lowStockAlert,
         lowStockThreshold: _lowStockAlert ? lowThresh : null,
         expiry: _expiryDate,
-        batchNumber: _batchNumberCtrl.text.trim().isEmpty ? null : _batchNumberCtrl.text.trim(),
+        batchNumber: _batchNumberCtrl.text.trim().isEmpty
+            ? null
+            : _batchNumberCtrl.text.trim(),
         storageLocation: _storageLocationCtrl.text.trim().isEmpty
             ? null
             : _storageLocationCtrl.text.trim(),
@@ -966,10 +1044,12 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
           final parts = <String>[];
           final s = _storageInstructionsCtrl.text.trim();
           if (s.isNotEmpty) parts.add(s);
-          if (_keepFrozen && !parts.any((p) => p.toLowerCase().contains('frozen'))) {
+          if (_keepFrozen &&
+              !parts.any((p) => p.toLowerCase().contains('frozen'))) {
             parts.add('Keep frozen');
           }
-          if (_lightSensitive && !parts.any((p) => p.toLowerCase().contains('light'))) {
+          if (_lightSensitive &&
+              !parts.any((p) => p.toLowerCase().contains('light'))) {
             parts.add('Protect from light');
           }
           return parts.isEmpty ? null : parts.join('. ');
@@ -986,7 +1066,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
     } catch (e, st) {
       debugPrint('Save failed: $e\n$st');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Save failed: $e')));
       }
     }
   }
@@ -1003,7 +1085,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
       color: cs.primary,
       fontWeight: FontWeight.w700,
     );
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+    );
 
     Widget row(String l, String v) => Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -1033,7 +1117,9 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
               ? 'mg'
               : 'g'}';
     final stockRaw = _stockCtrl.text.trim();
-    final inventoryText = stockRaw.isEmpty ? '' : '${trimZero(stockRaw)} tablets';
+    final inventoryText = stockRaw.isEmpty
+        ? ''
+        : '${trimZero(stockRaw)} tablets';
 
     // Build storage conditions text
     final storageConditions = <String>[];
@@ -1051,20 +1137,31 @@ class _AddEditTabletGeneralPageState extends State<AddEditTabletGeneralPage> {
         row(
           'Stock',
           inventoryText.isEmpty
-              ? (_stockCtrl.text.trim().isEmpty ? '' : '${_stockCtrl.text.trim()} tablets')
+              ? (_stockCtrl.text.trim().isEmpty
+                    ? ''
+                    : '${_stockCtrl.text.trim()} tablets')
               : inventoryText,
         ),
         if (_lowStockAlert)
-          row('Low Stock Alert', 'At ${_lowStockThresholdCtrl.text.trim()} tablets'),
+          row(
+            'Low Stock Alert',
+            'At ${_lowStockThresholdCtrl.text.trim()} tablets',
+          ),
         if (_expiryDate != null)
-          row('Expiry', MaterialLocalizations.of(ctx).formatCompactDate(_expiryDate!)),
-        if (_batchNumberCtrl.text.trim().isNotEmpty) row('Batch', _batchNumberCtrl.text.trim()),
+          row(
+            'Expiry',
+            MaterialLocalizations.of(ctx).formatCompactDate(_expiryDate!),
+          ),
+        if (_batchNumberCtrl.text.trim().isNotEmpty)
+          row('Batch', _batchNumberCtrl.text.trim()),
         if (_storageLocationCtrl.text.trim().isNotEmpty)
           row('Storage Location', _storageLocationCtrl.text.trim()),
-        if (storageConditions.isNotEmpty) row('Conditions', storageConditions.join(', ')),
+        if (storageConditions.isNotEmpty)
+          row('Conditions', storageConditions.join(', ')),
         if (_descriptionCtrl.text.trim().isNotEmpty)
           row('Description', _descriptionCtrl.text.trim()),
-        if (_notesCtrl.text.trim().isNotEmpty) row('Notes', _notesCtrl.text.trim()),
+        if (_notesCtrl.text.trim().isNotEmpty)
+          row('Notes', _notesCtrl.text.trim()),
       ],
     );
   }
