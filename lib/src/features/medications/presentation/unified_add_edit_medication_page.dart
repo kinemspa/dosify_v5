@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -209,9 +210,9 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
           child: TextFormField(
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.sentences,
-            decoration: _dec(hint: 'eg. Panadol'),
+            decoration: buildFieldDecoration(context, hint: 'eg. Panadol'),
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-            onChanged: (_) => setState(() => _touchedName = true),
+            onChanged: (_) => setState(() {}),
           ),
         ),
       ),
@@ -222,7 +223,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
           child: TextFormField(
             controller: _manufacturerCtrl,
             textCapitalization: TextCapitalization.sentences,
-            decoration: _dec(hint: 'eg. GSK'),
+            decoration: buildFieldDecoration(context, hint: 'eg. GSK'),
           ),
         ),
       ),
@@ -233,7 +234,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
           child: TextFormField(
             controller: _descriptionCtrl,
             textCapitalization: TextCapitalization.sentences,
-            decoration: _dec(hint: 'eg. Pain relief'),
+            decoration: buildFieldDecoration(context, hint: 'eg. Pain relief'),
           ),
         ),
       ),
@@ -246,7 +247,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
           keyboardType: TextInputType.multiline,
           minLines: 2,
           maxLines: null,
-          decoration: _dec(hint: 'eg. Take with water'),
+          decoration: buildFieldDecoration(context, hint: 'eg. Take with water'),
         ),
       ),
       _helperBelowLeft('Optional notes'),
@@ -264,7 +265,6 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
             final nv = (d - 1).clamp(0, 1000000000);
             setState(() {
               _strengthValueCtrl.text = nv.toStringAsFixed(0);
-              _touchedStrengthAmt = true;
             });
           },
           onInc: () {
@@ -272,10 +272,9 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
             final nv = (d + 1).clamp(0, 1000000000);
             setState(() {
               _strengthValueCtrl.text = nv.toStringAsFixed(0);
-              _touchedStrengthAmt = true;
             });
           },
-          decoration: _dec(hint: '0'),
+          decoration: buildCompactFieldDecoration(hint: '0'),
         ),
       ),
       _rowLabelField(
@@ -292,7 +291,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
               )
               .toList(),
           onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-          decoration: _decDrop(),
+          decoration: buildCompactFieldDecoration(),
         ),
       ),
       _helperBelowCenter(
@@ -327,7 +326,6 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
             final nv = (d - 1).clamp(0, 1000000000);
             setState(() {
               _stockValueCtrl.text = nv.toStringAsFixed(0);
-              _touchedStock = true;
             });
           },
           onInc: () {
@@ -335,10 +333,9 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
             final nv = (d + 1).clamp(0, 1000000000);
             setState(() {
               _stockValueCtrl.text = nv.toStringAsFixed(0);
-              _touchedStock = true;
             });
           },
-          decoration: _dec(hint: '0'),
+          decoration: buildCompactFieldDecoration(hint: '0'),
         ),
       ),
       _helperBelowLeft(
@@ -376,7 +373,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
               final nv = (d + 1).clamp(0, 1000000000);
               setState(() => _lowStockCtrl.text = nv.toStringAsFixed(0));
             },
-            decoration: _dec(hint: '0'),
+            decoration: buildCompactFieldDecoration(hint: '0'),
           ),
         ),
         _helperBelowLeft('Receive alert when stock reaches this level'),
@@ -400,7 +397,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
         field: Field36(
           child: TextFormField(
             controller: _batchCtrl,
-            decoration: _dec(hint: 'eg. B12345'),
+            decoration: buildFieldDecoration(context, hint: 'eg. B12345'),
           ),
         ),
       ),
@@ -409,7 +406,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
         field: Field36(
           child: TextFormField(
             controller: _storageCtrl,
-            decoration: _dec(hint: 'eg. Kitchen cabinet'),
+            decoration: buildFieldDecoration(context, hint: 'eg. Kitchen cabinet'),
           ),
         ),
       ),
@@ -423,7 +420,7 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
           keyboardType: TextInputType.multiline,
           minLines: 2,
           maxLines: null,
-          decoration: _dec(hint: 'eg. Keep away from children'),
+          decoration: buildFieldDecoration(context, hint: 'eg. Keep away from children'),
         ),
       ),
     ]);
@@ -692,30 +689,4 @@ class _UnifiedAddEditMedicationPageState extends ConsumerState<UnifiedAddEditMed
     );
   }
 
-  InputDecoration _dec({String? hint}) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      hintText: hint,
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
-      hintStyle: theme.textTheme.bodySmall?.copyWith(
-        fontSize: kHintFontSize,
-        color: cs.onSurfaceVariant,
-      ),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-    );
-  }
-
-  InputDecoration _decDrop() {
-    final theme = Theme.of(context);
-    return InputDecoration(
-      isDense: true,
-      filled: true,
-      fillColor: theme.colorScheme.surfaceContainerLowest,
-      border: InputBorder.none,
-      enabledBorder: InputBorder.none,
-      focusedBorder: InputBorder.none,
-    );
-  }
 }
