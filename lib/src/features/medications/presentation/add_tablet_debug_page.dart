@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -52,30 +53,6 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
     super.dispose();
   }
 
-  InputDecoration _dec({String? hint}) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    return InputDecoration(
-      hintText: hint,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      constraints: const BoxConstraints(minHeight: 40),
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      hintStyle: theme.textTheme.bodySmall?.copyWith(fontSize: 11, color: cs.onSurfaceVariant),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
-      ),
-    );
-  }
 
   Widget _rowLabelField({required String label, required Widget field}) {
     final theme = Theme.of(context);
@@ -200,7 +177,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: TextFormField(
                     controller: _nameCtrl,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(hint: 'e.g., Panadol'),
+                    decoration: buildFieldDecoration(context, hint: 'e.g., Panadol'),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
                 ),
@@ -209,7 +186,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: TextFormField(
                     controller: _manufacturerCtrl,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(hint: 'e.g., GSK'),
+                    decoration: buildFieldDecoration(context, hint: 'e.g., GSK'),
                   ),
                 ),
                 _rowLabelField(
@@ -217,7 +194,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: TextFormField(
                     controller: _descriptionCtrl,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(hint: 'e.g., Pain relief'),
+                    decoration: buildFieldDecoration(context, hint: 'e.g., Pain relief'),
                   ),
                 ),
               ]),
@@ -245,7 +222,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                               RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
                             ),
                           ],
-                          decoration: _dec(hint: '0'),
+                          decoration: buildFieldDecoration(context, hint: '0'),
                           validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                         ),
                       ),
@@ -287,7 +264,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                           )
                           .toList(),
                       onChanged: (u) => setState(() => _strengthUnit = u ?? _strengthUnit),
-                      decoration: _dec(),
+                      decoration: buildCompactFieldDecoration(),
                     ),
                   ),
                 ),
@@ -318,7 +295,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                                   RegExp(r'^$|^\d{0,7}(?:\.\d{0,2})?$'),
                                 ),
                               ],
-                              decoration: _dec(hint: '0.00'),
+                              decoration: buildFieldDecoration(context, hint: '0.00'),
                               validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                               onChanged: (v) {
                                 final d = double.tryParse(v);
@@ -361,7 +338,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                       DropdownMenuItem(value: StockUnit.tablets, child: Text('tablets')),
                     ],
                     onChanged: null,
-                    decoration: _dec(),
+                    decoration: buildCompactFieldDecoration(),
                   ),
                 ),
                 _rowLabelField(
@@ -390,7 +367,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: TextFormField(
                     controller: _batchCtrl,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(hint: 'Enter batch number'),
+                    decoration: buildFieldDecoration(context, hint: 'Enter batch number'),
                   ),
                 ),
                 _rowLabelField(
@@ -398,7 +375,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: TextFormField(
                     controller: _storageCtrl,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(hint: 'Enter storage location'),
+                    decoration: buildFieldDecoration(context, hint: 'Enter storage location'),
                   ),
                 ),
                 CheckboxListTile(
@@ -414,7 +391,7 @@ class _AddTabletDebugPageState extends State<AddTabletDebugPage> {
                   field: TextFormField(
                     controller: _storageNotesCtrl,
                     textCapitalization: TextCapitalization.sentences,
-                    decoration: _dec(hint: 'Enter storage instructions'),
+                    decoration: buildFieldDecoration(context, hint: 'Enter storage instructions'),
                   ),
                 ),
               ]),
