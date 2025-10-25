@@ -300,25 +300,36 @@ class SummaryHeaderCard extends StatelessWidget {
                                           ]
                                         : (perUnitLabel != null
                                               ? [
-                                                  TextSpan(
-                                                    text: _fmt2(
-                                                      strengthValue ?? 0,
+                                                  // Show concentration format for injection vials
+                                                  if (perMlValue != null) ...[
+                                                    TextSpan(
+                                                      text: _fmt2(perMlValue),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
                                                     ),
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                    ),
-                                                  ),
-                                                  TextSpan(
-                                                    text: ' $strengthUnitLabel',
-                                                  ),
-                                                  if (perMlValue != null)
                                                     TextSpan(
                                                       text:
-                                                          ' in ${_fmt2(perMlValue)} mL',
+                                                          ' $strengthUnitLabel/mL per ',
                                                     ),
-                                                  const TextSpan(text: ' per '),
-                                                  TextSpan(text: perUnitLabel),
+                                                    TextSpan(text: perUnitLabel),
+                                                  ] else ...[
+                                                    TextSpan(
+                                                      text: _fmt2(
+                                                        strengthValue ?? 0,
+                                                      ),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                      text:
+                                                          ' $strengthUnitLabel per ',
+                                                    ),
+                                                    TextSpan(text: perUnitLabel),
+                                                  ],
                                                 ]
                                               : (perTabletLabel
                                                     ? [
