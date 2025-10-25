@@ -156,6 +156,7 @@ class _MdvVolumeReconstitutionSectionState
   Widget _buildCalculatorButton() {
     final strengthVal = double.tryParse(widget.strengthController.text.trim());
     final hasStrength = strengthVal != null && strengthVal > 0;
+    final theme = Theme.of(context);
 
     return Center(
       child: _showCalculator
@@ -164,17 +165,52 @@ class _MdvVolumeReconstitutionSectionState
               icon: const Icon(Icons.close, size: 18),
               label: const Text('Close Calculator'),
             )
-          : OutlinedButton.icon(
-              onPressed: hasStrength
-                  ? () => setState(() => _showCalculator = true)
-                  : null,
-              icon: const Icon(Icons.calculate, size: 18),
-              label: Text(
-                _reconResult == null
-                    ? 'Reconstitution Calculator'
-                    : 'Edit Reconstitution',
-              ),
-            ),
+          : (_reconResult != null
+              // Show combined Reconstituted chip + Edit button
+              ? OutlinedButton.icon(
+                  onPressed: hasStrength
+                      ? () => setState(() => _showCalculator = true)
+                      : null,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                  ),
+                  icon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Reconstituted',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  label: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('•'),
+                      SizedBox(width: 6),
+                      Text('Edit'),
+                    ],
+                  ),
+                )
+              : OutlinedButton.icon(
+                  onPressed: hasStrength
+                      ? () => setState(() => _showCalculator = true)
+                      : null,
+                  icon: const Icon(Icons.calculate, size: 18),
+                  label: const Text('Reconstitution Calculator'),
+                )),
     );
   }
 
@@ -255,47 +291,14 @@ class _MdvVolumeReconstitutionSectionState
     final mlDrawStr = (result.recommendedUnits / 100 * result.syringeSizeMl).toStringAsFixed(2);
     final syringeStr = result.syringeSizeMl.toStringAsFixed(1);
 
-    // Build the full rich summary card (same as in calculator)
+    // Build the full rich summary card
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Reconstituted badge
-        Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: theme.colorScheme.primary.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.check_circle_outline,
-                  size: 18,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Reconstituted',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
         // Full summary card
         Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -310,7 +313,7 @@ class _MdvVolumeReconstitutionSectionState
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: theme.colorScheme.primary.withOpacity(0.25),
-                width: 2,
+                width: 0.75, // Extremely thin border
               ),
               boxShadow: [
                 BoxShadow(
@@ -328,10 +331,10 @@ class _MdvVolumeReconstitutionSectionState
                 // Icon header
                 Icon(
                   Icons.science_outlined,
-                  size: 32,
+                  size: 28,
                   color: theme.colorScheme.primary,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 // First line: Reconstitute X of MEDNAME
                 RichText(
                   textAlign: TextAlign.center,
@@ -346,7 +349,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: '$strengthStr $unitLabel',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 17,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w800,
                         ),
@@ -355,7 +358,7 @@ class _MdvVolumeReconstitutionSectionState
                         TextSpan(
                           text: '  of  ',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             color: Colors.white.withOpacity(kReconTextHighOpacity),
                             fontWeight: FontWeight.w400,
                           ),
@@ -363,7 +366,7 @@ class _MdvVolumeReconstitutionSectionState
                         TextSpan(
                           text: medName,
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 15,
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w700,
                           ),
@@ -372,7 +375,7 @@ class _MdvVolumeReconstitutionSectionState
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
                 // Second line: with X mL of DILUENT
                 RichText(
                   textAlign: TextAlign.center,
@@ -387,7 +390,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: '$volumeStr mL',
                         style: TextStyle(
-                          fontSize: 32,
+                          fontSize: 28,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w900,
                         ),
@@ -395,7 +398,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: '  of  ',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: Colors.white.withOpacity(kReconTextHighOpacity),
                           fontWeight: FontWeight.w400,
                         ),
@@ -403,7 +406,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: diluentName,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 15,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
@@ -411,12 +414,12 @@ class _MdvVolumeReconstitutionSectionState
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 // Divider
                 Container(
-                  width: 60,
-                  height: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  width: 100,
+                  height: 1,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -427,7 +430,7 @@ class _MdvVolumeReconstitutionSectionState
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 // Draw instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -442,7 +445,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: '$drawStr Units  ',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 19,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w800,
                         ),
@@ -450,7 +453,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: '$mlDrawStr mL',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 15,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
                         ),
@@ -458,7 +461,7 @@ class _MdvVolumeReconstitutionSectionState
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 // Syringe instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -472,7 +475,7 @@ class _MdvVolumeReconstitutionSectionState
                       TextSpan(
                         text: '$syringeStr mL',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 15,
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
                         ),
@@ -481,7 +484,7 @@ class _MdvVolumeReconstitutionSectionState
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 // Dose info
                 if (result.recommendedDose != null && result.doseUnit != null)
                   RichText(
@@ -498,7 +501,7 @@ class _MdvVolumeReconstitutionSectionState
                           text:
                               '${result.recommendedDose!.toStringAsFixed(result.recommendedDose! == result.recommendedDose!.roundToDouble() ? 0 : 2)} ${result.doseUnit}',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 15,
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w700,
                           ),
@@ -522,11 +525,13 @@ class _MdvVolumeReconstitutionSectionState
 
   Widget _buildVialVolumeField(bool isDarkMode) {
     final theme = Theme.of(context);
-    // Always allow manual edit, even after saving reconstitution result
-    // Remove the lock behavior entirely
-
-    // Define max vial size constraint (if saved reconstitution has it)
+    // Lock field while calculator is open, unlock after save
+    final isLocked = _showCalculator;
+    
+    // Check if current value exceeds max constraint
     final maxVialSize = _reconResult?.maxVialSizeMl ?? 1000.0;
+    final currentValue = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+    final exceedsMax = currentValue > maxVialSize && maxVialSize < 1000.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,20 +540,24 @@ class _MdvVolumeReconstitutionSectionState
           key: widget.vialVolumeKey,
           label: 'Total Volume (mL)',
           labelWidth: _labelWidth(),
+          lightText: isDarkMode, // Make label visible on dark background
           field: StepperRow36(
             controller: widget.vialVolumeController,
+            enabled: !isLocked, // Disable while calculator is open
             onDec: () {
+              if (isLocked) return;
               final d =
                   double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d - 0.5).clamp(0, maxVialSize);
+              final nv = (d - 0.5).clamp(0, 999.99); // Allow any value up to 999.99
               setState(() {
                 widget.vialVolumeController.text = nv.toStringAsFixed(2);
               });
             },
             onInc: () {
+              if (isLocked) return;
               final d =
                   double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d + 0.5).clamp(0, maxVialSize);
+              final nv = (d + 0.5).clamp(0, 999.99); // Allow any value up to 999.99
               setState(() {
                 widget.vialVolumeController.text = nv.toStringAsFixed(2);
               });
@@ -567,16 +576,21 @@ class _MdvVolumeReconstitutionSectionState
         Padding(
           padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4),
           child: Text(
-            _showCalculator
-                ? 'Vial volume updates automatically as you adjust the calculator above'
-                : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above',
+            exceedsMax
+                ? 'Warning: Volume exceeds max vial size (${maxVialSize.toStringAsFixed(1)} mL)'
+                : (_showCalculator
+                    ? 'Total volume updates automatically as you adjust the calculator above'
+                    : 'Enter total volume: if already filled/known, input directly; otherwise use calculator above'),
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,
-              color: isDarkMode
-                  ? Colors.white.withOpacity(kReconTextMediumOpacity)
-                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              color: exceedsMax
+                  ? Colors.orange
+                  : (isDarkMode
+                      ? Colors.white.withOpacity(kReconTextMediumOpacity)
+                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75)),
               fontStyle: FontStyle.italic,
+              fontWeight: exceedsMax ? FontWeight.w600 : null,
             ),
           ),
         ),

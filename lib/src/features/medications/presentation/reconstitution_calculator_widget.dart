@@ -649,6 +649,17 @@ class _ReconstitutionCalculatorWidgetState
               ),
             ),
           _gradientDivider(context),
+          // Target Dose heading
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'Target Dose',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
           // Support text above syringe with U = Units explanation
           Padding(
               padding: const EdgeInsets.symmetric(),
@@ -849,7 +860,7 @@ class _ReconstitutionCalculatorWidgetState
                   border: Border.all(
                     color:
                         Theme.of(context).colorScheme.primary.withOpacity(0.25),
-                    width: 2,
+                    width: 0.75, // Extremely thin border
                   ),
                   boxShadow: [
                     BoxShadow(
