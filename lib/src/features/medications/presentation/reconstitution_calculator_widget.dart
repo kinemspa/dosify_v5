@@ -133,13 +133,13 @@ class _ReconstitutionCalculatorWidgetState
 
   Widget _gradientDivider(BuildContext context) {
     return Container(
-      height: 2,
+      height: 1,
       margin: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            Theme.of(context).colorScheme.primary.withOpacity(0.3),
             Colors.transparent,
           ],
         ),
@@ -705,8 +705,8 @@ class _ReconstitutionCalculatorWidgetState
                 ),
               ],
             ),
-            _gradientDivider(context),
-             // Reconstitution summary - featured section with emphasis
+            const SizedBox(height: 24),
+            // Reconstitution summary - featured section with emphasis
             Center(
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -745,9 +745,9 @@ class _ReconstitutionCalculatorWidgetState
                         text:
                             '${_formatNoTrailing(widget.initialStrengthValue)} ${widget.unitLabel}',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 20,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       if (widget.medicationName != null &&
@@ -763,9 +763,9 @@ class _ReconstitutionCalculatorWidgetState
                         TextSpan(
                           text: widget.medicationName,
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 18,
                             color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -787,7 +787,7 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: '${_formatNoTrailing(currentV)} mL',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 32,
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w900,
                         ),
@@ -805,9 +805,9 @@ class _ReconstitutionCalculatorWidgetState
                             ? _diluentNameCtrl.text.trim()
                             : 'diluent',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -844,18 +844,18 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: '${_formatNoTrailing(_selectedUnits)} Units  ',
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 22,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       TextSpan(
                         text:
                             '${_formatNoTrailing((_selectedUnits / 100) * _syringe.ml)} mL',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 18,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -875,9 +875,9 @@ class _ReconstitutionCalculatorWidgetState
                       TextSpan(
                         text: _syringe.label,
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 18,
                           color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const TextSpan(text: ' syringe'),

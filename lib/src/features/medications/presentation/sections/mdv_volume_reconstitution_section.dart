@@ -380,7 +380,9 @@ class _MdvVolumeReconstitutionSectionState
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              color: isDarkMode
+                  ? Colors.white.withOpacity(kReconTextMediumOpacity)
+                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
               fontStyle: FontStyle.italic,
             ),
           ),
