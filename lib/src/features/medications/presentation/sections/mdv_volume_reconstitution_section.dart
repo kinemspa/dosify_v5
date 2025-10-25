@@ -162,28 +162,19 @@ class _MdvVolumeReconstitutionSectionState
       showApplyButton: true,
       onCalculate: (result, isIntermediate) {
         // Update vial volume dynamically as user adjusts calculator
-        // Only update the field, don't save the result yet
+        // Lock to 2 decimal places for consistency
         if (mounted) {
-          widget.vialVolumeController.text = result.solventVolumeMl
-              .toStringAsFixed(
-                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
-                    ? 0
-                    : 1,
-              );
+          widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(2);
         }
       },
       onApply: (result) {
         setState(() {
           _reconResult = result;
-          _showCalculator = false;
+          // Keep calculator open after save so summary card remains visible
+          // _showCalculator = false; // REMOVED: keep calculator open
 
-          // Update vial volume with calculated value
-          widget.vialVolumeController.text = result.solventVolumeMl
-              .toStringAsFixed(
-                result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
-                    ? 0
-                    : 1,
-              );
+          // Update vial volume with calculated value, locked to 2 decimals
+          widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(2);
 
           // Update perMl concentration
           widget.perMlController.text = result.perMlConcentration
@@ -320,9 +311,11 @@ class _MdvVolumeReconstitutionSectionState
 
   Widget _buildVialVolumeField(bool isDarkMode) {
     final theme = Theme.of(context);
-    // Lock field only when reconstitution is saved AND calculator is closed
-    // When calculator is open, allow dynamic updates from calculator
-    final isLocked = _reconResult != null && !_showCalculator;
+    // Always allow manual edit, even after saving reconstitution result
+    // Remove the lock behavior entirely
+
+    // Define max vial size constraint (if saved reconstitution has it)
+    final maxVialSize = _reconResult?.maxVialSizeMl ?? 1000.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,40 +326,46 @@ class _MdvVolumeReconstitutionSectionState
           labelWidth: _labelWidth(),
           field: StepperRow36(
             controller: widget.vialVolumeController,
-            enabled: !isLocked,
             onDec: () {
-              if (isLocked) return;
               final d =
                   double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d - 0.5).clamp(0, 1000);
+              final nv = (d - 0.5).clamp(0, maxVialSize);
               setState(() {
-                widget.vialVolumeController.text = nv.toStringAsFixed(1);
+                widget.vialVolumeController.text = nv.toStringAsFixed(2);
               });
             },
             onInc: () {
-              if (isLocked) return;
               final d =
                   double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d + 0.5).clamp(0, 1000);
+              final nv = (d + 0.5).clamp(0, maxVialSize);
               setState(() {
-                widget.vialVolumeController.text = nv.toStringAsFixed(1);
+                widget.vialVolumeController.text = nv.toStringAsFixed(2);
               });
             },
-            decoration:
-                buildCompactFieldDecoration(
-                  context: context,
-                  hint: '0.0',
-                ).copyWith(
-                  fillColor: isLocked
-                      ? theme.colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.5,
-                        )
-                      : theme.colorScheme.surfaceContainerLowest,
-                ),
+            decoration: buildCompactFieldDecoration(
+              context: context,
+              hint: '0.0',
+            ),
             // Restrict manual input to 2 decimal places
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
+            // Validate manual input on change
+            onChanged: (value) {
+              final parsedValue = double.tryParse(value.trim());
+              if (parsedValue != null && parsedValue > maxVialSize) {
+                // Show snackbar for invalid input
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Vial volume cannot exceed max vial size (${maxVialSize.toStringAsFixed(1)} mL)',
+                    ),
+                    duration: const Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
             compact: true,
           ),
         ),
@@ -375,9 +374,7 @@ class _MdvVolumeReconstitutionSectionState
           child: Text(
             _showCalculator
                 ? 'Vial volume updates automatically as you adjust the calculator above'
-                : (isLocked
-                      ? 'Total volume after reconstitution (locked - use calculator to adjust)'
-                      : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above'),
+                : 'Enter vial volume: if already filled/known, input directly; otherwise use calculator above',
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,
