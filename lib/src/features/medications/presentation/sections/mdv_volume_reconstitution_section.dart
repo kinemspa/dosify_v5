@@ -95,7 +95,7 @@ class _MdvVolumeReconstitutionSectionState
           _buildSavedReconstitution(),
         ],
         const SizedBox(height: 24),
-        _buildVialVolumeField(),
+        _buildVialVolumeField(isDarkMode),
       ],
     );
   }
@@ -317,7 +317,7 @@ class _MdvVolumeReconstitutionSectionState
     );
   }
 
-  Widget _buildVialVolumeField() {
+  Widget _buildVialVolumeField(bool isDarkMode) {
     final theme = Theme.of(context);
     // Lock field only when reconstitution is saved AND calculator is closed
     // When calculator is open, allow dynamic updates from calculator
