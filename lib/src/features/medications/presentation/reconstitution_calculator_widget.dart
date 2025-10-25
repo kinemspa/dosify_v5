@@ -1,4 +1,5 @@
 // Dart imports:
+import 'dart:async';
 import 'dart:math';
 
 // Flutter imports:
@@ -58,6 +59,8 @@ class _ReconstitutionCalculatorWidgetState
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
   double _selectedUnits = 50;
   String? _selectedOption; // Track which option is selected
+  Timer? _repeatTimer;
+  bool _isIncrementing = true;
 
   @override
   void initState() {
@@ -82,10 +85,35 @@ class _ReconstitutionCalculatorWidgetState
 
   @override
   void dispose() {
+    _repeatTimer?.cancel();
     _doseCtrl.dispose();
     _vialSizeCtrl.dispose();
     _diluentNameCtrl.dispose();
     super.dispose();
+  }
+
+  void _startRepeating(bool increment, double min, double max) {
+    _isIncrementing = increment;
+    // Initial delay before starting rapid repeat
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (_repeatTimer == null || !_repeatTimer!.isActive) {
+        _repeatTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+          if (mounted) {
+            final delta = _isIncrementing ? 0.01 : -0.01;
+            final newValue = (_selectedUnits + delta).clamp(min, max);
+            setState(() {
+              _selectedUnits = newValue;
+              _selectedOption = null;
+            });
+          }
+        });
+      }
+    });
+  }
+
+  void _stopRepeating() {
+    _repeatTimer?.cancel();
+    _repeatTimer = null;
   }
 
   // Helper methods now imported from reconstitution_calculator_helpers.dart
@@ -128,6 +156,7 @@ class _ReconstitutionCalculatorWidgetState
 
   InputDecoration _fieldDecoration(BuildContext context, {String? hint}) {
     final cs = Theme.of(context).colorScheme;
+    // Use lighter background and borders for visibility on dark card
     return InputDecoration(
       hintText: hint,
       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -136,18 +165,21 @@ class _ReconstitutionCalculatorWidgetState
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
-      fillColor: cs.surfaceContainerLowest,
+      fillColor: const Color(0xFF1A2035), // Slightly lighter than card background
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
+          color: Colors.white.withOpacity(0.2),
+          width: 1.0,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+      hintStyle: TextStyle(
+        color: Colors.white.withOpacity(0.4),
       ),
     );
   }
@@ -157,8 +189,8 @@ class _ReconstitutionCalculatorWidgetState
     required String label,
     required Widget field,
   }) {
-    // Use unified row to ensure consistent label styling and spacing.
-    return LabelFieldRow(label: label, field: field);
+    // Use unified row with light text for dark background
+    return LabelFieldRow(label: label, field: field, lightText: true);
   }
 
   Widget _helperText(String text) {
@@ -261,16 +293,10 @@ class _ReconstitutionCalculatorWidgetState
     final std = _computeForUnits(S: S, D: D, U: u2);
     final dil = _computeForUnits(S: S, D: D, U: u3);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: kReconBackgroundDark,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           const SizedBox(height: 8),
           // Center-aligned calculator title
           Center(
@@ -511,7 +537,7 @@ class _ReconstitutionCalculatorWidgetState
           Padding(
               padding: const EdgeInsets.symmetric(),
               child: Text(
-                'Drag the fill line or tap on the syringe to adjust diluent amount (U = Units)',
+                'Drag the syringe or use +/- buttons for fine adjustments (U = Units)',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.white.withOpacity(kReconTextMediumOpacity),
                   fontStyle: FontStyle.italic,
@@ -522,37 +548,34 @@ class _ReconstitutionCalculatorWidgetState
           const SizedBox(height: 8),
           // Syringe gauge with fine-tune buttons
           if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-            // Fine-tune buttons with syringe gauge
+            // Fine-tune buttons with syringe gauge - maximized width
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Decrement button - no outline, just icon
-                SizedBox(
-                  height: 28,
-                  width: 28,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    constraints: const BoxConstraints(minHeight: 28, minWidth: 28),
-                    onPressed: () {
-                      final newValue = (_selectedUnits - 0.01).clamp(
-                        sliderMin,
-                        sliderMax,
-                      );
-                      setState(() {
-                        _selectedUnits = newValue;
-                        _selectedOption = null;
-                      });
-                    },
-                    icon: Icon(
-                      Icons.remove,
-                      size: 18,
+                // Decrement button - compact, no padding
+                GestureDetector(
+                  onTap: () {
+                    final newValue =
+                        (_selectedUnits - 0.01).clamp(sliderMin, sliderMax);
+                    setState(() {
+                      _selectedUnits = newValue;
+                      _selectedOption = null;
+                    });
+                  },
+                  onLongPressStart: (_) => _startRepeating(false, sliderMin, sliderMax),
+                  onLongPressEnd: (_) => _stopRepeating(),
+                  child: Container(
+                    height: 32,
+                    width: 32,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.remove_circle_outline,
+                      size: 24,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -602,28 +625,26 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Increment button - no outline, just icon
-                SizedBox(
-                  height: 28,
-                  width: 28,
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    constraints: const BoxConstraints(minHeight: 28, minWidth: 28),
-                    onPressed: () {
-                      final newValue = (_selectedUnits + 0.01).clamp(
-                        sliderMin,
-                        sliderMax,
-                      );
-                      setState(() {
-                        _selectedUnits = newValue;
-                        _selectedOption = null;
-                      });
-                    },
-                    icon: Icon(
-                      Icons.add,
-                      size: 18,
+                const SizedBox(width: 6),
+                // Increment button - compact, no padding
+                GestureDetector(
+                  onTap: () {
+                    final newValue =
+                        (_selectedUnits + 0.01).clamp(sliderMin, sliderMax);
+                    setState(() {
+                      _selectedUnits = newValue;
+                      _selectedOption = null;
+                    });
+                  },
+                  onLongPressStart: (_) => _startRepeating(true, sliderMin, sliderMax),
+                  onLongPressEnd: (_) => _stopRepeating(),
+                  child: Container(
+                    height: 32,
+                    width: 32,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.add_circle_outline,
+                      size: 24,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
@@ -824,7 +845,6 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ],
         ],
-      ),
     );
   }
 

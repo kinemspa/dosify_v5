@@ -105,11 +105,13 @@ class LabelFieldRow extends StatelessWidget {
     required this.field,
     super.key,
     this.labelWidth = kLabelColWidth,
+    this.lightText = false,
   });
 
   final String label;
   final Widget field;
   final double labelWidth;
+  final bool lightText;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +122,16 @@ class LabelFieldRow extends StatelessWidget {
         children: [
           SizedBox(
             width: labelWidth,
-            child: Text(label, style: fieldLabelStyle(context)),
+            child: Text(
+              label,
+              style: lightText
+                  ? theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: kFontSizeMedium,
+                      fontWeight: kFontWeightBold,
+                      color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                    )
+                  : fieldLabelStyle(context),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(child: field),

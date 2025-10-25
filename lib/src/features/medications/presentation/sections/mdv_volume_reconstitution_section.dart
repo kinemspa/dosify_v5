@@ -77,10 +77,12 @@ class _MdvVolumeReconstitutionSectionState
 
   @override
   Widget build(BuildContext context) {
+    // Make card dark when calculator is open OR when result is saved
+    final isDarkMode = _showCalculator || _reconResult != null;
+    
     return SectionFormCard(
       title: 'Volume & Reconstitution',
-      backgroundColor:
-          _reconResult != null ? kReconBackgroundActive : null,
+      backgroundColor: isDarkMode ? kReconBackgroundActive : null,
       children: [
         _buildHelperText(),
         const SizedBox(height: 8),
