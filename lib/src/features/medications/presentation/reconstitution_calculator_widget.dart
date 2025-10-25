@@ -119,6 +119,10 @@ class _ReconstitutionCalculatorWidgetState
     super.dispose();
   }
 
+  /// Starts repeating increment/decrement when user long-presses the syringe buttons.
+  /// 
+  /// Provides continuous adjustment with an initial delay of 500ms before starting
+  /// rapid repeat at 100ms intervals. This allows for precise fine-tuning of values.
   void _startRepeating(bool increment, double min, double max) {
     _isIncrementing = increment;
     // Initial delay before starting rapid repeat
@@ -138,11 +142,17 @@ class _ReconstitutionCalculatorWidgetState
     });
   }
 
+  /// Stops the repeating increment/decrement when user releases the long-press.
   void _stopRepeating() {
     _repeatTimer?.cancel();
     _repeatTimer = null;
   }
   
+  /// Animates the syringe slider smoothly to a target value.
+  /// 
+  /// Used when selecting preset options (Concentrated, Balanced, Diluted) to provide
+  /// visual feedback and smooth transitions between values. Uses easeInOutCubic curve
+  /// for natural, professional motion over 400ms.
   void _animateToUnits(double targetValue) {
     _targetUnits = targetValue;
     _unitsAnimation = Tween<double>(
@@ -164,7 +174,12 @@ class _ReconstitutionCalculatorWidgetState
   // - formatDouble() - Format for display (was _fmt)
   // - toBaseMass() - Convert units to mg (was _toBaseMass)
 
-  // Format number removing trailing zeros
+  /// Formats a numeric value removing trailing zeros for cleaner display.
+  /// 
+  /// Examples:
+  /// - 10.00 → "10"
+  /// - 10.50 → "10.5"
+  /// - 10.25 → "10.25"
   String _formatNoTrailing(double value) {
     final str = value.toStringAsFixed(2);
     if (str.contains('.')) {
@@ -173,6 +188,10 @@ class _ReconstitutionCalculatorWidgetState
     return str;
   }
 
+  /// Creates a subtle gradient divider line for visual section separation.
+  /// 
+  /// Uses primary color with opacity fading to transparent on edges for elegant
+  /// visual hierarchy without harsh lines.
   Widget _gradientDivider(BuildContext context) {
     return Container(
       height: 1,
@@ -189,21 +208,41 @@ class _ReconstitutionCalculatorWidgetState
     );
   }
 
+  /// Computes concentration and vial volume for reconstitution based on units.
+  /// 
+  /// This is the core calculation that determines how much diluent to add to achieve
+  /// the desired concentration for the target dose.
+  /// 
+  /// Parameters:
+  /// - [S]: Total strength in vial (in base mass units, typically mg)
+  /// - [D]: Desired dose per injection (in base mass units, typically mg)
+  /// - [U]: Insulin syringe units to draw (0-100 scale per mL)
+  /// 
+  /// Formula:
+  /// - Vial Volume: V = (S / D) × (U / 100)
+  /// - Concentration: C = D × (100 / U)
+  /// 
+  /// Returns a record with:
+  /// - [cPerMl]: Concentration per mL
+  /// - [vialVolume]: Total volume to add to vial in mL
   ({double cPerMl, double vialVolume}) _computeForUnits({
     required double S,
     required double D,
     required double U,
   }) {
-    // S = total strength in vial (mg)
-    // D = desired dose per injection (mg)
-    // U = insulin syringe units to draw from syringe
-    // Formula: V = (S / D) × (U / 100)
-    // Concentration: C = D × (100 / U)
     final c = (100 * D) / max(U, 0.01);
     final v = (S / max(D, 0.000001)) * (U / 100.0);
     return (cPerMl: c, vialVolume: v);
   }
 
+  /// Calculates the three preset syringe unit values for the current syringe size.
+  /// 
+  /// Returns three values representing different reconstitution concentrations:
+  /// - Concentrated (5% or min 5 units): Strong, small doses
+  /// - Balanced (33%): Medium concentration
+  /// - Diluted (80%): Weaker, larger doses
+  /// 
+  /// These presets give users quick options without manual slider adjustment.
   (double, double, double) _presetUnitsRaw() {
     final total = _syringe.totalUnits.toDouble();
     final minU = max(5, (total * 0.05).ceil()).toDouble();
