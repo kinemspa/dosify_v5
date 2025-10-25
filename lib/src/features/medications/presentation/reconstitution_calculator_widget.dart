@@ -880,7 +880,22 @@ class _ReconstitutionCalculatorWidgetState
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const TextSpan(text: ' syringe for a dose of '),
+                      const TextSpan(text: ' syringe'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Dose amount on separate line
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                    ),
+                    children: [
+                      const TextSpan(text: 'for a dose of '),
                       TextSpan(
                         text: '${_formatNoTrailing(Draw)} $_doseUnit',
                         style: TextStyle(
@@ -897,7 +912,7 @@ class _ReconstitutionCalculatorWidgetState
                 Text(
                   'This calculates the reconstitution volume needed to achieve the correct concentration for your target dose. '
                   'This target dose will become your default dose in the schedule screen. '
-                  'Doses can be adjusted after reconstitution based on actual preparation.',
+                  'Doses can be created, adjusted, and tracked on the schedule screen where all medication administration is managed.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white.withOpacity(kReconTextMutedOpacity),
