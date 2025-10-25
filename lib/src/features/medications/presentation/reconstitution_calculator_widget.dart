@@ -1031,25 +1031,43 @@ class _ReconstitutionCalculatorWidgetState
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: isValid ? onTap : null,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: Opacity(
           opacity: isValid ? 1.0 : 0.4,
-          child: Container(
-            padding: const EdgeInsets.all(6),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: selected
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.1)
-                  : Colors.transparent,
+              gradient: selected
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.colorScheme.primary.withOpacity(0.15),
+                        theme.colorScheme.primary.withOpacity(0.08),
+                      ],
+                    )
+                  : null,
+              color: selected ? null : Colors.white.withOpacity(0.03),
               border: Border.all(
                 color: selected
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.outlineVariant,
-                width: 2, // Consistent width to prevent nudging
+                    : Colors.white.withOpacity(0.15),
+                width: selected ? 2.5 : 1.5,
               ),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.2),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                      ),
+                    ]
+                  : null,
             ),
             child: Row(
               children: [
@@ -1058,19 +1076,26 @@ class _ReconstitutionCalculatorWidgetState
                   groupValue: selectedValue,
                   onChanged: isValid ? (_) => onTap() : null,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  fillColor: WidgetStateProperty.resolveWith<Color?>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return theme.colorScheme.primary;
+                    }
+                    return Colors.white.withOpacity(0.5);
+                  }),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                         Text(
                           label,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
                             color: selected
                                 ? theme.colorScheme.primary
-                                : Colors.white.withOpacity(kReconTextNormalOpacity),
+                                : Colors.white.withOpacity(kReconTextHighOpacity),
                           ),
                         ),
                       if (explainerText.isNotEmpty) ...[
