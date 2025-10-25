@@ -51,7 +51,8 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
 }
 
 class _ReconstitutionCalculatorWidgetState
-    extends State<ReconstitutionCalculatorWidget> {
+    extends State<ReconstitutionCalculatorWidget>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
   final TextEditingController _diluentNameCtrl = TextEditingController();
@@ -61,6 +62,11 @@ class _ReconstitutionCalculatorWidgetState
   String? _selectedOption; // Track which option is selected
   Timer? _repeatTimer;
   bool _isIncrementing = true;
+  
+  // Animation for smooth preset transitions
+  late AnimationController _transitionController;
+  late Animation<double> _unitsAnimation;
+  double _targetUnits = 50;
 
   @override
   void initState() {
@@ -81,11 +87,32 @@ class _ReconstitutionCalculatorWidgetState
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
     }
     _selectedUnits = _syringe.totalUnits * 0.5;
+    _targetUnits = _selectedUnits;
+    
+    // Initialize animation controller
+    _transitionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _unitsAnimation = Tween<double>(
+      begin: _selectedUnits,
+      end: _targetUnits,
+    ).animate(
+      CurvedAnimation(
+        parent: _transitionController,
+        curve: Curves.easeInOutCubic,
+      ),
+    )..addListener(() {
+        setState(() {
+          _selectedUnits = _unitsAnimation.value;
+        });
+      });
   }
 
   @override
   void dispose() {
     _repeatTimer?.cancel();
+    _transitionController.dispose();
     _doseCtrl.dispose();
     _vialSizeCtrl.dispose();
     _diluentNameCtrl.dispose();
@@ -114,6 +141,21 @@ class _ReconstitutionCalculatorWidgetState
   void _stopRepeating() {
     _repeatTimer?.cancel();
     _repeatTimer = null;
+  }
+  
+  void _animateToUnits(double targetValue) {
+    _targetUnits = targetValue;
+    _unitsAnimation = Tween<double>(
+      begin: _selectedUnits,
+      end: _targetUnits,
+    ).animate(
+      CurvedAnimation(
+        parent: _transitionController,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+    _transitionController.reset();
+    _transitionController.forward();
   }
 
   // Helper methods now imported from reconstitution_calculator_helpers.dart
@@ -517,10 +559,12 @@ class _ReconstitutionCalculatorWidgetState
               'Concentrated',
               'concentrated',
               _selectedOption,
-              () => setState(() {
-                _selectedUnits = u1;
-                _selectedOption = 'concentrated';
-              }),
+              () {
+                setState(() {
+                  _selectedOption = 'concentrated';
+                });
+                _animateToUnits(u1);
+              },
               conc,
               u1,
               isValid: u1 >= sliderMin && u1 <= sliderMax,
@@ -530,10 +574,12 @@ class _ReconstitutionCalculatorWidgetState
               'Balanced',
               'balanced',
               _selectedOption,
-              () => setState(() {
-                _selectedUnits = u2;
-                _selectedOption = 'balanced';
-              }),
+              () {
+                setState(() {
+                  _selectedOption = 'balanced';
+                });
+                _animateToUnits(u2);
+              },
               std,
               u2,
               isValid: u2 >= sliderMin && u2 <= sliderMax,
@@ -543,10 +589,12 @@ class _ReconstitutionCalculatorWidgetState
               'Diluted',
               'diluted',
               _selectedOption,
-              () => setState(() {
-                _selectedUnits = u3;
-                _selectedOption = 'diluted';
-              }),
+              () {
+                setState(() {
+                  _selectedOption = 'diluted';
+                });
+                _animateToUnits(u3);
+              },
               dil,
               u3,
               isValid: u3 >= sliderMin && u3 <= sliderMax,
