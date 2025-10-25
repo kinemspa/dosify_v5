@@ -84,7 +84,7 @@ class _MdvVolumeReconstitutionSectionState
       title: 'Volume & Reconstitution',
       backgroundColor: isDarkMode ? kReconBackgroundActive : null,
       children: [
-        _buildHelperText(),
+        _buildHelperText(isDarkMode),
         const SizedBox(height: 8),
         _buildCalculatorButton(),
         if (_showCalculator) ...[
@@ -100,7 +100,7 @@ class _MdvVolumeReconstitutionSectionState
     );
   }
 
-  Widget _buildHelperText() {
+  Widget _buildHelperText(bool isDarkMode) {
     final theme = Theme.of(context);
     // Use white text when dark mode is active
     final textColor = isDarkMode
