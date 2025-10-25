@@ -79,6 +79,8 @@ class _MdvVolumeReconstitutionSectionState
   Widget build(BuildContext context) {
     return SectionFormCard(
       title: 'Volume & Reconstitution',
+      backgroundColor:
+          _reconResult != null ? kReconBackgroundActive : null,
       children: [
         _buildHelperText(),
         const SizedBox(height: 8),

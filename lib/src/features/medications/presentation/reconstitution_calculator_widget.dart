@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
@@ -166,9 +167,7 @@ class _ReconstitutionCalculatorWidgetState
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(
-            context,
-          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          color: Colors.white.withOpacity(kReconTextMediumOpacity),
           fontStyle: FontStyle.italic,
         ),
       ),
@@ -264,7 +263,7 @@ class _ReconstitutionCalculatorWidgetState
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0E27), // Dark blue-black background
+        color: kReconBackgroundDark,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
@@ -290,7 +289,7 @@ class _ReconstitutionCalculatorWidgetState
             child: RichText(
               text: TextSpan(
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: Colors.white.withOpacity(kReconTextMediumOpacity),
                 ),
                 children: [
                   const TextSpan(text: 'Using vial strength: '),
@@ -312,9 +311,7 @@ class _ReconstitutionCalculatorWidgetState
             child: Text(
               'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+                color: Colors.white.withOpacity(kReconTextMediumOpacity),
               ),
             ),
           ),
@@ -456,7 +453,7 @@ class _ReconstitutionCalculatorWidgetState
                 'Select a reconstitution option',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: Colors.white.withOpacity(kReconTextHighOpacity),
                 ),
               ),
             ),
@@ -512,17 +509,15 @@ class _ReconstitutionCalculatorWidgetState
           const SizedBox(height: 12),
           // Support text above syringe with U = Units explanation
           Padding(
-            padding: const EdgeInsets.symmetric(),
-            child: Text(
-              'Drag the fill line or tap on the syringe to adjust diluent amount (U = Units)',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
-                fontStyle: FontStyle.italic,
+              padding: const EdgeInsets.symmetric(),
+              child: Text(
+                'Drag the fill line or tap on the syringe to adjust diluent amount (U = Units)',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
-          ),
           // Range limit warning removed - using snackbar only for cleaner UI
           const SizedBox(height: 8),
           // Syringe gauge with fine-tune buttons
@@ -532,22 +527,14 @@ class _ReconstitutionCalculatorWidgetState
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Decrement button - small, matches other steppers
+                // Decrement button - no outline, just icon
                 SizedBox(
                   height: 28,
                   width: 28,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      minimumSize: const Size(28, 28),
-                      side: BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withOpacity(0.5),
-                        width: 0.75,
-                      ),
-                    ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minHeight: 28, minWidth: 28),
                     onPressed: () {
                       final newValue = (_selectedUnits - 0.01).clamp(
                         sliderMin,
@@ -558,14 +545,14 @@ class _ReconstitutionCalculatorWidgetState
                         _selectedOption = null;
                       });
                     },
-                    child: Icon(
+                    icon: Icon(
                       Icons.remove,
-                      size: 16,
+                      size: 18,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -615,23 +602,15 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(width: 4),
-                // Increment button - small, matches other steppers
+                const SizedBox(width: 12),
+                // Increment button - no outline, just icon
                 SizedBox(
                   height: 28,
                   width: 28,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      minimumSize: const Size(28, 28),
-                      side: BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withOpacity(0.5),
-                        width: 0.75,
-                      ),
-                    ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(minHeight: 28, minWidth: 28),
                     onPressed: () {
                       final newValue = (_selectedUnits + 0.01).clamp(
                         sliderMin,
@@ -642,9 +621,9 @@ class _ReconstitutionCalculatorWidgetState
                         _selectedOption = null;
                       });
                     },
-                    child: Icon(
+                    icon: Icon(
                       Icons.add,
-                      size: 16,
+                      size: 18,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
@@ -662,16 +641,9 @@ class _ReconstitutionCalculatorWidgetState
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
                       fontWeight: FontWeight.w600,
                       height: 1.4,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                        ),
-                      ],
                     ),
                     children: [
                       const TextSpan(text: 'Reconstitute '),
@@ -690,7 +662,7 @@ class _ReconstitutionCalculatorWidgetState
                           text: ' of ',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: Colors.white.withOpacity(kReconTextHighOpacity),
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -712,16 +684,9 @@ class _ReconstitutionCalculatorWidgetState
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
                       fontWeight: FontWeight.w600,
                       height: 1.4,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                        ),
-                      ],
                     ),
                     children: [
                       const TextSpan(text: 'with '),
@@ -737,7 +702,7 @@ class _ReconstitutionCalculatorWidgetState
                         text: ' of ',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: Colors.white.withOpacity(kReconTextHighOpacity),
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -760,16 +725,9 @@ class _ReconstitutionCalculatorWidgetState
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
                       fontWeight: FontWeight.w600,
                       height: 1.4,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                        ),
-                      ],
                     ),
                     children: [
                       const TextSpan(text: 'Draw '),
@@ -801,15 +759,8 @@ class _ReconstitutionCalculatorWidgetState
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
                       fontWeight: FontWeight.w600,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                        ),
-                      ],
                     ),
                     children: [
                       const TextSpan(text: 'into a '),
@@ -831,9 +782,7 @@ class _ReconstitutionCalculatorWidgetState
                   'This calculates reconstitution volume only.\nSet actual dose amounts in the scheduling screen.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.65),
+                    color: Colors.white.withOpacity(kReconTextMutedOpacity),
                     fontStyle: FontStyle.italic,
                     height: 1.4,
                   ),
@@ -941,23 +890,21 @@ class _ReconstitutionCalculatorWidgetState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        label,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: selected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(
-                                  0.5,
-                                ),
+                        Text(
+                          label,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: selected
+                                ? theme.colorScheme.primary
+                                : Colors.white.withOpacity(kReconTextNormalOpacity),
+                          ),
                         ),
-                      ),
                       if (explainerText.isNotEmpty) ...[
                         const SizedBox(height: 1),
                         Text(
                           explainerText,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: Colors.white.withOpacity(kReconTextMutedOpacity),
                             fontStyle: FontStyle.italic,
                             fontSize: 11,
                           ),
@@ -968,9 +915,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                ? Colors.white.withOpacity(0.9)
+                                : Colors.white.withOpacity(0.7),
                           ),
                           children: [
                             TextSpan(
@@ -990,9 +936,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                ? Colors.white.withOpacity(kReconTextHighOpacity)
+                                : Colors.white.withOpacity(kReconTextLowOpacity),
                           ),
                           children: [
                             const TextSpan(text: 'Concentration: '),
@@ -1010,9 +955,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                ? Colors.white.withOpacity(kReconTextHighOpacity)
+                                : Colors.white.withOpacity(kReconTextLowOpacity),
                           ),
                           children: [
                             TextSpan(text: 'Syringe (${_syringe.label}): '),

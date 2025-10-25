@@ -37,21 +37,24 @@ class SectionFormCard extends StatelessWidget {
     super.key,
     this.trailing,
     this.neutral = false,
+    this.backgroundColor,
   });
 
   final String title;
   final List<Widget> children;
   final Widget? trailing;
   final bool neutral;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: neutral
-            ? theme.colorScheme.surfaceContainerLowest
-            : theme.colorScheme.primary.withValues(alpha: 0.03),
+        color: backgroundColor ??
+            (neutral
+                ? theme.colorScheme.surfaceContainerLowest
+                : theme.colorScheme.primary.withValues(alpha: 0.03)),
         borderRadius: BorderRadius.circular(12),
         border: neutral
             ? Border.all(

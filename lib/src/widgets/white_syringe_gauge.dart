@@ -188,8 +188,6 @@ class _WhiteSyringePainter extends CustomPainter {
       // - 0.3ml/0.5ml: label every 5U (5, 10, 15, 20, 25, 30...)
       // - 1ml: label every 10U (10, 20, 30, 40, 50...)
       // - 3ml/5ml: label only 50U marks (50, 100, 150...)
-      final isFiveUnit =
-          isSmallSyringe && units % 5 == 0 && !isMinor && !isMajor;
       final shouldLabel = isMajor || isMinor || (isSmallSyringe && isFiveUnit);
 
       if (shouldLabel) {
@@ -205,8 +203,8 @@ class _WhiteSyringePainter extends CustomPainter {
           ),
           textDirection: TextDirection.ltr,
         )..layout();
-        // Position below baseline with padding
-        tp.paint(canvas, Offset(x - tp.width / 2, baselineY + 4));
+        // Position below baseline with more padding for better spacing
+        tp.paint(canvas, Offset(x - tp.width / 2, baselineY + 8));
       }
     }
 

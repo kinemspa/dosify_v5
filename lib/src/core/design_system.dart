@@ -144,6 +144,17 @@ const double kDisabledOpacity = kOpacityLow;
 const double kCardBorderOpacity = kOpacityLow;
 const double kHintTextOpacity = kOpacityMediumLow;
 
+/// Reconstitution calculator opacity (white text on dark background)
+const double kReconTextHighOpacity = 0.90; // Selected option details
+const double kReconTextMediumOpacity = 0.85; // Support text
+const double kReconTextNormalOpacity = 0.75; // Unselected labels
+const double kReconTextLowOpacity = 0.70; // Unselected details
+const double kReconTextMutedOpacity = 0.60; // Explainer text
+
+/// Reconstitution calculator background colors
+const Color kReconBackgroundDark = Color(0xFF0A0E27); // Dark blue-black
+const Color kReconBackgroundActive = Color(0xFF1A1E37); // Slightly lighter for active state
+
 /// Color helper functions (NEVER use these - use theme colors)
 /// These are kept only for backward compatibility during migration
 @Deprecated('Use Theme.of(context).colorScheme instead')
