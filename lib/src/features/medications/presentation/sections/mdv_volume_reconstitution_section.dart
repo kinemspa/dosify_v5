@@ -255,6 +255,7 @@ class _MdvVolumeReconstitutionSectionState
     final mlDrawStr = (result.recommendedUnits / 100 * result.syringeSizeMl).toStringAsFixed(2);
     final syringeStr = result.syringeSizeMl.toStringAsFixed(1);
 
+    // Build the full rich summary card (same as in calculator)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -291,77 +292,229 @@ class _MdvVolumeReconstitutionSectionState
           ),
         ),
         const SizedBox(height: 16),
-        // Syringe gauge spans full width
+        // Full summary card
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  theme.colorScheme.primary.withOpacity(0.12),
+                  theme.colorScheme.primary.withOpacity(0.05),
+                  theme.colorScheme.secondary.withOpacity(0.08),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: theme.colorScheme.primary.withOpacity(0.25),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withOpacity(0.15),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Icon header
+                Icon(
+                  Icons.science_outlined,
+                  size: 32,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+                // First line: Reconstitute X of MEDNAME
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Reconstitute '),
+                      TextSpan(
+                        text: '$strengthStr $unitLabel',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (medName.isNotEmpty) ...[
+                        TextSpan(
+                          text: '  of  ',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(kReconTextHighOpacity),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        TextSpan(
+                          text: medName,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Second line: with X mL of DILUENT
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                    children: [
+                      const TextSpan(text: 'with '),
+                      TextSpan(
+                        text: '$volumeStr mL',
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '  of  ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(kReconTextHighOpacity),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      TextSpan(
+                        text: diluentName,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Divider
+                Container(
+                  width: 60,
+                  height: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        theme.colorScheme.primary.withOpacity(0.5),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Draw instruction
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Draw '),
+                      TextSpan(
+                        text: '$drawStr Units  ',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '$mlDrawStr mL',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Syringe instruction
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white.withOpacity(kReconTextHighOpacity),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    children: [
+                      const TextSpan(text: 'into a '),
+                      TextSpan(
+                        text: '$syringeStr mL',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const TextSpan(text: ' syringe'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Dose info
+                if (result.recommendedDose != null && result.doseUnit != null)
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                        fontWeight: FontWeight.w500,
+                        height: 1.4,
+                      ),
+                      children: [
+                        const TextSpan(text: 'for a dose of '),
+                        TextSpan(
+                          text:
+                              '${result.recommendedDose!.toStringAsFixed(result.recommendedDose! == result.recommendedDose!.roundToDouble() ? 0 : 2)} ${result.doseUnit}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Syringe gauge
         WhiteSyringeGauge(
           totalUnits: result.syringeSizeMl * 100,
           fillUnits: result.recommendedUnits,
-        ),
-        const SizedBox(height: 12),
-        // Main instruction text spans full width
-        RichText(
-          text: TextSpan(
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(kReconTextHighOpacity),
-              fontWeight: FontWeight.w600,
-            ),
-            children: [
-              const TextSpan(text: 'Reconstitute '),
-              TextSpan(
-                text: '$strengthStr$unitLabel',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              if (medName.isNotEmpty) TextSpan(text: ' $medName'),
-              const TextSpan(text: ' with '),
-              TextSpan(
-                text: '$volumeStr mL',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              TextSpan(text: ' $diluentName'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Supporting details span full width
-        RichText(
-          text: TextSpan(
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(kReconTextMediumOpacity),
-              fontStyle: FontStyle.italic,
-            ),
-            children: [
-              const TextSpan(text: 'Draw '),
-              TextSpan(
-                text: '$drawStr U',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const TextSpan(text: ' ('),
-              TextSpan(
-                text: '$mlDrawStr mL',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const TextSpan(text: ') into a '),
-              TextSpan(
-                text: '$syringeStr mL',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const TextSpan(text: ' syringe'),
-            ],
-          ),
         ),
       ],
     );
@@ -380,7 +533,7 @@ class _MdvVolumeReconstitutionSectionState
       children: [
         LabelFieldRow(
           key: widget.vialVolumeKey,
-          label: 'Vial Volume (mL)',
+          label: 'Total Volume (mL)',
           labelWidth: _labelWidth(),
           field: StepperRow36(
             controller: widget.vialVolumeController,

@@ -130,8 +130,8 @@ class _ReconstitutionCalculatorWidgetState
       if (_repeatTimer == null || !_repeatTimer!.isActive) {
         _repeatTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
           if (mounted) {
-            final delta = _isIncrementing ? 0.01 : -0.01;
-            final newValue = (_selectedUnits + delta).clamp(min, max);
+            final delta = _isIncrementing ? 1.0 : -1.0; // Change by whole units
+            final newValue = (_selectedUnits + delta).clamp(min, max).roundToDouble();
             setState(() {
               _selectedUnits = newValue;
               _selectedOption = null;
@@ -364,11 +364,11 @@ class _ReconstitutionCalculatorWidgetState
     ); // Rounded for saving
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
-    // Notify parent of calculation result (use rounded value for saving)
+    // Notify parent of calculation result (use precise value for live display)
     final result = ReconstitutionResult(
       perMlConcentration: currentC,
-      solventVolumeMl: currentVRounded,
-      recommendedUnits: round2(_selectedUnits),
+      solventVolumeMl: currentV, // Use precise value not rounded
+      recommendedUnits: _selectedUnits.roundToDouble(), // Round to whole units
       syringeSizeMl: _syringe.ml,
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
@@ -672,7 +672,7 @@ class _ReconstitutionCalculatorWidgetState
                 GestureDetector(
                   onTap: () {
                     final newValue =
-                        (_selectedUnits - 0.01).clamp(sliderMin, sliderMax);
+                        (_selectedUnits - 1.0).clamp(sliderMin, sliderMax).roundToDouble();
                     setState(() {
                       _selectedUnits = newValue;
                       _selectedOption = null;
@@ -690,8 +690,8 @@ class _ReconstitutionCalculatorWidgetState
                       constraints:
                           const BoxConstraints(minHeight: 28, minWidth: 28),
                       onPressed: () {
-                        final rawValue = _selectedUnits - 0.01;
-                        final newValue = rawValue.clamp(sliderMin, sliderMax);
+                        final rawValue = _selectedUnits - 1.0; // Decrement by whole unit
+                        final newValue = rawValue.clamp(sliderMin, sliderMax).roundToDouble();
                         
                         // Show snackbar if hitting constraint
                         if (rawValue != newValue) {
@@ -750,7 +750,7 @@ class _ReconstitutionCalculatorWidgetState
                           final clampedValue = newValue.clamp(
                             sliderMin,
                             sliderMax,
-                          );
+                          ).roundToDouble(); // Round to whole units
                           setState(() {
                             _selectedUnits = clampedValue;
                             _selectedOption = null;
@@ -778,7 +778,7 @@ class _ReconstitutionCalculatorWidgetState
                 GestureDetector(
                   onTap: () {
                     final newValue =
-                        (_selectedUnits + 0.01).clamp(sliderMin, sliderMax);
+                        (_selectedUnits + 1.0).clamp(sliderMin, sliderMax).roundToDouble();
                     setState(() {
                       _selectedUnits = newValue;
                       _selectedOption = null;
@@ -796,8 +796,8 @@ class _ReconstitutionCalculatorWidgetState
                       constraints:
                           const BoxConstraints(minHeight: 28, minWidth: 28),
                       onPressed: () {
-                        final rawValue = _selectedUnits + 0.01;
-                        final newValue = rawValue.clamp(sliderMin, sliderMax);
+                        final rawValue = _selectedUnits + 1.0; // Increment by whole unit
+                        final newValue = rawValue.clamp(sliderMin, sliderMax).roundToDouble();
                         
                         // Show snackbar if hitting constraint
                         if (rawValue != newValue) {
@@ -833,7 +833,7 @@ class _ReconstitutionCalculatorWidgetState
             // Reconstitution summary - featured section with emphasis
             Center(
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -983,7 +983,7 @@ class _ReconstitutionCalculatorWidgetState
                     children: [
                       const TextSpan(text: 'Draw '),
                       TextSpan(
-                        text: '${_formatNoTrailing(_selectedUnits)} Units  ',
+                        text: '${_selectedUnits.round()} Units  ', // Show whole units only
                         style: TextStyle(
                           fontSize: 22,
                           color: Theme.of(context).colorScheme.primary,
@@ -1085,8 +1085,8 @@ class _ReconstitutionCalculatorWidgetState
                     ? () {
                         final result = ReconstitutionResult(
                           perMlConcentration: currentC,
-                          solventVolumeMl: currentV,
-                          recommendedUnits: round2(_selectedUnits),
+                          solventVolumeMl: currentV, // Use precise value
+                          recommendedUnits: _selectedUnits.roundToDouble(), // Round to whole units
                           syringeSizeMl: _syringe.ml,
                           diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                               ? _diluentNameCtrl.text.trim()
