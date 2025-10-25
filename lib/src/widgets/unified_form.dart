@@ -514,9 +514,16 @@ class StepperRow36 extends StatelessWidget {
             ),
             width: kBorderWidthThin,
           ),
+          foregroundColor: theme.colorScheme.onSurface,
         ),
         onPressed: enabled ? onTap : null,
-        child: Text(symbol, style: bodyTextStyle(context)),
+        child: Text(
+          symbol,
+          style: bodyTextStyle(context)?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

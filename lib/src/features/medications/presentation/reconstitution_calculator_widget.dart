@@ -131,6 +131,22 @@ class _ReconstitutionCalculatorWidgetState
     return str;
   }
 
+  Widget _gradientDivider(BuildContext context) {
+    return Container(
+      height: 2,
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+
   ({double cPerMl, double vialVolume}) _computeForUnits({
     required double S,
     required double D,
@@ -292,15 +308,18 @@ class _ReconstitutionCalculatorWidgetState
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
           const SizedBox(height: 8),
-          // Center-aligned calculator title
+          // Gradient divider above heading
+          _gradientDivider(context),
+          // Center-aligned calculator title - larger font
           Center(
             child: Text(
               'Reconstitution Calculator',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
@@ -478,12 +497,7 @@ class _ReconstitutionCalculatorWidgetState
           _helperText(
             'Maximum capacity in mL of the vial (optional constraint)',
           ),
-          Divider(
-            color: Theme.of(
-              context,
-            ).colorScheme.outlineVariant.withOpacity(0.5),
-          ),
-          const SizedBox(height: 12),
+          _gradientDivider(context),
           if (sliderMax > 0 && !sliderMax.isNaN) ...[
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -544,7 +558,7 @@ class _ReconstitutionCalculatorWidgetState
                 ),
               ),
             ),
-          const SizedBox(height: 12),
+          _gradientDivider(context),
           // Support text above syringe with U = Units explanation
           Padding(
               padding: const EdgeInsets.symmetric(),
@@ -691,26 +705,28 @@ class _ReconstitutionCalculatorWidgetState
                 ),
               ],
             ),
-            const SizedBox(height: 32),
-            // Reconstitution summary - featured section with emphasis
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                    Theme.of(context).colorScheme.primary.withOpacity(0.02),
-                  ],
+            _gradientDivider(context),
+             // Reconstitution summary - featured section with emphasis
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.02),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                    width: 1.5,
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -737,7 +753,7 @@ class _ReconstitutionCalculatorWidgetState
                       if (widget.medicationName != null &&
                           widget.medicationName!.isNotEmpty) ...[
                         TextSpan(
-                          text: ' of ',
+                          text: '  of  ',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.white.withOpacity(kReconTextHighOpacity),
@@ -777,7 +793,7 @@ class _ReconstitutionCalculatorWidgetState
                         ),
                       ),
                       TextSpan(
-                        text: ' of ',
+                        text: '  of  ',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.white.withOpacity(kReconTextHighOpacity),
@@ -826,14 +842,13 @@ class _ReconstitutionCalculatorWidgetState
                     children: [
                       const TextSpan(text: 'Draw '),
                       TextSpan(
-                        text: '${_formatNoTrailing(_selectedUnits)} Units',
+                        text: '${_formatNoTrailing(_selectedUnits)} Units  ',
                         style: TextStyle(
                           fontSize: 26,
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const TextSpan(text: ' ('),
                       TextSpan(
                         text:
                             '${_formatNoTrailing((_selectedUnits / 100) * _syringe.ml)} mL',
@@ -843,7 +858,6 @@ class _ReconstitutionCalculatorWidgetState
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const TextSpan(text: ')'),
                     ],
                   ),
                 ),
@@ -884,6 +898,7 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ),
           ),
+            ),
           const SizedBox(height: 16),
         ],
           if (!fitsVial)
