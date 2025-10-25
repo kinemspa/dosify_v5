@@ -600,8 +600,26 @@ class _ReconstitutionCalculatorWidgetState
                       constraints:
                           const BoxConstraints(minHeight: 28, minWidth: 28),
                       onPressed: () {
-                        final newValue =
-                            (_selectedUnits - 0.01).clamp(sliderMin, sliderMax);
+                        final rawValue = _selectedUnits - 0.01;
+                        final newValue = rawValue.clamp(sliderMin, sliderMax);
+                        
+                        // Show snackbar if hitting constraint
+                        if (rawValue != newValue) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                rawValue < sliderMin
+                                    ? 'Minimum value reached'
+                                    : (vialMax != null
+                                        ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                        : 'Limited by syringe capacity'),
+                              ),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                        
                         setState(() {
                           _selectedUnits = newValue;
                           _selectedOption = null;
@@ -688,8 +706,24 @@ class _ReconstitutionCalculatorWidgetState
                       constraints:
                           const BoxConstraints(minHeight: 28, minWidth: 28),
                       onPressed: () {
-                        final newValue =
-                            (_selectedUnits + 0.01).clamp(sliderMin, sliderMax);
+                        final rawValue = _selectedUnits + 0.01;
+                        final newValue = rawValue.clamp(sliderMin, sliderMax);
+                        
+                        // Show snackbar if hitting constraint
+                        if (rawValue != newValue) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                vialMax != null
+                                    ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                    : 'Limited by syringe capacity',
+                              ),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                        
                         setState(() {
                           _selectedUnits = newValue;
                           _selectedOption = null;
