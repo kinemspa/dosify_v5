@@ -292,6 +292,9 @@ class _ReconstitutionCalculatorWidgetState
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
           : null,
+      recommendedDose: Draw,
+      doseUnit: _doseUnit,
+      maxVialSizeMl: vialMax,
     );
     final isValid = S > 0 && D > 0 && fitsVial;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -984,6 +987,9 @@ class _ReconstitutionCalculatorWidgetState
                           diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                               ? _diluentNameCtrl.text.trim()
                               : null,
+                          recommendedDose: Draw,
+                          doseUnit: _doseUnit,
+                          maxVialSizeMl: vialMax,
                         );
                         widget.onApply?.call(result);
                       }
