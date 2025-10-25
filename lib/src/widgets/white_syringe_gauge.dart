@@ -31,6 +31,7 @@ class WhiteSyringeGauge extends StatefulWidget {
 class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
   double? _dragValue;
   bool _hitConstraint = false;
+  bool _isActivelyDragging = false;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +40,13 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
     final currentFill = _dragValue ?? widget.fillUnits;
 
     return GestureDetector(
+      onHorizontalDragStart: widget.interactive
+          ? (details) {
+              setState(() {
+                _isActivelyDragging = true;
+              });
+            }
+          : null,
       onHorizontalDragUpdate: widget.interactive
           ? (details) {
               final box = context.findRenderObject() as RenderBox?;
@@ -73,6 +81,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               setState(() {
                 _dragValue = null;
                 _hitConstraint = false;
+                _isActivelyDragging = false;
               });
             }
           : null,
@@ -97,13 +106,29 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
               }
             }
           : null,
-      child: CustomPaint(
-        size: const Size(double.infinity, 44),
-        painter: _WhiteSyringePainter(
-          totalUnits: widget.totalUnits,
-          fillUnits: currentFill,
-          color: effectiveColor,
-          interactive: widget.interactive,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: _isActivelyDragging
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: effectiveColor.withOpacity(0.4),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
+                ],
+              )
+            : null,
+        child: CustomPaint(
+          size: const Size(double.infinity, 44),
+          painter: _WhiteSyringePainter(
+            totalUnits: widget.totalUnits,
+            fillUnits: currentFill,
+            color: effectiveColor,
+            interactive: widget.interactive,
+            isActivelyDragging: _isActivelyDragging,
+          ),
         ),
       ),
     );
@@ -116,12 +141,14 @@ class _WhiteSyringePainter extends CustomPainter {
     required this.fillUnits,
     required this.color,
     this.interactive = false,
+    this.isActivelyDragging = false,
   });
 
   final double totalUnits;
   final double fillUnits;
   final Color color;
   final bool interactive;
+  final bool isActivelyDragging;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -228,18 +255,22 @@ class _WhiteSyringePainter extends CustomPainter {
 
       // Draw draggable handle indicator if interactive
       if (interactive && fillEndX > 0) {
+        // Larger handle when actively dragging
+        final handleRadius = isActivelyDragging ? 8.0 : 6.0;
+        final centerRadius = isActivelyDragging ? 4.0 : 3.0;
+        
         final handlePaint = Paint()
           ..color = color
           ..style = PaintingStyle.fill;
 
         // Draw a circular handle at the end of the fill line
-        canvas.drawCircle(Offset(fillEndX, baselineY), 6, handlePaint);
+        canvas.drawCircle(Offset(fillEndX, baselineY), handleRadius, handlePaint);
 
         // Draw white center to make it more visible
         final centerPaint = Paint()
           ..color = Colors.white
           ..style = PaintingStyle.fill;
-        canvas.drawCircle(Offset(fillEndX, baselineY), 3, centerPaint);
+        canvas.drawCircle(Offset(fillEndX, baselineY), centerRadius, centerPaint);
       }
     }
   }
@@ -249,6 +280,7 @@ class _WhiteSyringePainter extends CustomPainter {
     return oldDelegate.totalUnits != totalUnits ||
         oldDelegate.fillUnits != fillUnits ||
         oldDelegate.color != color ||
-        oldDelegate.interactive != interactive;
+        oldDelegate.interactive != interactive ||
+        oldDelegate.isActivelyDragging != isActivelyDragging;
   }
 }
