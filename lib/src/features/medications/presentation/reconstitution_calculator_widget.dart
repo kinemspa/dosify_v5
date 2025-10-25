@@ -746,27 +746,44 @@ class _ReconstitutionCalculatorWidgetState
             // Reconstitution summary - featured section with emphasis
             Center(
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                      Theme.of(context).colorScheme.primary.withOpacity(0.02),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.08),
                     ],
+                    stops: const [0.0, 0.5, 1.0],
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                    width: 1.5,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                    width: 2,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                      blurRadius: 16,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                // Summary header icon
+                Icon(
+                  Icons.science_outlined,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
                 // First line: Reconstitute X of MEDNAME
                 RichText(
                   textAlign: TextAlign.center,
