@@ -113,9 +113,9 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: effectiveColor.withOpacity(0.4),
-                    blurRadius: 12,
-                    spreadRadius: 2,
+                    color: effectiveColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 1,
                   ),
                 ],
               )

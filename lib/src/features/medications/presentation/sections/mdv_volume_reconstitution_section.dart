@@ -202,8 +202,7 @@ class _MdvVolumeReconstitutionSectionState
       onApply: (result) {
         setState(() {
           _reconResult = result;
-          // Keep calculator open after save so summary card remains visible
-          // _showCalculator = false; // REMOVED: keep calculator open
+          _showCalculator = false; // Close calculator after save
 
           // Update vial volume with calculated value, locked to 2 decimals
           widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(2);
@@ -244,27 +243,54 @@ class _MdvVolumeReconstitutionSectionState
     final unitLabel = _baseUnit(widget.strengthUnit);
     final diluentName = result.diluentName ?? 'diluent';
 
-    // Format values
+    // Format values with consistent 2 decimal places for volume
     final strengthStr = strengthVal == strengthVal.roundToDouble()
         ? strengthVal.toStringAsFixed(0)
         : strengthVal.toString();
-    final volumeStr =
-        result.solventVolumeMl == result.solventVolumeMl.roundToDouble()
-        ? result.solventVolumeMl.toStringAsFixed(0)
-        : result.solventVolumeMl.toStringAsFixed(1);
+    final volumeStr = result.solventVolumeMl.toStringAsFixed(2);
     final drawStr =
         result.recommendedUnits == result.recommendedUnits.roundToDouble()
         ? result.recommendedUnits.toStringAsFixed(0)
         : result.recommendedUnits.toStringAsFixed(1);
-    final mlDrawStr = (result.recommendedUnits / 100).toStringAsFixed(2);
-    final syringeStr =
-        result.syringeSizeMl == result.syringeSizeMl.roundToDouble()
-        ? result.syringeSizeMl.toStringAsFixed(1)
-        : result.syringeSizeMl.toString();
+    final mlDrawStr = (result.recommendedUnits / 100 * result.syringeSizeMl).toStringAsFixed(2);
+    final syringeStr = result.syringeSizeMl.toStringAsFixed(1);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Reconstituted badge
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: theme.colorScheme.primary.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Reconstituted',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
         // Syringe gauge spans full width
         WhiteSyringeGauge(
           totalUnits: result.syringeSizeMl * 100,
@@ -275,7 +301,7 @@ class _MdvVolumeReconstitutionSectionState
         RichText(
           text: TextSpan(
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
+              color: Colors.white.withOpacity(kReconTextHighOpacity),
               fontWeight: FontWeight.w600,
             ),
             children: [
@@ -305,7 +331,7 @@ class _MdvVolumeReconstitutionSectionState
         RichText(
           text: TextSpan(
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: Colors.white.withOpacity(kReconTextMediumOpacity),
               fontStyle: FontStyle.italic,
             ),
             children: [
