@@ -83,6 +83,7 @@ class _MdvVolumeReconstitutionSectionState
     return SectionFormCard(
       title: 'Volume & Reconstitution',
       backgroundColor: isDarkMode ? kReconBackgroundActive : null,
+      neutral: !isDarkMode, // Use neutral style when not in dark mode
       children: [
         _buildHelperText(isDarkMode),
         const SizedBox(height: 8),

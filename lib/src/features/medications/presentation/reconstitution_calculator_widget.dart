@@ -880,19 +880,29 @@ class _ReconstitutionCalculatorWidgetState
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const TextSpan(text: ' syringe'),
+                      const TextSpan(text: ' syringe for a dose of '),
+                      TextSpan(
+                        text: '${_formatNoTrailing(Draw)} $_doseUnit',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 // Clarification text
                 Text(
-                  'This calculates reconstitution volume only.\nSet actual dose amounts in the scheduling screen.',
+                  'This calculates the reconstitution volume needed to achieve the correct concentration for your target dose. '
+                  'This target dose will become your default dose in the schedule screen. '
+                  'Doses can be adjusted after reconstitution based on actual preparation.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white.withOpacity(kReconTextMutedOpacity),
                     fontStyle: FontStyle.italic,
-                    height: 1.4,
+                    height: 1.5,
                   ),
                 ),
               ],
@@ -1034,8 +1044,11 @@ class _ReconstitutionCalculatorWidgetState
                             ),
                             TextSpan(
                               text: '${formatDouble(roundedVolume)} mL',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
                               ),
                             ),
                           ],
@@ -1053,8 +1066,11 @@ class _ReconstitutionCalculatorWidgetState
                             TextSpan(
                               text:
                                   '${formatDouble(calcResult.cPerMl)} ${widget.unitLabel}/mL',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
                               ),
                             ),
                           ],
@@ -1072,8 +1088,11 @@ class _ReconstitutionCalculatorWidgetState
                             TextSpan(
                               text:
                                   '${formatDouble(units)} U / ${formatDouble(mlToDraw)} mL',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
                               ),
                             ),
                           ],

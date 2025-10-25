@@ -521,7 +521,7 @@ class StepperRow36 extends StatelessWidget {
           symbol,
           style: bodyTextStyle(context)?.copyWith(
             color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
         ),
