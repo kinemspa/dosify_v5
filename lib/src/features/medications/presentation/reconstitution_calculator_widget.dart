@@ -156,7 +156,7 @@ class _ReconstitutionCalculatorWidgetState
 
   InputDecoration _fieldDecoration(BuildContext context, {String? hint}) {
     final cs = Theme.of(context).colorScheme;
-    // Use lighter background and borders for visibility on dark card
+    // Use white/light background for visibility on dark card
     return InputDecoration(
       hintText: hint,
       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -165,21 +165,18 @@ class _ReconstitutionCalculatorWidgetState
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
-      fillColor: const Color(0xFF1A2035), // Slightly lighter than card background
+      fillColor: Colors.white.withOpacity(0.95),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: Colors.white.withOpacity(0.2),
-          width: 1.0,
+          color: cs.outlineVariant.withOpacity(0.5),
+          width: 0.75,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: cs.primary, width: 2),
-      ),
-      hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.4),
       ),
     );
   }
@@ -252,7 +249,7 @@ class _ReconstitutionCalculatorWidgetState
     final totalUnits = _syringe.totalUnits.toDouble();
     var iuMin = minURaw;
     var iuMax = totalUnits;
-    if (vialMax != null && S > 0 && D > 0) {
+    if (vialMax != null && vialMax > 0 && S > 0 && D > 0) {
       final uMaxAllowed = (100 * D * vialMax) / S;
       iuMax = uMaxAllowed.clamp(0, totalUnits).toDouble();
       if (iuMax < iuMin) iuMin = iuMax;
@@ -309,29 +306,44 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
           const SizedBox(height: 8),
-          // Strength value made prominent with larger font and bold
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextMediumOpacity),
-                ),
-                children: [
-                  const TextSpan(text: 'Using vial strength: '),
-                  TextSpan(
-                    text:
-                        '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.primary,
+          // Strength value made prominent with larger font and bold - centered
+          Center(
+            child: Column(
+              children: [
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withOpacity(kReconTextMediumOpacity),
                     ),
+                    children: [
+                      const TextSpan(text: 'Using vial strength: '),
+                      TextSpan(
+                        text:
+                            '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'To adjust, go to Strength section above',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withOpacity(kReconTextMutedOpacity),
+                    fontStyle: FontStyle.italic,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
@@ -548,11 +560,11 @@ class _ReconstitutionCalculatorWidgetState
           const SizedBox(height: 8),
           // Syringe gauge with fine-tune buttons
           if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-            // Fine-tune buttons with syringe gauge - maximized width
+            // Fine-tune buttons with syringe gauge
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Decrement button - compact, no padding
+                // Decrement button - original style
                 GestureDetector(
                   onTap: () {
                     final newValue =
@@ -562,16 +574,30 @@ class _ReconstitutionCalculatorWidgetState
                       _selectedOption = null;
                     });
                   },
-                  onLongPressStart: (_) => _startRepeating(false, sliderMin, sliderMax),
+                  onLongPressStart: (_) =>
+                      _startRepeating(false, sliderMin, sliderMax),
                   onLongPressEnd: (_) => _stopRepeating(),
-                  child: Container(
-                    height: 32,
-                    width: 32,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.remove_circle_outline,
-                      size: 24,
-                      color: Theme.of(context).colorScheme.primary,
+                  child: SizedBox(
+                    height: 28,
+                    width: 28,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      constraints:
+                          const BoxConstraints(minHeight: 28, minWidth: 28),
+                      onPressed: () {
+                        final newValue =
+                            (_selectedUnits - 0.01).clamp(sliderMin, sliderMax);
+                        setState(() {
+                          _selectedUnits = newValue;
+                          _selectedOption = null;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.remove,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -626,7 +652,7 @@ class _ReconstitutionCalculatorWidgetState
                   ),
                 ),
                 const SizedBox(width: 6),
-                // Increment button - compact, no padding
+                // Increment button - original style
                 GestureDetector(
                   onTap: () {
                     final newValue =
@@ -636,27 +662,58 @@ class _ReconstitutionCalculatorWidgetState
                       _selectedOption = null;
                     });
                   },
-                  onLongPressStart: (_) => _startRepeating(true, sliderMin, sliderMax),
+                  onLongPressStart: (_) =>
+                      _startRepeating(true, sliderMin, sliderMax),
                   onLongPressEnd: (_) => _stopRepeating(),
-                  child: Container(
-                    height: 32,
-                    width: 32,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.add_circle_outline,
-                      size: 24,
-                      color: Theme.of(context).colorScheme.primary,
+                  child: SizedBox(
+                    height: 28,
+                    width: 28,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      constraints:
+                          const BoxConstraints(minHeight: 28, minWidth: 28),
+                      onPressed: () {
+                        final newValue =
+                            (_selectedUnits + 0.01).clamp(sliderMin, sliderMax);
+                        setState(() {
+                          _selectedUnits = newValue;
+                          _selectedOption = null;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.add,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            // Reconstitution summary - no card background, properly centered
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+            const SizedBox(height: 32),
+            // Reconstitution summary - featured section with emphasis
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.02),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 // First line: Reconstitute X of MEDNAME
                 RichText(
                   textAlign: TextAlign.center,
@@ -699,7 +756,7 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 14),
                 // Second line: with X mL of DILUENT
                 RichText(
                   textAlign: TextAlign.center,
@@ -740,7 +797,23 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
+                // Divider line
+                Container(
+                  width: 60,
+                  height: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 // Draw instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -774,7 +847,7 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 // Syringe instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -810,8 +883,9 @@ class _ReconstitutionCalculatorWidgetState
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-          ],
+          ),
+          const SizedBox(height: 16),
+        ],
           if (!fitsVial)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -887,7 +961,7 @@ class _ReconstitutionCalculatorWidgetState
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: selected
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                  ? theme.colorScheme.primaryContainer.withOpacity(0.1)
                   : Colors.transparent,
               border: Border.all(
                 color: selected

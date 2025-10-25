@@ -102,13 +102,18 @@ class _MdvVolumeReconstitutionSectionState
 
   Widget _buildHelperText() {
     final theme = Theme.of(context);
+    // Use white text when dark mode is active
+    final textColor = isDarkMode
+        ? Colors.white.withOpacity(kReconTextMediumOpacity)
+        : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75);
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         'If vial is already filled or you know the volume, enter it below. Otherwise, use the calculator to determine the correct reconstitution amount.',
         textAlign: TextAlign.left,
         style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          color: textColor,
           fontStyle: FontStyle.italic,
         ),
       ),
