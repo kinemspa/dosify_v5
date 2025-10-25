@@ -50,6 +50,38 @@ class _MdvVolumeReconstitutionSectionState
   void initState() {
     super.initState();
     _reconResult = widget.initialReconResult;
+    
+    // Add listener for vial volume validation
+    widget.vialVolumeController.addListener(_validateVialVolume);
+  }
+  
+  @override
+  void dispose() {
+    widget.vialVolumeController.removeListener(_validateVialVolume);
+    super.dispose();
+  }
+  
+  /// Validates vial volume input and shows snackbar if exceeds max size
+  void _validateVialVolume() {
+    final maxVialSize = _reconResult?.maxVialSizeMl ?? 1000.0;
+    final parsedValue = double.tryParse(widget.vialVolumeController.text.trim());
+    
+    if (parsedValue != null && parsedValue > maxVialSize && mounted) {
+      // Debounce snackbar to avoid spam
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Vial volume cannot exceed max vial size (${maxVialSize.toStringAsFixed(1)} mL)',
+              ),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      });
+    }
   }
 
   double _labelWidth() {
@@ -350,22 +382,6 @@ class _MdvVolumeReconstitutionSectionState
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
             ],
-            // Validate manual input on change
-            onChanged: (value) {
-              final parsedValue = double.tryParse(value.trim());
-              if (parsedValue != null && parsedValue > maxVialSize) {
-                // Show snackbar for invalid input
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Vial volume cannot exceed max vial size (${maxVialSize.toStringAsFixed(1)} mL)',
-                    ),
-                    duration: const Duration(seconds: 2),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
             compact: true,
           ),
         ),
