@@ -615,13 +615,33 @@ Schedules Module Improvements (Enhanced UX)
   - SummaryHeaderCard properly displays reconstitution data via reconTotalIU and reconFillIU parameters
   - Fixed compilation errors preventing app from building
 
-- **Calculator UI Improvements** (Git commit: e11233b):
+- **Calculator UI Improvements** (Git commits: e11233b, fac5f8d):
   - Added calculator visibility tracking via onCalculatorVisibilityChanged callback
   - Summary card (Add Summary) now hides when reconstitution calculator is open
   - Save button (FAB) now hides when reconstitution calculator is open
+  - Fixed: Save button and summary card now return after calculator closes
   - Removed excessive 200px spacing at bottom of calculator widget
   - Removed redundant helper text at top of MDV section
   - Simplified vial volume field helper text to "Total volume after reconstitution"
   - Cleaner UI with better focus when calculator is active
   - Prevents user confusion about what actions are available while calculating
+
+- **MDV Data Model Expansion** (Git commit: 69fd5ab):
+  - Added separate tracking for active/reconstituted vial and backup stock vials
+  - **Active Vial Fields** (HiveFields 26-31):
+    - activeVialLowStockMl: Low stock threshold for active vial volume in mL
+    - activeVialBatchNumber: Batch number for the active reconstituted vial
+    - activeVialStorageLocation: Storage location for active vial (e.g., "Refrigerator")
+    - activeVialRequiresRefrigeration: Whether active vial needs refrigeration
+    - activeVialRequiresFreezer: Whether active vial needs freezer storage
+    - activeVialLightSensitive: Whether active vial is light-sensitive
+  - **Backup Stock Vials Fields** (HiveFields 32-37):
+    - backupVialsExpiry: Expiry date for sealed backup vials (typically months/years)
+    - backupVialsBatchNumber: Batch number for backup stock vials
+    - backupVialsStorageLocation: Storage location for backup vials (e.g., "Freezer")
+    - backupVialsRequiresRefrigeration: Whether backup vials need refrigeration
+    - backupVialsRequiresFreezer: Whether backup vials need freezer storage
+    - backupVialsLightSensitive: Whether backup vials are light-sensitive
+  - Enables separate inventory and storage management for active vs backup MDV tracking
+  - UI implementation pending: will add separate Inventory and Storage sections for MDV
 
