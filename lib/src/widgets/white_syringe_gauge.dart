@@ -310,9 +310,9 @@ class _WhiteSyringePainter extends CustomPainter {
         final unitPainter = TextPainter(
           text: TextSpan(
             text: unitsText,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11,
-              color: color,
+              color: Colors.white,
               fontWeight: FontWeight.w700,
             ),
           ),

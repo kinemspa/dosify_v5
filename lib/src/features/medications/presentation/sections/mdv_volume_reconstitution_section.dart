@@ -75,28 +75,16 @@ class _MdvVolumeReconstitutionSectionState
   }
   
   void _updateSummaryCardVolume(double newVolume) {
-    if (_reconResult != null && _reconResult!.recommendedDose != null) {
-      // Recalculate concentration and units based on new volume
-      // C = D × (100 / U), so U = (D × 100) / C
-      // When volume changes, concentration changes: C_new = (S / V_new)
-      // where S = total strength in vial
-      final strengthVal = double.tryParse(widget.strengthController.text.trim()) ?? 0;
-      final dose = _reconResult!.recommendedDose!;
-      
-      // New concentration based on new volume
-      final newConcentration = strengthVal / newVolume;
-      
-      // Calculate new units to draw for same dose
-      final newUnits = (dose * 100) / newConcentration;
-      
+    if (_reconResult != null) {
+      // Just update the volume, keep everything else from saved calculator result
       setState(() {
         _reconResult = ReconstitutionResult(
-          perMlConcentration: newConcentration,
+          perMlConcentration: _reconResult!.perMlConcentration,
           solventVolumeMl: newVolume,
-          recommendedUnits: newUnits.clamp(0, _reconResult!.syringeSizeMl * 100),
+          recommendedUnits: _reconResult!.recommendedUnits,
           syringeSizeMl: _reconResult!.syringeSizeMl,
           diluentName: _reconResult!.diluentName,
-          recommendedDose: dose,
+          recommendedDose: _reconResult!.recommendedDose,
           doseUnit: _reconResult!.doseUnit,
           maxVialSizeMl: _reconResult!.maxVialSizeMl,
         );
@@ -185,6 +173,9 @@ class _MdvVolumeReconstitutionSectionState
         ],
         const SizedBox(height: 24),
         _buildVialVolumeField(isDarkMode),
+        // Hide save button when calculator is open
+        if (_showCalculator) ...[          const SizedBox(height: 200),
+        ],
       ],
     );
   }
