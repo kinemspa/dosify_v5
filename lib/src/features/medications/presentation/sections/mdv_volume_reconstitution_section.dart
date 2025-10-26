@@ -67,7 +67,9 @@ class _MdvVolumeReconstitutionSectionState
     if (!_showCalculator && _reconResult != null) {
       final nv = double.tryParse(widget.vialVolumeController.text.trim());
       if (nv != null && nv != _reconResult!.solventVolumeMl) {
-        _updateSummaryCardVolume(nv);
+        setState(() {
+          _updateSummaryCardVolume(nv);
+        });
       }
     }
   }
@@ -109,7 +111,7 @@ class _MdvVolumeReconstitutionSectionState
           context,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          alignment: 0.1,
+          alignment: 0.0, // Align to top
         );
       }
     });
@@ -150,8 +152,10 @@ class _MdvVolumeReconstitutionSectionState
       backgroundColor: isDarkMode ? kReconBackgroundActive : null,
       neutral: !isDarkMode, // Use neutral style when not in dark mode
       children: [
-        _buildHelperText(isDarkMode),
-        const SizedBox(height: 8),
+        if (!_showCalculator) ...[
+          _buildHelperText(isDarkMode),
+          const SizedBox(height: 8),
+        ],
         _buildCalculatorButton(),
         if (_showCalculator) ...[
           const SizedBox(height: 12),
@@ -652,11 +656,11 @@ class _MdvVolumeReconstitutionSectionState
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      _reconResult != null
-                          ? _reconResult!.solventVolumeMl.toStringAsFixed(2)
-                          : (widget.vialVolumeController.text.isEmpty
-                              ? '0.00'
-                              : widget.vialVolumeController.text),
+                      widget.vialVolumeController.text.isEmpty
+                          ? (_reconResult != null
+                              ? _reconResult!.solventVolumeMl.toStringAsFixed(2)
+                              : '0.00')
+                          : widget.vialVolumeController.text,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                         fontWeight: FontWeight.w500,

@@ -110,18 +110,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
           : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        decoration: _isActivelyDragging
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: effectiveColor.withOpacity(0.08),
-                    blurRadius: 2,
-                    spreadRadius: 0,
-                  ),
-                ],
-              )
-            : null,
+        decoration: null, // Removed glow animation entirely
         child: CustomPaint(
           size: const Size(double.infinity, 44),
           painter: _WhiteSyringePainter(
@@ -283,9 +272,9 @@ class _WhiteSyringePainter extends CustomPainter {
           final unitPainter = TextPainter(
             text: TextSpan(
               text: unitsText,
-              style: TextStyle(
-                fontSize: isActivelyDragging ? 11 : 10,
-                color: color,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.white,
                 fontWeight: FontWeight.w700,
               ),
             ),
