@@ -19,6 +19,7 @@ October 25, 2025
 7. `a4fefd0` - Phase 4: Add smooth animated transitions when selecting preset options with easeInOutCubic curve
 8. `d391429` - Phase 5: Add comprehensive documentation to key methods and improve code organization
 9. `addb14f` - Fix: Remove unsupported onChanged parameter from StepperRow36 and implement proper validation via controller listener
+10. `93a266b` - Phase 6: Improve reconstitution UI with enhanced summary card styling, vial volume field locking behavior, and slider unit indicator
 
 ---
 
@@ -552,6 +553,189 @@ All changes maintain backward compatibility:
 These enhancements significantly improve the reconstitution calculator's usability, visual polish, and maintainability. The modular approach allows for easy future enhancements while maintaining code quality and performance.
 
 All changes are committed to the `chore/quality-sprint-2025-10` branch and ready for code review and integration into the main development branch.
+
+---
+
+## Phase 6: Advanced UI Refinements
+
+**Commit:** `93a266b`
+**Files:** `mdv_volume_reconstitution_section.dart`, `white_syringe_gauge.dart`
+
+### 6.1: Enhanced Saved Reconstitution Summary Card
+
+**Problem:** Saved summary card needed better visibility and visual polish.
+
+**Solution:** 
+- Increased gradient opacity for better visibility (0.20 → 0.12 → 0.15)
+- Removed `Center` wrapper to allow full-width span (no padding towards parent)
+- Reduced border thickness from 0.75px to 0.5px for cleaner appearance
+- Made divider thinner (0.5px) with wider gradient spread (150px vs 100px)
+- Increased divider opacity from 0.5 to 0.6 for better visibility
+
+**Implementation:**
+```dart
+Container(
+  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        theme.colorScheme.primary.withOpacity(0.20),
+        theme.colorScheme.primary.withOpacity(0.12),
+        theme.colorScheme.secondary.withOpacity(0.15),
+      ],
+      stops: const [0.0, 0.5, 1.0],
+    ),
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(
+      color: theme.colorScheme.primary.withOpacity(0.25),
+      width: 0.5, // Very thin border
+    ),
+  ),
+  // ...
+)
+
+// Divider:
+Container(
+  width: 150,
+  height: 0.5,
+  margin: const EdgeInsets.symmetric(vertical: 8),
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      colors: [
+        Colors.transparent,
+        theme.colorScheme.primary.withOpacity(0.6),
+        Colors.transparent,
+      ],
+    ),
+  ),
+)
+```
+
+### 6.2: Visual Locking of Vial Volume Field
+
+**Problem:** When calculator was open, the vial volume field appeared editable even though it was locked.
+
+**Solution:** 
+- Replaced `StepperRow36` with visually locked `Container` when calculator is active
+- Used semi-transparent background and muted text color to indicate locked state
+- Removed steppers and made it look like a read-only display
+- Reverts to fully editable `StepperRow36` after save
+
+**Implementation:**
+```dart
+field: isLocked
+    ? Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.2),
+            width: 0.5,
+          ),
+        ),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          widget.vialVolumeController.text.isEmpty
+              ? '0.0'
+              : widget.vialVolumeController.text,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      )
+    : StepperRow36(
+        // ... editable field
+      )
+```
+
+### 6.3: Dynamic Summary Card Updates
+
+**Problem:** Editing the total volume field after save didn't update the summary card.
+
+**Solution:** 
+- Added `onChanged` callback to `StepperRow36` when unlocked
+- Updates `_reconResult` with new `solventVolumeMl` value on any change
+- Added logic in both `onInc` and `onDec` handlers as well
+
+**Implementation:**
+```dart
+StepperRow36(
+  // ...
+  onDec: () {
+    final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+    final nv = (d - 0.5).clamp(0, 999.99);
+    setState(() {
+      widget.vialVolumeController.text = nv.toStringAsFixed(2);
+      // Update summary card if saved recon exists
+      if (_reconResult != null) {
+        _reconResult = _reconResult!.copyWith(
+          solventVolumeMl: nv,
+        );
+      }
+    });
+  },
+  onChanged: (value) {
+    // Update summary card on manual text change
+    if (_reconResult != null) {
+      final nv = double.tryParse(value) ?? 0;
+      setState(() {
+        _reconResult = _reconResult!.copyWith(
+          solventVolumeMl: nv,
+        );
+      });
+    }
+  },
+)
+```
+
+### 6.4: Numeric Unit Indicator on Slider Handle
+
+**File:** `white_syringe_gauge.dart`
+
+**Problem:** Users couldn't see the exact unit value while dragging the slider.
+
+**Solution:** 
+- Added numeric text label above the slider handle
+- Shows rounded whole unit value (e.g., "50")
+- Font size scales slightly larger when actively dragging (11px vs 10px)
+- Positioned above handle with 6px spacing
+- Uses same primary color as handle for consistency
+
+**Implementation:**
+```dart
+// Draw numeric unit indicator on handle
+final unitsText = fillUnits.round().toString();
+final unitPainter = TextPainter(
+  text: TextSpan(
+    text: unitsText,
+    style: TextStyle(
+      fontSize: isActivelyDragging ? 11 : 10,
+      color: color,
+      fontWeight: FontWeight.w700,
+    ),
+  ),
+  textDirection: TextDirection.ltr,
+)..layout();
+
+// Position above the handle
+final textX = fillEndX - unitPainter.width / 2;
+final textY = baselineY - handleRadius - unitPainter.height - 6;
+unitPainter.paint(canvas, Offset(textX, textY));
+```
+
+### Benefits
+
+1. **Better Visual Hierarchy**: Enhanced gradients and borders make the summary card more prominent
+2. **Clearer Locked State**: Visually locked field prevents confusion when calculator is active
+3. **Live Updates**: Summary card stays in sync with manual volume adjustments
+4. **Improved Feedback**: Numeric indicator on slider provides instant value reference
+5. **Cleaner Design**: Thinner borders and refined spacing improve overall aesthetics
+6. **Full Width Utilization**: Removing center padding allows better use of available space
 
 ---
 
