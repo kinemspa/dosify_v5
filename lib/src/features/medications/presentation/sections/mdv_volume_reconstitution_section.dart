@@ -295,35 +295,34 @@ class _MdvVolumeReconstitutionSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Full summary card
-        Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.colorScheme.primary.withOpacity(0.12),
-                  theme.colorScheme.primary.withOpacity(0.05),
-                  theme.colorScheme.secondary.withOpacity(0.08),
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: theme.colorScheme.primary.withOpacity(0.25),
-                width: 0.75, // Extremely thin border
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.15),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 4),
-                ),
+        // Full summary card (no padding towards parent, full width)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary.withOpacity(0.20),
+                theme.colorScheme.primary.withOpacity(0.12),
+                theme.colorScheme.secondary.withOpacity(0.15),
               ],
+              stops: const [0.0, 0.5, 1.0],
             ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: theme.colorScheme.primary.withOpacity(0.25),
+              width: 0.5, // Very thin border
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withOpacity(0.15),
+                blurRadius: 16,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -415,16 +414,16 @@ class _MdvVolumeReconstitutionSectionState
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Divider
+                // Divider with wider gradient spread, thinner line
                 Container(
-                  width: 100,
-                  height: 1,
+                  width: 150,
+                  height: 0.5,
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        theme.colorScheme.primary.withOpacity(0.5),
+                        theme.colorScheme.primary.withOpacity(0.6),
                         Colors.transparent,
                       ],
                     ),
@@ -512,7 +511,6 @@ class _MdvVolumeReconstitutionSectionState
               ],
             ),
           ),
-        ),
         const SizedBox(height: 12),
         // Syringe gauge
         WhiteSyringeGauge(
@@ -541,37 +539,78 @@ class _MdvVolumeReconstitutionSectionState
           label: 'Total Volume (mL)',
           labelWidth: _labelWidth(),
           lightText: isDarkMode, // Make label visible on dark background
-          field: StepperRow36(
-            controller: widget.vialVolumeController,
-            enabled: !isLocked, // Disable while calculator is open
-            onDec: () {
-              if (isLocked) return;
-              final d =
-                  double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d - 0.5).clamp(0, 999.99); // Allow any value up to 999.99
-              setState(() {
-                widget.vialVolumeController.text = nv.toStringAsFixed(2);
-              });
-            },
-            onInc: () {
-              if (isLocked) return;
-              final d =
-                  double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-              final nv = (d + 0.5).clamp(0, 999.99); // Allow any value up to 999.99
-              setState(() {
-                widget.vialVolumeController.text = nv.toStringAsFixed(2);
-              });
-            },
-            decoration: buildCompactFieldDecoration(
-              context: context,
-              hint: '0.0',
-            ),
-            // Restrict manual input to 2 decimal places
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-            ],
-            compact: true,
-          ),
+          field: isLocked
+              ? Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withOpacity(0.2),
+                      width: 0.5,
+                    ),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.vialVolumeController.text.isEmpty
+                        ? '0.0'
+                        : widget.vialVolumeController.text,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+              : StepperRow36(
+                  controller: widget.vialVolumeController,
+                  enabled: true,
+                  onDec: () {
+                    final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+                    final nv = (d - 0.5).clamp(0, 999.99);
+                    setState(() {
+                      widget.vialVolumeController.text = nv.toStringAsFixed(2);
+                      // Update summary card if saved recon exists
+                      if (_reconResult != null) {
+                        _reconResult = _reconResult!.copyWith(
+                          solventVolumeMl: nv,
+                        );
+                      }
+                    });
+                  },
+                  onInc: () {
+                    final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
+                    final nv = (d + 0.5).clamp(0, 999.99);
+                    setState(() {
+                      widget.vialVolumeController.text = nv.toStringAsFixed(2);
+                      // Update summary card if saved recon exists
+                      if (_reconResult != null) {
+                        _reconResult = _reconResult!.copyWith(
+                          solventVolumeMl: nv,
+                        );
+                      }
+                    });
+                  },
+                  decoration: buildCompactFieldDecoration(
+                    context: context,
+                    hint: '0.0',
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                  ],
+                  compact: true,
+                  onChanged: (value) {
+                    // Update summary card on manual text change
+                    if (_reconResult != null) {
+                      final nv = double.tryParse(value) ?? 0;
+                      setState(() {
+                        _reconResult = _reconResult!.copyWith(
+                          solventVolumeMl: nv,
+                        );
+                      });
+                    }
+                  },
+                ),
         ),
         Padding(
           padding: EdgeInsets.only(left: _labelWidth() + 8, top: 4),

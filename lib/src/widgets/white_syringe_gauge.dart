@@ -113,9 +113,9 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: effectiveColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    spreadRadius: 1,
+                    color: effectiveColor.withOpacity(0.15),
+                    blurRadius: 4,
+                    spreadRadius: 0,
                   ),
                 ],
               )
@@ -271,6 +271,25 @@ class _WhiteSyringePainter extends CustomPainter {
           ..color = Colors.white
           ..style = PaintingStyle.fill;
         canvas.drawCircle(Offset(fillEndX, baselineY), centerRadius, centerPaint);
+        
+        // Draw numeric unit indicator on handle
+        final unitsText = fillUnits.round().toString();
+        final unitPainter = TextPainter(
+          text: TextSpan(
+            text: unitsText,
+            style: TextStyle(
+              fontSize: isActivelyDragging ? 11 : 10,
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        
+        // Position above the handle
+        final textX = fillEndX - unitPainter.width / 2;
+        final textY = baselineY - handleRadius - unitPainter.height - 6;
+        unitPainter.paint(canvas, Offset(textX, textY));
       }
     }
   }
