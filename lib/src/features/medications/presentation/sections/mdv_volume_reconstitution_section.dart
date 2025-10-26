@@ -378,6 +378,7 @@ class _MdvVolumeReconstitutionSectionState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 4),
                 // Icon header
                 Icon(
                   Icons.science_outlined,
@@ -651,9 +652,11 @@ class _MdvVolumeReconstitutionSectionState
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      widget.vialVolumeController.text.isEmpty
-                          ? '0.00'
-                          : widget.vialVolumeController.text,
+                      _reconResult != null
+                          ? _reconResult!.solventVolumeMl.toStringAsFixed(2)
+                          : (widget.vialVolumeController.text.isEmpty
+                              ? '0.00'
+                              : widget.vialVolumeController.text),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                         fontWeight: FontWeight.w500,

@@ -295,6 +295,22 @@ class _WhiteSyringePainter extends CustomPainter {
           // Position above the handle
           final textX = fillEndX - unitPainter.width / 2;
           final textY = baselineY - handleRadius - unitPainter.height - 6;
+          
+          // Draw dark background circle behind number for contrast
+          final backgroundRadius = (unitPainter.width > unitPainter.height
+                  ? unitPainter.width
+                  : unitPainter.height) /
+              2 +
+              3;
+          final backgroundPaint = Paint()
+            ..color = const Color(0xFF1A1E37) // kReconBackgroundActive
+            ..style = PaintingStyle.fill;
+          canvas.drawCircle(
+            Offset(fillEndX, textY + unitPainter.height / 2),
+            backgroundRadius,
+            backgroundPaint,
+          );
+          
           unitPainter.paint(canvas, Offset(textX, textY));
         }
       }

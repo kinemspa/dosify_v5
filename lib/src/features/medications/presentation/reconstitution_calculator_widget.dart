@@ -565,16 +565,22 @@ class _ReconstitutionCalculatorWidgetState
             field: StepperRow36(
               controller: _vialSizeCtrl,
               onDec: () {
-                final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-                setState(
-                  () => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString(),
-                );
+                final v = double.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+                final newVal = (v - 1).clamp(0, 100);
+                setState(() {
+                  _vialSizeCtrl.text = newVal == newVal.roundToDouble()
+                      ? newVal.toInt().toString()
+                      : newVal.toStringAsFixed(1);
+                });
               },
               onInc: () {
-                final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-                setState(
-                  () => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString(),
-                );
+                final v = double.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+                final newVal = (v + 1).clamp(0, 100);
+                setState(() {
+                  _vialSizeCtrl.text = newVal == newVal.roundToDouble()
+                      ? newVal.toInt().toString()
+                      : newVal.toStringAsFixed(1);
+                });
               },
               decoration: _fieldDecoration(context, hint: 'mL'),
             ),
@@ -874,6 +880,7 @@ class _ReconstitutionCalculatorWidgetState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                const SizedBox(height: 4),
                 // Summary header icon
                 Icon(
                   Icons.science_outlined,
