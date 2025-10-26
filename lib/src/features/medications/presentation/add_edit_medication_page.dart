@@ -64,6 +64,24 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   ReconstitutionResult? _reconResult;
   bool _calculatorVisible = false;
 
+  // MDV Active Vial fields
+  final _activeVialLowStockMlCtrl = TextEditingController(text: '0');
+  bool _activeVialLowStockEnabled = false;
+  final _activeVialBatchCtrl = TextEditingController();
+  final _activeVialStorageCtrl = TextEditingController();
+  bool _activeVialRequiresFridge = false;
+  bool _activeVialKeepFrozen = false;
+  bool _activeVialLightSensitive = false;
+  DateTime? _activeVialExpiry; // Uses reconstitutedVialExpiry
+
+  // MDV Backup Stock fields
+  final _backupVialsBatchCtrl = TextEditingController();
+  final _backupVialsStorageCtrl = TextEditingController();
+  bool _backupVialsRequiresFridge = false;
+  bool _backupVialsKeepFrozen = false;
+  bool _backupVialsLightSensitive = false;
+  DateTime? _backupVialsExpiry;
+
   bool get _isMdv => widget.form == MedicationForm.injectionMultiDoseVial;
 
   @override
@@ -102,6 +120,24 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
       if (_isMdv) {
         _perMlCtrl.text = m.perMlValue?.toString() ?? '';
         _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
+        
+        // Active vial fields
+        _activeVialLowStockMlCtrl.text = m.activeVialLowStockMl?.toString() ?? '0';
+        _activeVialLowStockEnabled = m.activeVialLowStockMl != null && m.activeVialLowStockMl! > 0;
+        _activeVialBatchCtrl.text = m.activeVialBatchNumber ?? '';
+        _activeVialStorageCtrl.text = m.activeVialStorageLocation ?? '';
+        _activeVialRequiresFridge = m.activeVialRequiresRefrigeration;
+        _activeVialKeepFrozen = m.activeVialRequiresFreezer;
+        _activeVialLightSensitive = m.activeVialLightSensitive;
+        _activeVialExpiry = m.reconstitutedVialExpiry;
+        
+        // Backup vials fields
+        _backupVialsBatchCtrl.text = m.backupVialsBatchNumber ?? '';
+        _backupVialsStorageCtrl.text = m.backupVialsStorageLocation ?? '';
+        _backupVialsRequiresFridge = m.backupVialsRequiresRefrigeration;
+        _backupVialsKeepFrozen = m.backupVialsRequiresFreezer;
+        _backupVialsLightSensitive = m.backupVialsLightSensitive;
+        _backupVialsExpiry = m.backupVialsExpiry;
       }
     }
   }
@@ -120,6 +156,13 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
     _storageNotesCtrl.dispose();
     _perMlCtrl.dispose();
     _vialVolumeCtrl.dispose();
+    // MDV active vial
+    _activeVialLowStockMlCtrl.dispose();
+    _activeVialBatchCtrl.dispose();
+    _activeVialStorageCtrl.dispose();
+    // MDV backup vials
+    _backupVialsBatchCtrl.dispose();
+    _backupVialsStorageCtrl.dispose();
     super.dispose();
   }
 
