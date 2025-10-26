@@ -505,11 +505,6 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   }
 
   Widget _buildSummaryCard(GlobalKey key) {
-    // Hide Add Summary when calculator is open
-    if (_showReconCalculator) {
-      return const SizedBox.shrink();
-    }
-    
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
@@ -528,10 +523,6 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
       perMlValue: _isMdv && _perMlCtrl.text.isNotEmpty
           ? double.tryParse(_perMlCtrl.text.trim())
           : null,
-      vialVolumeMl: _isMdv && _vialVolumeCtrl.text.isNotEmpty
-          ? double.tryParse(_vialVolumeCtrl.text.trim())
-          : null,
-      reconResult: _isMdv ? _reconResult : null,
       stockCurrent: stockVal ?? 0,
       stockInitial: initialStock,
       stockUnitLabel: _formLabelPlural,
