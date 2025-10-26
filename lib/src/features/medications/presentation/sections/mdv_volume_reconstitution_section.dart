@@ -570,20 +570,20 @@ class _MdvVolumeReconstitutionSectionState
                   enabled: true,
                   onDec: () {
                     final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-                    final nv = (d - 0.5).clamp(0, 999.99);
+                    final nv = (d - 0.5).clamp(0.0, 999.99);
                     setState(() {
                       widget.vialVolumeController.text = nv.toStringAsFixed(2);
                       // Update summary card if saved recon exists
-                      _updateSummaryCardVolume(nv);
+                      _updateSummaryCardVolume(nv.toDouble());
                     });
                   },
                   onInc: () {
                     final d = double.tryParse(widget.vialVolumeController.text.trim()) ?? 0;
-                    final nv = (d + 0.5).clamp(0, 999.99);
+                    final nv = (d + 0.5).clamp(0.0, 999.99);
                     setState(() {
                       widget.vialVolumeController.text = nv.toStringAsFixed(2);
                       // Update summary card if saved recon exists
-                      _updateSummaryCardVolume(nv);
+                      _updateSummaryCardVolume(nv.toDouble());
                     });
                   },
                   decoration: buildCompactFieldDecoration(
