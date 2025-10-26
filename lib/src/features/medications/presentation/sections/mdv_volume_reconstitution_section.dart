@@ -288,6 +288,7 @@ class _MdvVolumeReconstitutionSectionState
               );
         });
         widget.onReconstitutionChanged(result);
+        widget.onCalculatorVisibilityChanged?.call(false); // Notify parent calculator is closed
 
         // Scroll to vial volume field
         if (widget.vialVolumeKey != null) {
