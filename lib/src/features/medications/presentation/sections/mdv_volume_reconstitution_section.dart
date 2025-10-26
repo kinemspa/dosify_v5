@@ -73,41 +73,16 @@ class _MdvVolumeReconstitutionSectionState
   void _updateSummaryCardVolume(double newVolume) {
     if (_reconResult != null) {
       setState(() {
-        _reconResult = _reconResult!.copyWith(
+        _reconResult = ReconstitutionResult(
+          perMlConcentration: _reconResult!.perMlConcentration,
           solventVolumeMl: newVolume,
+          recommendedUnits: _reconResult!.recommendedUnits,
+          syringeSizeMl: _reconResult!.syringeSizeMl,
+          diluentName: _reconResult!.diluentName,
+          recommendedDose: _reconResult!.recommendedDose,
+          doseUnit: _reconResult!.doseUnit,
+          maxVialSizeMl: _reconResult!.maxVialSizeMl,
         );
-      });
-    }
-  }
-    // Add listener for vial volume validation
-    widget.vialVolumeController.addListener(_validateVialVolume);
-  }
-  
-  @override
-  void dispose() {
-    widget.vialVolumeController.removeListener(_validateVialVolume);
-    super.dispose();
-  }
-  
-  /// Validates vial volume input and shows snackbar if exceeds max size
-  void _validateVialVolume() {
-    final maxVialSize = _reconResult?.maxVialSizeMl ?? 1000.0;
-    final parsedValue = double.tryParse(widget.vialVolumeController.text.trim());
-    
-    if (parsedValue != null && parsedValue > maxVialSize && mounted) {
-      // Debounce snackbar to avoid spam
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Vial volume cannot exceed max vial size (${maxVialSize.toStringAsFixed(1)} mL)',
-              ),
-              duration: const Duration(seconds: 2),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
       });
     }
   }
