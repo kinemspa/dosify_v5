@@ -851,24 +851,22 @@ class _ReconstitutionCalculatorWidgetState
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Theme.of(context).colorScheme.primary.withOpacity(0.18),
                   Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                  Theme.of(context).colorScheme.secondary.withOpacity(0.12),
+                  Theme.of(context).colorScheme.primary.withOpacity(0.04),
                 ],
-                stops: kReconDividerStops,
               ),
               borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
               border: Border.all(
                 color:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.3),
                 width: kReconSummaryBorderWidth,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                  blurRadius: kReconSummaryBlurRadius,
-                  spreadRadius: kReconSummaryShadowSpread,
-                  offset: kReconSummaryShadowOffset,
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -966,24 +964,23 @@ class _ReconstitutionCalculatorWidgetState
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 6),
                 // Divider line
                 Container(
-                  width: 60,
-                  height: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: kReconDividerHeight,
+                  margin: EdgeInsets.symmetric(vertical: kReconDividerVerticalMargin),
                   decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            Theme.of(context).colorScheme.primary.withOpacity(0.7),
-            Colors.transparent,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Theme.of(context).colorScheme.primary.withOpacity(kReconDividerOpacity),
+                        Colors.transparent,
+                      ],
+                      stops: kReconDividerStops,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 // Draw instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -1138,11 +1135,11 @@ class _ReconstitutionCalculatorWidgetState
     // Get explainer text based on label
     String explainerText;
     if (label == 'Concentrated') {
-      explainerText = 'Strong small dosage';
+      explainerText = 'High concentration, draw less volume (smaller doses)';
     } else if (label == 'Balanced') {
-      explainerText = 'Approx 50% syringe size dosage';
+      explainerText = 'Moderate concentration, balanced draw volume';
     } else if (label == 'Diluted') {
-      explainerText = 'Large doses';
+      explainerText = 'Low concentration, draw more volume (larger doses)';
     } else {
       explainerText = '';
     }

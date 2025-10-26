@@ -356,23 +356,21 @@ class _MdvVolumeReconstitutionSectionState
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                theme.colorScheme.primary.withOpacity(0.18),
                 theme.colorScheme.primary.withOpacity(0.08),
-                theme.colorScheme.secondary.withOpacity(0.12),
+                theme.colorScheme.primary.withOpacity(0.04),
               ],
-              stops: kReconDividerStops,
             ),
             borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
             border: Border.all(
-              color: theme.colorScheme.primary.withOpacity(0.25),
+              color: theme.colorScheme.primary.withOpacity(0.3),
               width: kReconSummaryBorderWidth,
             ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withOpacity(0.15),
-                blurRadius: kReconSummaryBlurRadius,
-                spreadRadius: kReconSummaryShadowSpread,
-                offset: kReconSummaryShadowOffset,
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                spreadRadius: 0,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -598,6 +596,17 @@ class _MdvVolumeReconstitutionSectionState
             ),
           ),
         const SizedBox(height: 12),
+        // Target dose heading
+        Text(
+          'Target Dose',
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
         // Syringe gauge with number indicator
         WhiteSyringeGauge(
           totalUnits: result.syringeSizeMl * 100,
@@ -640,7 +649,7 @@ class _MdvVolumeReconstitutionSectionState
                         width: 0.5,
                       ),
                     ),
-                    alignment: Alignment.centerLeft,
+                    alignment: Alignment.center,
                     child: Text(
                       widget.vialVolumeController.text.isEmpty
                           ? '0.00'
@@ -649,6 +658,7 @@ class _MdvVolumeReconstitutionSectionState
                         color: theme.colorScheme.onSurface.withOpacity(0.5),
                         fontWeight: FontWeight.w500,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 )
