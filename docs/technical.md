@@ -645,3 +645,26 @@ Schedules Module Improvements (Enhanced UX)
   - Enables separate inventory and storage management for active vs backup MDV tracking
   - UI implementation pending: will add separate Inventory and Storage sections for MDV
 
+- **Hive Schema Migration System** (Git commit: 72fa642):
+  - Created `HiveMigrationManager` for production-ready database migrations
+  - **Migration Strategy**:
+    - Tracks schema version using SharedPreferences (currentVersion = 2)
+    - Runs sequential migrations on app startup if version mismatch detected
+    - Validates migration success after completion
+    - Preserves all existing user data during schema updates
+  - **v1→v2 Migration** (MDV Fields):
+    - Opens existing medications box before migration
+    - Iterates through all medications and applies default values for new fields
+    - Uses copyWith to ensure all medications have updated schema
+    - Explicitly sets default values: false for boolean fields, null for optional fields
+  - **Error Handling**:
+    - Catches and logs migration errors without crashing app
+    - Allows app to continue if migration fails (TypeAdapter handles missing fields)
+    - Validation check after migration with warning if unsuccessful
+  - **Future-Proof Design**:
+    - Easy to add new migrations by incrementing version and adding migration method
+    - Sequential migration execution ensures smooth upgrades across multiple versions
+    - Template for v2→v3 migrations included in code comments
+  - Location: `lib/src/core/hive/hive_migration_manager.dart`
+  - Integrated into `HiveBootstrap.init()` for automatic execution on app startup
+
