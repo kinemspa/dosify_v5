@@ -50,7 +50,35 @@ class _MdvVolumeReconstitutionSectionState
   void initState() {
     super.initState();
     _reconResult = widget.initialReconResult;
-    
+    // Add listener to update summary card when vial volume changes manually
+    widget.vialVolumeController.addListener(_onVialVolumeChanged);
+  }
+  
+  @override
+  void dispose() {
+    widget.vialVolumeController.removeListener(_onVialVolumeChanged);
+    super.dispose();
+  }
+  
+  void _onVialVolumeChanged() {
+    // Only update if not locked and recon result exists
+    if (!_showCalculator && _reconResult != null) {
+      final nv = double.tryParse(widget.vialVolumeController.text.trim());
+      if (nv != null && nv != _reconResult!.solventVolumeMl) {
+        _updateSummaryCardVolume(nv);
+      }
+    }
+  }
+  
+  void _updateSummaryCardVolume(double newVolume) {
+    if (_reconResult != null) {
+      setState(() {
+        _reconResult = _reconResult!.copyWith(
+          solventVolumeMl: newVolume,
+        );
+      });
+    }
+  }
     // Add listener for vial volume validation
     widget.vialVolumeController.addListener(_validateVialVolume);
   }
@@ -571,11 +599,7 @@ class _MdvVolumeReconstitutionSectionState
                     setState(() {
                       widget.vialVolumeController.text = nv.toStringAsFixed(2);
                       // Update summary card if saved recon exists
-                      if (_reconResult != null) {
-                        _reconResult = _reconResult!.copyWith(
-                          solventVolumeMl: nv,
-                        );
-                      }
+                      _updateSummaryCardVolume(nv);
                     });
                   },
                   onInc: () {
@@ -584,11 +608,7 @@ class _MdvVolumeReconstitutionSectionState
                     setState(() {
                       widget.vialVolumeController.text = nv.toStringAsFixed(2);
                       // Update summary card if saved recon exists
-                      if (_reconResult != null) {
-                        _reconResult = _reconResult!.copyWith(
-                          solventVolumeMl: nv,
-                        );
-                      }
+                      _updateSummaryCardVolume(nv);
                     });
                   },
                   decoration: buildCompactFieldDecoration(
@@ -599,17 +619,6 @@ class _MdvVolumeReconstitutionSectionState
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                   ],
                   compact: true,
-                  onChanged: (value) {
-                    // Update summary card on manual text change
-                    if (_reconResult != null) {
-                      final nv = double.tryParse(value) ?? 0;
-                      setState(() {
-                        _reconResult = _reconResult!.copyWith(
-                          solventVolumeMl: nv,
-                        );
-                      });
-                    }
-                  },
                 ),
         ),
         Padding(
