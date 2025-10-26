@@ -62,6 +62,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   final _vialVolumeCtrl = TextEditingController(text: '0');
   final GlobalKey _vialVolumeKey = GlobalKey();
   ReconstitutionResult? _reconResult;
+  bool _calculatorVisible = false;
 
   bool get _isMdv => widget.form == MedicationForm.injectionMultiDoseVial;
 
@@ -177,14 +178,16 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
         forceBackButton: true,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: SizedBox(
-        width: 140,
-        child: FilledButton.icon(
-          onPressed: _saveMedication,
-          icon: const Icon(Icons.save),
-          label: const Text('Save'),
-        ),
-      ),
+      floatingActionButton: _calculatorVisible
+          ? null
+          : SizedBox(
+              width: 140,
+              child: FilledButton.icon(
+                onPressed: _saveMedication,
+                icon: const Icon(Icons.save),
+                label: const Text('Save'),
+              ),
+            ),
       body: MedEditorTemplate(
         appBarTitle: widget.initial == null
             ? 'Add $_formLabel'
@@ -317,6 +320,9 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
                 initialReconResult: _reconResult,
                 onReconstitutionChanged: (result) {
                   setState(() => _reconResult = result);
+                },
+                onCalculatorVisibilityChanged: (visible) {
+                  setState(() => _calculatorVisible = visible);
                 },
               )
             : null,
@@ -505,6 +511,11 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   }
 
   Widget _buildSummaryCard(GlobalKey key) {
+    // Hide summary when calculator is open
+    if (_calculatorVisible) {
+      return const SizedBox.shrink();
+    }
+    
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());

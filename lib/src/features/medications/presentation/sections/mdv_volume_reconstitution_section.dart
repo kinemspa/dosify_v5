@@ -25,6 +25,7 @@ class MdvVolumeReconstitutionSection extends StatefulWidget {
     super.key,
     this.initialReconResult,
     this.vialVolumeKey,
+    this.onCalculatorVisibilityChanged,
   });
 
   final TextEditingController strengthController;
@@ -35,6 +36,7 @@ class MdvVolumeReconstitutionSection extends StatefulWidget {
   final Function(ReconstitutionResult?) onReconstitutionChanged;
   final ReconstitutionResult? initialReconResult;
   final GlobalKey? vialVolumeKey;
+  final Function(bool)? onCalculatorVisibilityChanged;
 
   @override
   State<MdvVolumeReconstitutionSection> createState() =>
@@ -153,10 +155,6 @@ class _MdvVolumeReconstitutionSectionState
       backgroundColor: isDarkMode ? kReconBackgroundActive : null,
       neutral: !isDarkMode, // Use neutral style when not in dark mode
       children: [
-        if (!_showCalculator) ...[
-          _buildHelperText(isDarkMode),
-          const SizedBox(height: 8),
-        ],
         _buildCalculatorButton(),
         if (_showCalculator) ...[
           const SizedBox(height: 12),
@@ -173,32 +171,10 @@ class _MdvVolumeReconstitutionSectionState
         ],
         const SizedBox(height: 24),
         _buildVialVolumeField(isDarkMode),
-        // Hide save button when calculator is open
-        if (_showCalculator) ...[          const SizedBox(height: 200),
-        ],
       ],
     );
   }
 
-  Widget _buildHelperText(bool isDarkMode) {
-    final theme = Theme.of(context);
-    // Use white text when dark mode is active
-    final textColor = isDarkMode
-        ? Colors.white.withOpacity(kReconTextMediumOpacity)
-        : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.75);
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        'If vial is already filled or you know the volume, enter it below. Otherwise, use the calculator to determine the correct reconstitution amount.',
-        textAlign: TextAlign.left,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: textColor,
-          fontStyle: FontStyle.italic,
-        ),
-      ),
-    );
-  }
 
   Widget _buildCalculatorButton() {
     final strengthVal = double.tryParse(widget.strengthController.text.trim());
@@ -208,7 +184,10 @@ class _MdvVolumeReconstitutionSectionState
     return Center(
       child: _showCalculator
           ? FilledButton.icon(
-              onPressed: () => setState(() => _showCalculator = false),
+              onPressed: () {
+                setState(() => _showCalculator = false);
+                widget.onCalculatorVisibilityChanged?.call(false);
+              },
               icon: const Icon(Icons.close, size: 18),
               label: const Text('Close Calculator'),
             )
@@ -218,6 +197,7 @@ class _MdvVolumeReconstitutionSectionState
                   onPressed: hasStrength
                       ? () {
                           setState(() => _showCalculator = true);
+                          widget.onCalculatorVisibilityChanged?.call(true);
                           _scrollToCalculator();
                         }
                       : null,
@@ -258,6 +238,7 @@ class _MdvVolumeReconstitutionSectionState
                   onPressed: hasStrength
                       ? () {
                           setState(() => _showCalculator = true);
+                          widget.onCalculatorVisibilityChanged?.call(true);
                           _scrollToCalculator();
                         }
                       : null,
@@ -711,7 +692,7 @@ class _MdvVolumeReconstitutionSectionState
                 ? 'Warning: Volume exceeds max vial size (${maxVialSize.toStringAsFixed(1)} mL)'
                 : (_showCalculator
                     ? 'Total volume updates automatically as you adjust the calculator above'
-                    : 'Enter total volume: if already filled/known, input directly; otherwise use calculator above'),
+                    : 'Total volume after reconstitution'),
             textAlign: TextAlign.left,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: kHintFontSize,
