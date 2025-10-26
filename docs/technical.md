@@ -615,3 +615,13 @@ Schedules Module Improvements (Enhanced UX)
   - SummaryHeaderCard properly displays reconstitution data via reconTotalIU and reconFillIU parameters
   - Fixed compilation errors preventing app from building
 
+- **Calculator UI Improvements** (Git commit: e11233b):
+  - Added calculator visibility tracking via onCalculatorVisibilityChanged callback
+  - Summary card (Add Summary) now hides when reconstitution calculator is open
+  - Save button (FAB) now hides when reconstitution calculator is open
+  - Removed excessive 200px spacing at bottom of calculator widget
+  - Removed redundant helper text at top of MDV section
+  - Simplified vial volume field helper text to "Total volume after reconstitution"
+  - Cleaner UI with better focus when calculator is active
+  - Prevents user confusion about what actions are available while calculating
+
