@@ -35,6 +35,18 @@ class Medication {
     this.initialStockValue,
     this.reconstitutedAt,
     this.reconstitutedVialExpiry,
+    this.activeVialLowStockMl,
+    this.activeVialBatchNumber,
+    this.activeVialStorageLocation,
+    this.activeVialRequiresRefrigeration = false,
+    this.activeVialRequiresFreezer = false,
+    this.activeVialLightSensitive = false,
+    this.backupVialsExpiry,
+    this.backupVialsBatchNumber,
+    this.backupVialsStorageLocation,
+    this.backupVialsRequiresRefrigeration = false,
+    this.backupVialsRequiresFreezer = false,
+    this.backupVialsLightSensitive = false,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -123,6 +135,44 @@ class Medication {
   @HiveField(25)
   final DateTime? reconstitutedVialExpiry;
 
+  // Active/Reconstituted vial fields (MDV only)
+  @HiveField(26)
+  final double? activeVialLowStockMl; // Low stock threshold for active vial volume in mL
+  
+  @HiveField(27)
+  final String? activeVialBatchNumber;
+  
+  @HiveField(28)
+  final String? activeVialStorageLocation;
+  
+  @HiveField(29)
+  final bool activeVialRequiresRefrigeration;
+  
+  @HiveField(30)
+  final bool activeVialRequiresFreezer;
+  
+  @HiveField(31)
+  final bool activeVialLightSensitive;
+
+  // Backup stock vials fields (MDV only)
+  @HiveField(32)
+  final DateTime? backupVialsExpiry; // Expiry for sealed backup vials
+  
+  @HiveField(33)
+  final String? backupVialsBatchNumber;
+  
+  @HiveField(34)
+  final String? backupVialsStorageLocation;
+  
+  @HiveField(35)
+  final bool backupVialsRequiresRefrigeration;
+  
+  @HiveField(36)
+  final bool backupVialsRequiresFreezer;
+  
+  @HiveField(37)
+  final bool backupVialsLightSensitive;
+
   Medication copyWith({
     String? id,
     MedicationForm? form,
@@ -150,6 +200,18 @@ class Medication {
     double? initialStockValue,
     DateTime? reconstitutedAt,
     DateTime? reconstitutedVialExpiry,
+    double? activeVialLowStockMl,
+    String? activeVialBatchNumber,
+    String? activeVialStorageLocation,
+    bool? activeVialRequiresRefrigeration,
+    bool? activeVialRequiresFreezer,
+    bool? activeVialLightSensitive,
+    DateTime? backupVialsExpiry,
+    String? backupVialsBatchNumber,
+    String? backupVialsStorageLocation,
+    bool? backupVialsRequiresRefrigeration,
+    bool? backupVialsRequiresFreezer,
+    bool? backupVialsLightSensitive,
     bool clearReconstitution = false,
   }) {
     return Medication(
@@ -186,6 +248,18 @@ class Medication {
       reconstitutedVialExpiry: clearReconstitution
           ? null
           : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
+      activeVialLowStockMl: activeVialLowStockMl ?? this.activeVialLowStockMl,
+      activeVialBatchNumber: activeVialBatchNumber ?? this.activeVialBatchNumber,
+      activeVialStorageLocation: activeVialStorageLocation ?? this.activeVialStorageLocation,
+      activeVialRequiresRefrigeration: activeVialRequiresRefrigeration ?? this.activeVialRequiresRefrigeration,
+      activeVialRequiresFreezer: activeVialRequiresFreezer ?? this.activeVialRequiresFreezer,
+      activeVialLightSensitive: activeVialLightSensitive ?? this.activeVialLightSensitive,
+      backupVialsExpiry: backupVialsExpiry ?? this.backupVialsExpiry,
+      backupVialsBatchNumber: backupVialsBatchNumber ?? this.backupVialsBatchNumber,
+      backupVialsStorageLocation: backupVialsStorageLocation ?? this.backupVialsStorageLocation,
+      backupVialsRequiresRefrigeration: backupVialsRequiresRefrigeration ?? this.backupVialsRequiresRefrigeration,
+      backupVialsRequiresFreezer: backupVialsRequiresFreezer ?? this.backupVialsRequiresFreezer,
+      backupVialsLightSensitive: backupVialsLightSensitive ?? this.backupVialsLightSensitive,
     );
   }
 }
