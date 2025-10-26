@@ -208,7 +208,6 @@ class _ReconstitutionCalculatorWidgetState
       ),
     );
   }
-  }
 
   /// Computes concentration and vial volume for reconstitution based on units.
   /// 
