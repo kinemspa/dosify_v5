@@ -608,3 +608,10 @@ Schedules Module Improvements (Enhanced UX)
     - Removed unused material_design_icons_flutter import
     - Fixed type errors in stock depletion calculation
 
+- **Add/Edit Medication Page Fixes** (Git commit: e98b10b):
+  - Removed invalid vialVolumeMl parameter from SummaryHeaderCard (does not exist in widget)
+  - Removed invalid reconResult parameter from SummaryHeaderCard
+  - Removed _showReconCalculator check that referenced non-existent variable
+  - SummaryHeaderCard properly displays reconstitution data via reconTotalIU and reconFillIU parameters
+  - Fixed compilation errors preventing app from building
+
