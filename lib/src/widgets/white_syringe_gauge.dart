@@ -14,6 +14,7 @@ class WhiteSyringeGauge extends StatefulWidget {
     this.interactive = false,
     this.maxConstraint,
     this.onMaxConstraintHit,
+    this.showValueLabel = false,
   });
 
   final double totalUnits;
@@ -23,6 +24,7 @@ class WhiteSyringeGauge extends StatefulWidget {
   final bool interactive;
   final double? maxConstraint;
   final VoidCallback? onMaxConstraintHit;
+  final bool showValueLabel;
 
   @override
   State<WhiteSyringeGauge> createState() => _WhiteSyringeGaugeState();
@@ -128,6 +130,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
             color: effectiveColor,
             interactive: widget.interactive,
             isActivelyDragging: _isActivelyDragging,
+            showValueLabel: widget.showValueLabel,
           ),
         ),
       ),
@@ -142,6 +145,7 @@ class _WhiteSyringePainter extends CustomPainter {
     required this.color,
     this.interactive = false,
     this.isActivelyDragging = false,
+    this.showValueLabel = false,
   });
 
   final double totalUnits;
@@ -149,6 +153,7 @@ class _WhiteSyringePainter extends CustomPainter {
   final Color color;
   final bool interactive;
   final bool isActivelyDragging;
+  final bool showValueLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -272,13 +277,36 @@ class _WhiteSyringePainter extends CustomPainter {
           ..style = PaintingStyle.fill;
         canvas.drawCircle(Offset(fillEndX, baselineY), centerRadius, centerPaint);
         
-        // Draw numeric unit indicator on handle
-        final unitsText = fillUnits.round().toString();
+        // Draw numeric unit indicator on handle (interactive only)
+        if (interactive) {
+          final unitsText = fillUnits.round().toString();
+          final unitPainter = TextPainter(
+            text: TextSpan(
+              text: unitsText,
+              style: TextStyle(
+                fontSize: isActivelyDragging ? 11 : 10,
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            textDirection: TextDirection.ltr,
+          )..layout();
+          
+          // Position above the handle
+          final textX = fillEndX - unitPainter.width / 2;
+          final textY = baselineY - handleRadius - unitPainter.height - 6;
+          unitPainter.paint(canvas, Offset(textX, textY));
+        }
+      }
+      
+      // Draw value label for non-interactive gauges
+      if (showValueLabel && fillEndX > 0) {
+        final unitsText = '${fillUnits.round()} U';
         final unitPainter = TextPainter(
           text: TextSpan(
             text: unitsText,
             style: TextStyle(
-              fontSize: isActivelyDragging ? 11 : 10,
+              fontSize: 11,
               color: color,
               fontWeight: FontWeight.w700,
             ),
@@ -286,9 +314,9 @@ class _WhiteSyringePainter extends CustomPainter {
           textDirection: TextDirection.ltr,
         )..layout();
         
-        // Position above the handle
+        // Position above the fill line
         final textX = fillEndX - unitPainter.width / 2;
-        final textY = baselineY - handleRadius - unitPainter.height - 6;
+        final textY = baselineY - 20 - unitPainter.height;
         unitPainter.paint(canvas, Offset(textX, textY));
       }
     }
@@ -300,6 +328,7 @@ class _WhiteSyringePainter extends CustomPainter {
         oldDelegate.fillUnits != fillUnits ||
         oldDelegate.color != color ||
         oldDelegate.interactive != interactive ||
-        oldDelegate.isActivelyDragging != isActivelyDragging;
+        oldDelegate.isActivelyDragging != isActivelyDragging ||
+        oldDelegate.showValueLabel != showValueLabel;
   }
 }

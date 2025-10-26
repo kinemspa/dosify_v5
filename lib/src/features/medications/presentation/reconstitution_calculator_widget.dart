@@ -194,20 +194,20 @@ class _ReconstitutionCalculatorWidgetState
   /// visual hierarchy without harsh lines.
   Widget _gradientDivider(BuildContext context) {
     return Container(
-      height: 1.0,
-      margin: const EdgeInsets.symmetric(vertical: 12),
+      height: kReconDividerHeight,
+      margin: EdgeInsets.symmetric(vertical: kReconDividerVerticalMargin),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            Theme.of(context).colorScheme.primary.withOpacity(0.5),
-            Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            Theme.of(context).colorScheme.primary.withOpacity(kReconDividerOpacity),
             Colors.transparent,
           ],
-          stops: const [0.0, 0.3, 0.7, 1.0], // Expand gradient spread
+          stops: kReconDividerStops,
         ),
       ),
     );
+  }
   }
 
   /// Computes concentration and vial volume for reconstitution based on units.
@@ -846,33 +846,33 @@ class _ReconstitutionCalculatorWidgetState
             // Reconstitution summary - featured section with emphasis
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.20),
-                      Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.15),
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.25),
-                    width: 0.75, // Extremely thin border
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                      blurRadius: 16,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+            padding: kReconSummaryPadding,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary.withOpacity(0.18),
+                  Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.12),
+                ],
+                stops: kReconDividerStops,
+              ),
+              borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
+              border: Border.all(
+                color:
+                    Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                width: kReconSummaryBorderWidth,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                  blurRadius: kReconSummaryBlurRadius,
+                  spreadRadius: kReconSummaryShadowSpread,
+                  offset: kReconSummaryShadowOffset,
                 ),
+              ],
+            ),
                 child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -1174,7 +1174,7 @@ class _ReconstitutionCalculatorWidgetState
                 color: selected
                     ? theme.colorScheme.primary
                     : Colors.white.withOpacity(0.15),
-                width: selected ? 0.5 : 0.5, // Consistent thin borders
+                width: kReconOptionBorderWidth,
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: selected

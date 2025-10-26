@@ -45,6 +45,8 @@ class _MdvVolumeReconstitutionSectionState
     extends State<MdvVolumeReconstitutionSection> {
   ReconstitutionResult? _reconResult;
   bool _showCalculator = false;
+  final GlobalKey _calculatorKey = GlobalKey();
+  final GlobalKey _summaryKey = GlobalKey();
 
   @override
   void initState() {
@@ -98,6 +100,34 @@ class _MdvVolumeReconstitutionSectionState
     Unit.g => 'g',
     _ => u.name,
   };
+  
+  void _scrollToCalculator() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _calculatorKey.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: 0.1,
+        );
+      }
+    });
+  }
+  
+  void _scrollToSummary() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _summaryKey.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: 0.1,
+        );
+      }
+    });
+  }
 
   /// Convert a double ml value back to SyringeSizeMl enum
   SyringeSizeMl? _mlToSyringeSize(double? ml) {
@@ -125,10 +155,16 @@ class _MdvVolumeReconstitutionSectionState
         _buildCalculatorButton(),
         if (_showCalculator) ...[
           const SizedBox(height: 12),
-          _buildCalculatorWidget(),
+          Container(
+            key: _calculatorKey,
+            child: _buildCalculatorWidget(),
+          ),
         ] else if (_reconResult != null) ...[
           const SizedBox(height: 12),
-          _buildSavedReconstitution(),
+          Container(
+            key: _summaryKey,
+            child: _buildSavedReconstitution(),
+          ),
         ],
         const SizedBox(height: 24),
         _buildVialVolumeField(isDarkMode),
@@ -172,7 +208,10 @@ class _MdvVolumeReconstitutionSectionState
               // Show combined Reconstituted chip + Edit button
               ? OutlinedButton.icon(
                   onPressed: hasStrength
-                      ? () => setState(() => _showCalculator = true)
+                      ? () {
+                          setState(() => _showCalculator = true);
+                          _scrollToCalculator();
+                        }
                       : null,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
@@ -209,7 +248,10 @@ class _MdvVolumeReconstitutionSectionState
                 )
               : OutlinedButton.icon(
                   onPressed: hasStrength
-                      ? () => setState(() => _showCalculator = true)
+                      ? () {
+                          setState(() => _showCalculator = true);
+                          _scrollToCalculator();
+                        }
                       : null,
                   icon: const Icon(Icons.calculate, size: 18),
                   label: const Text('Reconstitution Calculator'),
@@ -242,6 +284,7 @@ class _MdvVolumeReconstitutionSectionState
         setState(() {
           _reconResult = result;
           _showCalculator = false; // Close calculator after save
+          _scrollToSummary();
 
           // Update vial volume with calculated value, locked to 2 decimals
           widget.vialVolumeController.text = result.solventVolumeMl.toStringAsFixed(2);
@@ -307,29 +350,29 @@ class _MdvVolumeReconstitutionSectionState
       children: [
         // Full summary card (no padding towards parent, full width)
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          padding: kReconSummaryPadding,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                theme.colorScheme.primary.withOpacity(0.20),
-                theme.colorScheme.primary.withOpacity(0.12),
-                theme.colorScheme.secondary.withOpacity(0.15),
+                theme.colorScheme.primary.withOpacity(0.18),
+                theme.colorScheme.primary.withOpacity(0.08),
+                theme.colorScheme.secondary.withOpacity(0.12),
               ],
-              stops: const [0.0, 0.5, 1.0],
+              stops: kReconDividerStops,
             ),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
             border: Border.all(
               color: theme.colorScheme.primary.withOpacity(0.25),
-              width: 0.5, // Very thin border
+              width: kReconSummaryBorderWidth,
             ),
             boxShadow: [
               BoxShadow(
                 color: theme.colorScheme.primary.withOpacity(0.15),
-                blurRadius: 16,
-                spreadRadius: 2,
-                offset: const Offset(0, 4),
+                blurRadius: kReconSummaryBlurRadius,
+                spreadRadius: kReconSummaryShadowSpread,
+                offset: kReconSummaryShadowOffset,
               ),
             ],
           ),
@@ -423,23 +466,23 @@ class _MdvVolumeReconstitutionSectionState
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 // Divider matching calculator style
                 Container(
-                  height: 1.0,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  height: kReconDividerHeight,
+                  margin: EdgeInsets.symmetric(vertical: kReconDividerVerticalMargin),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        theme.colorScheme.primary.withOpacity(0.7),
+                        theme.colorScheme.primary.withOpacity(kReconDividerOpacity),
                         Colors.transparent,
                       ],
-                      stops: const [0.0, 0.5, 1.0],
+                      stops: kReconDividerStops,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 // Draw instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -499,11 +542,11 @@ class _MdvVolumeReconstitutionSectionState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.error.withOpacity(0.15),
+                      color: kReconErrorBackground.withOpacity(kReconErrorOpacity),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: theme.colorScheme.error.withOpacity(0.5),
-                        width: 0.5,
+                        color: kReconErrorBackground.withOpacity(0.5),
+                        width: kReconSummaryBorderWidth,
                       ),
                     ),
                     child: Row(
@@ -512,14 +555,14 @@ class _MdvVolumeReconstitutionSectionState
                         Icon(
                           Icons.warning_rounded,
                           size: 16,
-                          color: theme.colorScheme.error,
+                          color: kReconErrorBackground,
                         ),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
                             'Volume exceeds max vial size (${maxVialSize.toStringAsFixed(1)} mL)',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
+                              color: kReconErrorBackground,
                               fontWeight: FontWeight.w600,
                             ),
                             textAlign: TextAlign.center,
@@ -555,10 +598,11 @@ class _MdvVolumeReconstitutionSectionState
             ),
           ),
         const SizedBox(height: 12),
-        // Syringe gauge
+        // Syringe gauge with number indicator
         WhiteSyringeGauge(
           totalUnits: result.syringeSizeMl * 100,
-          fillUnits: result.recommendedUnits,
+          fillUnits: exceedsMax ? 0 : result.recommendedUnits,
+          showValueLabel: true,
         ),
       ],
     );

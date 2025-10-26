@@ -155,6 +155,27 @@ const double kReconTextMutedOpacity = 0.60; // Explainer text
 const Color kReconBackgroundDark = Color(0xFF0A0E27); // Dark blue-black
 const Color kReconBackgroundActive = Color(0xFF1A1E37); // Slightly lighter for active state
 
+/// Reconstitution divider styling
+const double kReconDividerHeight = 1.0;
+const double kReconDividerOpacity = 0.7;
+const double kReconDividerVerticalMargin = 12.0;
+const List<double> kReconDividerStops = [0.0, 0.5, 1.0];
+
+/// Reconstitution summary card styling
+const double kReconSummaryBorderWidth = 0.5;
+const double kReconSummaryBorderRadius = 20.0;
+const EdgeInsets kReconSummaryPadding = EdgeInsets.symmetric(horizontal: 12, vertical: 12);
+const double kReconSummaryBlurRadius = 16.0;
+const double kReconSummaryShadowSpread = 2.0;
+const Offset kReconSummaryShadowOffset = Offset(0, 4);
+
+/// Reconstitution option button styling
+const double kReconOptionBorderWidth = 0.5;
+
+/// Reconstitution error colors
+const Color kReconErrorBackground = Color(0xFFFF6B35); // Orange-red background
+const double kReconErrorOpacity = 0.15;
+
 /// Color helper functions (NEVER use these - use theme colors)
 /// These are kept only for backward compatibility during migration
 @Deprecated('Use Theme.of(context).colorScheme instead')
