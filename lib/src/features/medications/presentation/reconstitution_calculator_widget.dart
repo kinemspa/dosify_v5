@@ -194,15 +194,17 @@ class _ReconstitutionCalculatorWidgetState
   /// visual hierarchy without harsh lines.
   Widget _gradientDivider(BuildContext context) {
     return Container(
-      height: 1,
-      margin: const EdgeInsets.symmetric(vertical: 16),
+      height: 1.0,
+      margin: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            Theme.of(context).colorScheme.primary.withOpacity(0.5),
             Colors.transparent,
           ],
+          stops: const [0.0, 0.3, 0.7, 1.0], // Expand gradient spread
         ),
       ),
     );
@@ -850,9 +852,9 @@ class _ReconstitutionCalculatorWidgetState
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.12),
-                      Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.08),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.20),
+                      Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.15),
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -972,13 +974,14 @@ class _ReconstitutionCalculatorWidgetState
                   height: 2,
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                        Colors.transparent,
-                      ],
-                    ),
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Theme.of(context).colorScheme.primary.withOpacity(0.7),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1171,7 +1174,7 @@ class _ReconstitutionCalculatorWidgetState
                 color: selected
                     ? theme.colorScheme.primary
                     : Colors.white.withOpacity(0.15),
-                width: selected ? 2.5 : 1.5,
+                width: selected ? 0.5 : 0.5, // Consistent thin borders
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: selected

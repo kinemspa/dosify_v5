@@ -281,17 +281,24 @@ class _MdvVolumeReconstitutionSectionState
         double.tryParse(widget.strengthController.text.trim()) ?? 0;
     final unitLabel = _baseUnit(widget.strengthUnit);
     final diluentName = result.diluentName ?? 'diluent';
+    
+    // Check if current volume exceeds max constraint
+    final maxVialSize = result.maxVialSizeMl ?? 1000.0;
+    final exceedsMax = result.solventVolumeMl > maxVialSize && maxVialSize < 1000.0;
 
     // Format values with consistent 2 decimal places for volume
     final strengthStr = strengthVal == strengthVal.roundToDouble()
         ? strengthVal.toStringAsFixed(0)
         : strengthVal.toString();
-    final volumeStr = result.solventVolumeMl.toStringAsFixed(2);
-    final drawStr =
-        result.recommendedUnits == result.recommendedUnits.roundToDouble()
-        ? result.recommendedUnits.toStringAsFixed(0)
-        : result.recommendedUnits.toStringAsFixed(1);
-    final mlDrawStr = (result.recommendedUnits / 100 * result.syringeSizeMl).toStringAsFixed(2);
+    final volumeStr = exceedsMax ? '—' : result.solventVolumeMl.toStringAsFixed(2);
+    final drawStr = exceedsMax
+        ? '—'
+        : (result.recommendedUnits == result.recommendedUnits.roundToDouble()
+            ? result.recommendedUnits.toStringAsFixed(0)
+            : result.recommendedUnits.toStringAsFixed(1));
+    final mlDrawStr = exceedsMax
+        ? '—'
+        : (result.recommendedUnits / 100 * result.syringeSizeMl).toStringAsFixed(2);
     final syringeStr = result.syringeSizeMl.toStringAsFixed(1);
 
     // Build the full rich summary card
@@ -416,23 +423,23 @@ class _MdvVolumeReconstitutionSectionState
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                // Divider with wider gradient spread, thinner line
+                const SizedBox(height: 8),
+                // Divider matching calculator style
                 Container(
-                  width: 150,
-                  height: 0.5,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  height: 1.0,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        theme.colorScheme.primary.withOpacity(0.6),
+                        theme.colorScheme.primary.withOpacity(0.7),
                         Colors.transparent,
                       ],
+                      stops: const [0.0, 0.5, 1.0],
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 // Draw instruction
                 RichText(
                   textAlign: TextAlign.center,
@@ -487,8 +494,41 @@ class _MdvVolumeReconstitutionSectionState
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Dose info
-                if (result.recommendedDose != null && result.doseUnit != null)
+                // Dose info or out-of-range warning
+                if (exceedsMax)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.error.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: theme.colorScheme.error.withOpacity(0.5),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.warning_rounded,
+                          size: 16,
+                          color: theme.colorScheme.error,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Volume exceeds max vial size (${maxVialSize.toStringAsFixed(1)} mL)',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (result.recommendedDose != null && result.doseUnit != null)
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
@@ -542,26 +582,29 @@ class _MdvVolumeReconstitutionSectionState
           label: 'Total Volume (mL)',
           labelWidth: _labelWidth(),
           lightText: isDarkMode, // Make label visible on dark background
-          field: isLocked
-              ? Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: theme.colorScheme.outline.withOpacity(0.2),
-                      width: 0.5,
+      field: isLocked
+              ? SizedBox(
+                  width: 120,
+                  child: Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withOpacity(0.2),
+                        width: 0.5,
+                      ),
                     ),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    widget.vialVolumeController.text.isEmpty
-                        ? '0.0'
-                        : widget.vialVolumeController.text,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      fontWeight: FontWeight.w500,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.vialVolumeController.text.isEmpty
+                          ? '0.00'
+                          : widget.vialVolumeController.text,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 )
