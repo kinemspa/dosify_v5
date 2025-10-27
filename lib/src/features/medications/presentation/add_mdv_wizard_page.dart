@@ -76,13 +76,37 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _strengthUnit = m.strengthUnit;
       _perMlCtrl.text = m.perMlValue?.toString() ?? '';
       _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
-      _stockValueCtrl.text = m.stockValue.toString();
-      _lowStockEnabled = m.lowStockEnabled;
-      _lowStockCtrl.text = m.lowStockThreshold?.toString() ?? '0';
-      _expiry = m.backupVialsExpiry ?? m.expiry;
-      _batchCtrl.text = m.backupVialsBatchNumber ?? m.batchNumber ?? '';
-      _storageCtrl.text =
+
+      // Active vial
+      _activeVialVolumeMlCtrl.text = m.containerVolumeMl?.toString() ?? '0';
+      _activeVialLowStockMlCtrl.text =
+          m.activeVialLowStockMl?.toString() ?? '1.0';
+      _activeVialLowStockEnabled = m.activeVialLowStockMl != null;
+      _activeVialExpiry = m.reconstitutedVialExpiry;
+      _activeVialStorageCtrl.text = m.activeVialStorageLocation ?? '';
+      _activeVialStorageCondition = m.activeVialRequiresRefrigeration
+          ? 'refrigerated'
+          : (m.activeVialRequiresFreezer
+                ? 'frozen'
+                : (m.activeVialLightSensitive ? 'protect_light' : 'room_temp'));
+
+      // Backup vials
+      _hasBackupVials = m.stockValue > 0;
+      _backupVialsQtyCtrl.text = m.stockValue.toString();
+      _backupVialsLowStockEnabled = m.lowStockEnabled;
+      _backupVialsLowStockCtrl.text = m.lowStockThreshold?.toString() ?? '0';
+      _backupVialsExpiry = m.backupVialsExpiry ?? m.expiry;
+      _backupVialsBatchCtrl.text =
+          m.backupVialsBatchNumber ?? m.batchNumber ?? '';
+      _backupVialsStorageCtrl.text =
           m.backupVialsStorageLocation ?? m.storageLocation ?? '';
+      _backupVialsStorageCondition = m.backupVialsRequiresRefrigeration
+          ? 'refrigerated'
+          : (m.backupVialsRequiresFreezer
+                ? 'frozen'
+                : (m.backupVialsLightSensitive
+                      ? 'protect_light'
+                      : 'room_temp'));
     }
   }
 
@@ -141,8 +165,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     final id = widget.initial?.id ?? _newId();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
     final backupStock = _hasBackupVials
-        ? (double.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0)
-        : 0;
+        ? (double.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0.0)
+        : 0.0;
     final previous = widget.initial;
     final initialStock = previous == null
         ? backupStock
@@ -194,9 +218,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           : null,
       initialStockValue: initialStock,
       // Active vial fields
-      activeVialVolumeMl: _activeVialVolumeMlCtrl.text.isNotEmpty
-          ? double.tryParse(_activeVialVolumeMlCtrl.text.trim())
-          : null,
       activeVialLowStockMl:
           _activeVialLowStockEnabled &&
               _activeVialLowStockMlCtrl.text.isNotEmpty
