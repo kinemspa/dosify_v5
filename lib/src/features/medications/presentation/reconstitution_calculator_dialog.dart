@@ -80,33 +80,66 @@ class _ReconstitutionCalculatorDialogState
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Reconstitution Calculator'),
-      content: SingleChildScrollView(
-        child: ReconstitutionCalculatorWidget(
-          initialStrengthValue: widget.initialStrengthValue,
-          unitLabel: widget.unitLabel,
-          initialDoseValue: widget.initialDoseValue,
-          initialDoseUnit: widget.initialDoseUnit,
-          initialSyringeSize: widget.initialSyringeSize,
-          initialVialSize: widget.initialVialSize,
-          onCalculate: _onCalculation,
+    final size = MediaQuery.of(context).size;
+    return Dialog(
+      child: Container(
+        width: size.width * 0.9,
+        constraints: BoxConstraints(
+          maxHeight: size.height * 0.85,
+          maxWidth: 600,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Reconstitution Calculator',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            // Content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ReconstitutionCalculatorWidget(
+                  initialStrengthValue: widget.initialStrengthValue,
+                  unitLabel: widget.unitLabel,
+                  initialDoseValue: widget.initialDoseValue,
+                  initialDoseUnit: widget.initialDoseUnit,
+                  initialSyringeSize: widget.initialSyringeSize,
+                  initialVialSize: widget.initialVialSize,
+                  onCalculate: _onCalculation,
+                ),
+              ),
+            ),
+            // Actions
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.of(context).pop<ReconstitutionResult>(),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 12),
+                  FilledButton(
+                    onPressed: _canSubmit
+                        ? () {
+                            Navigator.of(context).pop(_lastResult);
+                          }
+                        : null,
+                    child: const Text('Save Reconstitution'),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop<ReconstitutionResult>(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _canSubmit
-              ? () {
-                  Navigator.of(context).pop(_lastResult);
-                }
-              : null,
-          child: const Text('Save Reconstitution'),
-        ),
-      ],
     );
   }
 }
