@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Wizard-style MDV add screen with clear step-by-step flow
@@ -218,7 +219,15 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           Expanded(
             child: SingleChildScrollView(
               padding: kPagePadding,
-              child: _buildStepContent(),
+              child: Column(
+                children: [
+                  // Summary card at top
+                  _buildSummaryCard(),
+                  const SizedBox(height: 24),
+                  // Step content
+                  _buildStepContent(),
+                ],
+              ),
             ),
           ),
 
@@ -423,11 +432,19 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               );
               return;
             }
-            final result = await showDialog<ReconstitutionResult>(
+            final result = await showModalBottomSheet<ReconstitutionResult>(
               context: context,
-              builder: (context) => ReconstitutionCalculatorDialog(
-                initialStrengthValue: strength,
-                unitLabel: _strengthUnit.name,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => DraggableScrollableSheet(
+                initialChildSize: 0.9,
+                minChildSize: 0.5,
+                maxChildSize: 0.95,
+                builder: (context, scrollController) =>
+                    ReconstitutionCalculatorDialog(
+                      initialStrengthValue: strength,
+                      unitLabel: _strengthUnit.name,
+                    ),
               ),
             );
             if (result != null) {
@@ -667,6 +684,43 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    final name = _nameCtrl.text.trim();
+    final manufacturer = _manufacturerCtrl.text.trim();
+    final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
+    final stockVal = double.tryParse(_stockValueCtrl.text.trim());
+    final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
+    final unitLabel = _strengthUnit.name;
+    final threshold = double.tryParse(_lowStockCtrl.text.trim());
+    final headerTitle = name.isEmpty ? 'Multi-Dose Vial' : name;
+
+    return SummaryHeaderCard(
+      title: headerTitle,
+      manufacturer: manufacturer.isEmpty ? null : manufacturer,
+      strengthValue: strengthVal,
+      strengthUnitLabel: unitLabel,
+      perMlValue: _perMlCtrl.text.isNotEmpty
+          ? double.tryParse(_perMlCtrl.text.trim())
+          : null,
+      stockCurrent: stockVal ?? 0,
+      stockInitial: initialStock,
+      stockUnitLabel: 'vials',
+      expiryDate: _expiry,
+      showRefrigerate: _storageCondition == 'refrigerated',
+      showFrozen: _storageCondition == 'frozen',
+      showDark: _storageCondition == 'protect_light',
+      lowStockEnabled: _lowStockEnabled,
+      lowStockThreshold: threshold,
+      perTabletLabel: false,
+      formLabelPlural: 'vials',
+      // MDV reconstitution gauge data
+      reconTotalIU: _reconResult != null
+          ? _reconResult!.syringeSizeMl * 100
+          : null,
+      reconFillIU: _reconResult != null ? _reconResult!.recommendedUnits : null,
     );
   }
 

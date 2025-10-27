@@ -81,62 +81,86 @@ class _ReconstitutionCalculatorDialogState
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Dialog(
-      backgroundColor: kReconBackgroundDark,
-      child: Container(
-        width: size.width * 0.9,
-        constraints: BoxConstraints(
-          maxHeight: size.height * 0.85,
-          maxWidth: 600,
-        ),
-        decoration: BoxDecoration(
-          color: kReconBackgroundDark,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Title
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'Reconstitution Calculator',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: kFontWeightBold,
+    return Container(
+      decoration: const BoxDecoration(
+        color: kReconBackgroundDark,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calculate,
+                  color: Colors.white.withOpacity(0.9),
+                  size: 24,
                 ),
+                const SizedBox(width: 12),
+                Text(
+                  'Reconstitution Calculator',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: kFontWeightBold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(color: Colors.white12, height: 1),
+          // Content
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: ReconstitutionCalculatorWidget(
+                initialStrengthValue: widget.initialStrengthValue,
+                unitLabel: widget.unitLabel,
+                initialDoseValue: widget.initialDoseValue,
+                initialDoseUnit: widget.initialDoseUnit,
+                initialSyringeSize: widget.initialSyringeSize,
+                initialVialSize: widget.initialVialSize,
+                onCalculate: _onCalculation,
               ),
             ),
-            // Content
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ReconstitutionCalculatorWidget(
-                  initialStrengthValue: widget.initialStrengthValue,
-                  unitLabel: widget.unitLabel,
-                  initialDoseValue: widget.initialDoseValue,
-                  initialDoseUnit: widget.initialDoseUnit,
-                  initialSyringeSize: widget.initialSyringeSize,
-                  initialVialSize: widget.initialVialSize,
-                  onCalculate: _onCalculation,
-                ),
+          ),
+          // Actions
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
               ),
             ),
-            // Actions
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
                     onPressed: () =>
                         Navigator.of(context).pop<ReconstitutionResult>(),
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                    ),
                     child: const Text('Cancel'),
                   ),
-                  const SizedBox(width: 12),
-                  FilledButton(
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton(
                     onPressed: _canSubmit
                         ? () {
                             Navigator.of(context).pop(_lastResult);
@@ -144,11 +168,11 @@ class _ReconstitutionCalculatorDialogState
                         : null,
                     child: const Text('Save Reconstitution'),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
