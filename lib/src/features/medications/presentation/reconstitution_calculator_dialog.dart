@@ -47,7 +47,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
   const ReconstitutionCalculatorDialog({
     super.key,
     required this.initialStrengthValue,
-    required this.unitLabel, // e.g., mg, mcg, g, units, super.key,, super.key,
+    required this.unitLabel, // e.g., mg, mcg, g, units
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -82,11 +82,16 @@ class _ReconstitutionCalculatorDialogState
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Dialog(
+      backgroundColor: kReconBackgroundDark,
       child: Container(
         width: size.width * 0.9,
         constraints: BoxConstraints(
           maxHeight: size.height * 0.85,
           maxWidth: 600,
+        ),
+        decoration: BoxDecoration(
+          color: kReconBackgroundDark,
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -96,7 +101,10 @@ class _ReconstitutionCalculatorDialogState
               padding: const EdgeInsets.all(20),
               child: Text(
                 'Reconstitution Calculator',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: kFontWeightBold,
+                ),
               ),
             ),
             // Content
@@ -123,6 +131,7 @@ class _ReconstitutionCalculatorDialogState
                   TextButton(
                     onPressed: () =>
                         Navigator.of(context).pop<ReconstitutionResult>(),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
                     child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
