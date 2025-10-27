@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+- **Multi-Dose Vial: Separate Active Vial and Backup Stock UI**
+  - Created `MdvInventorySection` widget with split inventory fields:
+    - **Active vial**: Low volume alert (mL threshold), dedicated expiry date
+    - **Backup stock**: Stock quantity, low stock alert with threshold, separate expiry date
+  - Created `MdvStorageSection` widget with split storage fields:
+    - **Active vial**: Storage location, storage condition dropdown (Room Temp/Refrigerated/Frozen/Light Protection)
+    - **Backup stock**: Separate location and storage condition controls
+  - Updated `MedEditorTemplate` to optionally replace standard Inventory and Storage sections with MDV-specific variants
+  - Integrated MDV sections into `add_edit_medication_page` with proper state management
+  - Updated save method to persist all new MDV fields (active vial and backup stock separately)
+  - Applied design system constants throughout (kFieldSpacing, kSectionSpacing, kHelperTextOpacity)
+  - Fixed deprecated API usage (replaced `withOpacity` with `withValues(alpha:)`)
+  - Clearer separation improves user understanding of reconstituted vial vs sealed backup inventory
 - Reconstitution Calculator: Major UX overhaul with visual polish and precision controls
   - **Dark blue-black background** (0xFF0A0E27) for entire calculator with excellent contrast
   - **Split line layout**: 'Reconstitute X of MEDNAME' on line 1, 'with X mL of DILUENT' on line 2
