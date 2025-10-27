@@ -55,12 +55,7 @@ class MdvInventorySection extends StatelessWidget {
       neutral: true,
       children: [
         // Active/Reconstituted Vial Section
-        Text(
-          'Active Vial',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
+        Text('Active Vial', style: sectionTitleStyle(context)),
         const SizedBox(height: kSectionSpacing),
 
         // Low stock alert for active vial (in mL)
@@ -146,12 +141,7 @@ class MdvInventorySection extends StatelessWidget {
         const SizedBox(height: kSectionSpacing * 1.5),
 
         // Backup Stock Vials Section
-        Text(
-          'Backup Stock',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
+        Text('Backup Stock', style: sectionTitleStyle(context)),
         const SizedBox(height: kSectionSpacing),
 
         // Backup vials stock quantity
@@ -239,22 +229,6 @@ class MdvInventorySection extends StatelessWidget {
   }
 
   Widget _buildHelperText(BuildContext context, String text, Color? color) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: kLabelColWidth + 8,
-        top: 2,
-        bottom: 6,
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color:
-              color ??
-              Theme.of(context).colorScheme.onSurfaceVariant.withValues(
-                alpha: kHelperTextOpacity,
-              ),
-        ),
-      ),
-    );
+    return buildHelperText(context, text, color: color);
   }
 }

@@ -31,12 +31,7 @@ class MdvStorageSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Active/Reconstituted Vial Storage
-        Text(
-          'Active Vial Storage',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
+        Text('Active Vial Storage', style: sectionTitleStyle(context)),
         const SizedBox(height: kSectionSpacing),
 
         // Active Location
@@ -87,12 +82,7 @@ class MdvStorageSection extends StatelessWidget {
         const SizedBox(height: kSectionSpacing * 1.5),
 
         // Backup Stock Vials Storage
-        Text(
-          'Backup Stock Storage',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
+        Text('Backup Stock Storage', style: sectionTitleStyle(context)),
         const SizedBox(height: kSectionSpacing),
 
         // Backup Location
