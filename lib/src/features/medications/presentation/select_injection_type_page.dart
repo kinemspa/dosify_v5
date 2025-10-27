@@ -48,6 +48,13 @@ class SelectInjectionTypePage extends StatelessWidget {
             subtitle: 'Liquid vial for multiple doses',
             route: '/medications/add/injection/multi',
           ),
+          SizedBox(height: 16),
+          _Tile(
+            icon: Icons.assistant,
+            title: 'Multi Dose Vial (Wizard)',
+            subtitle: 'Step-by-step guided setup for reconstitution',
+            route: '/medications/add/injection/multi/wizard',
+          ),
         ],
       ),
     );

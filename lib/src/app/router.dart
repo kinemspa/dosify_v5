@@ -20,6 +20,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/select_injection_type_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/select_medication_type_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_edit_medication_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_mdv_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
@@ -169,6 +170,11 @@ final router = GoRouter(
           builder: (context, state) => const AddEditMedicationPage(
             form: MedicationForm.injectionMultiDoseVial,
           ),
+        ),
+        GoRoute(
+          path: '/medications/add/injection/multi/wizard',
+          name: 'addInjectionMultiWizard',
+          builder: (context, state) => const AddMdvWizardPage(),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
         GoRoute(
