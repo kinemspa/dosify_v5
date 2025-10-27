@@ -13,6 +13,8 @@ import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/sections/mdv_volume_reconstitution_section.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/mdv_inventory_section.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/mdv_storage_section.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
@@ -120,17 +122,19 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
       if (_isMdv) {
         _perMlCtrl.text = m.perMlValue?.toString() ?? '';
         _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
-        
+
         // Active vial fields
-        _activeVialLowStockMlCtrl.text = m.activeVialLowStockMl?.toString() ?? '0';
-        _activeVialLowStockEnabled = m.activeVialLowStockMl != null && m.activeVialLowStockMl! > 0;
+        _activeVialLowStockMlCtrl.text =
+            m.activeVialLowStockMl?.toString() ?? '0';
+        _activeVialLowStockEnabled =
+            m.activeVialLowStockMl != null && m.activeVialLowStockMl! > 0;
         _activeVialBatchCtrl.text = m.activeVialBatchNumber ?? '';
         _activeVialStorageCtrl.text = m.activeVialStorageLocation ?? '';
         _activeVialRequiresFridge = m.activeVialRequiresRefrigeration;
         _activeVialKeepFrozen = m.activeVialRequiresFreezer;
         _activeVialLightSensitive = m.activeVialLightSensitive;
         _activeVialExpiry = m.reconstitutedVialExpiry;
-        
+
         // Backup vials fields
         _backupVialsBatchCtrl.text = m.backupVialsBatchNumber ?? '';
         _backupVialsStorageCtrl.text = m.backupVialsStorageLocation ?? '';
@@ -549,7 +553,112 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           ),
         ),
         storageInstructionsHelp: 'Special handling notes (e.g., Keep upright)',
+
+        // MDV-specific inventory and storage sections
+        mdvInventorySection: _isMdv ? _buildMdvInventorySection(context) : null,
+        mdvStorageSection: _isMdv ? _buildMdvStorageSection() : null,
       ),
+    );
+  }
+
+  Widget _buildMdvInventorySection(BuildContext context) {
+    return MdvInventorySection(
+      activeVialLowStockMlController: _activeVialLowStockMlCtrl,
+      activeVialLowStockEnabled: _activeVialLowStockEnabled,
+      onActiveVialLowStockEnabledChanged: (v) =>
+          setState(() => _activeVialLowStockEnabled = v),
+      activeVialExpiry: _activeVialExpiry,
+      onActiveVialExpiryPressed: () async {
+        final now = DateTime.now();
+        final picked = await showDatePicker(
+          context: context,
+          firstDate: DateTime(now.year - 1),
+          lastDate: DateTime(now.year + 10),
+          initialDate: _activeVialExpiry ?? now,
+        );
+        if (picked != null) setState(() => _activeVialExpiry = picked);
+      },
+      activeVialExpiryHelp: 'Set expiry for the active reconstituted vial',
+      backupVialsStockController: _stockValueCtrl,
+      backupVialsLowStockEnabled: _lowStockEnabled,
+      onBackupVialsLowStockEnabledChanged: (v) =>
+          setState(() => _lowStockEnabled = v),
+      backupVialsLowStockThresholdController: _lowStockCtrl,
+      backupVialsExpiry: _backupVialsExpiry,
+      onBackupVialsExpiryPressed: () async {
+        final now = DateTime.now();
+        final picked = await showDatePicker(
+          context: context,
+          firstDate: DateTime(now.year - 1),
+          lastDate: DateTime(now.year + 10),
+          initialDate: _backupVialsExpiry ?? now,
+        );
+        if (picked != null) setState(() => _backupVialsExpiry = picked);
+      },
+      backupVialsExpiryHelp: (() {
+        final stock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+        final thr = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
+        if (stock > 0 && thr >= stock) {
+          return 'Max threshold cannot exceed stock count.';
+        }
+        return null;
+      })(),
+      onBackupVialsStockDec: () {
+        final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+        setState(
+          () => _stockValueCtrl.text = (v - 1).clamp(0, 1000000).toString(),
+        );
+      },
+      onBackupVialsStockInc: () {
+        final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+        setState(
+          () => _stockValueCtrl.text = (v + 1).clamp(0, 1000000).toString(),
+        );
+      },
+      onBackupVialsLowStockDec: () {
+        final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
+        setState(
+          () => _lowStockCtrl.text = (v - 1).clamp(0, 1000000).toString(),
+        );
+      },
+      onBackupVialsLowStockInc: () {
+        final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
+        final maxStock = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+        setState(
+          () => _lowStockCtrl.text = (v + 1).clamp(0, maxStock).toString(),
+        );
+      },
+    );
+  }
+
+  Widget _buildMdvStorageSection() {
+    return MdvStorageSection(
+      activeLocationController: _activeVialStorageCtrl,
+      activeStorageCondition: _activeVialRequiresFridge
+          ? 'refrigerated'
+          : (_activeVialKeepFrozen
+                ? 'frozen'
+                : (_activeVialLightSensitive ? 'protect_light' : 'room_temp')),
+      onActiveStorageConditionChanged: (v) {
+        setState(() {
+          _activeVialRequiresFridge = v == 'refrigerated';
+          _activeVialKeepFrozen = v == 'frozen';
+          _activeVialLightSensitive = v == 'protect_light';
+        });
+      },
+      backupLocationController: _backupVialsStorageCtrl,
+      backupStorageCondition: _backupVialsRequiresFridge
+          ? 'refrigerated'
+          : (_backupVialsKeepFrozen
+                ? 'frozen'
+                : (_backupVialsLightSensitive ? 'protect_light' : 'room_temp')),
+      onBackupStorageConditionChanged: (v) {
+        setState(() {
+          _backupVialsRequiresFridge = v == 'refrigerated';
+          _backupVialsKeepFrozen = v == 'frozen';
+          _backupVialsLightSensitive = v == 'protect_light';
+        });
+      },
     );
   }
 
@@ -558,7 +667,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
     if (_calculatorVisible) {
       return const SizedBox.shrink();
     }
-    
+
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
@@ -650,6 +759,40 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
           ? double.tryParse(_vialVolumeCtrl.text.trim())
           : null,
       initialStockValue: initialStock,
+
+      // MDV Active Vial fields
+      activeVialLowStockMl:
+          _isMdv &&
+              _activeVialLowStockEnabled &&
+              _activeVialLowStockMlCtrl.text.isNotEmpty
+          ? double.tryParse(_activeVialLowStockMlCtrl.text.trim())
+          : null,
+      activeVialBatchNumber:
+          _isMdv && _activeVialBatchCtrl.text.trim().isNotEmpty
+          ? _activeVialBatchCtrl.text.trim()
+          : null,
+      activeVialStorageLocation:
+          _isMdv && _activeVialStorageCtrl.text.trim().isNotEmpty
+          ? _activeVialStorageCtrl.text.trim()
+          : null,
+      activeVialRequiresRefrigeration: _isMdv && _activeVialRequiresFridge,
+      activeVialRequiresFreezer: _isMdv && _activeVialKeepFrozen,
+      activeVialLightSensitive: _isMdv && _activeVialLightSensitive,
+      reconstitutedVialExpiry: _isMdv ? _activeVialExpiry : null,
+
+      // MDV Backup Stock fields
+      backupVialsBatchNumber:
+          _isMdv && _backupVialsBatchCtrl.text.trim().isNotEmpty
+          ? _backupVialsBatchCtrl.text.trim()
+          : null,
+      backupVialsStorageLocation:
+          _isMdv && _backupVialsStorageCtrl.text.trim().isNotEmpty
+          ? _backupVialsStorageCtrl.text.trim()
+          : null,
+      backupVialsRequiresRefrigeration: _isMdv && _backupVialsRequiresFridge,
+      backupVialsRequiresFreezer: _isMdv && _backupVialsKeepFrozen,
+      backupVialsLightSensitive: _isMdv && _backupVialsLightSensitive,
+      backupVialsExpiry: _isMdv ? _backupVialsExpiry : null,
     );
 
     await repo.upsert(med);

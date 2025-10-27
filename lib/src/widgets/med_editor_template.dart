@@ -58,6 +58,10 @@ class MedEditorTemplate extends StatefulWidget {
 
     // Optional MDV section (rendered between Strength and Inventory)
     this.mdvSection,
+
+    // Optional MDV-specific inventory and storage sections
+    this.mdvInventorySection,
+    this.mdvStorageSection,
   });
 
   final String appBarTitle;
@@ -111,6 +115,10 @@ class MedEditorTemplate extends StatefulWidget {
 
   // Optional MDV Volume & Reconstitution section (rendered between Strength and Inventory)
   final Widget? mdvSection;
+
+  // Optional MDV-specific inventory and storage sections (replace standard sections for MDVs)
+  final Widget? mdvInventorySection;
+  final Widget? mdvStorageSection;
 
   @override
   State<MedEditorTemplate> createState() => _MedEditorTemplateState();
@@ -204,71 +212,84 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
                 const SizedBox(height: 12),
               ],
 
-              // Inventory
-              SectionFormCard(
-                title: 'Inventory',
-                neutral: true,
-                children: [
-                  LabelFieldRow(
-                    label: 'Stock quantity *',
-                    field: widget.stockStepper,
-                  ),
-                  _support(widget.stockHelp),
-                  // Show Quantity unit only if provided (optional for auto-determined stock units)
-                  if (widget.quantityDropdown != null)
+              // Inventory (use MDV-specific section if provided)
+              if (widget.mdvInventorySection != null) ...[
+                widget.mdvInventorySection!,
+                const SizedBox(height: 12),
+              ] else
+                SectionFormCard(
+                  title: 'Inventory',
+                  neutral: true,
+                  children: [
                     LabelFieldRow(
-                      label: 'Quantity unit',
-                      field: widget.quantityDropdown!,
+                      label: 'Stock quantity *',
+                      field: widget.stockStepper,
                     ),
-                  if (widget.lowStockRow != null)
+                    _support(widget.stockHelp),
+                    // Show Quantity unit only if provided (optional for auto-determined stock units)
+                    if (widget.quantityDropdown != null)
+                      LabelFieldRow(
+                        label: 'Quantity unit',
+                        field: widget.quantityDropdown!,
+                      ),
+                    if (widget.lowStockRow != null)
+                      LabelFieldRow(
+                        label: 'Low stock alert',
+                        field: widget.lowStockRow!,
+                      ),
+                    if (widget.lowStockThresholdField != null)
+                      LabelFieldRow(
+                        label: 'Threshold',
+                        field: widget.lowStockThresholdField!,
+                      ),
+                    if (widget.lowStockHelp != null)
+                      _supportColored(
+                        widget.lowStockHelp,
+                        widget.lowStockHelpColor,
+                      ),
                     LabelFieldRow(
-                      label: 'Low stock alert',
-                      field: widget.lowStockRow!,
+                      label: 'Expiry date',
+                      field: widget.expiryDateButton,
                     ),
-                  if (widget.lowStockThresholdField != null)
-                    LabelFieldRow(
-                      label: 'Threshold',
-                      field: widget.lowStockThresholdField!,
-                    ),
-                  if (widget.lowStockHelp != null)
-                    _supportColored(
-                      widget.lowStockHelp,
-                      widget.lowStockHelpColor,
-                    ),
-                  LabelFieldRow(
-                    label: 'Expiry date',
-                    field: widget.expiryDateButton,
-                  ),
-                  _support(widget.expiryHelp),
-                ],
-              ),
+                    _support(widget.expiryHelp),
+                  ],
+                ),
               const SizedBox(height: 12),
 
-              // Storage
-              SectionFormCard(
-                title: 'Storage',
-                neutral: true,
-                children: [
-                  LabelFieldRow(label: 'Batch No.', field: widget.batchField),
-                  _support(widget.batchHelp),
-                  LabelFieldRow(label: 'Location', field: widget.locationField),
-                  _support(widget.locationHelp),
-                  LabelFieldRow(
-                    label: 'Keep refrigerated',
-                    field: widget.refrigerateRow,
-                  ),
-                  _support(widget.refrigerateHelp),
-                  LabelFieldRow(label: 'Keep frozen', field: widget.freezeRow),
-                  _support(widget.freezeHelp),
-                  LabelFieldRow(label: 'Keep in dark', field: widget.darkRow),
-                  _support(widget.darkHelp),
-                  LabelFieldRow(
-                    label: 'Storage instructions',
-                    field: widget.storageInstructionsField,
-                  ),
-                  _support(widget.storageInstructionsHelp),
-                ],
-              ),
+              // Storage (use MDV-specific section if provided)
+              if (widget.mdvStorageSection != null)
+                widget.mdvStorageSection!
+              else
+                SectionFormCard(
+                  title: 'Storage',
+                  neutral: true,
+                  children: [
+                    LabelFieldRow(label: 'Batch No.', field: widget.batchField),
+                    _support(widget.batchHelp),
+                    LabelFieldRow(
+                      label: 'Location',
+                      field: widget.locationField,
+                    ),
+                    _support(widget.locationHelp),
+                    LabelFieldRow(
+                      label: 'Keep refrigerated',
+                      field: widget.refrigerateRow,
+                    ),
+                    _support(widget.refrigerateHelp),
+                    LabelFieldRow(
+                      label: 'Keep frozen',
+                      field: widget.freezeRow,
+                    ),
+                    _support(widget.freezeHelp),
+                    LabelFieldRow(label: 'Keep in dark', field: widget.darkRow),
+                    _support(widget.darkHelp),
+                    LabelFieldRow(
+                      label: 'Storage instructions',
+                      field: widget.storageInstructionsField,
+                    ),
+                    _support(widget.storageInstructionsHelp),
+                  ],
+                ),
             ],
           ),
         ),
