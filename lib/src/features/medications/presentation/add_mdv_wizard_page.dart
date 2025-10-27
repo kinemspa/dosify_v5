@@ -98,7 +98,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         return _nameCtrl.text.trim().isNotEmpty;
       case 1: // Strength & Reconstitution
         final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
-        return strength > 0;
+        final volume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
+        return strength > 0 && volume > 0;
       case 2: // Initial Stock
         return true; // Optional
       case 3: // Storage
@@ -412,11 +413,20 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         const SizedBox(height: 16),
         _ReconstitutionInfoCard(
           onCalculate: () async {
+            final strength =
+                double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+            if (strength <= 0) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please enter medication strength first'),
+                ),
+              );
+              return;
+            }
             final result = await showDialog<ReconstitutionResult>(
               context: context,
               builder: (context) => ReconstitutionCalculatorDialog(
-                initialStrengthValue:
-                    double.tryParse(_strengthValueCtrl.text.trim()) ?? 0,
+                initialStrengthValue: strength,
                 unitLabel: _strengthUnit.name,
               ),
             );
@@ -429,6 +439,43 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             }
           },
           result: _reconResult,
+        ),
+        const SizedBox(height: 16),
+        SectionFormCard(
+          title: 'Total Vial Volume',
+          neutral: true,
+          children: [
+            LabelFieldRow(
+              label: 'Volume (mL) *',
+              field: StepperRow36(
+                controller: _vialVolumeCtrl,
+                onDec: () {
+                  final v = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
+                  setState(
+                    () => _vialVolumeCtrl.text = (v - 0.5)
+                        .clamp(0, 999)
+                        .toStringAsFixed(1),
+                  );
+                },
+                onInc: () {
+                  final v = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
+                  setState(
+                    () => _vialVolumeCtrl.text = (v + 0.5)
+                        .clamp(0, 999)
+                        .toStringAsFixed(1),
+                  );
+                },
+                decoration: buildCompactFieldDecoration(
+                  context: context,
+                  hint: '0.0',
+                ),
+              ),
+            ),
+            buildHelperText(
+              context,
+              'Total liquid volume after mixing (or enter manually if already reconstituted)',
+            ),
+          ],
         ),
       ],
     );
