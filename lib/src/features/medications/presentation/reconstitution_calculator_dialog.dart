@@ -120,6 +120,18 @@ class _ReconstitutionCalculatorDialogState
               ],
             ),
           ),
+          // Helper text
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text(
+              'Select a reconstitution option below or fine-tune the values',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white.withOpacity(0.7),
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
           const Divider(color: Colors.white12, height: 1),
           // Content
           Flexible(

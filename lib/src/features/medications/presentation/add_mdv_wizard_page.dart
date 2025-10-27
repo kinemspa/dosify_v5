@@ -29,6 +29,7 @@ class AddMdvWizardPage extends ConsumerStatefulWidget {
 
 class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   int _currentStep = 0;
+  final _scrollController = ScrollController();
 
   // Step 1: Basic Info
   final _nameCtrl = TextEditingController();
@@ -42,7 +43,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   final _vialVolumeCtrl = TextEditingController(text: '0');
   ReconstitutionResult? _reconResult;
 
-  // Step 3: Active Vial Details
+  // Step 3: Reconstituted Vial Details
   final _activeVialVolumeMlCtrl = TextEditingController();
   final _activeVialLowStockMlCtrl = TextEditingController(text: '1.0');
   bool _activeVialLowStockEnabled = true;
@@ -50,7 +51,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   final _activeVialStorageCtrl = TextEditingController();
   String? _activeVialStorageCondition = 'refrigerated';
 
-  // Step 4: Backup Inventory (Optional)
+  // Step 4: Sealed Inventory (Optional)
   bool _hasBackupVials = false;
   final _backupVialsQtyCtrl = TextEditingController(text: '0');
   bool _backupVialsLowStockEnabled = false;
@@ -77,7 +78,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _perMlCtrl.text = m.perMlValue?.toString() ?? '';
       _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
 
-      // Active vial
+      // Reconstituted Vial
       _activeVialVolumeMlCtrl.text = m.containerVolumeMl?.toString() ?? '0';
       _activeVialLowStockMlCtrl.text =
           m.activeVialLowStockMl?.toString() ?? '1.0';
@@ -112,6 +113,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _nameCtrl.dispose();
     _manufacturerCtrl.dispose();
     _descriptionCtrl.dispose();
@@ -136,10 +138,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
         final volume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
         return strength > 0 && volume > 0;
-      case 2: // Active Vial
+      case 2: // Reconstituted Vial
         final vol = double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
         return vol > 0;
-      case 3: // Backup Inventory
+      case 3: // Sealed Inventory
         return true; // Optional
       case 4: // Review
         return true;
@@ -151,6 +153,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   void _nextStep() {
     if (_canProceed && _currentStep < 4) {
       setState(() => _currentStep++);
+      // Scroll to top of next step
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -161,6 +169,30 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   Future<void> _saveMedication() async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Save'),
+        content: Text(
+          widget.initial == null
+              ? 'Save this medication to your inventory?'
+              : 'Update this medication?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
     final repo = ref.read(medicationRepositoryProvider);
     final id = widget.initial?.id ?? _newId();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
@@ -217,7 +249,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           ? double.tryParse(_vialVolumeCtrl.text.trim())
           : null,
       initialStockValue: initialStock,
-      // Active vial fields
+      // Reconstituted Vial fields
       activeVialLowStockMl:
           _activeVialLowStockEnabled &&
               _activeVialLowStockMlCtrl.text.isNotEmpty
@@ -289,19 +321,18 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           // Progress indicator
           _buildStepIndicator(),
 
-          // Content
+          // Summary card (fixed, not scrolling)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildSummaryCard(),
+          ),
+
+          // Content (scrollable)
           Expanded(
             child: SingleChildScrollView(
+              controller: _scrollController,
               padding: kPagePadding,
-              child: Column(
-                children: [
-                  // Summary card at top
-                  _buildSummaryCard(),
-                  const SizedBox(height: 24),
-                  // Step content
-                  _buildStepContent(),
-                ],
-              ),
+              child: _buildStepContent(),
             ),
           ),
 
@@ -530,7 +561,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   2,
                 );
                 _perMlCtrl.text = result.perMlConcentration.toString();
-                // Auto-fill active vial volume
+                // Auto-fill Reconstituted Vial volume
                 _activeVialVolumeMlCtrl.text = result.solventVolumeMl
                     .toStringAsFixed(2);
               });
@@ -574,7 +605,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             buildHelperText(
               context,
-              'Total liquid volume after mixing (or enter manually if already reconstituted)',
+              'If you know the total volume, enter it here. Otherwise, use the calculator above to determine the correct reconstitution.',
             ),
           ],
         ),
@@ -586,7 +617,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Active Vial Details', style: sectionTitleStyle(context)),
+        Text('Reconstituted Vial Details', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
           'Track the reconstituted vial you\'re currently using for dosing',
@@ -594,44 +625,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         ),
         const SizedBox(height: 24),
         SectionFormCard(
-          title: 'Current Volume',
+          title: 'Low Stock Alert',
           neutral: true,
           children: [
-            LabelFieldRow(
-              label: 'Volume (mL) *',
-              field: StepperRow36(
-                controller: _activeVialVolumeMlCtrl,
-                onDec: () {
-                  final v =
-                      double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
-                  setState(
-                    () => _activeVialVolumeMlCtrl.text = (v - 0.5)
-                        .clamp(0, 999)
-                        .toStringAsFixed(2),
-                  );
-                },
-                onInc: () {
-                  final v =
-                      double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
-                  setState(
-                    () => _activeVialVolumeMlCtrl.text = (v + 0.5)
-                        .clamp(0, 999)
-                        .toStringAsFixed(2),
-                  );
-                },
-                decoration: buildCompactFieldDecoration(
-                  context: context,
-                  hint: '0.00',
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                ],
-              ),
-            ),
-            buildHelperText(
-              context,
-              'Current volume in the active vial (auto-filled from reconstitution)',
-            ),
             LabelFieldRow(
               label: 'Low stock alert',
               field: Row(
@@ -741,7 +737,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                 ),
               ),
             ),
-            buildHelperText(context, 'Where you keep the active vial'),
+            buildHelperText(context, 'Where you keep the Reconstituted Vial'),
             LabelFieldRow(
               label: 'Storage condition',
               field: Field36(
@@ -778,7 +774,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Backup Inventory', style: sectionTitleStyle(context)),
+        Text('Sealed Inventory', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
           'Optional: Track sealed vials for future use',
@@ -1011,7 +1007,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
-    // Active vial volume in mL
+    // Reconstituted Vial volume in mL
     final activeVialVol =
         double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
     final backupVialsQty = _hasBackupVials
@@ -1031,10 +1027,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       perMlValue: _perMlCtrl.text.isNotEmpty
           ? double.tryParse(_perMlCtrl.text.trim())
           : null,
-      // Show active vial volume in mL (not vial count)
+      // Show Reconstituted Vial volume in mL (not vial count)
       stockCurrent: activeVialVol,
       stockInitial: activeVialVol,
-      stockUnitLabel: 'mL (active vial)',
+      stockUnitLabel: 'mL (Reconstituted Vial)',
       expiryDate: _activeVialExpiry,
       showRefrigerate: _activeVialStorageCondition == 'refrigerated',
       showFrozen: _activeVialStorageCondition == 'frozen',
@@ -1163,8 +1159,8 @@ class _ReconstitutionInfoCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             result == null
-                ? 'Multi-dose vials need to be mixed with liquid (reconstituted). Use our calculator to find the perfect ratio.'
-                : 'Reconstitution calculated! Add ${result!.solventVolumeMl} mL solvent to vial',
+                ? 'Multi-dose vials need to be mixed with liquid (reconstituted). Use the calculator to determine the correct volume.'
+                : 'Reconstitution calculated! Add ${result!.solventVolumeMl.toStringAsFixed(2)} mL solvent. This has been applied to Total Vial Volume below.',
             style: mutedTextStyle(
               context,
             )?.copyWith(color: Colors.white.withOpacity(0.75)),
