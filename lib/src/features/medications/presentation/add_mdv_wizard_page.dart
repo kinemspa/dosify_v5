@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -41,16 +42,23 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   final _vialVolumeCtrl = TextEditingController(text: '0');
   ReconstitutionResult? _reconResult;
 
-  // Step 3: Initial Stock (Sealed Vials)
-  final _stockValueCtrl = TextEditingController(text: '0');
-  bool _lowStockEnabled = false;
-  final _lowStockCtrl = TextEditingController(text: '0');
-  DateTime? _expiry;
-  final _batchCtrl = TextEditingController();
+  // Step 3: Active Vial Details
+  final _activeVialVolumeMlCtrl = TextEditingController();
+  final _activeVialLowStockMlCtrl = TextEditingController(text: '1.0');
+  bool _activeVialLowStockEnabled = true;
+  DateTime? _activeVialExpiry;
+  final _activeVialStorageCtrl = TextEditingController();
+  String? _activeVialStorageCondition = 'refrigerated';
 
-  // Step 4: Storage
-  final _storageCtrl = TextEditingController();
-  String? _storageCondition = 'room_temp';
+  // Step 4: Backup Inventory (Optional)
+  bool _hasBackupVials = false;
+  final _backupVialsQtyCtrl = TextEditingController(text: '0');
+  bool _backupVialsLowStockEnabled = false;
+  final _backupVialsLowStockCtrl = TextEditingController(text: '0');
+  DateTime? _backupVialsExpiry;
+  final _backupVialsBatchCtrl = TextEditingController();
+  final _backupVialsStorageCtrl = TextEditingController();
+  String? _backupVialsStorageCondition = 'room_temp';
 
   @override
   void initState() {
@@ -84,12 +92,15 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     _manufacturerCtrl.dispose();
     _descriptionCtrl.dispose();
     _strengthValueCtrl.dispose();
-    _stockValueCtrl.dispose();
-    _lowStockCtrl.dispose();
-    _batchCtrl.dispose();
-    _storageCtrl.dispose();
     _perMlCtrl.dispose();
     _vialVolumeCtrl.dispose();
+    _activeVialVolumeMlCtrl.dispose();
+    _activeVialLowStockMlCtrl.dispose();
+    _activeVialStorageCtrl.dispose();
+    _backupVialsQtyCtrl.dispose();
+    _backupVialsLowStockCtrl.dispose();
+    _backupVialsBatchCtrl.dispose();
+    _backupVialsStorageCtrl.dispose();
     super.dispose();
   }
 
@@ -101,17 +112,20 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
         final volume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
         return strength > 0 && volume > 0;
-      case 2: // Initial Stock
+      case 2: // Active Vial
+        final vol = double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
+        return vol > 0;
+      case 3: // Backup Inventory
         return true; // Optional
-      case 3: // Storage
-        return true; // Optional
+      case 4: // Review
+        return true;
       default:
         return false;
     }
   }
 
   void _nextStep() {
-    if (_canProceed && _currentStep < 3) {
+    if (_canProceed && _currentStep < 4) {
       setState(() => _currentStep++);
     }
   }
@@ -126,12 +140,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     final repo = ref.read(medicationRepositoryProvider);
     final id = widget.initial?.id ?? _newId();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
-    final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+    final backupStock = _hasBackupVials
+        ? (double.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0)
+        : 0;
     final previous = widget.initial;
     final initialStock = previous == null
-        ? stock
-        : (stock > previous.stockValue
-              ? stock
+        ? backupStock
+        : (backupStock > previous.stockValue
+              ? backupStock
               : (previous.initialStockValue ?? previous.stockValue));
 
     final med = Medication(
@@ -150,35 +166,66 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       perMlValue: _perMlCtrl.text.isNotEmpty
           ? double.tryParse(_perMlCtrl.text.trim())
           : null,
-      stockValue: stock,
+      // Backup vials stock
+      stockValue: backupStock,
       stockUnit: StockUnit.multiDoseVials,
-      lowStockEnabled: _lowStockEnabled,
-      lowStockThreshold: _lowStockEnabled && _lowStockCtrl.text.isNotEmpty
-          ? double.tryParse(_lowStockCtrl.text.trim())
+      lowStockEnabled: _hasBackupVials && _backupVialsLowStockEnabled,
+      lowStockThreshold:
+          _hasBackupVials &&
+              _backupVialsLowStockEnabled &&
+              _backupVialsLowStockCtrl.text.isNotEmpty
+          ? double.tryParse(_backupVialsLowStockCtrl.text.trim())
           : null,
-      expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
-      requiresRefrigeration: _storageCondition == 'refrigerated',
+      expiry: _backupVialsExpiry,
+      batchNumber:
+          _hasBackupVials && _backupVialsBatchCtrl.text.trim().isNotEmpty
+          ? _backupVialsBatchCtrl.text.trim()
+          : null,
+      storageLocation:
+          _hasBackupVials && _backupVialsStorageCtrl.text.trim().isNotEmpty
+          ? _backupVialsStorageCtrl.text.trim()
+          : null,
+      requiresRefrigeration:
+          _hasBackupVials && _backupVialsStorageCondition == 'refrigerated',
       storageInstructions: _buildStorageInstructions(),
+      // Total vial volume after reconstitution
       containerVolumeMl: _vialVolumeCtrl.text.isNotEmpty
           ? double.tryParse(_vialVolumeCtrl.text.trim())
           : null,
       initialStockValue: initialStock,
-      backupVialsBatchNumber: _batchCtrl.text.trim().isEmpty
+      // Active vial fields
+      activeVialVolumeMl: _activeVialVolumeMlCtrl.text.isNotEmpty
+          ? double.tryParse(_activeVialVolumeMlCtrl.text.trim())
+          : null,
+      activeVialLowStockMl:
+          _activeVialLowStockEnabled &&
+              _activeVialLowStockMlCtrl.text.isNotEmpty
+          ? double.tryParse(_activeVialLowStockMlCtrl.text.trim())
+          : null,
+      activeVialStorageLocation: _activeVialStorageCtrl.text.trim().isEmpty
           ? null
-          : _batchCtrl.text.trim(),
-      backupVialsStorageLocation: _storageCtrl.text.trim().isEmpty
-          ? null
-          : _storageCtrl.text.trim(),
-      backupVialsRequiresRefrigeration: _storageCondition == 'refrigerated',
-      backupVialsRequiresFreezer: _storageCondition == 'frozen',
-      backupVialsLightSensitive: _storageCondition == 'protect_light',
-      backupVialsExpiry: _expiry,
+          : _activeVialStorageCtrl.text.trim(),
+      activeVialRequiresRefrigeration:
+          _activeVialStorageCondition == 'refrigerated',
+      activeVialRequiresFreezer: _activeVialStorageCondition == 'frozen',
+      activeVialLightSensitive: _activeVialStorageCondition == 'protect_light',
+      reconstitutedVialExpiry: _activeVialExpiry,
+      // Backup vials fields
+      backupVialsBatchNumber:
+          _hasBackupVials && _backupVialsBatchCtrl.text.trim().isNotEmpty
+          ? _backupVialsBatchCtrl.text.trim()
+          : null,
+      backupVialsStorageLocation:
+          _hasBackupVials && _backupVialsStorageCtrl.text.trim().isNotEmpty
+          ? _backupVialsStorageCtrl.text.trim()
+          : null,
+      backupVialsRequiresRefrigeration:
+          _hasBackupVials && _backupVialsStorageCondition == 'refrigerated',
+      backupVialsRequiresFreezer:
+          _hasBackupVials && _backupVialsStorageCondition == 'frozen',
+      backupVialsLightSensitive:
+          _hasBackupVials && _backupVialsStorageCondition == 'protect_light',
+      backupVialsExpiry: _hasBackupVials ? _backupVialsExpiry : null,
     );
 
     await repo.upsert(med);
@@ -191,8 +238,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
   String? _buildStorageInstructions() {
     final parts = <String>[];
-    if (_storageCondition == 'frozen') parts.add('Keep frozen');
-    if (_storageCondition == 'protect_light') parts.add('Protect from light');
+    if (_activeVialStorageCondition == 'frozen' ||
+        (_hasBackupVials && _backupVialsStorageCondition == 'frozen')) {
+      parts.add('Keep frozen');
+    }
+    if (_activeVialStorageCondition == 'protect_light' ||
+        (_hasBackupVials && _backupVialsStorageCondition == 'protect_light')) {
+      parts.add('Protect from light');
+    }
     return parts.isEmpty ? null : parts.join('. ');
   }
 
@@ -252,13 +305,13 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       ),
       child: Row(
         children: [
-          for (int i = 0; i < 4; i++) ...[
+          for (int i = 0; i < 5; i++) ...[
             _StepCircle(
               number: i + 1,
               isActive: i == _currentStep,
               isCompleted: i < _currentStep,
             ),
-            if (i < 3)
+            if (i < 4)
               Expanded(
                 child: Container(
                   height: 2,
@@ -282,9 +335,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       case 1:
         return _buildStrengthReconStep();
       case 2:
-        return _buildInitialStockStep();
+        return _buildActiveVialStep();
       case 3:
-        return _buildStorageStep();
+        return _buildBackupInventoryStep();
+      case 4:
+        return _buildReviewStep();
       default:
         return const SizedBox.shrink();
     }
@@ -450,8 +505,13 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             if (result != null) {
               setState(() {
                 _reconResult = result;
-                _vialVolumeCtrl.text = result.solventVolumeMl.toString();
+                _vialVolumeCtrl.text = result.solventVolumeMl.toStringAsFixed(
+                  2,
+                );
                 _perMlCtrl.text = result.perMlConcentration.toString();
+                // Auto-fill active vial volume
+                _activeVialVolumeMlCtrl.text = result.solventVolumeMl
+                    .toStringAsFixed(2);
               });
             }
           },
@@ -471,7 +531,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   setState(
                     () => _vialVolumeCtrl.text = (v - 0.5)
                         .clamp(0, 999)
-                        .toStringAsFixed(1),
+                        .toStringAsFixed(2),
                   );
                 },
                 onInc: () {
@@ -479,13 +539,16 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   setState(
                     () => _vialVolumeCtrl.text = (v + 0.5)
                         .clamp(0, 999)
-                        .toStringAsFixed(1),
+                        .toStringAsFixed(2),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
                   context: context,
-                  hint: '0.0',
+                  hint: '0.00',
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
               ),
             ),
             buildHelperText(
@@ -498,168 +561,171 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     );
   }
 
-  Widget _buildInitialStockStep() {
+  Widget _buildActiveVialStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Initial Stock', style: sectionTitleStyle(context)),
+        Text('Active Vial Details', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'How many sealed (unopened) vials do you have right now?',
+          'Track the reconstituted vial you\'re currently using for dosing',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
         SectionFormCard(
-          title: 'Sealed Vials',
+          title: 'Current Volume',
           neutral: true,
           children: [
             LabelFieldRow(
-              label: 'Quantity',
+              label: 'Volume (mL) *',
               field: StepperRow36(
-                controller: _stockValueCtrl,
+                controller: _activeVialVolumeMlCtrl,
                 onDec: () {
-                  final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                  final v =
+                      double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _stockValueCtrl.text = (v - 1)
-                        .clamp(0, 1000000)
-                        .toString(),
+                    () => _activeVialVolumeMlCtrl.text = (v - 0.5)
+                        .clamp(0, 999)
+                        .toStringAsFixed(2),
                   );
                 },
                 onInc: () {
-                  final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                  final v =
+                      double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _stockValueCtrl.text = (v + 1)
-                        .clamp(0, 1000000)
-                        .toString(),
+                    () => _activeVialVolumeMlCtrl.text = (v + 0.5)
+                        .clamp(0, 999)
+                        .toStringAsFixed(2),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
                   context: context,
-                  hint: '0',
+                  hint: '0.00',
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
               ),
             ),
-            buildHelperText(context, 'Number of sealed, unopened vials'),
+            buildHelperText(
+              context,
+              'Current volume in the active vial (auto-filled from reconstitution)',
+            ),
             LabelFieldRow(
               label: 'Low stock alert',
               field: Row(
                 children: [
                   Checkbox(
-                    value: _lowStockEnabled,
+                    value: _activeVialLowStockEnabled,
                     onChanged: (v) =>
-                        setState(() => _lowStockEnabled = v ?? false),
+                        setState(() => _activeVialLowStockEnabled = v ?? false),
                   ),
                   Expanded(
                     child: Text(
-                      'Alert when stock is low',
+                      'Alert when volume is low',
                       style: checkboxLabelStyle(context),
                     ),
                   ),
                 ],
               ),
             ),
-            if (_lowStockEnabled) ...[
+            if (_activeVialLowStockEnabled) ...[
               LabelFieldRow(
-                label: 'Threshold',
+                label: 'Threshold (mL)',
                 field: StepperRow36(
-                  controller: _lowStockCtrl,
+                  controller: _activeVialLowStockMlCtrl,
                   onDec: () {
-                    final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
+                    final v =
+                        double.tryParse(
+                          _activeVialLowStockMlCtrl.text.trim(),
+                        ) ??
+                        0;
                     setState(
-                      () => _lowStockCtrl.text = (v - 1)
-                          .clamp(0, 1000000)
-                          .toString(),
+                      () => _activeVialLowStockMlCtrl.text = (v - 0.5)
+                          .clamp(0, 999)
+                          .toStringAsFixed(2),
                     );
                   },
                   onInc: () {
-                    final v = int.tryParse(_lowStockCtrl.text.trim()) ?? 0;
-                    final maxStock =
-                        int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+                    final v =
+                        double.tryParse(
+                          _activeVialLowStockMlCtrl.text.trim(),
+                        ) ??
+                        0;
                     setState(
-                      () => _lowStockCtrl.text = (v + 1)
-                          .clamp(0, maxStock)
-                          .toString(),
+                      () => _activeVialLowStockMlCtrl.text = (v + 0.5)
+                          .clamp(0, 999)
+                          .toStringAsFixed(2),
                     );
                   },
                   decoration: buildCompactFieldDecoration(
                     context: context,
-                    hint: '0',
+                    hint: '1.0',
                   ),
                   compact: true,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
                 ),
               ),
+              buildHelperText(context, 'Alert when volume drops to this level'),
             ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        SectionFormCard(
+          title: 'Expiry & Storage',
+          neutral: true,
+          children: [
             LabelFieldRow(
               label: 'Expiry date',
               field: DateButton36(
-                label: _expiry == null
+                label: _activeVialExpiry == null
                     ? 'Select date'
                     : MaterialLocalizations.of(
                         context,
-                      ).formatCompactDate(_expiry!),
+                      ).formatCompactDate(_activeVialExpiry!),
                 onPressed: () async {
                   final now = DateTime.now();
                   final picked = await showDatePicker(
                     context: context,
-                    firstDate: DateTime(now.year - 1),
-                    lastDate: DateTime(now.year + 10),
-                    initialDate: _expiry ?? now,
+                    firstDate: now,
+                    lastDate: DateTime(now.year + 2),
+                    initialDate:
+                        _activeVialExpiry ?? now.add(const Duration(days: 30)),
                   );
-                  if (picked != null) setState(() => _expiry = picked);
+                  if (picked != null) {
+                    setState(() => _activeVialExpiry = picked);
+                  }
                 },
                 width: kSmallControlWidth,
-                selected: _expiry != null,
+                selected: _activeVialExpiry != null,
               ),
             ),
-            buildHelperText(context, 'When do sealed vials expire?'),
-            LabelFieldRow(
-              label: 'Batch No.',
-              field: Field36(
-                child: TextField(
-                  controller: _batchCtrl,
-                  decoration: buildFieldDecoration(context, hint: 'Optional'),
-                ),
-              ),
+            buildHelperText(
+              context,
+              'When does the reconstituted vial expire? (usually 28-30 days)',
             ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStorageStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Storage', style: sectionTitleStyle(context)),
-        const SizedBox(height: 8),
-        Text(
-          'Where do you store your sealed vials?',
-          style: mutedTextStyle(context),
-        ),
-        const SizedBox(height: 24),
-        SectionFormCard(
-          title: 'Storage Location',
-          neutral: true,
-          children: [
             LabelFieldRow(
-              label: 'Location',
+              label: 'Storage location',
               field: Field36(
                 child: TextField(
-                  controller: _storageCtrl,
+                  controller: _activeVialStorageCtrl,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Fridge, Medicine cabinet',
+                    hint: 'e.g., Fridge',
                   ),
                 ),
               ),
             ),
-            buildHelperText(context, 'Where you keep unopened vials'),
+            buildHelperText(context, 'Where you keep the active vial'),
             LabelFieldRow(
-              label: 'Condition',
+              label: 'Storage condition',
               field: Field36(
                 child: DropdownButtonFormField<String>(
-                  value: _storageCondition,
+                  value: _activeVialStorageCondition,
                   decoration: buildFieldDecoration(context, hint: 'Select'),
                   items: const [
                     DropdownMenuItem(
@@ -676,12 +742,245 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       child: Text('Protect from Light'),
                     ),
                   ],
-                  onChanged: (v) => setState(() => _storageCondition = v),
+                  onChanged: (v) =>
+                      setState(() => _activeVialStorageCondition = v),
                 ),
               ),
             ),
-            buildHelperText(context, 'Storage temperature requirements'),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBackupInventoryStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Backup Inventory', style: sectionTitleStyle(context)),
+        const SizedBox(height: 8),
+        Text(
+          'Optional: Track sealed vials for future use',
+          style: mutedTextStyle(context),
+        ),
+        const SizedBox(height: 24),
+        SectionFormCard(
+          title: 'Additional Sealed Vials',
+          neutral: true,
+          children: [
+            LabelFieldRow(
+              label: 'Track inventory',
+              field: Row(
+                children: [
+                  Checkbox(
+                    value: _hasBackupVials,
+                    onChanged: (v) =>
+                        setState(() => _hasBackupVials = v ?? false),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'I have additional sealed vials to track',
+                      style: checkboxLabelStyle(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            buildHelperText(
+              context,
+              'Enable if you have more vials that you\'ll reconstitute later',
+            ),
+          ],
+        ),
+        if (_hasBackupVials) ...[
+          const SizedBox(height: 16),
+          SectionFormCard(
+            title: 'Sealed Vial Stock',
+            neutral: true,
+            children: [
+              LabelFieldRow(
+                label: 'Quantity',
+                field: StepperRow36(
+                  controller: _backupVialsQtyCtrl,
+                  onDec: () {
+                    final v =
+                        int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0;
+                    setState(
+                      () => _backupVialsQtyCtrl.text = (v - 1)
+                          .clamp(0, 1000000)
+                          .toString(),
+                    );
+                  },
+                  onInc: () {
+                    final v =
+                        int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0;
+                    setState(
+                      () => _backupVialsQtyCtrl.text = (v + 1)
+                          .clamp(0, 1000000)
+                          .toString(),
+                    );
+                  },
+                  decoration: buildCompactFieldDecoration(
+                    context: context,
+                    hint: '0',
+                  ),
+                ),
+              ),
+              buildHelperText(context, 'Number of sealed, unopened vials'),
+              LabelFieldRow(
+                label: 'Low stock alert',
+                field: Row(
+                  children: [
+                    Checkbox(
+                      value: _backupVialsLowStockEnabled,
+                      onChanged: (v) => setState(
+                        () => _backupVialsLowStockEnabled = v ?? false,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Alert when stock is low',
+                        style: checkboxLabelStyle(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (_backupVialsLowStockEnabled) ...[
+                LabelFieldRow(
+                  label: 'Threshold',
+                  field: StepperRow36(
+                    controller: _backupVialsLowStockCtrl,
+                    onDec: () {
+                      final v =
+                          int.tryParse(_backupVialsLowStockCtrl.text.trim()) ??
+                          0;
+                      setState(
+                        () => _backupVialsLowStockCtrl.text = (v - 1)
+                            .clamp(0, 1000000)
+                            .toString(),
+                      );
+                    },
+                    onInc: () {
+                      final v =
+                          int.tryParse(_backupVialsLowStockCtrl.text.trim()) ??
+                          0;
+                      setState(
+                        () => _backupVialsLowStockCtrl.text = (v + 1)
+                            .clamp(0, 1000000)
+                            .toString(),
+                      );
+                    },
+                    decoration: buildCompactFieldDecoration(
+                      context: context,
+                      hint: '0',
+                    ),
+                    compact: true,
+                  ),
+                ),
+              ],
+              LabelFieldRow(
+                label: 'Expiry date',
+                field: DateButton36(
+                  label: _backupVialsExpiry == null
+                      ? 'Select date'
+                      : MaterialLocalizations.of(
+                          context,
+                        ).formatCompactDate(_backupVialsExpiry!),
+                  onPressed: () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      firstDate: DateTime(now.year - 1),
+                      lastDate: DateTime(now.year + 10),
+                      initialDate: _backupVialsExpiry ?? now,
+                    );
+                    if (picked != null) {
+                      setState(() => _backupVialsExpiry = picked);
+                    }
+                  },
+                  width: kSmallControlWidth,
+                  selected: _backupVialsExpiry != null,
+                ),
+              ),
+              buildHelperText(context, 'When do sealed vials expire?'),
+              LabelFieldRow(
+                label: 'Batch No.',
+                field: Field36(
+                  child: TextField(
+                    controller: _backupVialsBatchCtrl,
+                    decoration: buildFieldDecoration(context, hint: 'Optional'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SectionFormCard(
+            title: 'Sealed Vial Storage',
+            neutral: true,
+            children: [
+              LabelFieldRow(
+                label: 'Location',
+                field: Field36(
+                  child: TextField(
+                    controller: _backupVialsStorageCtrl,
+                    decoration: buildFieldDecoration(
+                      context,
+                      hint: 'e.g., Freezer, Medicine cabinet',
+                    ),
+                  ),
+                ),
+              ),
+              buildHelperText(context, 'Where you keep unopened vials'),
+              LabelFieldRow(
+                label: 'Condition',
+                field: Field36(
+                  child: DropdownButtonFormField<String>(
+                    value: _backupVialsStorageCondition,
+                    decoration: buildFieldDecoration(context, hint: 'Select'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'room_temp',
+                        child: Text('Room Temperature'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'refrigerated',
+                        child: Text('Refrigerated (2-8°C)'),
+                      ),
+                      DropdownMenuItem(value: 'frozen', child: Text('Frozen')),
+                      DropdownMenuItem(
+                        value: 'protect_light',
+                        child: Text('Protect from Light'),
+                      ),
+                    ],
+                    onChanged: (v) =>
+                        setState(() => _backupVialsStorageCondition = v),
+                  ),
+                ),
+              ),
+              buildHelperText(context, 'Storage temperature requirements'),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildReviewStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Review', style: sectionTitleStyle(context)),
+        const SizedBox(height: 8),
+        Text(
+          'Review your medication details before saving',
+          style: mutedTextStyle(context),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Summary card above shows your medication details. Tap "Save Medication" when ready.',
+          style: bodyTextStyle(context),
         ),
       ],
     );
@@ -691,10 +990,16 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
-    final stockVal = double.tryParse(_stockValueCtrl.text.trim());
-    final initialStock = widget.initial?.initialStockValue ?? stockVal ?? 0;
+    // Active vial volume in mL
+    final activeVialVol =
+        double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
+    final backupVialsQty = _hasBackupVials
+        ? (double.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0)
+        : 0;
     final unitLabel = _strengthUnit.name;
-    final threshold = double.tryParse(_lowStockCtrl.text.trim());
+    final activeThreshold = double.tryParse(
+      _activeVialLowStockMlCtrl.text.trim(),
+    );
     final headerTitle = name.isEmpty ? 'Multi-Dose Vial' : name;
 
     return SummaryHeaderCard(
@@ -705,17 +1010,18 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       perMlValue: _perMlCtrl.text.isNotEmpty
           ? double.tryParse(_perMlCtrl.text.trim())
           : null,
-      stockCurrent: stockVal ?? 0,
-      stockInitial: initialStock,
-      stockUnitLabel: 'vials',
-      expiryDate: _expiry,
-      showRefrigerate: _storageCondition == 'refrigerated',
-      showFrozen: _storageCondition == 'frozen',
-      showDark: _storageCondition == 'protect_light',
-      lowStockEnabled: _lowStockEnabled,
-      lowStockThreshold: threshold,
+      // Show active vial volume in mL (not vial count)
+      stockCurrent: activeVialVol,
+      stockInitial: activeVialVol,
+      stockUnitLabel: 'mL (active vial)',
+      expiryDate: _activeVialExpiry,
+      showRefrigerate: _activeVialStorageCondition == 'refrigerated',
+      showFrozen: _activeVialStorageCondition == 'frozen',
+      showDark: _activeVialStorageCondition == 'protect_light',
+      lowStockEnabled: _activeVialLowStockEnabled,
+      lowStockThreshold: activeThreshold,
       perTabletLabel: false,
-      formLabelPlural: 'vials',
+      formLabelPlural: 'mL',
       // MDV reconstitution gauge data
       reconTotalIU: _reconResult != null
           ? _reconResult!.syringeSizeMl * 100
@@ -750,9 +1056,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             flex: 2,
             child: FilledButton(
               onPressed: _canProceed
-                  ? (_currentStep < 3 ? _nextStep : _saveMedication)
+                  ? (_currentStep < 4 ? _nextStep : _saveMedication)
                   : null,
-              child: Text(_currentStep < 3 ? 'Continue' : 'Save Medication'),
+              child: Text(_currentStep < 4 ? 'Continue' : 'Save Medication'),
             ),
           ),
         ],
