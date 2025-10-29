@@ -318,14 +318,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       ),
       body: Column(
         children: [
-          // Progress indicator
-          _buildStepIndicator(),
-
-          // Summary card (fixed, not scrolling)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: _buildSummaryCard(),
-          ),
+          // Summary card with integrated step indicator
+          _buildEnhancedSummaryCard(),
 
           // Content (scrollable)
           Expanded(
@@ -343,41 +337,102 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     );
   }
 
-  Widget _buildStepIndicator() {
+  Widget _buildEnhancedSummaryCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-        ),
+        ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          for (int i = 0; i < 5; i++) ...[
-            _StepCircle(
-              number: i + 1,
-              isActive: i == _currentStep,
-              isCompleted: i < _currentStep,
-            ),
-            if (i < 4)
-              Expanded(
-                child: Container(
-                  height: 2,
-                  color: i < _currentStep
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withOpacity(0.3),
-                ),
+          // Step indicator at the top
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
               ),
-          ],
+            ),
+            child: Row(
+              children: [
+                for (int i = 0; i < 5; i++) ...[
+                  _StepCircle(
+                    number: i + 1,
+                    isActive: i == _currentStep,
+                    isCompleted: i < _currentStep,
+                  ),
+                  if (i < 4)
+                    Expanded(
+                      child: Container(
+                        height: 2,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: i < _currentStep
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
+          // Current step label
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              _getStepLabel(_currentStep),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          // Divider
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.15),
+          ),
+          // Summary content
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: _buildSummaryContent(),
+          ),
         ],
       ),
     );
+  }
+
+  String _getStepLabel(int step) {
+    switch (step) {
+      case 0:
+        return 'STEP 1: BASIC INFORMATION';
+      case 1:
+        return 'STEP 2: STRENGTH & RECONSTITUTION';
+      case 2:
+        return 'STEP 3: RECONSTITUTED VIAL DETAILS';
+      case 3:
+        return 'STEP 4: SEALED INVENTORY (OPTIONAL)';
+      case 4:
+        return 'STEP 5: REVIEW & SAVE';
+      default:
+        return '';
+    }
   }
 
   Widget _buildStepContent() {
@@ -1003,47 +1058,181 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryContent() {
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
-    // Reconstituted Vial volume in mL
     final activeVialVol =
         double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
-    final backupVialsQty = _hasBackupVials
-        ? (double.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0)
-        : 0;
     final unitLabel = _strengthUnit.name;
     final activeThreshold = double.tryParse(
       _activeVialLowStockMlCtrl.text.trim(),
     );
     final headerTitle = name.isEmpty ? 'Multi-Dose Vial' : name;
+    final theme = Theme.of(context);
+    final fg = theme.colorScheme.onPrimary;
 
-    return SummaryHeaderCard(
-      title: headerTitle,
-      manufacturer: manufacturer.isEmpty ? null : manufacturer,
-      strengthValue: strengthVal,
-      strengthUnitLabel: unitLabel,
-      perMlValue: _perMlCtrl.text.isNotEmpty
-          ? double.tryParse(_perMlCtrl.text.trim())
-          : null,
-      // Show Reconstituted Vial volume in mL (not vial count)
-      stockCurrent: activeVialVol,
-      stockInitial: activeVialVol,
-      stockUnitLabel: 'mL (Reconstituted Vial)',
-      expiryDate: _activeVialExpiry,
-      showRefrigerate: _activeVialStorageCondition == 'refrigerated',
-      showFrozen: _activeVialStorageCondition == 'frozen',
-      showDark: _activeVialStorageCondition == 'protect_light',
-      lowStockEnabled: _activeVialLowStockEnabled,
-      lowStockThreshold: activeThreshold,
-      perTabletLabel: false,
-      formLabelPlural: 'mL',
-      // MDV reconstitution gauge data
-      reconTotalIU: _reconResult != null
-          ? _reconResult!.syringeSizeMl * 100
-          : null,
-      reconFillIU: _reconResult != null ? _reconResult!.recommendedUnits : null,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: fg.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.addchart,
+                color: fg,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    headerTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: fg,
+                    ),
+                  ),
+                  if (manufacturer.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      manufacturer,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: fg.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 2),
+                  if (strengthVal != null && strengthVal > 0) ...[
+                    RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                        children: [
+                          TextSpan(
+                            text: strengthVal == strengthVal.roundToDouble()
+                                ? strengthVal.toStringAsFixed(0)
+                                : strengthVal.toStringAsFixed(2),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                          TextSpan(text: ' $unitLabel'),
+                          if (_perMlCtrl.text.isNotEmpty)
+                            TextSpan(
+                              text: ' in ${_perMlCtrl.text} mL',
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (activeVialVol > 0) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                          children: [
+                            TextSpan(
+                              text: activeVialVol == activeVialVol.roundToDouble()
+                                  ? activeVialVol.toStringAsFixed(0)
+                                  : activeVialVol.toStringAsFixed(2),
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                            const TextSpan(text: ' mL (Reconstituted Vial)'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (_activeVialLowStockEnabled && activeThreshold != null) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: fg.withValues(alpha: 0.85),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Alert at '),
+                            TextSpan(
+                              text: activeThreshold == activeThreshold.roundToDouble()
+                                  ? activeThreshold.toStringAsFixed(0)
+                                  : activeThreshold.toStringAsFixed(2),
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            const TextSpan(text: ' mL remaining'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (_activeVialExpiry != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                'Exp: ${MaterialLocalizations.of(context).formatCompactDate(_activeVialExpiry!)}',
+                style: theme.textTheme.bodySmall?.copyWith(color: fg),
+              ),
+            ],
+          ],
+        ),
+        // Reconstitution gauge
+        if (_reconResult != null) ...[
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 48),
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: fg.withValues(alpha: 0.85),
+                ),
+                children: [
+                  const TextSpan(
+                    text: 'Reconstitution: ',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const TextSpan(text: 'Draw '),
+                  TextSpan(
+                    text: '${_reconResult!.recommendedUnits.toStringAsFixed(1)} U',
+                    style: TextStyle(
+                      color: fg,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(text: ' ('),
+                  TextSpan(
+                    text: '${((_reconResult!.recommendedUnits / 100) * (_reconResult!.syringeSizeMl)).toStringAsFixed(2)} mL',
+                    style: TextStyle(
+                      color: fg,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const TextSpan(text: ')'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          WhiteSyringeGauge(
+            totalUnits: _reconResult!.syringeSizeMl * 100,
+            fillUnits: _reconResult!.recommendedUnits,
+          ),
+        ],
+      ],
     );
   }
 
@@ -1099,22 +1288,33 @@ class _StepCircle extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      width: 32,
-      height: 32,
+      width: 28,
+      height: 28,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isCompleted || isActive
-            ? cs.primary
-            : cs.surfaceContainerHighest,
+            ? cs.onPrimary
+            : cs.onPrimary.withValues(alpha: 0.2),
+        border: Border.all(
+          color: isCompleted || isActive
+              ? cs.onPrimary
+              : cs.onPrimary.withValues(alpha: 0.3),
+          width: isActive ? 2 : 1,
+        ),
       ),
       child: Center(
         child: isCompleted
-            ? Icon(Icons.check, size: 16, color: cs.onPrimary)
+            ? Icon(
+                Icons.check,
+                size: 14,
+                color: cs.primary,
+              )
             : Text(
                 number.toString(),
-                style: bodyTextStyle(context)?.copyWith(
-                  fontWeight: kFontWeightBold,
-                  color: isActive ? cs.onPrimary : cs.onSurfaceVariant,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isActive ? cs.primary : cs.onPrimary.withValues(alpha: 0.6),
+                  fontSize: 12,
                 ),
               ),
       ),
