@@ -14,8 +14,8 @@ import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 /// Wizard-style MDV add screen with clear step-by-step flow
 class AddMdvWizardPage extends ConsumerStatefulWidget {
@@ -1343,14 +1343,14 @@ class _ReconstitutionInfoCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.calculate,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 'Reconstitution Calculator',
                 style: bodyTextStyle(context)?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: kFontWeightBold,
                 ),
               ),
@@ -1363,7 +1363,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                 : 'Reconstitution calculated! Add ${result!.solventVolumeMl.toStringAsFixed(2)} mL solvent. This has been applied to Total Vial Volume below.',
             style: mutedTextStyle(
               context,
-            )?.copyWith(color: Colors.white.withOpacity(0.75)),
+            )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -1374,7 +1374,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               label: Text(result == null ? 'Open Calculator' : 'Recalculate'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.white,
-                side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
               ),
             ),
           ),
