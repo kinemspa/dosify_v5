@@ -663,8 +663,53 @@ Schedules Module Improvements (Enhanced UX)
     - Validation check after migration with warning if unsuccessful
   - **Future-Proof Design**:
     - Easy to add new migrations by incrementing version and adding migration method
-    - Sequential migration execution ensures smooth upgrades across multiple versions
-    - Template for v2→v3 migrations included in code comments
+  - Sequential migration execution ensures smooth upgrades across multiple versions
+  - Template for v2→v3 migrations included in code comments
   - Location: `lib/src/core/hive/hive_migration_manager.dart`
   - Integrated into `HiveBootstrap.init()` for automatic execution on app startup
+
+- **MDV Wizard Step-by-Step Flow** (Git commit: b84765e):
+  - Location: `lib/src/features/medications/presentation/add_mdv_wizard_page.dart`
+  - Alternative entry point for multi-dose vials with guided 5-step wizard
+  - Routes: `/medications/add/injection/multi` (standard form) and `/medications/add/injection/multi/wizard` (wizard)
+  - **Integrated Step Indicator Design**:
+    - Removed separate top-of-page step indicator component
+    - Step progress dots integrated into enhanced summary card header
+    - Summary card displays at top with primary color gradient background
+    - Step circles (28x28) with white theme on primary background
+    - Active steps show primary color fill, completed steps show checkmark icon
+    - Inactive steps appear semi-transparent (20% opacity)
+    - Active step has 2px border, others have 1px border
+    - Step connector lines shown between circles (2px height)
+  - **Step Label Banner**:
+    - Current step name displayed below progress dots
+    - Format: "STEP 1: BASIC INFORMATION", "STEP 2: STRENGTH & RECONSTITUTION", etc.
+    - Uses labelMedium font with letter spacing (0.5)
+    - White text at 90% opacity for readability on primary background
+    - Centered alignment for prominence
+  - **Enhanced Summary Card Layout**:
+    - Rounded corners (16px radius) with subtle shadow for elevation
+    - Three-section vertical layout:
+      1. Step indicator row (top section with semi-transparent white overlay)
+      2. Step label banner (centered text)
+      3. Medication summary content (icon, name, strength, volume, alerts, gauge)
+    - Divider line between step label and content (1px, 15% opacity)
+    - Consistent 12-16px padding throughout sections
+    - Professional card styling matching SummaryHeaderCard conventions
+  - **Wizard Steps**:
+    1. Basic Information (Name, Manufacturer, Description)
+    2. Strength & Reconstitution (Drug strength, calculator, vial volume)
+    3. Reconstituted Vial Details (Active vial tracking, low stock, expiry, storage)
+    4. Sealed Inventory - Optional (Backup vials stock management)
+    5. Review & Save (Final summary before saving)
+  - **Navigation Controls**:
+    - Bottom bar with Back/Continue buttons
+    - Continue button disabled until step requirements met
+    - Final step shows "Save Medication" instead of "Continue"
+    - Confirmation dialog before saving
+  - **Visual Hierarchy**:
+    - Step progress always visible at top of screen
+    - Clear indication of current position in workflow
+    - Summary card provides live preview of entered data
+    - Improved user confidence during multi-step data entry
 
