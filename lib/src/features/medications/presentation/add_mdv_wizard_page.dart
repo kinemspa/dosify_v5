@@ -353,16 +353,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       ),
       child: Column(
         children: [
-          // Step indicator at the top
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
+          // Step indicator at the top (no background overlay)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
             child: Row(
               children: [
                 for (int i = 0; i < 5; i++) ...[
@@ -374,12 +367,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   if (i < 4)
                     Expanded(
                       child: Container(
-                        height: 2,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        height: 1.5,
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
                           color: i < _currentStep
                               ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
+                              : Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(1),
                         ),
                       ),
@@ -389,15 +382,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
           ),
           // Current step label
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text(
               _getStepLabel(_currentStep),
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.85),
                 fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+                letterSpacing: 0.3,
               ),
               textAlign: TextAlign.center,
             ),
@@ -1062,12 +1054,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final strengthVal = double.tryParse(_strengthValueCtrl.text.trim());
-    final activeVialVol =
-        double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
+    final vialVolume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
     final unitLabel = _strengthUnit.name;
-    final activeThreshold = double.tryParse(
-      _activeVialLowStockMlCtrl.text.trim(),
-    );
+    final activeThreshold = _activeVialLowStockEnabled
+        ? double.tryParse(_activeVialLowStockMlCtrl.text.trim())
+        : null;
     final headerTitle = name.isEmpty ? 'Multi-Dose Vial' : name;
     final theme = Theme.of(context);
     final fg = theme.colorScheme.onPrimary;
@@ -1130,32 +1121,33 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                           TextSpan(text: ' $unitLabel'),
                           if (_perMlCtrl.text.isNotEmpty)
                             TextSpan(
-                              text: ' in ${_perMlCtrl.text} mL',
+                              text: ' (${_perMlCtrl.text} $unitLabel/mL)',
                             ),
                         ],
                       ),
                     ),
                   ],
-                  if (activeVialVol > 0) ...[
+                  if (vialVolume > 0) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: RichText(
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(color: fg),
                           children: [
+                            const TextSpan(text: 'Total vial: '),
                             TextSpan(
-                              text: activeVialVol == activeVialVol.roundToDouble()
-                                  ? activeVialVol.toStringAsFixed(0)
-                                  : activeVialVol.toStringAsFixed(2),
+                              text: vialVolume == vialVolume.roundToDouble()
+                                  ? vialVolume.toStringAsFixed(0)
+                                  : vialVolume.toStringAsFixed(2),
                               style: const TextStyle(fontWeight: FontWeight.w800),
                             ),
-                            const TextSpan(text: ' mL (Reconstituted Vial)'),
+                            const TextSpan(text: ' mL'),
                           ],
                         ),
                       ),
                     ),
                   ],
-                  if (_activeVialLowStockEnabled && activeThreshold != null) ...[
+                  if (activeThreshold != null) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: RichText(
@@ -1288,8 +1280,8 @@ class _StepCircle extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      width: 28,
-      height: 28,
+      width: 22,
+      height: 22,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isCompleted || isActive
@@ -1299,14 +1291,14 @@ class _StepCircle extends StatelessWidget {
           color: isCompleted || isActive
               ? cs.onPrimary
               : cs.onPrimary.withValues(alpha: 0.3),
-          width: isActive ? 2 : 1,
+          width: isActive ? 1.5 : 1,
         ),
       ),
       child: Center(
         child: isCompleted
             ? Icon(
                 Icons.check,
-                size: 14,
+                size: 12,
                 color: cs.primary,
               )
             : Text(
@@ -1314,7 +1306,7 @@ class _StepCircle extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: isActive ? cs.primary : cs.onPrimary.withValues(alpha: 0.6),
-                  fontSize: 12,
+                  fontSize: 10,
                 ),
               ),
       ),
