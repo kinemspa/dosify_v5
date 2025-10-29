@@ -46,7 +46,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   // Step 3: Reconstituted Vial Details
   final _activeVialVolumeMlCtrl = TextEditingController();
   final _activeVialLowStockMlCtrl = TextEditingController(text: '1.0');
-  bool _activeVialLowStockEnabled = true;
+  bool _activeVialLowStockEnabled = false; // Default OFF
   DateTime? _activeVialExpiry;
   final _activeVialStorageCtrl = TextEditingController();
   String? _activeVialStorageCondition = 'refrigerated';
@@ -139,8 +139,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         final volume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
         return strength > 0 && volume > 0;
       case 2: // Reconstituted Vial
-        final vol = double.tryParse(_activeVialVolumeMlCtrl.text.trim()) ?? 0;
-        return vol > 0;
+        // Step 3 is always optional - user doesn't need to fill anything
+        return true;
       case 3: // Sealed Inventory
         return true; // Optional
       case 4: // Review
@@ -339,14 +339,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
   Widget _buildEnhancedSummaryCard() {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -482,6 +482,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     context,
                     hint: 'e.g., NovoNordisk',
                   ),
+                  onChanged: (_) => setState(() {}),
                 ),
               ),
             ),
