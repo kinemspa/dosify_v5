@@ -3,21 +3,33 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
-- **Multi-Dose Vial Wizard: Polished UX and Reconstitution Card Redesign**
+- **Multi-Dose Vial Wizard: Complete UX Overhaul**
   - Summary card improvements:
     - Removed reconstitution info from summary - shows only total vial volume
     - Storage condition icons now show only active vial conditions (prevents clashing with sealed vial storage)
     - Icons aligned with expiry date for clean visual hierarchy
-  - Saved reconstitution card completely redesigned to match calculator summary:
-    - Identical gradient container styling with primary color accents
-    - Matches calculator text styling exactly (fontSize, fontWeight, colors)
-    - Shows "with X mL of diluent" line prominently like calculator
-    - Includes gradient divider and formatted draw instructions
-    - Displays syringe size and optional target dose information
-    - Uses _formatNoTrailing helper for clean number formatting (removes trailing zeros)
-    - Icon and spacing match calculator widget perfectly
-  - Fixed null safety for optional recommendedDose field
-  - Fixed deprecated API usage (withOpacity → withValues)
+  - Saved reconstitution card simplified and refined:
+    - Shows only "with X mL" or "with X mL of diluent" for clean minimal display
+    - Matches calculator summary styling (fontSize, fontWeight, colors)
+    - Uses _formatNoTrailing helper for clean number formatting (no trailing zeros)
+    - Dynamically updates when vial volume is manually changed
+    - Added text controller listener to keep reconstitution result in sync with vial volume changes
+  - Step 5 (Review & Save) completely expanded:
+    - Changed title to "Review & Save" for clarity
+    - Each section prefixed with step number (e.g., "Step 1: Basic Information")
+    - Shows ALL fields including empty ones with clear placeholders:
+      - "(Not set)" for optional empty fields
+      - "(Disabled)" for disabled options
+      - "(None)" for no selections
+    - Displays complete reconstitution details including diluent name if available
+    - Shows backup vials section with all details even when not configured
+    - Improved helper text explaining users can go back to any step to edit
+    - Comprehensive review of all 4 configuration steps before saving
+  - Code quality improvements:
+    - Fixed null safety for optional recommendedDose field
+    - Fixed deprecated API usage (withOpacity → withValues)
+    - Removed unused imports
+    - Proper listener cleanup in dispose method
 - **Multi-Dose Vial: Separate Active Vial and Backup Stock UI**
   - Created `MdvInventorySection` widget with split inventory fields:
     - **Active vial**: Low volume alert (mL threshold), dedicated expiry date
