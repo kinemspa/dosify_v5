@@ -713,3 +713,14 @@ Schedules Module Improvements (Enhanced UX)
     - Summary card provides live preview of entered data
     - Improved user confidence during multi-step data entry
 
+- **MDV Inventory Section Fixes** (Git commit: 581c00a):
+  - Fixed compilation errors in `lib/src/features/medications/presentation/sections/mdv_inventory_section.dart`
+  - Added required onDec/onInc callbacks to StepperRow36 widgets:
+    - Active vial low stock: 0.5 mL step increments, clamped at 0.0-999.0 mL
+    - Backup vials quantity: integer step increments, clamped at 0-1000000
+    - Backup low stock threshold: integer step increments, clamped at 0-1000000
+  - Replaced `Function(bool)` with `ValueChanged<bool>` for better type safety
+  - Fixed undefined method: replaced `kCheckboxLabelStyle` with `checkboxLabelStyle(context)` per design system
+  - All callbacks are optional with default inline implementations
+  - Formatted with `dart format` and verified with `flutter analyze` (0 errors)
+
