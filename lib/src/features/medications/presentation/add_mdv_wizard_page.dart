@@ -1630,191 +1630,44 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
             )
           else ...[
-            // Match calculator summary styling exactly
-            Container(
-              padding: kReconSummaryPadding,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                    Theme.of(context).colorScheme.primary.withOpacity(0.04),
-                  ],
+            // Simplified: show only "with X mL" or "with X mL of diluent"
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white.withOpacity(kReconTextHighOpacity),
+                  fontWeight: FontWeight.w600,
+                  height: 1.4,
                 ),
-                borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  width: kReconSummaryBorderWidth,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 4),
-                  Icon(
-                    Icons.science_outlined,
-                    size: 32,
-                    color: Theme.of(context).colorScheme.primary,
+                  const TextSpan(text: 'with '),
+                  TextSpan(
+                    text: '${_formatNoTrailing(result!.solventVolumeMl)} mL',
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                  const SizedBox(height: 14),
-                  // "with X mL of DILUENT" styled like calculator
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  if (result!.diluentName != null &&
+                      result!.diluentName!.isNotEmpty) ...[
+                    TextSpan(
+                      text: '  of  ',
+                      style: TextStyle(
+                        fontSize: 14,
                         color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    TextSpan(
+                      text: result!.diluentName!,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(text: 'with '),
-                        TextSpan(
-                          text:
-                              '${_formatNoTrailing(result!.solventVolumeMl)} mL',
-                          style: TextStyle(
-                            fontSize: 32,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        TextSpan(
-                          text: '  of  ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withOpacity(
-                              kReconTextHighOpacity,
-                            ),
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                              result!.diluentName != null &&
-                                  result!.diluentName!.isNotEmpty
-                              ? result!.diluentName!
-                              : 'diluent',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Divider
-                  Container(
-                    height: kReconDividerHeight,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: kReconDividerVerticalMargin,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Theme.of(context).colorScheme.primary.withOpacity(
-                            kReconDividerOpacity,
-                          ),
-                          Colors.transparent,
-                        ],
-                        stops: kReconDividerStops,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Draw instruction
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(text: 'Draw '),
-                        TextSpan(
-                          text: '${result!.recommendedUnits.round()} Units  ',
-                          style: TextStyle(
-                            fontSize: 22,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                              '${_formatNoTrailing((result!.recommendedUnits / 100) * result!.syringeSizeMl)} mL',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Syringe instruction
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      children: [
-                        const TextSpan(text: 'into a '),
-                        TextSpan(
-                          text:
-                              '${result!.syringeSizeMl.toStringAsFixed(1)} mL',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const TextSpan(text: ' syringe'),
-                      ],
-                    ),
-                  ),
-                  if (result!.recommendedDose != null &&
-                      result!.doseUnit != null) ...[
-                    const SizedBox(height: 12),
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(
-                            kReconTextMediumOpacity,
-                          ),
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                        ),
-                        children: [
-                          const TextSpan(text: 'for a dose of '),
-                          TextSpan(
-                            text:
-                                '${_formatNoTrailing(result!.recommendedDose!)} ${result!.doseUnit}',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],
-                  const SizedBox(height: 4),
                 ],
               ),
             ),
