@@ -74,10 +74,16 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     if (_reconResult != null) {
       final newVolume = double.tryParse(_vialVolumeCtrl.text.trim());
       if (newVolume != null && newVolume != _reconResult!.solventVolumeMl) {
-        // Update the reconstitution result with new volume
+        // Recalculate concentration based on new volume
+        final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+        final newConcentration = strength > 0 && newVolume > 0
+            ? strength / newVolume
+            : _reconResult!.perMlConcentration;
+
+        // Update the reconstitution result with new volume and concentration
         setState(() {
           _reconResult = ReconstitutionResult(
-            perMlConcentration: _reconResult!.perMlConcentration,
+            perMlConcentration: newConcentration,
             solventVolumeMl: newVolume,
             recommendedUnits: _reconResult!.recommendedUnits,
             syringeSizeMl: _reconResult!.syringeSizeMl,
@@ -86,6 +92,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             doseUnit: _reconResult!.doseUnit,
             maxVialSizeMl: _reconResult!.maxVialSizeMl,
           );
+          // Update the per mL display
+          _perMlCtrl.text = newConcentration.toStringAsFixed(2);
         });
       }
     }
@@ -600,6 +608,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         ),
         const SizedBox(height: 16),
         _ReconstitutionInfoCard(
+          medicationName: _nameCtrl.text.trim(),
           onCalculate: () async {
             final strength =
                 double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
@@ -749,9 +758,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                           _activeVialLowStockMlCtrl.text.trim(),
                         ) ??
                         0;
+                    final vialVol =
+                        double.tryParse(_vialVolumeCtrl.text.trim()) ?? 999;
                     setState(
                       () => _activeVialLowStockMlCtrl.text = (v - 0.5)
-                          .clamp(0, 999)
+                          .clamp(0, vialVol)
                           .toStringAsFixed(2),
                     );
                   },
@@ -761,11 +772,24 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                           _activeVialLowStockMlCtrl.text.trim(),
                         ) ??
                         0;
+                    final vialVol =
+                        double.tryParse(_vialVolumeCtrl.text.trim()) ?? 999;
+                    final newVal = (v + 0.5).clamp(0, vialVol);
                     setState(
-                      () => _activeVialLowStockMlCtrl.text = (v + 0.5)
-                          .clamp(0, 999)
+                      () => _activeVialLowStockMlCtrl.text = newVal
                           .toStringAsFixed(2),
                     );
+                    // Show message if clamped
+                    if (newVal == vialVol && (v + 0.5) > vialVol) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Threshold cannot exceed total vial volume ($vialVol mL)',
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
                   },
                   decoration: buildCompactFieldDecoration(
                     context: context,
@@ -1020,9 +1044,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       final v =
                           int.tryParse(_backupVialsLowStockCtrl.text.trim()) ??
                           0;
+                      final qty =
+                          int.tryParse(_backupVialsQtyCtrl.text.trim()) ??
+                          1000000;
                       setState(
                         () => _backupVialsLowStockCtrl.text = (v - 1)
-                            .clamp(0, 1000000)
+                            .clamp(0, qty)
                             .toString(),
                       );
                     },
@@ -1030,11 +1057,24 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       final v =
                           int.tryParse(_backupVialsLowStockCtrl.text.trim()) ??
                           0;
+                      final qty =
+                          int.tryParse(_backupVialsQtyCtrl.text.trim()) ??
+                          1000000;
+                      final newVal = (v + 1).clamp(0, qty);
                       setState(
-                        () => _backupVialsLowStockCtrl.text = (v + 1)
-                            .clamp(0, 1000000)
-                            .toString(),
+                        () => _backupVialsLowStockCtrl.text = newVal.toString(),
                       );
+                      // Show message if clamped
+                      if (newVal == qty && (v + 1) > qty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Threshold cannot exceed total quantity ($qty vials)',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
                     },
                     decoration: buildCompactFieldDecoration(
                       context: context,
@@ -1626,9 +1666,14 @@ class _StepCircle extends StatelessWidget {
 }
 
 class _ReconstitutionInfoCard extends StatelessWidget {
-  const _ReconstitutionInfoCard({required this.onCalculate, this.result});
+  const _ReconstitutionInfoCard({
+    required this.onCalculate,
+    required this.medicationName,
+    this.result,
+  });
 
   final VoidCallback onCalculate;
+  final String medicationName;
   final ReconstitutionResult? result;
 
   String _formatNoTrailing(double value) {
@@ -1676,7 +1721,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
             )
           else ...[
-            // Simplified: show only "with X mL" or "with X mL of diluent"
+            // "Reconstitute [MEDNAME] with [AMOUNT] of [RECONNAME]"
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -1686,6 +1731,18 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                   height: 1.4,
                 ),
                 children: [
+                  const TextSpan(text: 'Reconstitute '),
+                  if (medicationName.isNotEmpty) ...[
+                    TextSpan(
+                      text: medicationName,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const TextSpan(text: ' '),
+                  ],
                   const TextSpan(text: 'with '),
                   TextSpan(
                     text: '${_formatNoTrailing(result!.solventVolumeMl)} mL',
