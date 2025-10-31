@@ -724,3 +724,22 @@ Schedules Module Improvements (Enhanced UX)
   - All callbacks are optional with default inline implementations
   - Formatted with `dart format` and verified with `flutter analyze` (0 errors)
 
+- **MDV Wizard UX Improvements** (Git commit: 1649a9d):
+  - **Storage Conditions**: Replaced single-select dropdowns with multi-select checkboxes (Refrigerate, Freeze, Protect from Light)
+    - Allows multiple storage conditions per medication (e.g., refrigerate AND protect from light)
+    - Separate checkbox sets for active vial and backup vials
+  - **Helper Text**: Added `fullWidth` parameter to `buildHelperText()` in design system
+    - When `fullWidth: true`, removes left padding so text spans entire card width
+    - Applied to all wizard screens for better readability
+  - **Reconstitution Display**:
+    - Removed hidden text at bottom of summary card that was causing extra padding
+    - Simplified summary card text: "Total vial: X mL (reconstituted with Y mL)"
+    - Moved syringe gauge and calculation details to _ReconstitutionInfoCard (blue card)
+    - Calculator now shows saved results with "Draw X U (Y mL)" and syringe gauge after saving
+  - **Calculator Persistence**: Pass saved reconstitution values when reopening calculator
+    - Parameters: `initialSyringeSizeMl`, `initialRecommendedUnits`, `initialSolventVolumeMl`
+    - Calculator now restores previous settings instead of resetting
+  - **Backup Vials in Summary**: Display "Backup: X sealed vials" in summary card when enabled
+  - **Code Cleanup**: Removed obsolete `_buildStorageInstructions()` method
+  - Location: `lib/src/features/medications/presentation/add_mdv_wizard_page.dart`
+
