@@ -14,7 +14,6 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class MedicationDetailPage extends StatelessWidget {
@@ -36,7 +35,6 @@ class MedicationDetailPage extends StatelessWidget {
     }
 
     final cs = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
 
     Widget detailRow(String label, String? value) {
       if (value == null || value.isEmpty) return const SizedBox.shrink();
@@ -154,10 +152,6 @@ class MedicationDetailPage extends StatelessWidget {
 }
 
 // Helper functions
-String _twoDigits(int n) => n.toString().padLeft(2, '0');
-String _fmtDate(DateTime d) =>
-    '${_twoDigits(d.day)}/${_twoDigits(d.month)}/${d.year % 100}';
-
 String _formLabel(MedicationForm form) => switch (form) {
       MedicationForm.tablet => 'Tablet',
       MedicationForm.capsule => 'Capsule',
@@ -167,22 +161,15 @@ String _formLabel(MedicationForm form) => switch (form) {
     };
 
 String _unitLabel(Unit u) => switch (u) {
-  Unit.mcg => 'mcg',
-  Unit.mg => 'mg',
-  Unit.g => 'g',
-  Unit.units => 'units',
-  Unit.mcgPerMl => 'mcg/mL',
-  Unit.mgPerMl => 'mg/mL',
-  Unit.gPerMl => 'g/mL',
-  Unit.unitsPerMl => 'units/mL',
-};
-
-String _concentrationLabel(Unit u) => switch (u) {
-  Unit.mg || Unit.mgPerMl => 'mg/mL',
-  Unit.mcg || Unit.mcgPerMl => 'mcg/mL',
-  Unit.g || Unit.gPerMl => 'g/mL',
-  Unit.units || Unit.unitsPerMl => 'units/mL',
-};
+      Unit.mcg => 'mcg',
+      Unit.mg => 'mg',
+      Unit.g => 'g',
+      Unit.units => 'units',
+      Unit.mcgPerMl => 'mcg/mL',
+      Unit.mgPerMl => 'mg/mL',
+      Unit.gPerMl => 'g/mL',
+      Unit.unitsPerMl => 'units/mL',
+    };
 
 String _stockUnitLabel(StockUnit u) => switch (u) {
   StockUnit.tablets => 'tablets',
