@@ -1412,6 +1412,31 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       ),
                     ),
                   ],
+                  if (_reconResult != null) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: RichText(
+                        text: TextSpan(
+                          style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                          children: [
+                            const TextSpan(text: 'Mix: '),
+                            TextSpan(
+                              text:
+                                  '${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (_reconResult!.diluentName != null &&
+                                _reconResult!.diluentName!.isNotEmpty)
+                              TextSpan(text: ' ${_reconResult!.diluentName}')
+                            else
+                              const TextSpan(text: ' solvent'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   if (_hasBackupVials) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
@@ -1464,43 +1489,46 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                 ],
               ),
             ),
-            if (_activeVialExpiry != null) ...[
-              const SizedBox(width: 8),
-              Text(
-                'Exp: ${MaterialLocalizations.of(context).formatCompactDate(_activeVialExpiry!)}',
-                style: theme.textTheme.bodySmall?.copyWith(color: fg),
-              ),
-            ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (_activeVialExpiry != null)
+                  Text(
+                    'Exp: ${MaterialLocalizations.of(context).formatCompactDate(_activeVialExpiry!)}',
+                    style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                  ),
+                // Storage condition icons aligned with expiry
+                if (_activeVialRequiresFridge ||
+                    _activeVialRequiresFreezer ||
+                    _activeVialProtectLight ||
+                    _backupVialsRequiresFridge ||
+                    _backupVialsRequiresFreezer ||
+                    _backupVialsProtectLight) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_activeVialRequiresFridge ||
+                          _backupVialsRequiresFridge)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Icon(Icons.ac_unit, size: 18, color: fg),
+                        ),
+                      if (_activeVialRequiresFreezer ||
+                          _backupVialsRequiresFreezer)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Icon(Icons.severe_cold, size: 18, color: fg),
+                        ),
+                      if (_activeVialProtectLight || _backupVialsProtectLight)
+                        Icon(Icons.light_mode_outlined, size: 18, color: fg),
+                    ],
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
-        // Storage condition icons
-        if (_activeVialRequiresFridge ||
-            _activeVialRequiresFreezer ||
-            _activeVialProtectLight ||
-            _backupVialsRequiresFridge ||
-            _backupVialsRequiresFreezer ||
-            _backupVialsProtectLight) ...[
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              if (_activeVialRequiresFridge || _backupVialsRequiresFridge)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Icon(Icons.ac_unit, size: 18, color: fg),
-                ),
-              if (_activeVialRequiresFreezer || _backupVialsRequiresFreezer)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Icon(Icons.severe_cold, size: 18, color: fg),
-                ),
-              if (_activeVialProtectLight || _backupVialsProtectLight)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Icon(Icons.light_mode_outlined, size: 18, color: fg),
-                ),
-            ],
-          ),
-        ],
       ],
     );
   }
@@ -1624,15 +1652,63 @@ class _ReconstitutionInfoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            result == null
-                ? 'Multi-dose vials need to be mixed with liquid (reconstituted). Use the calculator to determine the correct volume.'
-                : 'Add ${result!.solventVolumeMl.toStringAsFixed(1)} mL solvent for reconstitution',
-            style: mutedTextStyle(
-              context,
-            )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
-          ),
-          if (result != null) ...[
+          if (result == null)
+            Text(
+              'Multi-dose vials need to be mixed with liquid (reconstituted). Use the calculator to determine the correct volume.',
+              style: mutedTextStyle(
+                context,
+              )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
+            )
+          else ...[
+            // Show comprehensive reconstitution summary
+            Text(
+              'Add ${result!.solventVolumeMl.toStringAsFixed(1)} mL${result!.diluentName != null && result!.diluentName!.isNotEmpty ? ' ${result!.diluentName}' : ' solvent'}',
+              style: bodyTextStyle(context)?.copyWith(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            RichText(
+              text: TextSpan(
+                style: mutedTextStyle(
+                  context,
+                )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
+                children: [
+                  const TextSpan(text: 'Draw '),
+                  TextSpan(
+                    text: '${result!.recommendedUnits.round()} Units',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const TextSpan(text: ' ('),
+                  TextSpan(
+                    text:
+                        '${((result!.recommendedUnits / 100) * result!.syringeSizeMl).toStringAsFixed(1)} mL',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (result!.recommendedDose != null &&
+                      result!.doseUnit != null) ...[
+                    const TextSpan(text: ') for a dose of '),
+                    TextSpan(
+                      text:
+                          '${result!.recommendedDose!.toStringAsFixed(1)} ${result!.doseUnit}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ] else
+                    const TextSpan(text: ')'),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
             Text(
               'Using ${result!.syringeSizeMl.toStringAsFixed(1)} mL syringe',
