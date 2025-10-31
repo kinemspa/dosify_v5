@@ -24,6 +24,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/add_mdv_wizard_p
 import 'package:dosifi_v5/src/features/medications/presentation/add_tablet_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_capsule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_syringe_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_single_dose_vial_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
@@ -160,9 +161,7 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) => const AddEditMedicationPage(
-            form: MedicationForm.singleDoseVial,
-          ),
+          builder: (context, state) => const AddSingleDoseVialWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
@@ -207,10 +206,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(
-              form: MedicationForm.singleDoseVial,
-              initial: med,
-            );
+            return AddSingleDoseVialWizardPage(initial: med);
           },
         ),
         GoRoute(
