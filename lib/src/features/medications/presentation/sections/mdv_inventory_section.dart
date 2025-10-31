@@ -19,18 +19,30 @@ class MdvInventorySection extends StatelessWidget {
     required this.onActiveVialExpiryPressed,
     required this.backupVialsExpiry,
     required this.onBackupVialsExpiryPressed,
+    this.onActiveVialLowStockDec,
+    this.onActiveVialLowStockInc,
+    this.onBackupStockDec,
+    this.onBackupStockInc,
+    this.onBackupLowStockDec,
+    this.onBackupLowStockInc,
     super.key,
   });
 
   final TextEditingController activeVialLowStockMlController;
   final bool activeVialLowStockEnabled;
-  final Function(bool) onActiveVialLowStockChanged;
+  final ValueChanged<bool> onActiveVialLowStockChanged;
+  final VoidCallback? onActiveVialLowStockDec;
+  final VoidCallback? onActiveVialLowStockInc;
   
   final TextEditingController backupStockController;
   final bool backupLowStockEnabled;
-  final Function(bool) onBackupLowStockChanged;
+  final ValueChanged<bool> onBackupLowStockChanged;
   final TextEditingController backupLowStockController;
-  
+  final VoidCallback? onBackupStockDec;
+  final VoidCallback? onBackupStockInc;
+  final VoidCallback? onBackupLowStockDec;
+  final VoidCallback? onBackupLowStockInc;
+
   final DateTime? activeVialExpiry;
   final VoidCallback onActiveVialExpiryPressed;
   final DateTime? backupVialsExpiry;
@@ -39,7 +51,7 @@ class MdvInventorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return SectionFormCard(
       title: 'Inventory',
       neutral: true,
@@ -55,7 +67,7 @@ class MdvInventorySection extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Active vial low stock alert
         LabelFieldRow(
           label: 'Low stock alert (mL)',
@@ -69,6 +81,30 @@ class MdvInventorySection extends StatelessWidget {
                 Expanded(
                   child: StepperRow36(
                     controller: activeVialLowStockMlController,
+                    onDec:
+                        onActiveVialLowStockDec ??
+                        () {
+                          final v =
+                              double.tryParse(
+                                activeVialLowStockMlController.text.trim(),
+                              ) ??
+                              0.0;
+                          activeVialLowStockMlController.text = (v - 0.5)
+                              .clamp(0.0, 999.0)
+                              .toStringAsFixed(1);
+                        },
+                    onInc:
+                        onActiveVialLowStockInc ??
+                        () {
+                          final v =
+                              double.tryParse(
+                                activeVialLowStockMlController.text.trim(),
+                              ) ??
+                              0.0;
+                          activeVialLowStockMlController.text = (v + 0.5)
+                              .clamp(0.0, 999.0)
+                              .toStringAsFixed(1);
+                        },
                     decoration: buildCompactFieldDecoration(
                       context: context,
                       hint: '0.0',
@@ -83,14 +119,16 @@ class MdvInventorySection extends StatelessWidget {
           context,
           'Alert when active vial volume drops below this threshold',
         ),
-        
+
         // Active vial expiry
         LabelFieldRow(
           label: 'Expiry date',
           field: DateButton36(
             label: activeVialExpiry == null
                 ? 'Select date'
-                : MaterialLocalizations.of(context).formatCompactDate(activeVialExpiry!),
+                : MaterialLocalizations.of(
+                    context,
+                  ).formatCompactDate(activeVialExpiry!),
             onPressed: onActiveVialExpiryPressed,
             width: kSmallControlWidth,
             selected: activeVialExpiry != null,
@@ -100,11 +138,11 @@ class MdvInventorySection extends StatelessWidget {
           context,
           'Reconstituted vial expiry (typically 48 hours after mixing)',
         ),
-        
+
         const SizedBox(height: 16),
         const Divider(),
         const SizedBox(height: 8),
-        
+
         // Backup Stock subsection header
         Padding(
           padding: const EdgeInsets.only(left: 8, top: 4, bottom: 8),
@@ -116,20 +154,38 @@ class MdvInventorySection extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Backup stock quantity
         LabelFieldRow(
           label: 'Stock quantity *',
           field: StepperRow36(
             controller: backupStockController,
-            decoration: buildCompactFieldDecoration(context: context, hint: '0'),
+            onDec:
+                onBackupStockDec ??
+                () {
+                  final v =
+                      int.tryParse(backupStockController.text.trim()) ?? 0;
+                  backupStockController.text = (v - 1)
+                      .clamp(0, 1000000)
+                      .toString();
+                },
+            onInc:
+                onBackupStockInc ??
+                () {
+                  final v =
+                      int.tryParse(backupStockController.text.trim()) ?? 0;
+                  backupStockController.text = (v + 1)
+                      .clamp(0, 1000000)
+                      .toString();
+                },
+            decoration: buildCompactFieldDecoration(
+              context: context,
+              hint: '0',
+            ),
           ),
         ),
-        _support(
-          context,
-          'Number of unreconstituted sealed vials in storage',
-        ),
-        
+        _support(context, 'Number of unreconstituted sealed vials in storage'),
+
         // Backup stock low alert
         LabelFieldRow(
           label: 'Low stock alert',
@@ -142,7 +198,7 @@ class MdvInventorySection extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Enable alert when stock is low',
-                  style: kCheckboxLabelStyle(context),
+                  style: checkboxLabelStyle(context),
                   softWrap: true,
                   maxLines: 2,
                 ),
@@ -155,6 +211,24 @@ class MdvInventorySection extends StatelessWidget {
             label: 'Threshold',
             field: StepperRow36(
               controller: backupLowStockController,
+              onDec:
+                  onBackupLowStockDec ??
+                  () {
+                    final v =
+                        int.tryParse(backupLowStockController.text.trim()) ?? 0;
+                    backupLowStockController.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString();
+                  },
+              onInc:
+                  onBackupLowStockInc ??
+                  () {
+                    final v =
+                        int.tryParse(backupLowStockController.text.trim()) ?? 0;
+                    backupLowStockController.text = (v + 1)
+                        .clamp(0, 1000000)
+                        .toString();
+                  },
               decoration: buildCompactFieldDecoration(
                 context: context,
                 hint: '0',
@@ -163,18 +237,17 @@ class MdvInventorySection extends StatelessWidget {
             ),
           ),
         if (backupLowStockEnabled)
-          _support(
-            context,
-            'Alert when backup stock drops below this count',
-          ),
-        
+          _support(context, 'Alert when backup stock drops below this count'),
+
         // Backup vials expiry
         LabelFieldRow(
           label: 'Expiry date',
           field: DateButton36(
             label: backupVialsExpiry == null
                 ? 'Select date'
-                : MaterialLocalizations.of(context).formatCompactDate(backupVialsExpiry!),
+                : MaterialLocalizations.of(
+                    context,
+                  ).formatCompactDate(backupVialsExpiry!),
             onPressed: onBackupVialsExpiryPressed,
             width: kSmallControlWidth,
             selected: backupVialsExpiry != null,
@@ -199,7 +272,9 @@ class MdvInventorySection extends StatelessWidget {
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
         ),
       ),
     );
