@@ -440,11 +440,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         return 'Tablets';
       case MedicationForm.capsule:
         return 'Capsules';
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         return 'Pre-Filled Syringes';
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         return 'Single Dose Vials';
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         return 'Multi Dose Vials';
     }
   }

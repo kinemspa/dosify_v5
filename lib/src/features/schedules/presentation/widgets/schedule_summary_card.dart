@@ -36,11 +36,11 @@ class ScheduleSummaryCard extends StatelessWidget {
         return Icons.medication;
       case MedicationForm.capsule:
         return MdiIcons.pill;
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         return Icons.colorize;
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         return Icons.local_drink;
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         return Icons.addchart;
     }
   }
@@ -68,10 +68,10 @@ class ScheduleSummaryCard extends StatelessWidget {
         return 'tablets';
       case MedicationForm.capsule:
         return 'capsules';
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         return 'syringes';
-      case MedicationForm.injectionSingleDoseVial:
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.singleDoseVial:
+      case MedicationForm.multiDoseVial:
         return 'vials';
     }
   }

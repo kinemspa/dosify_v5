@@ -12,11 +12,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
-import 'package:dosifi_v5/src/widgets/date_button_36.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/section_form_card.dart';
-import 'package:dosifi_v5/src/widgets/small_dropdown_36.dart';
-import 'package:dosifi_v5/src/widgets/stepper_row_36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Wizard-style Pre-filled Syringe add/edit screen with step-by-step flow
@@ -845,7 +841,7 @@ class _AddPrefilledSyringeWizardPageState
           storageInstructions.isEmpty ? null : storageInstructions,
     );
 
-    await repo.saveMedication(med);
+    await repo.upsert(med);
 
     if (mounted) {
       context.pop();

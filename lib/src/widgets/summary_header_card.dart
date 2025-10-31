@@ -79,20 +79,20 @@ class SummaryHeaderCard extends StatelessWidget {
           return Icons.add_circle;
         case MedicationForm.capsule:
           return MdiIcons.pill;
-        case MedicationForm.injectionPreFilledSyringe:
+        case MedicationForm.prefilledSyringe:
           return Icons.colorize;
-        case MedicationForm.injectionSingleDoseVial:
+        case MedicationForm.singleDoseVial:
           return Icons.local_drink;
-        case MedicationForm.injectionMultiDoseVial:
+        case MedicationForm.multiDoseVial:
           return Icons.addchart;
       }
     }();
 
     // Determine if this is a perMl medication and set perUnitLabel for injections
     String? perUnitLabel;
-    if (m.form == MedicationForm.injectionPreFilledSyringe) {
+    if (m.form == MedicationForm.prefilledSyringe) {
       perUnitLabel = 'Syringe';
-    } else if (m.form == MedicationForm.injectionSingleDoseVial) {
+    } else if (m.form == MedicationForm.singleDoseVial) {
       perUnitLabel = 'Vial';
     }
 

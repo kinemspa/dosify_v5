@@ -84,7 +84,7 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   bool _backupVialsLightSensitive = false;
   DateTime? _backupVialsExpiry;
 
-  bool get _isMdv => widget.form == MedicationForm.injectionMultiDoseVial;
+  bool get _isMdv => widget.form == MedicationForm.multiDoseVial;
 
   @override
   void initState() {
@@ -174,25 +174,25 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
   String get _formLabel => switch (widget.form) {
     MedicationForm.tablet => 'Tablet',
     MedicationForm.capsule => 'Capsule',
-    MedicationForm.injectionPreFilledSyringe => 'Pre-Filled Syringe',
-    MedicationForm.injectionSingleDoseVial => 'Single Dose Vial',
-    MedicationForm.injectionMultiDoseVial => 'Multi Dose Vial',
+    MedicationForm.prefilledSyringe => 'Pre-Filled Syringe',
+    MedicationForm.singleDoseVial => 'Single Dose Vial',
+    MedicationForm.multiDoseVial => 'Multi Dose Vial',
   };
 
   String get _formLabelPlural => switch (widget.form) {
     MedicationForm.tablet => 'tablets',
     MedicationForm.capsule => 'capsules',
-    MedicationForm.injectionPreFilledSyringe => 'pre filled syringes',
-    MedicationForm.injectionSingleDoseVial => 'single dose vials',
-    MedicationForm.injectionMultiDoseVial => 'multi dose vials',
+    MedicationForm.prefilledSyringe => 'pre filled syringes',
+    MedicationForm.singleDoseVial => 'single dose vials',
+    MedicationForm.multiDoseVial => 'multi dose vials',
   };
 
   StockUnit get _stockUnit => switch (widget.form) {
     MedicationForm.tablet => StockUnit.tablets,
     MedicationForm.capsule => StockUnit.capsules,
-    MedicationForm.injectionPreFilledSyringe => StockUnit.preFilledSyringes,
-    MedicationForm.injectionSingleDoseVial => StockUnit.singleDoseVials,
-    MedicationForm.injectionMultiDoseVial => StockUnit.multiDoseVials,
+    MedicationForm.prefilledSyringe => StockUnit.preFilledSyringes,
+    MedicationForm.singleDoseVial => StockUnit.singleDoseVials,
+    MedicationForm.multiDoseVial => StockUnit.multiDoseVials,
   };
 
   String _unitLabel(Unit u) => switch (u) {
@@ -208,11 +208,11 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
         'Enter the active ingredient amount per tablet (e.g., 500 mg). This is usually printed on the packaging.',
       MedicationForm.capsule =>
         'Enter the active ingredient amount per capsule (e.g., 250 mg). Check the label or packaging.',
-      MedicationForm.injectionPreFilledSyringe =>
+      MedicationForm.prefilledSyringe =>
         'Enter the total drug concentration (e.g., 100 mg/mL). For ready-to-use syringes, use mg/mL units.',
-      MedicationForm.injectionSingleDoseVial =>
+      MedicationForm.singleDoseVial =>
         'Enter the total amount in the vial (e.g., 50 mg) or concentration (e.g., 10 mg/mL) as printed on the label.',
-      MedicationForm.injectionMultiDoseVial =>
+      MedicationForm.multiDoseVial =>
         'Enter the total drug amount in the vial (e.g., 1000 mg). This is the amount BEFORE reconstitution.',
     };
   }
@@ -331,8 +331,8 @@ class _AddEditMedicationPageState extends ConsumerState<AddEditMedicationPage> {
               child: Center(child: Text('units')),
             ),
             // Add concentration units for pre-filled syringes and single dose vials
-            if (widget.form == MedicationForm.injectionPreFilledSyringe ||
-                widget.form == MedicationForm.injectionSingleDoseVial) ...[
+            if (widget.form == MedicationForm.prefilledSyringe ||
+                widget.form == MedicationForm.singleDoseVial) ...[
               const DropdownMenuItem(
                 value: Unit.mcgPerMl,
                 child: Center(child: Text('mcg/mL')),

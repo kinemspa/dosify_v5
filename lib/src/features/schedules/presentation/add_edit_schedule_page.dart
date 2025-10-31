@@ -138,13 +138,13 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         case MedicationForm.capsule:
           _doseUnit.text = 'capsules';
           if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
-        case MedicationForm.injectionPreFilledSyringe:
+        case MedicationForm.prefilledSyringe:
           _doseUnit.text = 'syringes';
           if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
-        case MedicationForm.injectionSingleDoseVial:
+        case MedicationForm.singleDoseVial:
           _doseUnit.text = 'vials';
           if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
-        case MedicationForm.injectionMultiDoseVial:
+        case MedicationForm.multiDoseVial:
           // Default to mg if mg/mL, else units if units/mL, else mg
           final u = selected.strengthUnit;
           if (u == Unit.unitsPerMl) {
@@ -341,17 +341,17 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
             displayUnitCode = doseUnitCode;
             inputModeCode = DoseInputMode.mass.index;
           }
-        case MedicationForm.injectionPreFilledSyringe:
+        case MedicationForm.prefilledSyringe:
           doseSyringes = doseVal.round();
           doseUnitCode = DoseUnit.syringes.index;
           displayUnitCode = DoseUnit.syringes.index;
           inputModeCode = DoseInputMode.count.index;
-        case MedicationForm.injectionSingleDoseVial:
+        case MedicationForm.singleDoseVial:
           doseVials = doseVal.round();
           doseUnitCode = DoseUnit.vials.index;
           displayUnitCode = DoseUnit.vials.index;
           inputModeCode = DoseInputMode.count.index;
-        case MedicationForm.injectionMultiDoseVial:
+        case MedicationForm.multiDoseVial:
           // Allow mg/mcg/g, IU/units or mL
           double? mgPerMl;
           double? iuPerMl;
@@ -1273,11 +1273,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         return const ['tablets', 'mg'];
       case MedicationForm.capsule:
         return const ['capsules', 'mg'];
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         return const ['syringes'];
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         return const ['vials'];
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         return const ['mg', 'mcg', 'g', 'IU'];
     }
   }
@@ -1378,11 +1378,11 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         medType = 'Tablets';
       case MedicationForm.capsule:
         medType = 'Capsules';
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         medType = 'Pre-Filled Syringes';
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         medType = 'Single Dose Vials';
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         medType = 'Multi Dose Vials';
     }
 
@@ -1528,9 +1528,9 @@ class _InlineMedicationSelector extends StatelessWidget {
   String _formLabel(MedicationForm form) => switch (form) {
     MedicationForm.tablet => 'Tablet',
     MedicationForm.capsule => 'Capsule',
-    MedicationForm.injectionPreFilledSyringe => 'PFS',
-    MedicationForm.injectionSingleDoseVial => 'SDV',
-    MedicationForm.injectionMultiDoseVial => 'MDV',
+    MedicationForm.prefilledSyringe => 'PFS',
+    MedicationForm.singleDoseVial => 'SDV',
+    MedicationForm.multiDoseVial => 'MDV',
   };
 
   String _formatDateDdMm(DateTime d) {
@@ -1541,9 +1541,9 @@ class _InlineMedicationSelector extends StatelessWidget {
     return switch (form) {
       MedicationForm.tablet => 'tablets',
       MedicationForm.capsule => 'capsules',
-      MedicationForm.injectionPreFilledSyringe => 'syringes',
-      MedicationForm.injectionSingleDoseVial => 'vials',
-      MedicationForm.injectionMultiDoseVial => 'vials',
+      MedicationForm.prefilledSyringe => 'syringes',
+      MedicationForm.singleDoseVial => 'vials',
+      MedicationForm.multiDoseVial => 'vials',
     };
   }
 

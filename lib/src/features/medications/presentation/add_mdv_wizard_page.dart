@@ -235,7 +235,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
     final med = Medication(
       id: id,
-      form: MedicationForm.injectionMultiDoseVial,
+      form: MedicationForm.multiDoseVial,
       name: _nameCtrl.text.trim(),
       manufacturer: _manufacturerCtrl.text.trim().isEmpty
           ? null

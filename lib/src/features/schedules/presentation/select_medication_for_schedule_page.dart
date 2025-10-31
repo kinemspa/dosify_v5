@@ -18,11 +18,11 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
         return 'Tablet';
       case MedicationForm.capsule:
         return 'Capsule';
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         return 'Pre-Filled Syringe';
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         return 'Single Dose Vial';
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         return 'Multi-Dose Vial';
     }
   }
@@ -64,13 +64,13 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
       case MedicationForm.capsule:
         final qty = m.stockValue.toInt() ?? 0;
         return '$qty capsule${qty == 1 ? '' : 's'} remaining';
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         final qty = m.stockValue.toInt() ?? 0;
         return '$qty syringe${qty == 1 ? '' : 's'} remaining';
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         final qty = m.stockValue.toInt() ?? 0;
         return '$qty vial${qty == 1 ? '' : 's'} remaining';
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         final qty = m.stockValue.toInt() ?? 0;
         return '$qty vial${qty == 1 ? '' : 's'} in stock';
     }

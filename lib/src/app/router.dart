@@ -154,21 +154,21 @@ final router = GoRouter(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
           builder: (context, state) => const AddEditMedicationPage(
-            form: MedicationForm.injectionPreFilledSyringe,
+            form: MedicationForm.prefilledSyringe,
           ),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
           builder: (context, state) => const AddEditMedicationPage(
-            form: MedicationForm.injectionSingleDoseVial,
+            form: MedicationForm.singleDoseVial,
           ),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
           builder: (context, state) => const AddEditMedicationPage(
-            form: MedicationForm.injectionMultiDoseVial,
+            form: MedicationForm.multiDoseVial,
           ),
         ),
         GoRoute(
@@ -211,7 +211,7 @@ final router = GoRouter(
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
             return AddEditMedicationPage(
-              form: MedicationForm.injectionPreFilledSyringe,
+              form: MedicationForm.prefilledSyringe,
               initial: med,
             );
           },
@@ -224,7 +224,7 @@ final router = GoRouter(
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
             return AddEditMedicationPage(
-              form: MedicationForm.injectionSingleDoseVial,
+              form: MedicationForm.singleDoseVial,
               initial: med,
             );
           },
@@ -237,7 +237,7 @@ final router = GoRouter(
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
             return AddEditMedicationPage(
-              form: MedicationForm.injectionMultiDoseVial,
+              form: MedicationForm.multiDoseVial,
               initial: med,
             );
           },
