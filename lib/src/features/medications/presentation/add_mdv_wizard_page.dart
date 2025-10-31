@@ -1,11 +1,4 @@
 // Flutter imports:
-import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -15,7 +8,11 @@ import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_c
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+import 'package:flutter/material.dart';
+// Package imports:
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Wizard-style MDV add screen with clear step-by-step flow
 class AddMdvWizardPage extends ConsumerStatefulWidget {
@@ -214,7 +211,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       description: _descriptionCtrl.text.trim().isEmpty
           ? null
           : _descriptionCtrl.text.trim(),
-      notes: null,
       strengthValue: strength,
       strengthUnit: _strengthUnit,
       perMlValue: _perMlCtrl.text.isNotEmpty
@@ -292,7 +288,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: false,
       appBar: GradientAppBar(
         title: widget.initial == null
             ? 'Add Multi-Dose Vial'
@@ -693,7 +688,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         Text('Reconstituted Vial Details', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Track the reconstituted vial you\'re currently using for dosing',
+          "Track the reconstituted vial you're currently using for dosing",
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
@@ -929,7 +924,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             buildHelperText(
               context,
-              'Enable if you have more vials that you\'ll reconstitute later',
+              "Enable if you have more vials that you'll reconstitute later",
               fullWidth: true,
             ),
           ],
@@ -1412,31 +1407,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       ),
                     ),
                   ],
-                  if (_reconResult != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: RichText(
-                        text: TextSpan(
-                          style: theme.textTheme.bodySmall?.copyWith(color: fg),
-                          children: [
-                            const TextSpan(text: 'Mix: '),
-                            TextSpan(
-                              text:
-                                  '${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            if (_reconResult!.diluentName != null &&
-                                _reconResult!.diluentName!.isNotEmpty)
-                              TextSpan(text: ' ${_reconResult!.diluentName}')
-                            else
-                              const TextSpan(text: ' solvent'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
                   if (_hasBackupVials) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
@@ -1497,30 +1467,25 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     'Exp: ${MaterialLocalizations.of(context).formatCompactDate(_activeVialExpiry!)}',
                     style: theme.textTheme.bodySmall?.copyWith(color: fg),
                   ),
-                // Storage condition icons aligned with expiry
+                // Storage condition icons for active vial only
                 if (_activeVialRequiresFridge ||
                     _activeVialRequiresFreezer ||
-                    _activeVialProtectLight ||
-                    _backupVialsRequiresFridge ||
-                    _backupVialsRequiresFreezer ||
-                    _backupVialsProtectLight) ...[
+                    _activeVialProtectLight) ...[
                   const SizedBox(height: 6),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (_activeVialRequiresFridge ||
-                          _backupVialsRequiresFridge)
+                      if (_activeVialRequiresFridge)
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Icon(Icons.ac_unit, size: 18, color: fg),
                         ),
-                      if (_activeVialRequiresFreezer ||
-                          _backupVialsRequiresFreezer)
+                      if (_activeVialRequiresFreezer)
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Icon(Icons.severe_cold, size: 18, color: fg),
                         ),
-                      if (_activeVialProtectLight || _backupVialsProtectLight)
+                      if (_activeVialProtectLight)
                         Icon(Icons.light_mode_outlined, size: 18, color: fg),
                     ],
                   ),
@@ -1539,10 +1504,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
-          ),
+          top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
       ),
       child: Row(
@@ -1623,11 +1585,19 @@ class _ReconstitutionInfoCard extends StatelessWidget {
   final VoidCallback onCalculate;
   final ReconstitutionResult? result;
 
+  String _formatNoTrailing(double value) {
+    final str = value.toStringAsFixed(2);
+    if (str.contains('.')) {
+      return str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return str;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0E27),
+        color: kReconBackgroundDark,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
@@ -1660,67 +1630,193 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
             )
           else ...[
-            // Show comprehensive reconstitution summary
-            Text(
-              'Add ${result!.solventVolumeMl.toStringAsFixed(1)} mL${result!.diluentName != null && result!.diluentName!.isNotEmpty ? ' ${result!.diluentName}' : ' solvent'}',
-              style: bodyTextStyle(context)?.copyWith(
-                color: Colors.white.withValues(alpha: 0.9),
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+            // Match calculator summary styling exactly
+            Container(
+              padding: kReconSummaryPadding,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                    Theme.of(context).colorScheme.primary.withOpacity(0.04),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  width: kReconSummaryBorderWidth,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            RichText(
-              text: TextSpan(
-                style: mutedTextStyle(
-                  context,
-                )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const TextSpan(text: 'Draw '),
-                  TextSpan(
-                    text: '${result!.recommendedUnits.round()} Units',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                  const SizedBox(height: 4),
+                  Icon(
+                    Icons.science_outlined,
+                    size: 32,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 14),
+                  // "with X mL of DILUENT" styled like calculator
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        fontWeight: FontWeight.w600,
+                        height: 1.4,
+                      ),
+                      children: [
+                        const TextSpan(text: 'with '),
+                        TextSpan(
+                          text:
+                              '${_formatNoTrailing(result!.solventVolumeMl)} mL',
+                          style: TextStyle(
+                            fontSize: 32,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '  of  ',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(
+                              kReconTextHighOpacity,
+                            ),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              result!.diluentName != null &&
+                                  result!.diluentName!.isNotEmpty
+                              ? result!.diluentName!
+                              : 'diluent',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const TextSpan(text: ' ('),
-                  TextSpan(
-                    text:
-                        '${((result!.recommendedUnits / 100) * result!.syringeSizeMl).toStringAsFixed(1)} mL',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                  const SizedBox(height: 6),
+                  // Divider
+                  Container(
+                    height: kReconDividerHeight,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: kReconDividerVerticalMargin,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Theme.of(context).colorScheme.primary.withOpacity(
+                            kReconDividerOpacity,
+                          ),
+                          Colors.transparent,
+                        ],
+                        stops: kReconDividerStops,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Draw instruction
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        fontWeight: FontWeight.w600,
+                        height: 1.4,
+                      ),
+                      children: [
+                        const TextSpan(text: 'Draw '),
+                        TextSpan(
+                          text: '${result!.recommendedUnits.round()} Units  ',
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              '${_formatNoTrailing((result!.recommendedUnits / 100) * result!.syringeSizeMl)} mL',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Syringe instruction
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        fontWeight: FontWeight.w600,
+                      ),
+                      children: [
+                        const TextSpan(text: 'into a '),
+                        TextSpan(
+                          text:
+                              '${result!.syringeSizeMl.toStringAsFixed(1)} mL',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const TextSpan(text: ' syringe'),
+                      ],
                     ),
                   ),
                   if (result!.recommendedDose != null &&
                       result!.doseUnit != null) ...[
-                    const TextSpan(text: ') for a dose of '),
-                    TextSpan(
-                      text:
-                          '${result!.recommendedDose!.toStringAsFixed(1)} ${result!.doseUnit}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                    const SizedBox(height: 12),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(
+                            kReconTextMediumOpacity,
+                          ),
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
+                        children: [
+                          const TextSpan(text: 'for a dose of '),
+                          TextSpan(
+                            text:
+                                '${_formatNoTrailing(result!.recommendedDose!)} ${result!.doseUnit}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ] else
-                    const TextSpan(text: ')'),
+                  ],
+                  const SizedBox(height: 4),
                 ],
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Using ${result!.syringeSizeMl.toStringAsFixed(1)} mL syringe',
-              style: bodyTextStyle(context)?.copyWith(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            WhiteSyringeGauge(
-              totalUnits: result!.syringeSizeMl * 100,
-              fillUnits: result!.recommendedUnits,
             ),
           ],
           const SizedBox(height: 16),
