@@ -1195,28 +1195,33 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Review', style: sectionTitleStyle(context)),
+        Text('Review & Save', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Review all details before saving',
+          'Review all entered information. You can go back to any step to make changes.',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
         // Basic Info
         SectionFormCard(
-          title: 'Basic Information',
+          title: 'Step 1: Basic Information',
           neutral: true,
           children: [
-            _reviewRow('Name', name.isEmpty ? 'Not entered' : name),
-            if (manufacturer.isNotEmpty)
-              _reviewRow('Manufacturer', manufacturer),
-            if (description.isNotEmpty) _reviewRow('Description', description),
+            _reviewRow('Name', name.isEmpty ? '(Not entered)' : name),
+            _reviewRow(
+              'Manufacturer',
+              manufacturer.isEmpty ? '(Not set)' : manufacturer,
+            ),
+            _reviewRow(
+              'Description',
+              description.isEmpty ? '(Not set)' : description,
+            ),
           ],
         ),
         const SizedBox(height: 16),
         // Strength & Reconstitution
         SectionFormCard(
-          title: 'Strength & Reconstitution',
+          title: 'Step 2: Strength & Reconstitution',
           neutral: true,
           children: [
             _reviewRow(
@@ -1224,89 +1229,106 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               '$strength ${_strengthUnit.name}${_perMlCtrl.text.isNotEmpty ? ' (${_perMlCtrl.text} ${_strengthUnit.name}/mL)' : ''}',
             ),
             _reviewRow('Total Vial Volume', '$vialVolume mL'),
-            if (_reconResult != null)
-              _reviewRow(
-                'Reconstitution',
-                'Add ${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL solvent',
-              ),
+            _reviewRow(
+              'Reconstitution',
+              _reconResult != null
+                  ? 'Add ${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL${_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty ? ' ${_reconResult!.diluentName}' : ' solvent'}'
+                  : '(Not calculated)',
+            ),
           ],
         ),
         const SizedBox(height: 16),
         // Active Vial
         SectionFormCard(
-          title: 'Reconstituted Vial',
+          title: 'Step 3: Reconstituted Vial Details',
           neutral: true,
           children: [
-            if (_activeVialLowStockEnabled)
-              _reviewRow(
-                'Low Stock Alert',
-                '${_activeVialLowStockMlCtrl.text} mL threshold',
-              ),
-            if (_activeVialExpiry != null)
-              _reviewRow(
-                'Expiry',
-                MaterialLocalizations.of(
-                  context,
-                ).formatCompactDate(_activeVialExpiry!),
-              ),
-            if (_activeVialStorageCtrl.text.trim().isNotEmpty)
-              _reviewRow(
-                'Storage Location',
-                _activeVialStorageCtrl.text.trim(),
-              ),
-            if (_activeVialRequiresFridge ||
-                _activeVialRequiresFreezer ||
-                _activeVialProtectLight)
-              _reviewRow(
-                'Storage Conditions',
-                [
-                  if (_activeVialRequiresFridge) 'Refrigerate',
-                  if (_activeVialRequiresFreezer) 'Freeze',
-                  if (_activeVialProtectLight) 'Protect from Light',
-                ].join(', '),
-              ),
+            _reviewRow(
+              'Low Stock Alert',
+              _activeVialLowStockEnabled
+                  ? 'Alert at ${_activeVialLowStockMlCtrl.text} mL threshold'
+                  : '(Disabled)',
+            ),
+            _reviewRow(
+              'Expiry Date',
+              _activeVialExpiry != null
+                  ? MaterialLocalizations.of(
+                      context,
+                    ).formatCompactDate(_activeVialExpiry!)
+                  : '(Not set)',
+            ),
+            _reviewRow(
+              'Storage Location',
+              _activeVialStorageCtrl.text.trim().isEmpty
+                  ? '(Not set)'
+                  : _activeVialStorageCtrl.text.trim(),
+            ),
+            _reviewRow(
+              'Storage Conditions',
+              (_activeVialRequiresFridge ||
+                      _activeVialRequiresFreezer ||
+                      _activeVialProtectLight)
+                  ? [
+                      if (_activeVialRequiresFridge) 'Refrigerate',
+                      if (_activeVialRequiresFreezer) 'Freeze',
+                      if (_activeVialProtectLight) 'Protect from Light',
+                    ].join(', ')
+                  : '(None)',
+            ),
           ],
         ),
-        if (_hasBackupVials) ...[
-          const SizedBox(height: 16),
-          SectionFormCard(
-            title: 'Sealed Backup Vials',
-            neutral: true,
-            children: [
-              _reviewRow('Quantity', '$backupQty vials'),
-              if (_backupVialsLowStockEnabled)
-                _reviewRow(
-                  'Low Stock Alert',
-                  '${_backupVialsLowStockCtrl.text} vials threshold',
-                ),
-              if (_backupVialsExpiry != null)
-                _reviewRow(
-                  'Expiry',
-                  MaterialLocalizations.of(
-                    context,
-                  ).formatCompactDate(_backupVialsExpiry!),
-                ),
-              if (_backupVialsBatchCtrl.text.trim().isNotEmpty)
-                _reviewRow('Batch No.', _backupVialsBatchCtrl.text.trim()),
-              if (_backupVialsStorageCtrl.text.trim().isNotEmpty)
-                _reviewRow(
-                  'Storage Location',
-                  _backupVialsStorageCtrl.text.trim(),
-                ),
-              if (_backupVialsRequiresFridge ||
-                  _backupVialsRequiresFreezer ||
-                  _backupVialsProtectLight)
-                _reviewRow(
-                  'Storage Conditions',
-                  [
-                    if (_backupVialsRequiresFridge) 'Refrigerate',
-                    if (_backupVialsRequiresFreezer) 'Freeze',
-                    if (_backupVialsProtectLight) 'Protect from Light',
-                  ].join(', '),
-                ),
+        const SizedBox(height: 16),
+        // Backup Vials
+        SectionFormCard(
+          title: 'Step 4: Sealed Inventory',
+          neutral: true,
+          children: [
+            _reviewRow(
+              'Backup Vials',
+              _hasBackupVials ? '$backupQty sealed vials' : '(None)',
+            ),
+            if (_hasBackupVials) ...[
+              _reviewRow(
+                'Low Stock Alert',
+                _backupVialsLowStockEnabled
+                    ? 'Alert at ${_backupVialsLowStockCtrl.text} vials threshold'
+                    : '(Disabled)',
+              ),
+              _reviewRow(
+                'Expiry Date',
+                _backupVialsExpiry != null
+                    ? MaterialLocalizations.of(
+                        context,
+                      ).formatCompactDate(_backupVialsExpiry!)
+                    : '(Not set)',
+              ),
+              _reviewRow(
+                'Batch Number',
+                _backupVialsBatchCtrl.text.trim().isEmpty
+                    ? '(Not set)'
+                    : _backupVialsBatchCtrl.text.trim(),
+              ),
+              _reviewRow(
+                'Storage Location',
+                _backupVialsStorageCtrl.text.trim().isEmpty
+                    ? '(Not set)'
+                    : _backupVialsStorageCtrl.text.trim(),
+              ),
+              _reviewRow(
+                'Storage Conditions',
+                (_backupVialsRequiresFridge ||
+                        _backupVialsRequiresFreezer ||
+                        _backupVialsProtectLight)
+                    ? [
+                        if (_backupVialsRequiresFridge) 'Refrigerate',
+                        if (_backupVialsRequiresFreezer) 'Freeze',
+                        if (_backupVialsProtectLight) 'Protect from Light',
+                      ].join(', ')
+                    : '(None)',
+              ),
             ],
-          ),
-        ],
+          ],
+        ),
       ],
     );
   }
