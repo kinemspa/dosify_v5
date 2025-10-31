@@ -310,6 +310,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: false,
       appBar: GradientAppBar(
         title: widget.initial == null
             ? 'Add Multi-Dose Vial'
@@ -464,6 +466,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               field: Field36(
                 child: TextField(
                   controller: _nameCtrl,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
                     hint: 'e.g., Insulin',
@@ -478,6 +481,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               field: Field36(
                 child: TextField(
                   controller: _manufacturerCtrl,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
                     hint: 'e.g., NovoNordisk',
@@ -491,6 +495,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               label: 'Description',
               field: TextField(
                 controller: _descriptionCtrl,
+                style: Theme.of(context).textTheme.bodyMedium,
                 minLines: 2,
                 maxLines: 3,
                 decoration: buildFieldDecoration(
@@ -778,6 +783,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               field: Field36(
                 child: TextField(
                   controller: _activeVialStorageCtrl,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
                     hint: 'e.g., Fridge',
@@ -791,6 +797,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               field: Field36(
                 child: DropdownButtonFormField<String>(
                   value: _activeVialStorageCondition,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(context, hint: 'Select'),
                   items: const [
                     DropdownMenuItem(
@@ -974,6 +981,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                 field: Field36(
                   child: TextField(
                     controller: _backupVialsBatchCtrl,
+                    style: Theme.of(context).textTheme.bodyMedium,
                     decoration: buildFieldDecoration(context, hint: 'Optional'),
                   ),
                 ),
@@ -990,6 +998,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                 field: Field36(
                   child: TextField(
                     controller: _backupVialsStorageCtrl,
+                    style: Theme.of(context).textTheme.bodyMedium,
                     decoration: buildFieldDecoration(
                       context,
                       hint: 'e.g., Freezer, Medicine cabinet',
@@ -1001,8 +1010,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               LabelFieldRow(
                 label: 'Condition',
                 field: Field36(
-                  child: DropdownButtonFormField<String>(
+                child: DropdownButtonFormField<String>(
                     value: _backupVialsStorageCondition,
+                    style: Theme.of(context).textTheme.bodyMedium,
                     decoration: buildFieldDecoration(context, hint: 'Select'),
                     items: const [
                       DropdownMenuItem(
