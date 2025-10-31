@@ -830,9 +830,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     children: [
                       Checkbox(
                         value: _activeVialRequiresFridge,
-                        onChanged: (v) => setState(
-                          () => _activeVialRequiresFridge = v ?? false,
-                        ),
+                        onChanged: (v) => setState(() {
+                          _activeVialRequiresFridge = v ?? false;
+                          if (_activeVialRequiresFridge) {
+                            _activeVialRequiresFreezer = false;
+                          }
+                        }),
                       ),
                       Expanded(
                         child: Text(
@@ -846,9 +849,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     children: [
                       Checkbox(
                         value: _activeVialRequiresFreezer,
-                        onChanged: (v) => setState(
-                          () => _activeVialRequiresFreezer = v ?? false,
-                        ),
+                        onChanged: (v) => setState(() {
+                          _activeVialRequiresFreezer = v ?? false;
+                          if (_activeVialRequiresFreezer) {
+                            _activeVialRequiresFridge = false;
+                          }
+                        }),
                       ),
                       Expanded(
                         child: Text(
@@ -1092,9 +1098,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       children: [
                         Checkbox(
                           value: _backupVialsRequiresFridge,
-                          onChanged: (v) => setState(
-                            () => _backupVialsRequiresFridge = v ?? false,
-                          ),
+                          onChanged: (v) => setState(() {
+                            _backupVialsRequiresFridge = v ?? false;
+                            if (_backupVialsRequiresFridge) {
+                              _backupVialsRequiresFreezer = false;
+                            }
+                          }),
                         ),
                         Expanded(
                           child: Text(
@@ -1108,9 +1117,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       children: [
                         Checkbox(
                           value: _backupVialsRequiresFreezer,
-                          onChanged: (v) => setState(
-                            () => _backupVialsRequiresFreezer = v ?? false,
-                          ),
+                          onChanged: (v) => setState(() {
+                            _backupVialsRequiresFreezer = v ?? false;
+                            if (_backupVialsRequiresFreezer) {
+                              _backupVialsRequiresFridge = false;
+                            }
+                          }),
                         ),
                         Expanded(
                           child: Text(
@@ -1152,21 +1164,155 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   Widget _buildReviewStep() {
+    final name = _nameCtrl.text.trim();
+    final manufacturer = _manufacturerCtrl.text.trim();
+    final description = _descriptionCtrl.text.trim();
+    final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+    final vialVolume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
+    final backupQty = _hasBackupVials
+        ? (int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0)
+        : 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Review', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Review your medication details before saving',
+          'Review all details before saving',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        Text(
-          'Summary card above shows your medication details. Tap "Save Medication" when ready.',
-          style: bodyTextStyle(context),
+        // Basic Info
+        SectionFormCard(
+          title: 'Basic Information',
+          neutral: true,
+          children: [
+            _reviewRow('Name', name.isEmpty ? 'Not entered' : name),
+            if (manufacturer.isNotEmpty)
+              _reviewRow('Manufacturer', manufacturer),
+            if (description.isNotEmpty) _reviewRow('Description', description),
+          ],
         ),
+        const SizedBox(height: 16),
+        // Strength & Reconstitution
+        SectionFormCard(
+          title: 'Strength & Reconstitution',
+          neutral: true,
+          children: [
+            _reviewRow(
+              'Strength',
+              '$strength ${_strengthUnit.name}${_perMlCtrl.text.isNotEmpty ? ' (${_perMlCtrl.text} ${_strengthUnit.name}/mL)' : ''}',
+            ),
+            _reviewRow('Total Vial Volume', '$vialVolume mL'),
+            if (_reconResult != null)
+              _reviewRow(
+                'Reconstitution',
+                'Add ${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL solvent',
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Active Vial
+        SectionFormCard(
+          title: 'Reconstituted Vial',
+          neutral: true,
+          children: [
+            if (_activeVialLowStockEnabled)
+              _reviewRow(
+                'Low Stock Alert',
+                '${_activeVialLowStockMlCtrl.text} mL threshold',
+              ),
+            if (_activeVialExpiry != null)
+              _reviewRow(
+                'Expiry',
+                MaterialLocalizations.of(
+                  context,
+                ).formatCompactDate(_activeVialExpiry!),
+              ),
+            if (_activeVialStorageCtrl.text.trim().isNotEmpty)
+              _reviewRow(
+                'Storage Location',
+                _activeVialStorageCtrl.text.trim(),
+              ),
+            if (_activeVialRequiresFridge ||
+                _activeVialRequiresFreezer ||
+                _activeVialProtectLight)
+              _reviewRow(
+                'Storage Conditions',
+                [
+                  if (_activeVialRequiresFridge) 'Refrigerate',
+                  if (_activeVialRequiresFreezer) 'Freeze',
+                  if (_activeVialProtectLight) 'Protect from Light',
+                ].join(', '),
+              ),
+          ],
+        ),
+        if (_hasBackupVials) ...[
+          const SizedBox(height: 16),
+          SectionFormCard(
+            title: 'Sealed Backup Vials',
+            neutral: true,
+            children: [
+              _reviewRow('Quantity', '$backupQty vials'),
+              if (_backupVialsLowStockEnabled)
+                _reviewRow(
+                  'Low Stock Alert',
+                  '${_backupVialsLowStockCtrl.text} vials threshold',
+                ),
+              if (_backupVialsExpiry != null)
+                _reviewRow(
+                  'Expiry',
+                  MaterialLocalizations.of(
+                    context,
+                  ).formatCompactDate(_backupVialsExpiry!),
+                ),
+              if (_backupVialsBatchCtrl.text.trim().isNotEmpty)
+                _reviewRow('Batch No.', _backupVialsBatchCtrl.text.trim()),
+              if (_backupVialsStorageCtrl.text.trim().isNotEmpty)
+                _reviewRow(
+                  'Storage Location',
+                  _backupVialsStorageCtrl.text.trim(),
+                ),
+              if (_backupVialsRequiresFridge ||
+                  _backupVialsRequiresFreezer ||
+                  _backupVialsProtectLight)
+                _reviewRow(
+                  'Storage Conditions',
+                  [
+                    if (_backupVialsRequiresFridge) 'Refrigerate',
+                    if (_backupVialsRequiresFreezer) 'Freeze',
+                    if (_backupVialsProtectLight) 'Protect from Light',
+                  ].join(', '),
+                ),
+            ],
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _reviewRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1261,14 +1407,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                               ),
                             ),
                             const TextSpan(text: ' mL'),
-                            if (_reconResult != null)
-                              TextSpan(
-                                text:
-                                    ' (reconstituted with ${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL)',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: fg.withValues(alpha: 0.75),
-                                ),
-                              ),
                           ],
                         ),
                       ),
@@ -1335,6 +1473,34 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ],
           ],
         ),
+        // Storage condition icons
+        if (_activeVialRequiresFridge ||
+            _activeVialRequiresFreezer ||
+            _activeVialProtectLight ||
+            _backupVialsRequiresFridge ||
+            _backupVialsRequiresFreezer ||
+            _backupVialsProtectLight) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              if (_activeVialRequiresFridge || _backupVialsRequiresFridge)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(Icons.ac_unit, size: 18, color: fg),
+                ),
+              if (_activeVialRequiresFreezer || _backupVialsRequiresFreezer)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(Icons.severe_cold, size: 18, color: fg),
+                ),
+              if (_activeVialProtectLight || _backupVialsProtectLight)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(Icons.light_mode_outlined, size: 18, color: fg),
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -1461,41 +1627,18 @@ class _ReconstitutionInfoCard extends StatelessWidget {
           Text(
             result == null
                 ? 'Multi-dose vials need to be mixed with liquid (reconstituted). Use the calculator to determine the correct volume.'
-                : 'Reconstitution calculated! Add ${result!.solventVolumeMl.toStringAsFixed(1)} mL solvent.',
+                : 'Add ${result!.solventVolumeMl.toStringAsFixed(1)} mL solvent for reconstitution',
             style: mutedTextStyle(
               context,
             )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
           ),
           if (result != null) ...[
             const SizedBox(height: 12),
-            RichText(
-              text: TextSpan(
-                style: bodyTextStyle(
-                  context,
-                )?.copyWith(color: Colors.white.withValues(alpha: 0.85)),
-                children: [
-                  const TextSpan(
-                    text: 'Draw ',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  TextSpan(
-                    text: '${result!.recommendedUnits.toStringAsFixed(1)} U',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const TextSpan(text: ' ('),
-                  TextSpan(
-                    text:
-                        '${((result!.recommendedUnits / 100) * result!.syringeSizeMl).toStringAsFixed(2)} mL',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const TextSpan(text: ')'),
-                ],
+            Text(
+              'Using ${result!.syringeSizeMl.toStringAsFixed(1)} mL syringe',
+              style: bodyTextStyle(context)?.copyWith(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
