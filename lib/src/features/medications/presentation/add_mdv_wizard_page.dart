@@ -66,6 +66,29 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   void initState() {
     super.initState();
     _loadInitialData();
+    // Listen to vial volume changes to update saved reconstitution
+    _vialVolumeCtrl.addListener(_onVialVolumeChanged);
+  }
+
+  void _onVialVolumeChanged() {
+    if (_reconResult != null) {
+      final newVolume = double.tryParse(_vialVolumeCtrl.text.trim());
+      if (newVolume != null && newVolume != _reconResult!.solventVolumeMl) {
+        // Update the reconstitution result with new volume
+        setState(() {
+          _reconResult = ReconstitutionResult(
+            perMlConcentration: _reconResult!.perMlConcentration,
+            solventVolumeMl: newVolume,
+            recommendedUnits: _reconResult!.recommendedUnits,
+            syringeSizeMl: _reconResult!.syringeSizeMl,
+            diluentName: _reconResult!.diluentName,
+            recommendedDose: _reconResult!.recommendedDose,
+            doseUnit: _reconResult!.doseUnit,
+            maxVialSizeMl: _reconResult!.maxVialSizeMl,
+          );
+        });
+      }
+    }
   }
 
   void _loadInitialData() {
@@ -108,6 +131,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
   @override
   void dispose() {
+    _vialVolumeCtrl.removeListener(_onVialVolumeChanged);
     _scrollController.dispose();
     _nameCtrl.dispose();
     _manufacturerCtrl.dispose();
