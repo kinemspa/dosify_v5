@@ -828,7 +828,7 @@ class _AddPrefilledSyringeWizardPageState
       volumePerDose: volume,
       volumeUnit: _volumeUnit,
       stockValue: stock,
-      stockUnit: StockUnit.syringes,
+      stockUnit: StockUnit.preFilledSyringes,
       initialStockValue: initialStock,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: _lowStockEnabled

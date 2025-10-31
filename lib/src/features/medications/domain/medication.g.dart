@@ -28,6 +28,8 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       description: fields[4] as String?,
       notes: fields[5] as String?,
       perMlValue: fields[8] as double?,
+      volumePerDose: fields[38] as double?,
+      volumeUnit: fields[39] as VolumeUnit?,
       lowStockEnabled: fields[11] as bool,
       lowStockThreshold: fields[12] as double?,
       expiry: fields[13] as DateTime?,
@@ -61,7 +63,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(38)
+      ..writeByte(40)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -80,6 +82,10 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..write(obj.strengthUnit)
       ..writeByte(8)
       ..write(obj.perMlValue)
+      ..writeByte(38)
+      ..write(obj.volumePerDose)
+      ..writeByte(39)
+      ..write(obj.volumeUnit)
       ..writeByte(9)
       ..write(obj.stockValue)
       ..writeByte(10)

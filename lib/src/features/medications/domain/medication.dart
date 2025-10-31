@@ -20,6 +20,8 @@ class Medication {
     this.description,
     this.notes,
     this.perMlValue,
+    this.volumePerDose,
+    this.volumeUnit,
     this.lowStockEnabled = false,
     this.lowStockThreshold,
     this.expiry,
@@ -77,6 +79,12 @@ class Medication {
   // Used when strengthUnit is a per mL unit
   @HiveField(8)
   final double? perMlValue;
+
+  @HiveField(38)
+  final double? volumePerDose;
+
+  @HiveField(39)
+  final VolumeUnit? volumeUnit;
 
   @HiveField(9)
   final double stockValue;
@@ -183,6 +191,8 @@ class Medication {
     double? strengthValue,
     Unit? strengthUnit,
     double? perMlValue,
+    double? volumePerDose,
+    VolumeUnit? volumeUnit,
     double? stockValue,
     StockUnit? stockUnit,
     bool? lowStockEnabled,
@@ -224,6 +234,8 @@ class Medication {
       strengthValue: strengthValue ?? this.strengthValue,
       strengthUnit: strengthUnit ?? this.strengthUnit,
       perMlValue: perMlValue ?? this.perMlValue,
+      volumePerDose: volumePerDose ?? this.volumePerDose,
+      volumeUnit: volumeUnit ?? this.volumeUnit,
       stockValue: stockValue ?? this.stockValue,
       stockUnit: stockUnit ?? this.stockUnit,
       lowStockEnabled: lowStockEnabled ?? this.lowStockEnabled,
