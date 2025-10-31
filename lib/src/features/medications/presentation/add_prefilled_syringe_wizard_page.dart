@@ -315,7 +315,7 @@ class _AddPrefilledSyringeWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(
+        SectionFormCard(neutral: true,
           title: 'Details',
           children: [
             LabelFieldRow(
@@ -391,7 +391,7 @@ class _AddPrefilledSyringeWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(
+        SectionFormCard(neutral: true,
           title: 'Medication Details',
           children: [
             LabelFieldRow(
@@ -515,7 +515,7 @@ class _AddPrefilledSyringeWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(
+        SectionFormCard(neutral: true,
           title: 'Stock Management',
           children: [
             LabelFieldRow(
@@ -632,7 +632,7 @@ class _AddPrefilledSyringeWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(
+        SectionFormCard(neutral: true,
           title: 'Expiry & Storage',
           children: [
             LabelFieldRow(
