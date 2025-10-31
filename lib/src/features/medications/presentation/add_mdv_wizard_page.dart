@@ -592,6 +592,23 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               );
               return;
             }
+            // Determine initial syringe size from saved result
+            SyringeSizeMl? initialSyringe;
+            if (_reconResult != null) {
+              final savedSizeMl = _reconResult!.syringeSizeMl;
+              if (savedSizeMl == 0.3) {
+                initialSyringe = SyringeSizeMl.ml0_3;
+              } else if (savedSizeMl == 0.5) {
+                initialSyringe = SyringeSizeMl.ml0_5;
+              } else if (savedSizeMl == 1.0) {
+                initialSyringe = SyringeSizeMl.ml1;
+              } else if (savedSizeMl == 3.0) {
+                initialSyringe = SyringeSizeMl.ml3;
+              } else if (savedSizeMl == 5.0) {
+                initialSyringe = SyringeSizeMl.ml5;
+              }
+            }
+
             final result = await showModalBottomSheet<ReconstitutionResult>(
               context: context,
               isScrollControlled: true,
@@ -604,9 +621,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     ReconstitutionCalculatorDialog(
                       initialStrengthValue: strength,
                       unitLabel: _strengthUnit.name,
-                      initialSyringeSizeMl: _reconResult?.syringeSizeMl,
-                      initialRecommendedUnits: _reconResult?.recommendedUnits,
-                      initialSolventVolumeMl: _reconResult?.solventVolumeMl,
+                      initialSyringeSize: initialSyringe,
+                      initialVialSize: _reconResult?.solventVolumeMl,
                     ),
               ),
             );
