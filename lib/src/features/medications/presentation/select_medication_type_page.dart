@@ -47,12 +47,6 @@ class SelectMedicationTypePage extends StatelessWidget {
             title: 'Injection',
             subtitle: 'Pre-filled syringes or vials',
           ),
-          SizedBox(height: 16),
-          _TypeTile(
-            icon: Icons.description,
-            title: 'Editor Template (Preview)',
-            subtitle: 'Open the template-based editor',
-          ),
         ],
       ),
     );

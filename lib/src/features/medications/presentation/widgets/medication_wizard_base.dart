@@ -69,6 +69,10 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        title: Text(widget.initial == null ? 'Add Medication' : 'Edit Medication'),
+        elevation: 0,
+      ),
       body: Column(
         children: [
           _buildWizardHeader(),

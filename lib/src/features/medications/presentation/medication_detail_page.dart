@@ -225,12 +225,19 @@ Widget _buildSummaryCard(BuildContext context, Medication med) {
 
   return Container(
     decoration: BoxDecoration(
-      color: cs.primaryContainer,
+      color: cs.surfaceContainerLowest,
       borderRadius: BorderRadius.circular(12),
       border: Border.all(
-        color: cs.primary.withValues(alpha: 0.2),
-        width: 1,
+        color: cs.outlineVariant.withValues(alpha: 0.5),
+        width: 0.75,
       ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.02),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ],
     ),
     padding: const EdgeInsets.all(16),
     child: Column(
