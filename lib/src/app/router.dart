@@ -21,6 +21,9 @@ import 'package:dosifi_v5/src/features/medications/presentation/select_injection
 import 'package:dosifi_v5/src/features/medications/presentation/select_medication_type_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_edit_medication_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_mdv_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_tablet_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_capsule_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_syringe_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
@@ -138,24 +141,21 @@ final router = GoRouter(
           name: 'selectInjectionType',
           builder: (context, state) => const SelectInjectionTypePage(),
         ),
+        // Wizard routes (preferred)
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          builder: (context, state) =>
-              const AddEditMedicationPage(form: MedicationForm.tablet),
+          builder: (context, state) => const AddTabletWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/capsule',
           name: 'addCapsule',
-          builder: (context, state) =>
-              const AddEditMedicationPage(form: MedicationForm.capsule),
+          builder: (context, state) => const AddCapsuleWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) => const AddEditMedicationPage(
-            form: MedicationForm.prefilledSyringe,
-          ),
+          builder: (context, state) => const AddPrefilledSyringeWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
@@ -167,13 +167,6 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
-          builder: (context, state) => const AddEditMedicationPage(
-            form: MedicationForm.multiDoseVial,
-          ),
-        ),
-        GoRoute(
-          path: '/medications/add/injection/multi/wizard',
-          name: 'addInjectionMultiWizard',
           builder: (context, state) => const AddMdvWizardPage(),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
@@ -184,10 +177,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(
-              form: MedicationForm.tablet,
-              initial: med,
-            );
+            return AddTabletWizardPage(initial: med);
           },
         ),
         GoRoute(
@@ -197,10 +187,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(
-              form: MedicationForm.capsule,
-              initial: med,
-            );
+            return AddCapsuleWizardPage(initial: med);
           },
         ),
         GoRoute(
@@ -210,10 +197,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(
-              form: MedicationForm.prefilledSyringe,
-              initial: med,
-            );
+            return AddPrefilledSyringeWizardPage(initial: med);
           },
         ),
         GoRoute(
@@ -236,10 +220,7 @@ final router = GoRouter(
             final id = state.pathParameters['id'];
             final box = Hive.box<Medication>('medications');
             final med = id != null ? box.get(id) : null;
-            return AddEditMedicationPage(
-              form: MedicationForm.multiDoseVial,
-              initial: med,
-            );
+            return AddMdvWizardPage(initial: med);
           },
         ),
         // Reconstitution calculator must be above the dynamic '/medications/:id' route

@@ -225,14 +225,14 @@ Widget _buildSummaryCard(BuildContext context, Medication med) {
 
   return Container(
     decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [cs.primaryContainer, cs.primaryContainer.withValues(alpha: 0.7)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+      color: cs.primaryContainer,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: cs.primary.withValues(alpha: 0.2),
+        width: 1,
       ),
-      borderRadius: BorderRadius.circular(16),
     ),
-    padding: const EdgeInsets.all(20),
+    padding: const EdgeInsets.all(16),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
