@@ -153,7 +153,9 @@ const double kReconTextMutedOpacity = 0.60; // Explainer text
 
 /// Reconstitution calculator background colors
 const Color kReconBackgroundDark = Color(0xFF0A0E27); // Dark blue-black
-const Color kReconBackgroundActive = Color(0xFF1A1E37); // Slightly lighter for active state
+const Color kReconBackgroundActive = Color(
+  0xFF1A1E37,
+); // Slightly lighter for active state
 
 /// Reconstitution divider styling
 const double kReconDividerHeight = 1.0;
@@ -164,7 +166,10 @@ const List<double> kReconDividerStops = [0.0, 0.5, 1.0];
 /// Reconstitution summary card styling
 const double kReconSummaryBorderWidth = 0.5;
 const double kReconSummaryBorderRadius = 20.0;
-const EdgeInsets kReconSummaryPadding = EdgeInsets.symmetric(horizontal: 12, vertical: 12);
+const EdgeInsets kReconSummaryPadding = EdgeInsets.symmetric(
+  horizontal: 12,
+  vertical: 12,
+);
 const double kReconSummaryBlurRadius = 16.0;
 const double kReconSummaryShadowSpread = 2.0;
 const Offset kReconSummaryShadowOffset = Offset(0, 4);
@@ -506,11 +511,18 @@ TextStyle? warningTextStyle(BuildContext context) {
 /// LabelFieldRow(label: 'Name', field: nameField),
 /// buildHelperText(context, 'Enter your full name'),
 /// ```
-Widget buildHelperText(BuildContext context, String? text, {Color? color}) {
+///
+/// Set [fullWidth] to true to span the entire card width (no left padding)
+Widget buildHelperText(
+  BuildContext context,
+  String? text, {
+  Color? color,
+  bool fullWidth = false,
+}) {
   if (text == null || text.isEmpty) return const SizedBox.shrink();
   return Padding(
-    padding: const EdgeInsets.only(
-      left: kHelperTextLeftPadding,
+    padding: EdgeInsets.only(
+      left: fullWidth ? 0 : kHelperTextLeftPadding,
       top: kHelperTextTopPadding,
       bottom: kHelperTextBottomPadding,
     ),
