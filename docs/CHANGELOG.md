@@ -3,18 +3,21 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
-- **Multi-Dose Vial Wizard: Enhanced Summary Card and Reconstitution Display**
-  - Added comprehensive reconstitution details to summary card:
-    - Shows solvent volume and diluent name (e.g., "Mix: 2.5 mL Sterile Water")
-    - Displays alongside total vial volume and backup vials count
-  - Aligned storage condition icons horizontally with expiry date for better visual hierarchy
-  - Enhanced reconstitution calculator info card with detailed calculation summary:
-    - Primary line shows volume and diluent (e.g., "Add 2.5 mL Sterile Water")
-    - Draw instructions with units and mL conversion (e.g., "Draw 50 Units (0.5 mL)")
-    - Target dose displayed if available (e.g., "for a dose of 5 mg")
-    - Syringe gauge visualization shows recommended fill level
-  - Fixed null safety for optional recommendedDose field in reconstitution result
-  - Improved overall UX with clearer, more informative displays throughout the wizard
+- **Multi-Dose Vial Wizard: Polished UX and Reconstitution Card Redesign**
+  - Summary card improvements:
+    - Removed reconstitution info from summary - shows only total vial volume
+    - Storage condition icons now show only active vial conditions (prevents clashing with sealed vial storage)
+    - Icons aligned with expiry date for clean visual hierarchy
+  - Saved reconstitution card completely redesigned to match calculator summary:
+    - Identical gradient container styling with primary color accents
+    - Matches calculator text styling exactly (fontSize, fontWeight, colors)
+    - Shows "with X mL of diluent" line prominently like calculator
+    - Includes gradient divider and formatted draw instructions
+    - Displays syringe size and optional target dose information
+    - Uses _formatNoTrailing helper for clean number formatting (removes trailing zeros)
+    - Icon and spacing match calculator widget perfectly
+  - Fixed null safety for optional recommendedDose field
+  - Fixed deprecated API usage (withOpacity → withValues)
 - **Multi-Dose Vial: Separate Active Vial and Backup Stock UI**
   - Created `MdvInventorySection` widget with split inventory fields:
     - **Active vial**: Low volume alert (mL threshold), dedicated expiry date
