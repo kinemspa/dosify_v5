@@ -135,18 +135,24 @@ class MedicationDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Compact info header
-          _buildInfoHeader(context, med),
-          const SizedBox(height: 16),
-          
-          // Form-specific content
-          ..._buildFormSpecificSections(context, med, detailRow),
-          
-          const SizedBox(height: 80),
-        ],
+      body: ValueListenableBuilder(
+        valueListenable: box.listenable(),
+        builder: (context, Box<Medication> box, _) {
+          final updatedMed = box.get(med.id) ?? med;
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Compact info header
+              _buildInfoHeader(context, updatedMed),
+              const SizedBox(height: 16),
+              
+              // Form-specific content
+              ..._buildFormSpecificSections(context, updatedMed, detailRow),
+              
+              const SizedBox(height: 80),
+            ],
+          );
+        },
       ),
     );
   }
@@ -225,84 +231,60 @@ Widget _modernSection(
   );
 }
 
-// Visually distinct header with gradient and inline editing
+// Clean professional header with key information
 Widget _buildInfoHeader(BuildContext context, Medication med) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
   
-  return Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          cs.primaryContainer,
-          cs.primaryContainer.withValues(alpha: 0.7),
-        ],
-      ),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: cs.primary.withValues(alpha: 0.2),
-        width: 1.5,
-      ),
-    ),
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  return Column(
+    children: [
+      // Main title area
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cs.primary.withValues(alpha: 0.08),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          border: Border(
+            bottom: BorderSide(
+              color: cs.primary.withValues(alpha: 0.2),
+              width: 2,
+            ),
+          ),
+        ),
+        child: Row(
           children: [
             Container(
-              width: 56,
-              height: 56,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 color: cs.primary,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: cs.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 _formIcon(med.form),
                 color: Colors.white,
-                size: 32,
+                size: 28,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     med.name,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: kFontWeightExtraBold,
-                      color: cs.onPrimaryContainer,
-                      height: 1.2,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: kFontWeightBold,
+                      color: cs.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      _formLabel(med.form),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: kFontWeightBold,
-                        color: cs.primary,
-                        letterSpacing: 0.5,
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _formLabel(med.form),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: kFontWeightMedium,
+                      color: cs.primary,
                     ),
                   ),
                 ],
@@ -310,59 +292,52 @@ Widget _buildInfoHeader(BuildContext context, Medication med) {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              _editableInfoRow(
-                context,
-                med,
-                Icons.business,
-                'Manufacturer',
-                med.manufacturer ?? 'Not set',
-                () => _showEditDialog(context, med, 'manufacturer'),
-              ),
-              const Divider(height: 16),
-              _editableInfoRow(
-                context,
-                med,
-                Icons.science_outlined,
-                'Strength',
-                '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-                () => _showEditDialog(context, med, 'strength'),
-              ),
-              const Divider(height: 16),
-              _editableInfoRow(
-                context,
-                med,
-                Icons.inventory_2_outlined,
-                'Stock',
-                '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
-                () => _showEditDialog(context, med, 'stock'),
-                warning: med.lowStockEnabled && 
-                         med.stockValue <= (med.lowStockThreshold ?? 0),
-              ),
-              const Divider(height: 16),
-              _editableInfoRow(
-                context,
-                med,
-                Icons.place_outlined,
-                'Location',
-                (med.storageLocation?.isNotEmpty ?? false)
-                    ? med.storageLocation!
-                    : 'Not set',
-                () => _showEditDialog(context, med, 'location'),
-              ),
-            ],
-          ),
+      ),
+      // Quick info grid
+      Container(
+        decoration: softWhiteCardDecoration(context),
+        child: Column(
+          children: [
+            _editableInfoRow(
+              context,
+              med,
+              Icons.business_outlined,
+              'Manufacturer',
+              med.manufacturer ?? 'Not set',
+              'manufacturer',
+            ),
+            _editableInfoRow(
+              context,
+              med,
+              Icons.science_outlined,
+              'Strength',
+              '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+              'strength',
+            ),
+            _editableInfoRow(
+              context,
+              med,
+              Icons.inventory_2_outlined,
+              'Stock',
+              '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
+              'stock',
+              warning: med.lowStockEnabled && 
+                       med.stockValue <= (med.lowStockThreshold ?? 0),
+            ),
+            _editableInfoRow(
+              context,
+              med,
+              Icons.place_outlined,
+              'Location',
+              (med.storageLocation?.isNotEmpty ?? false)
+                  ? med.storageLocation!
+                  : 'Not set',
+              'location',
+            ),
+          ],
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 
@@ -372,7 +347,7 @@ Widget _editableInfoRow(
   IconData icon,
   String label,
   String value,
-  VoidCallback onTap, {
+  String field, {
   bool warning = false,
 }) {
   final theme = Theme.of(context);
@@ -380,50 +355,53 @@ Widget _editableInfoRow(
   final textColor = warning ? cs.error : cs.onSurface;
   final isNotSet = value == 'Not set';
   
-  return InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(8),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: cs.primary.withValues(alpha: kOpacityMedium),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: kFontWeightSemiBold,
-                    color: cs.onSurface.withValues(alpha: kOpacityMedium),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: kFontWeightMedium,
-                    color: isNotSet
-                        ? cs.onSurface.withValues(alpha: kOpacityLow)
-                        : textColor,
-                    fontStyle: isNotSet ? FontStyle.italic : null,
-                  ),
-                ),
-              ],
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: () => _showEditDialog(context, med, field),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: cs.primary,
             ),
-          ),
-          Icon(
-            Icons.edit_outlined,
-            size: 16,
-            color: cs.onSurface.withValues(alpha: kOpacityLow),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: kFontWeightSemiBold,
+                      color: cs.onSurface.withValues(alpha: kOpacityMedium),
+                      fontSize: 11,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: kFontWeightMedium,
+                      color: isNotSet
+                          ? cs.onSurface.withValues(alpha: kOpacityLow)
+                          : textColor,
+                      fontStyle: isNotSet ? FontStyle.italic : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: cs.onSurface.withValues(alpha: kOpacityLow),
+            ),
+          ],
+        ),
       ),
     ),
   );
