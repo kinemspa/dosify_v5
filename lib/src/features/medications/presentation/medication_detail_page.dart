@@ -140,14 +140,30 @@ class MedicationDetailPage extends StatelessWidget {
         builder: (context, Box<Medication> box, _) {
           final updatedMed = box.get(med.id) ?? med;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.zero,
             children: [
-              // Compact info header
+              // Full-width dark header
               _buildInfoHeader(context, updatedMed),
-              const SizedBox(height: 16),
               
-              // Form-specific content
-              ..._buildFormSpecificSections(context, updatedMed, detailRow),
+              // Quick actions section
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quick Actions',
+                      style: sectionTitleStyle(context),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuickActions(context, updatedMed),
+                    const SizedBox(height: 16),
+                    
+                    // Form-specific content
+                    ..._buildFormSpecificSections(context, updatedMed, detailRow),
+                  ],
+                ),
+              ),
               
               const SizedBox(height: 80),
             ],
@@ -231,140 +247,301 @@ Widget _modernSection(
   );
 }
 
-// Dark high-contrast header inspired by reconstitution calculator
+// Full-width compact dark header
 Widget _buildInfoHeader(BuildContext context, Medication med) {
   final theme = Theme.of(context);
+  final cs = theme.colorScheme;
   
   return Container(
-    decoration: BoxDecoration(
-      color: kReconBackgroundDark,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      children: [
-        // Title area
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.25),
-                      Colors.white.withValues(alpha: 0.15),
+    width: double.infinity,
+    color: kReconBackgroundDark,
+    child: SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          // Compact title row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.25),
+                        Colors.white.withValues(alpha: 0.15),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Icon(
+                    _formIcon(med.form),
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        med.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: kFontWeightBold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _formLabel(med.form),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: kFontWeightMedium,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 1.5,
+                ),
+              ],
+            ),
+          ),
+          // Compact info grid
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _compactInfoChip(
+                    context,
+                    Icons.science_outlined,
+                    '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                    'Strength',
+                    () => _showEditDialog(context, med, 'strength'),
                   ),
                 ),
-                child: Icon(
-                  _formIcon(med.form),
-                  color: Colors.white,
-                  size: 30,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _compactInfoChip(
+                    context,
+                    Icons.inventory_2_outlined,
+                    '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
+                    'Stock',
+                    () => _showEditDialog(context, med, 'stock'),
+                    warning: med.lowStockEnabled && 
+                             med.stockValue <= (med.lowStockThreshold ?? 0),
+                  ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _compactInfoChip(
+                    context,
+                    Icons.place_outlined,
+                    (med.storageLocation?.isNotEmpty ?? false)
+                        ? med.storageLocation!
+                        : 'Not set',
+                    'Location',
+                    () => _showEditDialog(context, med, 'location'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _compactInfoChip(
+  BuildContext context,
+  IconData icon,
+  String value,
+  String label,
+  VoidCallback onTap, {
+  bool warning = false,
+}) {
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
+  final isNotSet = value == 'Not set';
+  
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(8),
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: warning
+              ? cs.error.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: warning
+                    ? cs.error
+                    : Colors.white.withValues(alpha: 0.8),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 4),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      med.name,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: kFontWeightBold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: Text(
-                        _formLabel(med.form),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontWeight: kFontWeightBold,
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: kFontWeightSemiBold,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 10,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: kFontWeightMedium,
+              color: isNotSet
+                  ? Colors.white.withValues(alpha: 0.5)
+                  : warning
+                      ? cs.error
+                      : Colors.white.withValues(alpha: 0.9),
+              fontStyle: isNotSet ? FontStyle.italic : null,
+              fontSize: 12,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// Quick action cards for scheduling features
+Widget _buildQuickActions(BuildContext context, Medication med) {
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
+  
+  return Wrap(
+    spacing: 10,
+    runSpacing: 10,
+    children: [
+      _actionCard(
+        context,
+        icon: Icons.add_circle_outline,
+        label: 'Take Dose',
+        color: const Color(0xFF10B981), // Green
+        onTap: () {
+          // TODO: Implement take dose
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Take dose feature coming soon')),
+          );
+        },
+      ),
+      _actionCard(
+        context,
+        icon: Icons.history,
+        label: 'History',
+        color: const Color(0xFF8B5CF6), // Purple
+        onTap: () {
+          // TODO: Show dose history
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('History feature coming soon')),
+          );
+        },
+      ),
+      _actionCard(
+        context,
+        icon: Icons.calendar_today,
+        label: 'Schedule',
+        color: const Color(0xFF3B82F6), // Blue
+        onTap: () {
+          // TODO: Manage schedule
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Schedule feature coming soon')),
+          );
+        },
+      ),
+      _actionCard(
+        context,
+        icon: Icons.inventory,
+        label: 'Refill',
+        color: const Color(0xFFF59E0B), // Amber
+        onTap: () {
+          // TODO: Refill stock
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Refill feature coming soon')),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+Widget _actionCard(
+  BuildContext context, {
+  required IconData icon,
+  required String label,
+  required Color color,
+  required VoidCallback onTap,
+}) {
+  final theme = Theme.of(context);
+  
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12),
+    child: Container(
+      width: (MediaQuery.of(context).size.width - 52) / 4,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1.5,
         ),
-        // Divider
-        Divider(
-          color: Colors.white.withValues(alpha: 0.15),
-          height: 1,
-        ),
-        // Info rows
-        _editableInfoRow(
-          context,
-          med,
-          Icons.business_outlined,
-          'Manufacturer',
-          med.manufacturer ?? 'Not set',
-          'manufacturer',
-          darkTheme: true,
-        ),
-        _editableInfoRow(
-          context,
-          med,
-          Icons.science_outlined,
-          'Strength',
-          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-          'strength',
-          darkTheme: true,
-        ),
-        _editableInfoRow(
-          context,
-          med,
-          Icons.inventory_2_outlined,
-          'Stock',
-          '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
-          'stock',
-          warning: med.lowStockEnabled && 
-                   med.stockValue <= (med.lowStockThreshold ?? 0),
-          darkTheme: true,
-        ),
-        _editableInfoRow(
-          context,
-          med,
-          Icons.place_outlined,
-          'Location',
-          (med.storageLocation?.isNotEmpty ?? false)
-              ? med.storageLocation!
-              : 'Not set',
-          'location',
-          darkTheme: true,
-        ),
-      ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: kFontWeightSemiBold,
+              color: color,
+              fontSize: 11,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     ),
   );
 }
