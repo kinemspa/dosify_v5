@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 /// Base class for medication wizard pages.
 /// Provides common wizard functionality: step indicator, navigation, validation.
@@ -69,9 +70,9 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: Text(widget.initial == null ? 'Add Medication' : 'Edit Medication'),
-        elevation: 0,
+      appBar: GradientAppBar(
+        title: widget.initial == null ? 'Add Medication' : 'Edit Medication',
+        forceBackButton: true,
       ),
       body: Column(
         children: [
