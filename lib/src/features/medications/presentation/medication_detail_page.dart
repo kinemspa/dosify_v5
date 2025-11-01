@@ -38,21 +38,42 @@ class MedicationDetailPage extends StatelessWidget {
 
     Widget detailRow(String label, String? value) {
       if (value == null || value.isEmpty) return const SizedBox.shrink();
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Column(
+      return Container(
+        padding: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: cs.outlineVariant.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+        ),
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: fieldLabelStyle(context)?.copyWith(color: cs.primary),
+            Expanded(
+              flex: 2,
+              child: Text(
+                label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: bodyTextStyle(
-                context,
-              )?.copyWith(color: cs.onSurface, height: kLineHeightNormal),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 3,
+              child: Text(
+                value,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: cs.onSurface,
+                  fontWeight: FontWeight.w600,
+                  height: 1.5,
+                ),
+              ),
             ),
           ],
         ),
@@ -134,17 +155,27 @@ class MedicationDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Summary Card
-          _buildSummaryCard(context, med),
-          const SizedBox(height: 16),
-
-          // Form-specific content
-          ..._buildFormSpecificSections(context, med, detailRow),
-
-          const SizedBox(height: 80), // Space for FAB if needed
+      body: CustomScrollView(
+        slivers: [
+          // Hero header with gradient and medication icon
+          _buildHeroHeader(context, med),
+          
+          // Content sections
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // Quick stats row
+                _buildQuickStatsRow(context, med),
+                const SizedBox(height: 20),
+                
+                // Form-specific content
+                ..._buildFormSpecificSections(context, med, detailRow),
+                
+                const SizedBox(height: 80),
+              ]),
+            ),
+          ),
         ],
       ),
     );
@@ -182,7 +213,7 @@ String _stockUnitLabel(StockUnit u) => switch (u) {
   StockUnit.g => 'g',
 };
 
-// Modern section widget with icon
+// Modern elevated section with gradient accent
 Widget _modernSection(
   BuildContext context,
   String title,
@@ -198,180 +229,328 @@ Widget _modernSection(
   if (visibleChildren.isEmpty) return const SizedBox.shrink();
 
   return Container(
-    decoration: softWhiteCardDecoration(context),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    decoration: BoxDecoration(
+      color: cs.surface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(
+        color: cs.outlineVariant.withValues(alpha: 0.3),
+        width: 1,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: cs.shadow.withValues(alpha: 0.08),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Gradient header
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                cs.primaryContainer.withValues(alpha: 0.3),
+                cs.primaryContainer.withValues(alpha: 0.1),
+              ],
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Row(
             children: [
-              Icon(icon, size: 20, color: cs.primary),
-              const SizedBox(width: 8),
-              Text(title, style: sectionTitleStyle(context)),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 20, color: cs.primary),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                  letterSpacing: 0.2,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          ...visibleChildren,
-        ],
-      ),
+        ),
+        // Content
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: visibleChildren,
+          ),
+        ),
+      ],
     ),
   );
 }
 
-Widget _buildSummaryCard(BuildContext context, Medication med) {
+// Stunning hero header with parallax effect
+Widget _buildHeroHeader(BuildContext context, Medication med) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
-
-  return Container(
-    decoration: BoxDecoration(
-      color: cs.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: cs.outlineVariant.withValues(alpha: 0.5),
-        width: 0.75,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.02),
-          blurRadius: 6,
-          offset: const Offset(0, 2),
+  
+  return SliverAppBar(
+    expandedHeight: 200,
+    pinned: false,
+    backgroundColor: Colors.transparent,
+    flexibleSpace: FlexibleSpaceBar(
+      background: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cs.primary,
+              cs.primary.withValues(alpha: 0.85),
+              cs.primaryContainer,
+            ],
+          ),
         ),
-      ],
-    ),
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: cs.onPrimaryContainer.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                _formIcon(med.form),
-                color: cs.onPrimaryContainer,
-                size: 28,
+            // Decorative circles
+            Positioned(
+              right: -30,
+              top: -30,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
+            Positioned(
+              left: -50,
+              bottom: -50,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
+              ),
+            ),
+            // Content
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 80, 20, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    med.name,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: cs.onPrimaryContainer,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          _formIcon(med.form),
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              med.name,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                _formLabel(med.form),
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formLabel(med.form),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: cs.onPrimaryContainer.withValues(alpha: 0.85),
-                    ),
-                  ),
-                  if (med.manufacturer != null) ...{
-                    const SizedBox(height: 2),
+                  if (med.manufacturer != null) ...[
+                    const SizedBox(height: 8),
                     Text(
                       med.manufacturer!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onPrimaryContainer.withValues(alpha: 0.7),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  },
+                  ],
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: [
-            _summaryChip(
-              context,
-              Icons.inventory_2,
-              '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
-            ),
-            if (med.strengthValue > 0)
-              _summaryChip(
-                context,
-                Icons.science,
-                '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-              ),
-            if (med.volumePerDose != null && med.volumePerDose! > 0)
-              _summaryChip(
-                context,
-                Icons.water_drop,
-                '${_formatNumber(med.volumePerDose!)} ${med.volumeUnit?.name ?? "ml"}',
-              ),
-            if (med.expiry != null)
-              _summaryChip(
-                context,
-                Icons.calendar_today,
-                'Exp: ${DateFormat('MMM d, y').format(med.expiry!)}',
-                warning: _isExpiringSoon(med.expiry!),
-              ),
-            if (med.requiresRefrigeration)
-              _summaryChip(context, Icons.ac_unit, 'Refrigerate'),
-            if (med.lowStockEnabled)
-              _summaryChip(
-                context,
-                Icons.warning_amber,
-                'Alert at ${_formatNumber(med.lowStockThreshold ?? 0)}',
-                warning: med.stockValue <= (med.lowStockThreshold ?? 0),
-              ),
-          ],
+      ),
+    ),
+  );
+}
+
+// Quick stats cards in a scrollable row
+Widget _buildQuickStatsRow(BuildContext context, Medication med) {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      children: [
+        _buildStatCard(
+          context,
+          icon: Icons.inventory_2_rounded,
+          label: 'Current Stock',
+          value: _formatNumber(med.stockValue),
+          unit: _stockUnitLabel(med.stockUnit),
+          color: const Color(0xFF6366F1), // Indigo
+          warning: med.lowStockEnabled && 
+                   med.stockValue <= (med.lowStockThreshold ?? 0),
         ),
+        const SizedBox(width: 12),
+        if (med.strengthValue > 0)
+          _buildStatCard(
+            context,
+            icon: Icons.science_rounded,
+            label: 'Strength',
+            value: _formatNumber(med.strengthValue),
+            unit: _unitLabel(med.strengthUnit),
+            color: const Color(0xFF8B5CF6), // Purple
+          ),
+        const SizedBox(width: 12),
+        if (med.volumePerDose != null && med.volumePerDose! > 0)
+          _buildStatCard(
+            context,
+            icon: Icons.water_drop_rounded,
+            label: 'Volume',
+            value: _formatNumber(med.volumePerDose!),
+            unit: med.volumeUnit?.name ?? 'ml',
+            color: const Color(0xFF06B6D4), // Cyan
+          ),
+        const SizedBox(width: 12),
+        if (med.expiry != null)
+          _buildStatCard(
+            context,
+            icon: Icons.event_rounded,
+            label: 'Expires',
+            value: DateFormat('MMM d').format(med.expiry!),
+            unit: DateFormat('y').format(med.expiry!),
+            color: const Color(0xFFEC4899), // Pink
+            warning: _isExpiringSoon(med.expiry!),
+          ),
       ],
     ),
   );
 }
 
-Widget _summaryChip(
-  BuildContext context,
-  IconData icon,
-  String label, {
+Widget _buildStatCard(
+  BuildContext context, {
+  required IconData icon,
+  required String label,
+  required String value,
+  required String unit,
+  required Color color,
   bool warning = false,
 }) {
-  final cs = Theme.of(context).colorScheme;
-  final bgColor = warning
-      ? cs.errorContainer.withValues(alpha: 0.3)
-      : cs.onPrimaryContainer.withValues(alpha: 0.1);
-  final fgColor =
-      warning ? cs.error : cs.onPrimaryContainer.withValues(alpha: 0.85);
-
+  final theme = Theme.of(context);
+  final displayColor = warning ? theme.colorScheme.error : color;
+  
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    width: 140,
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(20),
+      color: displayColor.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: displayColor.withValues(alpha: 0.2),
+        width: 1.5,
+      ),
     ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: fgColor),
-        const SizedBox(width: 6),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: displayColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: displayColor, size: 24),
+        ),
+        const SizedBox(height: 12),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: fgColor,
-                fontWeight: FontWeight.w600,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 4),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: value,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: displayColor,
+                  fontWeight: FontWeight.w900,
+                  height: 1.2,
+                ),
               ),
+              TextSpan(
+                text: ' $unit',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: displayColor.withValues(alpha: 0.8),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     ),
   );
 }
+
 
 List<Widget> _buildFormSpecificSections(
   BuildContext context,
