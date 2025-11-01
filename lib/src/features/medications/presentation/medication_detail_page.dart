@@ -436,113 +436,73 @@ Widget _compactInfoChip(
   );
 }
 
-// Quick action cards for scheduling features
+// Quick actions using proper button layout
 Widget _buildQuickActions(BuildContext context, Medication med) {
-  final theme = Theme.of(context);
-  final cs = theme.colorScheme;
-  
-  return Wrap(
-    spacing: 10,
-    runSpacing: 10,
+  return Column(
     children: [
-      _actionCard(
-        context,
-        icon: Icons.add_circle_outline,
-        label: 'Take Dose',
-        color: const Color(0xFF10B981), // Green
-        onTap: () {
-          // TODO: Implement take dose
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Take dose feature coming soon')),
-          );
-        },
-      ),
-      _actionCard(
-        context,
-        icon: Icons.history,
-        label: 'History',
-        color: const Color(0xFF8B5CF6), // Purple
-        onTap: () {
-          // TODO: Show dose history
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('History feature coming soon')),
-          );
-        },
-      ),
-      _actionCard(
-        context,
-        icon: Icons.calendar_today,
-        label: 'Schedule',
-        color: const Color(0xFF3B82F6), // Blue
-        onTap: () {
-          // TODO: Manage schedule
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Schedule feature coming soon')),
-          );
-        },
-      ),
-      _actionCard(
-        context,
-        icon: Icons.inventory,
-        label: 'Refill',
-        color: const Color(0xFFF59E0B), // Amber
-        onTap: () {
-          // TODO: Refill stock
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Refill feature coming soon')),
-          );
-        },
-      ),
-    ],
-  );
-}
-
-Widget _actionCard(
-  BuildContext context, {
-  required IconData icon,
-  required String label,
-  required Color color,
-  required VoidCallback onTap,
-}) {
-  final theme = Theme.of(context);
-  
-  return InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: Container(
-      width: (MediaQuery.of(context).size.width - 52) / 4,
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      Row(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              color: color,
-              fontSize: 11,
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: () {
+                // TODO: Implement take dose
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Take dose feature coming soon')),
+                );
+              },
+              icon: const Icon(Icons.add_circle_outline, size: 18),
+              label: const Text('Take Dose'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+              ),
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // TODO: Refill stock
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Refill feature coming soon')),
+                );
+              },
+              icon: const Icon(Icons.inventory, size: 18),
+              label: const Text('Refill'),
+            ),
           ),
         ],
       ),
-    ),
+      const SizedBox(height: 8),
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // TODO: Show dose history
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('History feature coming soon')),
+                );
+              },
+              icon: const Icon(Icons.history, size: 18),
+              label: const Text('History'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // TODO: Manage schedule
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Schedule feature coming soon')),
+                );
+              },
+              icon: const Icon(Icons.calendar_today, size: 18),
+              label: const Text('Schedule'),
+            ),
+          ),
+        ],
+      ),
+    ],
   );
 }
 
