@@ -20,14 +20,15 @@ class AddTabletWizardPage extends MedicationWizardBase {
   const AddTabletWizardPage({super.key, super.initial});
 
   @override
-  int get stepCount => 4;
+  int get stepCount => 5;
 
   @override
   List<String> get stepLabels => [
         'STEP 1: BASIC INFORMATION',
         'STEP 2: STRENGTH & DOSAGE',
         'STEP 3: INVENTORY',
-        'STEP 4: STORAGE & REVIEW',
+        'STEP 4: STORAGE',
+        'STEP 5: REVIEW & CONFIRM',
       ];
 
   @override
@@ -110,7 +111,9 @@ class _AddTabletWizardPageState
         return strength > 0;
       case 2: // Inventory
         return true; // Optional
-      case 3: // Storage & Review
+      case 3: // Storage
+        return true;
+      case 4: // Review
         return true;
       default:
         return false;
@@ -279,7 +282,9 @@ class _AddTabletWizardPageState
       case 2:
         return _buildInventoryStep();
       case 3:
-        return _buildStorageReviewStep();
+        return _buildStorageStep();
+      case 4:
+        return _buildReviewStep();
       default:
         return const SizedBox.shrink();
     }
@@ -553,14 +558,14 @@ class _AddTabletWizardPageState
     );
   }
 
-  Widget _buildStorageReviewStep() {
+  Widget _buildStorageStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Storage & Review', style: sectionTitleStyle(context)),
+        Text('Storage', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Set expiry date and storage conditions, then review before saving',
+          'Set expiry date and storage conditions',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
@@ -777,4 +782,100 @@ class _AddTabletWizardPageState
   }
 
   String _newId() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  Widget _buildReviewStep() {
+    final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+    final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+    final threshold = _lowStockEnabled
+        ? double.tryParse(_lowStockThresholdCtrl.text.trim())
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Review & Confirm', style: sectionTitleStyle(context)),
+        const SizedBox(height: 8),
+        Text(
+          'Please review all information before saving',
+          style: mutedTextStyle(context),
+        ),
+        const SizedBox(height: 24),
+        SectionFormCard(neutral: true,
+          title: 'Medication Details',
+          children: [
+            _reviewRow('Name', _nameCtrl.text.trim()),
+            _reviewRow('Type', 'Tablet'),
+            _reviewRow('Manufacturer', _manufacturerCtrl.text.trim()),
+            _reviewRow('Description', _descriptionCtrl.text.trim()),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SectionFormCard(neutral: true,
+          title: 'Strength',
+          children: [
+            _reviewRow(
+              'Active Ingredient',
+              '$strength ${_strengthUnit.name}',
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SectionFormCard(neutral: true,
+          title: 'Inventory',
+          children: [
+            _reviewRow('Current Stock', '$stock tablets'),
+            _reviewRow(
+              'Low Stock Alert',
+              _lowStockEnabled
+                  ? 'Enabled at $threshold tablets'
+                  : 'Disabled',
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SectionFormCard(neutral: true,
+          title: 'Storage',
+          children: [
+            if (_expiry != null)
+              _reviewRow(
+                'Expiry Date',
+                MaterialLocalizations.of(context).formatCompactDate(_expiry!),
+              ),
+            _reviewRow('Batch Number', _batchCtrl.text.trim()),
+            _reviewRow('Storage Location', _storageLocationCtrl.text.trim()),
+            if (_requiresFridge)
+              _reviewRow('Refrigeration', 'Required (2-8°C)'),
+            if (_requiresFreezer) _reviewRow('Storage', 'Freezer'),
+            if (_protectLight) _reviewRow('Light Sensitivity', 'Protect from light'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _reviewRow(String label, String? value) {
+    if (value == null || value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: fieldLabelStyle(context),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: bodyTextStyle(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
