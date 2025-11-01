@@ -151,14 +151,6 @@ class MedicationDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Quick Actions',
-                      style: sectionTitleStyle(context),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildQuickActions(context, updatedMed),
-                    const SizedBox(height: 16),
-                    
                     // Form-specific content
                     ..._buildFormSpecificSections(context, updatedMed, detailRow),
                   ],
@@ -436,75 +428,6 @@ Widget _compactInfoChip(
   );
 }
 
-// Quick actions using proper button layout
-Widget _buildQuickActions(BuildContext context, Medication med) {
-  return Column(
-    children: [
-      Row(
-        children: [
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: () {
-                // TODO: Implement take dose
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Take dose feature coming soon')),
-                );
-              },
-              icon: const Icon(Icons.add_circle_outline, size: 18),
-              label: const Text('Take Dose'),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: Refill stock
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Refill feature coming soon')),
-                );
-              },
-              icon: const Icon(Icons.inventory, size: 18),
-              label: const Text('Refill'),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 8),
-      Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: Show dose history
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('History feature coming soon')),
-                );
-              },
-              icon: const Icon(Icons.history, size: 18),
-              label: const Text('History'),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: Manage schedule
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Schedule feature coming soon')),
-                );
-              },
-              icon: const Icon(Icons.calendar_today, size: 18),
-              label: const Text('Schedule'),
-            ),
-          ),
-        ],
-      ),
-    ],
-  );
-}
 
 Widget _editableInfoRow(
   BuildContext context,
@@ -627,29 +550,37 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
   
   showDialog<void>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Edit ${getFieldLabel()}'),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        keyboardType: field == 'strength' || field == 'stock'
-            ? TextInputType.number
-            : TextInputType.text,
-        decoration: buildFieldDecoration(
-          context,
-          hint: 'Enter ${getFieldLabel().toLowerCase()}',
+    barrierDismissible: false, // Prevent dismiss by tapping outside
+    builder: (dialogContext) => WillPopScope(
+      onWillPop: () async {
+        // Dispose controller before closing
+        controller.dispose();
+        return true;
+      },
+      child: AlertDialog(
+        title: Text('Edit ${getFieldLabel()}'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: field == 'strength' || field == 'stock'
+              ? TextInputType.number
+              : TextInputType.text,
+          decoration: buildFieldDecoration(
+            context,
+            hint: 'Enter ${getFieldLabel().toLowerCase()}',
+          ),
+          style: bodyTextStyle(context),
         ),
-        style: bodyTextStyle(context),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
+        actions: [
+          TextButton(
+            onPressed: () {
+              controller.dispose();
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
             final value = controller.text.trim();
             if (value.isEmpty && field != 'manufacturer' && field != 'location') {
               if (context.mounted) {
@@ -700,7 +631,8 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
             }
             
             box.put(med.id, updated);
-            Navigator.pop(context);
+            controller.dispose();
+            Navigator.pop(dialogContext);
             
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -712,7 +644,8 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
         ),
       ],
     ),
-  ).then((_) => controller.dispose());
+    ),
+  );
 }
 
 
