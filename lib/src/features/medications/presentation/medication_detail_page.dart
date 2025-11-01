@@ -8,13 +8,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class MedicationDetailPage extends StatelessWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
@@ -34,7 +32,8 @@ class MedicationDetailPage extends StatelessWidget {
       );
     }
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     Widget detailRow(String label, String? value) {
       if (value == null || value.isEmpty) return const SizedBox.shrink();
@@ -44,7 +43,6 @@ class MedicationDetailPage extends StatelessWidget {
           border: Border(
             bottom: BorderSide(
               color: cs.outlineVariant.withValues(alpha: 0.2),
-              width: 1,
             ),
           ),
         ),
