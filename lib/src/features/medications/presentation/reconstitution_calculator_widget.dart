@@ -360,9 +360,6 @@ class _ReconstitutionCalculatorWidgetState
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
     final currentC = round2(current.cPerMl);
     final currentV = current.vialVolume; // Use precise value for live display
-    final currentVRounded = roundToHalfMl(
-      current.vialVolume,
-    ); // Rounded for saving
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
     // Notify parent of calculation result (use precise value for live display)

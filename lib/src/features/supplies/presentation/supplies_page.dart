@@ -334,7 +334,7 @@ class _SuppliesPageState extends State<SuppliesPage> {
                 color: low ? Colors.orange : null,
               ),
               onTap: () async {
-                await showModalBottomSheet(
+                await showModalBottomSheet<void>(
                   context: context,
                   showDragHandle: true,
                   isScrollControlled: true,
@@ -423,7 +423,7 @@ class _SupplyCard extends StatelessWidget {
       elevation: dense ? 1 : 2,
       child: InkWell(
         onTap: () async {
-          await showModalBottomSheet(
+          await showModalBottomSheet<void>(
             context: context,
             showDragHandle: true,
             isScrollControlled: true,
@@ -585,7 +585,7 @@ class _SupplyCard extends StatelessWidget {
                 right: 8,
                 child: TextButton(
                   onPressed: () async {
-                    await showModalBottomSheet(
+                    await showModalBottomSheet<void>(
                       context: context,
                       showDragHandle: true,
                       isScrollControlled: true,

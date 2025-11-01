@@ -59,25 +59,25 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
   String _formatStock(Medication m) {
     switch (m.form) {
       case MedicationForm.tablet:
-        final qty = m.stockValue.toInt() ?? 0;
+        final qty = m.stockValue.toInt();
         return '$qty tablet${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.capsule:
-        final qty = m.stockValue.toInt() ?? 0;
+        final qty = m.stockValue.toInt();
         return '$qty capsule${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.prefilledSyringe:
-        final qty = m.stockValue.toInt() ?? 0;
+        final qty = m.stockValue.toInt();
         return '$qty syringe${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.singleDoseVial:
-        final qty = m.stockValue.toInt() ?? 0;
+        final qty = m.stockValue.toInt();
         return '$qty vial${qty == 1 ? '' : 's'} remaining';
       case MedicationForm.multiDoseVial:
-        final qty = m.stockValue.toInt() ?? 0;
+        final qty = m.stockValue.toInt();
         return '$qty vial${qty == 1 ? '' : 's'} in stock';
     }
   }
 
   Color _getStockColor(BuildContext context, Medication m) {
-    final qty = m.stockValue.toInt() ?? 0;
+    final qty = m.stockValue.toInt();
     final lowStock = m.lowStockThreshold?.toInt() ?? 5;
     if (qty == 0) {
       return Theme.of(context).colorScheme.error;
@@ -93,7 +93,7 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
     final meds = box.values.toList(growable: false);
 
     // Filter out medications with no stock
-    final availableMeds = meds.where((m) => (m.stockValue ?? 0) > 0).toList();
+    final availableMeds = meds.where((m) => m.stockValue > 0).toList();
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Select Medication'),

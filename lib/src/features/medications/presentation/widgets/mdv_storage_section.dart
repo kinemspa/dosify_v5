@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
