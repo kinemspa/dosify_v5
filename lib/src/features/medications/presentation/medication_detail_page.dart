@@ -231,113 +231,141 @@ Widget _modernSection(
   );
 }
 
-// Clean professional header with key information
+// Dark high-contrast header inspired by reconstitution calculator
 Widget _buildInfoHeader(BuildContext context, Medication med) {
   final theme = Theme.of(context);
-  final cs = theme.colorScheme;
   
-  return Column(
-    children: [
-      // Main title area
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.08),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          border: Border(
-            bottom: BorderSide(
-              color: cs.primary.withValues(alpha: 0.2),
-              width: 2,
-            ),
+  return Container(
+    decoration: BoxDecoration(
+      color: kReconBackgroundDark,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.2),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        // Title area
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.25),
+                      Colors.white.withValues(alpha: 0.15),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(
+                  _formIcon(med.form),
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      med.name,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: kFontWeightBold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Text(
+                        _formLabel(med.form),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: kFontWeightBold,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: cs.primary,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                _formIcon(med.form),
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    med.name,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: kFontWeightBold,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _formLabel(med.form),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: kFontWeightMedium,
-                      color: cs.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        // Divider
+        Divider(
+          color: Colors.white.withValues(alpha: 0.15),
+          height: 1,
         ),
-      ),
-      // Quick info grid
-      Container(
-        decoration: softWhiteCardDecoration(context),
-        child: Column(
-          children: [
-            _editableInfoRow(
-              context,
-              med,
-              Icons.business_outlined,
-              'Manufacturer',
-              med.manufacturer ?? 'Not set',
-              'manufacturer',
-            ),
-            _editableInfoRow(
-              context,
-              med,
-              Icons.science_outlined,
-              'Strength',
-              '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-              'strength',
-            ),
-            _editableInfoRow(
-              context,
-              med,
-              Icons.inventory_2_outlined,
-              'Stock',
-              '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
-              'stock',
-              warning: med.lowStockEnabled && 
-                       med.stockValue <= (med.lowStockThreshold ?? 0),
-            ),
-            _editableInfoRow(
-              context,
-              med,
-              Icons.place_outlined,
-              'Location',
-              (med.storageLocation?.isNotEmpty ?? false)
-                  ? med.storageLocation!
-                  : 'Not set',
-              'location',
-            ),
-          ],
+        // Info rows
+        _editableInfoRow(
+          context,
+          med,
+          Icons.business_outlined,
+          'Manufacturer',
+          med.manufacturer ?? 'Not set',
+          'manufacturer',
+          darkTheme: true,
         ),
-      ),
-    ],
+        _editableInfoRow(
+          context,
+          med,
+          Icons.science_outlined,
+          'Strength',
+          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+          'strength',
+          darkTheme: true,
+        ),
+        _editableInfoRow(
+          context,
+          med,
+          Icons.inventory_2_outlined,
+          'Stock',
+          '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
+          'stock',
+          warning: med.lowStockEnabled && 
+                   med.stockValue <= (med.lowStockThreshold ?? 0),
+          darkTheme: true,
+        ),
+        _editableInfoRow(
+          context,
+          med,
+          Icons.place_outlined,
+          'Location',
+          (med.storageLocation?.isNotEmpty ?? false)
+              ? med.storageLocation!
+              : 'Not set',
+          'location',
+          darkTheme: true,
+        ),
+      ],
+    ),
   );
 }
 
@@ -349,26 +377,46 @@ Widget _editableInfoRow(
   String value,
   String field, {
   bool warning = false,
+  bool darkTheme = false,
 }) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
-  final textColor = warning ? cs.error : cs.onSurface;
+  
+  final iconColor = darkTheme
+      ? Colors.white.withValues(alpha: kReconTextHighOpacity)
+      : cs.primary;
+  final labelColor = darkTheme
+      ? Colors.white.withValues(alpha: kReconTextNormalOpacity)
+      : cs.onSurface.withValues(alpha: kOpacityMedium);
+  final valueColor = warning
+      ? cs.error
+      : darkTheme
+          ? Colors.white.withValues(alpha: kReconTextHighOpacity)
+          : cs.onSurface;
   final isNotSet = value == 'Not set';
+  final actualValueColor = isNotSet
+      ? (darkTheme
+          ? Colors.white.withValues(alpha: kReconTextMutedOpacity)
+          : cs.onSurface.withValues(alpha: kOpacityLow))
+      : valueColor;
+  final chevronColor = darkTheme
+      ? Colors.white.withValues(alpha: 0.4)
+      : cs.onSurface.withValues(alpha: kOpacityLow);
   
   return Material(
     color: Colors.transparent,
     child: InkWell(
       onTap: () => _showEditDialog(context, med, field),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         child: Row(
           children: [
             Icon(
               icon,
               size: 20,
-              color: cs.primary,
+              color: iconColor,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,18 +425,17 @@ Widget _editableInfoRow(
                     label,
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: kFontWeightSemiBold,
-                      color: cs.onSurface.withValues(alpha: kOpacityMedium),
+                      color: labelColor,
                       fontSize: 11,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                   Text(
                     value,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: kFontWeightMedium,
-                      color: isNotSet
-                          ? cs.onSurface.withValues(alpha: kOpacityLow)
-                          : textColor,
+                      color: actualValueColor,
                       fontStyle: isNotSet ? FontStyle.italic : null,
                     ),
                   ),
@@ -398,7 +445,7 @@ Widget _editableInfoRow(
             Icon(
               Icons.chevron_right,
               size: 20,
-              color: cs.onSurface.withValues(alpha: kOpacityLow),
+              color: chevronColor,
             ),
           ],
         ),
@@ -459,16 +506,20 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
+          },
           child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () {
             final value = controller.text.trim();
             if (value.isEmpty && field != 'manufacturer' && field != 'location') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Value cannot be empty')),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Value cannot be empty')),
+                );
+              }
               return;
             }
             
@@ -483,9 +534,11 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
               case 'strength':
                 final num = double.tryParse(value);
                 if (num == null || num <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a valid number')),
-                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid number')),
+                    );
+                  }
                   return;
                 }
                 updated = med.copyWith(strengthValue: num);
@@ -493,9 +546,11 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
               case 'stock':
                 final num = double.tryParse(value);
                 if (num == null || num < 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a valid number')),
-                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid number')),
+                    );
+                  }
                   return;
                 }
                 updated = med.copyWith(stockValue: num);
@@ -510,9 +565,11 @@ void _showEditDialog(BuildContext context, Medication med, String field) {
             box.put(med.id, updated);
             Navigator.pop(context);
             
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${getFieldLabel()} updated')),
-            );
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${getFieldLabel()} updated')),
+              );
+            }
           },
           child: const Text('Save'),
         ),
