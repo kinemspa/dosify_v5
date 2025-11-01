@@ -34,9 +34,6 @@ class MedicationDetailPage extends StatelessWidget {
       );
     }
 
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     Widget detailRow(String label, String? value) {
       if (value == null || value.isEmpty) return const SizedBox.shrink();
       return Padding(
@@ -228,14 +225,28 @@ Widget _modernSection(
   );
 }
 
-// Compact info header card with all key details
+// Visually distinct header with gradient and inline editing
 Widget _buildInfoHeader(BuildContext context, Medication med) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
   
   return Container(
-    decoration: softWhiteCardDecoration(context),
-    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          cs.primaryContainer,
+          cs.primaryContainer.withValues(alpha: 0.7),
+        ],
+      ),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: cs.primary.withValues(alpha: 0.2),
+        width: 1.5,
+      ),
+    ),
+    padding: const EdgeInsets.all(16),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -243,37 +254,54 @@ Widget _buildInfoHeader(BuildContext context, Medication med) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: cs.primary,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 _formIcon(med.form),
-                color: cs.primary,
-                size: 24,
+                color: Colors.white,
+                size: 32,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     med.name,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: kFontWeightBold,
-                      color: cs.onSurface,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: kFontWeightExtraBold,
+                      color: cs.onPrimaryContainer,
+                      height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _formLabel(med.form),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: kFontWeightMedium,
-                      color: cs.onSurfaceVariant.withValues(
-                        alpha: kOpacityMediumHigh,
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _formLabel(med.form),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: kFontWeightBold,
+                        color: cs.primary,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
@@ -282,80 +310,237 @@ Widget _buildInfoHeader(BuildContext context, Medication med) {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        _infoRow(
-          context,
-          Icons.business,
-          'Manufacturer',
-          med.manufacturer ?? '—',
-        ),
-        _infoRow(
-          context,
-          Icons.science_outlined,
-          'Strength',
-          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-        ),
-        _infoRow(
-          context,
-          Icons.inventory_2_outlined,
-          'Stock',
-          '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
-          warning: med.lowStockEnabled && 
-                   med.stockValue <= (med.lowStockThreshold ?? 0),
-        ),
-        if (med.storageLocation != null && med.storageLocation!.isNotEmpty)
-          _infoRow(
-            context,
-            Icons.place_outlined,
-            'Location',
-            med.storageLocation!,
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(10),
           ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              _editableInfoRow(
+                context,
+                med,
+                Icons.business,
+                'Manufacturer',
+                med.manufacturer ?? 'Not set',
+                () => _showEditDialog(context, med, 'manufacturer'),
+              ),
+              const Divider(height: 16),
+              _editableInfoRow(
+                context,
+                med,
+                Icons.science_outlined,
+                'Strength',
+                '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                () => _showEditDialog(context, med, 'strength'),
+              ),
+              const Divider(height: 16),
+              _editableInfoRow(
+                context,
+                med,
+                Icons.inventory_2_outlined,
+                'Stock',
+                '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
+                () => _showEditDialog(context, med, 'stock'),
+                warning: med.lowStockEnabled && 
+                         med.stockValue <= (med.lowStockThreshold ?? 0),
+              ),
+              const Divider(height: 16),
+              _editableInfoRow(
+                context,
+                med,
+                Icons.place_outlined,
+                'Location',
+                (med.storageLocation?.isNotEmpty ?? false)
+                    ? med.storageLocation!
+                    : 'Not set',
+                () => _showEditDialog(context, med, 'location'),
+              ),
+            ],
+          ),
+        ),
       ],
     ),
   );
 }
 
-Widget _infoRow(
+Widget _editableInfoRow(
   BuildContext context,
+  Medication med,
   IconData icon,
   String label,
-  String value, {
+  String value,
+  VoidCallback onTap, {
   bool warning = false,
 }) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
   final textColor = warning ? cs.error : cs.onSurface;
+  final isNotSet = value == 'Not set';
   
-  return Padding(
-    padding: const EdgeInsets.only(top: 8),
-    child: Row(
-      children: [
-        Icon(
-          icon,
-          size: 16,
-          color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          '$label:',
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: kFontWeightSemiBold,
-            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(8),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: cs.primary.withValues(alpha: kOpacityMedium),
           ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: kFontWeightMedium,
-              color: textColor,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: kFontWeightSemiBold,
+                    color: cs.onSurface.withValues(alpha: kOpacityMedium),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: kFontWeightMedium,
+                    color: isNotSet
+                        ? cs.onSurface.withValues(alpha: kOpacityLow)
+                        : textColor,
+                    fontStyle: isNotSet ? FontStyle.italic : null,
+                  ),
+                ),
+              ],
             ),
           ),
+          Icon(
+            Icons.edit_outlined,
+            size: 16,
+            color: cs.onSurface.withValues(alpha: kOpacityLow),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void _showEditDialog(BuildContext context, Medication med, String field) {
+  final controller = TextEditingController();
+  
+  // Set initial value based on field
+  switch (field) {
+    case 'manufacturer':
+      controller.text = med.manufacturer ?? '';
+      break;
+    case 'strength':
+      controller.text = med.strengthValue.toString();
+      break;
+    case 'stock':
+      controller.text = med.stockValue.toString();
+      break;
+    case 'location':
+      controller.text = med.storageLocation ?? '';
+      break;
+  }
+  
+  String getFieldLabel() {
+    switch (field) {
+      case 'manufacturer':
+        return 'Manufacturer';
+      case 'strength':
+        return 'Strength';
+      case 'stock':
+        return 'Stock';
+      case 'location':
+        return 'Storage Location';
+      default:
+        return field;
+    }
+  }
+  
+  showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Edit ${getFieldLabel()}'),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        keyboardType: field == 'strength' || field == 'stock'
+            ? TextInputType.number
+            : TextInputType.text,
+        decoration: buildFieldDecoration(
+          context,
+          hint: 'Enter ${getFieldLabel().toLowerCase()}',
+        ),
+        style: bodyTextStyle(context),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final value = controller.text.trim();
+            if (value.isEmpty && field != 'manufacturer' && field != 'location') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Value cannot be empty')),
+              );
+              return;
+            }
+            
+            // Update medication based on field
+            final box = Hive.box<Medication>('medications');
+            Medication updated;
+            
+            switch (field) {
+              case 'manufacturer':
+                updated = med.copyWith(manufacturer: value.isEmpty ? null : value);
+                break;
+              case 'strength':
+                final num = double.tryParse(value);
+                if (num == null || num <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid number')),
+                  );
+                  return;
+                }
+                updated = med.copyWith(strengthValue: num);
+                break;
+              case 'stock':
+                final num = double.tryParse(value);
+                if (num == null || num < 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a valid number')),
+                  );
+                  return;
+                }
+                updated = med.copyWith(stockValue: num);
+                break;
+              case 'location':
+                updated = med.copyWith(storageLocation: value.isEmpty ? null : value);
+                break;
+              default:
+                return;
+            }
+            
+            box.put(med.id, updated);
+            Navigator.pop(context);
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${getFieldLabel()} updated')),
+            );
+          },
+          child: const Text('Save'),
         ),
       ],
     ),
-  );
+  ).then((_) => controller.dispose());
 }
 
 
