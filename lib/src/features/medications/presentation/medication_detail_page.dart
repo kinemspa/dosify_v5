@@ -8,11 +8,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class MedicationDetailPage extends StatelessWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
@@ -37,40 +39,23 @@ class MedicationDetailPage extends StatelessWidget {
 
     Widget detailRow(String label, String? value) {
       if (value == null || value.isEmpty) return const SizedBox.shrink();
-      return Container(
-        padding: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: cs.outlineVariant.withValues(alpha: 0.2),
-            ),
-          ),
-        ),
-        margin: const EdgeInsets.only(bottom: 16),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: 100,
               child: Text(
                 label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: cs.onSurface.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
-                ),
+                style: fieldLabelStyle(context),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 8),
             Expanded(
-              flex: 3,
               child: Text(
                 value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: cs.onSurface,
-                  fontWeight: FontWeight.w600,
-                  height: 1.5,
-                ),
+                style: bodyTextStyle(context),
               ),
             ),
           ],
@@ -153,27 +138,17 @@ class MedicationDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          // Hero header with gradient and medication icon
-          _buildHeroHeader(context, med),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Compact info header
+          _buildInfoHeader(context, med),
+          const SizedBox(height: 16),
           
-          // Content sections
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Quick stats row
-                _buildQuickStatsRow(context, med),
-                const SizedBox(height: 20),
-                
-                // Form-specific content
-                ..._buildFormSpecificSections(context, med, detailRow),
-                
-                const SizedBox(height: 80),
-              ]),
-            ),
-          ),
+          // Form-specific content
+          ..._buildFormSpecificSections(context, med, detailRow),
+          
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -211,7 +186,7 @@ String _stockUnitLabel(StockUnit u) => switch (u) {
   StockUnit.g => 'g',
 };
 
-// Modern elevated section with gradient accent
+// Section card matching app's large card styling
 Widget _modernSection(
   BuildContext context,
   String title,
@@ -227,321 +202,155 @@ Widget _modernSection(
   if (visibleChildren.isEmpty) return const SizedBox.shrink();
 
   return Container(
-    decoration: BoxDecoration(
-      color: cs.surface,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(
-        color: cs.outlineVariant.withValues(alpha: 0.3),
-        width: 1,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: cs.shadow.withValues(alpha: 0.08),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
+    decoration: softWhiteCardDecoration(context),
+    padding: const EdgeInsets.all(12),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Gradient header
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                cs.primaryContainer.withValues(alpha: 0.3),
-                cs.primaryContainer.withValues(alpha: 0.1),
-              ],
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: cs.primary,
             ),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: sectionTitleStyle(context),
             ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 20, color: cs.primary),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
-        // Content
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: visibleChildren,
-          ),
-        ),
+        const SizedBox(height: 12),
+        ...visibleChildren,
       ],
     ),
   );
 }
 
-// Stunning hero header with parallax effect
-Widget _buildHeroHeader(BuildContext context, Medication med) {
+// Compact info header card with all key details
+Widget _buildInfoHeader(BuildContext context, Medication med) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
   
-  return SliverAppBar(
-    expandedHeight: 200,
-    pinned: false,
-    backgroundColor: Colors.transparent,
-    flexibleSpace: FlexibleSpaceBar(
-      background: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              cs.primary,
-              cs.primary.withValues(alpha: 0.85),
-              cs.primaryContainer,
-            ],
-          ),
-        ),
-        child: Stack(
+  return Container(
+    decoration: softWhiteCardDecoration(context),
+    padding: const EdgeInsets.all(12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Decorative circles
-            Positioned(
-              right: -30,
-              top: -30,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                _formIcon(med.form),
+                color: cs.primary,
+                size: 24,
               ),
             ),
-            Positioned(
-              left: -50,
-              bottom: -50,
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.05),
-                ),
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 80, 20, 24),
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: Icon(
-                          _formIcon(med.form),
-                          color: Colors.white,
-                          size: 36,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              med.name,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _formLabel(med.form),
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  Text(
+                    med.name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: kFontWeightBold,
+                      color: cs.onSurface,
+                    ),
                   ),
-                  if (med.manufacturer != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      med.manufacturer!,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w600,
+                  const SizedBox(height: 2),
+                  Text(
+                    _formLabel(med.form),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: kFontWeightMedium,
+                      color: cs.onSurfaceVariant.withValues(
+                        alpha: kOpacityMediumHigh,
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
           ],
         ),
-      ),
-    ),
-  );
-}
-
-// Quick stats cards in a scrollable row
-Widget _buildQuickStatsRow(BuildContext context, Medication med) {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: [
-        _buildStatCard(
+        const SizedBox(height: 12),
+        _infoRow(
           context,
-          icon: Icons.inventory_2_rounded,
-          label: 'Current Stock',
-          value: _formatNumber(med.stockValue),
-          unit: _stockUnitLabel(med.stockUnit),
-          color: const Color(0xFF6366F1), // Indigo
+          Icons.business,
+          'Manufacturer',
+          med.manufacturer ?? '—',
+        ),
+        _infoRow(
+          context,
+          Icons.science_outlined,
+          'Strength',
+          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+        ),
+        _infoRow(
+          context,
+          Icons.inventory_2_outlined,
+          'Stock',
+          '${_formatNumber(med.stockValue)} ${_stockUnitLabel(med.stockUnit)}',
           warning: med.lowStockEnabled && 
                    med.stockValue <= (med.lowStockThreshold ?? 0),
         ),
-        const SizedBox(width: 12),
-        if (med.strengthValue > 0)
-          _buildStatCard(
+        if (med.storageLocation != null && med.storageLocation!.isNotEmpty)
+          _infoRow(
             context,
-            icon: Icons.science_rounded,
-            label: 'Strength',
-            value: _formatNumber(med.strengthValue),
-            unit: _unitLabel(med.strengthUnit),
-            color: const Color(0xFF8B5CF6), // Purple
-          ),
-        const SizedBox(width: 12),
-        if (med.volumePerDose != null && med.volumePerDose! > 0)
-          _buildStatCard(
-            context,
-            icon: Icons.water_drop_rounded,
-            label: 'Volume',
-            value: _formatNumber(med.volumePerDose!),
-            unit: med.volumeUnit?.name ?? 'ml',
-            color: const Color(0xFF06B6D4), // Cyan
-          ),
-        const SizedBox(width: 12),
-        if (med.expiry != null)
-          _buildStatCard(
-            context,
-            icon: Icons.event_rounded,
-            label: 'Expires',
-            value: DateFormat('MMM d').format(med.expiry!),
-            unit: DateFormat('y').format(med.expiry!),
-            color: const Color(0xFFEC4899), // Pink
-            warning: _isExpiringSoon(med.expiry!),
+            Icons.place_outlined,
+            'Location',
+            med.storageLocation!,
           ),
       ],
     ),
   );
 }
 
-Widget _buildStatCard(
-  BuildContext context, {
-  required IconData icon,
-  required String label,
-  required String value,
-  required String unit,
-  required Color color,
+Widget _infoRow(
+  BuildContext context,
+  IconData icon,
+  String label,
+  String value, {
   bool warning = false,
 }) {
   final theme = Theme.of(context);
-  final displayColor = warning ? theme.colorScheme.error : color;
+  final cs = theme.colorScheme;
+  final textColor = warning ? cs.error : cs.onSurface;
   
-  return Container(
-    width: 140,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: displayColor.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: displayColor.withValues(alpha: 0.2),
-        width: 1.5,
-      ),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  return Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: displayColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: displayColor, size: 24),
+        Icon(
+          icon,
+          size: 16,
+          color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(width: 8),
         Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
+          '$label:',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: kFontWeightSemiBold,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
           ),
         ),
-        const SizedBox(height: 4),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: value,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: displayColor,
-                  fontWeight: FontWeight.w900,
-                  height: 1.2,
-                ),
-              ),
-              TextSpan(
-                text: ' $unit',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: displayColor.withValues(alpha: 0.8),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: kFontWeightMedium,
+              color: textColor,
+            ),
           ),
         ),
       ],
