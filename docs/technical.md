@@ -1,5 +1,43 @@
 # Technical Overview — Dosifi v5
 
+## Recent Changes
+
+### Dose Logging System (2025-11-05)
+
+**Added comprehensive dose history tracking:**
+
+- **DoseLog Domain Model** (`lib/src/features/schedules/domain/dose_log.dart`):
+  - Tracks every dose action: taken, skipped, snoozed
+  - Stores medication/schedule names (not just IDs) for historical reporting
+  - Persists even after medication or schedule deletion
+  - Records scheduled vs actual time (calculates on-time adherence)
+  - Supports actual dose amount if different from scheduled
+  - Hive typeId: 41 (DoseLog), 42 (DoseAction enum)
+  
+- **Key Fields**:
+  - `scheduleId`, `scheduleName` - preserved after deletion
+  - `medicationId`, `medicationName` - preserved after deletion  
+  - `scheduledTime` (UTC) - when dose should be taken
+  - `actionTime` (UTC) - when action recorded
+  - `doseValue`, `doseUnit` - scheduled dose
+  - `actualDoseValue`, `actualDoseUnit` - optional actual dose
+  - `action` - taken/skipped/snoozed
+  - `wasOnTime` - calculated (within 30min window)
+  - `minutesOffset` - early/late offset
+
+- **DoseLogRepository** (`lib/src/features/schedules/data/dose_log_repository.dart`):
+  - Query by schedule, medication, date, or date range
+  - Calculate adherence statistics (adherence %, on-time %)
+  - Never deletes logs (preserves history for reporting)
+
+- **Implementation**:
+  - Schedule detail page: Take/Snooze/Skip buttons now record to dose_logs Hive box
+  - Generates unique IDs using timestamp + random suffix
+  - Shows snackbar confirmation after action
+  - Ready for adherence reporting and calendar color-coding
+
+---
+
 Architecture
 - Flutter (Dart 3.x) mobile app, Android-first
 - State management: Riverpod

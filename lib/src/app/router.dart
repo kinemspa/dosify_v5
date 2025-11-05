@@ -25,6 +25,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_sy
 import 'package:dosifi_v5/src/features/medications/presentation/add_single_dose_vial_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_detail_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/select_medication_for_schedule_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/bottom_nav_settings_page.dart';
@@ -82,6 +83,14 @@ final router = GoRouter(
           path: '/schedules/add',
           name: 'addSchedule',
           builder: (context, state) => const AddEditSchedulePage(),
+        ),
+        GoRoute(
+          path: '/schedules/detail/:id',
+          name: 'scheduleDetail',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return ScheduleDetailPage(scheduleId: id);
+          },
         ),
         GoRoute(
           path: '/schedules/select-medication',

@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+
+### Dose Logging System (2025-11-05)
+- **Added comprehensive dose history tracking**
+  - New `DoseLog` domain model with Hive persistence (typeId: 41, 42)
+  - Stores medication/schedule names (not just IDs) for historical reporting after deletion
+  - Records scheduled vs actual time with automatic on-time calculation (30min window)
+  - Tracks action type: taken, skipped, snoozed
+  - Supports actual dose amount if different from scheduled
+  - `DoseLogRepository` with adherence statistics calculation
+  - Schedule detail page: Take/Snooze/Skip buttons now record to dose_logs Hive box
+  - Preserves full history even when medications or schedules are deleted
+  - Foundation for adherence reporting and calendar color-coding
+
 - **Multi-Dose Vial Wizard: Complete UX Overhaul**
   - Summary card improvements:
     - Removed reconstitution info from summary - shows only total vial volume

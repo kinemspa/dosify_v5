@@ -1,5 +1,17 @@
 # UI Standards for Medication Editors
 
+**CRITICAL: All UI implementations MUST use centralized design system constants and widgets.**
+
+See `AGENTS.md` and `APP-RULES.md` for enforcement details.
+
+## Centralized Files (Use These FIRST):
+- `lib/src/core/design_system.dart` - spacing, radii, opacity, colors
+- `lib/src/widgets/` - reusable widgets
+- `lib/src/widgets/detail_page_scaffold.dart` - detail page layouts
+- `lib/src/widgets/unified_form.dart` - form layouts
+
+---
+
 This document defines the shared visual rules for form controls used across all medication editors (Tablet Hybrid, Capsule, Injection, etc.).
 
 - Field height: 36 px for all single-line TextFields and DropdownButtonFormField controls
