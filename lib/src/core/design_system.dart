@@ -61,6 +61,16 @@ const double kIconSizeLarge = 24;
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
 
+/// Calendar component sizing
+const double kCalendarDayHeight =
+    60; // Height of day cell in month view (reduced from 80)
+const double kCalendarHourHeight = 60; // Height of hour row in day view
+const double kCalendarDoseBlockHeight = 60; // Default dose block height
+const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
+const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
+const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
+const double kCalendarHeaderHeight = 56; // Calendar header with navigation
+
 // ============================================================================
 // SPACING CONSTANTS
 // ============================================================================

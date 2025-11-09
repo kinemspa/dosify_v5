@@ -6,14 +6,17 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/dose_input_field.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -52,6 +55,10 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
   bool _nameAuto = true;
   Medication? _selectedMed;
   DateTime _startDate = DateTime.now();
+
+  // Week 2: DoseInputField integration
+  // DoseCalculationResult? _doseResult; // TODO: Implement dose calculation UI
+  SyringeType? _selectedSyringeType; // User-selected syringe size for MDV
 
   @override
   void initState() {
@@ -152,7 +159,25 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
           } else {
             _doseUnit.text = 'mg';
           }
-          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
+          // Week 5: Pre-fill reasonable default dose if empty
+          if (_doseValue.text.trim().isEmpty) {
+            // Use a reasonable default based on strength
+            if (u == Unit.mcgPerMl) {
+              _doseValue.text = selected.strengthValue.toString();
+              _doseUnit.text = 'mcg';
+            } else if (u == Unit.mgPerMl) {
+              _doseValue.text = selected.strengthValue.toString();
+              _doseUnit.text = 'mg';
+            } else if (u == Unit.gPerMl) {
+              _doseValue.text = selected.strengthValue.toString();
+              _doseUnit.text = 'g';
+            } else if (u == Unit.unitsPerMl) {
+              _doseValue.text = selected.strengthValue.toString();
+              _doseUnit.text = 'IU';
+            } else {
+              _doseValue.text = '1';
+            }
+          }
       }
       _maybeAutoName();
     });
@@ -573,25 +598,181 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     );
   }
 
-  Widget _incBtn(String symbol, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      height: 28,
-      width: 28,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-          minimumSize: const Size(28, 28),
-          side: BorderSide(color: theme.colorScheme.outlineVariant),
-        ),
-        onPressed: onTap,
-        child: Text(
-          symbol,
-          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
-        ),
-      ),
-    );
+  String _getReconstitutionHelper() {
+    if (_selectedMed == null) return '';
+    if (_selectedMed!.form != MedicationForm.multiDoseVial) return '';
+    if (_selectedMed!.reconstitutedAt == null) return '';
+
+    // Show reconstitution date and expiry
+    final recon = _selectedMed!.reconstitutedAt!;
+    final expiry = _selectedMed!.reconstitutedVialExpiry;
+    final reconDate = '${recon.month}/${recon.day}/${recon.year}';
+
+    if (expiry != null) {
+      final now = DateTime.now();
+      final daysLeft = expiry.difference(now).inDays;
+      if (daysLeft < 0) {
+        return '⚠️ Vial expired ${-daysLeft} days ago (reconstituted $reconDate)';
+      } else if (daysLeft == 0) {
+        return '⚠️ Vial expires today (reconstituted $reconDate)';
+      } else if (daysLeft == 1) {
+        return 'ℹ️ Vial expires tomorrow (reconstituted $reconDate)';
+      } else if (daysLeft <= 3) {
+        return 'ℹ️ Vial expires in $daysLeft days (reconstituted $reconDate)';
+      } else {
+        return 'ℹ️ Vial reconstituted on $reconDate';
+      }
+    }
+
+    return 'ℹ️ Vial reconstituted on $reconDate';
+  }
+
+  String _getDoseHelperText() {
+    if (_selectedMed == null) return '';
+
+    switch (_selectedMed!.form) {
+      case MedicationForm.tablet:
+        return 'Choose your input method: Tap quick buttons (¼, ½, 1, 2) for common doses, or toggle between "Tablets" and "Strength" modes. In Tablets mode, enter the number of tablets. In Strength mode, enter the total mg/mcg dose.';
+      case MedicationForm.capsule:
+        return 'Enter the number of capsules to take per dose. Use the +/- buttons or type directly.';
+      case MedicationForm.prefilledSyringe:
+        return 'Enter the number of pre-filled syringes to inject per dose.';
+      case MedicationForm.singleDoseVial:
+        return 'Enter the number of single-dose vials to use per dose.';
+      case MedicationForm.multiDoseVial:
+        return 'Choose your input method: Toggle between "Strength" (mcg/mg), "Volume" (ml), and "Units" modes. Or drag the syringe plunger to your desired dose. All three values update automatically based on vial concentration.';
+    }
+  }
+
+  // Week 2: Helper methods for DoseInputField integration
+  double _getStrengthPerUnitMcg() {
+    if (_selectedMed == null) return 0;
+
+    switch (_selectedMed!.form) {
+      case MedicationForm.tablet:
+      case MedicationForm.capsule:
+      case MedicationForm.prefilledSyringe:
+      case MedicationForm.singleDoseVial:
+        // Convert strength to mcg
+        final value = _selectedMed!.strengthValue;
+        return switch (_selectedMed!.strengthUnit) {
+          Unit.mcg || Unit.mcgPerMl => value,
+          Unit.mg || Unit.mgPerMl => value * 1000,
+          Unit.g || Unit.gPerMl => value * 1000000,
+          Unit.units || Unit.unitsPerMl => value, // Treat as mcg equivalent
+        };
+      case MedicationForm.multiDoseVial:
+        return 0; // MDV uses different parameters
+    }
+  }
+
+  double? _getVolumePerUnitMicroliter() {
+    if (_selectedMed == null) return null;
+
+    if (_selectedMed!.volumePerDose != null) {
+      // Convert to microliters based on volumeUnit
+      final volume = _selectedMed!.volumePerDose!;
+      return switch (_selectedMed!.volumeUnit) {
+        VolumeUnit.ml => volume * 1000,
+        VolumeUnit.l => volume * 1000000,
+        null => volume * 1000, // Default to ml
+      };
+    }
+
+    return null;
+  }
+
+  String _getStrengthUnit() {
+    if (_selectedMed == null) return 'mg';
+
+    return switch (_selectedMed!.strengthUnit) {
+      Unit.mcg || Unit.mcgPerMl => 'mcg',
+      Unit.mg || Unit.mgPerMl => 'mg',
+      Unit.g || Unit.gPerMl => 'g',
+      Unit.units || Unit.unitsPerMl => 'units',
+    };
+  }
+
+  double? _getTotalVialStrengthMcg() {
+    if (_selectedMed == null ||
+        _selectedMed!.form != MedicationForm.multiDoseVial) {
+      return null;
+    }
+
+    // For MDV, calculate total strength in vial
+    final strength = _selectedMed!.strengthValue;
+    final perMl = _selectedMed!.perMlValue ?? strength;
+    final volume = _selectedMed!.containerVolumeMl ?? 1.0;
+
+    // Convert to mcg
+    final mcgPerMl = switch (_selectedMed!.strengthUnit) {
+      Unit.mcgPerMl => perMl,
+      Unit.mgPerMl => perMl * 1000,
+      Unit.gPerMl => perMl * 1000000,
+      Unit.unitsPerMl => perMl, // Treat as mcg equivalent
+      _ => perMl,
+    };
+
+    return mcgPerMl * volume * 1000; // Total mcg in vial
+  }
+
+  double? _getTotalVialVolumeMicroliter() {
+    if (_selectedMed == null ||
+        _selectedMed!.form != MedicationForm.multiDoseVial) {
+      return null;
+    }
+
+    final volumeMl = _selectedMed!.containerVolumeMl ?? 1.0;
+    return volumeMl * 1000; // Convert ml to microliters
+  }
+
+  SyringeType? _getSyringeType() {
+    if (_selectedMed == null ||
+        _selectedMed!.form != MedicationForm.multiDoseVial) {
+      return null;
+    }
+
+    // If user selected a syringe type, use it
+    if (_selectedSyringeType != null) {
+      return _selectedSyringeType;
+    }
+
+    // Otherwise auto-select based on vial volume
+    final volumeMl = _selectedMed!.containerVolumeMl ?? 1.0;
+    if (volumeMl <= 0.3) return SyringeType.ml_0_3;
+    if (volumeMl <= 0.5) return SyringeType.ml_0_5;
+    if (volumeMl <= 1.0) return SyringeType.ml_1_0;
+    if (volumeMl <= 3.0) return SyringeType.ml_3_0;
+    if (volumeMl <= 5.0) return SyringeType.ml_5_0;
+    return SyringeType.ml_10_0;
+  }
+
+  double? _getInitialStrengthMcg() {
+    if (widget.initial == null) return null;
+    return widget.initial!.doseMassMcg?.toDouble();
+  }
+
+  double? _getInitialTabletCount() {
+    if (widget.initial == null) return null;
+    if (widget.initial!.doseTabletQuarters != null) {
+      return widget.initial!.doseTabletQuarters! / 4.0;
+    }
+    return null;
+  }
+
+  int? _getInitialCapsuleCount() {
+    if (widget.initial == null) return null;
+    return widget.initial!.doseCapsules;
+  }
+
+  int? _getInitialInjectionCount() {
+    if (widget.initial == null) return null;
+    return widget.initial!.doseSyringes;
+  }
+
+  int? _getInitialVialCount() {
+    if (widget.initial == null) return null;
+    return widget.initial!.doseVials;
   }
 
   @override
@@ -704,147 +885,73 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
                   ],
                 ]),
                 const SizedBox(height: 10),
-                // Dose controls (Typed) in a card with summary
+                // Week 2: Dose controls using DoseInputField widget
                 if (_selectedMed != null)
                   _section(context, 'Dose', [
-                    LabelFieldRow(
-                      label: 'Dose value',
-                      field: SizedBox(
-                        height: 36,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _incBtn('−', () {
-                              final unit = _doseUnit.text.trim().toLowerCase();
-                              // Smart step: 0.25 for tablets, 1.0 for everything else
-                              final step = unit == 'tablets' ? 0.25 : 1.0;
-                              final v =
-                                  double.tryParse(_doseValue.text.trim()) ??
-                                  0.0;
-                              final nv = (v - step).clamp(0, 1e12);
-                              setState(() {
-                                _doseValue.text = (unit == 'tablets')
-                                    ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
-                                    : nv.round().toString();
-                                _coerceDoseValueForUnit();
-                                _maybeAutoName();
-                              });
-                            }),
-                            const SizedBox(width: 4),
-                            SizedBox(
-                              width: 120,
-                              child: Field36(
-                                child: TextFormField(
-                                  controller: _doseValue,
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    labelText: '',
-                                  ),
-                                  keyboardType:
-                                      (_doseUnit.text.trim().toLowerCase() ==
-                                          'tablets')
-                                      ? const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        )
-                                      : TextInputType.number,
-                                  onChanged: (_) {
-                                    _coerceDoseValueForUnit();
-                                    _maybeAutoName();
-                                    setState(() {});
-                                  },
-                                  validator: (v) {
-                                    final d = double.tryParse(v?.trim() ?? '');
-                                    if (d == null || d <= 0)
-                                      return 'Enter a positive number';
-                                    final unit = _doseUnit.text
-                                        .trim()
-                                        .toLowerCase();
-                                    if ([
-                                      'capsules',
-                                      'syringes',
-                                      'vials',
-                                    ].contains(unit)) {
-                                      if (d % 1 != 0)
-                                        return 'Whole numbers only';
-                                    }
-                                    if (unit == 'tablets') {
-                                      final q = (d * 4).roundToDouble();
-                                      if ((q - d * 4).abs() > 1e-6 &&
-                                          d % 0.25 != 0) {
-                                        return 'Use quarter-tablet steps (0.25)';
-                                      }
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            _incBtn('+', () {
-                              final unit = _doseUnit.text.trim().toLowerCase();
-                              // Smart step: 0.25 for tablets, 1.0 for everything else
-                              final step = unit == 'tablets' ? 0.25 : 1.0;
-                              final v =
-                                  double.tryParse(_doseValue.text.trim()) ??
-                                  0.0;
-                              final nv = (v + step).clamp(0, 1e12);
-                              setState(() {
-                                _doseValue.text = (unit == 'tablets')
-                                    ? nv.toStringAsFixed(nv % 1 == 0 ? 0 : 2)
-                                    : nv.round().toString();
-                                _coerceDoseValueForUnit();
-                                _maybeAutoName();
-                              });
-                            }),
-                          ],
-                        ),
-                      ),
+                    DoseInputField(
+                      medicationForm: _selectedMed!.form,
+                      strengthPerUnitMcg: _getStrengthPerUnitMcg(),
+                      volumePerUnitMicroliter: _getVolumePerUnitMicroliter(),
+                      strengthUnit: _getStrengthUnit(),
+                      // MDV-specific parameters
+                      totalVialStrengthMcg: _getTotalVialStrengthMcg(),
+                      totalVialVolumeMicroliter:
+                          _getTotalVialVolumeMicroliter(),
+                      syringeType: _getSyringeType(),
+                      // Initial values from existing schedule or defaults
+                      initialStrengthMcg: _getInitialStrengthMcg(),
+                      initialTabletCount: _getInitialTabletCount(),
+                      initialCapsuleCount: _getInitialCapsuleCount(),
+                      initialInjectionCount: _getInitialInjectionCount(),
+                      initialVialCount: _getInitialVialCount(),
+                      onDoseChanged: (result) {
+                        setState(() {
+                          // _doseResult = result; // TODO: Store calculation result
+                          // Update legacy fields for backward compatibility
+                          if (result.doseMassMcg != null) {
+                            _doseValue.text = result.doseMassMcg.toString();
+                            _doseUnit.text = 'mcg';
+                          }
+                        });
+                        _maybeAutoName();
+                      },
                     ),
-                    LabelFieldRow(
-                      label: 'Unit',
-                      field: Align(
-                        child: SizedBox(
-                          height: kFieldHeight,
-                          width: 120,
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _doseUnit.text.isEmpty
-                                ? null
-                                : _doseUnit.text,
-                            alignment: AlignmentDirectional.center,
-                            decoration: const InputDecoration(labelText: ''),
-                            items: _doseUnitOptions()
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    alignment: AlignmentDirectional.center,
-                                    child: Center(
-                                      child: Text(
-                                        e,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) {
-                              setState(() {
-                                _doseUnit.text = v ?? '';
-                                _coerceDoseValueForUnit();
-                                _maybeAutoName();
-                              });
-                            },
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'Required'
-                                : null,
+                    const SizedBox(height: 12),
+                    // Helper for dose input - moved below
+                    _helperBelowLeft(_getDoseHelperText()),
+                    const SizedBox(height: 8),
+                    // Syringe size selector for MDV
+                    if (_selectedMed!.form == MedicationForm.multiDoseVial)
+                      LabelFieldRow(
+                        label: 'Syringe Size',
+                        field: DropdownButtonFormField<SyringeType>(
+                          value: _selectedSyringeType ?? _getSyringeType(),
+                          decoration: buildFieldDecoration(
+                            context,
+                            hint: 'Select syringe size',
                           ),
+                          items: SyringeType.values.map((type) {
+                            return DropdownMenuItem(
+                              value: type,
+                              child: Text(type.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedSyringeType = value;
+                            });
+                          },
                         ),
                       ),
-                    ),
-                    _helperBelowLeft(
-                      'Enter dose amount and unit (tablets allow 0.25 steps)',
-                    ),
+                    if (_selectedMed!.form == MedicationForm.multiDoseVial)
+                      _helperBelowLeft(
+                        'Choose the syringe size for drawing from the vial',
+                      ),
+                    if (_selectedMed!.form == MedicationForm.multiDoseVial)
+                      const SizedBox(height: 8),
+                    // Week 5: Show reconstitution info if available
+                    if (_getReconstitutionHelper().isNotEmpty)
+                      _helperBelowLeft(_getReconstitutionHelper()),
                   ]),
                 const SizedBox(height: 10),
                 if (_selectedMed != null)
@@ -1254,49 +1361,6 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     return card;
   }
 
-  List<String> _doseUnitOptions() {
-    final med = _selectedMed;
-    if (med == null) {
-      return const [
-        'mg',
-        'mcg',
-        'g',
-        'tablets',
-        'capsules',
-        'syringes',
-        'vials',
-        'IU',
-      ];
-    }
-    switch (med.form) {
-      case MedicationForm.tablet:
-        return const ['tablets', 'mg'];
-      case MedicationForm.capsule:
-        return const ['capsules', 'mg'];
-      case MedicationForm.prefilledSyringe:
-        return const ['syringes'];
-      case MedicationForm.singleDoseVial:
-        return const ['vials'];
-      case MedicationForm.multiDoseVial:
-        return const ['mg', 'mcg', 'g', 'IU'];
-    }
-  }
-
-  void _coerceDoseValueForUnit() {
-    final unit = _doseUnit.text.trim().toLowerCase();
-    final val = double.tryParse(_doseValue.text.trim());
-    if (val == null) return;
-    if (unit == 'tablets') {
-      // Round to nearest quarter tablet
-      final q = (val * 4).round() / 4.0;
-      _doseValue.text = q.toStringAsFixed(
-        q % 1 == 0 ? 0 : (q * 4 % 1 == 0 ? 2 : 2),
-      );
-    } else if (['capsules', 'syringes', 'vials'].contains(unit)) {
-      _doseValue.text = val.round().toString();
-    }
-  }
-
   void _maybeAutoName() {
     if (!_nameAuto) return;
     final med = _medicationName.text.trim();
@@ -1304,6 +1368,23 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
     final unit = _doseUnit.text.trim();
     if (med.isEmpty || dose.isEmpty || unit.isEmpty) return;
     _name.text = '$med — $dose $unit';
+  }
+
+  String _formatDoseValue(double value, String unit) {
+    // Convert mcg to mg if >= 1000
+    if (unit.toLowerCase() == 'mcg' && value >= 1000) {
+      final mgValue = value / 1000;
+      final formatted = mgValue == mgValue.roundToDouble()
+          ? mgValue.toStringAsFixed(0)
+          : mgValue.toStringAsFixed(2);
+      return '$formatted mg';
+    }
+
+    // Otherwise return as-is
+    final formatted = value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(2);
+    return '$formatted$unit';
   }
 
   String _getUnitLabel(Unit u) => switch (u) {
@@ -1397,10 +1478,7 @@ class _AddEditSchedulePageState extends State<AddEditSchedulePage> {
         doseUnitText.toLowerCase() == 'capsules' ||
         doseUnitText.toLowerCase() == 'capsule') {
       final totalStrength = strengthVal * doseVal;
-      final totalStr = totalStrength == totalStrength.roundToDouble()
-          ? totalStrength.toStringAsFixed(0)
-          : totalStrength.toStringAsFixed(2);
-      strengthInfo = ' is $totalStr$strengthUnit';
+      strengthInfo = ' is ${_formatDoseValue(totalStrength, strengthUnit)}';
     } else {
       // For mg/mcg/g doses, strength is the dose itself
       strengthInfo = ' is $doseStr$doseUnitText';

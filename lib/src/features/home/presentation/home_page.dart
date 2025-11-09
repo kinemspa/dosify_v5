@@ -39,6 +39,16 @@ class HomePage extends StatelessWidget {
                   icon: const Icon(Icons.medication),
                   label: const Text('Medications'),
                 ),
+                ElevatedButton.icon(
+                  onPressed: () => context.push('/schedules'),
+                  icon: const Icon(Icons.schedule),
+                  label: const Text('Schedules'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => context.push('/calendar'),
+                  icon: const Icon(Icons.calendar_month),
+                  label: const Text('Calendar'),
+                ),
               ],
             ),
           ],

@@ -62,17 +62,32 @@ class ScheduleSummaryCard extends StatelessWidget {
     }
   }
 
-  String _getStockUnitLabel(Medication m) {
-    switch (m.form) {
+  // String _getStockUnitLabel(Medication m) {
+  //   switch (m.form) {
+  //     case MedicationForm.tablet:
+  //       return 'tablets';
+  //     case MedicationForm.capsule:
+  //       return 'capsules';
+  //     case MedicationForm.prefilledSyringe:
+  //       return 'syringes';
+  //     case MedicationForm.singleDoseVial:
+  //     case MedicationForm.multiDoseVial:
+  //       return 'vials';
+  //   }
+  // }
+
+  String _getFormLabel(MedicationForm form) {
+    switch (form) {
       case MedicationForm.tablet:
         return 'tablets';
       case MedicationForm.capsule:
         return 'capsules';
       case MedicationForm.prefilledSyringe:
-        return 'syringes';
+        return 'syringe';
       case MedicationForm.singleDoseVial:
+        return 'vial';
       case MedicationForm.multiDoseVial:
-        return 'vials';
+        return 'vial';
     }
   }
 
@@ -128,7 +143,6 @@ class ScheduleSummaryCard extends StatelessWidget {
 
     final med = medication!;
     final unitLabel = _getUnitLabel(med.strengthUnit);
-    final stockLabel = _getStockUnitLabel(med);
 
     // Resolve expiry text
     String? expDisplay;
@@ -162,7 +176,7 @@ class ScheduleSummaryCard extends StatelessWidget {
                 child: Icon(_getMedicationIcon(med.form), color: fg),
               ),
               const SizedBox(width: 12),
-              // Med Name + Manufacturer
+              // Med Name + Manufacturer + Strength
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,23 +190,33 @@ class ScheduleSummaryCard extends StatelessWidget {
                         color: fg,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     if (med.manufacturer != null &&
-                        med.manufacturer!.isNotEmpty) ...{
-                      const SizedBox(height: 2),
+                        med.manufacturer!.isNotEmpty)
                       Text(
                         med.manufacturer!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: fg.withValues(alpha: 0.9),
+                          fontSize: 11,
                         ),
                       ),
-                    },
+                    const SizedBox(height: 2),
+                    // Strength - moved below manufacturer
+                    Text(
+                      '${_fmt2(med.strengthValue)}$unitLabel ${_getFormLabel(med.form)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: fg.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              // Right side: Expiry, Strength, Stock
+              // Right side: Expiry and Stock
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -200,23 +224,18 @@ class ScheduleSummaryCard extends StatelessWidget {
                   if (expDisplay != null && expDisplay.isNotEmpty)
                     Text(
                       'Exp: $expDisplay',
-                      style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: fg,
+                        fontSize: 11,
+                      ),
                     ),
                   const SizedBox(height: 4),
-                  // Strength
-                  Text(
-                    '${_fmt2(med.strengthValue)} $unitLabel',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: fg.withValues(alpha: 0.85),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
                   // Remaining tablets/stock
                   Text(
-                    '${_fmt2(med.stockValue)} $stockLabel remaining',
+                    '${_fmt2(med.stockValue)} remaining',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: fg.withValues(alpha: 0.85),
+                      fontSize: 11,
                     ),
                   ),
                 ],

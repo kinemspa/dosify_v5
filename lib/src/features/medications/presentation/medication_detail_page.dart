@@ -15,6 +15,8 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -159,6 +161,37 @@ class MedicationDetailPage extends StatelessWidget {
                 ),
                 centerTitle: true,
                 actions: [
+                  // Edit button
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                    tooltip: 'Edit Medication',
+                    onPressed: () {
+                      // Navigate to appropriate edit wizard based on medication form
+                      switch (updatedMed.form) {
+                        case MedicationForm.tablet:
+                          context.push(
+                            '/medications/edit/tablet/${updatedMed.id}',
+                          );
+                        case MedicationForm.capsule:
+                          context.push(
+                            '/medications/edit/capsule/${updatedMed.id}',
+                          );
+                        case MedicationForm.prefilledSyringe:
+                          context.push(
+                            '/medications/edit/injection/pfs/${updatedMed.id}',
+                          );
+                        case MedicationForm.singleDoseVial:
+                          context.push(
+                            '/medications/edit/injection/single/${updatedMed.id}',
+                          );
+                        case MedicationForm.multiDoseVial:
+                          context.push(
+                            '/medications/edit/injection/multi/${updatedMed.id}',
+                          );
+                      }
+                    },
+                  ),
+                  // Menu button
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.menu, color: Colors.white),
                     onSelected: (value) {
@@ -1069,6 +1102,23 @@ class MedicationDetailPage extends StatelessWidget {
           ],
         ),
       ],
+
+      // Dose Calendar Section
+      const SizedBox(height: 16),
+      SectionFormCard(
+        neutral: true,
+        title: 'Dose Calendar',
+        children: [
+          SizedBox(
+            height: 400,
+            child: DoseCalendarWidget(
+              variant: CalendarVariant.compact,
+              defaultView: CalendarView.week,
+              medicationId: med.id,
+            ),
+          ),
+        ],
+      ),
 
       if (med.notes != null && med.notes!.isNotEmpty) ...[
         const SizedBox(height: 16),

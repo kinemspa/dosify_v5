@@ -6,6 +6,76 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 class ScheduleScheduler {
+  /// Maximum alarms we'll use across ALL schedules to stay well under Android's 500 limit.
+  /// Leaves room for other apps and system alarms.
+  static const int _maxGlobalAlarms = 400;
+
+  /// Minimum days to schedule ahead for each schedule (ensures near-term coverage).
+  static const int _minDaysPerSchedule = 3;
+
+  /// Maximum days to schedule ahead when budget allows.
+  static const int _maxDaysPerSchedule = 7;
+
+  /// Estimates how many alarms would be needed for a schedule over N days.
+  static int _estimateAlarmCount(Schedule s, int days) {
+    final timesPerDay = (s.timesOfDay ?? [s.minutesOfDay]).length;
+    if (s.hasCycle) {
+      final cycleLength = s.cycleEveryNDays!.clamp(1, 365);
+      final occurrencesInPeriod = (days / cycleLength).ceil();
+      return occurrencesInPeriod * timesPerDay;
+    } else {
+      // Weekly pattern - count matching days in period
+      final daysOfWeek = s.daysOfWeek;
+      var matchingDays = 0;
+      for (var i = 0; i < days; i++) {
+        final weekday = (DateTime.now().weekday + i - 1) % 7 + 1;
+        if (daysOfWeek.contains(weekday)) matchingDays++;
+      }
+      return matchingDays * timesPerDay;
+    }
+  }
+
+  /// Calculates how many days to schedule for this schedule based on global budget.
+  static Future<int> _calculateScheduleDays(Schedule s) async {
+    final box = Hive.box<Schedule>('schedules');
+    final allActive = box.values.where((sch) => sch.active).toList();
+
+    // Calculate total alarms needed if we schedule _minDaysPerSchedule for all
+    var totalNeeded = 0;
+    for (final schedule in allActive) {
+      totalNeeded += _estimateAlarmCount(schedule, _minDaysPerSchedule);
+    }
+
+    print(
+      '[ScheduleScheduler] Active schedules: ${allActive.length}, '
+      'Min alarms needed: $totalNeeded / $_maxGlobalAlarms',
+    );
+
+    if (totalNeeded > _maxGlobalAlarms) {
+      // Critical: Can't even schedule minimum. Return minimum anyway and warn.
+      print(
+        '[ScheduleScheduler] WARNING: Too many schedules! '
+        'Exceeding alarm budget. Some notifications may be missed.',
+      );
+      return _minDaysPerSchedule;
+    }
+
+    // We have budget. Try to schedule more days.
+    final remainingBudget = _maxGlobalAlarms - totalNeeded;
+    final additionalDays =
+        remainingBudget ~/ (allActive.length * 2); // Conservative estimate
+    final targetDays = (_minDaysPerSchedule + additionalDays).clamp(
+      _minDaysPerSchedule,
+      _maxDaysPerSchedule,
+    );
+
+    print(
+      '[ScheduleScheduler] Scheduling $targetDays days ahead for "${s.name}"',
+    );
+
+    return targetDays;
+  }
+
   static int _stableHash32(String s) {
     // Deterministic 32-bit FNV-1a hash
     const fnvOffset = 0x811C9DC5;
@@ -44,19 +114,24 @@ class ScheduleScheduler {
     final title = s.name;
     final body = '${s.medicationName} • ${s.doseValue} ${s.doseUnit}';
 
-    // If cycle is enabled, schedule next N days occurrences based on anchor
+    // Calculate how many days we can afford to schedule for this schedule
+    final daysToSchedule = await _calculateScheduleDays(s);
+
+    // If cycle is enabled, schedule next N occurrences based on anchor
     if (s.hasCycle) {
       final n = s.cycleEveryNDays!.clamp(1, 365);
       final anchor = s.cycleAnchorDate ?? DateTime.now();
       final times = s.timesOfDay ?? [s.minutesOfDay];
-      // Schedule for the next ~30 occurrences
       final now = DateTime.now();
       var day = DateTime(anchor.year, anchor.month, anchor.day);
       // Advance to today or next cycle day
       while (day.isBefore(DateTime(now.year, now.month, now.day))) {
         day = day.add(Duration(days: n));
       }
-      for (var i = 0; i < 30; i++) {
+
+      // Schedule for calculated number of occurrences
+      final occurrences = (daysToSchedule / n).ceil().clamp(1, 14);
+      for (var i = 0; i < occurrences; i++) {
         for (final minutes in times) {
           final dt = DateTime(
             day.year,
@@ -84,8 +159,7 @@ class ScheduleScheduler {
     }
 
     // Otherwise weekly pattern, supporting multiple times per day
-    // Instead of weekly repeating alarms (which can be unreliable on some devices),
-    // schedule one-shot alarms for the next 60 days.
+    // Schedule one-shot alarms for the next N days (dynamically calculated).
     final useUtc = s.hasUtc;
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day);
@@ -94,7 +168,7 @@ class ScheduleScheduler {
     final daysLocal = s.daysOfWeek;
     final daysUtc = s.daysOfWeekUtc ?? const <int>[];
 
-    for (var dayOffset = 0; dayOffset < 60; dayOffset++) {
+    for (var dayOffset = 0; dayOffset < daysToSchedule; dayOffset++) {
       final date = start.add(Duration(days: dayOffset));
       if (useUtc) {
         // Check UTC weekday against daysOfWeekUtc using the UTC date
@@ -171,8 +245,8 @@ class ScheduleScheduler {
         final anchor = existing.cycleAnchorDate ?? DateTime.now();
         final times = existing.timesOfDay ?? [existing.minutesOfDay];
         var day = DateTime(anchor.year, anchor.month, anchor.day);
-        // cancel ~30 occurrences ahead
-        for (var i = 0; i < 30; i++) {
+        // Cancel up to max possible occurrences (conservative)
+        for (var i = 0; i < 20; i++) {
           for (final minutes in times) {
             final dt = DateTime(
               day.year,
@@ -202,7 +276,8 @@ class ScheduleScheduler {
             [existing.minutesOfDayUtc ?? existing.minutesOfDay];
         final daysLocal = existing.daysOfWeek;
         final daysUtc = existing.daysOfWeekUtc ?? const <int>[];
-        for (var dayOffset = 0; dayOffset < 60; dayOffset++) {
+        // Cancel up to max possible days (conservative)
+        for (var dayOffset = 0; dayOffset < 20; dayOffset++) {
           final date = start.add(Duration(days: dayOffset));
           if (useUtc) {
             final utcWeekday = date.toUtc().weekday;
@@ -242,10 +317,15 @@ class ScheduleScheduler {
     }
   }
 
+  /// Reschedules all active schedules. Called on app startup.
+  /// This keeps the 14-day notification window filled.
+  /// Safe to call repeatedly - will cancel and reschedule to ensure consistency.
   static Future<void> rescheduleAllActive() async {
     final box = Hive.box<Schedule>('schedules');
     for (final s in box.values) {
       if (s.active) {
+        // Cancel existing notifications and reschedule fresh
+        await cancelFor(s.id, days: s.daysOfWeek);
         await scheduleFor(s);
       }
     }

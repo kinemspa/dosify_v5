@@ -8,7 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/shell_scaffold.dart';
 import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
-import 'package:dosifi_v5/src/features/calendar/presentation/calendar_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/calendar_page.dart';
 import 'package:dosifi_v5/src/features/home/presentation/home_page.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/med_editor_template_demo_page.dart';
