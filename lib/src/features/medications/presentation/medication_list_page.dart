@@ -9,12 +9,14 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
+import 'package:dosifi_v5/src/widgets/large_card.dart';
+import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 enum _MedView { list, compact, large }
@@ -445,7 +447,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       case MedicationForm.singleDoseVial:
         return 'Single Dose Vials';
       case MedicationForm.multiDoseVial:
-        return 'Multi Dose Vials';
+        return 'Multi Dose Vial';
     }
   }
 
@@ -633,13 +635,13 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
         );
       case _MedView.large:
-        // Large view uses summary-style neutral cards.
+        // Large view uses centralized LargeCard layout.
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
+          itemBuilder: (context, i) => _MedLargeCard(m: items[i]),
         );
     }
   }
@@ -666,7 +668,9 @@ class _MedCard extends StatelessWidget {
       final colored = _stockStatusColor(Theme.of(context));
       return TextSpan(
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
           height: 1,
           fontSize: 9,
         ),
@@ -681,7 +685,9 @@ class _MedCard extends StatelessWidget {
     }
     return TextSpan(
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
+        color: Theme.of(
+          context,
+        ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
         height: 1,
         fontSize: 9,
       ),
@@ -701,14 +707,7 @@ class _MedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!dense) {
-      return GestureDetector(
-        onTap: () => context.push('/medications/${m.id}'),
-        child: SummaryHeaderCard.fromMedication(
-          m,
-          neutral: true,
-          outlined: true,
-        ),
-      );
+      return _MedLargeCard(m: m);
     }
 
     // Fallback: keep existing dense implementation
@@ -843,5 +842,302 @@ class _MedCard extends StatelessWidget {
       return theme.colorScheme.error;
     }
     return theme.colorScheme.onSurface;
+  }
+}
+
+class _MedLargeCard extends StatelessWidget {
+  const _MedLargeCard({required this.m});
+
+  final Medication m;
+
+  @override
+  Widget build(BuildContext context) {
+    return LargeCard(
+      onTap: () => context.push('/medications/${m.id}'),
+      leading: _buildLeading(context),
+      trailing: _buildTrailing(context),
+      footer: _buildFooter(context),
+    );
+  }
+
+  Widget _buildLeading(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          m.name,
+          style: cardTitleStyle(context)?.copyWith(fontWeight: FontWeight.w800),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingS),
+        if (m.manufacturer != null && m.manufacturer!.isNotEmpty) ...[
+          Text(
+            m.manufacturer!,
+            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: kSpacingXS),
+        ],
+        RichText(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            style: bodyTextStyle(context),
+            children: [
+              TextSpan(
+                text:
+                    '${fmt2(m.strengthValue)} ${_unitLabelForLarge(m.strengthUnit)}',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              TextSpan(text: ' ${_formLabelPluralForLarge(m.form)}'),
+            ],
+          ),
+        ),
+        if ((m.storageLocation ?? m.activeVialStorageLocation)?.isNotEmpty ??
+            false) ...[
+          const SizedBox(height: kSpacingXS),
+          Text(
+            m.storageLocation?.isNotEmpty == true
+                ? m.storageLocation!
+                : m.activeVialStorageLocation!,
+            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _unitLabelForLarge(Unit unit) {
+    switch (unit) {
+      case Unit.mcg:
+        return 'mcg';
+      case Unit.mg:
+        return 'mg';
+      case Unit.g:
+        return 'g';
+      case Unit.units:
+        return 'units';
+      case Unit.mcgPerMl:
+        return 'mcg/mL';
+      case Unit.mgPerMl:
+        return 'mg/mL';
+      case Unit.gPerMl:
+        return 'g/mL';
+      case Unit.unitsPerMl:
+        return 'units/mL';
+    }
+  }
+
+  String _formLabelPluralForLarge(MedicationForm form) {
+    switch (form) {
+      case MedicationForm.tablet:
+        return 'Tablets';
+      case MedicationForm.capsule:
+        return 'Capsules';
+      case MedicationForm.prefilledSyringe:
+        return 'Pre-Filled Syringes';
+      case MedicationForm.singleDoseVial:
+        return 'Single Dose Vials';
+      case MedicationForm.multiDoseVial:
+        return 'Multi Dose Vial';
+    }
+  }
+
+  String _stockUnitLabelForLarge(StockUnit unit) {
+    switch (unit) {
+      case StockUnit.tablets:
+        return 'tablets';
+      case StockUnit.capsules:
+        return 'capsules';
+      case StockUnit.preFilledSyringes:
+        return 'syringes';
+      case StockUnit.singleDoseVials:
+        return 'vials';
+      case StockUnit.multiDoseVials:
+        return 'vials';
+      case StockUnit.mcg:
+        return 'mcg';
+      case StockUnit.mg:
+        return 'mg';
+      case StockUnit.g:
+        return 'g';
+    }
+  }
+
+  Widget _buildTrailing(BuildContext context) {
+    final isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
+        m.stockUnit == StockUnit.singleDoseVials ||
+        m.stockUnit == StockUnit.multiDoseVials ||
+        m.stockUnit == StockUnit.tablets ||
+        m.stockUnit == StockUnit.capsules;
+
+    final bool isMdv = m.form == MedicationForm.multiDoseVial;
+
+    // Active vial volume for MDV: use stockValue vs containerVolumeMl
+    final double activeCurrentMl;
+    final double activeTotalMl;
+    if (isMdv && m.containerVolumeMl != null && m.containerVolumeMl! > 0) {
+      activeTotalMl = m.containerVolumeMl!;
+      activeCurrentMl = m.stockValue.clamp(0, activeTotalMl);
+    } else {
+      final current = m.stockValue.floor().toDouble();
+      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceil().toDouble()
+          : current;
+      activeCurrentMl = current;
+      activeTotalMl = total;
+    }
+
+    final pct = activeTotalMl > 0
+        ? (activeCurrentMl / activeTotalMl) * 100.0
+        : 0.0;
+    final pctRounded = pct.clamp(0, 100).round();
+
+    final countLabel = isMdv
+        ? '${fmt2(activeCurrentMl)}/${fmt2(activeTotalMl)} mL'
+        : isCountUnit
+        ? '${activeCurrentMl.toStringAsFixed(0)}/${activeTotalMl.toStringAsFixed(0)} ${_stockUnitLabelForLarge(m.stockUnit)}'
+        : '${fmt2(m.stockValue)}/${fmt2(activeTotalMl)} ${_stockUnitLabelForLarge(m.stockUnit)}';
+
+    final cs = Theme.of(context).colorScheme;
+    final parts = countLabel.split(' ');
+    final fractionText = parts.isNotEmpty ? parts.first : countLabel;
+    final trailingUnitText = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+
+    // For MDV, compute a second percentage for sealed/backup vials so
+    // the inner ring can represent backup stock coverage.
+    final double backupPct;
+    if (isMdv && m.stockUnit == StockUnit.multiDoseVials) {
+      final backupCount = m.stockValue;
+      final baseline =
+          m.lowStockVialsThresholdCount != null &&
+              m.lowStockVialsThresholdCount! > 0
+          ? m.lowStockVialsThresholdCount!
+          : backupCount;
+      backupPct = baseline > 0 ? (backupCount / baseline) * 100.0 : 0.0;
+    } else {
+      backupPct = 0;
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (isMdv)
+          DualStockDonutGauge(
+            outerPercentage: pct,
+            innerPercentage: backupPct,
+            primaryLabel: '$pctRounded%',
+          )
+        else
+          StockDonutGauge(percentage: pct, primaryLabel: '$pctRounded%'),
+        const SizedBox(height: kSpacingXS),
+        Align(
+          alignment: Alignment.centerRight,
+          child: RichText(
+            textAlign: TextAlign.right,
+            text: TextSpan(
+              style: helperTextStyle(context)?.copyWith(fontSize: 9),
+              children: [
+                TextSpan(
+                  text: fractionText,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: cs.primary,
+                  ),
+                ),
+                if (trailingUnitText.isNotEmpty)
+                  TextSpan(text: ' $trailingUnitText'),
+              ],
+            ),
+          ),
+        ),
+        if (m.form == MedicationForm.multiDoseVial)
+          Padding(
+            padding: const EdgeInsets.only(top: kSpacingXS),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                _buildMdvSecondaryLine(),
+                style: helperTextStyle(context)?.copyWith(fontSize: 9),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _buildMdvSecondaryLine() {
+    // Active vial total volume
+    final containerMl = m.containerVolumeMl;
+
+    // Backup/unopened vials: use stockValue when the stockUnit is multi-dose vials
+    final hasMdvUnit = m.stockUnit == StockUnit.multiDoseVials;
+    final backupCount = hasMdvUnit ? m.stockValue.floor() : null;
+
+    if (backupCount != null && backupCount > 0) {
+      final total = backupCount;
+      return '$backupCount/$total reserve vials';
+    }
+
+    if (containerMl != null) {
+      return '${fmt2(containerMl)} mL vial';
+    }
+
+    return '';
+  }
+
+  Widget _buildFooter(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final List<IconData> icons = [];
+    final bool isDark =
+        m.activeVialLightSensitive || m.backupVialsLightSensitive;
+    final bool isFrozen =
+        m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer;
+    final bool isRefrigerated =
+        m.requiresRefrigeration == true ||
+        m.activeVialRequiresRefrigeration ||
+        m.backupVialsRequiresRefrigeration;
+
+    if (isFrozen) {
+      icons.add(Icons.ac_unit);
+    } else if (isRefrigerated) {
+      icons.add(Icons.ac_unit);
+    }
+    if (isDark) {
+      icons.add(Icons.dark_mode);
+    }
+    if (icons.isEmpty) {
+      icons.add(Icons.thermostat);
+    }
+
+    // Cap at 2 icons
+    final visibleIcons = icons.take(2).toList();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ...visibleIcons.map(
+          (icon) => Padding(
+            padding: const EdgeInsets.only(right: kSpacingXS),
+            child: Icon(
+              icon,
+              size: kIconSizeSmall,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
