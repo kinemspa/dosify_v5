@@ -11,6 +11,11 @@ class StockDonutGauge extends StatelessWidget {
     super.key,
     required this.percentage,
     required this.primaryLabel,
+    this.color,
+    this.backgroundColor,
+    this.textColor,
+    this.showGlow = true,
+    this.isOutline = false,
   });
 
   /// Percentage remaining, in the range 0–100.
@@ -18,6 +23,21 @@ class StockDonutGauge extends StatelessWidget {
 
   /// Main label inside the donut (e.g. `12` or `450 mL`).
   final String primaryLabel;
+
+  /// Color of the progress arc.
+  final Color? color;
+
+  /// Color of the background ring.
+  final Color? backgroundColor;
+
+  /// Color of the center text.
+  final Color? textColor;
+
+  /// Whether to show the radial glass glow.
+  final bool showGlow;
+
+  /// Whether to render as an outline (thin borders) instead of a filled arc.
+  final bool isOutline;
 
   @override
   Widget build(BuildContext context) {
@@ -32,26 +52,30 @@ class StockDonutGauge extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           // Soft radial "glass" glow behind the ring.
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    cs.primary.withOpacity(0.16),
-                    cs.surface.withOpacity(0.0),
-                  ],
+          if (showGlow)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      cs.primary.withValues(alpha: 0.16),
+                      cs.surface.withValues(alpha: 0.0),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           // Donut ring.
           CustomPaint(
             size: const Size.square(96),
             painter: _StockDonutPainter(
               fraction: fraction,
-              baseColor: cs.outlineVariant.withOpacity(kCardBorderOpacity),
-              fillColor: cs.primary,
+              baseColor:
+                  backgroundColor ??
+                  cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+              fillColor: color ?? cs.primary,
+              isOutline: isOutline,
             ),
           ),
           // Center label (percentage only).
@@ -59,7 +83,9 @@ class StockDonutGauge extends StatelessWidget {
             primaryLabel,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: kFontWeightExtraBold,
-              color: cs.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
+              color:
+                  textColor ??
+                  cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
             ),
           ),
         ],
@@ -79,6 +105,11 @@ class DualStockDonutGauge extends StatelessWidget {
     required this.outerPercentage,
     required this.innerPercentage,
     required this.primaryLabel,
+    this.color,
+    this.backgroundColor,
+    this.textColor,
+    this.showGlow = true,
+    this.isOutline = false,
   });
 
   /// Outer ring percentage (e.g. active vial volume), 0–100.
@@ -90,11 +121,27 @@ class DualStockDonutGauge extends StatelessWidget {
   /// Main label in the centre (typically the active vial percentage).
   final String primaryLabel;
 
+  /// Color of the outer progress arc.
+  final Color? color;
+
+  /// Color of the background ring.
+  final Color? backgroundColor;
+
+  /// Color of the center text.
+  final Color? textColor;
+
+  /// Whether to show the radial glass glow.
+  final bool showGlow;
+
+  /// Whether to render as an outline (thin borders) instead of a filled arc.
+  final bool isOutline;
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final outerFraction = outerPercentage.clamp(0, 100) / 100.0;
     final innerFraction = innerPercentage.clamp(0, 100) / 100.0;
+    final effectiveColor = color ?? cs.primary;
 
     return SizedBox(
       width: 96,
@@ -103,37 +150,45 @@ class DualStockDonutGauge extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           // Shared glow.
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    cs.primary.withOpacity(0.16),
-                    cs.surface.withOpacity(0.0),
-                  ],
+          if (showGlow)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      cs.primary.withValues(alpha: 0.16),
+                      cs.surface.withValues(alpha: 0.0),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           // Outer ring (active vial).
           CustomPaint(
             size: const Size.square(96),
             painter: _StockDonutPainter(
               fraction: outerFraction,
-              baseColor: cs.outlineVariant.withOpacity(kCardBorderOpacity),
-              fillColor: cs.primary,
+              baseColor:
+                  backgroundColor ??
+                  cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+              fillColor: effectiveColor,
+              isOutline: isOutline,
             ),
           ),
-          // Inner ring (sealed/backup vials) – much thinner, very faint.
+          // Inner ring (sealed/backup vials) – same thickness, smaller radius
           CustomPaint(
-            size: const Size.square(84),
+            size: const Size.square(76), // Smaller size for inner ring
             painter: _StockDonutPainter(
               fraction: innerFraction,
-              baseColor: cs.outlineVariant.withOpacity(
-                kCardBorderOpacity * 0.6,
-              ),
-              fillColor: _lighten(cs.primary, 0.28),
+              baseColor:
+                  backgroundColor?.withValues(alpha: 0.5) ??
+                  cs.outlineVariant.withValues(alpha: kCardBorderOpacity * 0.6),
+              fillColor: effectiveColor.withValues(
+                alpha: 0.4,
+              ), // Low opacity primary color
+              isOutline: isOutline,
+              strokeWidth: 10.0,
             ),
           ),
           // Centre label.
@@ -141,7 +196,9 @@ class DualStockDonutGauge extends StatelessWidget {
             primaryLabel,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: kFontWeightExtraBold,
-              color: cs.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
+              color:
+                  textColor ??
+                  cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
             ),
           ),
         ],
@@ -150,59 +207,144 @@ class DualStockDonutGauge extends StatelessWidget {
   }
 }
 
-Color _lighten(Color color, double amount) {
-  final hsl = HSLColor.fromColor(color);
-  final lightened = hsl.withLightness(
-    (hsl.lightness + amount).clamp(0.0, 1.0),
-  );
-  return lightened.toColor();
-}
-
 class _StockDonutPainter extends CustomPainter {
   _StockDonutPainter({
     required this.fraction,
     required this.baseColor,
     required this.fillColor,
+    this.isOutline = false,
+    this.strokeWidth,
   });
 
   final double fraction; // 0.0–1.0
   final Color baseColor;
   final Color fillColor;
+  final bool isOutline;
+  final double? strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
     final radius = math.min(size.width, size.height) / 2;
-    final strokeWidth = size.width >= 90 ? 10.0 : 5.0;
-    final rect = Rect.fromCircle(center: center, radius: radius - 4);
+    // The "thickness" of the donut if it were filled
+    final thickness = strokeWidth ?? (size.width >= 90 ? 10.0 : 5.0);
+    // The thin border line width
+    final borderWidth = isOutline ? kBorderWidthThin : thickness;
 
-    final basePaint = Paint()
-      ..color = baseColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
+    // 1. Draw Background Ring (Track)
+    if (isOutline) {
+      // Outline mode: Draw thin lines for track
+      final basePaint = Paint()
+        ..color = baseColor.withValues(alpha: 0.3)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth;
 
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        colors: [fillColor.withOpacity(0.9), fillColor.withOpacity(0.6)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth;
+      canvas.drawCircle(center, radius - 4, basePaint);
+      canvas.drawCircle(center, radius - 4 - thickness, basePaint);
+    } else {
+      // Filled mode: Draw thick track
+      final basePaint = Paint()
+        ..color = baseColor.withValues(alpha: 0.3)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = thickness
+        ..strokeCap = StrokeCap.round;
 
-    // Background ring.
-    canvas.drawArc(rect, -math.pi / 2, 2 * math.pi, false, basePaint);
+      canvas.drawCircle(center, radius - thickness / 2, basePaint);
+    }
 
-    // Foreground arc.
+    // 2. Draw Foreground Arc
     if (fraction > 0) {
-      canvas.drawArc(
-        rect,
-        -math.pi / 2,
-        2 * math.pi * fraction,
-        false,
-        fillPaint,
-      );
+      if (isOutline) {
+        // Outline mode: Draw thin borders for the arc
+        final outlinePaint = Paint()
+          ..color = fillColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth
+          ..strokeCap = StrokeCap.round;
+
+        final startAngle = -math.pi / 2;
+        final sweepAngle = 2 * math.pi * fraction;
+
+        // Draw Outer Arc
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: radius - 4),
+          startAngle,
+          sweepAngle,
+          false,
+          outlinePaint,
+        );
+
+        // Draw Inner Arc
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: radius - 4 - thickness),
+          startAngle,
+          sweepAngle,
+          false,
+          outlinePaint,
+        );
+
+        // Draw Caps (Round ends connecting inner and outer)
+        // Start Cap
+        final startOuter = Offset(
+          center.dx + (radius - 4) * math.cos(startAngle),
+          center.dy + (radius - 4) * math.sin(startAngle),
+        );
+        final startInner = Offset(
+          center.dx + (radius - 4 - thickness) * math.cos(startAngle),
+          center.dy + (radius - 4 - thickness) * math.sin(startAngle),
+        );
+        final startCapCenter = Offset(
+          (startOuter.dx + startInner.dx) / 2,
+          (startOuter.dy + startInner.dy) / 2,
+        );
+        canvas.drawArc(
+          Rect.fromCircle(center: startCapCenter, radius: thickness / 2),
+          startAngle + math.pi,
+          math.pi,
+          false,
+          outlinePaint,
+        );
+
+        // End Cap
+        final endAngle = startAngle + sweepAngle;
+        final endOuter = Offset(
+          center.dx + (radius - 4) * math.cos(endAngle),
+          center.dy + (radius - 4) * math.sin(endAngle),
+        );
+        final endInner = Offset(
+          center.dx + (radius - 4 - thickness) * math.cos(endAngle),
+          center.dy + (radius - 4 - thickness) * math.sin(endAngle),
+        );
+        final endCapCenter = Offset(
+          (endOuter.dx + endInner.dx) / 2,
+          (endOuter.dy + endInner.dy) / 2,
+        );
+        canvas.drawArc(
+          Rect.fromCircle(center: endCapCenter, radius: thickness / 2),
+          endAngle,
+          math.pi,
+          false,
+          outlinePaint,
+        );
+      } else {
+        // Filled mode: Draw thick arc
+        final fillPaint = Paint()
+          ..color = fillColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = thickness
+          ..strokeCap = StrokeCap.round;
+
+        final startAngle = -math.pi / 2;
+        final sweepAngle = 2 * math.pi * fraction;
+
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: radius - thickness / 2),
+          startAngle,
+          sweepAngle,
+          false,
+          fillPaint,
+        );
+      }
     }
   }
 
@@ -210,6 +352,46 @@ class _StockDonutPainter extends CustomPainter {
   bool shouldRepaint(covariant _StockDonutPainter oldDelegate) {
     return fraction != oldDelegate.fraction ||
         baseColor != oldDelegate.baseColor ||
-        fillColor != oldDelegate.fillColor;
+        fillColor != oldDelegate.fillColor ||
+        isOutline != oldDelegate.isOutline ||
+        strokeWidth != oldDelegate.strokeWidth;
+  }
+}
+
+/// Miniature stock gauge for compact cards.
+///
+/// If [size] is provided, it forces a square size.
+/// Otherwise, it expands to fill the parent (useful in IntrinsicHeight rows).
+class MiniStockGauge extends StatelessWidget {
+  const MiniStockGauge({
+    super.key,
+    required this.percentage,
+    this.color,
+    this.size,
+  });
+
+  final double percentage;
+  final Color? color;
+  final double? size;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final fraction = percentage.clamp(0, 100) / 100.0;
+    final effectiveColor = color ?? cs.primary;
+
+    Widget gauge = CustomPaint(
+      painter: _StockDonutPainter(
+        fraction: fraction,
+        baseColor: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+        fillColor: effectiveColor,
+      ),
+    );
+
+    if (size != null) {
+      return SizedBox(width: size, height: size, child: gauge);
+    }
+
+    return AspectRatio(aspectRatio: 1, child: gauge);
   }
 }
