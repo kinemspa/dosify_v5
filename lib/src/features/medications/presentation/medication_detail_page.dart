@@ -30,7 +30,7 @@ import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 /// - Visual stock progress indicators
 /// - Clean sectioned information display
 /// - Responsive layout for all screen sizes
-const double _kDetailHeaderExpandedHeight = 430;
+const double _kDetailHeaderExpandedHeight = 340;
 const double _kDetailHeaderCollapsedHeight = 56;
 
 class MedicationDetailPage extends StatefulWidget {
@@ -402,7 +402,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Space for the animated Name (which is positioned absolutely)
-                const SizedBox(height: 72),
+                const SizedBox(height: 50),
 
                 // Manufacturer (Moved below Name)
                 if (manufacturer != null && manufacturer.isNotEmpty) ...[
