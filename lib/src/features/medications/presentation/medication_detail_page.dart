@@ -406,18 +406,49 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
 
                 // Manufacturer (Moved below Name)
                 if (manufacturer != null && manufacturer.isNotEmpty) ...[
-                  GestureDetector(
-                    onTap: () => _editManufacturer(context, med),
-                    child: Text(
-                      manufacturer,
-                      style: helperTextStyle(context)?.copyWith(
-                        color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-                        decoration: TextDecoration.underline,
-                        decorationStyle: TextDecorationStyle.dotted,
-                        decorationColor: onPrimary.withValues(alpha: 0.5),
-                        fontSize: 11,
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => _editManufacturer(context, med),
+                        child: Text(
+                          manufacturer,
+                          style: helperTextStyle(context)?.copyWith(
+                            color: onPrimary.withValues(
+                              alpha: kOpacityMediumHigh,
+                            ),
+                            decoration: TextDecoration.underline,
+                            decorationStyle: TextDecorationStyle.dotted,
+                            decorationColor: onPrimary.withValues(alpha: 0.5),
+                            fontSize: 11,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: kSpacingS,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: onPrimary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusChip,
+                          ),
+                          border: Border.all(
+                            color: onPrimary.withValues(alpha: 0.2),
+                            width: kBorderWidthThin,
+                          ),
+                        ),
+                        child: Text(
+                          _formLabel(med.form),
+                          style: helperTextStyle(context)?.copyWith(
+                            color: onPrimary,
+                            fontWeight: kFontWeightSemiBold,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                 ],
@@ -437,52 +468,24 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                // Strength moved here
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: kSpacingM,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: onPrimary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
-                        border: Border.all(
-                          color: onPrimary.withValues(alpha: 0.2),
-                          width: kBorderWidthThin,
-                        ),
-                      ),
-                      child: Text(
-                        _formLabel(med.form),
-                        style: helperTextStyle(context)?.copyWith(
-                          color: onPrimary,
-                          fontWeight: kFontWeightSemiBold,
-                          fontSize: 10,
-                        ),
+                    Text(
+                      strengthPerLabel,
+                      style: TextStyle(
+                        color: onPrimary.withValues(alpha: 0.7),
+                        fontSize: 10,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // Strength moved here
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          strengthPerLabel,
-                          style: TextStyle(
-                            color: onPrimary.withValues(alpha: 0.7),
-                            fontSize: 10,
-                          ),
-                        ),
-                        Text(
-                          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-                          style: TextStyle(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                      style: TextStyle(
+                        color: onPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
