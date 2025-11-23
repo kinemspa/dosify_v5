@@ -24,12 +24,12 @@ class AddCapsuleWizardPage extends MedicationWizardBase {
 
   @override
   List<String> get stepLabels => [
-        'STEP 1: BASIC INFORMATION',
-        'STEP 2: STRENGTH & DOSAGE',
-        'STEP 3: INVENTORY',
-        'STEP 4: STORAGE',
-        'STEP 5: REVIEW & CONFIRM',
-      ];
+    'STEP 1: BASIC INFORMATION',
+    'STEP 2: STRENGTH & DOSAGE',
+    'STEP 3: INVENTORY',
+    'STEP 4: STORAGE',
+    'STEP 5: REVIEW & CONFIRM',
+  ];
 
   @override
   ConsumerState<AddCapsuleWizardPage> createState() =>
@@ -202,8 +202,9 @@ class _AddCapsuleWizardPageState
                           children: [
                             TextSpan(
                               text: stock.toString(),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             const TextSpan(text: ' capsules in stock'),
                           ],
@@ -224,8 +225,9 @@ class _AddCapsuleWizardPageState
                             const TextSpan(text: 'Alert at '),
                             TextSpan(
                               text: threshold.toString(),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             const TextSpan(text: ' capsules'),
                           ],
@@ -301,7 +303,8 @@ class _AddCapsuleWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Details',
           children: [
             LabelFieldRow(
@@ -377,7 +380,8 @@ class _AddCapsuleWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Medication Strength',
           children: [
             LabelFieldRow(
@@ -387,15 +391,17 @@ class _AddCapsuleWizardPageState
                 onDec: () {
                   final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _strengthValueCtrl.text =
-                        (v - 1).clamp(0, 1000000).toString(),
+                    () => _strengthValueCtrl.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 onInc: () {
                   final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _strengthValueCtrl.text =
-                        (v + 1).clamp(0, 1000000).toString(),
+                    () => _strengthValueCtrl.text = (v + 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
@@ -452,7 +458,8 @@ class _AddCapsuleWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Stock Management',
           children: [
             LabelFieldRow(
@@ -462,15 +469,17 @@ class _AddCapsuleWizardPageState
                 onDec: () {
                   final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _stockValueCtrl.text =
-                        (v - 1).clamp(0, 1000000).toString(),
+                    () => _stockValueCtrl.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 onInc: () {
                   final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _stockValueCtrl.text =
-                        (v + 1).clamp(0, 1000000).toString(),
+                    () => _stockValueCtrl.text = (v + 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
@@ -512,15 +521,16 @@ class _AddCapsuleWizardPageState
                     final v =
                         int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
                     setState(
-                      () => _lowStockThresholdCtrl.text =
-                          (v - 1).clamp(0, 1000000).toString(),
+                      () => _lowStockThresholdCtrl.text = (v - 1)
+                          .clamp(0, 1000000)
+                          .toString(),
                     );
                   },
                   onInc: () {
                     final v =
                         int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
-                    final stock = int.tryParse(_stockValueCtrl.text.trim()) ??
-                        1000000;
+                    final stock =
+                        int.tryParse(_stockValueCtrl.text.trim()) ?? 1000000;
                     final newVal = (v + 1).clamp(0, stock);
                     setState(
                       () => _lowStockThresholdCtrl.text = newVal.toString(),
@@ -569,7 +579,8 @@ class _AddCapsuleWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Expiry & Storage',
           children: [
             LabelFieldRow(
@@ -577,8 +588,9 @@ class _AddCapsuleWizardPageState
               field: DateButton36(
                 label: _expiry == null
                     ? 'Select date'
-                    : MaterialLocalizations.of(context)
-                        .formatCompactDate(_expiry!),
+                    : MaterialLocalizations.of(
+                        context,
+                      ).formatCompactDate(_expiry!),
                 onPressed: () async {
                   final now = DateTime.now();
                   final picked = await showDatePicker(
@@ -735,8 +747,8 @@ class _AddCapsuleWizardPageState
     final initialStock = previous == null
         ? stock
         : (stock > previous.stockValue
-            ? stock
-            : (previous.initialStockValue ?? previous.stockValue));
+              ? stock
+              : (previous.initialStockValue ?? previous.stockValue));
 
     final storageInstructions = [
       if (_requiresFridge) 'Refrigerate (2-8°C)',
@@ -764,20 +776,22 @@ class _AddCapsuleWizardPageState
           ? double.tryParse(_lowStockThresholdCtrl.text.trim())
           : null,
       expiry: _expiry,
-      batchNumber:
-          _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty
+          ? null
+          : _batchCtrl.text.trim(),
       storageLocation: _storageLocationCtrl.text.trim().isEmpty
           ? null
           : _storageLocationCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
-      storageInstructions:
-          storageInstructions.isEmpty ? null : storageInstructions,
+      storageInstructions: storageInstructions.isEmpty
+          ? null
+          : storageInstructions,
     );
 
     await repo.upsert(med);
 
     if (mounted) {
-      context.pop();
+      context.go('/medications');
     }
   }
 
@@ -800,7 +814,8 @@ class _AddCapsuleWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Medication Details',
           children: [
             _reviewRow('Name', _nameCtrl.text.trim()),
@@ -810,30 +825,28 @@ class _AddCapsuleWizardPageState
           ],
         ),
         const SizedBox(height: 12),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Strength',
           children: [
-            _reviewRow(
-              'Active Ingredient',
-              '$strength ${_strengthUnit.name}',
-            ),
+            _reviewRow('Active Ingredient', '$strength ${_strengthUnit.name}'),
           ],
         ),
         const SizedBox(height: 12),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Inventory',
           children: [
             _reviewRow('Current Stock', '$stock capsules'),
             _reviewRow(
               'Low Stock Alert',
-              _lowStockEnabled
-                  ? 'Enabled at $threshold capsules'
-                  : 'Disabled',
+              _lowStockEnabled ? 'Enabled at $threshold capsules' : 'Disabled',
             ),
           ],
         ),
         const SizedBox(height: 12),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Storage',
           children: [
             if (_expiry != null)
@@ -846,7 +859,8 @@ class _AddCapsuleWizardPageState
             if (_requiresFridge)
               _reviewRow('Refrigeration', 'Required (2-8°C)'),
             if (_requiresFreezer) _reviewRow('Storage', 'Freezer'),
-            if (_protectLight) _reviewRow('Light Sensitivity', 'Protect from light'),
+            if (_protectLight)
+              _reviewRow('Light Sensitivity', 'Protect from light'),
           ],
         ),
       ],
@@ -862,18 +876,10 @@ class _AddCapsuleWizardPageState
         children: [
           SizedBox(
             width: 120,
-            child: Text(
-              label,
-              style: fieldLabelStyle(context),
-            ),
+            child: Text(label, style: fieldLabelStyle(context)),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: bodyTextStyle(context),
-            ),
-          ),
+          Expanded(child: Text(value, style: bodyTextStyle(context))),
         ],
       ),
     );

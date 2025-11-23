@@ -393,285 +393,265 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
       gaugeColor = onPrimary.withValues(alpha: 0.9);
     }
 
-    return Stack(
-      children: [
-        Column(
-          children: [
-            Row(
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Space for the animated Name (which is positioned absolutely)
-                      const SizedBox(height: 48),
+                // Space for the animated Name (which is positioned absolutely)
+                const SizedBox(height: 72),
 
-                      // Manufacturer (Moved below Name)
-                      if (manufacturer != null && manufacturer.isNotEmpty) ...[
-                        GestureDetector(
-                          onTap: () => _editManufacturer(context, med),
-                          child: Text(
-                            manufacturer,
-                            style: helperTextStyle(context)?.copyWith(
-                              color: onPrimary.withValues(
-                                alpha: kOpacityMediumHigh,
-                              ),
-                              decoration: TextDecoration.underline,
-                              decorationStyle: TextDecorationStyle.dotted,
-                              decorationColor: onPrimary.withValues(alpha: 0.5),
-                              fontSize: 11,
-                            ),
+                // Manufacturer (Moved below Name)
+                if (manufacturer != null && manufacturer.isNotEmpty) ...[
+                  GestureDetector(
+                    onTap: () => _editManufacturer(context, med),
+                    child: Text(
+                      manufacturer,
+                      style: helperTextStyle(context)?.copyWith(
+                        color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+                        decoration: TextDecoration.underline,
+                        decorationStyle: TextDecorationStyle.dotted,
+                        decorationColor: onPrimary.withValues(alpha: 0.5),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+
+                // Description (Smaller, Higher)
+                if (med.description != null && med.description!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      med.description!,
+                      style: TextStyle(
+                        color: onPrimary.withValues(alpha: 0.8),
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10, // Reduced from 11
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingM,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: onPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                        border: Border.all(
+                          color: onPrimary.withValues(alpha: 0.2),
+                          width: kBorderWidthThin,
+                        ),
+                      ),
+                      child: Text(
+                        _formLabel(med.form),
+                        style: helperTextStyle(context)?.copyWith(
+                          color: onPrimary,
+                          fontWeight: kFontWeightSemiBold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Strength moved here
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strengthPerLabel,
+                          style: TextStyle(
+                            color: onPrimary.withValues(alpha: 0.7),
+                            fontSize: 10,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        Text(
+                          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                          style: TextStyle(
+                            color: onPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
 
-                      // Description (Smaller, Higher)
-                      if (med.description != null &&
-                          med.description!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            med.description!,
-                            style: TextStyle(
-                              color: onPrimary.withValues(alpha: 0.8),
-                              fontStyle: FontStyle.italic,
-                              fontSize: 10, // Reduced from 11
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                // Storage
+                if (storageLabel != null && storageLabel.isNotEmpty) ...[
+                  _HeaderInfoTile(
+                    icon: med.activeVialRequiresFreezer
+                        ? Icons.ac_unit
+                        : (med.requiresRefrigeration
+                              ? Icons.ac_unit
+                              : Icons.location_on),
+                    label: med.activeVialRequiresFreezer
+                        ? 'Storage (Frozen)'
+                        : (med.requiresRefrigeration
+                              ? 'Storage (Cold)'
+                              : 'Storage'),
+                    value: storageLabel,
+                    textColor: onPrimary,
+                    trailingIcon: med.activeVialLightSensitive
+                        ? Icons.dark_mode_outlined
+                        : null,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+
+                const Spacer(),
+                // Adherence Graph (Moved to Left Column)
+                _buildAdherenceGraph(context, onPrimary, med),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: hasBackup
+                    ? DualStockDonutGauge(
+                        outerPercentage: pct,
+                        innerPercentage: backupPct,
+                        primaryLabel: primaryLabel,
+                        color: gaugeColor,
+                        backgroundColor: onPrimary.withValues(
+                          alpha: 0.05,
+                        ), // Almost invisible
+                        textColor: onPrimary,
+                        showGlow: false,
+                        isOutline: false,
+                      )
+                    : StockDonutGauge(
+                        percentage: pct,
+                        primaryLabel: primaryLabel,
+                        color: gaugeColor,
+                        backgroundColor: onPrimary.withValues(
+                          alpha: 0.05,
+                        ), // Almost invisible
+                        textColor: onPrimary,
+                        showGlow: false,
+                        isOutline: false,
+                      ),
+              ),
+              const SizedBox(height: 4),
+              RichText(
+                textAlign: TextAlign.right,
+                text: TextSpan(
+                  style: TextStyle(
+                    color: onPrimary,
+                    fontSize: 10,
+                  ), // Reduced from 12
+                  children: [
+                    TextSpan(
+                      text: _formatNumber(
+                        (isMdv &&
+                                med.containerVolumeMl != null &&
+                                med.containerVolumeMl! > 0)
+                            ? (med.activeVialVolume ?? med.containerVolumeMl!)
+                            : med.stockValue,
+                      ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primaryContainer,
+                      ),
+                    ),
+                    const TextSpan(text: ' / '),
+                    TextSpan(
+                      text: _formatNumber(initial),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: ' $unit'),
+                  ],
+                ),
+              ),
+              Text(
+                helperLabel,
+                style: TextStyle(
+                  color: onPrimary.withValues(alpha: 0.7),
+                  fontSize: 9, // Reduced
+                ),
+                textAlign: TextAlign.right,
+              ),
+              if (extraStockLabel != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  extraStockLabel,
+                  style: TextStyle(
+                    color: onPrimary.withValues(alpha: 0.9),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ],
+              const SizedBox(height: 8),
+
+              // Stock Forecast (Moved Here)
+              _buildStockForecastCard(context, onPrimary, med),
+
+              const SizedBox(height: 8),
+
+              // Custom Refill Button
+              Container(
+                height: 28,
+                decoration: BoxDecoration(
+                  color: onPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: onPrimary.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showRefillDialog(context, med),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: kSpacingM,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: onPrimary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(
-                                kBorderRadiusChip,
-                              ),
-                              border: Border.all(
-                                color: onPrimary.withValues(alpha: 0.2),
-                                width: kBorderWidthThin,
-                              ),
-                            ),
-                            child: Text(
-                              _formLabel(med.form),
-                              style: helperTextStyle(context)?.copyWith(
-                                color: onPrimary,
-                                fontWeight: kFontWeightSemiBold,
-                                fontSize: 10,
-                              ),
-                            ),
+                          Icon(
+                            Icons.add_circle_outline,
+                            size: 14,
+                            color: onPrimary,
                           ),
-                          const SizedBox(width: 16),
-                          // Strength moved here
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                strengthPerLabel,
-                                style: TextStyle(
-                                  color: onPrimary.withValues(alpha: 0.7),
-                                  fontSize: 10,
-                                ),
-                              ),
-                              Text(
-                                '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-                                style: TextStyle(
-                                  color: onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(width: 6),
+                          Text(
+                            'Refill',
+                            style: TextStyle(
+                              color: onPrimary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-
-                      // Storage
-                      if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                        _HeaderInfoTile(
-                          icon: med.activeVialRequiresFreezer
-                              ? Icons.ac_unit
-                              : (med.requiresRefrigeration
-                                    ? Icons.ac_unit
-                                    : Icons.location_on),
-                          label: med.activeVialRequiresFreezer
-                              ? 'Storage (Frozen)'
-                              : (med.requiresRefrigeration
-                                    ? 'Storage (Cold)'
-                                    : 'Storage'),
-                          value: storageLabel,
-                          textColor: onPrimary,
-                          trailingIcon: med.activeVialLightSensitive
-                              ? Icons.dark_mode_outlined
-                              : null,
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-
-                      // Adherence Graph (Moved to Left Column)
-                      _buildAdherenceGraph(context, onPrimary, med),
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Transform.translate(
-                  offset: const Offset(0, -10), // Adjusted from -40 to -10
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        height: 100,
-                        width: 100,
-                        child: hasBackup
-                            ? DualStockDonutGauge(
-                                outerPercentage: pct,
-                                innerPercentage: backupPct,
-                                primaryLabel: primaryLabel,
-                                color: gaugeColor,
-                                backgroundColor: onPrimary.withValues(
-                                  alpha: 0.05,
-                                ), // Almost invisible
-                                textColor: onPrimary,
-                                showGlow: false,
-                                isOutline: false,
-                              )
-                            : StockDonutGauge(
-                                percentage: pct,
-                                primaryLabel: primaryLabel,
-                                color: gaugeColor,
-                                backgroundColor: onPrimary.withValues(
-                                  alpha: 0.05,
-                                ), // Almost invisible
-                                textColor: onPrimary,
-                                showGlow: false,
-                                isOutline: false,
-                              ),
-                      ),
-                      const SizedBox(height: 4),
-                      RichText(
-                        textAlign: TextAlign.right,
-                        text: TextSpan(
-                          style: TextStyle(
-                            color: onPrimary,
-                            fontSize: 10,
-                          ), // Reduced from 12
-                          children: [
-                            TextSpan(
-                              text: _formatNumber(
-                                (isMdv &&
-                                        med.containerVolumeMl != null &&
-                                        med.containerVolumeMl! > 0)
-                                    ? (med.activeVialVolume ??
-                                          med.containerVolumeMl!)
-                                    : med.stockValue,
-                              ),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primaryContainer,
-                              ),
-                            ),
-                            const TextSpan(text: ' / '),
-                            TextSpan(
-                              text: _formatNumber(initial),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextSpan(text: ' $unit'),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        helperLabel,
-                        style: TextStyle(
-                          color: onPrimary.withValues(alpha: 0.7),
-                          fontSize: 9, // Reduced
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                      if (extraStockLabel != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          extraStockLabel,
-                          style: TextStyle(
-                            color: onPrimary.withValues(alpha: 0.9),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.right,
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-
-                      // Stock Forecast (Moved Here)
-                      _buildStockForecastCard(context, onPrimary, med),
-
-                      const SizedBox(height: 8),
-
-                      // Custom Refill Button
-                      Container(
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: onPrimary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: onPrimary.withValues(alpha: 0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _showRefillDialog(context, med),
-                            borderRadius: BorderRadius.circular(14),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.add_circle_outline,
-                                    size: 14,
-                                    color: onPrimary,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Refill',
-                                    style: TextStyle(
-                                      color: onPrimary,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 0),
-            // Adherence Graph (Removed from bottom)
-          ],
-        ),
-      ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

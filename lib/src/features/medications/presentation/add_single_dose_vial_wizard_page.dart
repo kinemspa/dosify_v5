@@ -24,12 +24,12 @@ class AddSingleDoseVialWizardPage extends MedicationWizardBase {
 
   @override
   List<String> get stepLabels => [
-        'STEP 1: BASIC INFORMATION',
-        'STEP 2: STRENGTH & DOSAGE',
-        'STEP 3: INVENTORY',
-        'STEP 4: STORAGE',
-        'STEP 5: REVIEW & CONFIRM',
-      ];
+    'STEP 1: BASIC INFORMATION',
+    'STEP 2: STRENGTH & DOSAGE',
+    'STEP 3: INVENTORY',
+    'STEP 4: STORAGE',
+    'STEP 5: REVIEW & CONFIRM',
+  ];
 
   @override
   ConsumerState<AddSingleDoseVialWizardPage> createState() =>
@@ -112,8 +112,7 @@ class _AddSingleDoseVialWizardPageState
       case 0: // Basic Info
         return _nameCtrl.text.trim().isNotEmpty;
       case 1: // Concentration & Volume
-        final conc =
-            double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
+        final conc = double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
         final vol = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
         return conc > 0 && vol > 0;
       case 2: // Inventory
@@ -203,8 +202,9 @@ class _AddSingleDoseVialWizardPageState
                               text: volVal == volVal.roundToDouble()
                                   ? volVal.toStringAsFixed(0)
                                   : volVal.toStringAsFixed(2),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             TextSpan(text: ' ${_volumeUnit.name}'),
                           },
@@ -221,8 +221,9 @@ class _AddSingleDoseVialWizardPageState
                           children: [
                             TextSpan(
                               text: stock.toString(),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             const TextSpan(text: ' vials in stock'),
                           ],
@@ -243,8 +244,9 @@ class _AddSingleDoseVialWizardPageState
                             const TextSpan(text: 'Alert at '),
                             TextSpan(
                               text: threshold.toString(),
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             const TextSpan(text: ' vials'),
                           ],
@@ -320,7 +322,8 @@ class _AddSingleDoseVialWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Details',
           children: [
             LabelFieldRow(
@@ -396,7 +399,8 @@ class _AddSingleDoseVialWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Medication Details',
           children: [
             LabelFieldRow(
@@ -407,16 +411,18 @@ class _AddSingleDoseVialWizardPageState
                   final v =
                       int.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _concentrationValueCtrl.text =
-                        (v - 1).clamp(0, 1000000).toString(),
+                    () => _concentrationValueCtrl.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 onInc: () {
                   final v =
                       int.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _concentrationValueCtrl.text =
-                        (v + 1).clamp(0, 1000000).toString(),
+                    () => _concentrationValueCtrl.text = (v + 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
@@ -464,15 +470,17 @@ class _AddSingleDoseVialWizardPageState
                 onDec: () {
                   final v = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _volumeValueCtrl.text =
-                        (v - 0.1).clamp(0, 1000000).toStringAsFixed(1),
+                    () => _volumeValueCtrl.text = (v - 0.1)
+                        .clamp(0, 1000000)
+                        .toStringAsFixed(1),
                   );
                 },
                 onInc: () {
                   final v = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _volumeValueCtrl.text =
-                        (v + 0.1).clamp(0, 1000000).toStringAsFixed(1),
+                    () => _volumeValueCtrl.text = (v + 0.1)
+                        .clamp(0, 1000000)
+                        .toStringAsFixed(1),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
@@ -520,7 +528,8 @@ class _AddSingleDoseVialWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Stock Management',
           children: [
             LabelFieldRow(
@@ -530,15 +539,17 @@ class _AddSingleDoseVialWizardPageState
                 onDec: () {
                   final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _stockValueCtrl.text =
-                        (v - 1).clamp(0, 1000000).toString(),
+                    () => _stockValueCtrl.text = (v - 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 onInc: () {
                   final v = int.tryParse(_stockValueCtrl.text.trim()) ?? 0;
                   setState(
-                    () => _stockValueCtrl.text =
-                        (v + 1).clamp(0, 1000000).toString(),
+                    () => _stockValueCtrl.text = (v + 1)
+                        .clamp(0, 1000000)
+                        .toString(),
                   );
                 },
                 decoration: buildCompactFieldDecoration(
@@ -580,15 +591,16 @@ class _AddSingleDoseVialWizardPageState
                     final v =
                         int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
                     setState(
-                      () => _lowStockThresholdCtrl.text =
-                          (v - 1).clamp(0, 1000000).toString(),
+                      () => _lowStockThresholdCtrl.text = (v - 1)
+                          .clamp(0, 1000000)
+                          .toString(),
                     );
                   },
                   onInc: () {
                     final v =
                         int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
-                    final stock = int.tryParse(_stockValueCtrl.text.trim()) ??
-                        1000000;
+                    final stock =
+                        int.tryParse(_stockValueCtrl.text.trim()) ?? 1000000;
                     final newVal = (v + 1).clamp(0, stock);
                     setState(
                       () => _lowStockThresholdCtrl.text = newVal.toString(),
@@ -637,7 +649,8 @@ class _AddSingleDoseVialWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Expiry & Storage',
           children: [
             LabelFieldRow(
@@ -645,8 +658,9 @@ class _AddSingleDoseVialWizardPageState
               field: DateButton36(
                 label: _expiry == null
                     ? 'Select date'
-                    : MaterialLocalizations.of(context)
-                        .formatCompactDate(_expiry!),
+                    : MaterialLocalizations.of(
+                        context,
+                      ).formatCompactDate(_expiry!),
                 onPressed: () async {
                   final now = DateTime.now();
                   final picked = await showDatePicker(
@@ -805,8 +819,8 @@ class _AddSingleDoseVialWizardPageState
     final initialStock = previous == null
         ? stock
         : (stock > previous.stockValue
-            ? stock
-            : (previous.initialStockValue ?? previous.stockValue));
+              ? stock
+              : (previous.initialStockValue ?? previous.stockValue));
 
     final storageInstructions = [
       if (_requiresFridge) 'Refrigerate (2-8°C)',
@@ -836,27 +850,30 @@ class _AddSingleDoseVialWizardPageState
           ? double.tryParse(_lowStockThresholdCtrl.text.trim())
           : null,
       expiry: _expiry,
-      batchNumber:
-          _batchCtrl.text.trim().isEmpty ? null : _batchCtrl.text.trim(),
+      batchNumber: _batchCtrl.text.trim().isEmpty
+          ? null
+          : _batchCtrl.text.trim(),
       storageLocation: _storageLocationCtrl.text.trim().isEmpty
           ? null
           : _storageLocationCtrl.text.trim(),
       requiresRefrigeration: _requiresFridge,
-      storageInstructions:
-          storageInstructions.isEmpty ? null : storageInstructions,
+      storageInstructions: storageInstructions.isEmpty
+          ? null
+          : storageInstructions,
     );
 
     await repo.upsert(med);
 
     if (mounted) {
-      context.pop();
+      context.go('/medications');
     }
   }
 
   String _newId() => DateTime.now().millisecondsSinceEpoch.toString();
 
   Widget _buildReviewStep() {
-    final concentration = double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
+    final concentration =
+        double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
     final volume = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
     final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
     final threshold = _lowStockEnabled
@@ -873,7 +890,8 @@ class _AddSingleDoseVialWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Medication Details',
           children: [
             _reviewRow('Name', _nameCtrl.text.trim()),
@@ -883,7 +901,8 @@ class _AddSingleDoseVialWizardPageState
           ],
         ),
         const SizedBox(height: 12),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Strength & Volume',
           children: [
             _reviewRow(
@@ -894,20 +913,20 @@ class _AddSingleDoseVialWizardPageState
           ],
         ),
         const SizedBox(height: 12),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Inventory',
           children: [
             _reviewRow('Current Stock', '$stock vials'),
             _reviewRow(
               'Low Stock Alert',
-              _lowStockEnabled
-                  ? 'Enabled at $threshold vials'
-                  : 'Disabled',
+              _lowStockEnabled ? 'Enabled at $threshold vials' : 'Disabled',
             ),
           ],
         ),
         const SizedBox(height: 12),
-        SectionFormCard(neutral: true,
+        SectionFormCard(
+          neutral: true,
           title: 'Storage',
           children: [
             if (_expiry != null)
@@ -920,7 +939,8 @@ class _AddSingleDoseVialWizardPageState
             if (_requiresFridge)
               _reviewRow('Refrigeration', 'Required (2-8°C)'),
             if (_requiresFreezer) _reviewRow('Storage', 'Freezer'),
-            if (_protectLight) _reviewRow('Light Sensitivity', 'Protect from light'),
+            if (_protectLight)
+              _reviewRow('Light Sensitivity', 'Protect from light'),
           ],
         ),
       ],
@@ -936,18 +956,10 @@ class _AddSingleDoseVialWizardPageState
         children: [
           SizedBox(
             width: 120,
-            child: Text(
-              label,
-              style: fieldLabelStyle(context),
-            ),
+            child: Text(label, style: fieldLabelStyle(context)),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: bodyTextStyle(context),
-            ),
-          ),
+          Expanded(child: Text(value, style: bodyTextStyle(context))),
         ],
       ),
     );

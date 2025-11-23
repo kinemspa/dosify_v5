@@ -273,6 +273,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           ? double.tryParse(_vialVolumeCtrl.text.trim())
           : null,
       initialStockValue: initialStock,
+      activeVialVolume:
+          previous?.activeVialVolume ??
+          (_vialVolumeCtrl.text.isNotEmpty
+              ? double.tryParse(_vialVolumeCtrl.text.trim())
+              : null),
       // Reconstituted Vial fields
       activeVialLowStockMl:
           _activeVialLowStockEnabled &&
