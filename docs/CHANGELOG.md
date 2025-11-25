@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. Dates in UT
 
 ## Unreleased
 
+### Medication List Cards (2025-02-14)
+- Added a quick toggle between Halo and Concept-9 Focus cards, persisting the last selection between sessions.
+- Rebuilt the Halo card to match the flattened Concept-9 baseline: conditional adherence, inline fact rows, and clearer MDV stock signals.
+- Introduced the Focus card variant that mirrors Concept-9 copy, hero text, and single-row statistic layout.
+- Updated the compact card layout with the approved form chip, concise strength/next dose labels, and aligned expiry + stock copy.
+
 ### Dose Logging System (2025-11-05)
 - **Added comprehensive dose history tracking**
   - New `DoseLog` domain model with Hive persistence (typeId: 41, 42)

@@ -1,9 +1,12 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_calculation_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_day_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
@@ -244,7 +247,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         onMarkTaken: (notes) => _markDoseAsTaken(dose, notes),
         onSnooze: () => _snoozeDose(dose),
         onSkip: () => _skipDose(dose),
-        onEditLog: () => _editDoseLog(dose),
+        onDelete: () => _deleteDoseLog(dose),
       ),
     );
   }
@@ -269,6 +272,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
+
+      // Deduct medication stock
+      await _deductStock(dose);
 
       // Cancel the notification for this dose
       await _cancelNotificationForDose(dose);
@@ -371,6 +377,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
 
+      // Cancel the notification for this dose
+      await _cancelNotificationForDose(dose);
+
       await _loadDoses();
 
       if (mounted) {
@@ -387,93 +396,182 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
   }
 
-  Future<void> _editDoseLog(CalculatedDose dose) async {
+  Future<void> _deleteDoseLog(CalculatedDose dose) async {
     if (dose.existingLog == null) return;
 
-    // Show dialog to choose new status
-    final result = await showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Dose Status'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.cancel),
-              title: const Text('Mark as Skipped'),
-              onTap: () => Navigator.pop(context, DoseAction.skipped),
-            ),
-            ListTile(
-              leading: const Icon(Icons.close),
-              title: const Text('Delete Log (back to pending)'),
-              onTap: () => Navigator.pop(context, 'delete'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
+    try {
+      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      await repo.delete(dose.existingLog!.id);
 
-    if (result == null) return; // Cancelled
-
-    if (result == 'delete') {
-      // Delete the log
-      try {
-        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.delete(dose.existingLog!.id);
-        await _loadDoses();
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Log deleted - dose back to pending')),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-        }
+      // Restore stock if the dose was previously taken
+      if (dose.existingLog!.action == DoseAction.taken) {
+        await _restoreStock(dose);
       }
-    } else {
-      // Update to new action (result is DoseAction)
-      final newAction = result as DoseAction;
-      final updatedLog = DoseLog(
-        id: dose.existingLog!.id,
-        scheduleId: dose.existingLog!.scheduleId,
-        scheduleName: dose.scheduleName,
-        medicationId: dose.existingLog!.medicationId,
-        medicationName: dose.medicationName,
-        scheduledTime: dose.scheduledTime,
-        doseValue: dose.doseValue,
-        doseUnit: dose.doseUnit,
-        action: newAction,
-        notes: dose.existingLog!.notes,
-      );
 
-      try {
-        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(updatedLog);
-        await _loadDoses();
+      await _loadDoses();
 
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose status updated')));
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose reset to pending')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
+  }
+
+  /// Deducts medication stock when a dose is taken
+  Future<bool> _deductStock(CalculatedDose dose) async {
+    try {
+      // Get the schedule to access medication info
+      final scheduleBox = Hive.box<Schedule>('schedules');
+      final schedule = scheduleBox.get(dose.scheduleId);
+
+      if (schedule == null || schedule.medicationId == null) {
+        return true; // No medication linked, skip stock management
+      }
+
+      final medBox = Hive.box<Medication>('medications');
+      final med = medBox.get(schedule.medicationId);
+
+      if (med == null) {
+        return true; // Medication not found, skip
+      }
+
+      // Calculate stock delta based on medication and dose type
+      final delta = _calculateStockDelta(med, schedule);
+
+      if (delta <= 0) {
+        return true; // Can't calculate delta, skip
+      }
+
+      final newStock = (med.stockValue - delta).clamp(0.0, double.infinity);
+      await medBox.put(med.id, med.copyWith(stockValue: newStock));
+
+      return true;
+    } catch (e) {
+      debugPrint('[DoseCalendar] Failed to deduct stock: $e');
+      return false;
+    }
+  }
+
+  /// Restores medication stock when a taken dose is reset
+  Future<bool> _restoreStock(CalculatedDose dose) async {
+    try {
+      // Get the schedule to access medication info
+      final scheduleBox = Hive.box<Schedule>('schedules');
+      final schedule = scheduleBox.get(dose.scheduleId);
+
+      if (schedule == null || schedule.medicationId == null) {
+        return true; // No medication linked
+      }
+
+      final medBox = Hive.box<Medication>('medications');
+      final med = medBox.get(schedule.medicationId);
+
+      if (med == null) {
+        return true; // Medication not found
+      }
+
+      // Calculate stock delta
+      final delta = _calculateStockDelta(med, schedule);
+
+      if (delta <= 0) {
+        return true; // Can't calculate delta
+      }
+
+      final newStock = med.stockValue + delta;
+      await medBox.put(med.id, med.copyWith(stockValue: newStock));
+
+      return true;
+    } catch (e) {
+      debugPrint('[DoseCalendar] Failed to restore stock: $e');
+      return false;
+    }
+  }
+
+  double _calculateStockDelta(Medication med, Schedule schedule) {
+    var delta = 0.0;
+
+    switch (med.stockUnit) {
+      case StockUnit.tablets:
+        if (schedule.doseTabletQuarters != null) {
+          delta = schedule.doseTabletQuarters! / 4.0;
+        } else if (schedule.doseMassMcg != null) {
+          final perTabMcg = _convertToMcg(med.strengthValue, med.strengthUnit);
+          delta = (schedule.doseMassMcg! / perTabMcg).clamp(0, double.infinity);
+        }
+      case StockUnit.capsules:
+        if (schedule.doseCapsules != null) {
+          delta = schedule.doseCapsules!.toDouble();
+        } else if (schedule.doseMassMcg != null) {
+          final perCapMcg = _convertToMcg(med.strengthValue, med.strengthUnit);
+          delta = (schedule.doseMassMcg! / perCapMcg).clamp(0, double.infinity);
+        }
+      case StockUnit.preFilledSyringes:
+        if (schedule.doseSyringes != null)
+          delta = schedule.doseSyringes!.toDouble();
+      case StockUnit.singleDoseVials:
+        if (schedule.doseVials != null) delta = schedule.doseVials!.toDouble();
+      case StockUnit.multiDoseVials:
+        // For MDV: stockValue = active vial mL remaining
+        // Deduct the raw mL volume used, NOT a vial fraction
+        var usedMl = 0.0;
+        if (schedule.doseVolumeMicroliter != null) {
+          usedMl = schedule.doseVolumeMicroliter! / 1000.0;
+        } else if (schedule.doseMassMcg != null) {
+          double? mgPerMl;
+          switch (med.strengthUnit) {
+            case Unit.mgPerMl:
+              mgPerMl = med.perMlValue ?? med.strengthValue;
+            case Unit.mcgPerMl:
+              mgPerMl = (med.perMlValue ?? med.strengthValue) / 1000.0;
+            case Unit.gPerMl:
+              mgPerMl = (med.perMlValue ?? med.strengthValue) * 1000.0;
+            default:
+              mgPerMl = null;
+          }
+          if (mgPerMl != null)
+            usedMl = (schedule.doseMassMcg! / 1000.0) / mgPerMl;
+        } else if (schedule.doseIU != null) {
+          double? iuPerMl;
+          if (med.strengthUnit == Unit.unitsPerMl) {
+            iuPerMl = med.perMlValue ?? med.strengthValue;
+          }
+          if (iuPerMl != null) usedMl = schedule.doseIU! / iuPerMl;
+        }
+        // Deduct mL directly from active vial stock
+        if (usedMl > 0) {
+          delta = usedMl;
+        }
+      case StockUnit.mcg:
+        if (schedule.doseMassMcg != null)
+          delta = schedule.doseMassMcg!.toDouble();
+      case StockUnit.mg:
+        if (schedule.doseMassMcg != null)
+          delta = schedule.doseMassMcg! / 1000.0;
+      case StockUnit.g:
+        if (schedule.doseMassMcg != null) delta = schedule.doseMassMcg! / 1e6;
+    }
+
+    return delta;
+  }
+
+  double _convertToMcg(double value, Unit unit) {
+    return switch (unit) {
+      Unit.mcg => value,
+      Unit.mg => value * 1000,
+      Unit.g => value * 1e6,
+      Unit.units => value,
+      Unit.mcgPerMl => value,
+      Unit.mgPerMl => value * 1000,
+      Unit.gPerMl => value * 1e6,
+      Unit.unitsPerMl => value,
+    };
   }
 
   @override
@@ -517,7 +615,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             _buildCurrentView(), // Month/Week views size themselves
           // Selected date schedules (if date selected, only for week/month views)
           if (_selectedDate != null && _currentView != CalendarView.day)
-            Expanded(child: _buildSelectedDayPanel()),
+            widget.variant == CalendarVariant.compact
+                ? _buildSelectedDayPanel()
+                : Expanded(child: _buildSelectedDayPanel()),
         ],
       ),
     );
@@ -619,25 +719,48 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ),
           ),
           // Dose list
-          Expanded(
-            child: dayDoses.isEmpty
-                ? Center(
-                    child: Text(
-                      'No doses scheduled',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80), // Space for FAB
-                    itemCount: dayDoses.length,
-                    itemBuilder: (context, index) {
-                      final dose = dayDoses[index];
-                      return _buildDoseListTile(dose);
-                    },
-                  ),
-          ),
+          widget.variant == CalendarVariant.compact
+              ? (dayDoses.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: Text(
+                            'No doses scheduled',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 16),
+                        itemCount: dayDoses.length,
+                        itemBuilder: (context, index) {
+                          final dose = dayDoses[index];
+                          return _buildDoseListTile(dose);
+                        },
+                      ))
+              : Expanded(
+                  child: dayDoses.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No doses scheduled',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 80),
+                          itemCount: dayDoses.length,
+                          itemBuilder: (context, index) {
+                            final dose = dayDoses[index];
+                            return _buildDoseListTile(dose);
+                          },
+                        ),
+                ),
         ],
       ),
     );
@@ -717,14 +840,14 @@ class _DoseDetailBottomSheet extends StatefulWidget {
   final void Function(String? notes) onMarkTaken;
   final VoidCallback onSnooze;
   final VoidCallback onSkip;
-  final VoidCallback onEditLog;
+  final VoidCallback onDelete;
 
   const _DoseDetailBottomSheet({
     required this.dose,
     required this.onMarkTaken,
     required this.onSnooze,
     required this.onSkip,
-    required this.onEditLog,
+    required this.onDelete,
   });
 
   @override
@@ -862,75 +985,18 @@ class _DoseDetailBottomSheetState extends State<_DoseDetailBottomSheet> {
                     _buildInfoRow(
                       context,
                       'Date',
-                      DateFormat.yMMMd().format(widget.dose.scheduledTime),
+                      MaterialLocalizations.of(
+                        context,
+                      ).formatMediumDate(widget.dose.scheduledTime),
                       Icons.calendar_today,
                     ),
                     const SizedBox(height: 12),
-                    // Interactive status section
+                    // Compact status section
                     _buildStatusSection(context, widget.dose, colorScheme),
                     const SizedBox(height: 16),
-                    // Action buttons - compact row for pending doses
-                    if (widget.dose.status == DoseStatus.pending) ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                widget.onMarkTaken(
-                                  _notesController.text.isEmpty
-                                      ? null
-                                      : _notesController.text,
-                                );
-                              },
-                              icon: const Icon(Icons.check_circle, size: 18),
-                              label: const Text('Take'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                widget.onSnooze();
-                              },
-                              icon: const Icon(Icons.snooze, size: 18),
-                              label: const Text('Snooze'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                widget.onSkip();
-                              },
-                              icon: const Icon(Icons.cancel, size: 18),
-                              label: const Text('Skip'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                    // Action buttons - always visible with state-based styling
+                    _buildActionButtons(context, widget.dose, colorScheme),
+                    const SizedBox(height: 16),
                     // Notes field (always visible)
                     TextField(
                       controller: _notesController,
@@ -1001,54 +1067,108 @@ class _DoseDetailBottomSheetState extends State<_DoseDetailBottomSheet> {
     final statusIcon = _getStatusIcon(dose.status);
     final statusText = _getStatusText(dose.status);
 
-    // Make status interactive if it has a log OR is overdue (can be marked as taken late)
-    final canEdit =
-        dose.existingLog != null || dose.status == DoseStatus.overdue;
+    return Row(
+      children: [
+        Icon(statusIcon, size: 20, color: statusColor),
+        const SizedBox(width: 8),
+        Text(
+          statusText,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: statusColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
 
-    return InkWell(
-      onTap: canEdit
-          ? () {
+  Widget _buildActionButtons(
+    BuildContext context,
+    CalculatedDose dose,
+    ColorScheme colorScheme,
+  ) {
+    final status = dose.status;
+
+    // Snooze only enabled for pending doses
+    final snoozeEnabled = status == DoseStatus.pending;
+
+    // Highlight based on current status
+    final takePrimary = status == DoseStatus.taken;
+    final skipPrimary = status == DoseStatus.skipped;
+
+    return Row(
+      children: [
+        // Take button - toggles between taken and pending/overdue
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () {
               Navigator.pop(context);
-              widget.onEditLog();
-            }
-          : null,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: statusColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: statusColor.withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            Icon(statusIcon, size: 24, color: statusColor),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Status',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    statusText,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+              if (status == DoseStatus.taken) {
+                // Toggle back to pending/overdue
+                widget.onDelete();
+              } else {
+                // Mark as taken
+                widget.onMarkTaken(
+                  _notesController.text.isEmpty ? null : _notesController.text,
+                );
+              }
+            },
+            icon: Icon(
+              Icons.check_circle,
+              size: 18,
+              color: takePrimary ? Colors.green : null,
             ),
-            if (canEdit)
-              Icon(Icons.edit, size: 20, color: colorScheme.onSurfaceVariant),
-          ],
+            label: const Text('Take'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              backgroundColor: takePrimary ? Colors.green : null,
+              foregroundColor: takePrimary ? Colors.white : null,
+            ),
+          ),
         ),
-      ),
+        const SizedBox(width: 8),
+        // Snooze button
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: snoozeEnabled
+                ? () {
+                    Navigator.pop(context);
+                    widget.onSnooze();
+                  }
+                : null,
+            icon: const Icon(Icons.snooze, size: 18),
+            label: const Text('Snooze'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Skip button - toggles between skipped and pending/overdue
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              if (status == DoseStatus.skipped) {
+                // Toggle back to pending/overdue
+                widget.onDelete();
+              } else {
+                // Mark as skipped
+                widget.onSkip();
+              }
+            },
+            icon: const Icon(Icons.cancel, size: 18),
+            label: const Text('Skip'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              backgroundColor: skipPrimary ? colorScheme.errorContainer : null,
+              foregroundColor: skipPrimary
+                  ? colorScheme.onErrorContainer
+                  : null,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

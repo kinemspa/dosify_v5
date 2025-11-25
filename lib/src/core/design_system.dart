@@ -81,10 +81,18 @@ const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(16, 16, 16, 16);
 const double kPageHorizontalPadding = 16;
 const double kPageVerticalPadding = 16;
 
+/// Generic spacing scale (apply everywhere before creating new values)
+const double kSpacingXS = 4;
+const double kSpacingS = 8;
+const double kSpacingM = 12;
+const double kSpacingL = 16;
+const double kSpacingXL = 20;
+const double kSpacingXXL = 24;
+
 /// Section/card spacing
-const double kSectionSpacing = 12;
-const double kCardPadding = 12;
-const double kCardInnerSpacing = 8;
+const double kSectionSpacing = kSpacingM;
+const double kCardPadding = kSpacingM;
+const double kCardInnerSpacing = kSpacingS;
 
 /// Field spacing
 const double kFieldSpacing = 6; // Between label-field rows
@@ -128,7 +136,10 @@ const double kBorderWidthThick = kFocusedOutlineWidth; // 2px
 const double kBorderRadiusSmall = 8;
 const double kBorderRadiusMedium = 12;
 const double kBorderRadiusLarge = 16;
+const double kBorderRadiusXLarge = 20;
+const double kBorderRadiusXXLarge = 24;
 const double kBorderRadiusFull = 999; // Pill shape
+const double kBorderRadiusChip = 6; // Less rounded for chips
 
 /// Standard border radius for fields, buttons, cards
 const Radius kStandardRadius = Radius.circular(kBorderRadiusMedium);
@@ -141,12 +152,12 @@ const BorderRadius kStandardBorderRadius = BorderRadius.all(kStandardRadius);
 /// Text opacity levels
 const double kOpacityFull = 1.0;
 const double kOpacityHigh = 0.87; // Primary text
-const double kOpacityMediumHigh = 0.85;
-const double kOpacityMedium = 0.75; // Helper text
-const double kOpacityMediumLow = 0.60; // Placeholder/hint
-const double kOpacityLow = 0.50; // Disabled text
-const double kOpacityVeryLow = 0.45; // Very muted
-const double kOpacityMinimal = 0.30; // Borders, dividers
+const double kOpacityMediumHigh = 0.70; // Reduced from 0.85 to be lighter
+const double kOpacityMedium = 0.60; // Reduced from 0.75 to be lighter
+const double kOpacityMediumLow = 0.50; // Reduced from 0.60
+const double kOpacityLow = 0.40; // Reduced from 0.50
+const double kOpacityVeryLow = 0.35; // Reduced from 0.45
+const double kOpacityMinimal = 0.25; // Reduced from 0.30
 
 /// Specific use case opacity
 const double kHelperTextOpacity = kOpacityMedium;
@@ -465,7 +476,9 @@ TextStyle? cardTitleStyle(BuildContext context) {
   return Theme.of(context).textTheme.titleSmall?.copyWith(
     fontSize: kFontSizeLarge,
     fontWeight: kFontWeightSemiBold,
-    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityHigh),
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
   );
 }
 
@@ -475,7 +488,9 @@ TextStyle? bodyTextStyle(BuildContext context) {
     fontSize: kFontSizeMedium,
     fontWeight: kFontWeightNormal,
     height: kLineHeightNormal,
-    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityHigh),
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
   );
 }
 

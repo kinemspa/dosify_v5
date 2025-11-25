@@ -24,15 +24,13 @@ import 'package:dosifi_v5/src/features/medications/presentation/add_capsule_wiza
 import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_syringe_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_single_dose_vial_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_detail_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/select_medication_for_schedule_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/bottom_nav_settings_page.dart';
-import 'package:dosifi_v5/src/features/settings/presentation/form_field_styles_page.dart';
-import 'package:dosifi_v5/src/features/settings/presentation/large_card_styles_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/settings_page.dart';
-import 'package:dosifi_v5/src/features/settings/presentation/strength_input_styles_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/wide_card_samples_page.dart';
 import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart';
 
 // Removed incorrect import
@@ -82,7 +80,7 @@ final router = GoRouter(
         GoRoute(
           path: '/schedules/add',
           name: 'addSchedule',
-          builder: (context, state) => const AddEditSchedulePage(),
+          builder: (context, state) => const AddScheduleWizardPage(),
         ),
         GoRoute(
           path: '/schedules/detail/:id',
@@ -102,10 +100,10 @@ final router = GoRouter(
           name: 'editSchedule',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            if (id == null) return const AddEditSchedulePage();
+            if (id == null) return const AddScheduleWizardPage();
             final box = Hive.box<Schedule>('schedules');
             final initial = box.get(id);
-            return AddEditSchedulePage(initial: initial);
+            return AddScheduleWizardPage(initial: initial);
           },
         ),
         GoRoute(
@@ -119,19 +117,14 @@ final router = GoRouter(
           builder: (context, state) => const BottomNavSettingsPage(),
         ),
         GoRoute(
-          path: '/settings/large-card-styles',
-          name: 'largeCardStyles',
-          builder: (context, state) => const LargeCardStylesPage(),
+          path: '/settings/wide-card-samples',
+          name: 'wideCardSamples',
+          builder: (context, state) => const WideCardSamplesPage(),
         ),
         GoRoute(
-          path: '/settings/strength-input-styles',
-          name: 'strengthInputStyles',
-          builder: (context, state) => const StrengthInputStylesPage(),
-        ),
-        GoRoute(
-          path: '/settings/form-field-styles',
-          name: 'formFieldStyles',
-          builder: (context, state) => const FormFieldStylesPage(),
+          path: '/settings/final-card-decisions',
+          name: 'finalCardDecisions',
+          builder: (context, state) => const FinalCardDecisionsPage(),
         ),
         // Nested under shell so bottom nav persists
         GoRoute(

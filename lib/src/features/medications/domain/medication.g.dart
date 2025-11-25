@@ -57,13 +57,15 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       backupVialsRequiresRefrigeration: fields[35] as bool,
       backupVialsRequiresFreezer: fields[36] as bool,
       backupVialsLightSensitive: fields[37] as bool,
+      activeVialVolume: fields[40] as double?,
+      diluentName: fields[41] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(40)
+      ..writeByte(42)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -86,6 +88,10 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..write(obj.volumePerDose)
       ..writeByte(39)
       ..write(obj.volumeUnit)
+      ..writeByte(40)
+      ..write(obj.activeVialVolume)
+      ..writeByte(41)
+      ..write(obj.diluentName)
       ..writeByte(9)
       ..write(obj.stockValue)
       ..writeByte(10)

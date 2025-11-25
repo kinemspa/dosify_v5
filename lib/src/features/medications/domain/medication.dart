@@ -49,6 +49,8 @@ class Medication {
     this.backupVialsRequiresRefrigeration = false,
     this.backupVialsRequiresFreezer = false,
     this.backupVialsLightSensitive = false,
+    this.activeVialVolume,
+    this.diluentName,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -85,6 +87,13 @@ class Medication {
 
   @HiveField(39)
   final VolumeUnit? volumeUnit;
+
+  // For MDV: The remaining volume (mL) in the currently open/active vial.
+  @HiveField(40)
+  final double? activeVialVolume;
+
+  @HiveField(41)
+  final String? diluentName;
 
   @HiveField(9)
   final double stockValue;
@@ -146,38 +155,38 @@ class Medication {
   // Active/Reconstituted vial fields (MDV only)
   @HiveField(26)
   final double? activeVialLowStockMl; // Low stock threshold for active vial volume in mL
-  
+
   @HiveField(27)
   final String? activeVialBatchNumber;
-  
+
   @HiveField(28)
   final String? activeVialStorageLocation;
-  
+
   @HiveField(29)
   final bool activeVialRequiresRefrigeration;
-  
+
   @HiveField(30)
   final bool activeVialRequiresFreezer;
-  
+
   @HiveField(31)
   final bool activeVialLightSensitive;
 
   // Backup stock vials fields (MDV only)
   @HiveField(32)
   final DateTime? backupVialsExpiry; // Expiry for sealed backup vials
-  
+
   @HiveField(33)
   final String? backupVialsBatchNumber;
-  
+
   @HiveField(34)
   final String? backupVialsStorageLocation;
-  
+
   @HiveField(35)
   final bool backupVialsRequiresRefrigeration;
-  
+
   @HiveField(36)
   final bool backupVialsRequiresFreezer;
-  
+
   @HiveField(37)
   final bool backupVialsLightSensitive;
 
@@ -222,6 +231,8 @@ class Medication {
     bool? backupVialsRequiresRefrigeration,
     bool? backupVialsRequiresFreezer,
     bool? backupVialsLightSensitive,
+    double? activeVialVolume,
+    String? diluentName,
     bool clearReconstitution = false,
   }) {
     return Medication(
@@ -261,17 +272,31 @@ class Medication {
           ? null
           : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
       activeVialLowStockMl: activeVialLowStockMl ?? this.activeVialLowStockMl,
-      activeVialBatchNumber: activeVialBatchNumber ?? this.activeVialBatchNumber,
-      activeVialStorageLocation: activeVialStorageLocation ?? this.activeVialStorageLocation,
-      activeVialRequiresRefrigeration: activeVialRequiresRefrigeration ?? this.activeVialRequiresRefrigeration,
-      activeVialRequiresFreezer: activeVialRequiresFreezer ?? this.activeVialRequiresFreezer,
-      activeVialLightSensitive: activeVialLightSensitive ?? this.activeVialLightSensitive,
+      activeVialBatchNumber:
+          activeVialBatchNumber ?? this.activeVialBatchNumber,
+      activeVialStorageLocation:
+          activeVialStorageLocation ?? this.activeVialStorageLocation,
+      activeVialRequiresRefrigeration:
+          activeVialRequiresRefrigeration ??
+          this.activeVialRequiresRefrigeration,
+      activeVialRequiresFreezer:
+          activeVialRequiresFreezer ?? this.activeVialRequiresFreezer,
+      activeVialLightSensitive:
+          activeVialLightSensitive ?? this.activeVialLightSensitive,
       backupVialsExpiry: backupVialsExpiry ?? this.backupVialsExpiry,
-      backupVialsBatchNumber: backupVialsBatchNumber ?? this.backupVialsBatchNumber,
-      backupVialsStorageLocation: backupVialsStorageLocation ?? this.backupVialsStorageLocation,
-      backupVialsRequiresRefrigeration: backupVialsRequiresRefrigeration ?? this.backupVialsRequiresRefrigeration,
-      backupVialsRequiresFreezer: backupVialsRequiresFreezer ?? this.backupVialsRequiresFreezer,
-      backupVialsLightSensitive: backupVialsLightSensitive ?? this.backupVialsLightSensitive,
+      backupVialsBatchNumber:
+          backupVialsBatchNumber ?? this.backupVialsBatchNumber,
+      backupVialsStorageLocation:
+          backupVialsStorageLocation ?? this.backupVialsStorageLocation,
+      backupVialsRequiresRefrigeration:
+          backupVialsRequiresRefrigeration ??
+          this.backupVialsRequiresRefrigeration,
+      backupVialsRequiresFreezer:
+          backupVialsRequiresFreezer ?? this.backupVialsRequiresFreezer,
+      backupVialsLightSensitive:
+          backupVialsLightSensitive ?? this.backupVialsLightSensitive,
+      activeVialVolume: activeVialVolume ?? this.activeVialVolume,
+      diluentName: diluentName ?? this.diluentName,
     );
   }
 }

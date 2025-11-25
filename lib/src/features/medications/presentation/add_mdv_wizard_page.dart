@@ -306,6 +306,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           _hasBackupVials && _backupVialsRequiresFreezer,
       backupVialsLightSensitive: _hasBackupVials && _backupVialsProtectLight,
       backupVialsExpiry: _hasBackupVials ? _backupVialsExpiry : null,
+      diluentName: _reconResult?.diluentName,
     );
 
     await repo.upsert(med);

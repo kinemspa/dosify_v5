@@ -6,11 +6,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 
 enum _SchedView { list, compact, large }
 
@@ -223,15 +225,10 @@ class _SchedulesPageState extends State<SchedulesPage> {
           itemBuilder: (context, i) => _ScheduleTile(s: items[i]),
         );
       case _SchedView.compact:
-        return GridView.builder(
+        return ListView.separated(
           padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.1,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
           itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, i) => _ScheduleCard(s: items[i], dense: true),
         );
       case _SchedView.large:
@@ -449,194 +446,207 @@ class _ScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final next = _nextOccurrence(s);
     final last = _lastOccurrence(s);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.3),
-        ),
-      ),
-      child: InkWell(
+    if (dense) {
+      // Compact Card (Concept 9)
+      final timeLabel = s.timesOfDay != null && s.timesOfDay!.isNotEmpty
+          ? TimeOfDay(
+              hour: s.timesOfDay!.first ~/ 60,
+              minute: s.timesOfDay!.first % 60,
+            ).format(context)
+          : TimeOfDay(
+              hour: s.minutesOfDay ~/ 60,
+              minute: s.minutesOfDay % 60,
+            ).format(context);
+
+      return GlassCardSurface(
         onTap: () => context.push('/schedules/detail/${s.id}'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: dense ? const EdgeInsets.all(6) : const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        useGradient: false,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: dense ? 28 : 36,
-                    height: dense ? 28 : 36,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.secondaryContainer,
-                          theme.colorScheme.secondary,
-                        ],
+              // Time Column
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      timeLabel,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.primary,
                       ),
-                      borderRadius: BorderRadius.circular(dense ? 8 : 10),
                     ),
-                    child: Icon(
-                      Icons.notifications_active,
-                      color: Colors.white,
-                      size: dense ? 16 : 18,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          s.name,
-                          style: dense
-                              ? theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                )
-                              : theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          s.medicationName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!dense)
-                    IconButton(
-                      tooltip: 'Delete',
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () async {
-                        final ok = await _confirmDelete(context, s);
-                        if (!ok) return;
-                        await ScheduleScheduler.cancelFor(s.id);
-                        await Hive.box<Schedule>('schedules').delete(s.id);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Deleted "${s.name}"')),
-                          );
-                        }
-                      },
-                    ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.medication,
-                    size: dense ? 14 : 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _doseLine(s),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.schedule,
-                    size: dense ? 14 : 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      _timesLine(context, s),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+              const SizedBox(width: kSpacingM),
+              // Info Column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      s.medicationName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      '${s.doseValue} ${s.doseUnit}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              if (!dense) const SizedBox(height: 4),
-              if (!dense)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Last: ${last == null ? '—' : _fmtWhen(context, last)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+              // Action
+              Center(
+                child: IconButton.filledTonal(
+                  icon: const Icon(Icons.check, size: 20),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(36, 36),
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: () async {
+                    final ok = await _confirmTake(context, s);
+                    if (!ok) return;
+                    final success = await _applyStockDecrement(context, s);
+                    if (success && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Marked as taken: ${s.name}')),
+                      );
+                    }
+                  },
                 ),
-              if (!dense) const SizedBox(height: 2),
-              if (!dense)
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Next: ${next == null ? '—' : _fmtWhen(context, next)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: () async {
-                        final ok = await _confirmTake(context, s);
-                        if (!ok) return;
-                        final success = await _applyStockDecrement(context, s);
-                        if (success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Marked as taken: ${s.name}'),
-                            ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.check_circle_outline, size: 16),
-                      label: const Text('Take'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
-                  ],
-                ),
+              ),
             ],
           ),
         ),
+      );
+    }
+
+    // Large Card (Existing Logic with Glass Surface)
+    return GlassCardSurface(
+      onTap: () => context.push('/schedules/detail/${s.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            s.medicationName,
+            style: theme.textTheme.labelSmall?.copyWith(
+              letterSpacing: 1.1,
+              color: cs.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            s.name,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: kFieldSpacing),
+          Text(
+            '${_doseLine(s)} · ${_timesLine(context, s)}',
+            style: theme.textTheme.bodySmall,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: kFieldSpacing),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      next == null
+                          ? 'No upcoming dose'
+                          : 'Next: ${_fmtWhen(context, next)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (!dense && last != null)
+                      Text(
+                        'Last: ${_fmtWhen(context, last)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: kFieldSpacing),
+              if (!dense)
+                FilledButton.tonal(
+                  onPressed: () async {
+                    final ok = await _confirmTake(context, s);
+                    if (!ok) return;
+                    final success = await _applyStockDecrement(context, s);
+                    if (success && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Marked as taken: ${s.name}')),
+                      );
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 0,
+                    ),
+                    minimumSize: const Size(0, 32),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Take'),
+                )
+              else
+                FilledButton.tonal(
+                  onPressed: () => context.push('/schedules/detail/${s.id}'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 0,
+                    ),
+                    minimumSize: const Size(0, 32),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('View'),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -860,8 +870,8 @@ Future<bool> _applyStockDecrement(BuildContext context, Schedule s) async {
     case StockUnit.singleDoseVials:
       if (s.doseVials != null) delta = s.doseVials!.toDouble();
     case StockUnit.multiDoseVials:
-      // Subtract as a fraction of a vial based on volume vs containerVolumeMl if we know volume
-      final containerMl = med.containerVolumeMl ?? 0;
+      // For MDV: activeVialVolume = active vial mL remaining
+      // Deduct the raw mL volume used from active vial
       var usedMl = 0.0;
       if (s.doseVolumeMicroliter != null) {
         usedMl = s.doseVolumeMicroliter! / 1000.0;
@@ -885,9 +895,71 @@ Future<bool> _applyStockDecrement(BuildContext context, Schedule s) async {
         }
         if (iuPerMl != null) usedMl = s.doseIU! / iuPerMl;
       }
-      if (containerMl > 0 && usedMl > 0) {
-        delta = usedMl / containerMl; // subtract fractional vial
+
+      if (usedMl > 0) {
+        // MDV Logic: Decrement active vial first
+        // Fallback to stockValue if activeVialVolume is null (legacy data)
+
+        // CRITICAL FIX: If stockValue is larger than containerVolumeMl, it's likely a count (legacy data).
+        // In that case, assume activeVialVolume is full (containerVolumeMl) and stockValue is the backup count.
+        final isLegacyCount =
+            med.activeVialVolume == null &&
+            med.stockValue > (med.containerVolumeMl ?? 0);
+
+        final currentActive = isLegacyCount
+            ? (med.containerVolumeMl ?? 0.0)
+            : (med.activeVialVolume ?? med.stockValue);
+
+        var newActive = currentActive - usedMl;
+        var newBackup = med.stockValue;
+
+        // If we are in legacy mode (activeVialVolume was null), we need to initialize backup count.
+        if (med.activeVialVolume == null) {
+          if (isLegacyCount) {
+            // stockValue was count, so keep it as backup count (minus 0 because we are using the "open" vial which we just assumed was full)
+            // Wait, if we assume we just opened a vial from the stock, we should decrement stockValue?
+            // No, if we assume the "active" vial was already open but untracked, we don't decrement backup.
+            // BUT, if stockValue was 9, does that mean 9 sealed + 1 open? Or 9 total?
+            // Usually stockValue is "total inventory". So if we have 9 total, and we say 1 is open, then backup is 8.
+            newBackup = (med.stockValue - 1).clamp(0.0, double.infinity);
+          } else {
+            // stockValue was volume, so backup is 0
+            newBackup = 0;
+          }
+        }
+
+        if (newActive <= 0) {
+          // Vial depleted, open new one if available
+          if (newBackup > 0) {
+            newBackup = newBackup - 1;
+            // Carry over any excess usage to the new vial?
+            // For now, just reset to full minus excess usage
+            final capacity = med.containerVolumeMl ?? 0.0;
+            newActive = capacity + newActive; // newActive is negative here
+
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Active vial depleted. Opened new vial.'),
+                ),
+              );
+            }
+          } else {
+            newActive = 0;
+          }
+        }
+
+        await medsBox.put(
+          med.id,
+          med.copyWith(
+            activeVialVolume: newActive.clamp(0.0, double.infinity),
+            stockValue: newBackup.clamp(0.0, double.infinity),
+          ),
+        );
+        return true;
       }
+      break; // Exit switch, don't use default delta logic
+
     case StockUnit.mcg:
       if (s.doseMassMcg != null) delta = s.doseMassMcg!.toDouble();
     case StockUnit.mg:

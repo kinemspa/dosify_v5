@@ -71,33 +71,6 @@ class SettingsPage extends ConsumerWidget {
               }
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.view_comfortable),
-            title: const Text('Large Card Styles'),
-            subtitle: const Text(
-              'Choose how large medication cards look in lists',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/large-card-styles'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.tune),
-            title: const Text('Strength Input Styles'),
-            subtitle: const Text(
-              'Style variations for amount stepper + unit dropdown',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/strength-input-styles'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.text_fields),
-            title: const Text('Form Field Styles'),
-            subtitle: const Text(
-              '10 distinct styles for add/edit medication input fields',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/form-field-styles'),
-          ),
           const SizedBox(height: 24),
           const Text(
             'Navigation',
@@ -110,6 +83,26 @@ class SettingsPage extends ConsumerWidget {
             subtitle: const Text('Pick and order 4 tabs to show at the bottom'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/bottom-nav'),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'UI Components',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            leading: const Icon(Icons.view_carousel_outlined),
+            title: const Text('Wide Card Samples'),
+            subtitle: const Text('Preview large medication card layouts'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () => context.push('/settings/wide-card-samples'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.verified_outlined),
+            title: const Text('Final Card Decisions'),
+            subtitle: const Text('View locked-in card concepts for launch'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () => context.push('/settings/final-card-decisions'),
           ),
           const SizedBox(height: 24),
           const Text(

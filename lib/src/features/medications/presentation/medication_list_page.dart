@@ -1,23 +1,18 @@
-// Flutter imports:
-import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-// Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum _MedView { list, compact, large }
 
@@ -103,10 +98,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           final items = _getFilteredAndSortedMedications(
             b.values.toList(growable: false),
           );
-          // Ensure initial stock values so large cards can show current/initial remain
+          // Ensure initial stock values so large cards can show current vs
+          // initial amounts.
           _ensureInitialStockValues(items);
 
-          // Show initial state if no medications at all, or filtered state if search has no results
+          // Show initial state if no medications exist, or the filtered
+          // empty state when search removes everything.
           if (items.isEmpty) {
             if (_query.isEmpty && b.values.isEmpty) {
               // No medications at all - show initial state
@@ -543,6 +540,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final m = items[index];
+            final strengthLabel =
+                '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} '
+                '${_formLabelPlural(m.form)}';
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8,
@@ -573,7 +573,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} ${_formLabelPlural(m.form)}',
+                    strengthLabel,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: kTextLightGrey(context),
@@ -617,21 +617,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           },
         );
       case _MedView.compact:
-        return GridView.builder(
+        return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 900
-                ? 4
-                : MediaQuery.of(context).size.width > 600
-                ? 3
-                : 2,
-            childAspectRatio:
-                2.1, // shorter tiles to reduce bottom empty space while avoiding overflow
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
           itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
         );
       case _MedView.large:
@@ -652,133 +642,101 @@ class _MedCard extends StatelessWidget {
   final Medication m;
   final bool dense;
 
-  TextSpan _stockSpan(BuildContext context) {
-    // Count-based units show current/total unit
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      final colored = _stockStatusColor(Theme.of(context));
-      return TextSpan(
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(
-            context,
-          ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
-          height: 1,
-          fontSize: 9,
-        ),
-        children: [
-          TextSpan(
-            text: '$current',
-            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
-          ),
-          TextSpan(text: '/$total ${_getStockUnitLabel(m.stockUnit)}'),
-        ],
-      );
-    }
-    return TextSpan(
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(
-          context,
-        ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
-        height: 1,
-        fontSize: 9,
-      ),
-      children: [
-        TextSpan(
-          text: fmt2(m.stockValue),
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: _stockStatusColor(Theme.of(context)),
-          ),
-        ),
-        TextSpan(text: ' ${_getStockUnitLabel(m.stockUnit)}'),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!dense) {
       return _MedLargeCard(m: m);
     }
 
-    // Fallback: keep existing dense implementation
     final theme = Theme.of(context);
-    final isExpiringSoon =
-        m.expiry != null &&
-        m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
+    final cs = theme.colorScheme;
+    final isCountUnit =
+        m.stockUnit == StockUnit.preFilledSyringes ||
+        m.stockUnit == StockUnit.singleDoseVials ||
+        m.stockUnit == StockUnit.multiDoseVials ||
+        m.stockUnit == StockUnit.tablets ||
+        m.stockUnit == StockUnit.capsules;
+    final isMdv = m.form == MedicationForm.multiDoseVial;
 
-    return Container(
-      decoration: softWhiteCardDecoration(context),
-      child: InkWell(
-        onTap: () => context.push('/medications/${m.id}'),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Name
-              Text(
-                m.name,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  height: 1,
-                  fontSize: 12,
-                  color: theme.colorScheme.primary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              // Expiry (trailing) without chip
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+    final double current;
+    final double total;
+    if (isMdv && m.containerVolumeMl != null && m.containerVolumeMl! > 0) {
+      // MDV Logic: Use activeVialVolume.
+      // Fallback: If activeVialVolume is null (legacy data), use stockValue.
+      // CRITICAL FIX: If stockValue is larger than containerVolumeMl, it's likely a count (legacy data).
+      // In that case, assume activeVialVolume is full (containerVolumeMl) and stockValue is the backup count.
+      if (m.activeVialVolume == null && m.stockValue > m.containerVolumeMl!) {
+        current = m.containerVolumeMl!;
+      } else {
+        current = m.activeVialVolume ?? m.stockValue;
+      }
+      total = m.containerVolumeMl!;
+    } else if (isCountUnit) {
+      current = m.stockValue.floorToDouble();
+      total = (m.initialStockValue != null && m.initialStockValue! > 0)
+          ? m.initialStockValue!.ceilToDouble()
+          : current;
+    } else {
+      current = m.stockValue;
+      total = m.initialStockValue ?? m.stockValue;
+    }
+
+    final pct = total > 0 ? (current / total) * 100.0 : 0.0;
+
+    final fractionLabel = isMdv
+        ? '${fmt2(current)}/${fmt2(total)} mL'
+        : isCountUnit
+        ? '${current.toStringAsFixed(0)}/${total.toStringAsFixed(0)} '
+              '${_getStockUnitLabel(m.stockUnit)}'
+        : '${fmt2(current)}/${fmt2(total)} '
+              '${_getStockUnitLabel(m.stockUnit)}';
+
+    final strengthAndFormLabel =
+        '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)} '
+        '${_getFormLabel(m.form)}';
+
+    return GlassCardSurface(
+      onTap: () => context.push('/medications/${m.id}'),
+      useGradient: false,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (m.expiry != null)
-                    Text(
-                      _formatDateDayMonth(m.expiry!),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isExpiringSoon
-                            ? theme.colorScheme.error
-                            : theme.colorScheme.onSurfaceVariant,
-                        height: 1,
-                        fontSize: 9,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    m.manufacturer ?? 'Medication',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      letterSpacing: 1.1,
+                      color: cs.onSurfaceVariant,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    m.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: kFieldSpacing),
+                  Text(
+                    '$fractionLabel · $strengthAndFormLabel',
+                    style: theme.textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
-              const SizedBox(height: 2),
-              // Strength
-              Text(
-                '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              // Stock
-              RichText(
-                text: _stockSpan(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: kSpacingM),
+            MiniStockGauge(percentage: pct),
+          ],
         ),
       ),
     );
@@ -805,6 +763,21 @@ class _MedCard extends StatelessWidget {
     }
   }
 
+  String _getFormLabel(MedicationForm form) {
+    switch (form) {
+      case MedicationForm.tablet:
+        return 'Tablets';
+      case MedicationForm.capsule:
+        return 'Capsules';
+      case MedicationForm.prefilledSyringe:
+        return 'Pre-Filled Syringes';
+      case MedicationForm.singleDoseVial:
+        return 'Single Dose Vials';
+      case MedicationForm.multiDoseVial:
+        return 'Multi Dose Vial';
+    }
+  }
+
   String _getStockUnitLabel(StockUnit unit) {
     switch (unit) {
       case StockUnit.tablets:
@@ -825,24 +798,6 @@ class _MedCard extends StatelessWidget {
         return 'g';
     }
   }
-
-  String _formatDateDayMonth(DateTime d) => DateFormat('d/M').format(d);
-
-  Color _stockStatusColor(ThemeData theme) {
-    // Color by percentage of baseline when available
-    final baseline = m.lowStockThreshold;
-    if (baseline != null && baseline > 0) {
-      final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
-      if (pct <= 0.2) return theme.colorScheme.error;
-      if (pct <= 0.5) return Colors.orange;
-      return theme.colorScheme.primary;
-    }
-    // Fall back to lowStock flag
-    if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
-      return theme.colorScheme.error;
-    }
-    return theme.colorScheme.onSurface;
-  }
 }
 
 class _MedLargeCard extends StatelessWidget {
@@ -861,6 +816,14 @@ class _MedLargeCard extends StatelessWidget {
   }
 
   Widget _buildLeading(BuildContext context) {
+    final primaryStorage = m.storageLocation;
+    final fallbackStorage = m.activeVialStorageLocation;
+    final storageLabel = (primaryStorage?.isNotEmpty ?? false)
+        ? primaryStorage
+        : fallbackStorage;
+    final strengthQuantityLabel =
+        '${fmt2(m.strengthValue)} ${_unitLabelForLarge(m.strengthUnit)}';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -888,24 +851,35 @@ class _MedLargeCard extends StatelessWidget {
             style: bodyTextStyle(context),
             children: [
               TextSpan(
-                text:
-                    '${fmt2(m.strengthValue)} ${_unitLabelForLarge(m.strengthUnit)}',
+                text: strengthQuantityLabel,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               TextSpan(text: ' ${_formLabelPluralForLarge(m.form)}'),
             ],
           ),
         ),
-        if ((m.storageLocation ?? m.activeVialStorageLocation)?.isNotEmpty ??
-            false) ...[
+        if (storageLabel?.isNotEmpty ?? false) ...[
           const SizedBox(height: kSpacingXS),
-          Text(
-            m.storageLocation?.isNotEmpty == true
-                ? m.storageLocation!
-                : m.activeVialStorageLocation!,
-            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                size: kIconSizeSmall,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: kSpacingXS),
+              Expanded(
+                child: Text(
+                  storageLabel!,
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontSize: kFontSizeSmall),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ],
@@ -977,14 +951,18 @@ class _MedLargeCard extends StatelessWidget {
         m.stockUnit == StockUnit.tablets ||
         m.stockUnit == StockUnit.capsules;
 
-    final bool isMdv = m.form == MedicationForm.multiDoseVial;
+    final isMdv = m.form == MedicationForm.multiDoseVial;
 
-    // Active vial volume for MDV: use stockValue vs containerVolumeMl
+    // Active vial volume for MDV: use activeVialVolume vs containerVolumeMl
     final double activeCurrentMl;
     final double activeTotalMl;
     if (isMdv && m.containerVolumeMl != null && m.containerVolumeMl! > 0) {
       activeTotalMl = m.containerVolumeMl!;
-      activeCurrentMl = m.stockValue.clamp(0, activeTotalMl);
+      // Fallback to stockValue if activeVialVolume is null (legacy data)
+      activeCurrentMl = (m.activeVialVolume ?? m.stockValue).clamp(
+        0,
+        activeTotalMl,
+      );
     } else {
       final current = m.stockValue.floor().toDouble();
       final total = (m.initialStockValue != null && m.initialStockValue! > 0)
@@ -1095,15 +1073,30 @@ class _MedLargeCard extends StatelessWidget {
     return '';
   }
 
+  String _formatExpiryLabel(DateTime expiry) {
+    return DateFormat('dd MMM').format(expiry);
+  }
+
+  Color _expiryTextColor(BuildContext context, DateTime expiry) {
+    final cs = Theme.of(context).colorScheme;
+    final now = DateTime.now();
+    if (expiry.isBefore(now)) {
+      return cs.error;
+    }
+    if (expiry.isBefore(now.add(const Duration(days: 30)))) {
+      return cs.error;
+    }
+    return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+  }
+
   Widget _buildFooter(BuildContext context) {
     final theme = Theme.of(context);
 
-    final List<IconData> icons = [];
-    final bool isDark =
-        m.activeVialLightSensitive || m.backupVialsLightSensitive;
-    final bool isFrozen =
+    final icons = <IconData>[];
+    final isDark = m.activeVialLightSensitive || m.backupVialsLightSensitive;
+    final isFrozen =
         m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer;
-    final bool isRefrigerated =
+    final isRefrigerated =
         m.requiresRefrigeration == true ||
         m.activeVialRequiresRefrigeration ||
         m.backupVialsRequiresRefrigeration;
@@ -1124,8 +1117,6 @@ class _MedLargeCard extends StatelessWidget {
     final visibleIcons = icons.take(2).toList();
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         ...visibleIcons.map(
           (icon) => Padding(
@@ -1137,6 +1128,15 @@ class _MedLargeCard extends StatelessWidget {
             ),
           ),
         ),
+        const Spacer(),
+        if (m.expiry != null)
+          Text(
+            'Exp ${_formatExpiryLabel(m.expiry!)}',
+            style: helperTextStyle(context)?.copyWith(
+              fontSize: 9,
+              color: _expiryTextColor(context, m.expiry!),
+            ),
+          ),
       ],
     );
   }

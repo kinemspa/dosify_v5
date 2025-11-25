@@ -111,18 +111,27 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   bool _shouldDefaultToCountMode() {
-    // Default to count mode if initial count provided, otherwise strength mode
+    if (widget.medicationForm == MedicationForm.multiDoseVial) {
+      return false;
+    }
+
+    final hasInitialStrength = widget.initialStrengthMcg != null;
+
     switch (widget.medicationForm) {
       case MedicationForm.tablet:
-        return widget.initialTabletCount != null;
+        if (widget.initialTabletCount != null) return true;
+        if (hasInitialStrength) return false;
+        return true; // Default to tablet count mode
       case MedicationForm.capsule:
-        return widget.initialCapsuleCount != null;
+        if (widget.initialCapsuleCount != null) return true;
+        if (hasInitialStrength) return false;
+        return true; // Capsules default to count mode
       case MedicationForm.prefilledSyringe:
-        return widget.initialInjectionCount != null;
+        return true; // Only count input supported
       case MedicationForm.singleDoseVial:
-        return widget.initialVialCount != null;
+        return true; // Only count input supported
       case MedicationForm.multiDoseVial:
-        return false; // MDV uses _mdvMode instead
+        return false;
     }
   }
 
@@ -152,6 +161,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
           } else {
             _controller.text = '';
           }
+          break;
         case MdvInputMode.volume:
           if (widget.initialVolumeMicroliter != null) {
             // Convert microliters to ml
@@ -160,26 +170,33 @@ class _DoseInputFieldState extends State<DoseInputField> {
           } else {
             _controller.text = '';
           }
+          break;
         case MdvInputMode.units:
           if (widget.initialSyringeUnits != null) {
             _controller.text = widget.initialSyringeUnits.toString();
           } else {
             _controller.text = '';
           }
+          break;
       }
     } else if (_isCountMode) {
       switch (widget.medicationForm) {
         case MedicationForm.tablet:
           // Default to 1.0 if no initial value to ensure calculation works
           _controller.text = (widget.initialTabletCount ?? 1.0).toString();
+          break;
         case MedicationForm.capsule:
           _controller.text = (widget.initialCapsuleCount ?? 1).toString();
+          break;
         case MedicationForm.prefilledSyringe:
           _controller.text = (widget.initialInjectionCount ?? 1).toString();
+          break;
         case MedicationForm.singleDoseVial:
           _controller.text = (widget.initialVialCount ?? 1).toString();
+          break;
         case MedicationForm.multiDoseVial:
           _controller.text = '';
+          break;
       }
     } else {
       // Strength mode (tablets/capsules)
@@ -241,7 +258,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
           break;
 
         case MedicationForm.capsule:
-          final count = int.tryParse(text) ?? 0;
+          final count = _tryParseWholeNumber(text);
+          if (count == null) {
+            result = DoseCalculationResult.error(
+              'Capsule count must be a whole number',
+            );
+            break;
+          }
           result = DoseCalculator.calculateFromCapsules(
             capsuleCount: count,
             strengthPerCapsuleMcg: widget.strengthPerUnitMcg,
@@ -249,7 +272,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
           break;
 
         case MedicationForm.prefilledSyringe:
-          final count = int.tryParse(text) ?? 0;
+          final count = _tryParseWholeNumber(text);
+          if (count == null) {
+            result = DoseCalculationResult.error(
+              'Injection count must be a whole number',
+            );
+            break;
+          }
           result = DoseCalculator.calculateFromPrefilledInjections(
             injectionCount: count,
             strengthPerInjectionMcg: widget.strengthPerUnitMcg,
@@ -258,7 +287,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
           break;
 
         case MedicationForm.singleDoseVial:
-          final count = int.tryParse(text) ?? 0;
+          final count = _tryParseWholeNumber(text);
+          if (count == null) {
+            result = DoseCalculationResult.error(
+              'Vial count must be a whole number',
+            );
+            break;
+          }
           result = DoseCalculator.calculateFromSingleDoseVials(
             vialCount: count,
             strengthPerVialMcg: widget.strengthPerUnitMcg,
@@ -293,6 +328,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               totalVialVolumeMicroliter: widget.totalVialVolumeMicroliter!,
               syringeType: widget.syringeType!,
             );
+            break;
 
           case MdvInputMode.volume:
             // Input: desired dose volume (in ml) → calc volume + units
@@ -303,6 +339,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               totalVialVolumeMicroliter: widget.totalVialVolumeMicroliter!,
               syringeType: widget.syringeType!,
             );
+            break;
 
           case MdvInputMode.units:
             // Input: desired syringe units → calc strength + volume
@@ -312,6 +349,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               totalVialVolumeMicroliter: widget.totalVialVolumeMicroliter!,
               syringeType: widget.syringeType!,
             );
+            break;
         }
       }
     } else {
@@ -382,7 +420,8 @@ class _DoseInputFieldState extends State<DoseInputField> {
       step = 1;
     }
 
-    _controller.text = (current + step).toString();
+    final newValue = current + step;
+    _controller.text = _formatStepperValue(newValue);
     _calculate();
   }
 
@@ -400,7 +439,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
     final newValue = current - step;
     if (newValue >= 0) {
-      _controller.text = newValue.toString();
+      _controller.text = _formatStepperValue(newValue);
       _calculate();
     }
   }
@@ -408,6 +447,48 @@ class _DoseInputFieldState extends State<DoseInputField> {
   void _setQuickValue(double value) {
     _controller.text = value.toString();
     _calculate();
+  }
+
+  bool _requiresWholeNumber() {
+    if (!_isCountMode) {
+      return false;
+    }
+
+    switch (widget.medicationForm) {
+      case MedicationForm.capsule:
+      case MedicationForm.prefilledSyringe:
+      case MedicationForm.singleDoseVial:
+        return true;
+      case MedicationForm.tablet:
+      case MedicationForm.multiDoseVial:
+        return false;
+    }
+  }
+
+  String _formatStepperValue(double value) {
+    if (_requiresWholeNumber()) {
+      return value.round().toString();
+    }
+
+    final isWholeNumber = (value - value.roundToDouble()).abs() < 0.0001;
+    if (isWholeNumber) {
+      return value.round().toString();
+    }
+    return value.toString();
+  }
+
+  int? _tryParseWholeNumber(String text) {
+    final parsed = double.tryParse(text);
+    if (parsed == null) {
+      return null;
+    }
+
+    final rounded = parsed.round();
+    if ((parsed - rounded).abs() > 0.0001) {
+      return null;
+    }
+
+    return rounded;
   }
 
   void _onSyringeDragChanged(double newUnits) {
@@ -438,11 +519,14 @@ class _DoseInputFieldState extends State<DoseInputField> {
           final strengthMcg = result.doseMassMcg ?? 0;
           final displayValue = _convertMcgToDisplayUnit(strengthMcg);
           _controller.text = displayValue.toString();
+          break;
         case MdvInputMode.volume:
           final volumeMl = (result.doseVolumeMicroliter ?? 0) / 1000;
           _controller.text = volumeMl.toString();
+          break;
         case MdvInputMode.units:
           _controller.text = newUnits.toString();
+          break;
       }
     }
 
