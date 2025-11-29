@@ -17,6 +17,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
@@ -208,15 +209,45 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                             )!,
                             child: GestureDetector(
                               onTap: () => _editName(context, updatedMed),
-                              child: Text(
-                                updatedMed.name,
-                                style: TextStyle(
-                                  color: onPrimary,
-                                  fontSize: lerpDouble(22, 17, t),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      updatedMed.name,
+                                      style: TextStyle(
+                                        color: onPrimary,
+                                        fontSize: lerpDouble(22, 17, t),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 1,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: onPrimary.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color: onPrimary.withValues(alpha: 0.3),
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      _formLabel(updatedMed.form),
+                                      style: TextStyle(
+                                        color: onPrimary,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -416,53 +447,22 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Space for the animated Name (which is positioned absolutely)
-                const SizedBox(height: 36),
+                const SizedBox(height: kSpacingM),
 
                 // Manufacturer (Moved below Name)
                 if (manufacturer != null && manufacturer.isNotEmpty) ...[
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => _editManufacturer(context, med),
-                        child: Text(
-                          manufacturer,
-                          style: helperTextStyle(context)?.copyWith(
-                            color: onPrimary.withValues(
-                              alpha: kOpacityMediumHigh,
-                            ),
-                            decoration: TextDecoration.underline,
-                            decorationStyle: TextDecorationStyle.dotted,
-                            decorationColor: onPrimary.withValues(alpha: 0.5),
-                            fontSize: 11,
-                          ),
-                        ),
+                  GestureDetector(
+                    onTap: () => _editManufacturer(context, med),
+                    child: Text(
+                      manufacturer,
+                      style: helperTextStyle(context)?.copyWith(
+                        color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+                        decoration: TextDecoration.underline,
+                        decorationStyle: TextDecorationStyle.dotted,
+                        decorationColor: onPrimary.withValues(alpha: 0.5),
+                        fontSize: 11,
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: kSpacingS,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: onPrimary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadiusChip,
-                          ),
-                          border: Border.all(
-                            color: onPrimary.withValues(alpha: 0.2),
-                            width: kBorderWidthThin,
-                          ),
-                        ),
-                        child: Text(
-                          _formLabel(med.form),
-                          style: helperTextStyle(context)?.copyWith(
-                            color: onPrimary,
-                            fontWeight: kFontWeightSemiBold,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 4),
                 ],
@@ -527,7 +527,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   const SizedBox(height: 8),
                 ],
 
-                const Spacer(),
+                // Reduce large spacer above adherence graph so it visually connects
+                // to the storage/location text. Use a small gap instead.
+                const SizedBox(height: kSpacingS),
                 // Adherence Graph (Moved to Left Column)
                 _buildAdherenceGraph(context, onPrimary, med),
               ],
@@ -704,60 +706,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     );
   }
 
-  void _takeDose(
-    BuildContext context,
-    Medication med,
-    ScheduledDose dose,
-  ) async {
-    final box = Hive.box<DoseLog>('dose_logs');
-    final log = DoseLog(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      medicationId: med.id,
-      medicationName: med.name,
-      scheduleId: dose.schedule?.id ?? 'manual',
-      scheduleName: dose.schedule?.name ?? 'Manual',
-      scheduledTime: dose.dateTime,
-      actionTime: DateTime.now(),
-      action: DoseAction.taken,
-      doseValue: dose.schedule?.doseValue ?? 1.0,
-      doseUnit: dose.schedule?.doseUnit ?? 'unit',
-      notes: 'Taken from detail page',
-    );
-    await box.put(log.id, log);
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Dose recorded')));
-    }
-  }
-
-  void _skipDose(
-    BuildContext context,
-    Medication med,
-    ScheduledDose dose,
-  ) async {
-    final box = Hive.box<DoseLog>('dose_logs');
-    final log = DoseLog(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      medicationId: med.id,
-      medicationName: med.name,
-      scheduleId: dose.schedule?.id ?? 'manual',
-      scheduleName: dose.schedule?.name ?? 'Manual',
-      scheduledTime: dose.dateTime,
-      actionTime: DateTime.now(),
-      action: DoseAction.skipped,
-      doseValue: dose.schedule?.doseValue ?? 1.0,
-      doseUnit: dose.schedule?.doseUnit ?? 'unit',
-      notes: 'Skipped from detail page',
-    );
-    await box.put(log.id, log);
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
-    }
-  }
-
   Widget _buildUnifiedDetailsCard(
     BuildContext context,
     Medication med,
@@ -828,14 +776,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-    );
+    return Text(title, style: sectionTitleStyle(context));
   }
 
   Widget _buildScheduleSection(
@@ -854,101 +795,14 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              nextDose?.schedule?.name ?? 'Scheduled',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            if (nextDose != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'Next Dose',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (nextDose != null) ...[
-          Row(
-            children: [
-              Icon(
-                Icons.access_time,
-                size: 20,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _formatDateTime(nextDose.dateTime),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(
-                Icons.medication_liquid,
-                size: 20,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${nextDose.schedule?.doseValue ?? 1} ${nextDose.schedule?.doseUnit ?? "unit"}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _takeDose(context, med, nextDose),
-                  icon: const Icon(Icons.check),
-                  label: const Text('Take'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _skipDose(context, med, nextDose),
-                  icon: const Icon(Icons.skip_next),
-                  label: const Text('Skip'),
-                ),
-              ),
-            ],
-          ),
-        ] else ...[
+        if (nextDose != null && nextDose.schedule != null)
+          ScheduleCard(s: nextDose.schedule!, dense: false, useGradient: false)
+        else ...[
           Text(
             'No upcoming doses scheduled',
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            style: bodyTextStyle(
+              context,
+            )?.copyWith(color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 12),
           FilledButton.icon(
@@ -961,7 +815,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           const SizedBox(height: 16),
           Text(
             'Last taken: ${_formatDateTime(lastDose.actionTime)}',
-            style: TextStyle(
+            style: helperTextStyle(context)?.copyWith(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -975,6 +829,18 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildInfoRow(context, 'Name', med.name),
+        const SizedBox(height: 8),
+        if (med.manufacturer != null && med.manufacturer!.isNotEmpty) ...[
+          _buildInfoRow(context, 'Manufacturer', med.manufacturer!),
+          const SizedBox(height: 8),
+        ],
+        _buildInfoRow(
+          context,
+          'Strength',
+          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+        ),
+        const SizedBox(height: 8),
         _buildInfoRow(context, 'Type', med.form.name.toUpperCase()),
         if (med.notes != null && med.notes!.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -1623,14 +1489,6 @@ ScheduledDose? _nextDoseForMedication(String medId) {
       : null;
 }
 
-String _formatRelativeTimeUntil(DateTime date) {
-  final now = DateTime.now();
-  final diff = date.difference(now);
-  if (diff.inDays > 0) return '${diff.inDays}d';
-  if (diff.inHours > 0) return '${diff.inHours}h';
-  return '${diff.inMinutes}m';
-}
-
 void _showRefillDialog(BuildContext context, Medication med) {
   // TODO: Implement refill dialog
 }
@@ -1711,13 +1569,6 @@ void _editBatchNumber(BuildContext context, Medication med) {
     final box = Hive.box<Medication>('medications');
     box.put(med.id, med.copyWith(batchNumber: val));
   });
-}
-
-void _editDescription(BuildContext context, Medication med) {
-  _showEditDialog(context, med, 'Description', med.description ?? '', (val) {
-    final box = Hive.box<Medication>('medications');
-    box.put(med.id, med.copyWith(description: val));
-  }, maxLines: 3);
 }
 
 void _editExpiry(BuildContext context, Medication med) {
@@ -2007,6 +1858,15 @@ Widget _buildStockForecastCard(
         textAlign: TextAlign.right,
       ),
       const SizedBox(height: 2),
+      Text(
+        'Based on current schedule',
+        style: TextStyle(
+          color: color.withValues(alpha: 0.5),
+          fontSize: 9,
+          fontStyle: FontStyle.italic,
+        ),
+        textAlign: TextAlign.right,
+      ),
       Text(
         'Expected to last until',
         style: TextStyle(

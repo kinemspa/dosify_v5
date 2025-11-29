@@ -151,13 +151,13 @@ const BorderRadius kStandardBorderRadius = BorderRadius.all(kStandardRadius);
 
 /// Text opacity levels
 const double kOpacityFull = 1.0;
-const double kOpacityHigh = 0.87; // Primary text
-const double kOpacityMediumHigh = 0.70; // Reduced from 0.85 to be lighter
-const double kOpacityMedium = 0.60; // Reduced from 0.75 to be lighter
-const double kOpacityMediumLow = 0.50; // Reduced from 0.60
-const double kOpacityLow = 0.40; // Reduced from 0.50
-const double kOpacityVeryLow = 0.35; // Reduced from 0.45
-const double kOpacityMinimal = 0.25; // Reduced from 0.30
+const double kOpacityHigh = 1.0; // Increased to full black
+const double kOpacityMediumHigh = 0.90; // Increased from 0.70
+const double kOpacityMedium = 0.80; // Increased from 0.60
+const double kOpacityMediumLow = 0.70; // Increased from 0.50
+const double kOpacityLow = 0.60; // Increased from 0.40
+const double kOpacityVeryLow = 0.50; // Increased from 0.35
+const double kOpacityMinimal = 0.40; // Increased from 0.25
 
 /// Specific use case opacity
 const double kHelperTextOpacity = kOpacityMedium;
@@ -406,9 +406,7 @@ TextStyle? helperTextStyle(BuildContext context, {Color? color}) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
     color:
         color ??
-        Theme.of(
-          context,
-        ).colorScheme.onSurfaceVariant.withOpacity(kHelperTextOpacity),
+        Theme.of(context).colorScheme.onSurface.withOpacity(kHelperTextOpacity),
   );
 }
 
@@ -419,7 +417,7 @@ TextStyle? checkboxLabelStyle(BuildContext context) {
     fontWeight: kFontWeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
+    ).colorScheme.onSurface.withOpacity(kOpacityMediumHigh),
   );
 }
 
@@ -437,9 +435,7 @@ TextStyle? fieldLabelStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
     fontSize: kFontSizeMedium,
     fontWeight: kFontWeightBold,
-    color: Theme.of(
-      context,
-    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMedium),
+    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityMedium),
   );
 }
 
@@ -459,7 +455,7 @@ TextStyle? hintTextStyle(BuildContext context) {
     fontWeight: kFontWeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurfaceVariant.withOpacity(kHintTextOpacity),
+    ).colorScheme.onSurface.withOpacity(kHintTextOpacity),
   );
 }
 
@@ -478,7 +474,7 @@ TextStyle? cardTitleStyle(BuildContext context) {
     fontWeight: kFontWeightSemiBold,
     color: Theme.of(
       context,
-    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
+    ).colorScheme.onSurface.withOpacity(kOpacityMediumHigh),
   );
 }
 
@@ -490,7 +486,7 @@ TextStyle? bodyTextStyle(BuildContext context) {
     height: kLineHeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurfaceVariant.withOpacity(kOpacityMediumHigh),
+    ).colorScheme.onSurface.withOpacity(kOpacityMediumHigh),
   );
 }
 
@@ -501,7 +497,7 @@ TextStyle? mutedTextStyle(BuildContext context) {
     fontWeight: kFontWeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurfaceVariant.withOpacity(kDisabledOpacity),
+    ).colorScheme.onSurface.withOpacity(kDisabledOpacity),
   );
 }
 

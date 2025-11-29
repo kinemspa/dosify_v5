@@ -25,30 +25,26 @@ const double kHintFontSize = 10.5; // hint/help text (compact)
 Color kTextPrimary(BuildContext c) => Theme.of(c).colorScheme.primary;
 Color kTextDark(BuildContext c) => Theme.of(c).colorScheme.onSurface;
 Color kTextGrey(BuildContext c) =>
-    Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.85);
+    Theme.of(c).colorScheme.onSurface.withValues(alpha: 0.90);
 Color kTextLightGrey(BuildContext c) =>
-    Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.75);
+    Theme.of(c).colorScheme.onSurface.withValues(alpha: 0.80);
 Color kTextLighterGrey(BuildContext c) =>
-    Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.60);
+    Theme.of(c).colorScheme.onSurface.withValues(alpha: 0.70);
 Color kTextLightestGrey(BuildContext c) =>
-    Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.45);
+    Theme.of(c).colorScheme.onSurface.withValues(alpha: 0.60);
 Color kTextError(BuildContext c) => Theme.of(c).colorScheme.error;
 Color kTextWarning(BuildContext c) => Colors.orange;
 
 // Shared muted label style
 TextStyle kMutedLabelStyle(BuildContext context) =>
     Theme.of(context).textTheme.bodyMedium!.copyWith(
-      color: Theme.of(
-        context,
-      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.50),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.60),
     );
 
 // Checkbox label style: darker than support text but lighter than primary label
 TextStyle kCheckboxLabelStyle(BuildContext context) =>
     Theme.of(context).textTheme.bodyMedium!.copyWith(
-      color: Theme.of(
-        context,
-      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.90),
     );
 
 // Layout tweaks

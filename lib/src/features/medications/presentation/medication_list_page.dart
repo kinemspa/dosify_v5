@@ -2,6 +2,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -412,63 +413,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   // Helpers for list view formatting (duplicated from card helpers)
-  String _unitLabel(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'units';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'units/mL';
-    }
-  }
-
-  String _formLabelPlural(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablets';
-      case MedicationForm.capsule:
-        return 'Capsules';
-      case MedicationForm.prefilledSyringe:
-        return 'Pre-Filled Syringes';
-      case MedicationForm.singleDoseVial:
-        return 'Single Dose Vials';
-      case MedicationForm.multiDoseVial:
-        return 'Multi Dose Vial';
-    }
-  }
-
-  String _stockUnitLabel(StockUnit unit) {
-    switch (unit) {
-      case StockUnit.tablets:
-        return 'tablets';
-      case StockUnit.capsules:
-        return 'capsules';
-      case StockUnit.preFilledSyringes:
-        return 'syringes';
-      case StockUnit.singleDoseVials:
-        return 'vials';
-      case StockUnit.multiDoseVials:
-        return 'vials';
-      case StockUnit.mcg:
-        return 'mcg';
-      case StockUnit.mg:
-        return 'mg';
-      case StockUnit.g:
-        return 'g';
-    }
-  }
-
   String _formatDateDdMm(DateTime d) => DateFormat('dd/MM').format(d);
 
   Color _stockStatusColorFor(BuildContext context, Medication m) {
@@ -492,26 +436,21 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       fontWeight: FontWeight.w600,
       color: theme.colorScheme.onSurface,
     );
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+
+    if (stockInfo.isCountUnit) {
       final colored = _stockStatusColorFor(context, m);
       return TextSpan(
         style: baseStyle,
         children: [
           TextSpan(
-            text: '$current',
+            text: '${stockInfo.current.floor()}',
             style: TextStyle(fontWeight: FontWeight.w800, color: colored),
           ),
-          TextSpan(text: '/$total ${_stockUnitLabel(m.stockUnit)}'),
+          TextSpan(
+            text:
+                '/${stockInfo.total.floor()} ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
+          ),
         ],
       );
     }
@@ -525,7 +464,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             color: _stockStatusColorFor(context, m),
           ),
         ),
-        TextSpan(text: ' ${_stockUnitLabel(m.stockUnit)}'),
+        TextSpan(
+          text: ' ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
+        ),
       ],
     );
   }
@@ -541,8 +482,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           itemBuilder: (context, index) {
             final m = items[index];
             final strengthLabel =
-                '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} '
-                '${_formLabelPlural(m.form)}';
+                '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
+                '${MedicationDisplayHelpers.formLabel(m.form, plural: true)}';
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8,
@@ -650,50 +591,12 @@ class _MedCard extends StatelessWidget {
 
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    final isMdv = m.form == MedicationForm.multiDoseVial;
 
-    final double current;
-    final double total;
-    if (isMdv && m.containerVolumeMl != null && m.containerVolumeMl! > 0) {
-      // MDV Logic: Use activeVialVolume.
-      // Fallback: If activeVialVolume is null (legacy data), use stockValue.
-      // CRITICAL FIX: If stockValue is larger than containerVolumeMl, it's likely a count (legacy data).
-      // In that case, assume activeVialVolume is full (containerVolumeMl) and stockValue is the backup count.
-      if (m.activeVialVolume == null && m.stockValue > m.containerVolumeMl!) {
-        current = m.containerVolumeMl!;
-      } else {
-        current = m.activeVialVolume ?? m.stockValue;
-      }
-      total = m.containerVolumeMl!;
-    } else if (isCountUnit) {
-      current = m.stockValue.floorToDouble();
-      total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceilToDouble()
-          : current;
-    } else {
-      current = m.stockValue;
-      total = m.initialStockValue ?? m.stockValue;
-    }
-
-    final pct = total > 0 ? (current / total) * 100.0 : 0.0;
-
-    final fractionLabel = isMdv
-        ? '${fmt2(current)}/${fmt2(total)} mL'
-        : isCountUnit
-        ? '${current.toStringAsFixed(0)}/${total.toStringAsFixed(0)} '
-              '${_getStockUnitLabel(m.stockUnit)}'
-        : '${fmt2(current)}/${fmt2(total)} '
-              '${_getStockUnitLabel(m.stockUnit)}';
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
 
     final strengthAndFormLabel =
-        '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)} '
-        '${_getFormLabel(m.form)}';
+        '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
+        '${MedicationDisplayHelpers.formLabel(m.form)}';
 
     return GlassCardSurface(
       onTap: () => context.push('/medications/${m.id}'),
@@ -726,7 +629,7 @@ class _MedCard extends StatelessWidget {
                   ),
                   const SizedBox(height: kFieldSpacing),
                   Text(
-                    '$fractionLabel · $strengthAndFormLabel',
+                    '${stockInfo.label} · $strengthAndFormLabel',
                     style: theme.textTheme.bodySmall,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -735,68 +638,11 @@ class _MedCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: kSpacingM),
-            MiniStockGauge(percentage: pct),
+            MiniStockGauge(percentage: stockInfo.percentage),
           ],
         ),
       ),
     );
-  }
-
-  String _getUnitLabel(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'units';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'units/mL';
-    }
-  }
-
-  String _getFormLabel(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablets';
-      case MedicationForm.capsule:
-        return 'Capsules';
-      case MedicationForm.prefilledSyringe:
-        return 'Pre-Filled Syringes';
-      case MedicationForm.singleDoseVial:
-        return 'Single Dose Vials';
-      case MedicationForm.multiDoseVial:
-        return 'Multi Dose Vial';
-    }
-  }
-
-  String _getStockUnitLabel(StockUnit unit) {
-    switch (unit) {
-      case StockUnit.tablets:
-        return 'tablets';
-      case StockUnit.capsules:
-        return 'capsules';
-      case StockUnit.preFilledSyringes:
-        return 'syringes';
-      case StockUnit.singleDoseVials:
-        return 'vials';
-      case StockUnit.multiDoseVials:
-        return 'vials';
-      case StockUnit.mcg:
-        return 'mcg';
-      case StockUnit.mg:
-        return 'mg';
-      case StockUnit.g:
-        return 'g';
-    }
   }
 }
 
@@ -822,7 +668,7 @@ class _MedLargeCard extends StatelessWidget {
         ? primaryStorage
         : fallbackStorage;
     final strengthQuantityLabel =
-        '${fmt2(m.strengthValue)} ${_unitLabelForLarge(m.strengthUnit)}';
+        '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -854,7 +700,10 @@ class _MedLargeCard extends StatelessWidget {
                 text: strengthQuantityLabel,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
-              TextSpan(text: ' ${_formLabelPluralForLarge(m.form)}'),
+              TextSpan(
+                text:
+                    ' ${MedicationDisplayHelpers.formLabel(m.form, plural: true)}',
+              ),
             ],
           ),
         ),
@@ -886,134 +735,28 @@ class _MedLargeCard extends StatelessWidget {
     );
   }
 
-  String _unitLabelForLarge(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'units';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'units/mL';
-    }
-  }
-
-  String _formLabelPluralForLarge(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablets';
-      case MedicationForm.capsule:
-        return 'Capsules';
-      case MedicationForm.prefilledSyringe:
-        return 'Pre-Filled Syringes';
-      case MedicationForm.singleDoseVial:
-        return 'Single Dose Vials';
-      case MedicationForm.multiDoseVial:
-        return 'Multi Dose Vial';
-    }
-  }
-
-  String _stockUnitLabelForLarge(StockUnit unit) {
-    switch (unit) {
-      case StockUnit.tablets:
-        return 'tablets';
-      case StockUnit.capsules:
-        return 'capsules';
-      case StockUnit.preFilledSyringes:
-        return 'syringes';
-      case StockUnit.singleDoseVials:
-        return 'vials';
-      case StockUnit.multiDoseVials:
-        return 'vials';
-      case StockUnit.mcg:
-        return 'mcg';
-      case StockUnit.mg:
-        return 'mg';
-      case StockUnit.g:
-        return 'g';
-    }
-  }
-
   Widget _buildTrailing(BuildContext context) {
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-
-    final isMdv = m.form == MedicationForm.multiDoseVial;
-
-    // Active vial volume for MDV: use activeVialVolume vs containerVolumeMl
-    final double activeCurrentMl;
-    final double activeTotalMl;
-    if (isMdv && m.containerVolumeMl != null && m.containerVolumeMl! > 0) {
-      activeTotalMl = m.containerVolumeMl!;
-      // Fallback to stockValue if activeVialVolume is null (legacy data)
-      activeCurrentMl = (m.activeVialVolume ?? m.stockValue).clamp(
-        0,
-        activeTotalMl,
-      );
-    } else {
-      final current = m.stockValue.floor().toDouble();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil().toDouble()
-          : current;
-      activeCurrentMl = current;
-      activeTotalMl = total;
-    }
-
-    final pct = activeTotalMl > 0
-        ? (activeCurrentMl / activeTotalMl) * 100.0
-        : 0.0;
-    final pctRounded = pct.clamp(0, 100).round();
-
-    final countLabel = isMdv
-        ? '${fmt2(activeCurrentMl)}/${fmt2(activeTotalMl)} mL'
-        : isCountUnit
-        ? '${activeCurrentMl.toStringAsFixed(0)}/${activeTotalMl.toStringAsFixed(0)} ${_stockUnitLabelForLarge(m.stockUnit)}'
-        : '${fmt2(m.stockValue)}/${fmt2(activeTotalMl)} ${_stockUnitLabelForLarge(m.stockUnit)}';
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    final pctRounded = stockInfo.percentage.clamp(0, 100).round();
 
     final cs = Theme.of(context).colorScheme;
-    final parts = countLabel.split(' ');
-    final fractionText = parts.isNotEmpty ? parts.first : countLabel;
-    final trailingUnitText = parts.length > 1 ? parts.sublist(1).join(' ') : '';
-
-    // For MDV, compute a second percentage for sealed/backup vials so
-    // the inner ring can represent backup stock coverage.
-    final double backupPct;
-    if (isMdv && m.stockUnit == StockUnit.multiDoseVials) {
-      final backupCount = m.stockValue;
-      final baseline =
-          m.lowStockVialsThresholdCount != null &&
-              m.lowStockVialsThresholdCount! > 0
-          ? m.lowStockVialsThresholdCount!
-          : backupCount;
-      backupPct = baseline > 0 ? (backupCount / baseline) * 100.0 : 0.0;
-    } else {
-      backupPct = 0;
-    }
+    final fractionText = stockInfo.fractionPart;
+    final trailingUnitText = stockInfo.unitPart;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (isMdv)
+        if (stockInfo.isMdv)
           DualStockDonutGauge(
-            outerPercentage: pct,
-            innerPercentage: backupPct,
+            outerPercentage: stockInfo.percentage,
+            innerPercentage: stockInfo.backupPercentage,
             primaryLabel: '$pctRounded%',
           )
         else
-          StockDonutGauge(percentage: pct, primaryLabel: '$pctRounded%'),
+          StockDonutGauge(
+            percentage: stockInfo.percentage,
+            primaryLabel: '$pctRounded%',
+          ),
         const SizedBox(height: kSpacingXS),
         Align(
           alignment: Alignment.centerRight,
