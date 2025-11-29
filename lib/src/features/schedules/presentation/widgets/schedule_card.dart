@@ -5,6 +5,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -396,6 +397,27 @@ class ScheduleCard extends StatelessWidget {
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
+
+      // Reschedule notification for 15 minutes later as a one-off snooze alarm.
+      try {
+        final snoozeDt = next.add(const Duration(minutes: 15));
+        final minutes = snoozeDt.hour * 60 + snoozeDt.minute;
+        // Generate a stable slot id for the snooze; iterate a small occurrence window to avoid collision.
+        final id = _slotId(
+          s.id,
+          weekday: snoozeDt.weekday,
+          minutes: minutes,
+          occurrence: 0,
+        );
+        await NotificationService.scheduleAtAlarmClock(
+          id,
+          snoozeDt,
+          title: s.name,
+          body: '${s.medicationName} • ${s.doseValue} ${s.doseUnit}',
+        );
+      } catch (e) {
+        // ignore scheduling failure - best effort
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Dose snoozed for 15 minutes')),
@@ -441,6 +463,20 @@ class ScheduleCard extends StatelessWidget {
 
       // Attempt to cancel scheduled notification for the day (best-effort)
       try {
+        // Try to cancel the exact slot(s) scheduled for this time by canceling a small occurrence window.
+        final minutes = next.hour * 60 + next.minute;
+        for (var i = 0; i < 20; i++) {
+          try {
+            final id = _slotId(
+              s.id,
+              weekday: next.weekday,
+              minutes: minutes,
+              occurrence: i,
+            );
+            await NotificationService.cancel(id);
+          } catch (_) {}
+        }
+        // Also fallback to cancelFor to ensure best-effort removal
         await ScheduleScheduler.cancelFor(s.id, days: [next.weekday]);
       } catch (_) {
         // ignore - best effort cancel
@@ -459,6 +495,28 @@ class ScheduleCard extends StatelessWidget {
       }
     }
   }
+}
+
+// Stable 32-bit hash function and slot id generation to match ScheduleScheduler.
+int _stableHash32(String s) {
+  const fnvOffset = 0x811C9DC5;
+  const fnvPrime = 0x01000193;
+  var hash = fnvOffset;
+  for (final codeUnit in s.codeUnits) {
+    hash ^= codeUnit & 0xFF;
+    hash = (hash * fnvPrime) & 0xFFFFFFFF;
+  }
+  return hash & 0x7FFFFFFF; // keep it positive and within 31-bit
+}
+
+int _slotId(
+  String scheduleId, {
+  required int weekday,
+  required int minutes,
+  int occurrence = 0,
+}) {
+  final key = '$scheduleId|w:$weekday|m:$minutes|o:$occurrence';
+  return _stableHash32(key);
 }
 
 Future<bool> confirmTake(BuildContext context, Schedule s) async {
