@@ -334,6 +334,65 @@ class ScheduleCard extends StatelessWidget {
     return null;
   }
 
+  /// Returns the next occurrence and its scheduler occurrence index.
+  /// For cyclic schedules, occurrence is (date - anchor).inDays ~/ n.
+  /// For weekly schedules, occurrence is the day offset from today (0..).
+  _OccurrenceResult? _nextOccurrenceAndIndex(Schedule s) {
+    final now = DateTime.now();
+    final times = s.timesOfDay ?? [s.minutesOfDay];
+    // Weekly schedule: compute day offset as occurrence index
+    final start = DateTime(now.year, now.month, now.day);
+
+    if (s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0) {
+      final n = s.cycleEveryNDays!.clamp(1, 365);
+      final anchor = s.cycleAnchorDate ?? now;
+      var day = DateTime(anchor.year, anchor.month, anchor.day);
+      // Advance to today or the next cycle day
+      while (day.isBefore(start)) day = day.add(Duration(days: n));
+      // Search the upcoming cycle occurrences for the next scheduled time
+      for (var i = 0; i < 365; i += n) {
+        for (final minutes in times) {
+          final dt = DateTime(
+            day.year,
+            day.month,
+            day.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
+          if (dt.isAfter(now)) {
+            final daysSinceAnchor = DateTime(day.year, day.month, day.day)
+                .difference(DateTime(anchor.year, anchor.month, anchor.day))
+                .inDays
+                .clamp(0, 1 << 30);
+            final occurrence = (daysSinceAnchor / n).floor();
+            return _OccurrenceResult(dt, occurrence);
+          }
+        }
+        day = day.add(Duration(days: n));
+      }
+      return null;
+    }
+
+    // Weekly pattern - count day offset from today's start as occurrence
+    for (var d = 0; d < 60; d++) {
+      final date = start.add(Duration(days: d));
+      final onDay = s.daysOfWeek.contains(date.weekday);
+      if (onDay) {
+        for (final minutes in times) {
+          final dt = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            minutes ~/ 60,
+            minutes % 60,
+          );
+          if (dt.isAfter(now)) return _OccurrenceResult(dt, d);
+        }
+      }
+    }
+    return null;
+  }
+
   DateTime? _lastOccurrence(Schedule s) {
     final now = DateTime.now();
     final times = s.timesOfDay ?? [s.minutesOfDay];
@@ -371,7 +430,8 @@ class ScheduleCard extends StatelessWidget {
 
   /// Helper: snooze current schedule's next occurrence by creating a DoseLog entry
   Future<void> _snoozeSchedule(BuildContext context, Schedule s) async {
-    final next = _nextOccurrence(s);
+    final occ = _nextOccurrenceAndIndex(s);
+    final next = occ?.dt;
     if (next == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -402,12 +462,12 @@ class ScheduleCard extends StatelessWidget {
       try {
         final snoozeDt = next.add(const Duration(minutes: 15));
         final minutes = snoozeDt.hour * 60 + snoozeDt.minute;
-        // Generate a stable slot id for the snooze; iterate a small occurrence window to avoid collision.
-        final id = _slotId(
+        final occurrence = occ?.occurrence ?? 0;
+        final id = ScheduleScheduler.slotIdFor(
           s.id,
           weekday: snoozeDt.weekday,
           minutes: minutes,
-          occurrence: 0,
+          occurrence: occurrence,
         );
         await NotificationService.scheduleAtAlarmClock(
           id,
@@ -434,7 +494,8 @@ class ScheduleCard extends StatelessWidget {
 
   /// Helper: skip current schedule's next occurrence by creating a DoseLog and attempting to cancel notification
   Future<void> _skipSchedule(BuildContext context, Schedule s) async {
-    final next = _nextOccurrence(s);
+    final occ = _nextOccurrenceAndIndex(s);
+    final next = occ?.dt;
     if (next == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -463,19 +524,18 @@ class ScheduleCard extends StatelessWidget {
 
       // Attempt to cancel scheduled notification for the day (best-effort)
       try {
-        // Try to cancel the exact slot(s) scheduled for this time by canceling a small occurrence window.
+        // Try to cancel the exact slot scheduled for this time using its occurrence index.
         final minutes = next.hour * 60 + next.minute;
-        for (var i = 0; i < 20; i++) {
-          try {
-            final id = _slotId(
-              s.id,
-              weekday: next.weekday,
-              minutes: minutes,
-              occurrence: i,
-            );
-            await NotificationService.cancel(id);
-          } catch (_) {}
-        }
+        final occurrence = occ?.occurrence ?? 0;
+        try {
+          final id = ScheduleScheduler.slotIdFor(
+            s.id,
+            weekday: next.weekday,
+            minutes: minutes,
+            occurrence: occurrence,
+          );
+          await NotificationService.cancel(id);
+        } catch (_) {}
         // Also fallback to cancelFor to ensure best-effort removal
         await ScheduleScheduler.cancelFor(s.id, days: [next.weekday]);
       } catch (_) {
@@ -497,26 +557,11 @@ class ScheduleCard extends StatelessWidget {
   }
 }
 
-// Stable 32-bit hash function and slot id generation to match ScheduleScheduler.
-int _stableHash32(String s) {
-  const fnvOffset = 0x811C9DC5;
-  const fnvPrime = 0x01000193;
-  var hash = fnvOffset;
-  for (final codeUnit in s.codeUnits) {
-    hash ^= codeUnit & 0xFF;
-    hash = (hash * fnvPrime) & 0xFFFFFFFF;
-  }
-  return hash & 0x7FFFFFFF; // keep it positive and within 31-bit
-}
-
-int _slotId(
-  String scheduleId, {
-  required int weekday,
-  required int minutes,
-  int occurrence = 0,
-}) {
-  final key = '$scheduleId|w:$weekday|m:$minutes|o:$occurrence';
-  return _stableHash32(key);
+/// Small result type to return both a DateTime and scheduler occurrence index
+class _OccurrenceResult {
+  final DateTime dt;
+  final int occurrence;
+  const _OccurrenceResult(this.dt, this.occurrence);
 }
 
 Future<bool> confirmTake(BuildContext context, Schedule s) async {
