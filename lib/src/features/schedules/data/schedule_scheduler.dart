@@ -109,6 +109,21 @@ class ScheduleScheduler {
     return _stableHash32(key);
   }
 
+  // Public wrapper for generating slot ids; used by UI and other helpers.
+  static int slotIdFor(
+    String scheduleId, {
+    required int weekday,
+    required int minutes,
+    int occurrence = 0,
+  }) {
+    return _slotId(
+      scheduleId,
+      weekday: weekday,
+      minutes: minutes,
+      occurrence: occurrence,
+    );
+  }
+
   static Future<void> scheduleFor(Schedule s) async {
     if (!s.active) return;
     final title = s.name;
