@@ -1,13 +1,15 @@
 // Package imports:
+import 'dart:async';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
+/// Schedules notifications for registered [Schedule] entries and exposes helpers
+/// for deterministic stable slot ID generation used across the app.
 class ScheduleScheduler {
   /// Maximum alarms we'll use across ALL schedules to stay well under Android's 500 limit.
-  /// Leaves room for other apps and system alarms.
   static const int _maxGlobalAlarms = 400;
 
   /// Minimum days to schedule ahead for each schedule (ensures near-term coverage).
@@ -15,6 +17,24 @@ class ScheduleScheduler {
 
   /// Maximum days to schedule ahead when budget allows.
   static const int _maxDaysPerSchedule = 7;
+
+  /// Public API: deterministic stable scheduling slot id used by UI and scheduler
+  /// to refer to a single scheduled notification occurrence.
+  static int slotIdFor(
+    String scheduleId, {
+    required int weekday,
+    required int minutes,
+    int occurrence = 0,
+  }) {
+    final key = '$scheduleId|w:$weekday|m:$minutes|o:$occurrence';
+    return _stableHash31(key);
+  }
+
+  /// Public API: legacy id for day-based notification cancellation (safe within 32-bit)
+  static int idForDay(String scheduleId, int weekday) {
+    final key = '$scheduleId|d:$weekday';
+    return _stableHash31(key);
+  }
 
   /// Estimates how many alarms would be needed for a schedule over N days.
   static int _estimateAlarmCount(Schedule s, int days) {
@@ -46,84 +66,38 @@ class ScheduleScheduler {
       totalNeeded += _estimateAlarmCount(schedule, _minDaysPerSchedule);
     }
 
-    print(
-      '[ScheduleScheduler] Active schedules: ${allActive.length}, '
-      'Min alarms needed: $totalNeeded / $_maxGlobalAlarms',
-    );
-
     if (totalNeeded > _maxGlobalAlarms) {
       // Critical: Can't even schedule minimum. Return minimum anyway and warn.
       print(
-        '[ScheduleScheduler] WARNING: Too many schedules! '
-        'Exceeding alarm budget. Some notifications may be missed.',
+        '[ScheduleScheduler] WARNING: Too many schedules! Exceeding alarm budget.',
       );
       return _minDaysPerSchedule;
     }
 
-    // We have budget. Try to schedule more days.
-    final remainingBudget = _maxGlobalAlarms - totalNeeded;
-    final additionalDays =
-        remainingBudget ~/ (allActive.length * 2); // Conservative estimate
-    final targetDays = (_minDaysPerSchedule + additionalDays).clamp(
+    // Otherwise scale up to fit within the budget up to _maxDaysPerSchedule
+    var budgetLeft = _maxGlobalAlarms - totalNeeded;
+    var additionalDays = 0; // per-schedule additional days
+    // Keep scaling additional days until budget runs out or we hit cap
+    while (additionalDays < (_maxDaysPerSchedule - _minDaysPerSchedule)) {
+      // Count the incremental cost of adding 1 day across all schedules
+      var incremental = 0;
+      for (final schedule in allActive) {
+        incremental += _estimateAlarmCount(schedule, 1);
+      }
+      if (incremental <= budgetLeft) {
+        budgetLeft -= incremental;
+        additionalDays++;
+      } else {
+        break;
+      }
+    }
+    return (_minDaysPerSchedule + additionalDays).clamp(
       _minDaysPerSchedule,
       _maxDaysPerSchedule,
     );
-
-    print(
-      '[ScheduleScheduler] Scheduling $targetDays days ahead for "${s.name}"',
-    );
-
-    return targetDays;
   }
 
-  static int _stableHash32(String s) {
-    // Deterministic 32-bit FNV-1a hash
-    const fnvOffset = 0x811C9DC5;
-    const fnvPrime = 0x01000193;
-    var hash = fnvOffset;
-    for (final codeUnit in s.codeUnits) {
-      hash ^= codeUnit & 0xFF;
-      hash = (hash * fnvPrime) & 0xFFFFFFFF;
-    }
-    return hash & 0x7FFFFFFF; // ensure positive 31-bit
-  }
-
-  static int _baseId(String scheduleId) {
-    // Legacy base id retained for backwards compatibility with older IDs
-    final h = _stableHash32(scheduleId) % 100000000; // up to 8 digits
-    return h;
-  }
-
-  static int idForDay(String scheduleId, int weekday) {
-    return _baseId(scheduleId) * 10 + weekday; // legacy day-based id
-  }
-
-  // New: stable 31-bit id for a specific slot combining scheduleId, weekday, minutes and optional occurrence
-  static int _slotId(
-    String scheduleId, {
-    required int weekday,
-    required int minutes,
-    int occurrence = 0,
-  }) {
-    final key = '$scheduleId|w:$weekday|m:$minutes|o:$occurrence';
-    return _stableHash32(key);
-  }
-
-  // Public wrapper for generating slot ids; used by UI and other helpers.
-  static int slotIdFor(
-    String scheduleId, {
-    required int weekday,
-    required int minutes,
-    int occurrence = 0,
-  }) {
-    return _slotId(
-      scheduleId,
-      weekday: weekday,
-      minutes: minutes,
-      occurrence: occurrence,
-    );
-  }
-
+  /// Schedules upcoming alarms for the given schedule (best-effort)
   static Future<void> scheduleFor(Schedule s) async {
     if (!s.active) return;
     final title = s.name;
@@ -132,7 +106,7 @@ class ScheduleScheduler {
     // Calculate how many days we can afford to schedule for this schedule
     final daysToSchedule = await _calculateScheduleDays(s);
 
-    // If cycle is enabled, schedule next N occurrences based on anchor
+    // If cycle is enabled, schedule next occurrences based on anchor
     if (s.hasCycle) {
       final n = s.cycleEveryNDays!.clamp(1, 365);
       final anchor = s.cycleAnchorDate ?? DateTime.now();
@@ -155,7 +129,7 @@ class ScheduleScheduler {
             minutes ~/ 60,
             minutes % 60,
           );
-          final id = _slotId(
+          final id = slotIdFor(
             s.id,
             weekday: dt.weekday,
             minutes: minutes,
@@ -173,8 +147,7 @@ class ScheduleScheduler {
       return;
     }
 
-    // Otherwise weekly pattern, supporting multiple times per day
-    // Schedule one-shot alarms for the next N days (dynamically calculated).
+    // Otherwise weekly pattern with optional UTC handling
     final useUtc = s.hasUtc;
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day);
@@ -186,7 +159,6 @@ class ScheduleScheduler {
     for (var dayOffset = 0; dayOffset < daysToSchedule; dayOffset++) {
       final date = start.add(Duration(days: dayOffset));
       if (useUtc) {
-        // Check UTC weekday against daysOfWeekUtc using the UTC date
         final utcWeekday = date.toUtc().weekday; // 1..7
         if (daysUtc.contains(utcWeekday)) {
           for (final mUtc in timesUtc) {
@@ -199,7 +171,7 @@ class ScheduleScheduler {
             );
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now)) {
-              final id = _slotId(
+              final id = slotIdFor(
                 s.id,
                 weekday: date.weekday,
                 minutes: mUtc,
@@ -215,7 +187,6 @@ class ScheduleScheduler {
           }
         }
       } else {
-        // Local weekly pattern
         if (daysLocal.contains(date.weekday)) {
           for (final mLocal in timesLocal) {
             final dt = DateTime(
@@ -226,7 +197,7 @@ class ScheduleScheduler {
               mLocal % 60,
             );
             if (dt.isAfter(now)) {
-              final id = _slotId(
+              final id = slotIdFor(
                 s.id,
                 weekday: date.weekday,
                 minutes: mLocal,
@@ -245,22 +216,19 @@ class ScheduleScheduler {
     }
   }
 
+  /// Cancel scheduled notifications for a schedule (best-effort)
   static Future<void> cancelFor(
     String scheduleId, {
     Iterable<int>? days,
   }) async {
-    // Best-effort cancel that supports both legacy and new ID schemes without exceeding 32-bit range.
     final box = Hive.box<Schedule>('schedules');
     final existing = box.get(scheduleId); // may be null for brand-new schedules
-
-    // 1) New scheme: cancel _slotId-based notifications for known days/times
     if (existing != null) {
       if (existing.hasCycle) {
         final n = existing.cycleEveryNDays!.clamp(1, 365);
         final anchor = existing.cycleAnchorDate ?? DateTime.now();
         final times = existing.timesOfDay ?? [existing.minutesOfDay];
         var day = DateTime(anchor.year, anchor.month, anchor.day);
-        // Cancel up to max possible occurrences (conservative)
         for (var i = 0; i < 20; i++) {
           for (final minutes in times) {
             final dt = DateTime(
@@ -270,7 +238,7 @@ class ScheduleScheduler {
               minutes ~/ 60,
               minutes % 60,
             );
-            final id = _slotId(
+            final id = slotIdFor(
               existing.id,
               weekday: dt.weekday,
               minutes: minutes,
@@ -281,7 +249,6 @@ class ScheduleScheduler {
           day = day.add(Duration(days: n));
         }
       } else {
-        // Cancel next ~60 days of one-shot weekly occurrences
         final useUtc = existing.hasUtc;
         final now = DateTime.now();
         final start = DateTime(now.year, now.month, now.day);
@@ -291,14 +258,13 @@ class ScheduleScheduler {
             [existing.minutesOfDayUtc ?? existing.minutesOfDay];
         final daysLocal = existing.daysOfWeek;
         final daysUtc = existing.daysOfWeekUtc ?? const <int>[];
-        // Cancel up to max possible days (conservative)
         for (var dayOffset = 0; dayOffset < 20; dayOffset++) {
           final date = start.add(Duration(days: dayOffset));
           if (useUtc) {
             final utcWeekday = date.toUtc().weekday;
             if (daysUtc.contains(utcWeekday)) {
               for (final mUtc in timesUtc) {
-                final id = _slotId(
+                final id = slotIdFor(
                   existing.id,
                   weekday: date.weekday,
                   minutes: mUtc,
@@ -310,7 +276,7 @@ class ScheduleScheduler {
           } else {
             if (daysLocal.contains(date.weekday)) {
               for (final mLocal in timesLocal) {
-                final id = _slotId(
+                final id = slotIdFor(
                   existing.id,
                   weekday: date.weekday,
                   minutes: mLocal,
@@ -323,8 +289,6 @@ class ScheduleScheduler {
         }
       }
     }
-
-    // 2) Legacy scheme: cancel day-based ids (safe within 32-bit). Avoid base*100+minutes pattern (overflow risk).
     final ds = days ?? List<int>.generate(7, (i) => i + 1);
     for (final d in ds) {
       final base = idForDay(scheduleId, d);
@@ -332,17 +296,29 @@ class ScheduleScheduler {
     }
   }
 
-  /// Reschedules all active schedules. Called on app startup.
-  /// This keeps the 14-day notification window filled.
-  /// Safe to call repeatedly - will cancel and reschedule to ensure consistency.
+  /// Reschedules all active schedules by canceling then re-scheduling.
   static Future<void> rescheduleAllActive() async {
     final box = Hive.box<Schedule>('schedules');
     for (final s in box.values) {
       if (s.active) {
-        // Cancel existing notifications and reschedule fresh
         await cancelFor(s.id, days: s.daysOfWeek);
         await scheduleFor(s);
       }
     }
   }
+
+  /// Internal: stable hash 31-bit positive int (suitable for notification IDs)
+  static int _stableHash31(String input) {
+    // FNV-1a 32-bit hash then mask to 31 bits to ensure positive signed int range.
+    const int fnvOffset = 2166136261;
+    const int fnvPrime = 16777619;
+    var hash = fnvOffset;
+    for (var i = 0; i < input.length; i++) {
+      hash ^= input.codeUnitAt(i);
+      hash = (hash * fnvPrime) & 0xFFFFFFFF;
+    }
+    return hash & 0x7FFFFFFF;
+  }
 }
+
+// Package imports:
