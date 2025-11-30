@@ -50,7 +50,7 @@ class MdvStorageSection extends StatelessWidget {
 
         // Active Storage Condition
         LabelFieldRow(
-          label: 'Storage',
+          label: 'Storage Location',
           field: Field36(
             child: DropdownButtonFormField<String>(
               value: activeStorageCondition,
@@ -101,7 +101,7 @@ class MdvStorageSection extends StatelessWidget {
 
         // Backup Storage Condition
         LabelFieldRow(
-          label: 'Storage',
+          label: 'Storage Location',
           field: Field36(
             child: DropdownButtonFormField<String>(
               value: backupStorageCondition,

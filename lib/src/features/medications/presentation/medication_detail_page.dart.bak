@@ -1,3 +1,4 @@
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 // Dart imports:
 
 import 'dart:ui';
@@ -19,8 +20,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
@@ -42,6 +41,141 @@ class MedicationDetailPage extends StatefulWidget {
 
   @override
   State<MedicationDetailPage> createState() => _MedicationDetailPageState();
+}
+
+class _AdherenceBarPainter extends CustomPainter {
+  final List<double> data;
+  final Color color;
+
+  _AdherenceBarPainter({required this.data, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    final barWidth = size.width / (data.length * 2 - 1);
+    final spacing = barWidth;
+
+    for (int i = 0; i < data.length; i++) {
+      final value = data[i];
+      final x = i * (barWidth + spacing);
+
+      if (value < 0) {
+        paint.color = color.withValues(alpha: 0.2);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(x, size.height - 2, barWidth, 2),
+            const Radius.circular(1),
+          ),
+                    ],
+                    _HeaderInfoTile(
+                      icon: med.activeVialRequiresFreezer
+      }
+    }
+  }
+
+                      label: med.activeVialRequiresFreezer
+  bool shouldRepaint(covariant _AdherenceBarPainter oldDelegate) {
+    return oldDelegate.data != data || oldDelegate.color != color;
+  }
+}
+                      value: storageLabel,
+                      textColor: onPrimary,
+                      trailingIcon: med.activeVialLightSensitive
+                          ? Icons.dark_mode_outlined
+                          : null,
+                    ),
+
+class _HeaderInfoTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData? icon;
+  final Color? textColor;
+  final IconData? trailingIcon;
+
+  const _HeaderInfoTile({
+    required this.label,
+    required this.value,
+    this.icon,
+    this.textColor,
+    this.trailingIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = textColor ?? Colors.white;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: color, size: 14),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            if (trailingIcon != null) ...[
+              const SizedBox(width: 4),
+              Icon(trailingIcon, color: color, size: 14),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _BooleanChip extends StatelessWidget {
+  const _BooleanChip({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return FilterChip(
+      label: Text(label),
+      selected: value,
+      onSelected: onChanged,
+      showCheckmark: true,
+      checkmarkColor: value ? colorScheme.onPrimaryContainer : null,
+      selectedColor: colorScheme.primaryContainer,
+      labelStyle: TextStyle(
+        color: value ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+        fontWeight: value ? FontWeight.bold : FontWeight.normal,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: value
+              ? Colors.transparent
+              : colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+    );
+  }
 }
 
 class _MedicationDetailPageState extends State<MedicationDetailPage> {
@@ -327,15 +461,12 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   child: _buildReconstitutionCard(context, updatedMed),
                 ),
 
-              // Unified Details Card
+              // Main details
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100),
-                  child: _buildUnifiedDetailsCard(
-                    context,
-                    updatedMed,
-                    _nextDoseForMedication(updatedMed.id),
-                  ),
+                child: _buildUnifiedDetailsCard(
+                  context,
+                  updatedMed,
+                  _nextDoseForMedication(updatedMed.id),
                 ),
               ),
             ],
@@ -345,364 +476,11 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     );
   }
 
-  /// Stats banner content (without outer container/gradient, used inside FlexibleSpace)
-  Widget _buildStatsBannerContent(
-    BuildContext context,
-    Medication med, {
-    bool hideName = false,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final onPrimary = colorScheme.onPrimary;
-    final manufacturer = med.manufacturer;
-    final stockRatio = _stockFillRatio(med);
-    final storageLabel = med.storageLocation;
-
-    // Gauge logic
-    final isMdv = med.form == MedicationForm.multiDoseVial;
-
-    // For MDV, we want to show Volume % in the main gauge if possible
-    // Otherwise fall back to stock count
-    double pct = 0;
-    String primaryLabel = '';
-    String helperLabel = '';
-    String? extraStockLabel;
-    double initial = med.initialStockValue ?? med.stockValue;
-    String unit = _stockUnitLabel(med.stockUnit);
-
-    if (isMdv) {
-      // MDV Logic:
-      // Primary Gauge: Active Vial Volume % (if available)
-      // Secondary/Text: Total Vials Count
-
-      if (med.containerVolumeMl != null && med.containerVolumeMl! > 0) {
-        final currentVol = med.activeVialVolume ?? med.containerVolumeMl!;
-        pct = (currentVol / med.containerVolumeMl!) * 100;
-        primaryLabel = '${pct.round()}%';
-
-        initial = med.containerVolumeMl!;
-        unit = 'mL';
-
-        helperLabel = 'Remaining of Active Vial';
-        extraStockLabel =
-            '${_formatNumber(med.stockValue)} sealed vials in stock';
-      } else {
-        // Fallback if no volume info
-        pct = stockRatio * 100;
-        primaryLabel = '${pct.round()}%';
-        helperLabel = 'Remaining';
-      }
-    } else {
-      // Standard Logic (Tablets, etc)
-      pct = stockRatio * 100;
-      primaryLabel = '${pct.round()}%';
-      helperLabel = 'Remaining';
-    }
-
-    final hasBackup =
-        isMdv &&
-        med.stockUnit == StockUnit.multiDoseVials &&
-        med.stockValue > 0;
-
-    double backupPct = 0;
-    if (hasBackup) {
-      final baseline =
-          med.lowStockVialsThresholdCount != null &&
-              med.lowStockVialsThresholdCount! > 0
-          ? med.lowStockVialsThresholdCount!
-          : med.stockValue; // Fallback to current if no threshold/baseline
-      backupPct = baseline > 0 ? (med.stockValue / baseline) * 100.0 : 0.0;
-    }
-
-    // Strength per X label
-    String strengthPerLabel = 'Strength';
-    switch (med.form) {
-      case MedicationForm.tablet:
-        strengthPerLabel = 'Strength per Tablet';
-      case MedicationForm.capsule:
-        strengthPerLabel = 'Strength per Capsule';
-      case MedicationForm.prefilledSyringe:
-        strengthPerLabel = 'Strength per Syringe';
-      case MedicationForm.singleDoseVial:
-      case MedicationForm.multiDoseVial:
-        strengthPerLabel = 'Strength per Vial';
-    }
-
-    // Determine gauge color based on percentage
-    Color gaugeColor = onPrimary;
-    if (pct <= 10) {
-      gaugeColor = theme.colorScheme.errorContainer;
-    } else if (pct <= 25) {
-      gaugeColor = theme.colorScheme.tertiaryContainer;
-    } else {
-      gaugeColor = onPrimary.withValues(alpha: 0.9);
-    }
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Space for the animated Name (which is positioned absolutely)
-                const SizedBox(height: 60),
-
-                // Manufacturer (Moved below Name)
-                if (manufacturer != null && manufacturer.isNotEmpty) ...[
-                  GestureDetector(
-                    onTap: () => _editManufacturer(context, med),
-                    child: Text(
-                      manufacturer,
-                      style: helperTextStyle(context)?.copyWith(
-                        color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-                        decoration: TextDecoration.underline,
-                        decorationStyle: TextDecorationStyle.dotted,
-                        decorationColor: onPrimary.withValues(alpha: 0.5),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-
-                // Description (Smaller, Higher)
-                if (med.description != null && med.description!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      med.description!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.8),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 10, // Reduced from 11
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                // Strength moved here
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strengthPerLabel,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.7),
-                        fontSize: 10,
-                      ),
-                    ),
-                    Text(
-                      '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-                      style: TextStyle(
-                        color: onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Storage
-                if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                  _HeaderInfoTile(
-                    icon: med.activeVialRequiresFreezer
-                        ? Icons.ac_unit
-                        : (med.requiresRefrigeration
-                              ? Icons.ac_unit
-                              : Icons.location_on),
-                    label: med.activeVialRequiresFreezer
-                        ? 'Storage (Frozen)'
-                        : (med.requiresRefrigeration
-                              ? 'Storage (Cold)'
-                              : 'Storage'),
-                    value: storageLabel,
-                    textColor: onPrimary,
-                    trailingIcon: med.activeVialLightSensitive
-                        ? Icons.dark_mode_outlined
-                        : null,
-                  ),
-                  const SizedBox(height: 8),
-                ],
-
-                const Spacer(),
-                // Adherence Graph (Moved to Left Column)
-                _buildAdherenceGraph(context, onPrimary, med),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SizedBox(
-                height: 100,
-                width: 100,
-                child: hasBackup
-                    ? DualStockDonutGauge(
-                        outerPercentage: pct,
-                        innerPercentage: backupPct,
-                        primaryLabel: primaryLabel,
-                        color: gaugeColor,
-                        backgroundColor: onPrimary.withValues(
-                          alpha: 0.05,
-                        ), // Almost invisible
-                        textColor: onPrimary,
-                        showGlow: false,
-                        isOutline: false,
-                      )
-                    : StockDonutGauge(
-                        percentage: pct,
-                        primaryLabel: primaryLabel,
-                        color: gaugeColor,
-                        backgroundColor: onPrimary.withValues(
-                          alpha: 0.05,
-                        ), // Almost invisible
-                        textColor: onPrimary,
-                        showGlow: false,
-                        isOutline: false,
-                      ),
-              ),
-              const SizedBox(height: 4),
-              RichText(
-                textAlign: TextAlign.right,
-                text: TextSpan(
-                  style: TextStyle(
-                    color: onPrimary,
-                    fontSize: 10,
-                  ), // Reduced from 12
-                  children: [
-                    TextSpan(
-                      text: _formatNumber(
-                        (isMdv &&
-                                med.containerVolumeMl != null &&
-                                med.containerVolumeMl! > 0)
-                            ? (med.activeVialVolume ?? med.containerVolumeMl!)
-                            : med.stockValue,
-                      ),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primaryContainer,
-                      ),
-                    ),
-                    const TextSpan(text: ' / '),
-                    TextSpan(
-                      text: _formatNumber(initial),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: ' $unit'),
-                  ],
-                ),
-              ),
-              Text(
-                helperLabel,
-                style: TextStyle(
-                  color: onPrimary.withValues(alpha: 0.7),
-                  fontSize: 9, // Reduced
-                ),
-                textAlign: TextAlign.right,
-              ),
-              if (extraStockLabel != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  extraStockLabel,
-                  style: TextStyle(
-                    color: onPrimary.withValues(alpha: 0.9),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ],
-              const SizedBox(height: 8),
-
-              // Stock Forecast (Moved Here)
-              _buildStockForecastCard(context, onPrimary, med),
-
-              const SizedBox(height: 8),
-
-              // Custom Refill Button
-              Container(
-                height: 28,
-                decoration: BoxDecoration(
-                  color: onPrimary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: onPrimary.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _showRefillDialog(context, med),
-                    borderRadius: BorderRadius.circular(14),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_circle_outline,
-                            size: 14,
-                            color: onPrimary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Refill',
-                            style: TextStyle(
-                              color: onPrimary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatDateTime(DateTime dt) {
     return DateFormat('MMM d, h:mm a').format(dt);
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Removed unused `_buildInfoRow` helper to reduce duplication in other files.
 
   Widget _buildUnifiedDetailsCard(
     BuildContext context,
@@ -714,25 +492,44 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
 
     return Card(
       margin: EdgeInsets.zero,
+      color: Theme.of(context).colorScheme.surface,
+      elevation: 1,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        side: BorderSide(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: kCardBorderOpacity),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Schedule & Next Dose
+            // 1. Schedule / Next Dose
             _buildSectionTitle(context, 'Schedule & Next Dose'),
             const SizedBox(height: 16),
             _buildScheduleSection(context, med, nextDose),
             const Divider(height: 32),
 
-            // 2. Merged Medication Details
-            _buildSectionTitle(context, 'Medication Details'),
+            // 2. Medication Info
+            Row(
+              children: [
+                Expanded(child: _buildSectionTitle(context, 'Medication Info')),
+                IconButton(
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  onPressed: () => _showMedicationInfoEditorSheet(context, med),
+                  tooltip: 'Edit Medication Info',
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
-            _buildMergedDetailsSection(context, med),
+            _buildMedicationInfoSection(context, med),
             const Divider(height: 32),
 
             // 3. Active Vial (MDV Only)
@@ -750,6 +547,11 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
               _buildBackupStockSection(context, med),
               const Divider(height: 32),
             ],
+
+            // 5. General Information
+            _buildSectionTitle(context, 'General Information'),
+            const SizedBox(height: 16),
+            _buildGeneralInfoSection(context, med),
 
             const SizedBox(height: 24),
             Center(
@@ -777,120 +579,82 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     Medication med,
     ScheduledDose? nextDose,
   ) {
-    final scheduleBox = Hive.box<Schedule>('schedules');
-    final schedules = scheduleBox.values
-        .where((s) => s.medicationId == med.id && s.active)
+    final logsBox = Hive.box<DoseLog>('dose_logs');
+    final logs = logsBox.values
+        .where((log) => log.medicationId == med.id)
         .toList();
-    final count = schedules.length;
+    final lastDose = logs.isNotEmpty
+        ? logs.reduce((a, b) => a.actionTime.isAfter(b.actionTime) ? a : b)
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(
-              Icons.calendar_today,
-              size: 16,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              '$count Schedule${count == 1 ? '' : 's'} Configured',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const Spacer(),
-            TextButton(
-              onPressed: () => context.go('/schedules'),
-              child: const Text('Manage'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 120,
-          child: DoseCalendarWidget(
-            variant: CalendarVariant.compact,
-            defaultView: CalendarView.week,
-            medicationId: med.id,
-            height: 120,
+        if (nextDose != null && nextDose.schedule != null)
+          ScheduleCard(s: nextDose.schedule!, dense: false, useGradient: false)
+        else ...[
+          Text(
+            'No upcoming doses scheduled',
+            style: bodyTextStyle(
+              context,
+            )?.copyWith(color: Theme.of(context).colorScheme.onSurface),
           ),
-        ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: () => context.go('/schedules'),
+            icon: const Icon(Icons.add_alarm),
+            label: const Text('Add Schedule'),
+          ),
+        ],
+        if (lastDose != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            'Last taken: ${_formatDateTime(lastDose.actionTime)}',
+            style: helperTextStyle(context)?.copyWith(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _buildMergedDetailsSection(BuildContext context, Medication med) {
+  Widget _buildMedicationInfoSection(BuildContext context, Medication med) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildCompactGrid(context, [
-          _buildCompactInfoItem(
-            context,
-            label: 'Name',
-            value: med.name,
-            onTap: () => _editName(context, med),
-          ),
+        _buildCompactInfoItem(
+          context,
+          label: 'Name',
+          value: med.name,
+          onTap: () => _editName(context, med),
+        ),
+        const SizedBox(height: 8),
+        if (med.manufacturer != null && med.manufacturer!.isNotEmpty) ...[
           _buildCompactInfoItem(
             context,
             label: 'Manufacturer',
-            value: med.manufacturer ?? 'Tap to add',
+            value: med.manufacturer!,
             onTap: () => _editManufacturer(context, med),
           ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Strength',
-            value:
-                '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-            onTap: () => _editStrength(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Type',
-            value: _formLabel(med.form),
-            onTap: () => _editForm(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Batch Number',
-            value: med.batchNumber ?? 'Tap to add',
-            onTap: () => _editBatchNumber(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Expiry Date',
-            value: med.expiry != null
-                ? DateFormat('MMMM d, y').format(med.expiry!)
-                : 'Tap to set',
-            warning: med.expiry != null && _isExpiringSoon(med.expiry!),
-            onTap: () => _editExpiry(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Storage Location',
-            value: med.storageLocation ?? 'Tap to add',
-            onTap: () => _editStorageLocation(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Low Stock Alert',
-            value: med.lowStockEnabled
-                ? '${_formatNumber(med.lowStockThreshold ?? 0)} ${_stockUnitLabel(med.stockUnit)}'
-                : 'Disabled',
-            onTap: () => _editLowStockThreshold(context, med),
-          ),
-        ]),
-        const SizedBox(height: 16),
-        Text(
-          'Storage Condition',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 11,
-          ),
+          const SizedBox(height: 8),
+        ],
+        _buildCompactInfoItem(
+          context,
+          label: 'Strength',
+          value:
+              '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+          onTap: () => _editStrength(context, med),
         ),
         const SizedBox(height: 8),
-        _buildStorageToggle(context, med),
+        _buildCompactInfoItem(
+          context,
+          label: 'Type',
+          value: med.form.name.toUpperCase(),
+        ),
         if (med.notes != null && med.notes!.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           _buildCompactInfoItem(
             context,
             label: 'Notes',
@@ -898,48 +662,36 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             onTap: () => _editNotes(context, med),
           ),
         ],
-        if (med.storageInstructions != null &&
-            med.storageInstructions!.isNotEmpty) ...[
-          const SizedBox(height: 16),
+        if (med.description != null && med.description!.isNotEmpty) ...[
+          const SizedBox(height: 8),
           _buildCompactInfoItem(
             context,
-            label: 'Storage Instructions',
-            value: med.storageInstructions!,
-            onTap: () => _editStorageInstructions(context, med),
+            label: 'Description',
+            value: med.description!,
+            onTap: () => _editDescription(context, med),
           ),
         ],
-      ],
-    );
-  }
-
-  Widget _buildStorageToggle(BuildContext context, Medication med) {
-    final isRefrigerated = med.requiresRefrigeration;
-
-    return SegmentedButton<bool>(
-      segments: const [
-        ButtonSegment<bool>(
-          value: false,
-          label: Text('Room Temp'),
-          icon: Icon(Icons.thermostat),
+        const SizedBox(height: 8),
+        // Storage chips
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _BooleanChip(
+              label: 'Refrigerated',
+              value: med.requiresRefrigeration,
+              onChanged: (bool v) {
+                final box = Hive.box<Medication>('medications');
+                box.put(med.id, med.copyWith(requiresRefrigeration: v));
+              },
+            ),
+            ActionChip(
+              label: Text(med.storageLocation ?? 'Edit storage'),
+              onPressed: () => _editStorageLocation(context, med),
+            ),
+          ],
         ),
-        ButtonSegment<bool>(
-          value: true,
-          label: Text('Refrigerated'),
-          icon: Icon(Icons.ac_unit),
-        ),
       ],
-      selected: {isRefrigerated},
-      onSelectionChanged: (Set<bool> newSelection) {
-        final box = Hive.box<Medication>('medications');
-        box.put(
-          med.id,
-          med.copyWith(requiresRefrigeration: newSelection.first),
-        );
-      },
-      style: const ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
     );
   }
 
@@ -1119,7 +871,504 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     );
   }
 
+  Widget _buildGeneralInfoSection(BuildContext context, Medication med) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompactGrid(context, [
+          _buildCompactInfoItem(
+            context,
+            label: 'Batch Number',
+            value: med.batchNumber ?? 'Tap to add',
+            onTap: () => _editBatchNumber(context, med),
+          ),
+          _buildCompactInfoItem(
+            context,
+            label: 'Expiry Date',
+            value: med.expiry != null
+                ? DateFormat('MMMM d, y').format(med.expiry!)
+                : 'Tap to set',
+            warning: med.expiry != null && _isExpiringSoon(med.expiry!),
+            onTap: () => _editExpiry(context, med),
+          ),
+          _buildCompactInfoItem(
+            context,
+            label: 'Storage Location',
+            value: med.storageLocation ?? 'Tap to add',
+            onTap: () => _editStorageLocation(context, med),
+          ),
+          _buildCompactInfoItem(
+            context,
+            label: 'Low Stock Alert',
+            value: med.lowStockEnabled
+                ? '${_formatNumber(med.lowStockThreshold ?? 0)} ${_stockUnitLabel(med.stockUnit)}'
+                : 'Disabled',
+            onTap: () => _editLowStockThreshold(context, med),
+          ),
+        ]),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _BooleanChip(
+              label: 'Refrigerated',
+              value: med.requiresRefrigeration,
+              onChanged: (bool v) {
+                final box = Hive.box<Medication>('medications');
+                box.put(med.id, med.copyWith(requiresRefrigeration: v));
+              },
+            ),
+          ],
+        ),
+        if (med.storageInstructions != null &&
+            med.storageInstructions!.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _buildCompactInfoItem(
+            context,
+            label: 'Instructions',
+            value: med.storageInstructions!,
+            onTap: () => _editStorageInstructions(context, med),
+          ),
+        ],
+      ],
+    );
+  }
 
+  Widget _buildStatsBannerContent(
+    BuildContext context,
+    Medication med, {
+    bool hideName = false,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final onPrimary = colorScheme.onPrimary;
+
+    final stockInfo = MedicationDisplayHelpers.calculateStock(med);
+    final pct = stockInfo.percentage; // 0..100
+    final backupPct = stockInfo.backupPercentage;
+    final isMdv = stockInfo.isMdv;
+    final manufacturer = med.manufacturer ?? '';
+
+    final primaryLabel = stockInfo.label;
+    final donutLabel = stockInfo.isCountUnit
+      ? stockInfo.current.toInt().toString()
+      : _formatNumber(stockInfo.current);
+    final helperLabel = 'Remaining';
+
+    final initial = isMdv
+        ? (med.containerVolumeMl ?? stockInfo.total)
+        : stockInfo.total;
+    final unit = isMdv
+        ? 'mL'
+        : MedicationDisplayHelpers.stockUnitLabel(med.stockUnit);
+    final storageLabel = isMdv
+        ? (med.activeVialStorageLocation ?? med.storageLocation ?? '')
+        : (med.storageLocation ?? '');
+
+    String strengthPerLabel = 'Strength';
+    switch (med.form) {
+      case MedicationForm.tablet:
+        strengthPerLabel = 'Strength per Tablet';
+        break;
+      case MedicationForm.capsule:
+        strengthPerLabel = 'Strength per Capsule';
+        break;
+      case MedicationForm.prefilledSyringe:
+        strengthPerLabel = 'Strength per Syringe';
+        break;
+      case MedicationForm.singleDoseVial:
+      case MedicationForm.multiDoseVial:
+        strengthPerLabel = 'Strength per Vial';
+        break;
+    }
+
+    Color gaugeColor = onPrimary;
+    if (pct <= 10) {
+      gaugeColor = theme.colorScheme.errorContainer;
+    } else if (pct <= 25) {
+      gaugeColor = theme.colorScheme.tertiaryContainer;
+    } else {
+      gaugeColor = onPrimary.withValues(alpha: 0.9);
+    }
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Space for the animated Name (which is positioned absolutely)
+                SizedBox(height: hideName ? 36 : kSpacingM),
+                // Manufacturer (Moved below Name)
+                if (manufacturer.isNotEmpty) ...[
+                  GestureDetector(
+                    onTap: () => _editManufacturer(context, med),
+                    child: Text(
+                      manufacturer,
+                      style: helperTextStyle(context)?.copyWith(
+                        color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+                        decoration: TextDecoration.underline,
+                        decorationStyle: TextDecorationStyle.dotted,
+                        decorationColor: onPrimary.withValues(alpha: 0.5),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                // Description
+                if (med.description != null && med.description!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      med.description!,
+                      style: TextStyle(
+                        color: onPrimary.withValues(alpha: 0.8),
+                        fontStyle: FontStyle.italic,
+                        fontSize: 10,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.scale,
+                              size: 12,
+                              color: onPrimary.withValues(alpha: 0.75),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              strengthPerLabel,
+                              style: TextStyle(
+                                color: onPrimary.withValues(alpha: 0.7),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                          style: TextStyle(
+                            color: onPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    icon: med.activeVialRequiresFreezer
+                        ? Icons.ac_unit
+                        : (med.requiresRefrigeration
+                              ? Icons.ac_unit
+                              : Icons.location_on),
+                    label: med.activeVialRequiresFreezer
+                      ? 'Storage Location (Frozen)'
+                      : (med.requiresRefrigeration
+                          ? 'Storage Location (Cold)'
+                          : 'Storage Location'),
+                    value: storageLabel,
+                    textColor: onPrimary,
+                    trailingIcon: med.activeVialLightSensitive
+                        ? Icons.dark_mode_outlined
+                        : null,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Reduce large spacer above adherence graph so it visually connects
+                const SizedBox(height: kSpacingS),
+                const Spacer(),
+                _buildAdherenceGraph(context, onPrimary, med),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: isMdv
+                    ? DualStockDonutGauge(
+                        outerPercentage: pct,
+                        innerPercentage: backupPct,
+                        primaryLabel: donutLabel,
+                        labelStyle: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: onPrimary,
+                            ),
+                        color: gaugeColor,
+                        backgroundColor: onPrimary.withValues(alpha: 0.05),
+                        textColor: onPrimary,
+                        showGlow: false,
+                        isOutline: false,
+                      )
+                    : StockDonutGauge(
+                        percentage: pct,
+                        primaryLabel: donutLabel,
+                        labelStyle: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: onPrimary,
+                            ),
+                        color: gaugeColor,
+                        backgroundColor: onPrimary.withValues(alpha: 0.05),
+                        textColor: onPrimary,
+                        showGlow: false,
+                        isOutline: false,
+                      ),
+              ),
+              const SizedBox(height: 4),
+              RichText(
+                textAlign: TextAlign.right,
+                text: TextSpan(
+                  style: TextStyle(color: onPrimary, fontSize: 10),
+                  children: [
+                    TextSpan(
+                      text: _formatNumber(
+                        (isMdv &&
+                                med.containerVolumeMl != null &&
+                                med.containerVolumeMl! > 0)
+                            ? (med.activeVialVolume ?? med.containerVolumeMl!)
+                            : med.stockValue,
+                      ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primaryContainer,
+                      ),
+                    ),
+                    const TextSpan(text: ' / '),
+                    TextSpan(
+                      text: _formatNumber(initial),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: ' $unit'),
+                  ],
+                ),
+              ),
+              Text(
+                helperLabel,
+                style: TextStyle(
+                  color: onPrimary.withValues(alpha: 0.7),
+                  fontSize: 9,
+                ),
+                textAlign: TextAlign.right,
+              ),
+              const SizedBox(height: 8),
+              // Stock Forecast (Moved Here)
+              _buildStockForecastCard(context, onPrimary, med),
+              const SizedBox(height: 8),
+              // Custom Refill Button
+              Container(
+                height: 28,
+                decoration: BoxDecoration(
+                  color: onPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: onPrimary.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showRefillDialog(context, med),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_circle_outline,
+                            size: 14,
+                            color: onPrimary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Refill',
+                            style: TextStyle(
+                              color: onPrimary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Medication _applyRefillUpdate(
+    Medication med,
+    double qty,
+    double topupMl,
+    String batch,
+  ) {
+    final isMdv = med.form == MedicationForm.multiDoseVial;
+    var updated = med;
+    if (isMdv) {
+      final newBackupCount = med.stockValue + qty;
+      double newActive = med.activeVialVolume ?? med.containerVolumeMl ?? 0.0;
+      final capacity = med.containerVolumeMl ?? 0.0;
+      if (topupMl > 0 && capacity > 0) {
+        newActive = (newActive + topupMl);
+        if (newActive > capacity) {
+          final overflow = newActive - capacity;
+          final extraVials = (overflow / capacity).floor();
+          newActive = newActive - extraVials * capacity;
+        }
+      }
+      updated = updated.copyWith(
+        stockValue: newBackupCount,
+        activeVialVolume: newActive.clamp(0.0, double.infinity),
+        backupVialsBatchNumber: batch.isNotEmpty
+            ? batch
+            : med.backupVialsBatchNumber,
+      );
+    } else {
+      updated = updated.copyWith(
+        stockValue: (med.stockValue + qty).clamp(0.0, double.infinity),
+        batchNumber: batch.isNotEmpty ? batch : med.batchNumber,
+      );
+    }
+    return updated;
+  }
+
+  void _showRefillDialog(BuildContext context, Medication med) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (c) {
+        final qtyController = TextEditingController(text: '1');
+        final topupController = TextEditingController(text: '0');
+        final batchController = TextEditingController();
+        final isMdv = med.form == MedicationForm.multiDoseVial;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 16,
+                right: 16,
+                top: 12,
+              ),
+              child: Wrap(
+                children: [
+                  ListTile(
+                    title: Text('Refill ${med.name}'),
+                    subtitle: Text(
+                      isMdv
+                          ? 'Multi-dose vial refill (backup or top-up)'
+                          : 'Add to stock',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: qtyController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: buildFieldDecoration(
+                      context,
+                      hint: isMdv ? 'Backup vials to add' : 'Amount to add',
+                    ),
+                  ),
+                  if (isMdv) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: topupController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: buildFieldDecoration(
+                        context,
+                        hint: 'mL to top-up active vial',
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: batchController,
+                    decoration: buildFieldDecoration(
+                      context,
+                      hint: 'Batch number (optional)',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () async {
+                            final qty =
+                                (double.tryParse(qtyController.text) ?? 0.0)
+                                    .clamp(0.0, double.infinity);
+                            final topup =
+                                (double.tryParse(topupController.text) ?? 0.0)
+                                    .clamp(0.0, double.infinity);
+                            final batch = batchController.text.trim();
+                            if (qty <= 0 && topup <= 0) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Enter amount to add'),
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+                            final updated = _applyRefillUpdate(
+                              med,
+                              qty,
+                              topup,
+                              batch,
+                            );
+                            final box = Hive.box<Medication>('medications');
+                            await box.put(updated.id, updated);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Refill saved')),
+                              );
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: const Text('Refill'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   Widget _buildReconstitutionCard(BuildContext context, Medication med) {
     if (med.form != MedicationForm.multiDoseVial ||
@@ -1165,10 +1414,13 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                 );
 
                 if (result != null && context.mounted) {
+                  final now = DateTime.now();
                   final updatedMed = med.copyWith(
                     containerVolumeMl: result.solventVolumeMl,
                     perMlValue: result.perMlConcentration,
                     volumePerDose: result.recommendedUnits / 100,
+                    reconstitutedAt: now,
+                    reconstitutedVialExpiry: now.add(const Duration(hours: 48)),
                   );
                   final box = await Hive.openBox<Medication>('medications');
                   await box.put(updatedMed.id, updatedMed);
@@ -1268,164 +1520,8 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
   }
 }
 
-class _AdherenceBarPainter extends CustomPainter {
-  final List<double> data;
-  final Color color;
-
-  _AdherenceBarPainter({required this.data, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-
-    final barWidth = size.width / (data.length * 2 - 1);
-    final spacing = barWidth;
-
-    for (int i = 0; i < data.length; i++) {
-      final value = data[i];
-      final x = i * (barWidth + spacing);
-
-      if (value < 0) {
-        // Future / No Data - Draw a dot or small line
-        paint.color = color.withValues(alpha: 0.2);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, size.height - 2, barWidth, 2),
-            const Radius.circular(1),
-          ),
-          paint,
-        );
-      } else {
-        // Draw bar
-        // Height based on value (0.0 to 1.0)
-        // If 0.0 (missed), draw a small red indicator or just a small bar
-        final barHeight = value == 0 ? 4.0 : size.height * value;
-        final y = size.height - barHeight;
-
-        // Color: Full opacity for taken, lower for partial, maybe warning color for missed?
-        // Since we only have one color passed in (onPrimary usually white), we use opacity.
-        if (value == 0) {
-          paint.color = color.withValues(alpha: 0.3); // Missed
-        } else if (value < 1.0) {
-          paint.color = color.withValues(alpha: 0.6); // Partial
-        } else {
-          paint.color = color; // Taken
-        }
-
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, barWidth, barHeight),
-            const Radius.circular(2),
-          ),
-          paint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _AdherenceBarPainter oldDelegate) {
-    return oldDelegate.data != data || oldDelegate.color != color;
-  }
-}
-
-class ScheduledDose {
-  final DateTime dateTime;
-  final Schedule? schedule;
-  ScheduledDose(this.dateTime, {this.schedule});
-}
-
-class _HeaderInfoTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData? icon;
-  final Color? textColor;
-  final IconData? trailingIcon;
-
-  const _HeaderInfoTile({
-    required this.label,
-    required this.value,
-    this.icon,
-    this.textColor,
-    this.trailingIcon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = textColor ?? Colors.white;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-            if (trailingIcon != null) ...[
-              const SizedBox(width: 4),
-              Icon(trailingIcon, color: color, size: 14),
-            ],
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _BooleanChip extends StatelessWidget {
-  const _BooleanChip({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return FilterChip(
-      label: Text(label),
-      selected: value,
-      onSelected: onChanged,
-      showCheckmark: true,
-      checkmarkColor: value ? colorScheme.onPrimaryContainer : null,
-      selectedColor: colorScheme.primaryContainer,
-      labelStyle: TextStyle(
-        color: value ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
-        fontWeight: value ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: value
-              ? Colors.transparent
-              : colorScheme.outline.withValues(alpha: 0.3),
-        ),
-      ),
-    );
-  }
-}
+// We'll reinsert the widget & helper classes at the end of the file to ensure
+// the state class includes all its helper methods.
 
 // Helper methods
 
@@ -1471,12 +1567,7 @@ String _formatNumber(double value) {
   return value.toStringAsFixed(1);
 }
 
-double _stockFillRatio(Medication med) {
-  if (med.initialStockValue == null || med.initialStockValue == 0) {
-    return med.stockValue > 0 ? 1.0 : 0.0;
-  }
-  return (med.stockValue / med.initialStockValue!).clamp(0.0, 1.0);
-}
+// `_stockFillRatio` has been replaced by `MedicationDisplayHelpers.calculateStock`.
 
 ScheduledDose? _nextDoseForMedication(String medId) {
   final schedulesBox = Hive.box<Schedule>('schedules');
@@ -1516,9 +1607,7 @@ ScheduledDose? _nextDoseForMedication(String medId) {
       : null;
 }
 
-void _showRefillDialog(BuildContext context, Medication med) {
-  // TODO: Implement refill dialog
-}
+// Note: Refill helpers live as instance methods in `_MedicationDetailPageState`.
 
 Future<void> _showEditDialog(
   BuildContext context,
@@ -1591,60 +1680,6 @@ void _editManufacturer(BuildContext context, Medication med) {
   });
 }
 
-void _editStrength(BuildContext context, Medication med) {
-  _showEditDialog(
-    context,
-    med,
-    'Strength Value',
-    med.strengthValue.toString(),
-    (val) {
-      final d = double.tryParse(val);
-      if (d != null) {
-        final box = Hive.box<Medication>('medications');
-        box.put(med.id, med.copyWith(strengthValue: d));
-      }
-    },
-    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-  );
-}
-
-void _editForm(BuildContext context, Medication med) async {
-  final result = await showDialog<MedicationForm>(
-    context: context,
-    builder: (context) => SimpleDialog(
-      title: const Text('Select Medication Type'),
-      children: MedicationForm.values.map((form) {
-        return SimpleDialogOption(
-          onPressed: () => Navigator.pop(context, form),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(_formLabel(form)),
-          ),
-        );
-      }).toList(),
-    ),
-  );
-
-  if (result != null) {
-    final box = Hive.box<Medication>('medications');
-    box.put(med.id, med.copyWith(form: result));
-  }
-}
-
-void _editNotes(BuildContext context, Medication med) {
-  _showEditDialog(
-    context,
-    med,
-    'Notes',
-    med.notes ?? '',
-    (val) {
-      final box = Hive.box<Medication>('medications');
-      box.put(med.id, med.copyWith(notes: val));
-    },
-    maxLines: 3,
-  );
-}
-
 void _editBatchNumber(BuildContext context, Medication med) {
   _showEditDialog(context, med, 'Batch Number', med.batchNumber ?? '', (val) {
     final box = Hive.box<Medication>('medications');
@@ -1680,6 +1715,74 @@ void _editStorageInstructions(BuildContext context, Medication med) {
     },
     maxLines: 3,
   );
+}
+
+void _editStrength(BuildContext context, Medication med) async {
+  final valueController = TextEditingController(
+    text: med.strengthValue.toString(),
+  );
+  Unit selectedUnit = med.strengthUnit;
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Edit Strength'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: valueController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: buildFieldDecoration(context, hint: 'Strength value'),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<Unit>(
+            value: selectedUnit,
+            items: Unit.values
+                .map(
+                  (u) => DropdownMenuItem(value: u, child: Text(_unitLabel(u))),
+                )
+                .toList(),
+            onChanged: (u) => selectedUnit = u ?? selectedUnit,
+            decoration: buildFieldDecoration(context, hint: 'Unit'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+  if (result == true) {
+    final d = double.tryParse(valueController.text);
+    if (d != null) {
+      final box = Hive.box<Medication>('medications');
+      box.put(
+        med.id,
+        med.copyWith(strengthValue: d, strengthUnit: selectedUnit),
+      );
+    }
+  }
+}
+
+void _editNotes(BuildContext context, Medication med) {
+  _showEditDialog(context, med, 'Notes', med.notes ?? '', (val) {
+    final box = Hive.box<Medication>('medications');
+    box.put(med.id, med.copyWith(notes: val));
+  }, maxLines: 3);
+}
+
+void _editDescription(BuildContext context, Medication med) {
+  _showEditDialog(context, med, 'Description', med.description ?? '', (val) {
+    final box = Hive.box<Medication>('medications');
+    box.put(med.id, med.copyWith(description: val));
+  }, maxLines: 3);
 }
 
 void _editLowStockThreshold(BuildContext context, Medication med) {
@@ -1810,6 +1913,70 @@ void _deleteMedication(BuildContext context, Medication med) async {
       context.pop(); // Go back to list
     }
   }
+}
+
+void _showMedicationInfoEditorSheet(
+  BuildContext context,
+  Medication med,
+) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    builder: (context) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.drive_file_rename_outline),
+            title: const Text('Edit Name'),
+            onTap: () {
+              Navigator.pop(context);
+              _editName(context, med);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.domain),
+            title: const Text('Edit Manufacturer'),
+            onTap: () {
+              Navigator.pop(context);
+              _editManufacturer(context, med);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.scale),
+            title: const Text('Edit Strength'),
+            onTap: () {
+              Navigator.pop(context);
+              _editStrength(context, med);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: const Text('Edit Storage Location'),
+            onTap: () {
+              Navigator.pop(context);
+              _editStorageLocation(context, med);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.notes),
+            title: const Text('Edit Notes'),
+            onTap: () {
+              Navigator.pop(context);
+              _editNotes(context, med);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Edit Description'),
+            onTap: () {
+              Navigator.pop(context);
+              _editDescription(context, med);
+            },
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {

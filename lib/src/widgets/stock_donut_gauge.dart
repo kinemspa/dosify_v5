@@ -16,6 +16,7 @@ class StockDonutGauge extends StatelessWidget {
     this.textColor,
     this.showGlow = true,
     this.isOutline = false,
+    this.labelStyle,
   });
 
   /// Percentage remaining, in the range 0–100.
@@ -38,6 +39,7 @@ class StockDonutGauge extends StatelessWidget {
 
   /// Whether to render as an outline (thin borders) instead of a filled arc.
   final bool isOutline;
+  final TextStyle? labelStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -81,12 +83,14 @@ class StockDonutGauge extends StatelessWidget {
           // Center label (percentage only).
           Text(
             primaryLabel,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: kFontWeightExtraBold,
-              color:
-                  textColor ??
-                  cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-            ),
+            style:
+                labelStyle ??
+                Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: kFontWeightExtraBold,
+                  color:
+                      textColor ??
+                      cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+                ),
           ),
         ],
       ),
@@ -110,6 +114,7 @@ class DualStockDonutGauge extends StatelessWidget {
     this.textColor,
     this.showGlow = true,
     this.isOutline = false,
+    this.labelStyle,
   });
 
   /// Outer ring percentage (e.g. active vial volume), 0–100.
@@ -135,6 +140,7 @@ class DualStockDonutGauge extends StatelessWidget {
 
   /// Whether to render as an outline (thin borders) instead of a filled arc.
   final bool isOutline;
+  final TextStyle? labelStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -194,12 +200,14 @@ class DualStockDonutGauge extends StatelessWidget {
           // Centre label.
           Text(
             primaryLabel,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: kFontWeightExtraBold,
-              color:
-                  textColor ??
-                  cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-            ),
+            style:
+                labelStyle ??
+                Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: kFontWeightExtraBold,
+                  color:
+                      textColor ??
+                      cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+                ),
           ),
         ],
       ),

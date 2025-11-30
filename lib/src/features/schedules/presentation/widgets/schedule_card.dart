@@ -5,6 +5,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -607,143 +608,11 @@ Future<bool> applyStockDecrement(BuildContext context, Schedule s) async {
     return false;
   }
 
-  var delta = 0.0; // amount to subtract from stockValue
+  // Defer to centralized helper for stock decrement logic
 
-  switch (med.stockUnit) {
-    case StockUnit.tablets:
-      if (s.doseTabletQuarters != null) {
-        delta = s.doseTabletQuarters! / 4.0;
-      } else if (s.doseMassMcg != null) {
-        // Convert mass to tablets using strength
-        final perTabMcg = switch (med.strengthUnit) {
-          Unit.mcg => med.strengthValue,
-          Unit.mg => med.strengthValue * 1000,
-          Unit.g => med.strengthValue * 1e6,
-          Unit.units => med.strengthValue,
-          Unit.mcgPerMl => med.strengthValue,
-          Unit.mgPerMl => med.strengthValue * 1000,
-          Unit.gPerMl => med.strengthValue * 1e6,
-          Unit.unitsPerMl => med.strengthValue,
-        };
-        delta = (s.doseMassMcg! / perTabMcg).clamp(0, double.infinity);
-      }
-    case StockUnit.capsules:
-      if (s.doseCapsules != null) {
-        delta = s.doseCapsules!.toDouble();
-      } else if (s.doseMassMcg != null) {
-        final perCapMcg = switch (med.strengthUnit) {
-          Unit.mcg => med.strengthValue,
-          Unit.mg => med.strengthValue * 1000,
-          Unit.g => med.strengthValue * 1e6,
-          Unit.units => med.strengthValue,
-          _ => med.strengthValue,
-        };
-        delta = (s.doseMassMcg! / perCapMcg).clamp(0, double.infinity);
-      }
-    case StockUnit.preFilledSyringes:
-      if (s.doseSyringes != null) delta = s.doseSyringes!.toDouble();
-    case StockUnit.singleDoseVials:
-      if (s.doseVials != null) delta = s.doseVials!.toDouble();
-    case StockUnit.multiDoseVials:
-      // For MDV: activeVialVolume = active vial mL remaining
-      // Deduct the raw mL volume used from active vial
-      var usedMl = 0.0;
-      if (s.doseVolumeMicroliter != null) {
-        usedMl = s.doseVolumeMicroliter! / 1000.0;
-      } else if (s.doseMassMcg != null) {
-        double? mgPerMl;
-        switch (med.strengthUnit) {
-          case Unit.mgPerMl:
-            mgPerMl = med.perMlValue ?? med.strengthValue;
-          case Unit.mcgPerMl:
-            mgPerMl = (med.perMlValue ?? med.strengthValue) / 1000.0;
-          case Unit.gPerMl:
-            mgPerMl = (med.perMlValue ?? med.strengthValue) * 1000.0;
-          default:
-            mgPerMl = null;
-        }
-        if (mgPerMl != null) usedMl = (s.doseMassMcg! / 1000.0) / mgPerMl;
-      } else if (s.doseIU != null) {
-        double? iuPerMl;
-        if (med.strengthUnit == Unit.unitsPerMl) {
-          iuPerMl = med.perMlValue ?? med.strengthValue;
-        }
-        if (iuPerMl != null) usedMl = s.doseIU! / iuPerMl;
-      }
-
-      if (usedMl > 0) {
-        // MDV Logic: Decrement active vial first
-        // Fallback to stockValue if activeVialVolume is null (legacy data)
-
-        // CRITICAL FIX: If stockValue is larger than containerVolumeMl, it's likely a count (legacy data).
-        // In that case, assume activeVialVolume is full (containerVolumeMl) and stockValue is the backup count.
-        final isLegacyCount =
-            med.activeVialVolume == null &&
-            med.stockValue > (med.containerVolumeMl ?? 0);
-
-        final currentActive = isLegacyCount
-            ? (med.containerVolumeMl ?? 0.0)
-            : (med.activeVialVolume ?? med.stockValue);
-
-        var newActive = currentActive - usedMl;
-        var newBackup = med.stockValue;
-
-        // If we are in legacy mode (activeVialVolume was null), we need to initialize backup count.
-        if (med.activeVialVolume == null) {
-          if (isLegacyCount) {
-            // stockValue was count, so keep it as backup count (minus 0 because we are using the "open" vial which we just assumed was full)
-            // Wait, if we assume we just opened a vial from the stock, we should decrement stockValue?
-            // No, if we assume the "active" vial was already open but untracked, we don't decrement backup.
-            // BUT, if stockValue was 9, does that mean 9 sealed + 1 open? Or 9 total?
-            // Usually stockValue is "total inventory". So if we have 9 total, and we say 1 is open, then backup is 8.
-            newBackup = (med.stockValue - 1).clamp(0.0, double.infinity);
-          } else {
-            // stockValue was volume, so backup is 0
-            newBackup = 0;
-          }
-        }
-
-        if (newActive <= 0) {
-          // Vial depleted, open new one if available
-          if (newBackup > 0) {
-            newBackup = newBackup - 1;
-            // Carry over any excess usage to the new vial?
-            // For now, just reset to full minus excess usage
-            final capacity = med.containerVolumeMl ?? 0.0;
-            newActive = capacity + newActive; // newActive is negative here
-
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Active vial depleted. Opened new vial.'),
-                ),
-              );
-            }
-          } else {
-            newActive = 0;
-          }
-        }
-
-        await medsBox.put(
-          med.id,
-          med.copyWith(
-            activeVialVolume: newActive.clamp(0.0, double.infinity),
-            stockValue: newBackup.clamp(0.0, double.infinity),
-          ),
-        );
-        return true;
-      }
-      break; // Exit switch, don't use default delta logic
-
-    case StockUnit.mcg:
-      if (s.doseMassMcg != null) delta = s.doseMassMcg!.toDouble();
-    case StockUnit.mg:
-      if (s.doseMassMcg != null) delta = s.doseMassMcg! / 1000.0;
-    case StockUnit.g:
-      if (s.doseMassMcg != null) delta = s.doseMassMcg! / 1e6;
-  }
-
-  if (delta <= 0) {
+  // Use centralized helper
+  final updated = applyDoseTakenUpdate(med, s);
+  if (updated == null) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -753,8 +622,15 @@ Future<bool> applyStockDecrement(BuildContext context, Schedule s) async {
     );
     return false;
   }
-
-  final newStock = (med.stockValue - delta).clamp(0.0, double.infinity);
-  await medsBox.put(med.id, med.copyWith(stockValue: newStock));
+  final prevStock = med.stockValue;
+  await medsBox.put(updated.id, updated);
+  // If MDV and we consumed a backup vial (stock decreased) to open new active vial, inform user
+  if (med.form == MedicationForm.multiDoseVial &&
+      updated.stockValue < prevStock) {
+    if (context.mounted)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Active vial depleted. Opened new vial.')),
+      );
+  }
   return true;
 }

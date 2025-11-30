@@ -19,6 +19,19 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static const MethodChannel _platform = MethodChannel('dosifi/notifications');
   static void _log(String msg) => debugPrint('[NotificationService] $msg');
+  // Test hooks: allow overriding scheduling/cancel behavior for tests. When non-null,
+  // the overrides will be called in place of the real plugin methods to avoid
+  // platform channel invocations during unit/widget tests.
+  static Future<void> Function(
+    int id,
+    DateTime when, {
+    required String title,
+    required String body,
+    String channelId,
+  })?
+  scheduleAtAlarmClockOverride;
+
+  static Future<void> Function(int id)? cancelOverride;
 
   static const AndroidNotificationChannel _upcomingDose =
       AndroidNotificationChannel(
@@ -434,6 +447,10 @@ class NotificationService {
   }
 
   static Future<void> cancel(int id) async {
+    if (cancelOverride != null) {
+      await cancelOverride!(id);
+      return;
+    }
     _log('cancel(id=$id)');
     await _fln.cancel(id);
   }
@@ -613,6 +630,16 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    if (scheduleAtAlarmClockOverride != null) {
+      await scheduleAtAlarmClockOverride!(
+        id,
+        when,
+        title: title,
+        body: body,
+        channelId: channelId,
+      );
+      return;
+    }
     _log(
       'scheduleAtAlarmClock(id=$id, when=${when.toIso8601String()}, title=$title)',
     );

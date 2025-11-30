@@ -1,6 +1,8 @@
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+// import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart'; // unused
 
 /// Centralized helpers for displaying medication information.
 class MedicationDisplayHelpers {
@@ -168,4 +170,194 @@ class StockDisplayInfo {
   String get fractionPart => label.split(' ').first;
   String get unitPart =>
       label.split(' ').length > 1 ? label.split(' ').sublist(1).join(' ') : '';
+}
+
+/// Apply a single scheduled dose decrement to a medication and return an updated
+/// Medication object.
+///
+/// Behavior:
+/// - For tablets/capsules/single dose vials/pre-filled syringes, this subtracts
+///   the relevant quantity from `stockValue`.
+/// - For multi-dose vials (MDV) it decrements `activeVialVolume` first and, if
+///   the active vial is depleted, opens backup sealed vials (reducing `stockValue`)
+///   as required to satisfy the dose. The helper will consume multiple backup
+///   vials if necessary, and clamps values to non-negative ranges.
+/// - Returns `null` if the decrement could not be computed (e.g., missing
+///   strength, missing per-mL conversions required for MDV dosing).
+Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
+  // Copy candidates
+  var updated = med;
+
+  switch (med.stockUnit) {
+    case StockUnit.tablets:
+      double delta = 0.0;
+      if (s.doseTabletQuarters != null) {
+        delta = s.doseTabletQuarters! / 4.0;
+      } else if (s.doseMassMcg != null) {
+        final perTabMcg = switch (med.strengthUnit) {
+          Unit.mcg => med.strengthValue,
+          Unit.mg => med.strengthValue * 1000,
+          Unit.g => med.strengthValue * 1e6,
+          Unit.units => med.strengthValue,
+          Unit.mcgPerMl => med.strengthValue,
+          Unit.mgPerMl => med.strengthValue * 1000,
+          Unit.gPerMl => med.strengthValue * 1e6,
+          Unit.unitsPerMl => med.strengthValue,
+        };
+        delta = (s.doseMassMcg! / perTabMcg).clamp(0, double.infinity);
+      }
+      if (delta <= 0) return null;
+      updated = updated.copyWith(
+        stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+      );
+      return updated;
+
+    case StockUnit.capsules:
+      double delta = 0.0;
+      if (s.doseCapsules != null) {
+        delta = s.doseCapsules!.toDouble();
+      } else if (s.doseMassMcg != null) {
+        final perCapMcg = switch (med.strengthUnit) {
+          Unit.mcg => med.strengthValue,
+          Unit.mg => med.strengthValue * 1000,
+          Unit.g => med.strengthValue * 1e6,
+          Unit.units => med.strengthValue,
+          _ => med.strengthValue,
+        };
+        delta = (s.doseMassMcg! / perCapMcg).clamp(0, double.infinity);
+      }
+      if (delta <= 0) return null;
+      updated = updated.copyWith(
+        stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+      );
+      return updated;
+
+    case StockUnit.preFilledSyringes:
+      if (s.doseSyringes != null) {
+        final delta = s.doseSyringes!.toDouble();
+        updated = updated.copyWith(
+          stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+        );
+        return updated;
+      }
+      return null;
+
+    case StockUnit.singleDoseVials:
+      if (s.doseVials != null) {
+        final delta = s.doseVials!.toDouble();
+        updated = updated.copyWith(
+          stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+        );
+        return updated;
+      }
+      return null;
+
+    case StockUnit.multiDoseVials:
+      // For MDV: compute used milliliters and decrement active vial first
+      var usedMl = 0.0;
+      if (s.doseVolumeMicroliter != null) {
+        usedMl = s.doseVolumeMicroliter! / 1000.0;
+      } else if (s.doseMassMcg != null) {
+        double? mgPerMl;
+        switch (med.strengthUnit) {
+          case Unit.mgPerMl:
+            mgPerMl = med.perMlValue ?? med.strengthValue;
+            break;
+          case Unit.mcgPerMl:
+            mgPerMl = (med.perMlValue ?? med.strengthValue) / 1000.0;
+            break;
+          case Unit.gPerMl:
+            mgPerMl = (med.perMlValue ?? med.strengthValue) * 1000.0;
+            break;
+          default:
+            mgPerMl = null;
+        }
+        if (mgPerMl != null) usedMl = (s.doseMassMcg! / 1000.0) / mgPerMl;
+      } else if (s.doseIU != null) {
+        double? iuPerMl;
+        if (med.strengthUnit == Unit.unitsPerMl)
+          iuPerMl = med.perMlValue ?? med.strengthValue;
+        if (iuPerMl != null) usedMl = s.doseIU! / iuPerMl;
+      }
+
+      if (usedMl > 0) {
+        final isLegacyCount =
+            med.activeVialVolume == null &&
+            med.stockValue > (med.containerVolumeMl ?? 0);
+        final currentActive = isLegacyCount
+            ? (med.containerVolumeMl ?? 0.0)
+            : (med.activeVialVolume ?? med.stockValue);
+        var newActive = currentActive - usedMl;
+        var newBackup = med.stockValue;
+        if (med.activeVialVolume == null) {
+          if (isLegacyCount)
+            newBackup = (med.stockValue - 1).clamp(0.0, double.infinity);
+          else
+            newBackup = 0;
+        }
+        if (newActive < 0) {
+          final capacity = med.containerVolumeMl ?? 0.0;
+          if (capacity > 0) {
+            // Compute how many additional sealed vials are needed
+            var deficit = -newActive;
+            var extraVialsNeeded = (deficit / capacity).ceil();
+            if (newBackup >= extraVialsNeeded) {
+              newBackup = newBackup - extraVialsNeeded;
+              newActive =
+                  newActive +
+                  extraVialsNeeded * capacity; // bring back to non-negative
+            } else {
+              // Use whatever backup vials are available; if insufficient, clamp remaining active to 0
+              final usedVials = newBackup;
+              newBackup = 0;
+              newActive = newActive + usedVials * capacity;
+              if (newActive < 0) newActive = 0;
+            }
+          } else {
+            // No container capacity info; consume one backup if available as best-effort
+            if (newBackup > 0) {
+              newBackup = (newBackup - 1).clamp(0.0, double.infinity);
+              newActive =
+                  0; // best-effort: no remaining active volume unless otherwise tracked
+            } else {
+              newActive = 0;
+            }
+          }
+        }
+        updated = updated.copyWith(
+          activeVialVolume: newActive.clamp(0.0, double.infinity),
+          stockValue: newBackup.clamp(0.0, double.infinity),
+        );
+        return updated;
+      }
+      return null;
+
+    case StockUnit.mcg:
+      if (s.doseMassMcg != null) {
+        final delta = s.doseMassMcg!.toDouble();
+        updated = updated.copyWith(
+          stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+        );
+        return updated;
+      }
+      return null;
+    case StockUnit.mg:
+      if (s.doseMassMcg != null) {
+        final delta = s.doseMassMcg! / 1000.0;
+        updated = updated.copyWith(
+          stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+        );
+        return updated;
+      }
+      return null;
+    case StockUnit.g:
+      if (s.doseMassMcg != null) {
+        final delta = s.doseMassMcg! / 1e6;
+        updated = updated.copyWith(
+          stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
+        );
+        return updated;
+      }
+      return null;
+  }
 }
