@@ -200,7 +200,7 @@ class _ReconstitutionCalculatorWidgetState
             Colors.transparent,
             Theme.of(
               context,
-            ).colorScheme.primary.withOpacity(kReconDividerOpacity),
+            ).colorScheme.primary.withValues(alpha: kReconDividerOpacity),
             Colors.transparent,
           ],
           stops: kReconDividerStops,
@@ -263,12 +263,12 @@ class _ReconstitutionCalculatorWidgetState
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.95),
+      fillColor: Colors.white.withValues(alpha: 0.95),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
+          color: cs.outlineVariant.withValues(alpha: 0.5),
           width: 0.75,
         ),
       ),
@@ -294,7 +294,7 @@ class _ReconstitutionCalculatorWidgetState
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white.withOpacity(kReconTextMediumOpacity),
+          color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
           fontStyle: FontStyle.italic,
         ),
       ),
@@ -401,7 +401,7 @@ class _ReconstitutionCalculatorWidgetState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                    color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
                   ),
                   children: [
                     const TextSpan(text: 'Using vial strength: '),
@@ -422,7 +422,7 @@ class _ReconstitutionCalculatorWidgetState
                 'To adjust, go to Strength section above',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextMutedOpacity),
+                  color: Colors.white.withValues(alpha: kReconTextMutedOpacity),
                   fontStyle: FontStyle.italic,
                   fontSize: 10,
                 ),
@@ -436,7 +436,7 @@ class _ReconstitutionCalculatorWidgetState
           child: Text(
             'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(kReconTextMediumOpacity),
+              color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
             ),
           ),
         ),
@@ -577,7 +577,7 @@ class _ReconstitutionCalculatorWidgetState
               'Select a reconstitution option',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(kReconTextHighOpacity),
+                color: Colors.white.withValues(alpha: kReconTextHighOpacity),
               ),
             ),
           ),
@@ -654,7 +654,7 @@ class _ReconstitutionCalculatorWidgetState
           child: Text(
             'Drag the syringe or use +/- buttons for fine adjustments (U = Units)',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(kReconTextMediumOpacity),
+              color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -848,18 +848,18 @@ class _ReconstitutionCalculatorWidgetState
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                    Theme.of(context).colorScheme.primary.withOpacity(0.04),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.04),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                   width: kReconSummaryBorderWidth,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     spreadRadius: 0,
                     offset: const Offset(0, 2),
@@ -883,7 +883,7 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -904,8 +904,8 @@ class _ReconstitutionCalculatorWidgetState
                             text: '  of  ',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withOpacity(
-                                kReconTextHighOpacity,
+                              color: Colors.white.withValues(
+                                alpha: kReconTextHighOpacity,
                               ),
                               fontWeight: FontWeight.w400,
                             ),
@@ -928,7 +928,7 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -946,8 +946,8 @@ class _ReconstitutionCalculatorWidgetState
                           text: '  of  ',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(
-                              kReconTextHighOpacity,
+                            color: Colors.white.withValues(
+                              alpha: kReconTextHighOpacity,
                             ),
                             fontWeight: FontWeight.w400,
                           ),
@@ -976,8 +976,8 @@ class _ReconstitutionCalculatorWidgetState
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          Theme.of(context).colorScheme.primary.withOpacity(
-                            kReconDividerOpacity,
+                          Theme.of(context).colorScheme.primary.withValues(
+                            alpha: kReconDividerOpacity,
                           ),
                           Colors.transparent,
                         ],
@@ -991,7 +991,7 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -1024,7 +1024,7 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                       ),
                       children: [
@@ -1047,8 +1047,8 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(
-                          kReconTextMediumOpacity,
+                        color: Colors.white.withValues(
+                          alpha: kReconTextMediumOpacity,
                         ),
                         fontWeight: FontWeight.w500,
                         height: 1.4,
@@ -1074,7 +1074,7 @@ class _ReconstitutionCalculatorWidgetState
                     'Doses can be created, adjusted, and tracked on the schedule screen where all medication administration is managed.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(kReconTextMutedOpacity),
+                      color: Colors.white.withValues(alpha: kReconTextMutedOpacity),
                       fontStyle: FontStyle.italic,
                       height: 1.5,
                     ),
@@ -1169,23 +1169,23 @@ class _ReconstitutionCalculatorWidgetState
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        theme.colorScheme.primary.withOpacity(0.15),
-                        theme.colorScheme.primary.withOpacity(0.08),
+                        theme.colorScheme.primary.withValues(alpha: 0.15),
+                        theme.colorScheme.primary.withValues(alpha: 0.08),
                       ],
                     )
                   : null,
-              color: selected ? null : Colors.white.withOpacity(0.03),
+              color: selected ? null : Colors.white.withValues(alpha: 0.03),
               border: Border.all(
                 color: selected
                     ? theme.colorScheme.primary
-                    : Colors.white.withOpacity(0.15),
+                    : Colors.white.withValues(alpha: 0.15),
                 width: kReconOptionBorderWidth,
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: selected
                   ? [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(0.2),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
                         blurRadius: 8,
                         spreadRadius: 0,
                       ),
@@ -1203,7 +1203,7 @@ class _ReconstitutionCalculatorWidgetState
                     if (states.contains(WidgetState.selected)) {
                       return theme.colorScheme.primary;
                     }
-                    return Colors.white.withOpacity(0.5);
+                    return Colors.white.withValues(alpha: 0.5);
                   }),
                 ),
                 const SizedBox(width: 12),
@@ -1218,7 +1218,7 @@ class _ReconstitutionCalculatorWidgetState
                           fontSize: 16,
                           color: selected
                               ? theme.colorScheme.primary
-                              : Colors.white.withOpacity(kReconTextHighOpacity),
+                              : Colors.white.withValues(alpha: kReconTextHighOpacity),
                         ),
                       ),
                       if (explainerText.isNotEmpty) ...[
@@ -1226,8 +1226,8 @@ class _ReconstitutionCalculatorWidgetState
                         Text(
                           explainerText,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withOpacity(
-                              kReconTextMutedOpacity,
+                            color: Colors.white.withValues(
+                              alpha: kReconTextMutedOpacity,
                             ),
                             fontStyle: FontStyle.italic,
                             fontSize: 11,
@@ -1239,8 +1239,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? Colors.white.withOpacity(0.9)
-                                : Colors.white.withOpacity(0.7),
+                                ? Colors.white.withValues(alpha: 0.9)
+                                : Colors.white.withValues(alpha: 0.7),
                           ),
                           children: [
                             TextSpan(
@@ -1263,11 +1263,11 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? Colors.white.withOpacity(
-                                    kReconTextHighOpacity,
+                                ? Colors.white.withValues(
+                                    alpha: kReconTextHighOpacity,
                                   )
-                                : Colors.white.withOpacity(
-                                    kReconTextLowOpacity,
+                                : Colors.white.withValues(
+                                    alpha: kReconTextLowOpacity,
                                   ),
                           ),
                           children: [
@@ -1289,11 +1289,11 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? Colors.white.withOpacity(
-                                    kReconTextHighOpacity,
+                                ? Colors.white.withValues(
+                                    alpha: kReconTextHighOpacity,
                                   )
-                                : Colors.white.withOpacity(
-                                    kReconTextLowOpacity,
+                                : Colors.white.withValues(
+                                    alpha: kReconTextLowOpacity,
                                   ),
                           ),
                           children: [

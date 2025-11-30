@@ -555,11 +555,11 @@ class _ConceptCardNova extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(.4),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .4),
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(.08),
+            color: theme.colorScheme.shadow.withValues(alpha: .08),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -636,8 +636,8 @@ class _ConceptCardNova extends StatelessWidget {
                     ),
                     CircleAvatar(
                       radius: 34,
-                      backgroundColor: theme.colorScheme.primary.withOpacity(
-                        .08,
+                      backgroundColor: theme.colorScheme.primary.withValues(
+                        alpha: .08,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -697,7 +697,7 @@ class _ConceptCardWave extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            theme.colorScheme.primary.withOpacity(.1),
+            theme.colorScheme.primary.withValues(alpha: .1),
             theme.colorScheme.surface,
           ],
           begin: Alignment.topRight,
@@ -705,7 +705,7 @@ class _ConceptCardWave extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(.5),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .5),
         ),
       ),
       child: Column(
@@ -808,12 +808,12 @@ class _ConceptCardPassport extends StatelessWidget {
                 color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(kBorderRadiusLarge),
                 border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withOpacity(.9),
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: .9),
                   width: 1.6,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.shadow.withOpacity(.06),
+                    color: theme.colorScheme.shadow.withValues(alpha: .06),
                     blurRadius: 24,
                     offset: const Offset(0, 10),
                   ),
@@ -854,7 +854,7 @@ class _ConceptCardPassport extends StatelessWidget {
                   ),
                   const SizedBox(height: kFieldSpacing),
                   Divider(
-                    color: theme.colorScheme.outlineVariant.withOpacity(.4),
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: .4),
                   ),
                   const SizedBox(height: kFieldSpacing),
                   Wrap(
@@ -872,7 +872,7 @@ class _ConceptCardPassport extends StatelessWidget {
                               kBorderRadiusMedium,
                             ),
                             border: Border.all(
-                              color: accent.withOpacity(.5),
+                              color: accent.withValues(alpha: .5),
                               width: 1.2,
                             ),
                           ),
@@ -930,7 +930,7 @@ class _ConceptCardNotebook extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: theme.colorScheme.outlineVariant.withOpacity(.25),
+              color: theme.colorScheme.outlineVariant.withValues(alpha: .25),
             ),
           ),
         ),
@@ -974,8 +974,8 @@ class _ConceptCardNotebook extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(
-            kCardBorderOpacity,
+          color: theme.colorScheme.outlineVariant.withValues(
+            alpha: kCardBorderOpacity,
           ),
         ),
       ),
@@ -994,7 +994,7 @@ class _ConceptCardNotebook extends StatelessWidget {
             bottom: 0,
             child: Container(
               width: 2,
-              color: theme.colorScheme.primary.withOpacity(.25),
+              color: theme.colorScheme.primary.withValues(alpha: .25),
             ),
           ),
           Padding(
@@ -1086,7 +1086,7 @@ class _ConceptCardTicker extends StatelessWidget {
                 horizontal: kFieldSpacing,
               ),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(.4),
+                color: theme.colorScheme.surfaceVariant.withValues(alpha: .4),
                 borderRadius: BorderRadius.circular(kBorderRadiusMedium),
               ),
               child: Text(
@@ -1117,8 +1117,8 @@ class _ConceptCardTicker extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(
-            kCardBorderOpacity,
+          color: theme.colorScheme.outlineVariant.withValues(
+            alpha: kCardBorderOpacity,
           ),
         ),
       ),
@@ -1145,7 +1145,7 @@ class _ConceptCardTicker extends StatelessWidget {
               vertical: kFieldSpacing,
             ),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(.2),
+              color: theme.colorScheme.surfaceVariant.withValues(alpha: .2),
               borderRadius: BorderRadius.circular(kBorderRadiusMedium),
             ),
             child: Row(
@@ -1220,15 +1220,15 @@ class _ConceptCardPulse extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             theme.colorScheme.surface,
-            theme.colorScheme.primary.withOpacity(.15),
+            theme.colorScheme.primary.withValues(alpha: .15),
           ],
           begin: Alignment.bottomLeft,
           end: Alignment.topRight,
         ),
         borderRadius: BorderRadius.circular(kBorderRadiusLarge * 1.1),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(
-            kCardBorderOpacity,
+          color: theme.colorScheme.outlineVariant.withValues(
+            alpha: kCardBorderOpacity,
           ),
         ),
       ),
@@ -1291,10 +1291,10 @@ class _ConceptCardPulse extends StatelessWidget {
                   height: 96,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: theme.colorScheme.primary.withOpacity(.15),
+                    color: theme.colorScheme.primary.withValues(alpha: .15),
                     boxShadow: [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(.25),
+                        color: theme.colorScheme.primary.withValues(alpha: .25),
                         blurRadius: 24,
                       ),
                     ],
@@ -1341,8 +1341,8 @@ class _ConceptCardDuplex extends StatelessWidget {
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
             color: theme.colorScheme.surface,
             border: Border.all(
-              color: theme.colorScheme.outlineVariant.withOpacity(
-                kCardBorderOpacity,
+              color: theme.colorScheme.outlineVariant.withValues(
+                alpha: kCardBorderOpacity,
               ),
             ),
           ),
@@ -1367,7 +1367,7 @@ class _ConceptCardDuplex extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(kCardPadding),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(.18),
+        color: theme.colorScheme.surfaceVariant.withValues(alpha: .18),
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
       ),
       child: Column(
@@ -1465,8 +1465,8 @@ class _ConceptCardBadgeGrid extends StatelessWidget {
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           border: Border.all(
-            color: theme.colorScheme.outlineVariant.withOpacity(
-              kCardBorderOpacity,
+            color: theme.colorScheme.outlineVariant.withValues(
+              alpha: kCardBorderOpacity,
             ),
           ),
         ),
@@ -1489,7 +1489,7 @@ class _ConceptCardBadgeGrid extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(kCardPadding * 1.2),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(.15),
+        color: theme.colorScheme.surfaceVariant.withValues(alpha: .15),
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
       ),
       child: Column(
@@ -1545,8 +1545,8 @@ class _ConceptCardFocus extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(kBorderRadiusLarge * 1.1),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(
-            kCardBorderOpacity,
+          color: theme.colorScheme.outlineVariant.withValues(
+            alpha: kCardBorderOpacity,
           ),
         ),
       ),
@@ -1613,15 +1613,15 @@ class _ConceptCardHalo extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             theme.colorScheme.surface,
-            theme.colorScheme.primary.withOpacity(.08),
+            theme.colorScheme.primary.withValues(alpha: .08),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(kBorderRadiusLarge * 1.1),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(
-            kCardBorderOpacity,
+          color: theme.colorScheme.outlineVariant.withValues(
+            alpha: kCardBorderOpacity,
           ),
         ),
       ),
@@ -1692,8 +1692,8 @@ class _ConceptCardHalo extends StatelessWidget {
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          theme.colorScheme.primary.withOpacity(.15),
-                          theme.colorScheme.surface.withOpacity(0),
+                          theme.colorScheme.primary.withValues(alpha: .15),
+                          theme.colorScheme.surface.withValues(alpha: 0),
                         ],
                       ),
                     ),
@@ -1705,8 +1705,8 @@ class _ConceptCardHalo extends StatelessWidget {
                   child: CustomPaint(
                     painter: _SegmentedRingPainter(
                       progress: ratio,
-                      baseColor: theme.colorScheme.outlineVariant.withOpacity(
-                        .2,
+                      baseColor: theme.colorScheme.outlineVariant.withValues(
+                        alpha: .2,
                       ),
                       primary: theme.colorScheme.primary,
                       warning: theme.colorScheme.tertiary,
@@ -2529,7 +2529,7 @@ class _ListCardInventoryPulse extends StatelessWidget {
             child: LinearProgressIndicator(
               minHeight: 6,
               value: ratio,
-              backgroundColor: cs.outlineVariant.withOpacity(.2),
+              backgroundColor: cs.outlineVariant.withValues(alpha: .2),
               valueColor: AlwaysStoppedAnimation(cs.primary),
             ),
           ),
@@ -2689,7 +2689,7 @@ class _ListCardTimeline extends StatelessWidget {
           _ListRowSpec(
             leadingWidget: CircleAvatar(
               radius: 16,
-              backgroundColor: cs.primary.withOpacity(.1),
+              backgroundColor: cs.primary.withValues(alpha: .1),
               child: Text(
                 '${i + 1}',
                 style: theme.textTheme.labelLarge?.copyWith(
@@ -2862,7 +2862,7 @@ class _ListBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor = theme.colorScheme.outlineVariant.withOpacity(.35);
+    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: .35);
     if (rows.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2958,7 +2958,7 @@ class _ListRow extends StatelessWidget {
       final color = spec.leadingColor ?? cs.primary;
       leading = CircleAvatar(
         radius: 18,
-        backgroundColor: color.withOpacity(.12),
+        backgroundColor: color.withValues(alpha: .12),
         child: Icon(spec.leadingIcon, color: color, size: 18),
       );
     }
@@ -3022,7 +3022,7 @@ class _ListRow extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: cs.outlineVariant.withOpacity(.35),
+            color: cs.outlineVariant.withValues(alpha: .35),
           ),
       ],
     );
@@ -3091,7 +3091,7 @@ class _PillChip extends StatelessWidget {
     Color foreground;
     switch (tone) {
       case _PillChipTone.vibrant:
-        background = theme.colorScheme.primary.withOpacity(.12);
+        background = theme.colorScheme.primary.withValues(alpha: .12);
         foreground = theme.colorScheme.primary;
         break;
       case _PillChipTone.soft:
@@ -3176,7 +3176,7 @@ class _WavePainter extends CustomPainter {
       return;
     }
     final backgroundPaint = Paint()
-      ..color = color.withOpacity(.08)
+      ..color = color.withValues(alpha: .08)
       ..style = PaintingStyle.fill;
     canvas.drawRect(Offset.zero & size, backgroundPaint);
 
@@ -3198,7 +3198,7 @@ class _WavePainter extends CustomPainter {
       ..close();
 
     final fillPaint = Paint()
-      ..color = color.withOpacity(.35)
+      ..color = color.withValues(alpha: .35)
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, fillPaint);
 
@@ -3228,7 +3228,7 @@ class _NotebookLinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(.2)
+      ..color = color.withValues(alpha: .2)
       ..strokeWidth = 1;
     for (double y = 32; y < size.height; y += 32) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
@@ -3254,7 +3254,7 @@ class _ArcPainter extends CustomPainter {
     final sweepAngle = 2 * pi * progress;
 
     final backgroundPaint = Paint()
-      ..color = color.withOpacity(.08)
+      ..color = color.withValues(alpha: .08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;

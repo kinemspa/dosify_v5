@@ -23,11 +23,11 @@ class FormFieldStyler {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       helperStyle: theme.textTheme.bodySmall?.copyWith(
-        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.60),
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.60),
         fontSize: kHintFontSize,
       ),
       hintStyle: theme.textTheme.bodySmall?.copyWith(
-        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.60),
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.60),
         fontSize: kHintFontSize,
       ),
     );

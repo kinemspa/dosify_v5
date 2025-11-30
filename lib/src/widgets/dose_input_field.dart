@@ -686,7 +686,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
             border: Border.all(
               color: isSelected
                   ? cs.primary
-                  : cs.outlineVariant.withOpacity(kCardBorderOpacity),
+                  : cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
               width: isSelected ? kBorderWidthMedium : kBorderWidthThin,
             ),
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
@@ -848,7 +848,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
         color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         border: Border.all(
-          color: cs.outlineVariant.withOpacity(kCardBorderOpacity),
+          color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
           width: kBorderWidthThin,
         ),
       ),
@@ -901,7 +901,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
         color: _result!.hasError
             ? cs.errorContainer
             : (_result!.hasWarning
-                  ? Colors.orange.withOpacity(0.1)
+                  ? Colors.orange.withValues(alpha: 0.1)
                   : cs.surfaceContainerHigh),
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         border: Border.all(
@@ -909,7 +909,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               ? cs.error
               : (_result!.hasWarning
                     ? Colors.orange
-                    : cs.outlineVariant.withOpacity(kCardBorderOpacity)),
+                    : cs.outlineVariant.withValues(alpha: kCardBorderOpacity)),
           width: kBorderWidthThin,
         ),
       ),

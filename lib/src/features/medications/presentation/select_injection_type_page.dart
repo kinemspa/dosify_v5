@@ -76,8 +76,8 @@ class _Tile extends StatelessWidget {
     final titleColor = isPrimary ? cs.onPrimary : cs.onSurface;
     final subtitleColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
     final badgeBg = isPrimary
-        ? cs.onPrimary.withOpacity(0.15)
-        : cs.primary.withOpacity(0.12);
+        ? cs.onPrimary.withValues(alpha: 0.15)
+        : cs.primary.withValues(alpha: 0.12);
     final badgeIconColor = isPrimary ? cs.onPrimary : cs.primary;
     final chevronColor = isPrimary ? cs.onPrimary : cs.onSurfaceVariant;
 
@@ -169,7 +169,7 @@ class _ScreenHeader extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: cs.onPrimary.withOpacity(0.15),
+              color: cs.onPrimary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: cs.onPrimary),

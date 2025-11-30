@@ -196,7 +196,7 @@ class _MdvVolumeReconstitutionSectionState
                         : null,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
-                        color: theme.colorScheme.primary.withOpacity(0.5),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
                         width: 1.5,
                       ),
                     ),
@@ -343,18 +343,18 @@ class _MdvVolumeReconstitutionSectionState
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                theme.colorScheme.primary.withOpacity(0.08),
-                theme.colorScheme.primary.withOpacity(0.04),
+                theme.colorScheme.primary.withValues(alpha: 0.08),
+                theme.colorScheme.primary.withValues(alpha: 0.04),
               ],
             ),
             borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
             border: Border.all(
-              color: theme.colorScheme.primary.withOpacity(0.3),
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
               width: kReconSummaryBorderWidth,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 spreadRadius: 0,
                 offset: const Offset(0, 2),
@@ -378,7 +378,7 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(kReconTextHighOpacity),
+                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -397,8 +397,8 @@ class _MdvVolumeReconstitutionSectionState
                         text: '  of  ',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white.withOpacity(
-                            kReconTextHighOpacity,
+                          color: Colors.white.withValues(
+                            alpha: kReconTextHighOpacity,
                           ),
                           fontWeight: FontWeight.w400,
                         ),
@@ -421,7 +421,7 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(kReconTextHighOpacity),
+                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -439,7 +439,7 @@ class _MdvVolumeReconstitutionSectionState
                       text: '  of  ',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -465,8 +465,8 @@ class _MdvVolumeReconstitutionSectionState
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      theme.colorScheme.primary.withOpacity(
-                        kReconDividerOpacity,
+                      theme.colorScheme.primary.withValues(
+                        alpha: kReconDividerOpacity,
                       ),
                       Colors.transparent,
                     ],
@@ -480,7 +480,7 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(kReconTextHighOpacity),
+                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -511,7 +511,7 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(kReconTextHighOpacity),
+                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                     fontWeight: FontWeight.w600,
                   ),
                   children: [
@@ -537,12 +537,12 @@ class _MdvVolumeReconstitutionSectionState
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: kReconErrorBackground.withOpacity(
-                      kReconErrorOpacity,
+                    color: kReconErrorBackground.withValues(
+                      alpha: kReconErrorOpacity,
                     ),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: kReconErrorBackground.withOpacity(0.5),
+                      color: kReconErrorBackground.withValues(alpha: 0.5),
                       width: kReconSummaryBorderWidth,
                     ),
                   ),
@@ -574,7 +574,7 @@ class _MdvVolumeReconstitutionSectionState
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                      color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
                       fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),
@@ -644,10 +644,10 @@ class _MdvVolumeReconstitutionSectionState
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surfaceContainerHighest
-                          .withOpacity(0.3),
+                          .withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withOpacity(0.2),
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         width: 0.5,
                       ),
                     ),
@@ -659,7 +659,7 @@ class _MdvVolumeReconstitutionSectionState
                                 ? '0.00'
                                 : widget.vialVolumeController.text),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
@@ -721,7 +721,7 @@ class _MdvVolumeReconstitutionSectionState
               color: exceedsMax
                   ? Colors.orange
                   : (isDarkMode
-                        ? Colors.white.withOpacity(kReconTextMediumOpacity)
+                        ? Colors.white.withValues(alpha: kReconTextMediumOpacity)
                         : theme.colorScheme.onSurfaceVariant.withValues(
                             alpha: 0.75,
                           )),

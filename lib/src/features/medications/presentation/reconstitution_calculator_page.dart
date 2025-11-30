@@ -90,7 +90,7 @@ class _ReconstitutionCalculatorPageState
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
+          color: cs.outlineVariant.withValues(alpha: 0.5),
           width: 0.75,
         ),
       ),
@@ -112,7 +112,7 @@ class _ReconstitutionCalculatorPageState
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
+          color: cs.outlineVariant.withValues(alpha: 0.5),
           width: 0.75,
         ),
       ),
@@ -224,7 +224,7 @@ class _ReconstitutionCalculatorPageState
           Divider(
             color: Theme.of(
               context,
-            ).colorScheme.outlineVariant.withOpacity(0.5),
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 12),
           // Embedded calculator widget

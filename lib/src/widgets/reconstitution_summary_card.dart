@@ -47,12 +47,12 @@ class ReconstitutionSummaryCard extends StatelessWidget {
         color: kReconBackgroundActive,
         borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.3),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
           width: kReconSummaryBorderWidth,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             spreadRadius: 0,
             offset: const Offset(0, 2),
@@ -90,7 +90,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(kReconTextHighOpacity),
+                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -108,7 +108,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                       text: '  of  ',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -125,8 +125,8 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                         text: '\nwith $reconFluidName',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(
-                            kReconTextHighOpacity,
+                          color: Colors.white.withValues(
+                            alpha: kReconTextHighOpacity,
                           ),
                           fontWeight: FontWeight.w500,
                         ),
@@ -148,7 +148,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     Colors.transparent,
-                    theme.colorScheme.primary.withOpacity(kReconDividerOpacity),
+                    theme.colorScheme.primary.withValues(
+                      alpha: kReconDividerOpacity,
+                    ),
                     Colors.transparent,
                   ],
                   stops: kReconDividerStops,
@@ -161,7 +163,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextHighOpacity),
+                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -186,7 +188,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextHighOpacity),
+                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -212,7 +214,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextHighOpacity),
+                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -236,7 +238,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 '${_formatNoTrailing(syringeSizeMl!)} mL Syringe',
                 textAlign: TextAlign.center,
                 style: helperTextStyle(context)?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextHighOpacity),
+                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                   fontSize: 11,
                 ),
               ),

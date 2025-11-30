@@ -1732,7 +1732,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withOpacity(kReconTextHighOpacity),
+                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -1764,7 +1764,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                       text: '  of  ',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withOpacity(kReconTextHighOpacity),
+                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w400,
                       ),
                     ),

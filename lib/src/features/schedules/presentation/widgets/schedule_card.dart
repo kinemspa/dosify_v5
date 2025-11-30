@@ -56,7 +56,7 @@ class ScheduleCard extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: cs.primaryContainer.withOpacity(0.4),
+                  color: cs.primaryContainer.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -83,9 +83,9 @@ class ScheduleCard extends StatelessWidget {
                   children: [
                     Text(
                       s.medicationName,
-                      style: cardTitleStyle(context)?.copyWith(
-                        color: cs.onSurface,
-                      ),
+                      style: cardTitleStyle(
+                        context,
+                      )?.copyWith(color: cs.onSurface),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -157,9 +157,7 @@ class ScheduleCard extends StatelessWidget {
         children: [
           Text(
             s.medicationName,
-            style: helperTextStyle(context)?.copyWith(
-              letterSpacing: 1.1,
-            ),
+            style: helperTextStyle(context)?.copyWith(letterSpacing: 1.1),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

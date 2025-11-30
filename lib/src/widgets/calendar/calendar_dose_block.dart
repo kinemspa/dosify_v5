@@ -60,7 +60,7 @@ class CalendarDoseBlock extends StatelessWidget {
               Text(
                 dose.doseDescription,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: _getTextColor(colorScheme).withOpacity(0.8),
+                  color: _getTextColor(colorScheme).withValues(alpha: 0.8),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -125,30 +125,30 @@ class CalendarDoseBlock extends StatelessWidget {
   Color _getBackgroundColor(ColorScheme colorScheme) {
     switch (dose.status) {
       case DoseStatus.taken:
-        return colorScheme.primaryContainer.withOpacity(0.3);
+        return colorScheme.primaryContainer.withValues(alpha: 0.3);
       case DoseStatus.skipped:
-        return colorScheme.errorContainer.withOpacity(0.3);
+        return colorScheme.errorContainer.withValues(alpha: 0.3);
       case DoseStatus.snoozed:
-        return Colors.orange.withOpacity(0.2);
+        return Colors.orange.withValues(alpha: 0.2);
       case DoseStatus.overdue:
-        return colorScheme.errorContainer.withOpacity(0.5);
+        return colorScheme.errorContainer.withValues(alpha: 0.5);
       case DoseStatus.pending:
-        return colorScheme.surfaceContainerHighest.withOpacity(0.5);
+        return colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     }
   }
 
   Color _getBorderColor(ColorScheme colorScheme) {
     switch (dose.status) {
       case DoseStatus.taken:
-        return colorScheme.primary.withOpacity(0.5);
+        return colorScheme.primary.withValues(alpha: 0.5);
       case DoseStatus.skipped:
-        return colorScheme.error.withOpacity(0.5);
+        return colorScheme.error.withValues(alpha: 0.5);
       case DoseStatus.snoozed:
-        return Colors.orange.withOpacity(0.7);
+        return Colors.orange.withValues(alpha: 0.7);
       case DoseStatus.overdue:
         return colorScheme.error;
       case DoseStatus.pending:
-        return colorScheme.outline.withOpacity(0.3);
+        return colorScheme.outline.withValues(alpha: 0.3);
     }
   }
 
@@ -214,7 +214,7 @@ class CalendarDoseIndicator extends StatelessWidget {
       case DoseStatus.overdue:
         return colorScheme.error;
       case DoseStatus.pending:
-        return colorScheme.primary.withOpacity(0.5);
+        return colorScheme.primary.withValues(alpha: 0.5);
     }
   }
 }

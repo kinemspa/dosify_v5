@@ -25,7 +25,7 @@ class LargeCard extends StatelessWidget {
         color: cs.surface,
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         border: Border.all(
-          color: cs.outlineVariant.withOpacity(kCardBorderOpacity),
+          color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
           width: kBorderWidthThin,
         ),
       ),

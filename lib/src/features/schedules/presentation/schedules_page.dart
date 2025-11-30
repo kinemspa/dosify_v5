@@ -477,7 +477,7 @@ class _ScheduleCard extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: cs.primaryContainer.withOpacity(0.4),
+                  color: cs.primaryContainer.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,

@@ -202,6 +202,10 @@ const double kReconOptionBorderWidth = 0.5;
 const Color kReconErrorBackground = Color(0xFFFF6B35); // Orange-red background
 const double kReconErrorOpacity = 0.15;
 
+/// Medication Detail Gradient
+const Color kMedicationDetailGradientStart = Color(0xFF09A8BD);
+const Color kMedicationDetailGradientEnd = Color(0xFF18537D);
+
 /// Color helper functions (NEVER use these - use theme colors)
 /// These are kept only for backward compatibility during migration
 @Deprecated('Use Theme.of(context).colorScheme instead')
@@ -321,7 +325,7 @@ InputDecoration buildFieldDecoration(
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: cs.outlineVariant.withOpacity(kCardBorderOpacity),
+        color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
         width: kOutlineWidth,
       ),
     ),
@@ -378,7 +382,7 @@ InputDecoration buildCompactFieldDecoration({
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: cs.outlineVariant.withOpacity(kCardBorderOpacity),
+        color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
         width: kOutlineWidth,
       ),
     ),
@@ -406,7 +410,9 @@ TextStyle? helperTextStyle(BuildContext context, {Color? color}) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
     color:
         color ??
-        Theme.of(context).colorScheme.onSurface.withOpacity(kHelperTextOpacity),
+        Theme.of(context).colorScheme.onSurface.withValues(
+          alpha: kHelperTextOpacity,
+        ),
   );
 }
 
@@ -417,7 +423,7 @@ TextStyle? checkboxLabelStyle(BuildContext context) {
     fontWeight: kFontWeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurface.withOpacity(kOpacityMediumHigh),
+    ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
   );
 }
 
@@ -435,7 +441,9 @@ TextStyle? fieldLabelStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
     fontSize: kFontSizeMedium,
     fontWeight: kFontWeightBold,
-    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityMedium),
+    color: Theme.of(context).colorScheme.onSurface.withValues(
+      alpha: kOpacityMedium,
+    ),
   );
 }
 
@@ -444,7 +452,9 @@ TextStyle? inputTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
     fontSize: kFontSizeInput,
     fontWeight: kFontWeightNormal,
-    color: Theme.of(context).colorScheme.onSurface.withOpacity(kOpacityHigh),
+    color: Theme.of(context).colorScheme.onSurface.withValues(
+      alpha: kOpacityHigh,
+    ),
   );
 }
 
@@ -455,7 +465,7 @@ TextStyle? hintTextStyle(BuildContext context) {
     fontWeight: kFontWeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurface.withOpacity(kHintTextOpacity),
+    ).colorScheme.onSurface.withValues(alpha: kHintTextOpacity),
   );
 }
 
@@ -474,7 +484,7 @@ TextStyle? cardTitleStyle(BuildContext context) {
     fontWeight: kFontWeightSemiBold,
     color: Theme.of(
       context,
-    ).colorScheme.onSurface.withOpacity(kOpacityMediumHigh),
+    ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
   );
 }
 
@@ -486,7 +496,7 @@ TextStyle? bodyTextStyle(BuildContext context) {
     height: kLineHeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurface.withOpacity(kOpacityMediumHigh),
+    ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
   );
 }
 
@@ -497,7 +507,7 @@ TextStyle? mutedTextStyle(BuildContext context) {
     fontWeight: kFontWeightNormal,
     color: Theme.of(
       context,
-    ).colorScheme.onSurface.withOpacity(kDisabledOpacity),
+    ).colorScheme.onSurface.withValues(alpha: kDisabledOpacity),
   );
 }
 

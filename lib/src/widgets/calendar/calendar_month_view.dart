@@ -205,9 +205,9 @@ class _DayHeaders extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: isToday
-                    ? colorScheme.primary.withOpacity(0.15)
+                    ? colorScheme.primary.withValues(alpha: 0.15)
                     : isSelected
-                    ? colorScheme.primaryContainer.withOpacity(0.3)
+                    ? colorScheme.primaryContainer.withValues(alpha: 0.3)
                     : null,
               ),
               child: Center(

@@ -203,7 +203,7 @@ class _InteractiveSyringePainter extends CustomPainter {
 
     // Draw min/max range indicators
     final rangePaint = Paint()
-      ..color = color.withOpacity(0.3)
+      ..color = color.withValues(alpha: 0.3)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 

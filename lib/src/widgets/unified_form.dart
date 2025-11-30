@@ -58,7 +58,7 @@ class SectionFormCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: neutral
             ? Border.all(
-                color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                 width: 0.75,
               )
             : Border.all(
@@ -67,7 +67,7 @@ class SectionFormCard extends StatelessWidget {
         boxShadow: neutral
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -128,7 +128,7 @@ class LabelFieldRow extends StatelessWidget {
                   ? theme.textTheme.bodyMedium?.copyWith(
                       fontSize: kFontSizeMedium,
                       fontWeight: kFontWeightBold,
-                      color: Colors.white.withOpacity(kReconTextMediumOpacity),
+                      color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
                     )
                   : fieldLabelStyle(context),
             ),
@@ -323,12 +323,12 @@ BoxDecoration softWhiteCardDecoration(BuildContext context) {
     color: theme.colorScheme.surfaceContainerLowest,
     borderRadius: BorderRadius.circular(12),
     border: Border.all(
-      color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
       width: 0.75,
     ),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.02),
+        color: Colors.black.withValues(alpha: 0.02),
         blurRadius: 6,
         offset: const Offset(0, 2),
       ),
@@ -509,8 +509,8 @@ class StepperRow36 extends StatelessWidget {
           visualDensity: VisualDensity.compact,
           minimumSize: const Size(28, 28),
           side: BorderSide(
-            color: theme.colorScheme.outlineVariant.withOpacity(
-              kCardBorderOpacity,
+            color: theme.colorScheme.outlineVariant.withValues(
+              alpha: kCardBorderOpacity,
             ),
             width: kBorderWidthThin,
           ),

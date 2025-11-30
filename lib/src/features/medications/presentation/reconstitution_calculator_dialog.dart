@@ -95,7 +95,7 @@ class _ReconstitutionCalculatorDialogState
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -106,7 +106,7 @@ class _ReconstitutionCalculatorDialogState
               children: [
                 Icon(
                   Icons.calculate,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 12),
@@ -126,7 +126,7 @@ class _ReconstitutionCalculatorDialogState
             child: Text(
               'Select a reconstitution option below or fine-tune the values',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
@@ -153,7 +153,7 @@ class _ReconstitutionCalculatorDialogState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+                top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
               ),
             ),
             child: Row(
@@ -164,7 +164,7 @@ class _ReconstitutionCalculatorDialogState
                         Navigator.of(context).pop<ReconstitutionResult>(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                     ),
                     child: const Text('Cancel'),
                   ),

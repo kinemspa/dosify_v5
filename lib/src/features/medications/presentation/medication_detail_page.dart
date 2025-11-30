@@ -160,7 +160,10 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [Color(0xFF09A8BD), Color(0xFF18537D)],
+                              colors: [
+                                kMedicationDetailGradientStart,
+                                kMedicationDetailGradientEnd,
+                              ],
                             ),
                           ),
                         ),
@@ -972,8 +975,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
               med.id,
               med.copyWith(
                 requiresFreezer: value,
-                requiresRefrigeration:
-                    value ? false : med.requiresRefrigeration,
+                requiresRefrigeration: value
+                    ? false
+                    : med.requiresRefrigeration,
               ),
             );
           },

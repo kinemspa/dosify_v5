@@ -40,7 +40,7 @@ class CalendarHeader extends StatelessWidget {
         color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant.withOpacity(0.3),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -252,7 +252,7 @@ class CalendarViewToggle extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
