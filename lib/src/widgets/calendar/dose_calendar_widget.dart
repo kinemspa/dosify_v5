@@ -689,7 +689,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         color: colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: colorScheme.outlineVariant.withOpacity(0.3),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -727,7 +727,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           child: Text(
                             'No doses scheduled',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.6),
+                              color: colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -748,7 +748,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           child: Text(
                             'No doses scheduled',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.6),
+                              color: colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         )
@@ -814,7 +814,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         statusIcon = Icons.warning;
         break;
       case DoseStatus.pending:
-        statusColor = colorScheme.onSurface.withOpacity(0.6);
+        statusColor = colorScheme.onSurface.withValues(alpha: 0.6);
         statusIcon = Icons.schedule;
         break;
     }
@@ -932,7 +932,7 @@ class _DoseDetailBottomSheetState extends State<_DoseDetailBottomSheet> {
                 height: 4,
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1183,7 +1183,7 @@ class _DoseDetailBottomSheetState extends State<_DoseDetailBottomSheet> {
       case DoseStatus.overdue:
         return colorScheme.error; // Red for missed/overdue
       case DoseStatus.pending:
-        return colorScheme.onSurface.withOpacity(0.6); // Muted for pending
+        return colorScheme.onSurface.withValues(alpha: 0.6); // Muted for pending
     }
   }
 

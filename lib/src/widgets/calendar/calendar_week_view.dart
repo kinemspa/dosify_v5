@@ -117,7 +117,7 @@ class CalendarWeekView extends StatelessWidget {
           _WeekHeader(startDate: startDate, onDayTap: onDayTap),
           // Week grid
           SizedBox(
-            height: 220, // Fixed height for week grid
+            height: 160, // Reduced height for week grid
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(7, (index) {
@@ -175,19 +175,18 @@ class _WeekHeader extends StatelessWidget {
         children: List.generate(7, (index) {
           final day = startDate.add(Duration(days: index));
           final isToday = _isToday(day);
+          final theme = Theme.of(context);
+          final colorScheme = theme.colorScheme;
 
           return Expanded(
             child: InkWell(
               onTap: onDayTap != null ? () => onDayTap!(day) : null,
               child: Container(
+                margin: const EdgeInsets.all(4),
                 decoration: isToday
                     ? BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 3,
-                          ),
-                        ),
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
                       )
                     : null,
                 child: Column(
@@ -195,21 +194,22 @@ class _WeekHeader extends StatelessWidget {
                   children: [
                     Text(
                       DateFormat.E().format(day),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: isToday
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface.withAlpha(
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface.withAlpha(
                                 (0.6 * 255).round(),
                               ),
+                        fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       day.day.toString(),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         color: isToday
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurface,
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
                         fontWeight: isToday
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -291,25 +291,32 @@ class _CompactDoseIndicator extends StatelessWidget {
   final VoidCallback? onTap;
 
   Color _getBackgroundColor(BuildContext context) {
+    final now = DateTime.now();
+    // Check if strictly in future (not just today)
+    final isFuture = dose.scheduledTime.isAfter(now);
+
     switch (dose.status) {
       case DoseStatus.taken:
-        return Theme.of(
-          context,
-        ).colorScheme.primary.withAlpha((0.1 * 255).round());
+        return Theme.of(context).colorScheme.primary;
       case DoseStatus.skipped:
         return Theme.of(
           context,
-        ).colorScheme.error.withAlpha((0.1 * 255).round());
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
       case DoseStatus.snoozed:
-        return Colors.orange.withAlpha((0.1 * 255).round());
+        return Colors.orange.withValues(alpha: 0.2);
       case DoseStatus.overdue:
-        return Theme.of(
-          context,
-        ).colorScheme.error.withAlpha((0.1 * 255).round());
+        return Theme.of(context).colorScheme.error;
       case DoseStatus.pending:
+        if (isFuture) {
+          // Tentative color for future
+          return Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.3);
+        }
+        // Pending but not overdue (e.g. later today)
         return Theme.of(
           context,
-        ).colorScheme.surfaceContainerHighest.withAlpha((0.3 * 255).round());
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     }
   }
 
@@ -318,24 +325,42 @@ class _CompactDoseIndicator extends StatelessWidget {
       case DoseStatus.taken:
         return Theme.of(context).colorScheme.primary;
       case DoseStatus.skipped:
-        return Theme.of(context).colorScheme.error;
+        return Theme.of(context).colorScheme.outline.withValues(alpha: 0.3);
       case DoseStatus.snoozed:
         return Colors.orange;
       case DoseStatus.overdue:
         return Theme.of(context).colorScheme.error;
       case DoseStatus.pending:
-        return Theme.of(
-          context,
-        ).colorScheme.outline.withAlpha((0.3 * 255).round());
+        return Theme.of(context).colorScheme.outline.withValues(alpha: 0.2);
     }
   }
 
-  String _getInitials() {
-    final words = dose.scheduleName.split(' ');
-    if (words.length >= 2) {
-      return '${words[0][0]}${words[1][0]}'.toUpperCase();
+  Color _getTextColor(BuildContext context) {
+    switch (dose.status) {
+      case DoseStatus.taken:
+        return Theme.of(context).colorScheme.onPrimary;
+      case DoseStatus.overdue:
+        return Theme.of(context).colorScheme.onError;
+      default:
+        return Theme.of(context).colorScheme.onSurface;
     }
-    return dose.scheduleName.substring(0, 2).toUpperCase();
+  }
+
+  String _getDisplayText() {
+    // Try to show dose value (e.g. "10", "0.5") if it's short
+    if (dose.doseValue > 0) {
+      String val =
+          dose.doseValue == dose.doseValue.roundToDouble()
+              ? dose.doseValue.toInt().toString()
+              : dose.doseValue.toString();
+      if (val.length <= 3) return val;
+    }
+
+    // Fallback to 1 letter of schedule name
+    if (dose.scheduleName.isNotEmpty) {
+      return dose.scheduleName[0].toUpperCase();
+    }
+    return '?';
   }
 
   @override
@@ -344,11 +369,8 @@ class _CompactDoseIndicator extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(kBorderRadiusSmall),
       child: Container(
-        height: 42,
-        padding: const EdgeInsets.symmetric(
-          horizontal: kListItemSpacing,
-          vertical: 4,
-        ),
+        height: 36, // Reduced height
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         decoration: BoxDecoration(
           color: _getBackgroundColor(context),
           borderRadius: BorderRadius.circular(kBorderRadiusSmall),
@@ -360,22 +382,21 @@ class _CompactDoseIndicator extends StatelessWidget {
           children: [
             Flexible(
               child: Text(
-                _getInitials(),
+                _getDisplayText(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 10,
+                  fontSize: 11,
+                  color: _getTextColor(context),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             Flexible(
               child: Text(
-                dose.timeFormatted,
+                DateFormat('h:mm a').format(dose.scheduledTime).toLowerCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontSize: 9,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withAlpha((0.7 * 255).round()),
+                  fontSize: 8,
+                  color: _getTextColor(context).withValues(alpha: 0.8),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

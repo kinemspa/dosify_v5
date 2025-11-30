@@ -449,57 +449,69 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                 // Space for the animated Name (which is positioned absolutely)
                 const SizedBox(height: 60),
 
-                // Manufacturer (Moved below Name)
+                // Manufacturer (Moved below Name, Bigger)
                 if (manufacturer != null && manufacturer.isNotEmpty) ...[
                   GestureDetector(
                     onTap: () => _editManufacturer(context, med),
                     child: Text(
                       manufacturer,
                       style: helperTextStyle(context)?.copyWith(
-                        color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-                        decoration: TextDecoration.underline,
-                        decorationStyle: TextDecorationStyle.dotted,
-                        decorationColor: onPrimary.withValues(alpha: 0.5),
-                        fontSize: 11,
+                        color: onPrimary.withValues(alpha: kOpacityHigh),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14, // Increased from 11
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
                 ],
 
-                // Description (Smaller, Higher)
-                if (med.description != null && med.description!.isNotEmpty)
+                // Notes (Description) - Under Manufacturer
+                if (med.notes != null && med.notes!.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
-                      med.description!,
+                      med.notes!,
                       style: TextStyle(
                         color: onPrimary.withValues(alpha: 0.8),
                         fontStyle: FontStyle.italic,
-                        fontSize: 10, // Reduced from 11
+                        fontSize: 11,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                // Strength moved here
-                Column(
+
+                const SizedBox(height: 8),
+
+                // Strength with Icon
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      strengthPerLabel,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.7),
-                        fontSize: 10,
-                      ),
+                    Icon(
+                      Icons.scale_outlined,
+                      size: 16,
+                      color: onPrimary.withValues(alpha: 0.7),
                     ),
-                    Text(
-                      '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-                      style: TextStyle(
-                        color: onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strengthPerLabel,
+                          style: TextStyle(
+                            color: onPrimary.withValues(alpha: 0.7),
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                          style: TextStyle(
+                            color: onPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -806,14 +818,11 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           ],
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: 120,
-          child: DoseCalendarWidget(
-            variant: CalendarVariant.compact,
-            defaultView: CalendarView.week,
-            medicationId: med.id,
-            height: 120,
-          ),
+        DoseCalendarWidget(
+          variant: CalendarVariant.compact,
+          defaultView: CalendarView.week,
+          medicationId: med.id,
+          // height removed to allow auto-sizing
         ),
       ],
     );

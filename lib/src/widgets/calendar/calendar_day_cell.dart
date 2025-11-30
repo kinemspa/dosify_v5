@@ -94,8 +94,8 @@ class CalendarDayCell extends StatelessWidget {
                             '+${doses.length - 5}',
                             style: theme.textTheme.labelSmall?.copyWith(
                               fontSize: 9,
-                              color: colorScheme.onSurfaceVariant.withOpacity(
-                                0.6,
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
                               ),
                             ),
                           ),
@@ -112,10 +112,10 @@ class CalendarDayCell extends StatelessWidget {
 
   Color _getBackgroundColor(ColorScheme colorScheme) {
     if (isToday) {
-      return colorScheme.primaryContainer.withOpacity(0.1);
+      return colorScheme.primaryContainer.withValues(alpha: 0.1);
     }
     if (!isCurrentMonth) {
-      return colorScheme.surfaceContainerHighest.withOpacity(0.3);
+      return colorScheme.surfaceContainerHighest.withValues(alpha: 0.3);
     }
     return Colors.transparent;
   }
@@ -125,9 +125,9 @@ class CalendarDayCell extends StatelessWidget {
       return colorScheme.primary;
     }
     if (isToday) {
-      return colorScheme.primary.withOpacity(0.3);
+      return colorScheme.primary.withValues(alpha: 0.3);
     }
-    return colorScheme.outlineVariant.withOpacity(0.2);
+    return colorScheme.outlineVariant.withValues(alpha: 0.2);
   }
 
   double _getBorderWidth() {
@@ -145,7 +145,7 @@ class CalendarDayCell extends StatelessWidget {
       return colorScheme.onPrimary;
     }
     if (!isCurrentMonth) {
-      return colorScheme.onSurfaceVariant.withOpacity(0.5);
+      return colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
     }
     return colorScheme.onSurface;
   }
