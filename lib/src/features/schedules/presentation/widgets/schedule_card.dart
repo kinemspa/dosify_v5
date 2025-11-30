@@ -83,9 +83,8 @@ class ScheduleCard extends StatelessWidget {
                   children: [
                     Text(
                       s.medicationName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                      style: cardTitleStyle(context)?.copyWith(
+                        color: cs.onSurface,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -93,10 +92,7 @@ class ScheduleCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${s.doseValue} ${s.doseUnit}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: helperTextStyle(context),
                     ),
                   ],
                 ),
@@ -161,18 +157,15 @@ class ScheduleCard extends StatelessWidget {
         children: [
           Text(
             s.medicationName,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: helperTextStyle(context)?.copyWith(
               letterSpacing: 1.1,
-              color: cs.onSurfaceVariant,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           Text(
             s.name,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: sectionTitleStyle(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

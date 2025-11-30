@@ -297,7 +297,6 @@ class _CompactDoseIndicator extends StatelessWidget {
 
   Color _getBackgroundColor(BuildContext context) {
     final now = DateTime.now();
-    final isFuture = dose.scheduledTime.isAfter(now);
     final isToday =
         dose.scheduledTime.year == now.year &&
         dose.scheduledTime.month == now.month &&

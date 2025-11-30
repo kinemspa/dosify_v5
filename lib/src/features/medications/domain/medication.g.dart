@@ -36,6 +36,8 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       batchNumber: fields[14] as String?,
       storageLocation: fields[15] as String?,
       requiresRefrigeration: fields[16] as bool,
+      requiresFreezer: fields[42] as bool,
+      lightSensitive: fields[43] as bool,
       storageInstructions: fields[17] as String?,
       createdAt: fields[18] as DateTime?,
       updatedAt: fields[19] as DateTime?,
@@ -65,7 +67,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(42)
+      ..writeByte(44)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -108,6 +110,10 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..write(obj.storageLocation)
       ..writeByte(16)
       ..write(obj.requiresRefrigeration)
+      ..writeByte(42)
+      ..write(obj.requiresFreezer)
+      ..writeByte(43)
+      ..write(obj.lightSensitive)
       ..writeByte(17)
       ..write(obj.storageInstructions)
       ..writeByte(18)

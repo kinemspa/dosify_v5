@@ -28,6 +28,8 @@ class Medication {
     this.batchNumber,
     this.storageLocation,
     this.requiresRefrigeration = false,
+    this.requiresFreezer = false,
+    this.lightSensitive = false,
     this.storageInstructions,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -118,6 +120,12 @@ class Medication {
 
   @HiveField(16)
   final bool requiresRefrigeration;
+
+  @HiveField(42)
+  final bool requiresFreezer;
+
+  @HiveField(43)
+  final bool lightSensitive;
 
   @HiveField(17)
   final String? storageInstructions;
@@ -210,6 +218,8 @@ class Medication {
     String? batchNumber,
     String? storageLocation,
     bool? requiresRefrigeration,
+    bool? requiresFreezer,
+    bool? lightSensitive,
     String? storageInstructions,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -256,6 +266,8 @@ class Medication {
       storageLocation: storageLocation ?? this.storageLocation,
       requiresRefrigeration:
           requiresRefrigeration ?? this.requiresRefrigeration,
+      requiresFreezer: requiresFreezer ?? this.requiresFreezer,
+      lightSensitive: lightSensitive ?? this.lightSensitive,
       storageInstructions: storageInstructions ?? this.storageInstructions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),

@@ -835,10 +835,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
-          child: Text(
-            'Today is $dateStr',
-            style: helperTextStyle(context),
-          ),
+          child: Text('Today is $dateStr', style: helperTextStyle(context)),
         ),
         const SizedBox(height: 4),
         DoseCalendarWidget(
@@ -957,8 +954,38 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             final box = Hive.box<Medication>('medications');
             box.put(
               med.id,
-              med.copyWith(requiresRefrigeration: value),
+              med.copyWith(
+                requiresRefrigeration: value,
+                requiresFreezer: value ? false : med.requiresFreezer,
+              ),
             );
+          },
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        SwitchListTile(
+          title: const Text('Frozen'),
+          value: med.requiresFreezer,
+          onChanged: (bool value) {
+            final box = Hive.box<Medication>('medications');
+            box.put(
+              med.id,
+              med.copyWith(
+                requiresFreezer: value,
+                requiresRefrigeration:
+                    value ? false : med.requiresRefrigeration,
+              ),
+            );
+          },
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        SwitchListTile(
+          title: const Text('Light Sensitive'),
+          value: med.lightSensitive,
+          onChanged: (bool value) {
+            final box = Hive.box<Medication>('medications');
+            box.put(med.id, med.copyWith(lightSensitive: value));
           },
           dense: true,
           contentPadding: EdgeInsets.zero,
@@ -1043,7 +1070,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   med.id,
                   med.copyWith(
                     activeVialRequiresRefrigeration: v,
-                    activeVialRequiresFreezer: v ? false : med.activeVialRequiresFreezer,
+                    activeVialRequiresFreezer: v
+                        ? false
+                        : med.activeVialRequiresFreezer,
                   ),
                 );
               },
@@ -1059,7 +1088,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   med.id,
                   med.copyWith(
                     activeVialRequiresFreezer: v,
-                    activeVialRequiresRefrigeration: v ? false : med.activeVialRequiresRefrigeration,
+                    activeVialRequiresRefrigeration: v
+                        ? false
+                        : med.activeVialRequiresRefrigeration,
                   ),
                 );
               },
@@ -1130,7 +1161,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   med.id,
                   med.copyWith(
                     backupVialsRequiresRefrigeration: v,
-                    backupVialsRequiresFreezer: v ? false : med.backupVialsRequiresFreezer,
+                    backupVialsRequiresFreezer: v
+                        ? false
+                        : med.backupVialsRequiresFreezer,
                   ),
                 );
               },
@@ -1146,7 +1179,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   med.id,
                   med.copyWith(
                     backupVialsRequiresFreezer: v,
-                    backupVialsRequiresRefrigeration: v ? false : med.backupVialsRequiresRefrigeration,
+                    backupVialsRequiresRefrigeration: v
+                        ? false
+                        : med.backupVialsRequiresRefrigeration,
                   ),
                 );
               },
