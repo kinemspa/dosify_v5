@@ -893,6 +893,9 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             value: med.expiry != null
                 ? DateFormat('MMMM d, y').format(med.expiry!)
                 : 'Tap to set',
+            warning: med.expiry != null && _isExpiringSoon(med.expiry!),
+            onTap: () => _editExpiry(context, med),
+          ),
           _buildCompactInfoItem(
             context,
             label: 'Low Stock Alert',
@@ -929,21 +932,21 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             value: med.notes!,
             onTap: () => _editNotes(context, med),
           ),
-        ],uildStorageToggle(context, med),
-        if (med.notes != null && med.notes!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _buildCompactInfoItem(
-            context,
-            label: 'Notes',
-            value: med.notes!,
-            onTap: () => _editNotes(context, med),
-          ),
         ],
         if (med.storageInstructions != null &&
             med.storageInstructions!.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildCompactInfoItem(
             context,
+            label: 'Storage Instructions',
+            value: med.storageInstructions!,
+            onTap: () => _editStorageInstructions(context, med),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildStorageSwitches(BuildContext context, Medication med) {
     return Column(
       children: [
@@ -952,7 +955,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           value: med.requiresRefrigeration,
           onChanged: (bool value) {
             final box = Hive.box<Medication>('medications');
-            // If turning ON, ensure Frozen is OFF (if it existed)
             box.put(
               med.id,
               med.copyWith(requiresRefrigeration: value),
@@ -961,19 +963,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
         ),
-        // Note: Main medication model lacks 'requiresFreezer' and 'lightSensitive'
-        // Adding placeholders if user insists on 3 switches, but they won't persist
-        // unless added to model. For now, we only show what's in the model.
       ],
-    );
-  }
-
-  Widget _buildActiveVialSection(BuildContext context, Medication med) {
-      },
-      style: const ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
     );
   }
 
@@ -1042,13 +1032,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           ),
         ]),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _BooleanChip(
-              label: 'Refrigerated',
-        const SizedBox(height: 8),
         Column(
           children: [
             SwitchListTile(
@@ -1097,7 +1080,14 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
         ),
       ],
     );
-  }       _buildCompactInfoItem(
+  }
+
+  Widget _buildBackupStockSection(BuildContext context, Medication med) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompactGrid(context, [
+          _buildCompactInfoItem(
             context,
             label: 'Quantity',
             value: '${_formatNumber(med.stockValue)} vials',
@@ -1122,6 +1112,12 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             onTap: () => _editBackupVialExpiry(context, med),
           ),
           _buildCompactInfoItem(
+            context,
+            label: 'Location',
+            value: med.backupVialsStorageLocation ?? 'Tap to add',
+            onTap: () => _editBackupVialLocation(context, med),
+          ),
+        ]),
         const SizedBox(height: 8),
         Column(
           children: [
@@ -1166,12 +1162,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
               },
               dense: true,
               contentPadding: EdgeInsets.zero,
-            ),
-          ],
-        ),
-      ],
-    );
-  }           },
             ),
           ],
         ),
