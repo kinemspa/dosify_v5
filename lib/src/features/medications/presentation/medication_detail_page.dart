@@ -458,14 +458,28 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                       style: helperTextStyle(context)?.copyWith(
                         color: onPrimary.withValues(alpha: kOpacityHigh),
                         fontWeight: FontWeight.w600,
-                        fontSize: 14, // Increased from 11
+                        fontSize: 12, // Reduced from 14
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
                 ],
 
-                // Notes (Description) - Under Manufacturer
+                // Description & Notes
+                if (med.description != null && med.description!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      med.description!,
+                      style: TextStyle(
+                        color: onPrimary.withValues(alpha: 0.9),
+                        fontSize: 12,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+
                 if (med.notes != null && med.notes!.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -640,7 +654,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                 height: 28,
                 decoration: BoxDecoration(
                   color: onPrimary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: onPrimary.withValues(alpha: 0.3),
                     width: 1,
@@ -650,7 +664,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () => _showRefillDialog(context, med),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(8),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Row(
@@ -794,6 +808,8 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
         .where((s) => s.medicationId == med.id && s.active)
         .toList();
     final count = schedules.length;
+    final now = DateTime.now();
+    final dateStr = DateFormat('EEEE, MMMM d').format(now);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -808,7 +824,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             const SizedBox(width: 8),
             Text(
               '$count Schedule${count == 1 ? '' : 's'} Configured',
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: sectionTitleStyle(context)?.copyWith(fontSize: 14),
             ),
             const Spacer(),
             TextButton(
@@ -817,7 +833,14 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Text(
+            'Today is $dateStr',
+            style: helperTextStyle(context),
+          ),
+        ),
+        const SizedBox(height: 4),
         DoseCalendarWidget(
           variant: CalendarVariant.compact,
           defaultView: CalendarView.week,
@@ -870,15 +893,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             value: med.expiry != null
                 ? DateFormat('MMMM d, y').format(med.expiry!)
                 : 'Tap to set',
-            warning: med.expiry != null && _isExpiringSoon(med.expiry!),
-            onTap: () => _editExpiry(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Storage Location',
-            value: med.storageLocation ?? 'Tap to add',
-            onTap: () => _editStorageLocation(context, med),
-          ),
           _buildCompactInfoItem(
             context,
             label: 'Low Stock Alert',
@@ -889,6 +903,15 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           ),
         ]),
         const SizedBox(height: 16),
+        if (med.description != null && med.description!.isNotEmpty) ...[
+          _buildCompactInfoItem(
+            context,
+            label: 'Description',
+            value: med.description!,
+            onTap: () => _editDescription(context, med),
+          ),
+          const SizedBox(height: 16),
+        ],
         Text(
           'Storage Condition',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -897,7 +920,16 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           ),
         ),
         const SizedBox(height: 8),
-        _buildStorageToggle(context, med),
+        _buildStorageSwitches(context, med),
+        if (med.notes != null && med.notes!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildCompactInfoItem(
+            context,
+            label: 'Notes',
+            value: med.notes!,
+            onTap: () => _editNotes(context, med),
+          ),
+        ],uildStorageToggle(context, med),
         if (med.notes != null && med.notes!.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildCompactInfoItem(
@@ -912,38 +944,31 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           const SizedBox(height: 16),
           _buildCompactInfoItem(
             context,
-            label: 'Storage Instructions',
-            value: med.storageInstructions!,
-            onTap: () => _editStorageInstructions(context, med),
-          ),
-        ],
+  Widget _buildStorageSwitches(BuildContext context, Medication med) {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: const Text('Refrigerated'),
+          value: med.requiresRefrigeration,
+          onChanged: (bool value) {
+            final box = Hive.box<Medication>('medications');
+            // If turning ON, ensure Frozen is OFF (if it existed)
+            box.put(
+              med.id,
+              med.copyWith(requiresRefrigeration: value),
+            );
+          },
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        // Note: Main medication model lacks 'requiresFreezer' and 'lightSensitive'
+        // Adding placeholders if user insists on 3 switches, but they won't persist
+        // unless added to model. For now, we only show what's in the model.
       ],
     );
   }
 
-  Widget _buildStorageToggle(BuildContext context, Medication med) {
-    final isRefrigerated = med.requiresRefrigeration;
-
-    return SegmentedButton<bool>(
-      segments: const [
-        ButtonSegment<bool>(
-          value: false,
-          label: Text('Room Temp'),
-          icon: Icon(Icons.thermostat),
-        ),
-        ButtonSegment<bool>(
-          value: true,
-          label: Text('Refrigerated'),
-          icon: Icon(Icons.ac_unit),
-        ),
-      ],
-      selected: {isRefrigerated},
-      onSelectionChanged: (Set<bool> newSelection) {
-        final box = Hive.box<Medication>('medications');
-        box.put(
-          med.id,
-          med.copyWith(requiresRefrigeration: newSelection.first),
-        );
+  Widget _buildActiveVialSection(BuildContext context, Medication med) {
       },
       style: const ButtonStyle(
         visualDensity: VisualDensity.compact,
@@ -1023,43 +1048,56 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           children: [
             _BooleanChip(
               label: 'Refrigerated',
+        const SizedBox(height: 8),
+        Column(
+          children: [
+            SwitchListTile(
+              title: const Text('Refrigerated'),
               value: med.activeVialRequiresRefrigeration,
               onChanged: (bool v) {
                 final box = Hive.box<Medication>('medications');
                 box.put(
                   med.id,
-                  med.copyWith(activeVialRequiresRefrigeration: v),
+                  med.copyWith(
+                    activeVialRequiresRefrigeration: v,
+                    activeVialRequiresFreezer: v ? false : med.activeVialRequiresFreezer,
+                  ),
                 );
               },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
             ),
-            _BooleanChip(
-              label: 'Frozen',
+            SwitchListTile(
+              title: const Text('Frozen'),
               value: med.activeVialRequiresFreezer,
               onChanged: (bool v) {
                 final box = Hive.box<Medication>('medications');
-                box.put(med.id, med.copyWith(activeVialRequiresFreezer: v));
+                box.put(
+                  med.id,
+                  med.copyWith(
+                    activeVialRequiresFreezer: v,
+                    activeVialRequiresRefrigeration: v ? false : med.activeVialRequiresRefrigeration,
+                  ),
+                );
               },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
             ),
-            _BooleanChip(
-              label: 'Light Sensitive',
+            SwitchListTile(
+              title: const Text('Light Sensitive'),
               value: med.activeVialLightSensitive,
               onChanged: (bool v) {
                 final box = Hive.box<Medication>('medications');
                 box.put(med.id, med.copyWith(activeVialLightSensitive: v));
               },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
             ),
           ],
         ),
       ],
     );
-  }
-
-  Widget _buildBackupStockSection(BuildContext context, Medication med) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildCompactGrid(context, [
-          _buildCompactInfoItem(
+  }       _buildCompactInfoItem(
             context,
             label: 'Quantity',
             value: '${_formatNumber(med.stockValue)} vials',
@@ -1084,43 +1122,56 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             onTap: () => _editBackupVialExpiry(context, med),
           ),
           _buildCompactInfoItem(
-            context,
-            label: 'Location',
-            value: med.backupVialsStorageLocation ?? 'Tap to add',
-            onTap: () => _editBackupVialLocation(context, med),
-          ),
-        ]),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        Column(
           children: [
-            _BooleanChip(
-              label: 'Refrigerated',
+            SwitchListTile(
+              title: const Text('Refrigerated'),
               value: med.backupVialsRequiresRefrigeration,
               onChanged: (bool v) {
                 final box = Hive.box<Medication>('medications');
                 box.put(
                   med.id,
-                  med.copyWith(backupVialsRequiresRefrigeration: v),
+                  med.copyWith(
+                    backupVialsRequiresRefrigeration: v,
+                    backupVialsRequiresFreezer: v ? false : med.backupVialsRequiresFreezer,
+                  ),
                 );
               },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
             ),
-            _BooleanChip(
-              label: 'Frozen',
+            SwitchListTile(
+              title: const Text('Frozen'),
               value: med.backupVialsRequiresFreezer,
               onChanged: (bool v) {
                 final box = Hive.box<Medication>('medications');
-                box.put(med.id, med.copyWith(backupVialsRequiresFreezer: v));
+                box.put(
+                  med.id,
+                  med.copyWith(
+                    backupVialsRequiresFreezer: v,
+                    backupVialsRequiresRefrigeration: v ? false : med.backupVialsRequiresRefrigeration,
+                  ),
+                );
               },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
             ),
-            _BooleanChip(
-              label: 'Light Sensitive',
+            SwitchListTile(
+              title: const Text('Light Sensitive'),
               value: med.backupVialsLightSensitive,
               onChanged: (bool v) {
                 final box = Hive.box<Medication>('medications');
                 box.put(med.id, med.copyWith(backupVialsLightSensitive: v));
               },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+          ],
+        ),
+      ],
+    );
+  }           },
             ),
           ],
         ),

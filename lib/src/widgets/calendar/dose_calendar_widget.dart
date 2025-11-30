@@ -727,7 +727,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           child: Text(
                             'No doses scheduled',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                             ),
                           ),
                         ),
@@ -748,7 +750,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           child: Text(
                             'No doses scheduled',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                             ),
                           ),
                         )
@@ -1183,7 +1187,9 @@ class _DoseDetailBottomSheetState extends State<_DoseDetailBottomSheet> {
       case DoseStatus.overdue:
         return colorScheme.error; // Red for missed/overdue
       case DoseStatus.pending:
-        return colorScheme.onSurface.withValues(alpha: 0.6); // Muted for pending
+        return colorScheme.onSurface.withValues(
+          alpha: 0.6,
+        ); // Muted for pending
     }
   }
 
