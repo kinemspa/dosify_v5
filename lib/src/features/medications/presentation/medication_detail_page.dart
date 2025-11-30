@@ -716,7 +716,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1118,8 +1118,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
       ],
     );
   }
-
-
 
   Widget _buildReconstitutionCard(BuildContext context, Medication med) {
     if (med.form != MedicationForm.multiDoseVial ||
@@ -1632,17 +1630,10 @@ void _editForm(BuildContext context, Medication med) async {
 }
 
 void _editNotes(BuildContext context, Medication med) {
-  _showEditDialog(
-    context,
-    med,
-    'Notes',
-    med.notes ?? '',
-    (val) {
-      final box = Hive.box<Medication>('medications');
-      box.put(med.id, med.copyWith(notes: val));
-    },
-    maxLines: 3,
-  );
+  _showEditDialog(context, med, 'Notes', med.notes ?? '', (val) {
+    final box = Hive.box<Medication>('medications');
+    box.put(med.id, med.copyWith(notes: val));
+  }, maxLines: 3);
 }
 
 void _editBatchNumber(BuildContext context, Medication med) {
