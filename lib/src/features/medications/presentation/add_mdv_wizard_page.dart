@@ -311,7 +311,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
     await repo.upsert(med);
     if (!mounted) return;
-    context.go('/medications');
+    if (widget.initial != null) {
+      context.pop();
+    } else {
+      context.go('/medications');
+    }
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Medication saved')));
@@ -489,7 +493,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Insulin',
+                    hint: 'e.g., Peptide',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -508,7 +512,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., NovoNordisk',
+                    hint: 'e.g., BioTech',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -1764,7 +1768,9 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                       text: '  of  ',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w400,
                       ),
                     ),

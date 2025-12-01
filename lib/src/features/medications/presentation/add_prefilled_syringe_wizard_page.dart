@@ -334,7 +334,7 @@ class _AddPrefilledSyringeWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Insulin Glargine',
+                    hint: 'e.g., Growth Hormone',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -353,7 +353,7 @@ class _AddPrefilledSyringeWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Sanofi',
+                    hint: 'e.g., MedCo',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -865,7 +865,13 @@ class _AddPrefilledSyringeWizardPageState
     await repo.upsert(med);
 
     if (mounted) {
-      context.go('/medications');
+      // If we are editing (initial != null), pop back to detail page.
+      // If we are creating, go back to list.
+      if (widget.initial != null) {
+        context.pop();
+      } else {
+        context.go('/medications');
+      }
     }
   }
 

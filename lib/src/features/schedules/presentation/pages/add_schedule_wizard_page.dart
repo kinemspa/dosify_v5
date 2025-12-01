@@ -842,7 +842,7 @@ class _AddScheduleWizardPageState
           decoration: const InputDecoration(
             labelText: 'Schedule Name',
             border: OutlineInputBorder(),
-            hintText: 'e.g., Morning Insulin',
+            hintText: 'e.g., Morning Dose',
           ),
         ),
         const SizedBox(height: 8),

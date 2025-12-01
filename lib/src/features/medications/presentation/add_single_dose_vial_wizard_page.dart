@@ -334,7 +334,7 @@ class _AddSingleDoseVialWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Insulin Glargine',
+                    hint: 'e.g., Antibiotic',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -353,7 +353,7 @@ class _AddSingleDoseVialWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Sanofi',
+                    hint: 'e.g., PharmaInc',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -865,7 +865,11 @@ class _AddSingleDoseVialWizardPageState
     await repo.upsert(med);
 
     if (mounted) {
-      context.go('/medications');
+      if (widget.initial != null) {
+        context.pop();
+      } else {
+        context.go('/medications');
+      }
     }
   }
 
