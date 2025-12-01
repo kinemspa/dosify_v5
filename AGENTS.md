@@ -75,11 +75,16 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ## Git Process For Every Change
 
-1. Before editing, run any relevant format/analyzer/test commands noted in the spec or feature area.
-2. After implementing changes, execute the appropriate validation (e.g., `dart format`, `dart analyze`, targeted tests) and review `git status`.
-3. Stage affected files explicitly with `git add <path>` and create a descriptive commit using `git commit -m "<summary>"`.
-4. Push the commit to the remote with `git push` (include branch name if necessary) so every change is saved in git.
-5. Document any deviations (tests skipped, follow-up tasks) in the PR/notes before moving on.
+1. **Analyze Build**: Before committing, ALWAYS run `dart analyze` (or `flutter analyze`) to ensure there are no build errors or fatal warnings.
+2. **Commit & Push Every Change**:
+   - After *every single* logical change (even small ones), you must commit and push.
+   - `git add .`
+   - `git commit -m "Fix: <description>"`
+   - `git push`
+   - **Do not batch changes.** Push immediately to the remote repository.
+3. **Validation**:
+   - If `dart analyze` fails, FIX IT before pushing.
+   - Do not push broken code.
 
 ## Refactoring & Regression Prevention
 
