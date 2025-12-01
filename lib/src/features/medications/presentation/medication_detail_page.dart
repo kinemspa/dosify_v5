@@ -191,7 +191,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                             ),
                           ),
                         ),
-                        // Animated Name
+                        // Animated Name & Manufacturer
                         Positioned(
                           top: lerpDouble(
                             top + 48,
@@ -210,48 +210,83 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                               Alignment.center,
                               t,
                             )!,
-                            child: GestureDetector(
-                              onTap: () => _editName(context, updatedMed),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      updatedMed.name,
-                                      style: TextStyle(
-                                        color: onPrimary,
-                                        fontSize: lerpDouble(22, 17, t),
-                                        fontWeight: FontWeight.w600,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => _editName(context, updatedMed),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          updatedMed.name,
+                                          style: TextStyle(
+                                            color: onPrimary,
+                                            fontSize: lerpDouble(22, 17, t),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: onPrimary.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          border: Border.all(
+                                            color: onPrimary.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _formLabel(updatedMed.form),
+                                          style: TextStyle(
+                                            color: onPrimary,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (updatedMed.manufacturer != null &&
+                                    updatedMed.manufacturer!.isNotEmpty &&
+                                    t < 0.5)
+                                  GestureDetector(
+                                    onTap: () =>
+                                        _editManufacturer(context, updatedMed),
+                                    child: Opacity(
+                                      opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Text(
+                                          updatedMed.manufacturer!,
+                                          style: TextStyle(
+                                            color: onPrimary.withValues(
+                                              alpha: 0.8,
+                                            ),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 1,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: onPrimary.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(
-                                        color: onPrimary.withValues(alpha: 0.3),
-                                        width: 0.5,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _formLabel(updatedMed.form),
-                                      style: TextStyle(
-                                        color: onPrimary,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
                         ),
@@ -452,22 +487,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                 // Space for the animated Name (which is positioned absolutely)
                 const SizedBox(height: 60),
 
-                // Manufacturer (Moved below Name, Bigger)
-                if (manufacturer != null && manufacturer.isNotEmpty) ...[
-                  GestureDetector(
-                    onTap: () => _editManufacturer(context, med),
-                    child: Text(
-                      manufacturer,
-                      style: helperTextStyle(context)?.copyWith(
-                        color: onPrimary.withValues(alpha: kOpacityHigh),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12, // Reduced from 14
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-
                 // Description & Notes
                 if (med.description != null && med.description!.isNotEmpty)
                   Padding(
@@ -489,7 +508,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                     child: Text(
                       med.notes!,
                       style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.8),
+                        color: onPrimary.withValues(alpha: 0.6),
                         fontStyle: FontStyle.italic,
                         fontSize: 11,
                       ),
@@ -741,6 +760,12 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // Check for schedules
+    final scheduleBox = Hive.box<Schedule>('schedules');
+    final hasSchedules = scheduleBox.values.any(
+      (s) => s.medicationId == med.id && s.active,
+    );
+
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
@@ -753,10 +778,12 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Schedule & Next Dose
-            _buildSectionTitle(context, 'Schedule & Next Dose'),
-            const SizedBox(height: 16),
-            _buildScheduleSection(context, med, nextDose),
-            const Divider(height: 32),
+            if (hasSchedules) ...[
+              _buildSectionTitle(context, 'Schedule & Next Dose'),
+              const SizedBox(height: 16),
+              _buildScheduleSection(context, med, nextDose),
+              const Divider(height: 32),
+            ],
 
             // 2. Merged Medication Details
             _buildSectionTitle(context, 'Medication Details'),
@@ -1653,14 +1680,128 @@ Future<void> _editDate(
   DateTime? initialDate,
   void Function(DateTime) onSave,
 ) async {
-  final picked = await showDatePicker(
+  final picked = await showDialog<DateTime>(
     context: context,
-    initialDate: initialDate ?? DateTime.now(),
-    firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
-    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    builder: (context) => _ExpiryDatePickerDialog(
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    ),
   );
   if (picked != null) {
     onSave(picked);
+  }
+}
+
+class _ExpiryDatePickerDialog extends StatefulWidget {
+  final DateTime initialDate;
+  final DateTime firstDate;
+  final DateTime lastDate;
+
+  const _ExpiryDatePickerDialog({
+    required this.initialDate,
+    required this.firstDate,
+    required this.lastDate,
+  });
+
+  @override
+  State<_ExpiryDatePickerDialog> createState() =>
+      _ExpiryDatePickerDialogState();
+}
+
+class _ExpiryDatePickerDialogState extends State<_ExpiryDatePickerDialog> {
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final daysUntil = _selectedDate.difference(DateTime.now()).inDays;
+    final isExpired = daysUntil < 0;
+
+    return AlertDialog(
+      contentPadding: EdgeInsets.zero,
+      content: SizedBox(
+        width: 320,
+        height: 450,
+        child: Column(
+          children: [
+            // Custom Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Theme.of(context).colorScheme.primary,
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Expiry Date',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('EEE, MMM d').format(_selectedDate),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      isExpired
+                          ? 'Expired ${daysUntil.abs()} days ago'
+                          : '$daysUntil days remaining',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CalendarDatePicker(
+                initialDate: _selectedDate,
+                firstDate: widget.firstDate,
+                lastDate: widget.lastDate,
+                onDateChanged: (date) => setState(() => _selectedDate = date),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _selectedDate),
+          child: const Text('OK'),
+        ),
+      ],
+    );
   }
 }
 
@@ -1716,6 +1857,13 @@ void _editForm(BuildContext context, Medication med) async {
     final box = Hive.box<Medication>('medications');
     box.put(med.id, med.copyWith(form: result));
   }
+}
+
+void _editDescription(BuildContext context, Medication med) {
+  _showEditDialog(context, med, 'Description', med.description ?? '', (val) {
+    final box = Hive.box<Medication>('medications');
+    box.put(med.id, med.copyWith(description: val));
+  }, maxLines: 3);
 }
 
 void _editNotes(BuildContext context, Medication med) {
