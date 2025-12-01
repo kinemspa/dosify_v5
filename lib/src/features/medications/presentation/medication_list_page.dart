@@ -845,8 +845,9 @@ class _MedLargeCard extends StatelessWidget {
         m.backupVialsRequiresRefrigeration;
 
     if (isFrozen) {
-      icons.add(Icons.ac_unit);
-    } else if (isRefrigerated) {
+      icons.add(Icons.severe_cold);
+    }
+    if (isRefrigerated) {
       icons.add(Icons.ac_unit);
     }
     if (isDark) {
@@ -856,8 +857,8 @@ class _MedLargeCard extends StatelessWidget {
       icons.add(Icons.thermostat);
     }
 
-    // Cap at 2 icons
-    final visibleIcons = icons.take(2).toList();
+    // Cap at 3 icons to allow for more info
+    final visibleIcons = icons.take(3).toList();
 
     return Row(
       children: [
