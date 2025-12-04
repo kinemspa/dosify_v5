@@ -12,13 +12,15 @@ import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 
 class HiveBootstrap {
   static Future<void> init() async {
+    print('HiveBootstrap: initFlutter...');
     await Hive.initFlutter();
     _registerAdapters();
 
     // Open medications box
-    await Hive.openBox<Medication>('medications');
+    await _openBoxWithRetry<Medication>('medications');
 
     // Run migrations if needed
+    print('HiveBootstrap: Running migrations...');
     await HiveMigrationManager.migrate();
 
     // Validate migration was successful
@@ -28,13 +30,13 @@ class HiveBootstrap {
     }
 
     if (!Hive.isAdapterRegistered(40)) Hive.registerAdapter(ScheduleAdapter());
-    await Hive.openBox<Schedule>('schedules');
+    await _openBoxWithRetry<Schedule>('schedules');
 
     // Dose logs (persistent history even after schedule/medication deletion)
     if (!Hive.isAdapterRegistered(41)) Hive.registerAdapter(DoseLogAdapter());
     if (!Hive.isAdapterRegistered(42))
       Hive.registerAdapter(DoseActionAdapter());
-    await Hive.openBox<DoseLog>('dose_logs');
+    await _openBoxWithRetry<DoseLog>('dose_logs');
 
     // Supplies
     if (!Hive.isAdapterRegistered(50)) Hive.registerAdapter(SupplyAdapter());
@@ -46,8 +48,33 @@ class HiveBootstrap {
       Hive.registerAdapter(StockMovementAdapter());
     if (!Hive.isAdapterRegistered(54))
       Hive.registerAdapter(MovementReasonAdapter());
-    await Hive.openBox<Supply>('supplies');
-    await Hive.openBox<StockMovement>('stock_movements');
+
+    await _openBoxWithRetry<Supply>('supplies');
+    await _openBoxWithRetry<StockMovement>('stock_movements');
+    print('HiveBootstrap: Initialization complete');
+  }
+
+  static Future<Box<T>> _openBoxWithRetry<T>(String name) async {
+    try {
+      print('HiveBootstrap: Opening box "$name"...');
+      // Timeout after 2 seconds to detect hangs
+      return await Hive.openBox<T>(name).timeout(const Duration(seconds: 2));
+    } catch (e) {
+      print(
+        'HiveBootstrap: Failed to open box "$name" (Error: $e). Attempting recovery...',
+      );
+      try {
+        // Attempt to delete the box file directly if possible
+        await Hive.deleteBoxFromDisk(name);
+        print('HiveBootstrap: Deleted box "$name". Retrying open...');
+        return await Hive.openBox<T>(name);
+      } catch (e2) {
+        print(
+          'HiveBootstrap: CRITICAL ERROR: Could not recover box "$name": $e2',
+        );
+        rethrow;
+      }
+    }
   }
 
   static void _registerAdapters() {

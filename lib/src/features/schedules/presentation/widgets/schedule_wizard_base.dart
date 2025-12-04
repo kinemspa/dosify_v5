@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 
 /// Base class for schedule wizard pages.
 /// Provides common wizard functionality: step indicator, navigation, validation.
@@ -68,10 +68,9 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: GradientAppBar(title: 'Add Schedule', forceBackButton: true),
       body: Column(
         children: [
-          _buildWizardHeader(),
+          _buildUnifiedHeader(),
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -85,78 +84,107 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
     );
   }
 
-  Widget _buildWizardHeader() {
+  Widget _buildUnifiedHeader() {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+            kMedicationDetailGradientStart,
+            kMedicationDetailGradientEnd,
           ],
         ),
       ),
-      child: Column(
-        children: [
-          // Step indicator at the top
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-            child: Row(
-              children: [
-                for (int i = 0; i < widget.stepCount; i++) ...{
-                  _StepCircle(
-                    number: i + 1,
-                    isActive: i == _currentStep,
-                    isCompleted: i < _currentStep,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // AppBar Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
-                  if (i < widget.stepCount - 1)
-                    Expanded(
-                      child: Container(
-                        height: 1.5,
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: i < _currentStep
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(1),
+                  const Expanded(
+                    child: Text(
+                      'Add Schedule',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Balance back button
+                ],
+              ),
+            ),
+            // Step indicator
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  for (int i = 0; i < widget.stepCount; i++) ...{
+                    _StepCircle(
+                      number: i + 1,
+                      isActive: i == _currentStep,
+                      isCompleted: i < _currentStep,
+                    ),
+                    if (i < widget.stepCount - 1)
+                      Expanded(
+                        child: Container(
+                          height: 1.5,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            color: i < _currentStep
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onPrimary
+                                      .withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(1),
+                          ),
                         ),
                       ),
-                    ),
-                },
-              ],
-            ),
-          ),
-          // Current step label
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(
-              getStepLabel(_currentStep),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.85),
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.3,
+                  },
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
-          // Divider
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: Theme.of(
-              context,
-            ).colorScheme.onPrimary.withValues(alpha: 0.15),
-          ),
-          // Summary content
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: buildSummaryContent(),
-          ),
-        ],
+            // Current step label
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                getStepLabel(_currentStep),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            // Divider
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: Theme.of(
+                context,
+              ).colorScheme.onPrimary.withValues(alpha: 0.15),
+            ),
+            // Summary content with fixed min height
+            Container(
+              constraints: const BoxConstraints(minHeight: 100),
+              padding: const EdgeInsets.all(12),
+              child: buildSummaryContent(),
+            ),
+          ],
+        ),
       ),
     );
   }

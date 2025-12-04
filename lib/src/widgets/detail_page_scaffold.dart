@@ -297,7 +297,9 @@ Widget buildDetailInfoRow(
                   ? theme.colorScheme.error
                   : highlighted
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface,
+                  : theme.colorScheme.onSurface.withValues(
+                      alpha: kOpacityMediumHigh,
+                    ),
             ),
             maxLines: maxLines,
             overflow: maxLines == 1 ? TextOverflow.ellipsis : null,

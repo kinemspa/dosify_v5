@@ -11,6 +11,7 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_day_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_week_view.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -51,6 +52,7 @@ class DoseCalendarWidget extends StatefulWidget {
     this.height,
     this.startDate,
     this.onDoseTap,
+    this.showSelectedDayPanel = true,
     super.key,
   });
 
@@ -61,6 +63,7 @@ class DoseCalendarWidget extends StatefulWidget {
   final double? height;
   final DateTime? startDate;
   final void Function(CalculatedDose dose)? onDoseTap;
+  final bool showSelectedDayPanel;
 
   @override
   State<DoseCalendarWidget> createState() => _DoseCalendarWidgetState();
@@ -239,16 +242,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
 
     // Otherwise show bottom sheet with dose details
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => _DoseDetailBottomSheet(
-        dose: dose,
-        onMarkTaken: (notes) => _markDoseAsTaken(dose, notes),
-        onSnooze: () => _snoozeDose(dose),
-        onSkip: () => _skipDose(dose),
-        onDelete: () => _deleteDoseLog(dose),
-      ),
+    DoseActionSheet.show(
+      context,
+      dose: dose,
+      onMarkTaken: (notes) => _markDoseAsTaken(dose, notes),
+      onSnooze: () => _snoozeDose(dose),
+      onSkip: () => _skipDose(dose),
+      onDelete: () => _deleteDoseLog(dose),
     );
   }
 
@@ -590,7 +590,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ? Border.all(
                 color: Theme.of(
                   context,
-                ).colorScheme.outline.withAlpha((0.2 * 255).round()),
+                ).colorScheme.outline.withValues(alpha: 0.2),
               )
             : null,
       ),
@@ -614,7 +614,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           else
             _buildCurrentView(), // Month/Week views size themselves
           // Selected date schedules (if date selected, only for week/month views)
-          if (_selectedDate != null && _currentView != CalendarView.day)
+          if (_selectedDate != null &&
+              _currentView != CalendarView.day &&
+              widget.showSelectedDayPanel)
             widget.variant == CalendarVariant.compact
                 ? _buildSelectedDayPanel()
                 : Expanded(child: _buildSelectedDayPanel()),
@@ -728,7 +730,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                             'No doses scheduled',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurface.withValues(
-                                alpha: 0.6,
+                                alpha: kOpacityLow,
                               ),
                             ),
                           ),
@@ -751,7 +753,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                             'No doses scheduled',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurface.withValues(
-                                alpha: 0.6,
+                                alpha: kOpacityLow,
                               ),
                             ),
                           ),
@@ -810,7 +812,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         statusIcon = Icons.cancel;
         break;
       case DoseStatus.snoozed:
-        statusColor = Colors.orange;
+        statusColor = colorScheme.tertiary;
         statusIcon = Icons.snooze;
         break;
       case DoseStatus.overdue:
@@ -818,7 +820,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         statusIcon = Icons.warning;
         break;
       case DoseStatus.pending:
-        statusColor = colorScheme.onSurface.withValues(alpha: 0.6);
+        statusColor = colorScheme.onSurface.withValues(alpha: kOpacityMedium);
         statusIcon = Icons.schedule;
         break;
     }
@@ -835,423 +837,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       ),
       onTap: () => _onDoseTapInternal(dose),
     );
-  }
-}
-
-/// Bottom sheet showing dose details
-class _DoseDetailBottomSheet extends StatefulWidget {
-  final CalculatedDose dose;
-  final void Function(String? notes) onMarkTaken;
-  final VoidCallback onSnooze;
-  final VoidCallback onSkip;
-  final VoidCallback onDelete;
-
-  const _DoseDetailBottomSheet({
-    required this.dose,
-    required this.onMarkTaken,
-    required this.onSnooze,
-    required this.onSkip,
-    required this.onDelete,
-  });
-
-  @override
-  State<_DoseDetailBottomSheet> createState() => _DoseDetailBottomSheetState();
-}
-
-class _DoseDetailBottomSheetState extends State<_DoseDetailBottomSheet> {
-  late final TextEditingController _notesController;
-
-  @override
-  void initState() {
-    super.initState();
-    _notesController = TextEditingController(
-      text: widget.dose.existingLog?.notes ?? '',
-    );
-  }
-
-  @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveNotesOnly() async {
-    if (widget.dose.existingLog == null) return;
-
-    try {
-      // Update the existing log with new notes
-      final updatedLog = DoseLog(
-        id: widget.dose.existingLog!.id,
-        scheduleId: widget.dose.existingLog!.scheduleId,
-        scheduleName: widget.dose.existingLog!.scheduleName,
-        medicationId: widget.dose.existingLog!.medicationId,
-        medicationName: widget.dose.existingLog!.medicationName,
-        scheduledTime: widget.dose.existingLog!.scheduledTime,
-        doseValue: widget.dose.existingLog!.doseValue,
-        doseUnit: widget.dose.existingLog!.doseUnit,
-        action: widget.dose.existingLog!.action,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
-      );
-
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(updatedLog);
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Notes saved')));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving notes: $e')));
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(kBorderRadiusLarge),
-            ),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              // Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.dose.scheduleName,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.dose.doseDescription,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              // Content
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    _buildInfoRow(
-                      context,
-                      'Time',
-                      widget.dose.timeFormatted,
-                      Icons.access_time,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildInfoRow(
-                      context,
-                      'Date',
-                      MaterialLocalizations.of(
-                        context,
-                      ).formatMediumDate(widget.dose.scheduledTime),
-                      Icons.calendar_today,
-                    ),
-                    const SizedBox(height: 12),
-                    // Compact status section
-                    _buildStatusSection(context, widget.dose, colorScheme),
-                    const SizedBox(height: 16),
-                    // Action buttons - always visible with state-based styling
-                    _buildActionButtons(context, widget.dose, colorScheme),
-                    const SizedBox(height: 16),
-                    // Notes field (always visible)
-                    TextField(
-                      controller: _notesController,
-                      decoration: InputDecoration(
-                        labelText: 'Notes (optional)',
-                        hintText: 'Add any notes about this dose...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        prefixIcon: const Icon(Icons.note_outlined),
-                      ),
-                      maxLines: 3,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                    const SizedBox(height: 12),
-                    // Save notes button (for doses with existing logs)
-                    if (widget.dose.existingLog != null) ...[
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await _saveNotesOnly();
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                          icon: const Icon(Icons.save, size: 18),
-                          label: const Text('Save Notes'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    const SizedBox(height: 8),
-                    // Note for doses with logs
-                    if (widget.dose.existingLog != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tap status above to change',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatusSection(
-    BuildContext context,
-    CalculatedDose dose,
-    ColorScheme colorScheme,
-  ) {
-    final statusColor = _getStatusColor(dose.status, colorScheme);
-    final statusIcon = _getStatusIcon(dose.status);
-    final statusText = _getStatusText(dose.status);
-
-    return Row(
-      children: [
-        Icon(statusIcon, size: 20, color: statusColor),
-        const SizedBox(width: 8),
-        Text(
-          statusText,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: statusColor,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(
-    BuildContext context,
-    CalculatedDose dose,
-    ColorScheme colorScheme,
-  ) {
-    final status = dose.status;
-
-    // Snooze only enabled for pending doses
-    final snoozeEnabled = status == DoseStatus.pending;
-
-    // Highlight based on current status
-    final takePrimary = status == DoseStatus.taken;
-    final skipPrimary = status == DoseStatus.skipped;
-
-    return Row(
-      children: [
-        // Take button - toggles between taken and pending/overdue
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              if (status == DoseStatus.taken) {
-                // Toggle back to pending/overdue
-                widget.onDelete();
-              } else {
-                // Mark as taken
-                widget.onMarkTaken(
-                  _notesController.text.isEmpty ? null : _notesController.text,
-                );
-              }
-            },
-            icon: Icon(
-              Icons.check_circle,
-              size: 18,
-              color: takePrimary ? Colors.green : null,
-            ),
-            label: const Text('Take'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              backgroundColor: takePrimary ? Colors.green : null,
-              foregroundColor: takePrimary ? Colors.white : null,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        // Snooze button
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: snoozeEnabled
-                ? () {
-                    Navigator.pop(context);
-                    widget.onSnooze();
-                  }
-                : null,
-            icon: const Icon(Icons.snooze, size: 18),
-            label: const Text('Snooze'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        // Skip button - toggles between skipped and pending/overdue
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              if (status == DoseStatus.skipped) {
-                // Toggle back to pending/overdue
-                widget.onDelete();
-              } else {
-                // Mark as skipped
-                widget.onSkip();
-              }
-            },
-            icon: const Icon(Icons.cancel, size: 18),
-            label: const Text('Skip'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              backgroundColor: skipPrimary ? colorScheme.errorContainer : null,
-              foregroundColor: skipPrimary
-                  ? colorScheme.onErrorContainer
-                  : null,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Color _getStatusColor(DoseStatus status, ColorScheme colorScheme) {
-    switch (status) {
-      case DoseStatus.taken:
-        return colorScheme.primary; // Blue/Primary
-      case DoseStatus.skipped:
-        return Colors.grey; // Grey for canceled/skipped
-      case DoseStatus.snoozed:
-        return Colors.orange; // Orange for snoozed
-      case DoseStatus.overdue:
-        return colorScheme.error; // Red for missed/overdue
-      case DoseStatus.pending:
-        return colorScheme.onSurface.withValues(
-          alpha: 0.6,
-        ); // Muted for pending
-    }
-  }
-
-  String _getStatusText(DoseStatus status) {
-    switch (status) {
-      case DoseStatus.taken:
-        return 'Taken';
-      case DoseStatus.skipped:
-        return 'Skipped';
-      case DoseStatus.snoozed:
-        return 'Snoozed';
-      case DoseStatus.overdue:
-        return 'Overdue';
-      case DoseStatus.pending:
-        return 'Pending';
-    }
-  }
-
-  Widget _buildInfoRow(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: colorScheme.primary),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(value, style: theme.textTheme.bodyLarge),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  IconData _getStatusIcon(DoseStatus status) {
-    switch (status) {
-      case DoseStatus.taken:
-        return Icons.check_circle;
-      case DoseStatus.skipped:
-        return Icons.cancel;
-      case DoseStatus.snoozed:
-        return Icons.snooze;
-      case DoseStatus.overdue:
-        return Icons.warning;
-      case DoseStatus.pending:
-        return Icons.schedule;
-    }
   }
 }
 

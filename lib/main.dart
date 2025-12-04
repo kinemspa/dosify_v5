@@ -19,12 +19,25 @@ Future<void> main() async {
     // NEW: Wraps app init for MCP error reporting
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      print('Dosifi: WidgetsFlutterBinding initialized');
+
+      print('Dosifi: Initializing Hive...');
       await HiveBootstrap.init();
+      print('Dosifi: Hive initialized');
+
+      print('Dosifi: Initializing NotificationService...');
       await NotificationService.init();
+      print('Dosifi: NotificationService initialized');
+
+      print('Dosifi: Initializing MCPToolkit...');
       MCPToolkitBinding.instance
         ..initialize() // NEW: Initializes MCP bridge
         ..initializeFlutterToolkit(); // NEW: Hooks Flutter inspector for widget trees/screenshots
+      print('Dosifi: MCPToolkit initialized');
+
+      print('Dosifi: Running App...');
       runApp(const ProviderScope(child: DosifiApp()));
+
       // Kick off rescheduling in the background so startup isn't blocked
       // ignore: unawaited_futures
       ScheduleScheduler.rescheduleAllActive().catchError((_) {});

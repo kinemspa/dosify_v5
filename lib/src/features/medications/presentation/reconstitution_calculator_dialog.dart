@@ -153,7 +153,10 @@ class _ReconstitutionCalculatorDialogState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               border: Border(
-                top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
+                top: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  width: 1,
+                ),
               ),
             ),
             child: Row(
@@ -164,7 +167,9 @@ class _ReconstitutionCalculatorDialogState
                         Navigator.of(context).pop<ReconstitutionResult>(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: const Text('Cancel'),
                   ),

@@ -51,7 +51,8 @@ class SectionFormCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ??
+        color:
+            backgroundColor ??
             (neutral
                 ? theme.colorScheme.surfaceContainerLowest
                 : theme.colorScheme.primary.withValues(alpha: 0.03)),
@@ -128,7 +129,9 @@ class LabelFieldRow extends StatelessWidget {
                   ? theme.textTheme.bodyMedium?.copyWith(
                       fontSize: kFontSizeMedium,
                       fontWeight: kFontWeightBold,
-                      color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
+                      color: Colors.white.withValues(
+                        alpha: kReconTextMediumOpacity,
+                      ),
                     )
                   : fieldLabelStyle(context),
             ),

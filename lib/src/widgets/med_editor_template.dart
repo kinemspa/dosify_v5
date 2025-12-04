@@ -336,7 +336,9 @@ class _MedEditorTemplateState extends State<MedEditorTemplate> {
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color:
               color ??
-              Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
         ),
       ),
     );

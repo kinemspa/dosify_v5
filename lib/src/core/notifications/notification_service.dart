@@ -60,15 +60,27 @@ class NotificationService {
       );
 
   static Future<void> init() async {
+    _log('Initializing NotificationService...');
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
+
+    _log('Initializing FlutterLocalNotificationsPlugin...');
     await _fln.initialize(initSettings);
 
     // Timezone for scheduled notifications
+    _log('Initializing TimeZones...');
     tz.initializeTimeZones();
     String localTz;
     try {
-      localTz = await FlutterTimezone.getLocalTimezone();
+      _log('Getting local timezone...');
+      // Add timeout to prevent hang
+      localTz = await FlutterTimezone.getLocalTimezone().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          _log('Timeout getting local timezone');
+          return 'UTC';
+        },
+      );
       _log('Resolved local timezone via flutter_timezone: $localTz');
     } catch (e) {
       // Fallback to system default if plugin fails
@@ -98,6 +110,7 @@ class NotificationService {
     }
 
     // Do not request notification permissions here to avoid blocking app startup.
+    _log('NotificationService initialization complete');
   }
 
   static Future<bool> ensurePermissionGranted() async {

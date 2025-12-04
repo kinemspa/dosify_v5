@@ -1,0 +1,35 @@
+00:00 +0: loading F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart
+lib/src/features/schedules/presentation/controllers/schedule_form_controller.dart:554:30: Error: Type argument 'ScheduleFormController' doesn't conform to the bound 'AutoDisposeFamilyNotifier<T, Arg>' of the type variable 'NotifierT' on 'AutoDisposeNotifierProviderFamily'.
+ - 'ScheduleFormController' is from 'package:dosifi_v5/src/features/schedules/presentation/controllers/schedule_form_controller.dart' ('lib/src/features/schedules/presentation/controllers/schedule_form_controller.dart').
+ - 'AutoDisposeFamilyNotifier' is from 'package:riverpod/src/notifier.dart' ('/F:/PubCache/hosted/pub.dev/riverpod-2.6.1/lib/src/notifier.dart').
+Try changing type arguments so that they conform to the bounds.
+final scheduleFormProvider = AutoDisposeNotifierProviderFamily<ScheduleFormController, ScheduleFormState, Schedule?>(ScheduleFormController.new);
+                             ^
+/F:/PubCache/hosted/pub.dev/riverpod-2.6.1/lib/src/notifier/auto_dispose_family.dart:82:9: Context: This is the type variable whose bound isn't conformed to.
+        NotifierT extends AutoDisposeFamilyNotifier<T, Arg>, T, Arg>
+        ^
+lib/src/features/schedules/presentation/controllers/schedule_form_controller.dart:47:21: Error: The method 'ScheduleFormController.build' has more required arguments than those of overridden method 'AutoDisposeNotifier.build'.
+  ScheduleFormState build(Schedule? initial) {
+                    ^
+/F:/PubCache/hosted/pub.dev/riverpod-2.6.1/lib/src/notifier/auto_dispose.dart:30:9: Context: This is the overridden method ('build').
+  State build();
+        ^
+00:00 +0 -1: loading F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart [E]
+  Failed to load "F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart":
+  Compilation failed for testPath=F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart: lib/src/features/schedules/presentation/controllers/schedule_form_controller.dart:554:30: Error: Type argument 'ScheduleFormController' doesn't conform to the bound 'AutoDisposeFamilyNotifier<T, Arg>' of the type variable 'NotifierT' on 'AutoDisposeNotifierProviderFamily'.
+   - 'ScheduleFormController' is from 'package:dosifi_v5/src/features/schedules/presentation/controllers/schedule_form_controller.dart' ('lib/src/features/schedules/presentation/controllers/schedule_form_controller.dart').
+   - 'AutoDisposeFamilyNotifier' is from 'package:riverpod/src/notifier.dart' ('/F:/PubCache/hosted/pub.dev/riverpod-2.6.1/lib/src/notifier.dart').
+  Try changing type arguments so that they conform to the bounds.
+  final scheduleFormProvider = AutoDisposeNotifierProviderFamily<ScheduleFormController, ScheduleFormState, Schedule?>(ScheduleFormController.new);
+                               ^
+  /F:/PubCache/hosted/pub.dev/riverpod-2.6.1/lib/src/notifier/auto_dispose_family.dart:82:9: Context: This is the type variable whose bound isn't conformed to.
+          NotifierT extends AutoDisposeFamilyNotifier<T, Arg>, T, Arg>
+          ^
+  lib/src/features/schedules/presentation/controllers/schedule_form_controller.dart:47:21: Error: The method 'ScheduleFormController.build' has more required arguments than those of overridden method 'AutoDisposeNotifier.build'.
+    ScheduleFormState build(Schedule? initial) {
+                      ^
+  /F:/PubCache/hosted/pub.dev/riverpod-2.6.1/lib/src/notifier/auto_dispose.dart:30:9: Context: This is the overridden method ('build').
+    State build();
+          ^
+  .
+00:00 +0 -1: Some tests failed.

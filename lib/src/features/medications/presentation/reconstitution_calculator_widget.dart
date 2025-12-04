@@ -401,7 +401,9 @@ class _ReconstitutionCalculatorWidgetState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
+                    color: Colors.white.withValues(
+                      alpha: kReconTextMediumOpacity,
+                    ),
                   ),
                   children: [
                     const TextSpan(text: 'Using vial strength: '),
@@ -848,13 +850,19 @@ class _ReconstitutionCalculatorWidgetState
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
-                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.04),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.04),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
                   width: kReconSummaryBorderWidth,
                 ),
                 boxShadow: [
@@ -883,7 +891,9 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -928,7 +938,9 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -991,7 +1003,9 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -1024,7 +1038,9 @@ class _ReconstitutionCalculatorWidgetState
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                       children: [
@@ -1074,7 +1090,9 @@ class _ReconstitutionCalculatorWidgetState
                     'Doses can be created, adjusted, and tracked on the schedule screen where all medication administration is managed.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withValues(alpha: kReconTextMutedOpacity),
+                      color: Colors.white.withValues(
+                        alpha: kReconTextMutedOpacity,
+                      ),
                       fontStyle: FontStyle.italic,
                       height: 1.5,
                     ),
@@ -1218,7 +1236,9 @@ class _ReconstitutionCalculatorWidgetState
                           fontSize: 16,
                           color: selected
                               ? theme.colorScheme.primary
-                              : Colors.white.withValues(alpha: kReconTextHighOpacity),
+                              : Colors.white.withValues(
+                                  alpha: kReconTextHighOpacity,
+                                ),
                         ),
                       ),
                       if (explainerText.isNotEmpty) ...[

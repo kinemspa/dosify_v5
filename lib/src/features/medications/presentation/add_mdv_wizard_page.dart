@@ -5,8 +5,8 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:flutter/material.dart';
 // Package imports:
@@ -329,19 +329,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: GradientAppBar(
-        title: widget.initial == null
-            ? 'Add Multi-Dose Vial'
-            : 'Edit Multi-Dose Vial',
-        forceBackButton: true,
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
-          // Summary card with integrated step indicator
-          _buildEnhancedSummaryCard(),
-
-          // Content (scrollable)
+          _buildUnifiedHeader(),
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -349,89 +340,115 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               child: _buildStepContent(),
             ),
           ),
-
-          // Navigation buttons
           _buildNavigationBar(),
         ],
       ),
     );
   }
 
-  Widget _buildEnhancedSummaryCard() {
+  Widget _buildUnifiedHeader() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            kMedicationDetailGradientStart,
+            kMedicationDetailGradientEnd,
+          ],
+        ),
       ),
-      child: Column(
-        children: [
-          // Step indicator at the top (no background overlay)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-            child: Row(
-              children: [
-                for (int i = 0; i < 5; i++) ...[
-                  _StepCircle(
-                    number: i + 1,
-                    isActive: i == _currentStep,
-                    isCompleted: i < _currentStep,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // AppBar Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
-                  if (i < 4)
-                    Expanded(
-                      child: Container(
-                        height: 1.5,
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: i < _currentStep
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(1),
+                  Expanded(
+                    child: Text(
+                      widget.initial == null
+                          ? 'Add Multi-Dose Vial'
+                          : 'Edit Multi-Dose Vial',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Balance back button
+                ],
+              ),
+            ),
+            // Step indicator
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  for (int i = 0; i < 5; i++) ...[
+                    _StepCircle(
+                      number: i + 1,
+                      isActive: i == _currentStep,
+                      isCompleted: i < _currentStep,
+                    ),
+                    if (i < 4)
+                      Expanded(
+                        child: Container(
+                          height: 1.5,
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            color: i < _currentStep
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onPrimary
+                                      .withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(1),
+                          ),
                         ),
                       ),
-                    ),
+                  ],
                 ],
-              ],
-            ),
-          ),
-          // Current step label
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(
-              _getStepLabel(_currentStep),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.85),
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.3,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
-          // Divider
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: Theme.of(
-              context,
-            ).colorScheme.onPrimary.withValues(alpha: 0.15),
-          ),
-          // Summary content
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: _buildSummaryContent(),
-          ),
-        ],
+            // Current step label
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                _getStepLabel(_currentStep),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            // Divider
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: Theme.of(
+                context,
+              ).colorScheme.onPrimary.withValues(alpha: 0.15),
+            ),
+            // Summary content with fixed min height
+            Container(
+              constraints: const BoxConstraints(minHeight: 100),
+              padding: const EdgeInsets.all(12),
+              child: _buildSummaryContent(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -836,8 +853,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       ).formatCompactDate(_activeVialExpiry!),
                 onPressed: () async {
                   final now = DateTime.now();
-                  final picked = await showDatePicker(
-                    context: context,
+                  final picked = await SmartExpiryPicker.show(
+                    context,
                     firstDate: now,
                     lastDate: DateTime(now.year + 2),
                     initialDate:
@@ -1104,8 +1121,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                         ).formatCompactDate(_backupVialsExpiry!),
                   onPressed: () async {
                     final now = DateTime.now();
-                    final picked = await showDatePicker(
-                      context: context,
+                    final picked = await SmartExpiryPicker.show(
+                      context,
                       firstDate: DateTime(now.year - 1),
                       lastDate: DateTime(now.year + 10),
                       initialDate: _backupVialsExpiry ?? now,

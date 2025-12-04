@@ -410,9 +410,9 @@ TextStyle? helperTextStyle(BuildContext context, {Color? color}) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
     color:
         color ??
-        Theme.of(context).colorScheme.onSurface.withValues(
-          alpha: kHelperTextOpacity,
-        ),
+        Theme.of(
+          context,
+        ).colorScheme.onSurface.withValues(alpha: kHelperTextOpacity),
   );
 }
 
@@ -441,9 +441,9 @@ TextStyle? fieldLabelStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
     fontSize: kFontSizeMedium,
     fontWeight: kFontWeightBold,
-    color: Theme.of(context).colorScheme.onSurface.withValues(
-      alpha: kOpacityMedium,
-    ),
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: kOpacityMedium),
   );
 }
 
@@ -452,9 +452,9 @@ TextStyle? inputTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
     fontSize: kFontSizeInput,
     fontWeight: kFontWeightNormal,
-    color: Theme.of(context).colorScheme.onSurface.withValues(
-      alpha: kOpacityHigh,
-    ),
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: kOpacityHigh),
   );
 }
 
@@ -558,6 +558,23 @@ Widget buildHelperText(
       bottom: kHelperTextBottomPadding,
     ),
     child: Text(text, style: helperTextStyle(context, color: color)),
+  );
+}
+
+/// Builds a standardized chip for storage conditions
+Widget buildStorageConditionChip(
+  BuildContext context, {
+  required String label,
+  required IconData icon,
+  required Color backgroundColor,
+}) {
+  return Chip(
+    avatar: Icon(icon, size: 16),
+    label: Text(label, style: const TextStyle(fontSize: 12)),
+    visualDensity: VisualDensity.compact,
+    backgroundColor: backgroundColor,
+    side: BorderSide.none,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   );
 }
 

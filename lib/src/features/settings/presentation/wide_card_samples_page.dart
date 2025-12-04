@@ -854,7 +854,9 @@ class _ConceptCardPassport extends StatelessWidget {
                   ),
                   const SizedBox(height: kFieldSpacing),
                   Divider(
-                    color: theme.colorScheme.outlineVariant.withValues(alpha: .4),
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: .4,
+                    ),
                   ),
                   const SizedBox(height: kFieldSpacing),
                   Wrap(

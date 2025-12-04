@@ -378,7 +378,9 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                    color: Colors.white.withValues(
+                      alpha: kReconTextHighOpacity,
+                    ),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -421,7 +423,9 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                    color: Colors.white.withValues(
+                      alpha: kReconTextHighOpacity,
+                    ),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -439,7 +443,9 @@ class _MdvVolumeReconstitutionSectionState
                       text: '  of  ',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -480,7 +486,9 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                    color: Colors.white.withValues(
+                      alpha: kReconTextHighOpacity,
+                    ),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -511,7 +519,9 @@ class _MdvVolumeReconstitutionSectionState
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                    color: Colors.white.withValues(
+                      alpha: kReconTextHighOpacity,
+                    ),
                     fontWeight: FontWeight.w600,
                   ),
                   children: [
@@ -574,7 +584,9 @@ class _MdvVolumeReconstitutionSectionState
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
+                      color: Colors.white.withValues(
+                        alpha: kReconTextMediumOpacity,
+                      ),
                       fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),
@@ -659,7 +671,9 @@ class _MdvVolumeReconstitutionSectionState
                                 ? '0.00'
                                 : widget.vialVolumeController.text),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
                         fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
@@ -721,7 +735,9 @@ class _MdvVolumeReconstitutionSectionState
               color: exceedsMax
                   ? Colors.orange
                   : (isDarkMode
-                        ? Colors.white.withValues(alpha: kReconTextMediumOpacity)
+                        ? Colors.white.withValues(
+                            alpha: kReconTextMediumOpacity,
+                          )
                         : theme.colorScheme.onSurfaceVariant.withValues(
                             alpha: 0.75,
                           )),

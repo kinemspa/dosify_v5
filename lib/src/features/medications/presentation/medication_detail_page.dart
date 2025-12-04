@@ -4,6 +4,7 @@ import 'dart:ui';
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
@@ -15,15 +16,15 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
+import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Modern, revolutionized medication detail screen with:
 /// - Hero header with gradient and key stats
@@ -279,7 +280,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                                             color: onPrimary.withValues(
                                               alpha: 0.8,
                                             ),
-                                            fontSize: 12,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -392,7 +393,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final onPrimary = colorScheme.onPrimary;
-    final manufacturer = med.manufacturer;
     final stockRatio = _stockFillRatio(med);
     final storageLabel = med.storageLocation;
 
@@ -495,9 +495,10 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                       med.description!,
                       style: TextStyle(
                         color: onPrimary.withValues(alpha: 0.9),
-                        fontSize: 12,
+                        fontSize: 11, // Reduced from 12
+                        fontStyle: FontStyle.italic,
                       ),
-                      maxLines: 3,
+                      maxLines: 2, // Reduced from 3
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -510,46 +511,22 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                       style: TextStyle(
                         color: onPrimary.withValues(alpha: 0.6),
                         fontStyle: FontStyle.italic,
-                        fontSize: 11,
+                        fontSize: 10, // Reduced from 11
                       ),
-                      maxLines: 2,
+                      maxLines: 1, // Reduced from 2
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
 
                 const SizedBox(height: 8),
 
-                // Strength with Icon
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.scale_outlined,
-                      size: 16,
-                      color: onPrimary.withValues(alpha: 0.7),
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          strengthPerLabel,
-                          style: TextStyle(
-                            color: onPrimary.withValues(alpha: 0.7),
-                            fontSize: 10,
-                          ),
-                        ),
-                        Text(
-                          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-                          style: TextStyle(
-                            color: onPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                // Strength with Icon (Standardized)
+                _HeaderInfoTile(
+                  icon: Icons.fitness_center,
+                  label: strengthPerLabel,
+                  value:
+                      '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+                  textColor: onPrimary,
                 ),
                 const SizedBox(height: 8),
 
@@ -557,15 +534,11 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                 if (storageLabel != null && storageLabel.isNotEmpty) ...[
                   _HeaderInfoTile(
                     icon: med.activeVialRequiresFreezer
-                        ? Icons.ac_unit
+                        ? Icons.severe_cold
                         : (med.requiresRefrigeration
                               ? Icons.ac_unit
-                              : Icons.location_on),
-                    label: med.activeVialRequiresFreezer
-                        ? 'Storage (Frozen)'
-                        : (med.requiresRefrigeration
-                              ? 'Storage (Cold)'
-                              : 'Storage'),
+                              : Icons.inventory_2_outlined),
+                    label: 'Storage',
                     value: storageLabel,
                     textColor: onPrimary,
                     trailingIcon: med.activeVialLightSensitive
@@ -720,38 +693,6 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     );
   }
 
-  String _formatDateTime(DateTime dt) {
-    return DateFormat('MMM d, h:mm a').format(dt);
-  }
-
-  Widget _buildInfoRow(BuildContext context, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildUnifiedDetailsCard(
     BuildContext context,
     Medication med,
@@ -770,7 +711,11 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+        side: BorderSide(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: kCardBorderOpacity),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -779,21 +724,33 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           children: [
             // 1. Schedule & Next Dose
             if (hasSchedules) ...[
-              _buildSectionTitle(context, 'Schedule & Next Dose'),
+              _buildSectionTitle(
+                context,
+                'Schedule',
+                icon: Icons.calendar_today,
+              ),
               const SizedBox(height: 16),
               _buildScheduleSection(context, med, nextDose),
               const Divider(height: 32),
             ],
 
             // 2. Merged Medication Details
-            _buildSectionTitle(context, 'Medication Details'),
+            _buildSectionTitle(
+              context,
+              'Medication Details',
+              icon: Icons.medication,
+            ),
             const SizedBox(height: 16),
             _buildMergedDetailsSection(context, med),
             const Divider(height: 32),
 
             // 3. Active Vial (MDV Only)
             if (med.form == MedicationForm.multiDoseVial) ...[
-              _buildSectionTitle(context, 'Active Vial (In Use)'),
+              _buildSectionTitle(
+                context,
+                'Active Vial (In Use)',
+                icon: Icons.science,
+              ),
               const SizedBox(height: 16),
               _buildActiveVialSection(context, med),
               const Divider(height: 32),
@@ -801,7 +758,11 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
 
             // 4. Backup Stock (MDV Only)
             if (med.form == MedicationForm.multiDoseVial) ...[
-              _buildSectionTitle(context, 'Backup Stock (Sealed)'),
+              _buildSectionTitle(
+                context,
+                'Backup Stock (Sealed)',
+                icon: Icons.inventory_2,
+              ),
               const SizedBox(height: 16),
               _buildBackupStockSection(context, med),
               const Divider(height: 32),
@@ -824,7 +785,20 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _buildSectionTitle(
+    BuildContext context,
+    String title, {
+    IconData? icon,
+  }) {
+    if (icon != null) {
+      return Row(
+        children: [
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(title, style: sectionTitleStyle(context)),
+        ],
+      );
+    }
     return Text(title, style: sectionTitleStyle(context));
   }
 
@@ -838,41 +812,37 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
         .where((s) => s.medicationId == med.id && s.active)
         .toList();
     final count = schedules.length;
-    final now = DateTime.now();
-    final dateStr = DateFormat('EEEE, MMMM d').format(now);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (schedules.isNotEmpty) ...[
+          NextDoseCard(medication: med, schedules: schedules),
+          const SizedBox(height: 16),
+        ],
+
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(
-              Icons.calendar_today,
-              size: 16,
-              color: Theme.of(context).colorScheme.primary,
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$count Schedule${count == 1 ? '' : 's'} Configured',
+                  style: sectionTitleStyle(context)?.copyWith(fontSize: 14),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              '$count Schedule${count == 1 ? '' : 's'} Configured',
-              style: sectionTitleStyle(context)?.copyWith(fontSize: 14),
-            ),
-            const Spacer(),
             TextButton(
               onPressed: () => context.go('/schedules'),
               child: const Text('Manage'),
             ),
           ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Text('Today is $dateStr', style: helperTextStyle(context)),
-        ),
-        const SizedBox(height: 4),
-        DoseCalendarWidget(
-          variant: CalendarVariant.compact,
-          defaultView: CalendarView.week,
-          medicationId: med.id,
-          // height removed to allow auto-sizing
         ),
       ],
     );
@@ -918,7 +888,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             context,
             label: 'Expiry Date',
             value: med.expiry != null
-                ? DateFormat('MMMM d, y').format(med.expiry!)
+                ? _formatExpiry(med.expiry!)
                 : 'Tap to set',
             warning: med.expiry != null && _isExpiringSoon(med.expiry!),
             onTap: () => _editExpiry(context, med),
@@ -930,6 +900,12 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                 ? '${_formatNumber(med.lowStockThreshold ?? 0)} ${_stockUnitLabel(med.stockUnit)}'
                 : 'Disabled',
             onTap: () => _editLowStockThreshold(context, med),
+          ),
+          _buildCompactInfoItem(
+            context,
+            label: 'Storage Location',
+            value: med.storageLocation ?? 'Tap to add',
+            onTap: () => _editStorageLocation(context, med),
           ),
         ]),
         const SizedBox(height: 16),
@@ -957,17 +933,8 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             context,
             label: 'Notes',
             value: med.notes!,
+            isItalic: true,
             onTap: () => _editNotes(context, med),
-          ),
-        ],
-        if (med.storageInstructions != null &&
-            med.storageInstructions!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _buildCompactInfoItem(
-            context,
-            label: 'Storage Instructions',
-            value: med.storageInstructions!,
-            onTap: () => _editStorageInstructions(context, med),
           ),
         ],
       ],
@@ -976,50 +943,67 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
 
   Widget _buildStorageSwitches(BuildContext context, Medication med) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SwitchListTile(
-          title: const Text('Refrigerated'),
-          value: med.requiresRefrigeration,
-          onChanged: (bool value) {
-            final box = Hive.box<Medication>('medications');
-            box.put(
-              med.id,
-              med.copyWith(
-                requiresRefrigeration: value,
-                requiresFreezer: value ? false : med.requiresFreezer,
+        Row(
+          children: [
+            Checkbox(
+              value: med.requiresRefrigeration,
+              onChanged: (v) {
+                final box = Hive.box<Medication>('medications');
+                box.put(
+                  med.id,
+                  med.copyWith(
+                    requiresRefrigeration: v ?? false,
+                    requiresFreezer: (v ?? false) ? false : med.requiresFreezer,
+                  ),
+                );
+              },
+            ),
+            Expanded(
+              child: Text(
+                'Refrigerate (2-8°C)',
+                style: checkboxLabelStyle(context),
               ),
-            );
-          },
-          dense: true,
-          contentPadding: EdgeInsets.zero,
+            ),
+          ],
         ),
-        SwitchListTile(
-          title: const Text('Frozen'),
-          value: med.requiresFreezer,
-          onChanged: (bool value) {
-            final box = Hive.box<Medication>('medications');
-            box.put(
-              med.id,
-              med.copyWith(
-                requiresFreezer: value,
-                requiresRefrigeration: value
-                    ? false
-                    : med.requiresRefrigeration,
+        Row(
+          children: [
+            Checkbox(
+              value: med.requiresFreezer,
+              onChanged: (v) {
+                final box = Hive.box<Medication>('medications');
+                box.put(
+                  med.id,
+                  med.copyWith(
+                    requiresFreezer: v ?? false,
+                    requiresRefrigeration: (v ?? false)
+                        ? false
+                        : med.requiresRefrigeration,
+                  ),
+                );
+              },
+            ),
+            Expanded(child: Text('Freeze', style: checkboxLabelStyle(context))),
+          ],
+        ),
+        Row(
+          children: [
+            Checkbox(
+              value: med.lightSensitive,
+              onChanged: (v) {
+                final box = Hive.box<Medication>('medications');
+                box.put(med.id, med.copyWith(lightSensitive: v ?? false));
+              },
+            ),
+            Expanded(
+              child: Text(
+                'Protect from Light',
+                style: checkboxLabelStyle(context),
               ),
-            );
-          },
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-        ),
-        SwitchListTile(
-          title: const Text('Light Sensitive'),
-          value: med.lightSensitive,
-          onChanged: (bool value) {
-            final box = Hive.box<Medication>('medications');
-            box.put(med.id, med.copyWith(lightSensitive: value));
-          },
-          dense: true,
-          contentPadding: EdgeInsets.zero,
+            ),
+          ],
         ),
       ],
     );
@@ -1049,15 +1033,19 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
               Expanded(
                 child: Text(
                   'Medicine being drawn from for each injection',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  style: bodyTextStyle(context)?.copyWith(fontSize: 12),
                 ),
               ),
             ],
           ),
         ),
+        if (med.diluentName != null && med.diluentName!.isNotEmpty)
+          buildDetailInfoRow(
+            context,
+            label: 'Reconstitution Fluid',
+            value: med.diluentName!,
+            onTap: null,
+          ),
         if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
           buildDetailInfoRow(
             context,
@@ -1092,51 +1080,72 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
         const SizedBox(height: 8),
         Column(
           children: [
-            SwitchListTile(
-              title: const Text('Refrigerated'),
-              value: med.activeVialRequiresRefrigeration,
-              onChanged: (bool v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(
-                  med.id,
-                  med.copyWith(
-                    activeVialRequiresRefrigeration: v,
-                    activeVialRequiresFreezer: v
-                        ? false
-                        : med.activeVialRequiresFreezer,
+            Row(
+              children: [
+                Checkbox(
+                  value: med.activeVialRequiresRefrigeration,
+                  onChanged: (bool? v) {
+                    final box = Hive.box<Medication>('medications');
+                    box.put(
+                      med.id,
+                      med.copyWith(
+                        activeVialRequiresRefrigeration: v ?? false,
+                        activeVialRequiresFreezer: (v ?? false)
+                            ? false
+                            : med.activeVialRequiresFreezer,
+                      ),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    'Refrigerated',
+                    style: checkboxLabelStyle(context),
                   ),
-                );
-              },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+                ),
+              ],
             ),
-            SwitchListTile(
-              title: const Text('Frozen'),
-              value: med.activeVialRequiresFreezer,
-              onChanged: (bool v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(
-                  med.id,
-                  med.copyWith(
-                    activeVialRequiresFreezer: v,
-                    activeVialRequiresRefrigeration: v
-                        ? false
-                        : med.activeVialRequiresRefrigeration,
+            Row(
+              children: [
+                Checkbox(
+                  value: med.activeVialRequiresFreezer,
+                  onChanged: (bool? v) {
+                    final box = Hive.box<Medication>('medications');
+                    box.put(
+                      med.id,
+                      med.copyWith(
+                        activeVialRequiresFreezer: v ?? false,
+                        activeVialRequiresRefrigeration: (v ?? false)
+                            ? false
+                            : med.activeVialRequiresRefrigeration,
+                      ),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: Text('Frozen', style: checkboxLabelStyle(context)),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: med.activeVialLightSensitive,
+                  onChanged: (bool? v) {
+                    final box = Hive.box<Medication>('medications');
+                    box.put(
+                      med.id,
+                      med.copyWith(activeVialLightSensitive: v ?? false),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    'Light Sensitive',
+                    style: checkboxLabelStyle(context),
                   ),
-                );
-              },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-            SwitchListTile(
-              title: const Text('Light Sensitive'),
-              value: med.activeVialLightSensitive,
-              onChanged: (bool v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(med.id, med.copyWith(activeVialLightSensitive: v));
-              },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+                ),
+              ],
             ),
           ],
         ),
@@ -1166,7 +1175,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             context,
             label: 'Expiry Date',
             value: med.backupVialsExpiry != null
-                ? DateFormat('MMMM d, y').format(med.backupVialsExpiry!)
+                ? _formatExpiry(med.backupVialsExpiry!)
                 : 'Tap to set',
             warning:
                 med.backupVialsExpiry != null &&
@@ -1255,6 +1264,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
             volumePerDose: med.volumePerDose,
             reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
             syringeSizeMl: 3.0,
+            compact: true,
           ),
           Positioned(
             top: 8,
@@ -1326,6 +1336,7 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
     VoidCallback? onTap,
     bool highlighted = false,
     bool warning = false,
+    bool isItalic = false,
   }) {
     final theme = Theme.of(context);
 
@@ -1344,12 +1355,15 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: highlighted ? FontWeight.bold : FontWeight.w500,
+            fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
             color: warning
                 ? theme.colorScheme.error
-                : theme.colorScheme.onSurface,
+                : theme.colorScheme.onSurface.withValues(
+                    alpha: kOpacityMediumHigh,
+                  ),
             fontSize: 13,
           ),
-          maxLines: 1,
+          maxLines: 2, // Increased from 1
           overflow: TextOverflow.ellipsis,
         ),
       ],
@@ -1501,46 +1515,6 @@ class _HeaderInfoTile extends StatelessWidget {
   }
 }
 
-class _BooleanChip extends StatelessWidget {
-  const _BooleanChip({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return FilterChip(
-      label: Text(label),
-      selected: value,
-      onSelected: onChanged,
-      showCheckmark: true,
-      checkmarkColor: value ? colorScheme.onPrimaryContainer : null,
-      selectedColor: colorScheme.primaryContainer,
-      labelStyle: TextStyle(
-        color: value ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
-        fontWeight: value ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: value
-              ? Colors.transparent
-              : colorScheme.outline.withValues(alpha: 0.3),
-        ),
-      ),
-    );
-  }
-}
-
 // Helper methods
 
 bool _isExpiringSoon(DateTime expiry) {
@@ -1578,6 +1552,16 @@ String _stockUnitLabel(StockUnit unit) => switch (unit) {
   StockUnit.g => 'g',
 };
 
+String _formatExpiry(DateTime date) {
+  final now = DateTime.now();
+  final diff = date.difference(now).inDays;
+  final dateStr = DateFormat('d MMM y').format(date);
+  if (diff < 0) {
+    return '$dateStr (Expired)';
+  }
+  return '$dateStr ($diff days)';
+}
+
 String _formatNumber(double value) {
   if (value == value.roundToDouble()) {
     return value.toInt().toString();
@@ -1592,8 +1576,17 @@ double _stockFillRatio(Medication med) {
   return (med.stockValue / med.initialStockValue!).clamp(0.0, 1.0);
 }
 
+bool _isIntegerStock(StockUnit unit) {
+  return unit == StockUnit.tablets ||
+      unit == StockUnit.capsules ||
+      unit == StockUnit.preFilledSyringes ||
+      unit == StockUnit.singleDoseVials ||
+      unit == StockUnit.multiDoseVials;
+}
+
 ScheduledDose? _nextDoseForMedication(String medId) {
   final schedulesBox = Hive.box<Schedule>('schedules');
+  final doseLogBox = Hive.box<DoseLog>('dose_logs');
   final schedules = schedulesBox.values
       .where((s) => s.medicationId == medId && s.active)
       .toList();
@@ -1612,15 +1605,59 @@ ScheduledDose? _nextDoseForMedication(String medId) {
     for (final minutes in times) {
       final hour = minutes ~/ 60;
       final minute = minutes % 60;
+
+      // Start checking from today
       var candidate = DateTime(now.year, now.month, now.day, hour, minute);
 
-      if (candidate.isBefore(now)) {
-        candidate = candidate.add(const Duration(days: 1));
-      }
+      // If the time has already passed for today, start checking from tomorrow
+      // UNLESS it's today and we haven't taken it yet?
+      // Actually, if it's in the past, it's either missed or taken.
+      // "Next Dose" usually implies future or "due now".
+      // If it's 5 mins ago and not taken, is it "Next Dose"? Yes, it's overdue.
+      // But the original logic skipped past times.
+      // Let's stick to "future" or "very recent past" logic, but for now,
+      // let's just find the next *valid* slot that isn't taken.
 
-      if (nextTime == null || candidate.isBefore(nextTime)) {
-        nextTime = candidate;
-        nextSchedule = schedule;
+      // We'll check up to 14 days
+      for (int i = 0; i < 14; i++) {
+        // Check if this candidate is in the past (with a small buffer, e.g. 1 hour ago is still "next" if missed?)
+        // For simplicity, let's say "Next Dose" is strictly in the future OR today.
+        // If it's in the past, we skip it unless we want to show overdue.
+        // The user said "I marked that dose as taken and it should refresh as taken, or show the next dose."
+        // This implies if I take the 9am dose at 9am, it should show the 1pm dose.
+
+        if (candidate.isBefore(now.subtract(const Duration(minutes: 15)))) {
+          // If it's more than 15 mins in the past, assume we missed it or it's done, move to next day/time
+          // But wait, we need to check if it was taken.
+          // If it wasn't taken, it's overdue.
+          // For this specific "Next Dose" card, let's just show the next *future* one for now to satisfy "refresh as taken".
+          // If we want to show overdue, we need more complex logic.
+          // Let's stick to the original "isBefore(now)" check but add the log check.
+        }
+
+        if (candidate.isBefore(now)) {
+          candidate = candidate.add(const Duration(days: 1));
+          continue; // This specific time slot is past, try tomorrow (or next loop iteration will handle it)
+          // Actually, the inner loop iterates days.
+          // Wait, the original logic:
+          // if (candidate.isBefore(now)) candidate = candidate.add(Duration(days: 1));
+          // This only added 1 day. It didn't loop.
+          // The loop below `for (int i = 0; i < 8; i++)` adds days.
+        }
+
+        // Check if this specific slot is taken
+        final logId = '${schedule.id}_${candidate.millisecondsSinceEpoch}';
+        final isTaken = doseLogBox.containsKey(logId);
+
+        if (schedule.daysOfWeek.contains(candidate.weekday) && !isTaken) {
+          // Found a valid, untaken slot
+          if (nextTime == null || candidate.isBefore(nextTime)) {
+            nextTime = candidate;
+            nextSchedule = schedule;
+          }
+          break; // Found the next slot for this specific time-of-day rule
+        }
+        candidate = candidate.add(const Duration(days: 1));
       }
     }
   }
@@ -1630,8 +1667,146 @@ ScheduledDose? _nextDoseForMedication(String medId) {
       : null;
 }
 
-void _showRefillDialog(BuildContext context, Medication med) {
-  // TODO: Implement refill dialog
+void _showRefillDialog(BuildContext context, Medication med) async {
+  final isMdv = med.form == MedicationForm.multiDoseVial;
+  final unit = isMdv ? 'vials' : _stockUnitLabel(med.stockUnit);
+  final controller = TextEditingController(text: '1');
+
+  final result = await showDialog<double>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Refill ${med.name}'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Add stock to your inventory.', style: bodyTextStyle(context)),
+          const SizedBox(height: 16),
+          StatefulBuilder(
+            builder: (context, setState) {
+              return StepperRow36(
+                controller: controller,
+                onDec: () {
+                  final v = double.tryParse(controller.text) ?? 0;
+                  if (v > 0) {
+                    controller.text = (v - 1).toStringAsFixed(0);
+                  }
+                },
+                onInc: () {
+                  final v = double.tryParse(controller.text) ?? 0;
+                  controller.text = (v + 1).toStringAsFixed(0);
+                },
+                decoration: buildCompactFieldDecoration(context: context),
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          Text(unit, style: helperTextStyle(context)),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final val = double.tryParse(controller.text);
+            if (val != null && val > 0) {
+              Navigator.pop(context, val);
+            }
+          },
+          child: const Text('Add Stock'),
+        ),
+      ],
+    ),
+  );
+
+  if (result != null && context.mounted) {
+    final box = Hive.box<Medication>('medications');
+    final newStock = med.stockValue + result;
+
+    box.put(med.id, med.copyWith(stockValue: newStock));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Added ${_formatNumber(result)} $unit')),
+    );
+  }
+}
+
+Future<void> _showStepperEditDialog(
+  BuildContext context,
+  Medication med,
+  String title,
+  double initialValue,
+  void Function(double) onSave, {
+  bool isInt = false,
+  String? unit,
+}) async {
+  final controller = TextEditingController(
+    text: isInt ? initialValue.toInt().toString() : initialValue.toString(),
+  );
+
+  final result = await showDialog<double>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StatefulBuilder(
+            builder: (context, setState) {
+              return StepperRow36(
+                controller: controller,
+                onDec: () {
+                  final v = double.tryParse(controller.text) ?? 0;
+                  final step = isInt ? 1.0 : 0.1;
+                  final newVal = (v - step).clamp(0.0, 1000000.0);
+                  controller.text = isInt
+                      ? newVal.toInt().toString()
+                      : newVal.toStringAsFixed(1);
+                },
+                onInc: () {
+                  final v = double.tryParse(controller.text) ?? 0;
+                  final step = isInt ? 1.0 : 0.1;
+                  final newVal = (v + step).clamp(0.0, 1000000.0);
+                  controller.text = isInt
+                      ? newVal.toInt().toString()
+                      : newVal.toStringAsFixed(1);
+                },
+                decoration: buildCompactFieldDecoration(context: context),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
+              );
+            },
+          ),
+          if (unit != null) ...[
+            const SizedBox(height: 8),
+            Text(unit, style: helperTextStyle(context)),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final val = double.tryParse(controller.text);
+            if (val != null) {
+              Navigator.pop(context, val);
+            }
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+
+  if (result != null && result != initialValue) {
+    onSave(result);
+  }
 }
 
 Future<void> _showEditDialog(
@@ -1680,128 +1855,14 @@ Future<void> _editDate(
   DateTime? initialDate,
   void Function(DateTime) onSave,
 ) async {
-  final picked = await showDialog<DateTime>(
-    context: context,
-    builder: (context) => _ExpiryDatePickerDialog(
-      initialDate: initialDate ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    ),
+  final picked = await SmartExpiryPicker.show(
+    context,
+    initialDate: initialDate ?? DateTime.now(),
+    firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
+    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
   );
   if (picked != null) {
     onSave(picked);
-  }
-}
-
-class _ExpiryDatePickerDialog extends StatefulWidget {
-  final DateTime initialDate;
-  final DateTime firstDate;
-  final DateTime lastDate;
-
-  const _ExpiryDatePickerDialog({
-    required this.initialDate,
-    required this.firstDate,
-    required this.lastDate,
-  });
-
-  @override
-  State<_ExpiryDatePickerDialog> createState() =>
-      _ExpiryDatePickerDialogState();
-}
-
-class _ExpiryDatePickerDialogState extends State<_ExpiryDatePickerDialog> {
-  late DateTime _selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate = widget.initialDate;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final daysUntil = _selectedDate.difference(DateTime.now()).inDays;
-    final isExpired = daysUntil < 0;
-
-    return AlertDialog(
-      contentPadding: EdgeInsets.zero,
-      content: SizedBox(
-        width: 320,
-        height: 450,
-        child: Column(
-          children: [
-            // Custom Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Theme.of(context).colorScheme.primary,
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Expiry Date',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormat('EEE, MMM d').format(_selectedDate),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onPrimary.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      isExpired
-                          ? 'Expired ${daysUntil.abs()} days ago'
-                          : '$daysUntil days remaining',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CalendarDatePicker(
-                initialDate: _selectedDate,
-                firstDate: widget.firstDate,
-                lastDate: widget.lastDate,
-                onDateChanged: (date) => setState(() => _selectedDate = date),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, _selectedDate),
-          child: const Text('OK'),
-        ),
-      ],
-    );
   }
 }
 
@@ -1820,19 +1881,16 @@ void _editManufacturer(BuildContext context, Medication med) {
 }
 
 void _editStrength(BuildContext context, Medication med) {
-  _showEditDialog(
+  _showStepperEditDialog(
     context,
     med,
     'Strength Value',
-    med.strengthValue.toString(),
+    med.strengthValue,
     (val) {
-      final d = double.tryParse(val);
-      if (d != null) {
-        final box = Hive.box<Medication>('medications');
-        box.put(med.id, med.copyWith(strengthValue: d));
-      }
+      final box = Hive.box<Medication>('medications');
+      box.put(med.id, med.copyWith(strengthValue: val));
     },
-    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    unit: _unitLabel(med.strengthUnit),
   );
 }
 
@@ -1896,37 +1954,103 @@ void _editStorageLocation(BuildContext context, Medication med) {
   });
 }
 
-void _editStorageInstructions(BuildContext context, Medication med) {
-  _showEditDialog(
-    context,
-    med,
-    'Storage Instructions',
-    med.storageInstructions ?? '',
-    (val) {
-      final box = Hive.box<Medication>('medications');
-      box.put(med.id, med.copyWith(storageInstructions: val));
+void _editStorageConditions(BuildContext context, Medication med) async {
+  final result = await showDialog<Map<String, bool>>(
+    context: context,
+    builder: (context) {
+      bool refrigerated = med.requiresRefrigeration;
+      bool frozen = med.requiresFreezer;
+      bool lightSensitive = med.lightSensitive;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Storage Conditions'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SwitchListTile(
+                  title: const Text('Refrigerated'),
+                  secondary: const Icon(Icons.ac_unit),
+                  value: refrigerated,
+                  onChanged: (val) {
+                    setState(() {
+                      refrigerated = val;
+                      if (val) frozen = false;
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Frozen'),
+                  secondary: const Icon(Icons.severe_cold),
+                  value: frozen,
+                  onChanged: (val) {
+                    setState(() {
+                      frozen = val;
+                      if (val) refrigerated = false;
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Light Sensitive'),
+                  secondary: const Icon(Icons.light_mode_outlined),
+                  value: lightSensitive,
+                  onChanged: (val) {
+                    setState(() {
+                      lightSensitive = val;
+                    });
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, {
+                  'refrigerated': refrigerated,
+                  'frozen': frozen,
+                  'lightSensitive': lightSensitive,
+                }),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
     },
-    maxLines: 3,
   );
+
+  if (result != null) {
+    final box = Hive.box<Medication>('medications');
+    box.put(
+      med.id,
+      med.copyWith(
+        requiresRefrigeration: result['refrigerated']!,
+        requiresFreezer: result['frozen']!,
+        lightSensitive: result['lightSensitive']!,
+      ),
+    );
+  }
 }
 
 void _editLowStockThreshold(BuildContext context, Medication med) {
-  _showEditDialog(
+  _showStepperEditDialog(
     context,
     med,
     'Low Stock Threshold',
-    med.lowStockThreshold?.toString() ?? '',
+    med.lowStockThreshold ?? 0,
     (val) {
-      final d = double.tryParse(val);
-      if (d != null) {
-        final box = Hive.box<Medication>('medications');
-        box.put(
-          med.id,
-          med.copyWith(lowStockThreshold: d, lowStockEnabled: true),
-        );
-      }
+      final box = Hive.box<Medication>('medications');
+      box.put(
+        med.id,
+        med.copyWith(lowStockThreshold: val, lowStockEnabled: true),
+      );
     },
-    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    isInt: _isIntegerStock(med.stockUnit),
+    unit: _stockUnitLabel(med.stockUnit),
   );
 }
 
@@ -1958,19 +2082,16 @@ void _editActiveVialLocation(BuildContext context, Medication med) {
 }
 
 void _editActiveVialLowStock(BuildContext context, Medication med) {
-  _showEditDialog(
+  _showStepperEditDialog(
     context,
     med,
     'Active Vial Low Stock (mL)',
-    med.activeVialLowStockMl?.toString() ?? '',
+    med.activeVialLowStockMl ?? 0,
     (val) {
-      final d = double.tryParse(val);
-      if (d != null) {
-        final box = Hive.box<Medication>('medications');
-        box.put(med.id, med.copyWith(activeVialLowStockMl: d));
-      }
+      final box = Hive.box<Medication>('medications');
+      box.put(med.id, med.copyWith(activeVialLowStockMl: val));
     },
-    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    unit: 'mL',
   );
 }
 
@@ -2150,7 +2271,7 @@ Widget _buildStockForecastCard(
 
   final daysRemaining = totalStockDoses / dailyConsumption;
   final date = DateTime.now().add(Duration(days: daysRemaining.floor()));
-  final dateStr = DateFormat('MMM d, y').format(date);
+  final dateStr = DateFormat('d MMM y').format(date);
 
   final expiry = med.expiry;
   bool expiresBeforeStockout = false;
@@ -2217,7 +2338,7 @@ Widget _buildStockForecastCard(
             ),
             const SizedBox(width: 4),
             Text(
-              'Expires: ${DateFormat('MMM d, y').format(expiry)}',
+              'Expires: ${DateFormat('d MMM y').format(expiry)}',
               style: TextStyle(
                 color: expiresBeforeStockout
                     ? Theme.of(context).colorScheme.errorContainer

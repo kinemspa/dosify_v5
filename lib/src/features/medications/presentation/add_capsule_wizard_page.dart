@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Wizard-style Capsule add/edit screen with step-by-step flow
@@ -334,7 +335,7 @@ class _AddCapsuleWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., AstraZeneca',
+                    hint: 'e.g., PharmaInc',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -593,8 +594,8 @@ class _AddCapsuleWizardPageState
                       ).formatCompactDate(_expiry!),
                 onPressed: () async {
                   final now = DateTime.now();
-                  final picked = await showDatePicker(
-                    context: context,
+                  final picked = await SmartExpiryPicker.show(
+                    context,
                     firstDate: now,
                     lastDate: DateTime(now.year + 10),
                     initialDate: _expiry ?? now.add(const Duration(days: 365)),

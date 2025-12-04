@@ -110,7 +110,13 @@ class ScheduleCard extends StatelessWidget {
                     onPressed: () async {
                       final ok = await confirmTake(context, s);
                       if (!ok) return;
+
+                      // 1. Create Dose Log
+                      await _markAsTaken(context, s);
+
+                      // 2. Decrement Stock
                       final success = await applyStockDecrement(context, s);
+
                       if (success && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Marked as taken: ${s.name}')),
@@ -210,6 +216,9 @@ class ScheduleCard extends StatelessWidget {
                   onPressed: () async {
                     final ok = await confirmTake(context, s);
                     if (!ok) return;
+
+                    await _markAsTaken(context, s);
+
                     final success = await applyStockDecrement(context, s);
                     if (success && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -418,6 +427,47 @@ class ScheduleCard extends StatelessWidget {
       }
     }
     return null;
+  }
+
+  /// Helper: mark current schedule's next occurrence as taken by creating a DoseLog
+  Future<void> _markAsTaken(BuildContext context, Schedule s) async {
+    final occ = _nextOccurrenceAndIndex(s);
+    final next = occ?.dt;
+    if (next == null) return;
+
+    final logId = '${s.id}_${next.millisecondsSinceEpoch}';
+    final log = DoseLog(
+      id: logId,
+      scheduleId: s.id,
+      scheduleName: s.name,
+      medicationId: s.medicationId ?? 'unknown',
+      medicationName: s.medicationName,
+      scheduledTime: next,
+      doseValue: s.doseValue,
+      doseUnit: s.doseUnit,
+      action: DoseAction.taken,
+      actionTime: DateTime.now(),
+    );
+
+    try {
+      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      await repo.upsert(log);
+
+      // Cancel notification for this slot
+      try {
+        final minutes = next.hour * 60 + next.minute;
+        final occurrence = occ?.occurrence ?? 0;
+        final id = ScheduleScheduler.slotIdFor(
+          s.id,
+          weekday: next.weekday,
+          minutes: minutes,
+          occurrence: occurrence,
+        );
+        await NotificationService.cancel(id);
+      } catch (_) {}
+    } catch (e) {
+      debugPrint('Error logging dose: $e');
+    }
   }
 
   /// Helper: snooze current schedule's next occurrence by creating a DoseLog entry

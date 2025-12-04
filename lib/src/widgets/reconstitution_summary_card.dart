@@ -19,6 +19,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     this.volumePerDose,
     this.reconFluidName,
     this.syringeSizeMl,
+    this.compact = false,
   });
 
   final double strengthValue;
@@ -29,6 +30,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
   final double? volumePerDose;
   final String? reconFluidName;
   final double? syringeSizeMl;
+  final bool compact;
 
   String _formatNoTrailing(double value) {
     final str = value.toStringAsFixed(2);
@@ -42,7 +44,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: kReconSummaryPadding,
+      padding: compact
+          ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
+          : kReconSummaryPadding,
       decoration: BoxDecoration(
         color: kReconBackgroundActive,
         borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
@@ -69,28 +73,32 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.w700,
-              fontSize: 14,
+              fontSize: compact ? 12 : 14,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: compact ? 8 : 12),
           // Center the rest of the content
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Science icon
-              Icon(
-                Icons.science_outlined,
-                size: 32,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 12),
+              if (!compact) ...[
+                Icon(
+                  Icons.science_outlined,
+                  size: 32,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 12),
+              ],
               // Medication strength and name with "Reconstituted" prefix and fluid
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                    color: Colors.white.withValues(
+                      alpha: kReconTextHighOpacity,
+                    ),
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                   ),
@@ -99,7 +107,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                     TextSpan(
                       text: '${_formatNoTrailing(strengthValue)} $strengthUnit',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: compact ? 16 : 20,
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w800,
                       ),
@@ -107,15 +115,17 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                     TextSpan(
                       text: '  of  ',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                        fontSize: compact ? 12 : 14,
+                        color: Colors.white.withValues(
+                          alpha: kReconTextHighOpacity,
+                        ),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
                     TextSpan(
                       text: medicationName,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: compact ? 14 : 18,
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w700,
                       ),
@@ -124,7 +134,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                       TextSpan(
                         text: '\nwith $reconFluidName',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: compact ? 11 : 13,
                           color: Colors.white.withValues(
                             alpha: kReconTextHighOpacity,
                           ),
@@ -137,12 +147,12 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ],
           ),
           if (containerVolumeMl != null && containerVolumeMl! > 0) ...[
-            const SizedBox(height: 6),
+            SizedBox(height: compact ? 4 : 6),
             // Divider line
             Container(
               height: kReconDividerHeight,
               margin: EdgeInsets.symmetric(
-                vertical: kReconDividerVerticalMargin,
+                vertical: compact ? 8 : kReconDividerVerticalMargin,
               ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -157,7 +167,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: compact ? 4 : 6),
             // Total volume line
             RichText(
               textAlign: TextAlign.center,
@@ -172,7 +182,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                   TextSpan(
                     text: '${_formatNoTrailing(containerVolumeMl!)} mL',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: compact ? 18 : 22,
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w800,
                     ),
@@ -182,7 +192,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ),
           ],
           if (perMlValue != null && perMlValue! > 0) ...[
-            const SizedBox(height: 14),
+            SizedBox(height: compact ? 8 : 14),
             // Concentration line
             RichText(
               textAlign: TextAlign.center,
@@ -198,7 +208,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                     text:
                         '${_formatNoTrailing(perMlValue!)} ${strengthUnit.replaceAll('/mL', '')}/mL',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: compact ? 14 : 18,
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -208,7 +218,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ),
           ],
           if (volumePerDose != null && volumePerDose! > 0) ...[
-            const SizedBox(height: 14),
+            SizedBox(height: compact ? 8 : 14),
             // Volume per dose line
             RichText(
               textAlign: TextAlign.center,
@@ -223,7 +233,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                   TextSpan(
                     text: '${_formatNoTrailing(volumePerDose!)} mL',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: compact ? 14 : 18,
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w700,
                     ),
@@ -231,7 +241,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: compact ? 8 : 12),
             // Syringe size text
             if (syringeSizeMl != null)
               Text(

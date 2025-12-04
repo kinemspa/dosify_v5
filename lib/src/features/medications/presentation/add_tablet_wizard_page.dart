@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Wizard-style Tablet add/edit screen with step-by-step flow
@@ -315,7 +316,7 @@ class _AddTabletWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Panadol',
+                    hint: 'e.g., Ibuprofen',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -332,7 +333,10 @@ class _AddTabletWizardPageState
                 child: TextField(
                   controller: _manufacturerCtrl,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(context, hint: 'e.g., GSK'),
+                  decoration: buildFieldDecoration(
+                    context,
+                    hint: 'e.g., PharmaInc',
+                  ),
                   onChanged: (_) => setState(() {}),
                 ),
               ),
@@ -590,8 +594,8 @@ class _AddTabletWizardPageState
                       ).formatCompactDate(_expiry!),
                 onPressed: () async {
                   final now = DateTime.now();
-                  final picked = await showDatePicker(
-                    context: context,
+                  final picked = await SmartExpiryPicker.show(
+                    context,
                     firstDate: now,
                     lastDate: DateTime(now.year + 10),
                     initialDate: _expiry ?? now.add(const Duration(days: 365)),
