@@ -547,8 +547,8 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
                 other.selectedMed == selectedMed) &&
             (identical(other.startDate, startDate) ||
                 other.startDate == startDate) &&
-            const DeepCollectionEquality()
-                .equals(other.selectedSyringeType, selectedSyringeType) &&
+            (identical(other.selectedSyringeType, selectedSyringeType) ||
+                other.selectedSyringeType == selectedSyringeType) &&
             (identical(other.showMedSelector, showMedSelector) ||
                 other.showMedSelector == showMedSelector) &&
             (identical(other.isSaving, isSaving) ||
@@ -579,7 +579,7 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
         nameAuto,
         selectedMed,
         startDate,
-        const DeepCollectionEquality().hash(selectedSyringeType),
+        selectedSyringeType,
         showMedSelector,
         isSaving,
         error
