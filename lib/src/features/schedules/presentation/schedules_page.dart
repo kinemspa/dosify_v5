@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 
@@ -243,38 +244,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
   }
 
   DateTime? _nextOccurrence(Schedule s) {
-    final now = DateTime.now();
-    final times = s.timesOfDay ?? [s.minutesOfDay];
-    for (var d = 0; d < 60; d++) {
-      final date = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).add(Duration(days: d));
-      final onDay =
-          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-          ? (() {
-              final anchor = s.cycleAnchorDate ?? now;
-              final a = DateTime(anchor.year, anchor.month, anchor.day);
-              final d0 = DateTime(date.year, date.month, date.day);
-              final diff = d0.difference(a).inDays;
-              return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-            })()
-          : s.daysOfWeek.contains(date.weekday);
-      if (onDay) {
-        for (final minutes in times) {
-          final dt = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            minutes ~/ 60,
-            minutes % 60,
-          );
-          if (dt.isAfter(now)) return dt;
-        }
-      }
-    }
-    return null;
+    return ScheduleOccurrenceService.nextOccurrence(s);
   }
 }
 
@@ -404,38 +374,7 @@ class _ScheduleTile extends StatelessWidget {
   }
 
   DateTime? _nextOccurrence(Schedule s) {
-    final now = DateTime.now();
-    final times = s.timesOfDay ?? [s.minutesOfDay];
-    for (var d = 0; d < 60; d++) {
-      final date = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).add(Duration(days: d));
-      final onDay =
-          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-          ? (() {
-              final anchor = s.cycleAnchorDate ?? now;
-              final a = DateTime(anchor.year, anchor.month, anchor.day);
-              final d0 = DateTime(date.year, date.month, date.day);
-              final diff = d0.difference(a).inDays;
-              return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-            })()
-          : s.daysOfWeek.contains(date.weekday);
-      if (onDay) {
-        for (final minutes in times) {
-          final dt = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            minutes ~/ 60,
-            minutes % 60,
-          );
-          if (dt.isAfter(now)) return dt;
-        }
-      }
-    }
-    return null;
+    return ScheduleOccurrenceService.nextOccurrence(s);
   }
 }
 
@@ -697,38 +636,7 @@ class _ScheduleCard extends StatelessWidget {
   }
 
   DateTime? _nextOccurrence(Schedule s) {
-    final now = DateTime.now();
-    final times = s.timesOfDay ?? [s.minutesOfDay];
-    for (var d = 0; d < 60; d++) {
-      final date = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).add(Duration(days: d));
-      final onDay =
-          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-          ? (() {
-              final anchor = s.cycleAnchorDate ?? now;
-              final a = DateTime(anchor.year, anchor.month, anchor.day);
-              final d0 = DateTime(date.year, date.month, date.day);
-              final diff = d0.difference(a).inDays;
-              return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-            })()
-          : s.daysOfWeek.contains(date.weekday);
-      if (onDay) {
-        for (final minutes in times) {
-          final dt = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            minutes ~/ 60,
-            minutes % 60,
-          );
-          if (dt.isAfter(now)) return dt;
-        }
-      }
-    }
-    return null;
+    return ScheduleOccurrenceService.nextOccurrence(s);
   }
 
   DateTime? _lastOccurrence(Schedule s) {
