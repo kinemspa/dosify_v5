@@ -380,7 +380,7 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
                 Unit.mgPerMl => med.strengthValue * 1000,
                 Unit.gPerMl => med.strengthValue * 1e6,
                 Unit.unitsPerMl => med.strengthValue,
-                Unit.unitsPerMl => med.strengthValue, // Duplicate in original?
+  
               };
               doseTabletQuarters = ((desiredMcg / perTabMcg) * 4).round();
               doseUnitCode = switch (unitStr) {

@@ -1,0 +1,91 @@
+Analyzing 2 items...                                            
+
+   info - Sort directive sections alphabetically - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:10:1 - directives_ordering
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:30:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:97:81 - lines_longer_than_80_chars
+warning - The value of the local variable 'n' isn't used - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:103:11 - unused_local_variable
+   info - Unnecessary duplication of receiver - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:106:5 - cascade_invocations
+   info - Unnecessary duplication of receiver - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:107:5 - cascade_invocations
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:119:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:124:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:190:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:191:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:240:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:267:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:284:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:303:81 - lines_longer_than_80_chars
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:323:17 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:324:38 - use_build_context_synchronously
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:338:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:354:81 - lines_longer_than_80_chars
+   info - Closure should be a tearoff - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:357:38 - unnecessary_lambdas
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:358:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:359:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:360:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:361:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:406:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:407:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:410:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:413:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:423:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:425:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:426:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:435:81 - lines_longer_than_80_chars
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:442:27 - deprecated_member_use
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:442:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:464:81 - lines_longer_than_80_chars
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:475:29 - deprecated_member_use
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:491:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:506:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:561:81 - lines_longer_than_80_chars
+   info - Use the constant 'TextInputType.number' rather than a constructor returning the same object - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:581:39 - use_named_constants
+   info - Use the constant 'TextInputType.number' rather than a constructor returning the same object - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:607:39 - use_named_constants
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:621:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:625:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:633:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:654:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:670:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:677:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:697:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:710:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:717:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:734:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:779:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:786:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:845:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:932:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:933:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:945:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:994:81 - lines_longer_than_80_chars
+   info - Unnecessary use of a 'double' literal - lib\src\features\schedules\presentation\add_edit_schedule_page.dart:1271:43 - prefer_int_literals
+   info - Sort directive sections alphabetically - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:5:1 - directives_ordering
+   info - Sort directive sections alphabetically - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:6:1 - directives_ordering
+   info - Sort directive sections alphabetically - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:8:1 - directives_ordering
+   info - Sort directive sections alphabetically - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:10:1 - directives_ordering
+   info - Required named parameters should be before optional named parameters - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:33:23 - always_put_required_named_parameters_first
+   info - Required named parameters should be before optional named parameters - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:36:23 - always_put_required_named_parameters_first
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:45:81 - lines_longer_than_80_chars
+   info - Unnecessary type annotation on a local variable - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:53:7 - omit_local_variable_types
+   info - Unnecessary type annotation on a local variable - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:54:7 - omit_local_variable_types
+   info - The value of the argument is redundant because it matches the default value - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:71:9 - avoid_redundant_argument_values
+   info - To-do comment doesn't follow the Flutter style - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:71:24 - flutter_style_todos
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:71:81 - lines_longer_than_80_chars
+   info - The value of the argument is redundant because it matches the default value - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:72:9 - avoid_redundant_argument_values
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:72:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:78:81 - lines_longer_than_80_chars
+   info - To-do comment doesn't follow the Flutter style - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:88:36 - flutter_style_todos
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:90:81 - lines_longer_than_80_chars
+   info - Unnecessary type annotation on a local variable - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:145:5 - omit_local_variable_types
+   info - Unnecessary type annotation on a local variable - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:146:5 - omit_local_variable_types
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:211:81 - lines_longer_than_80_chars
+   info - Unnecessary duplication of receiver - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:222:7 - cascade_invocations
+   info - 'bool' parameters should be named parameters - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:263:17 - avoid_positional_boolean_parameters
+   info - 'bool' parameters should be named parameters - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:283:18 - avoid_positional_boolean_parameters
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:290:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:291:81 - lines_longer_than_80_chars
+warning - This case is covered by the previous cases - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:383:33 - unreachable_switch_case
+   info - Invalid use of 'default' member in a switch - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:457:15 - no_default_cases
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:518:81 - lines_longer_than_80_chars
+   info - The line length exceeds the 80-character limit - lib\src\features\schedules\presentation\controllers\schedule_form_controller.dart:554:81 - lines_longer_than_80_chars
+
+87 issues found. (ran in 1.8s)

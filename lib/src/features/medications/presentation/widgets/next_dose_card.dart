@@ -212,7 +212,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
         context,
       ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kBorderRadiusM),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Center(
@@ -246,11 +246,11 @@ class _NextDoseCardState extends State<NextDoseCard> {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: InkWell(
         onTap: () => _showDoseActionSheet(dose),
-        borderRadius: BorderRadius.circular(kBorderRadiusM),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(kBorderRadiusM),
+            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
             border: Border.all(color: borderColor),
             boxShadow: [
               if (total > 1)
