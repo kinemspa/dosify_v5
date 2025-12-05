@@ -273,53 +273,8 @@ class MedicationHeaderWidget extends StatelessWidget {
                   medication: medication,
                   daysRemaining: daysRemaining!,
                   stockoutDate: stockoutDate!,
+                  onRefill: onRefill,
                 ),
-
-              const SizedBox(height: 8),
-
-              // Custom Refill Button
-              Container(
-                height: 28,
-                decoration: BoxDecoration(
-                  color: onPrimary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: onPrimary.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onRefill,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.add_circle_outline,
-                            size: 14,
-                            color: onPrimary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Refill',
-                            style: TextStyle(
-                              color: onPrimary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ],
@@ -614,12 +569,14 @@ class _StockForecastCard extends StatelessWidget {
     required this.medication,
     required this.daysRemaining,
     required this.stockoutDate,
+    required this.onRefill,
   });
 
   final Color color;
   final Medication medication;
   final double daysRemaining;
   final DateTime stockoutDate;
+  final VoidCallback onRefill;
 
   @override
   Widget build(BuildContext context) {
@@ -744,6 +701,42 @@ class _StockForecastCard extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 10),
+          // Refill button
+          SizedBox(
+            width: double.infinity,
+            child: Material(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(6),
+              child: InkWell(
+                onTap: onRefill,
+                borderRadius: BorderRadius.circular(6),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add_circle_outline,
+                        size: 14,
+                        color: color,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Refill Stock',
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
