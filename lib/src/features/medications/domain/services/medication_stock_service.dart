@@ -6,8 +6,9 @@ class MedicationStockService {
   /// Calculate the stock fill ratio (0.0 to 1.0)
   static double calculateStockRatio(Medication med) {
     if (med.stockValue <= 0) return 0.0;
-    if (med.stockMax <= 0) return 1.0;
-    return (med.stockValue / med.stockMax).clamp(0.0, 1.0);
+    final maxStock = med.initialStockValue ?? med.stockValue;
+    if (maxStock <= 0) return 1.0;
+    return (med.stockValue / maxStock).clamp(0.0, 1.0);
   }
 
   /// Check if medication is low on stock (below 25%)

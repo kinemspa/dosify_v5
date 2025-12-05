@@ -15,7 +15,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 0,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -30,7 +30,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 100,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -45,7 +45,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 50,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -60,7 +60,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 150,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -77,7 +77,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 20,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -92,7 +92,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 30,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -109,7 +109,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 0,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -137,7 +137,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 30,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -168,7 +168,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 30,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -200,7 +200,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 30,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -217,7 +217,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 0,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -232,7 +232,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 5,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 
@@ -247,7 +247,7 @@ void main() {
           strengthValue: 10,
           strengthUnit: Unit.mg,
           stockValue: 60,
-          stockMax: 100,
+          initialStockValue: 100,
           stockUnit: StockUnit.tablets,
         );
 

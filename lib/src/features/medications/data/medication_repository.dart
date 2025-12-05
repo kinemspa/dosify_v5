@@ -61,8 +61,9 @@ class MedicationRepository {
   /// Get medications that are low on stock (below 25%)
   List<Medication> getLowStock() {
     return _box.values.where((m) {
-      if (m.stockMax <= 0) return false;
-      return (m.stockValue / m.stockMax) < 0.25;
+      final maxStock = m.initialStockValue ?? m.stockValue;
+      if (maxStock <= 0) return false;
+      return (m.stockValue / maxStock) < 0.25;
     }).toList(growable: false);
   }
 
