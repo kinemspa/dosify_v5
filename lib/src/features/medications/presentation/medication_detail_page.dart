@@ -292,15 +292,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                     child: Opacity(
                                       opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
                                       child: Padding(
-                                        padding: const EdgeInsets.only(top: 2),
+                                        padding: const EdgeInsets.only(top: 1),
                                         child: Text(
                                           updatedMed.manufacturer!,
                                           style: TextStyle(
                                             color: onPrimary.withValues(
-                                              alpha: 0.8,
+                                              alpha: 0.7,
                                             ),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w400,
+                                            letterSpacing: 0.2,
                                           ),
                                         ),
                                       ),

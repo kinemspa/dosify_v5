@@ -108,13 +108,13 @@ class MedicationHeaderWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Space for the animated Name (which is positioned absolutely in parent)
-                const SizedBox(height: 60),
+                const SizedBox(height: 52),
 
                 // Description & Notes
                 if (medication.description != null &&
                     medication.description!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: Text(
                       medication.description!,
                       style: TextStyle(
@@ -380,18 +380,20 @@ class _HeaderInfoTile extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: color.withValues(alpha: 0.7),
-            fontSize: 10,
+            color: color.withValues(alpha: 0.65),
+            fontSize: 9,
             fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+            height: 1.2,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 5),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: 4),
+              Icon(icon, color: color.withValues(alpha: 0.95), size: 15),
+              const SizedBox(width: 5),
             ],
             Flexible(
               child: Text(
@@ -399,13 +401,15 @@ class _HeaderInfoTile extends StatelessWidget {
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: 13,
+                  letterSpacing: 0.1,
+                  height: 1.1,
                 ),
               ),
             ),
             if (trailingIcon != null) ...[
-              const SizedBox(width: 4),
-              Icon(trailingIcon, color: color, size: 14),
+              const SizedBox(width: 5),
+              Icon(trailingIcon, color: color.withValues(alpha: 0.95), size: 15),
             ],
           ],
         ),
