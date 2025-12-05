@@ -501,15 +501,22 @@ class _StockInfoCard extends StatelessWidget {
     final stockService = MedicationStockService;
     final pct = stockRatio.clamp(0.0, 1.0);
     
-    final hasBackup = medication.backupStockValue > 0;
-    final backupPct = hasBackup
-        ? (medication.backupStockValue / medication.backupStockInitial).clamp(0.0, 1.0)
-        : 0.0;
+    final isMdv = medication.form == MedicationForm.mdv;
+    final hasBackup = isMdv && medication.backupVials > 0;
+    
+    double backupPct = 0;
+    if (hasBackup) {
+      final baseline = medication.lowStockVialsThresholdCount != null &&
+              medication.lowStockVialsThresholdCount! > 0
+          ? medication.lowStockVialsThresholdCount!.toDouble()
+          : medication.stockValue;
+      backupPct =
+          baseline > 0 ? (medication.stockValue / baseline) * 100.0 : 0.0;
+    }
     
     final primaryLabel = '${(pct * 100).round()}%';
     final gaugeColor = stockService.getStockLevelColor(medication);
     
-    final isMdv = medication.form == MedicationForm.mdv;
     final initial = isMdv && medication.containerVolumeMl != null
         ? medication.containerVolumeMl!
         : medication.stockInitial;
@@ -518,9 +525,7 @@ class _StockInfoCard extends StatelessWidget {
     final helperLabel = isMdv ? 'Active Vial' : 'Remaining';
     
     String? extraStockLabel;
-    if (hasBackup) {
-      extraStockLabel = '+ ${_formatNumber(medication.backupStockValue)} $unit backup';
-    } else if (isMdv && medication.backupVials > 0) {
+    if (isMdv && medication.backupVials > 0) {
       extraStockLabel = '+ ${medication.backupVials} backup ${medication.backupVials == 1 ? 'vial' : 'vials'}';
     }
 
