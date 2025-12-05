@@ -630,80 +630,122 @@ class _StockForecastCard extends StatelessWidget {
       stockoutDate,
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          'Stock Forecast',
-          style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10),
-          textAlign: TextAlign.right,
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 1,
         ),
-        const SizedBox(height: 2),
-        Text(
-          'Based on current schedule',
-          style: TextStyle(
-            color: color.withValues(alpha: 0.5),
-            fontSize: 9,
-            fontStyle: FontStyle.italic,
-          ),
-          textAlign: TextAlign.right,
-        ),
-        Text(
-          'Expected to last until',
-          style: TextStyle(
-            color: color.withValues(alpha: 0.5),
-            fontSize: 10,
-            fontStyle: FontStyle.italic,
-          ),
-          textAlign: TextAlign.right,
-        ),
-        Text(
-          dateStr,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-          textAlign: TextAlign.right,
-        ),
-        Text(
-          '${daysRemaining.floor()} days',
-          style: TextStyle(
-            color: color.withValues(alpha: 0.9),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.right,
-        ),
-        if (expiry != null) ...[
-          const SizedBox(height: 4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Icon(
-                Icons.event,
-                size: 12,
-                color: expiresBeforeStockout
-                    ? Theme.of(context).colorScheme.errorContainer
-                    : color.withValues(alpha: 0.7),
+                Icons.calendar_today,
+                size: 11,
+                color: color.withValues(alpha: 0.65),
               ),
               const SizedBox(width: 4),
               Text(
-                'Expires: ${DateFormat('d MMM y').format(expiry)}',
+                'STOCK FORECAST',
                 style: TextStyle(
-                  color: expiresBeforeStockout
-                      ? Theme.of(context).colorScheme.errorContainer
-                      : color.withValues(alpha: 0.7),
-                  fontSize: 10,
-                  fontWeight: expiresBeforeStockout
-                      ? FontWeight.bold
-                      : FontWeight.normal,
+                  color: color.withValues(alpha: 0.65),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Lasts until',
+                    style: TextStyle(
+                      color: color.withValues(alpha: 0.6),
+                      fontSize: 9,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    dateStr,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      height: 1.1,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${daysRemaining.floor()} days',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (expiry != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: expiresBeforeStockout
+                    ? Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.2)
+                    : color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.event_outlined,
+                    size: 11,
+                    color: expiresBeforeStockout
+                        ? Theme.of(context).colorScheme.error
+                        : color.withValues(alpha: 0.7),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Expires ${DateFormat('d MMM').format(expiry)}',
+                    style: TextStyle(
+                      color: expiresBeforeStockout
+                          ? Theme.of(context).colorScheme.error
+                          : color.withValues(alpha: 0.8),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
