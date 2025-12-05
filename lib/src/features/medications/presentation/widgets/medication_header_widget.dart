@@ -114,15 +114,14 @@ class MedicationHeaderWidget extends StatelessWidget {
                 if (medication.description != null &&
                     medication.description!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
                       medication.description!,
                       style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.95),
-                        fontSize: 12,
+                        color: onPrimary.withValues(alpha: 0.9),
+                        fontSize: 11,
                         fontStyle: FontStyle.italic,
-                        height: 1.4,
-                        letterSpacing: 0.1,
+                        height: 1.3,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -131,14 +130,14 @@ class MedicationHeaderWidget extends StatelessWidget {
 
                 if (medication.notes != null && medication.notes!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       medication.notes!,
                       style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.7),
+                        color: onPrimary.withValues(alpha: 0.65),
                         fontStyle: FontStyle.italic,
-                        fontSize: 11,
-                        height: 1.3,
+                        fontSize: 10,
+                        height: 1.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -155,7 +154,7 @@ class MedicationHeaderWidget extends StatelessWidget {
                       '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
                   textColor: onPrimary,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 // Storage
                 if (storageLabel != null && storageLabel.isNotEmpty) ...[
@@ -172,7 +171,7 @@ class MedicationHeaderWidget extends StatelessWidget {
                         ? Icons.dark_mode_outlined
                         : null,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                 ],
 
                 const Spacer(),
@@ -264,7 +263,7 @@ class MedicationHeaderWidget extends StatelessWidget {
                   textAlign: TextAlign.right,
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
               // Stock Forecast
               if (daysRemaining != null && stockoutDate != null)
@@ -279,39 +278,39 @@ class MedicationHeaderWidget extends StatelessWidget {
 
               // Custom Refill Button
               Container(
-                height: 32,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: onPrimary.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(10),
+                  color: onPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: onPrimary.withValues(alpha: 0.35),
-                    width: 1.5,
+                    color: onPrimary.withValues(alpha: 0.3),
+                    width: 1,
                   ),
                 ),
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: onRefill,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.add_circle_outline,
-                            size: 16,
+                            size: 14,
                             color: onPrimary,
                           ),
-                          const SizedBox(width: 7),
+                          const SizedBox(width: 6),
                           Text(
                             'Refill',
                             style: TextStyle(
                               color: onPrimary,
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
+                              letterSpacing: 0.2,
                             ),
                           ),
                         ],
@@ -381,19 +380,18 @@ class _HeaderInfoTile extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: color.withValues(alpha: 0.75),
+            color: color.withValues(alpha: 0.7),
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            letterSpacing: 0.3,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 4),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, color: color, size: 15),
-              const SizedBox(width: 5),
+              Icon(icon, color: color, size: 14),
+              const SizedBox(width: 4),
             ],
             Flexible(
               child: Text(
@@ -401,14 +399,13 @@ class _HeaderInfoTile extends StatelessWidget {
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  letterSpacing: 0.1,
+                  fontSize: 12,
                 ),
               ),
             ),
             if (trailingIcon != null) ...[
-              const SizedBox(width: 5),
-              Icon(trailingIcon, color: color, size: 15),
+              const SizedBox(width: 4),
+              Icon(trailingIcon, color: color, size: 14),
             ],
           ],
         ),
@@ -436,13 +433,12 @@ class _AdherenceGraph extends StatelessWidget {
         Text(
           '7 Day Adherence',
           style: TextStyle(
-            color: color.withValues(alpha: 0.75),
+            color: color.withValues(alpha: 0.7),
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            letterSpacing: 0.3,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         SizedBox(
           height: 40,
           width: double.infinity,
