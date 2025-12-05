@@ -377,24 +377,29 @@ class _HeaderInfoTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: color.withValues(alpha: 0.65),
-            fontSize: 9,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.5,
-            height: 1.2,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: color.withValues(alpha: 0.65), size: 12),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: color.withValues(alpha: 0.65),
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+                height: 1.2,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 5),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
-              Icon(icon, color: color.withValues(alpha: 0.95), size: 15),
-              const SizedBox(width: 5),
-            ],
             Flexible(
               child: Text(
                 value,
