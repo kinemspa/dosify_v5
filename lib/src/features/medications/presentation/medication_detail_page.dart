@@ -2192,8 +2192,8 @@ void _deleteMedication(BuildContext context, Medication med) async {
 
       final logsForDay = doseLogBox.values.where((log) {
         return log.medicationId == med.id &&
-            log.takenAt.isAfter(day) &&
-            log.takenAt.isBefore(nextDay);
+            log.actionTime.isAfter(day) &&
+            log.actionTime.isBefore(nextDay);
       }).toList();
 
       if (logsForDay.isEmpty) {
