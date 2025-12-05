@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +16,11 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
+import 'package:dosifi_v5/src/features/medications/domain/services/expiry_tracking_service.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/controllers/medication_detail_controller.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -36,16 +41,16 @@ const double _kDetailHeaderExpandedHeight = 325;
 const double _kDetailHeaderCompactHeight = 245;
 const double _kDetailHeaderCollapsedHeight = 56;
 
-class MedicationDetailPage extends StatefulWidget {
+class MedicationDetailPage extends ConsumerStatefulWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
   final String? medicationId;
   final Medication? initial;
 
   @override
-  State<MedicationDetailPage> createState() => _MedicationDetailPageState();
+  ConsumerState<MedicationDetailPage> createState() => _MedicationDetailPageState();
 }
 
-class _MedicationDetailPageState extends State<MedicationDetailPage> {
+class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
 
   @override
@@ -183,10 +188,24 @@ class _MedicationDetailPageState extends State<MedicationDetailPage> {
                                   kPageHorizontalPadding,
                                   kSpacingS,
                                 ),
-                                child: _buildStatsBannerContent(
-                                  context,
-                                  updatedMed,
-                                  hideName: true,
+                                child: MedicationHeaderWidget(
+                                  medication: updatedMed,
+                                  onRefill: () => _showRefillDialog(context, updatedMed),
+                                  daysRemaining: MedicationStockService.calculateDaysRemaining(
+                                    updatedMed,
+                                    Hive.box<Schedule>('schedules')
+                                        .values
+                                        .where((s) => s.medicationId == updatedMed.id && s.active)
+                                        .toList(),
+                                  ),
+                                  stockoutDate: MedicationStockService.calculateStockoutDate(
+                                    updatedMed,
+                                    Hive.box<Schedule>('schedules')
+                                        .values
+                                        .where((s) => s.medicationId == updatedMed.id && s.active)
+                                        .toList(),
+                                  ),
+                                  adherenceData: _calculateAdherenceData(updatedMed),
                                 ),
                               ),
                             ),
@@ -2160,6 +2179,32 @@ void _deleteMedication(BuildContext context, Medication med) async {
     }
   }
 }
+
+  // Calculate adherence data for the last 7 days
+  List<double> _calculateAdherenceData(Medication med) {
+    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final now = DateTime.now();
+    final data = <double>[];
+
+    for (int i = 6; i >= 0; i--) {
+      final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
+      final nextDay = day.add(const Duration(days: 1));
+
+      final logsForDay = doseLogBox.values.where((log) {
+        return log.medicationId == med.id &&
+            log.takenAt.isAfter(day) &&
+            log.takenAt.isBefore(nextDay);
+      }).toList();
+
+      if (logsForDay.isEmpty) {
+        data.add(-1); // No data
+      } else {
+        data.add(1.0); // Taken (simplified - could calculate partial adherence)
+      }
+    }
+
+    return data;
+  }
 
 Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
   final doseBox = Hive.box<DoseLog>('dose_logs');
