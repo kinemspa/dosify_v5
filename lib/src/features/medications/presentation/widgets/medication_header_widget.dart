@@ -174,9 +174,10 @@ class MedicationHeaderWidget extends StatelessWidget {
                   const SizedBox(height: 8),
                 ],
 
-                const Spacer(),
+                const SizedBox(height: 16),
                 // Adherence Graph
                 _AdherenceGraph(data: adherenceData, color: onPrimary),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -439,79 +440,170 @@ class _AdherenceGraph extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '7 Day Adherence',
-          style: TextStyle(
-            color: color.withValues(alpha: 0.7),
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
+        Row(
+          children: [
+            Icon(
+              Icons.show_chart,
+              size: 12,
+              color: color.withValues(alpha: 0.65),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '7 DAY ADHERENCE',
+              style: TextStyle(
+                color: color.withValues(alpha: 0.65),
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 50,
+          child: CustomPaint(
+            painter: _AdherenceLinePainter(data: data, color: color),
+            child: Container(),
           ),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 40,
-          width: double.infinity,
-          child: CustomPaint(
-            painter: _AdherenceBarPainter(data: data, color: color),
-          ),
+        const SizedBox(height: 6),
+        // Day labels
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(7, (i) {
+            final day = DateTime.now().subtract(Duration(days: 6 - i));
+            final dayName = ['M', 'T', 'W', 'T', 'F', 'S', 'S'][day.weekday - 1];
+            return Text(
+              dayName,
+              style: TextStyle(
+                color: color.withValues(alpha: 0.5),
+                fontSize: 8,
+                fontWeight: FontWeight.w500,
+              ),
+            );
+          }),
         ),
       ],
     );
   }
 }
 
-class _AdherenceBarPainter extends CustomPainter {
+class _AdherenceLinePainter extends CustomPainter {
   final List<double> data;
   final Color color;
 
-  _AdherenceBarPainter({required this.data, required this.color});
+  _AdherenceLinePainter({required this.data, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
+    if (data.isEmpty) return;
 
-    final barWidth = size.width / (data.length * 2 - 1);
-    final spacing = barWidth;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    final fillPaint = Paint()
+      ..style = PaintingStyle.fill;
+
+    final width = size.width;
+    final height = size.height;
+    final spacing = width / (data.length - 1);
+
+    // Draw background grid
+    final gridPaint = Paint()
+      ..color = color.withValues(alpha: 0.1)
+      ..strokeWidth = 0.5;
+
+    for (int i = 0; i <= 4; i++) {
+      final y = height * (i / 4);
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(width, y),
+        gridPaint,
+      );
+    }
+
+    // Build path for line and area
+    final linePath = Path();
+    final areaPath = Path();
+    bool hasStarted = false;
 
     for (int i = 0; i < data.length; i++) {
       final value = data[i];
-      final x = i * (barWidth + spacing);
+      if (value < 0) continue; // Skip no-data points
 
-      if (value < 0) {
-        // Future / No Data
-        paint.color = color.withValues(alpha: 0.2);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, size.height - 2, barWidth, 2),
-            const Radius.circular(1),
-          ),
-          paint,
-        );
+      final x = i * spacing;
+      final y = height - (value * height * 0.8) - (height * 0.1);
+
+      if (!hasStarted) {
+        linePath.moveTo(x, y);
+        areaPath.moveTo(x, height);
+        areaPath.lineTo(x, y);
+        hasStarted = true;
       } else {
-        final barHeight = value == 0 ? 4.0 : size.height * value;
-        final y = size.height - barHeight;
+        linePath.lineTo(x, y);
+        areaPath.lineTo(x, y);
+      }
+    }
 
-        if (value == 0) {
-          paint.color = color.withValues(alpha: 0.3); // Missed
-        } else if (value < 1.0) {
-          paint.color = color.withValues(alpha: 0.6); // Partial
-        } else {
-          paint.color = color; // Taken
-        }
+    if (hasStarted) {
+      // Close area path
+      areaPath.lineTo((data.length - 1) * spacing, height);
+      areaPath.close();
 
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, barWidth, barHeight),
-            const Radius.circular(2),
-          ),
-          paint,
+      // Draw gradient fill
+      final gradient = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          color.withValues(alpha: 0.3),
+          color.withValues(alpha: 0.05),
+        ],
+      );
+
+      fillPaint.shader = gradient.createShader(
+        Rect.fromLTWH(0, 0, width, height),
+      );
+
+      canvas.drawPath(areaPath, fillPaint);
+
+      // Draw line
+      paint.color = color.withValues(alpha: 0.9);
+      canvas.drawPath(linePath, paint);
+
+      // Draw points
+      for (int i = 0; i < data.length; i++) {
+        final value = data[i];
+        if (value < 0) continue;
+
+        final x = i * spacing;
+        final y = height - (value * height * 0.8) - (height * 0.1);
+
+        // Outer circle
+        canvas.drawCircle(
+          Offset(x, y),
+          4,
+          Paint()
+            ..color = color.withValues(alpha: 0.9)
+            ..style = PaintingStyle.fill,
+        );
+
+        // Inner circle
+        canvas.drawCircle(
+          Offset(x, y),
+          2,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.fill,
         );
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _AdherenceBarPainter oldDelegate) {
+  bool shouldRepaint(covariant _AdherenceLinePainter oldDelegate) {
     return oldDelegate.data != data || oldDelegate.color != color;
   }
 }
