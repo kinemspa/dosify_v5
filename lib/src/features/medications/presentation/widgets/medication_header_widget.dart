@@ -148,7 +148,7 @@ class MedicationHeaderWidget extends StatelessWidget {
 
                 // Strength with Icon
                 _HeaderInfoTile(
-                  icon: Icons.fitness_center,
+                  icon: Icons.medication_liquid,
                   label: strengthPerLabel,
                   value:
                       '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
@@ -159,17 +159,17 @@ class MedicationHeaderWidget extends StatelessWidget {
                 // Storage
                 if (storageLabel != null && storageLabel.isNotEmpty) ...[
                   _HeaderInfoTile(
-                    icon: medication.activeVialRequiresFreezer
-                        ? Icons.severe_cold
-                        : (medication.requiresRefrigeration
-                            ? Icons.ac_unit
-                            : Icons.inventory_2_outlined),
+                    icon: Icons.location_on_outlined,
                     label: 'Storage',
                     value: storageLabel,
                     textColor: onPrimary,
-                    trailingIcon: medication.activeVialLightSensitive
-                        ? Icons.dark_mode_outlined
-                        : null,
+                    trailingIcon: medication.activeVialRequiresFreezer
+                        ? Icons.severe_cold
+                        : (medication.requiresRefrigeration
+                            ? Icons.ac_unit
+                            : (medication.activeVialLightSensitive
+                                ? Icons.dark_mode_outlined
+                                : null)),
                   ),
                   const SizedBox(height: 8),
                 ],
