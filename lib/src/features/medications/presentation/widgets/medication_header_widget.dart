@@ -99,100 +99,99 @@ class MedicationHeaderWidget extends StatelessWidget {
       gaugeColor = onPrimary.withValues(alpha: 0.9);
     }
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Space for the animated Name (which is positioned absolutely in parent)
-                const SizedBox(height: 52),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Space for the animated Name (which is positioned absolutely in parent)
+              const SizedBox(height: 52),
 
-                // Description & Notes
-                if (medication.description != null &&
-                    medication.description!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      medication.description!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.9),
-                        fontSize: 11,
-                        fontStyle: FontStyle.italic,
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+              // Description & Notes
+              if (medication.description != null &&
+                  medication.description!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    medication.description!,
+                    style: TextStyle(
+                      color: onPrimary.withValues(alpha: 0.9),
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      height: 1.3,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
 
-                if (medication.notes != null && medication.notes!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      medication.notes!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.65),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 10,
-                        height: 1.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              if (medication.notes != null && medication.notes!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    medication.notes!,
+                    style: TextStyle(
+                      color: onPrimary.withValues(alpha: 0.65),
+                      fontStyle: FontStyle.italic,
+                      fontSize: 10,
+                      height: 1.2,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
 
-                const SizedBox(height: 4),
+              const SizedBox(height: 4),
 
-                // Strength with Icon
+              // Strength with Icon
+              _HeaderInfoTile(
+                icon: Icons.medication_liquid,
+                label: strengthPerLabel,
+                value:
+                    '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
+                textColor: onPrimary,
+              ),
+              const SizedBox(height: 8),
+
+              // Storage
+              if (storageLabel != null && storageLabel.isNotEmpty) ...[
                 _HeaderInfoTile(
-                  icon: Icons.medication_liquid,
-                  label: strengthPerLabel,
-                  value:
-                      '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
+                  icon: Icons.location_on_outlined,
+                  label: 'Storage',
+                  value: storageLabel,
                   textColor: onPrimary,
+                  trailingIcon: medication.activeVialRequiresFreezer
+                      ? Icons.severe_cold
+                      : (medication.requiresRefrigeration
+                          ? Icons.ac_unit
+                          : (medication.activeVialLightSensitive
+                              ? Icons.dark_mode_outlined
+                              : null)),
                 ),
                 const SizedBox(height: 8),
-
-                // Storage
-                if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                  _HeaderInfoTile(
-                    icon: Icons.location_on_outlined,
-                    label: 'Storage',
-                    value: storageLabel,
-                    textColor: onPrimary,
-                    trailingIcon: medication.activeVialRequiresFreezer
-                        ? Icons.severe_cold
-                        : (medication.requiresRefrigeration
-                            ? Icons.ac_unit
-                            : (medication.activeVialLightSensitive
-                                ? Icons.dark_mode_outlined
-                                : null)),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-
-                const SizedBox(height: 16),
-                // Adherence Graph
-                _AdherenceGraph(data: adherenceData, color: onPrimary),
-                const SizedBox(height: 12),
               ],
-            ),
+
+              const SizedBox(height: 16),
+              // Adherence Graph
+              _AdherenceGraph(data: adherenceData, color: onPrimary),
+              const SizedBox(height: 12),
+            ],
           ),
-          const SizedBox(width: 16),
-          _StockInfoCard(
-            medication: medication,
-            theme: theme,
-            onPrimary: onPrimary,
-            stockRatio: stockRatio,
-            daysRemaining: daysRemaining,
-            stockoutDate: stockoutDate,
-            onRefill: onRefill,
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 16),
+        // StockInfoCard with natural width
+        _StockInfoCard(
+          medication: medication,
+          theme: theme,
+          onPrimary: onPrimary,
+          stockRatio: stockRatio,
+          daysRemaining: daysRemaining,
+          stockoutDate: stockoutDate,
+          onRefill: onRefill,
+        ),
+      ],
     );
   }
 
@@ -498,7 +497,7 @@ class _StockInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stockService = MedicationStockService;
+
     final pct = stockRatio.clamp(0.0, 1.0);
     
     // Correct logic for MDVs based on existing properties
@@ -521,7 +520,7 @@ class _StockInfoCard extends StatelessWidget {
     final primaryLabel = '${(pct * 100).round()}%';
     
     // Get color from StockLevel enum
-    final level = stockService.getStockLevel(medication);
+    final level = MedicationStockService.getStockLevel(medication);
     final gaugeColor = _getStockColor(level, theme);
     
     // Calculate initial helper value
@@ -546,6 +545,20 @@ class _StockInfoCard extends StatelessWidget {
         }
     }
 
+    // Prepare formatted dates
+    String? forecastText;
+    if (daysRemaining != null && stockoutDate != null) {
+      final dateStr = DateFormat.yMMMd().format(stockoutDate!);
+      // "Stock lasts until Dec 12, 2024 (5 days left)."
+      forecastText =
+          'Stock lasts until $dateStr (${daysRemaining!.ceil()} days left).';
+
+      if (medication.expiry != null) {
+        final expiryStr = DateFormat.yMMMd().format(medication.expiry!);
+        forecastText += '\nExpires on $expiryStr.';
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -557,7 +570,7 @@ class _StockInfoCard extends StatelessWidget {
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Stock Gauge
           Center(
@@ -587,7 +600,7 @@ class _StockInfoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          
+
           // Stock Count
           RichText(
             textAlign: TextAlign.center,
@@ -643,51 +656,59 @@ class _StockInfoCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
-          
-          // Stock Forecast
-          if (daysRemaining != null && stockoutDate != null) ...[
+
+          // Stock Forecast Text (Flattened)
+          if (forecastText != null) ...[
             const SizedBox(height: 12),
-            _StockForecastCard(
-              color: onPrimary,
-              medication: medication,
-              daysRemaining: daysRemaining!,
-              stockoutDate: stockoutDate!,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: onPrimary.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                forecastText,
+                style: TextStyle(
+                  color: onPrimary.withValues(alpha: 0.8),
+                  fontSize: 10,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
-          
-          const SizedBox(height: 12),
-          
-          // Refill Button
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              color: onPrimary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                onTap: onRefill,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_circle_outline,
-                        size: 16,
-                        color: onPrimary,
+
+          const SizedBox(height: 16),
+
+          // Refill Button - High Contrast
+          Material(
+            color: onPrimary,
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              onTap: onRefill,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: 14,
+                      color: theme.colorScheme.primary, 
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Refill',
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Refill Stock',
-                        style: TextStyle(
-                          color: onPrimary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -731,144 +752,3 @@ class _StockInfoCard extends StatelessWidget {
   }
 }
 
-class _StockForecastCard extends StatelessWidget {
-  const _StockForecastCard({
-    required this.color,
-    required this.medication,
-    required this.daysRemaining,
-    required this.stockoutDate,
-  });
-
-  final Color color;
-  final Medication medication;
-  final double daysRemaining;
-  final DateTime stockoutDate;
-
-  @override
-  Widget build(BuildContext context) {
-    final dateStr = DateFormat('d MMM y').format(stockoutDate);
-    final expiry = medication.expiry;
-    final expiresBeforeStockout = ExpiryTrackingService.willExpireBeforeStockout(
-      expiry,
-      stockoutDate,
-    );
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today,
-                size: 11,
-                color: color.withValues(alpha: 0.65),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'STOCK FORECAST',
-                style: TextStyle(
-                  color: color.withValues(alpha: 0.65),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Lasts until',
-                    style: TextStyle(
-                      color: color.withValues(alpha: 0.6),
-                      fontSize: 9,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    dateStr,
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  '${daysRemaining.floor()} days',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (expiry != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: expiresBeforeStockout
-                    ? Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.2)
-                    : color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.event_outlined,
-                    size: 11,
-                    color: expiresBeforeStockout
-                        ? Theme.of(context).colorScheme.error
-                        : color.withValues(alpha: 0.7),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Expires ${DateFormat('d MMM').format(expiry)}',
-                    style: TextStyle(
-                      color: expiresBeforeStockout
-                          ? Theme.of(context).colorScheme.error
-                          : color.withValues(alpha: 0.8),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
