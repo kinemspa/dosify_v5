@@ -627,7 +627,7 @@ class _StockInfoCard extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+          
 
           // Expiry Text - RESTORED
           if (medication.expiry != null) ...[
