@@ -311,120 +311,81 @@ class _NextDoseCardState extends State<NextDoseCard> {
       statusLabel = 'Missed Dose';
     }
 
-    return Stack(
-      children: [
-        InkWell(
-          onTap: () => _showDoseActionSheet(dose),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
-            child: Row(
-              children: [
-                // Leading Circular Icon (moved to left)
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: iconBg,
-                  ),
-                  child: Icon(statusIcon, size: 24, color: iconColor),
-                ),
-                const SizedBox(width: 16),
+    return InkWell(
+      onTap: () => _showDoseActionSheet(dose),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
+        child: Row(
+          children: [
+            // Leading Circular Icon (moved to left)
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: iconBg,
+              ),
+              child: Icon(statusIcon, size: 24, color: iconColor),
+            ),
+            const SizedBox(width: 16),
 
-                // Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+            // Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Top Row: Dynamic Status Label + Date
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Top Row: Dynamic Status Label + Date
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            statusLabel,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                          ),
-                          Text(
-                            DateFormat('MMM d').format(dose.scheduledTime),
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      // Time
                       Text(
-                        DateFormat('h:mm a').format(dose.scheduledTime),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: isOverdue
-                                  ? colorScheme.error
-                                  : colorScheme.primary,
-                              height: 1.1,
-                              fontSize: 20,
+                        statusLabel,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                       ),
-                      const SizedBox(height: 2),
-                      // Value
                       Text(
-                        '${_formatNumber(dose.doseValue)} ${dose.doseUnit}' +
-                            (dose.status != DoseStatus.pending
-                                ? ' • ${dose.status.name.toUpperCase()}'
-                                : ''),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        DateFormat('MMM d').format(dose.scheduledTime),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  // Time
+                  Text(
+                    DateFormat('h:mm a').format(dose.scheduledTime),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: isOverdue
+                              ? colorScheme.error
+                              : colorScheme.primary,
+                          height: 1.1,
+                          fontSize: 20,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Value
+                  Text(
+                    '${_formatNumber(dose.doseValue)} ${dose.doseUnit}' +
+                        (dose.status != DoseStatus.pending
+                            ? ' • ${dose.status.name.toUpperCase()}'
+                            : ''),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
-        // Navigation arrows
-        Positioned(
-          left: 0,
-          top: 0,
-          bottom: 0,
-          child: Center(
-            child: IconButton(
-              icon: Icon(Icons.chevron_left, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
-              onPressed: index > 0 ? () {
-                _pageController.previousPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              } : null,
-              iconSize: 20,
-            ),
-          ),
-        ),
-        Positioned(
-          right: 0,
-          top: 0,
-          bottom: 0,
-          child: Center(
-            child: IconButton(
-              icon: Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
-              onPressed: index < total - 1 ? () {
-                _pageController.nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              } : null,
-              iconSize: 20,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
