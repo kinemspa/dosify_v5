@@ -314,10 +314,10 @@ class _NextDoseCardState extends State<NextDoseCard> {
     return InkWell(
       onTap: () => _showDoseActionSheet(dose),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
+        padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
         child: Row(
           children: [
-            // Leading Circular Icon (moved to left)
+            // Leading Circular Icon (all the way to left)
             Container(
               width: 48,
               height: 48,
@@ -327,7 +327,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
               ),
               child: Icon(statusIcon, size: 24, color: iconColor),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
 
             // Content
             Expanded(
@@ -356,7 +356,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 1),
                   // Time
                   Text(
                     DateFormat('h:mm a').format(dose.scheduledTime),
@@ -369,13 +369,10 @@ class _NextDoseCardState extends State<NextDoseCard> {
                           fontSize: 20,
                         ),
                   ),
-                  const SizedBox(height: 2),
-                  // Value
+                  const SizedBox(height: 1),
+                  // Value (without status text)
                   Text(
-                    '${_formatNumber(dose.doseValue)} ${dose.doseUnit}' +
-                        (dose.status != DoseStatus.pending
-                            ? ' • ${dose.status.name.toUpperCase()}'
-                            : ''),
+                    '${_formatNumber(dose.doseValue)} ${dose.doseUnit}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
