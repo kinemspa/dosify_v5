@@ -719,6 +719,17 @@ class _NextDoseCardState extends State<NextDoseCard> {
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
         await repo.upsert(log);
 
+        // Deduct stock when dose is taken
+        final medBox = Hive.box<Medication>('medications');
+        final currentMed = medBox.get(widget.medication.id);
+        if (currentMed != null) {
+          final newStockValue = (currentMed.stockValue - dose.doseValue).clamp(0.0, double.infinity);
+          await medBox.put(
+            currentMed.id,
+            currentMed.copyWith(stockValue: newStockValue),
+          );
+        }
+
         if (mounted) {
           setState(() {
             _calculateDosesForWeek(_selectedDate);
@@ -758,7 +769,38 @@ class _NextDoseCardState extends State<NextDoseCard> {
           ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
         }
       },
-      onDelete: () {},
+      onDelete: () async {
+        // When deleting/undoing a dose, restore the stock if it was taken
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        final existingLog = await repo.getById(logId);
+        
+        if (existingLog != null && existingLog.action == DoseAction.taken) {
+          // Restore stock when undoing a taken dose
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(widget.medication.id);
+          if (currentMed != null) {
+            final newStockValue = currentMed.stockValue + dose.doseValue;
+            await medBox.put(
+              currentMed.id,
+              currentMed.copyWith(stockValue: newStockValue),
+            );
+          }
+        }
+
+        await repo.delete(logId);
+
+        if (mounted) {
+          setState(() {
+            _calculateDosesForWeek(_selectedDate);
+            _updateDayDoses();
+          });
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+        }
+      },
     );
   }
 }
