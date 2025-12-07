@@ -516,6 +516,38 @@ class _StockInfoCard extends StatelessWidget {
           width: 1,
         ),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // Stock Gauge (Reduced size to fix overflow)
+          Center(
+            child: SizedBox(
+              height: 80,
+              width: 80,
+              child: hasBackup
+                  ? DualStockDonutGauge(
+                      outerPercentage: pct * 100,
+                      innerPercentage: backupPct * 100,
+                      primaryLabel: primaryLabel,
+                      color: gaugeColor,
+                      backgroundColor: onPrimary.withValues(alpha: 0.15),
+                      textColor: onPrimary,
+                      showGlow: false,
+                      isOutline: false,
+                    )
+                  : StockDonutGauge(
+                      percentage: pct * 100,
+                      primaryLabel: primaryLabel,
+                      color: gaugeColor,
+                      backgroundColor: onPrimary.withValues(alpha: 0.15),
+                      textColor: onPrimary,
+                      showGlow: false,
+                      isOutline: false,
+                    ),
+            ),
+          ),
+          const SizedBox(height: 10),
+
           // Stock Count (Align Right)
           Align(
             alignment: Alignment.centerRight,
@@ -575,7 +607,7 @@ class _StockInfoCard extends StatelessWidget {
             ),
           ],
 
-          // Stock Forecast Text (Right Aligned RichText) - RESTORED
+          // Stock Forecast Text (Right Aligned RichText)
           if (daysRemaining != null && stockoutDate != null) ...[
             const SizedBox(height: 12),
             Container(
@@ -627,11 +659,10 @@ class _StockInfoCard extends StatelessWidget {
                 ],
               ),
             ),
-          
+          ],
 
-          // Expiry Text - RESTORED
+          // Expiry Text
           if (medication.expiry != null) ...[
-             // If we didn't show the daysRemaining block, add some spacing
              if (daysRemaining == null) const SizedBox(height: 12),
              Padding(
                padding: const EdgeInsets.only(top: 2),
@@ -658,7 +689,7 @@ class _StockInfoCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Refill Button - Less Rounded, Subtle Outlined
+          // Refill Button
           Align(
             alignment: Alignment.center,
             child: Material(
@@ -693,6 +724,11 @@ class _StockInfoCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -383,87 +383,9 @@ class _NextDoseCardState extends State<NextDoseCard> {
     );
   }
 
+
   Widget _buildEmptyState() {
-    return const SizedBox.shrink(); // Handled above
-  }
-
-  // ... (remove old _buildDoseCard if present, or keep as artifact if unused)
-  
-  Widget _buildCalendarStrip() {
-    return SizedBox(
-      height: 60, // Reduced from 72/80
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: 30,
-        itemBuilder: (context, index) {
-          final date = DateTime.now().add(Duration(days: index));
-          final isSelected =
-              date.year == _selectedDate.year &&
-              date.month == _selectedDate.month &&
-              date.day == _selectedDate.day;
-          
-          // Check for doses on this day
-          final hasDose = widget.schedules.any((s) {
-              // Simple check - in reality need to check recurrence
-              // For now assume daily if active
-              return s.active;
-          });
-
-          return GestureDetector(
-             onTap: () => setState(() => _selectedDate = date),
-             child: Container(
-                width: 44, // Reduced width
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                   color: isSelected ? Theme.of(context).colorScheme.secondaryContainer : Colors.transparent,
-                   borderRadius: BorderRadius.circular(12),
-                   border: Border.all(
-                      color: isSelected 
-                          ? Theme.of(context).colorScheme.secondaryContainer 
-                          : Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                   )
-                ),
-                child: Column(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                      Text(
-                         DateFormat('EEE').format(date).toUpperCase(),
-                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                             fontSize: 9,
-                             color: isSelected ? Theme.of(context).colorScheme.onSecondaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
-                             fontWeight: FontWeight.bold,
-                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                         date.day.toString(),
-                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                             fontWeight: FontWeight.bold,
-                             color: isSelected ? Theme.of(context).colorScheme.onSecondaryContainer : Theme.of(context).colorScheme.onSurface,
-                             fontSize: 14,
-                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      // Square Indicator
-                      Container(
-                         width: 4,
-                         height: 4,
-                         decoration: BoxDecoration(
-                             color: hasDose 
-                                 ? (isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant)
-                                 : Colors.transparent,
-                             shape: BoxShape.rectangle,
-                             borderRadius: BorderRadius.circular(1),
-                         ),
-                      ),
-                   ],
-                ),
-             )
-          );
-        },
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildDoseCard(CalculatedDose dose, int index, int total) {
