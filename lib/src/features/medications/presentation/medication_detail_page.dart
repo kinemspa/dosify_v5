@@ -178,6 +178,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                           top: -scrollOffset,
                           left: 0,
                           right: 0,
+                          height: expandedHeight, // Fix: Ensure header has finite height for layout
                           child: Opacity(
                             opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
                             child: SafeArea(
@@ -191,21 +192,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 child: MedicationHeaderWidget(
                                   medication: updatedMed,
                                   onRefill: () => _showRefillDialog(context, updatedMed),
-                                  daysRemaining: MedicationStockService.calculateDaysRemaining(
-                                    updatedMed,
-                                    Hive.box<Schedule>('schedules')
-                                        .values
-                                        .where((s) => s.medicationId == updatedMed.id && s.active)
-                                        .toList(),
-                                  ),
-                                  stockoutDate: MedicationStockService.calculateStockoutDate(
-                                    updatedMed,
-                                    Hive.box<Schedule>('schedules')
-                                        .values
-                                        .where((s) => s.medicationId == updatedMed.id && s.active)
-                                        .toList(),
-                                  ),
-                                  adherenceData: _calculateAdherenceData(updatedMed),
                                 ),
                               ),
                             ),
@@ -841,30 +827,55 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           const SizedBox(height: 16),
         ],
 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '$count Schedule${count == 1 ? '' : 's'} Configured',
-                  style: sectionTitleStyle(context)?.copyWith(fontSize: 14),
-                ),
-              ],
+        // Improved Manage Button
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant.withValues(
+                    alpha: 0.5,
+                  ),
             ),
-            TextButton(
-              onPressed: () => context.go('/schedules'),
-              child: const Text('Manage'),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            leading: divvyIcon(
+              Icons.calendar_month_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
             ),
-          ],
+            title: Text(
+              '$count Active ${count == 1 ? 'Schedule' : 'Schedules'}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            subtitle: Text(
+              'Tap to manage dosing schedule',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            trailing: const Icon(Icons.chevron_right, size: 20),
+            onTap: () => context.go('/schedules'),
+          ),
         ),
       ],
+    );
+  }
+
+  Widget divvyIcon(IconData icon, {Color? color, double? size}) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: (color ?? Colors.blue).withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: size),
     );
   }
 
@@ -938,15 +949,15 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           ),
           const SizedBox(height: 16),
         ],
-        Text(
-          'Storage Condition',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 11,
-          ),
+
+        // Storage Conditions (Dialog Trigger)
+        _buildCompactInfoItem(
+          context,
+          label: 'Storage Conditions',
+          value: _getStorageConditionsLabel(med),
+          onTap: () => _showStorageConditionsDialog(context, med),
         ),
-        const SizedBox(height: 8),
-        _buildStorageSwitches(context, med),
+
         if (med.notes != null && med.notes!.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildCompactInfoItem(
@@ -961,71 +972,85 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  Widget _buildStorageSwitches(BuildContext context, Medication med) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Checkbox(
-              value: med.requiresRefrigeration,
-              onChanged: (v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(
-                  med.id,
-                  med.copyWith(
-                    requiresRefrigeration: v ?? false,
-                    requiresFreezer: (v ?? false) ? false : med.requiresFreezer,
-                  ),
-                );
-              },
+  String _getStorageConditionsLabel(Medication med) {
+    final conditions = <String>[];
+    if (med.requiresRefrigeration) conditions.add('Refrigerate');
+    if (med.requiresFreezer) conditions.add('Freeze');
+    if (med.lightSensitive) conditions.add('Light Sensitive');
+
+    if (conditions.isEmpty) return 'None specified';
+    return conditions.join(', ');
+  }
+
+  void _showStorageConditionsDialog(BuildContext context, Medication med) {
+    bool refrigerate = med.requiresRefrigeration;
+    bool freeze = med.requiresFreezer;
+    bool light = med.lightSensitive;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Storage Conditions'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CheckboxListTile(
+                  value: refrigerate,
+                  onChanged: (v) {
+                    setState(() {
+                      refrigerate = v ?? false;
+                      if (refrigerate) freeze = false;
+                    });
+                  },
+                  title: const Text('Refrigerate (2-8°C)'),
+                ),
+                CheckboxListTile(
+                  value: freeze,
+                  onChanged: (v) {
+                    setState(() {
+                      freeze = v ?? false;
+                      if (freeze) refrigerate = false;
+                    });
+                  },
+                  title: const Text('Freeze'),
+                ),
+                CheckboxListTile(
+                  value: light,
+                  onChanged: (v) {
+                    setState(() {
+                      light = v ?? false;
+                    });
+                  },
+                  title: const Text('Protect from Light'),
+                ),
+              ],
             ),
-            Expanded(
-              child: Text(
-                'Refrigerate (2-8°C)',
-                style: checkboxLabelStyle(context),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Checkbox(
-              value: med.requiresFreezer,
-              onChanged: (v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(
-                  med.id,
-                  med.copyWith(
-                    requiresFreezer: v ?? false,
-                    requiresRefrigeration: (v ?? false)
-                        ? false
-                        : med.requiresRefrigeration,
-                  ),
-                );
-              },
-            ),
-            Expanded(child: Text('Freeze', style: checkboxLabelStyle(context))),
-          ],
-        ),
-        Row(
-          children: [
-            Checkbox(
-              value: med.lightSensitive,
-              onChanged: (v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(med.id, med.copyWith(lightSensitive: v ?? false));
-              },
-            ),
-            Expanded(
-              child: Text(
-                'Protect from Light',
-                style: checkboxLabelStyle(context),
+              FilledButton(
+                onPressed: () {
+                  final box = Hive.box<Medication>('medications');
+                  box.put(
+                    med.id,
+                    med.copyWith(
+                      requiresRefrigeration: refrigerate,
+                      requiresFreezer: freeze,
+                      lightSensitive: light,
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          );
+        },
+      ),
     );
   }
 

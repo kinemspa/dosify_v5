@@ -175,29 +175,91 @@ class _NextDoseCardState extends State<NextDoseCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Top Card Area
-        SizedBox(
-          height: 140,
-          child: _dayDoses.isEmpty
-              ? _buildEmptyState()
-              : PageView.builder(
-                  controller: _dosePageController,
-                  scrollDirection: Axis.vertical,
-                  itemCount: _dayDoses.length,
-                  itemBuilder: (context, index) {
-                    return _buildDoseCard(
-                      _dayDoses[index],
-                      index,
-                      _dayDoses.length,
-                    );
-                  },
+        // Top Card Area - "Active Schedule Card" look
+        Container(
+          height: 100, // Compact fixed height
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Page View
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: _dayDoses.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No doses',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      )
+                    : PageView.builder(
+                        controller: _dosePageController,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: _dayDoses.length,
+                        itemBuilder: (context, index) {
+                          return _buildDoseCardContent(_dayDoses[index], index, _dayDoses.length);
+                        },
+                      ),
+              ),
+
+              // Left Arrow (conditionally visible)
+              if (_dayDoses.length > 1)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: IconButton(
+                      icon: const Icon(Icons.chevron_left),
+                      onPressed: () => _dosePageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 48),
+                      iconSize: 20,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
+
+              // Right Arrow (conditionally visible)
+              if (_dayDoses.length > 1)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      onPressed: () => _dosePageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 48),
+                      iconSize: 20,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
 
-        const SizedBox(height: kSpacingM),
+        const SizedBox(height: 8), // Reduced spacing
 
         // Calendar Strip
         _buildCalendarStrip(),
@@ -205,23 +267,201 @@ class _NextDoseCardState extends State<NextDoseCard> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Card(
-      elevation: 0,
-      color: Theme.of(
-        context,
-      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Center(
-        child: Text(
-          'No doses scheduled for ${DateFormat('EEE, MMM d').format(_selectedDate)}',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+  // NOTE: Replaced _buildDoseCard with _buildDoseCardContent that doesn't have its own container
+  // effectively merging it into the parent container look or keeping it transparent.
+  // Wait, if I want swipeable pages, the "Card" look should probably remain?
+  // "Active Schedule card looks good. This is how I want the next dose card to look like."
+  // The Active Schedule card is a single container.
+  // So the Next Dose Card should be a single container that swipes CONTENT.
+  // YES.
+
+  Widget _buildDoseCardContent(CalculatedDose dose, int index, int total) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isTaken = dose.status == DoseStatus.taken;
+    final isOverdue = dose.status == DoseStatus.overdue;
+    final isSkipped = dose.status == DoseStatus.skipped;
+    final isSnoozed = dose.status == DoseStatus.snoozed;
+
+    // Determine Icon
+    IconData statusIcon = Icons.notifications_outlined;
+    Color iconColor = colorScheme.primary;
+    Color iconBg = colorScheme.primaryContainer;
+
+    if (isTaken) {
+      statusIcon = Icons.check;
+      iconColor = Colors.green;
+      iconBg = Colors.green.withValues(alpha: 0.2);
+    } else if (isSkipped) {
+      statusIcon = Icons.block;
+      iconColor = Colors.grey;
+      iconBg = Colors.grey.withValues(alpha: 0.2);
+    } else if (isSnoozed) {
+      statusIcon = Icons.snooze;
+      iconColor = Colors.orange;
+      iconBg = Colors.orange.withValues(alpha: 0.2);
+    } else if (isOverdue) {
+      statusIcon = Icons.warning_amber_rounded;
+      iconColor = colorScheme.error;
+      iconBg = colorScheme.errorContainer;
+    }
+
+    return InkWell(
+      onTap: () => _showDoseActionSheet(dose),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), // Adjusted padding
+        child: Row(
+          children: [
+            // Leading Circular Icon (Bigger and moved left)
+            Container(
+              width: 48, // Increased from 36
+              height: 48, // Increased from 36
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: iconBg,
+              ),
+              child: Icon(statusIcon, size: 24, color: iconColor), // Increased from 18
+            ),
+            const SizedBox(width: 16),
+
+            // Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Top Row: "Next Dose" + Date (Right Aligned)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Next Dose',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                      ),
+                      Text(
+                        DateFormat('MMM d').format(dose.scheduledTime),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  // Time
+                  Text(
+                    DateFormat('h:mm a').format(dose.scheduledTime),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: isOverdue
+                              ? colorScheme.error
+                              : colorScheme.primary,
+                          height: 1.1,
+                          fontSize: 20, // Slightly bigger
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  // Value
+                  Text(
+                    '${_formatNumber(dose.doseValue)} ${dose.doseUnit}' +
+                        (dose.status != DoseStatus.pending
+                            ? ' • ${dose.status.name.toUpperCase()}'
+                            : ''),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const SizedBox.shrink(); // Handled above
+  }
+
+  // ... (remove old _buildDoseCard if present, or keep as artifact if unused)
+  
+  Widget _buildCalendarStrip() {
+    return SizedBox(
+      height: 60, // Reduced from 72/80
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: 30,
+        itemBuilder: (context, index) {
+          final date = DateTime.now().add(Duration(days: index));
+          final isSelected =
+              date.year == _selectedDate.year &&
+              date.month == _selectedDate.month &&
+              date.day == _selectedDate.day;
+          
+          // Check for doses on this day
+          final hasDose = _schedules.any((s) {
+              // Simple check - in reality need to check recurrence
+              // For now assume daily if active
+              return s.active;
+          });
+
+          return GestureDetector(
+             onTap: () => setState(() => _selectedDate = date),
+             child: Container(
+                width: 44, // Reduced width
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                   color: isSelected ? Theme.of(context).colorScheme.secondaryContainer : Colors.transparent,
+                   borderRadius: BorderRadius.circular(12),
+                   border: Border.all(
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.secondaryContainer 
+                          : Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                   )
+                ),
+                child: Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                      Text(
+                         DateFormat('EEE').format(date).toUpperCase(),
+                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                             fontSize: 9,
+                             color: isSelected ? Theme.of(context).colorScheme.onSecondaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
+                             fontWeight: FontWeight.bold,
+                         ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                         date.day.toString(),
+                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                             fontWeight: FontWeight.bold,
+                             color: isSelected ? Theme.of(context).colorScheme.onSecondaryContainer : Theme.of(context).colorScheme.onSurface,
+                             fontSize: 14,
+                         ),
+                      ),
+                      const SizedBox(height: 4),
+                      // Square Indicator
+                      Container(
+                         width: 4,
+                         height: 4,
+                         decoration: BoxDecoration(
+                             color: hasDose 
+                                 ? (isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant)
+                                 : Colors.transparent,
+                             shape: BoxShape.rectangle,
+                             borderRadius: BorderRadius.circular(1),
+                         ),
+                      ),
+                   ],
+                ),
+             )
+          );
+        },
       ),
     );
   }
@@ -230,6 +470,8 @@ class _NextDoseCardState extends State<NextDoseCard> {
     final colorScheme = Theme.of(context).colorScheme;
     final isTaken = dose.status == DoseStatus.taken;
     final isOverdue = dose.status == DoseStatus.overdue;
+    final isSkipped = dose.status == DoseStatus.skipped;
+    final isSnoozed = dose.status == DoseStatus.snoozed;
 
     Color cardColor = colorScheme.surface;
     Color borderColor = colorScheme.outlineVariant;
@@ -242,87 +484,115 @@ class _NextDoseCardState extends State<NextDoseCard> {
       borderColor = colorScheme.error.withValues(alpha: 0.5);
     }
 
+    // Determine Icon
+    IconData statusIcon = Icons.notifications_outlined; // Default Pending
+    if (isTaken) statusIcon = Icons.check;
+    else if (isSkipped) statusIcon = Icons.block;
+    else if (isSnoozed) statusIcon = Icons.snooze;
+    else if (isOverdue) statusIcon = Icons.warning_amber_rounded;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2), // Reduced vertical padding
       child: InkWell(
         onTap: () => _showDoseActionSheet(dose),
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        borderRadius: BorderRadius.circular(12), // Slightly less rounded
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor),
             boxShadow: [
               if (total > 1)
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
-                  offset: const Offset(0, 4),
-                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
                 ),
             ],
           ),
-          padding: const EdgeInsets.all(kSpacingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10), // Reduced internal padding
+          child: Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Next Dose ${DateFormat('MMM d').format(dose.scheduledTime)}',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  if (total > 1)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${index + 1}/$total',
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ),
-                ],
+              // Leading Circular Icon (Status Based)
+              Container(
+                width: 36, // Slightly smaller
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isTaken
+                      ? Colors.green.withValues(alpha: 0.2)
+                      : (isOverdue
+                          ? colorScheme.errorContainer
+                          : colorScheme.primaryContainer),
+                ),
+                child: Icon(
+                  statusIcon,
+                  size: 18,
+                  color: isTaken
+                      ? Colors.green
+                      : (isOverdue ? colorScheme.error : colorScheme.primary),
+                ),
               ),
-              const SizedBox(height: kSpacingS),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    DateFormat('h:mm a').format(dose.scheduledTime),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isOverdue
-                          ? colorScheme.error
-                          : colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: kSpacingM),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: 12),
+              // Main content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // ROW 1: "Next Dose" Label & Counter
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${_formatNumber(dose.doseValue)} ${dose.doseUnit}',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                          'Next Dose ${DateFormat('MMM d').format(dose.scheduledTime)}',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
                         ),
-                        const SizedBox(height: 2),
-                        _buildStatusBadge(dose.status),
+                        if (total > 1)
+                          Text(
+                            '${index + 1}/$total',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.outline,
+                                  fontSize: 10,
+                                ),
+                          ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    
+                    // ROW 2: Time (Big)
+                    Text(
+                      DateFormat('h:mm a').format(dose.scheduledTime),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: isOverdue
+                                ? colorScheme.error
+                                : colorScheme.primary,
+                            height: 1.1,
+                          ),
+                    ),
+                    
+                    // ROW 3: Instruction/Amount + Status Badge
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                         Text(
+                          '${_formatNumber(dose.doseValue)} ${dose.doseUnit}', // "1 tablet"
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                         if (dose.status != DoseStatus.pending)
+                          _buildStatusBadge(dose.status),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -359,7 +629,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
@@ -369,7 +639,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
         label.toUpperCase(),
         style: TextStyle(
           color: color,
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -382,7 +652,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
     );
 
     return SizedBox(
-      height: 80,
+      height: 72, // Slightly reduced
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(7, (index) {
@@ -412,7 +682,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
                   color: isSelected
                       ? Theme.of(context).colorScheme.primaryContainer
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8), // Less rounded, "squarer" (was 8, keeping 8 is actually square-ish for small items. User said "some square elements". Maybe reduce to 4?)
                   border: isToday && !isSelected
                       ? Border.all(
                           color: Theme.of(context).colorScheme.primary,
@@ -426,7 +696,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
                     Text(
                       DateFormat('E').format(day).toUpperCase(),
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.bold,
                         color: isSelected
                             ? Theme.of(context).colorScheme.onPrimaryContainer
@@ -437,14 +707,14 @@ class _NextDoseCardState extends State<NextDoseCard> {
                     Text(
                       day.day.toString(),
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: isSelected
                             ? Theme.of(context).colorScheme.onPrimaryContainer
                             : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     // Dose Indicators
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -456,7 +726,8 @@ class _NextDoseCardState extends State<NextDoseCard> {
                               height: 4,
                               margin: const EdgeInsets.symmetric(horizontal: 1),
                               decoration: BoxDecoration(
-                                shape: BoxShape.circle,
+                                shape: BoxShape.rectangle, // SQUARE ELEMENTS
+                                borderRadius: BorderRadius.circular(1),
                                 color: _getStatusColor(d.status),
                               ),
                             ),

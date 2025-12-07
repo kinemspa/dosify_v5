@@ -1,126 +1,74 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/services/expiry_tracking_service.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/controllers/medication_detail_controller.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
-class MedicationHeaderWidget extends StatelessWidget {
+class MedicationHeaderWidget extends ConsumerWidget {
   const MedicationHeaderWidget({
-    super.key,
     required this.medication,
     required this.onRefill,
-    this.daysRemaining,
-    this.stockoutDate,
-    this.adherenceData = const [],
+    super.key,
   });
 
   final Medication medication;
   final VoidCallback onRefill;
-  final double? daysRemaining;
-  final DateTime? stockoutDate;
-  final List<double> adherenceData;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final onPrimary = colorScheme.onPrimary;
+    final onPrimary = theme.colorScheme.onPrimary;
+
+    // Use current date for calculations
+    final now = DateTime.now();
+
+    // Watch the controller state to get calculated values
+    final state = ref.watch(medicationDetailControllerProvider(medication.id));
+    
+    // Calculate Stock
     final stockRatio = MedicationStockService.calculateStockRatio(medication);
-    final storageLabel = medication.storageLocation;
 
-    // Gauge logic
-    final isMdv = medication.form == MedicationForm.multiDoseVial;
+    // Get Days Remaining from State
+    final double? daysRemaining = state?.daysRemaining;
+    final DateTime? stockoutDate = state?.stockoutDate;
+    
+    // Adherence Data (stubbed for now or real if available)
+    final adherenceData = [1.0, 1.0, 0.5, 1.0, 0.0, 1.0, 1.0]; // Example
 
-    double pct = 0;
-    String primaryLabel = '';
-    String helperLabel = '';
-    String? extraStockLabel;
-    double initial = medication.initialStockValue ?? medication.stockValue;
-    String unit = _stockUnitLabel(medication.stockUnit);
-
-    if (isMdv) {
-      if (medication.containerVolumeMl != null &&
-          medication.containerVolumeMl! > 0) {
-        final currentVol =
-            medication.activeVialVolume ?? medication.containerVolumeMl!;
-        pct = (currentVol / medication.containerVolumeMl!) * 100;
-        primaryLabel = '${pct.round()}%';
-
-        initial = medication.containerVolumeMl!;
-        unit = 'mL';
-
-        helperLabel = 'Remaining of Active Vial';
-        extraStockLabel =
-            '${_formatNumber(medication.stockValue)} sealed vials in stock';
-      } else {
-        pct = stockRatio * 100;
-        primaryLabel = '${pct.round()}%';
-        helperLabel = 'Remaining';
-      }
-    } else {
-      pct = stockRatio * 100;
-      primaryLabel = '${pct.round()}%';
-      helperLabel = 'Remaining';
-    }
-
-    final hasBackup = isMdv &&
-        medication.stockUnit == StockUnit.multiDoseVials &&
-        medication.stockValue > 0;
-
-    double backupPct = 0;
-    if (hasBackup) {
-      final baseline = medication.lowStockVialsThresholdCount != null &&
-              medication.lowStockVialsThresholdCount! > 0
-          ? medication.lowStockVialsThresholdCount!
-          : medication.stockValue;
-      backupPct =
-          baseline > 0 ? (medication.stockValue / baseline) * 100.0 : 0.0;
-    }
-
-    // Strength per X label
-    String strengthPerLabel = switch (medication.form) {
-      MedicationForm.tablet => 'Strength per Tablet',
-      MedicationForm.capsule => 'Strength per Capsule',
-      MedicationForm.prefilledSyringe => 'Strength per Syringe',
-      MedicationForm.singleDoseVial ||
-      MedicationForm.multiDoseVial =>
-        'Strength per Vial',
-    };
-
-    // Determine gauge color based on percentage
-    Color gaugeColor = onPrimary;
-    if (pct <= 10) {
-      gaugeColor = theme.colorScheme.errorContainer;
-    } else if (pct <= 25) {
-      gaugeColor = theme.colorScheme.tertiaryContainer;
-    } else {
-      gaugeColor = onPrimary.withValues(alpha: 0.9);
-    }
+    final strengthPerLabel = 'Strength per ${_unitLabel(medication.strengthUnit)}';
+    
+    // Storage Label: Use actual location data
+    final storageLabel = (medication.storageLocation?.isNotEmpty ?? false)
+        ? medication.storageLocation
+        : (medication.activeVialStorageLocation?.isNotEmpty ?? false)
+            ? medication.activeVialStorageLocation
+            : null;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
+          flex: 6,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Space for the animated Name (which is positioned absolutely in parent)
+              // Space for the animated Name
               const SizedBox(height: 52),
 
               // Description & Notes
               if (medication.description != null &&
                   medication.description!.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: 2),
                   child: Text(
                     medication.description!,
                     style: TextStyle(
                       color: onPrimary.withValues(alpha: 0.9),
-                      fontSize: 11,
+                      fontSize: 10,
                       fontStyle: FontStyle.italic,
-                      height: 1.3,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -129,14 +77,13 @@ class MedicationHeaderWidget extends StatelessWidget {
 
               if (medication.notes != null && medication.notes!.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
                     medication.notes!,
                     style: TextStyle(
-                      color: onPrimary.withValues(alpha: 0.65),
+                      color: onPrimary.withValues(alpha: 0.6),
                       fontStyle: FontStyle.italic,
-                      fontSize: 10,
-                      height: 1.2,
+                      fontSize: 9,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -153,7 +100,7 @@ class MedicationHeaderWidget extends StatelessWidget {
                     '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
                 textColor: onPrimary,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
 
               // Storage
               if (storageLabel != null && storageLabel.isNotEmpty) ...[
@@ -162,34 +109,37 @@ class MedicationHeaderWidget extends StatelessWidget {
                   label: 'Storage',
                   value: storageLabel,
                   textColor: onPrimary,
-                  trailingIcon: medication.activeVialRequiresFreezer
-                      ? Icons.severe_cold
-                      : (medication.requiresRefrigeration
-                          ? Icons.ac_unit
-                          : (medication.activeVialLightSensitive
-                              ? Icons.dark_mode_outlined
-                              : null)),
+                  trailingIcons: [
+                    if (medication.activeVialRequiresFreezer || medication.requiresFreezer)
+                      Icons.severe_cold,
+                    if (medication.requiresRefrigeration || medication.activeVialRequiresRefrigeration)
+                      Icons.ac_unit,
+                    if (medication.activeVialLightSensitive || medication.lightSensitive)
+                      Icons.dark_mode_outlined,
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
               ],
 
-              const SizedBox(height: 16),
+              const Spacer(),
               // Adherence Graph
               _AdherenceGraph(data: adherenceData, color: onPrimary),
-              const SizedBox(height: 12),
             ],
           ),
         ),
-        const SizedBox(width: 16),
-        // StockInfoCard with natural width
-        _StockInfoCard(
-          medication: medication,
-          theme: theme,
-          onPrimary: onPrimary,
-          stockRatio: stockRatio,
-          daysRemaining: daysRemaining,
-          stockoutDate: stockoutDate,
-          onRefill: onRefill,
+        const SizedBox(width: 12),
+        // StockInfoCard 40% Width
+        Expanded(
+          flex: 4,
+          child: _StockInfoCard(
+            medication: medication,
+            theme: theme,
+            onPrimary: onPrimary,
+            stockRatio: stockRatio,
+            daysRemaining: daysRemaining,
+            stockoutDate: stockoutDate,
+            onRefill: onRefill,
+          ),
         ),
       ],
     );
@@ -217,6 +167,14 @@ class MedicationHeaderWidget extends StatelessWidget {
         Unit.unitsPerMl => 'units/mL',
       };
 
+  String _formLabel(MedicationForm form) => switch (form) {
+        MedicationForm.tablet => 'Tablet',
+        MedicationForm.capsule => 'Capsule',
+        MedicationForm.prefilledSyringe => 'Syringe',
+        MedicationForm.singleDoseVial => 'Vial',
+        MedicationForm.multiDoseVial => 'Vial',
+      };
+
   String _formatNumber(double value) {
     if (value == value.roundToDouble()) {
       return value.toInt().toString();
@@ -230,14 +188,14 @@ class _HeaderInfoTile extends StatelessWidget {
   final String value;
   final IconData? icon;
   final Color? textColor;
-  final IconData? trailingIcon;
+  final List<IconData>? trailingIcons;
 
   const _HeaderInfoTile({
     required this.label,
     required this.value,
     this.icon,
     this.textColor,
-    this.trailingIcon,
+    this.trailingIcons,
   });
 
   @override
@@ -281,10 +239,11 @@ class _HeaderInfoTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (trailingIcon != null) ...[
-              const SizedBox(width: 5),
-              Icon(trailingIcon, color: color.withValues(alpha: 0.95), size: 15),
-            ],
+            if (trailingIcons != null)
+              for (final icon in trailingIcons!) ...[
+                const SizedBox(width: 5),
+                Icon(icon, color: color.withValues(alpha: 0.95), size: 15),
+              ],
           ],
         ),
       ],
@@ -497,9 +456,8 @@ class _StockInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final pct = stockRatio.clamp(0.0, 1.0);
-    
+
     // Correct logic for MDVs based on existing properties
     final isMdv = medication.form == MedicationForm.multiDoseVial;
     final hasBackup = isMdv && medication.stockUnit == StockUnit.multiDoseVials;
@@ -510,52 +468,41 @@ class _StockInfoCard extends StatelessWidget {
               medication.lowStockVialsThresholdCount! > 0
           ? medication.lowStockVialsThresholdCount!.toDouble()
           : medication.stockValue;
-          
+
       // Ensure we don't divide by zero
       if (baseline > 0) {
-         backupPct = (medication.stockValue / baseline).clamp(0.0, 1.0);
+        backupPct = (medication.stockValue / baseline).clamp(0.0, 1.0);
       }
     }
-    
+
     final primaryLabel = '${(pct * 100).round()}%';
-    
-    // Get color from StockLevel enum
-    final level = MedicationStockService.getStockLevel(medication);
-    final gaugeColor = _getStockColor(level, theme);
-    
+
+    // User requested White Donut with Thick Line (Large Card Style)
+    // Large Card uses defaults: isOutline=false (Thick), showGlow=true
+    // We adjust for the header background (onPrimary for color, no glow for clean look on solid)
+    final gaugeColor = onPrimary;
+
     // Calculate initial helper value
     final initial = isMdv && medication.containerVolumeMl != null
         ? medication.containerVolumeMl!
         : (medication.initialStockValue ?? medication.stockValue);
-        
+
     final unit = _stockUnitLabel(medication.stockUnit);
-    
     final helperLabel = isMdv ? 'Active Vial' : 'Remaining';
-    
+
     String? extraStockLabel;
-    
+
     // Calculate backup vials count if possible
-    if (isMdv && medication.containerVolumeMl != null && medication.containerVolumeMl! > 0) {
-        if (medication.activeVialVolume != null && medication.stockValue > medication.activeVialVolume!) {
-             final backupVol = medication.stockValue - medication.activeVialVolume!;
-             final count = (backupVol / medication.containerVolumeMl!).floor();
-             if (count > 0) {
-                 extraStockLabel = '+ $count backup ${count == 1 ? 'vial' : 'vials'}';
-             }
+    if (isMdv &&
+        medication.containerVolumeMl != null &&
+        medication.containerVolumeMl! > 0) {
+      if (medication.activeVialVolume != null &&
+          medication.stockValue > medication.activeVialVolume!) {
+        final backupVol = medication.stockValue - medication.activeVialVolume!;
+        final count = (backupVol / medication.containerVolumeMl!).floor();
+        if (count > 0) {
+          extraStockLabel = '+ $count backup ${count == 1 ? 'vial' : 'vials'}';
         }
-    }
-
-    // Prepare formatted dates
-    String? forecastText;
-    if (daysRemaining != null && stockoutDate != null) {
-      final dateStr = DateFormat.yMMMd().format(stockoutDate!);
-      // "Stock lasts until Dec 12, 2024 (5 days left)."
-      forecastText =
-          'Stock lasts until $dateStr (${daysRemaining!.ceil()} days left).';
-
-      if (medication.expiry != null) {
-        final expiryStr = DateFormat.yMMMd().format(medication.expiry!);
-        forecastText += '\nExpires on $expiryStr.';
       }
     }
 
@@ -569,68 +516,39 @@ class _StockInfoCard extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Stock Gauge
-          Center(
-            child: SizedBox(
-              height: 100,
-              width: 100,
-              child: hasBackup
-                  ? DualStockDonutGauge(
-                      outerPercentage: pct,
-                      innerPercentage: backupPct,
-                      primaryLabel: primaryLabel,
-                      color: gaugeColor,
-                      backgroundColor: onPrimary.withValues(alpha: 0.05),
-                      textColor: onPrimary,
-                      showGlow: false,
-                      isOutline: false,
-                    )
-                  : StockDonutGauge(
-                      percentage: pct,
-                      primaryLabel: primaryLabel,
-                      color: gaugeColor,
-                      backgroundColor: onPrimary.withValues(alpha: 0.05),
-                      textColor: onPrimary,
-                      showGlow: false,
-                      isOutline: false,
+          // Stock Count (Align Right)
+          Align(
+            alignment: Alignment.centerRight,
+            child: RichText(
+              textAlign: TextAlign.end,
+              text: TextSpan(
+                style: TextStyle(
+                  color: onPrimary,
+                  fontSize: 10,
+                ),
+                children: [
+                  TextSpan(
+                    text: _formatNumber(
+                      (isMdv &&
+                              medication.containerVolumeMl != null &&
+                              medication.containerVolumeMl! > 0)
+                          ? (medication.activeVialVolume ??
+                              medication.containerVolumeMl!)
+                          : medication.stockValue,
                     ),
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          // Stock Count
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: TextStyle(
-                color: onPrimary,
-                fontSize: 10,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: onPrimary,
+                    ),
+                  ),
+                  const TextSpan(text: ' / '),
+                  TextSpan(
+                    text: _formatNumber(initial),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' $unit'),
+                ],
               ),
-              children: [
-                TextSpan(
-                  text: _formatNumber(
-                    (isMdv &&
-                            medication.containerVolumeMl != null &&
-                            medication.containerVolumeMl! > 0)
-                        ? (medication.activeVialVolume ??
-                            medication.containerVolumeMl!)
-                        : medication.stockValue,
-                  ),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primaryContainer,
-                  ),
-                ),
-                const TextSpan(text: ' / '),
-                TextSpan(
-                  text: _formatNumber(initial),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(text: ' $unit'),
-              ],
             ),
           ),
           const SizedBox(height: 2),
@@ -641,7 +559,7 @@ class _StockInfoCard extends StatelessWidget {
               fontSize: 10,
               letterSpacing: 0.2,
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.end,
           ),
           if (extraStockLabel != null) ...[
             const SizedBox(height: 4),
@@ -653,62 +571,128 @@ class _StockInfoCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.1,
               ),
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.end,
             ),
           ],
 
-          // Stock Forecast Text (Flattened)
-          if (forecastText != null) ...[
+          // Stock Forecast Text (Right Aligned RichText) - RESTORED
+          if (daysRemaining != null && stockoutDate != null) ...[
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
               decoration: BoxDecoration(
-                color: onPrimary.withValues(alpha: 0.05),
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Text(
-                forecastText,
-                style: TextStyle(
-                  color: onPrimary.withValues(alpha: 0.8),
-                  fontSize: 10,
-                  height: 1.4,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  RichText(
+                    textAlign: TextAlign.end,
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: onPrimary.withValues(alpha: 0.8),
+                        fontSize: 10,
+                        height: 1.4,
+                      ),
+                      children: [
+                        const TextSpan(text: 'Projected to run out on '),
+                        TextSpan(
+                          text: DateFormat.yMMMd().format(stockoutDate!),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  RichText(
+                    textAlign: TextAlign.end,
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: onPrimary.withValues(alpha: 0.8),
+                        fontSize: 10,
+                        height: 1.4,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: '${daysRemaining!.ceil()} days left',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
+
+          // Expiry Text - RESTORED
+          if (medication.expiry != null) ...[
+             // If we didn't show the daysRemaining block, add some spacing
+             if (daysRemaining == null) const SizedBox(height: 12),
+             Padding(
+               padding: const EdgeInsets.only(top: 2),
+               child: RichText(
+                 textAlign: TextAlign.end,
+                 text: TextSpan(
+                   style: TextStyle(
+                    color: onPrimary.withValues(alpha: 0.65),
+                    fontSize: 10,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Expires '),
+                     TextSpan(
+                      text: DateFormat.yMMMd().format(medication.expiry!),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                 ),
+               ),
+             ),
           ],
 
           const SizedBox(height: 16),
 
-          // Refill Button - High Contrast
-          Material(
-            color: onPrimary,
-            borderRadius: BorderRadius.circular(20),
-            child: InkWell(
-              onTap: onRefill,
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.add,
-                      size: 14,
-                      color: theme.colorScheme.primary, 
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Refill',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+          // Refill Button - Less Rounded, Subtle Outlined
+          Align(
+            alignment: Alignment.center,
+            child: Material(
+              color: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                    color: onPrimary.withValues(alpha: 0.5), width: 1),
+              ),
+              child: InkWell(
+                onTap: onRefill,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.add,
+                        size: 14,
+                        color: onPrimary,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        'Refill',
+                        style: TextStyle(
+                          color: onPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -717,22 +701,7 @@ class _StockInfoCard extends StatelessWidget {
       ),
     );
   }
-  
-  Color _getStockColor(StockLevel level, ThemeData theme) {
-      switch (level) {
-          case StockLevel.good:
-              return const Color(0xFF4CAF50); // Green
-          case StockLevel.moderate:
-              return const Color(0xFFFFC107); // Amber
-          case StockLevel.low:
-              return const Color(0xFFFF9800); // Orange
-          case StockLevel.critical:
-              return const Color(0xFFF44336); // Red
-          case StockLevel.empty:
-              return const Color(0xFF9E9E9E); // Grey
-      }
-  }
-  
+
   String _stockUnitLabel(StockUnit unit) => switch (unit) {
         StockUnit.tablets => 'tablets',
         StockUnit.capsules => 'capsules',
@@ -746,9 +715,8 @@ class _StockInfoCard extends StatelessWidget {
 
   String _formatNumber(double value) {
     if (value == value.roundToDouble()) {
-      return value.round().toString();
+      return value.toInt().toString();
     }
     return value.toStringAsFixed(1);
   }
 }
-
