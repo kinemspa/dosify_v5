@@ -404,7 +404,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
               date.day == _selectedDate.day;
           
           // Check for doses on this day
-          final hasDose = _schedules.any((s) {
+          final hasDose = widget.schedules.any((s) {
               // Simple check - in reality need to check recurrence
               // For now assume daily if active
               return s.active;

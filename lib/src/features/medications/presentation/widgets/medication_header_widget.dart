@@ -693,11 +693,6 @@ class _StockInfoCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
