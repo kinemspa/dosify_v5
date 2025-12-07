@@ -286,100 +286,145 @@ class _NextDoseCardState extends State<NextDoseCard> {
     IconData statusIcon = Icons.notifications_outlined;
     Color iconColor = colorScheme.primary;
     Color iconBg = colorScheme.primaryContainer;
-
+    
+    // Dynamic status label
+    String statusLabel = 'Next Dose';
     if (isTaken) {
       statusIcon = Icons.check;
       iconColor = Colors.green;
       iconBg = Colors.green.withValues(alpha: 0.2);
+      statusLabel = 'Taken Dose';
     } else if (isSkipped) {
       statusIcon = Icons.block;
       iconColor = Colors.grey;
       iconBg = Colors.grey.withValues(alpha: 0.2);
+      statusLabel = 'Skipped Dose';
     } else if (isSnoozed) {
       statusIcon = Icons.snooze;
       iconColor = Colors.orange;
       iconBg = Colors.orange.withValues(alpha: 0.2);
+      statusLabel = 'Snoozed Dose';
     } else if (isOverdue) {
       statusIcon = Icons.warning_amber_rounded;
       iconColor = colorScheme.error;
       iconBg = colorScheme.errorContainer;
+      statusLabel = 'Missed Dose';
     }
 
-    return InkWell(
-      onTap: () => _showDoseActionSheet(dose),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12), // Adjusted padding
-        child: Row(
-          children: [
-            // Leading Circular Icon (Bigger and moved left)
-            Container(
-              width: 48, // Increased from 36
-              height: 48, // Increased from 36
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: iconBg,
-              ),
-              child: Icon(statusIcon, size: 24, color: iconColor), // Increased from 18
-            ),
-            const SizedBox(width: 16),
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () => _showDoseActionSheet(dose),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
+            child: Row(
+              children: [
+                // Leading Circular Icon (moved to left)
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: iconBg,
+                  ),
+                  child: Icon(statusIcon, size: 24, color: iconColor),
+                ),
+                const SizedBox(width: 16),
 
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Top Row: "Next Dose" + Date (Right Aligned)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Top Row: Dynamic Status Label + Date
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            statusLabel,
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                          ),
+                          Text(
+                            DateFormat('MMM d').format(dose.scheduledTime),
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      // Time
                       Text(
-                        'Next Dose',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                        DateFormat('h:mm a').format(dose.scheduledTime),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: isOverdue
+                                  ? colorScheme.error
+                                  : colorScheme.primary,
+                              height: 1.1,
+                              fontSize: 20,
                             ),
                       ),
+                      const SizedBox(height: 2),
+                      // Value
                       Text(
-                        DateFormat('MMM d').format(dose.scheduledTime),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        '${_formatNumber(dose.doseValue)} ${dose.doseUnit}' +
+                            (dose.status != DoseStatus.pending
+                                ? ' • ${dose.status.name.toUpperCase()}'
+                                : ''),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  // Time
-                  Text(
-                    DateFormat('h:mm a').format(dose.scheduledTime),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: isOverdue
-                              ? colorScheme.error
-                              : colorScheme.primary,
-                          height: 1.1,
-                          fontSize: 20, // Slightly bigger
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  // Value
-                  Text(
-                    '${_formatNumber(dose.doseValue)} ${dose.doseUnit}' +
-                        (dose.status != DoseStatus.pending
-                            ? ' • ${dose.status.name.toUpperCase()}'
-                            : ''),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        // Navigation arrows
+        Positioned(
+          left: 0,
+          top: 0,
+          bottom: 0,
+          child: Center(
+            child: IconButton(
+              icon: Icon(Icons.chevron_left, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+              onPressed: index > 0 ? () {
+                _pageController.previousPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              } : null,
+              iconSize: 20,
+            ),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: Center(
+            child: IconButton(
+              icon: Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+              onPressed: index < total - 1 ? () {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              } : null,
+              iconSize: 20,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

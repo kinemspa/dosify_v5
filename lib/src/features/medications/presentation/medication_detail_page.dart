@@ -817,7 +817,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final schedules = scheduleBox.values
         .where((s) => s.medicationId == med.id && s.active)
         .toList();
-    final count = schedules.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,43 +826,52 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           const SizedBox(height: 16),
         ],
 
-        // Improved Manage Button
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant.withValues(
-                    alpha: 0.5,
+        // Compact Schedule List
+        if (schedules.isNotEmpty)
+          ...schedules.map((schedule) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-            ),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-            leading: divvyIcon(
-              Icons.calendar_month_outlined,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
-            ),
-            title: Text(
-              '$count Active ${count == 1 ? 'Schedule' : 'Schedules'}',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      schedule.name,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
                   ),
-            ),
-            subtitle: Text(
-              'Tap to manage dosing schedule',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () {
+                      // Navigate directly to schedule edit
+                      context.go('/schedules/${schedule.id}');
+                    },
+                    tooltip: 'Edit Schedule',
                   ),
+                ],
+              ),
             ),
-            trailing: const Icon(Icons.chevron_right, size: 20),
-            onTap: () => context.go('/schedules'),
-          ),
-        ),
+          )),
       ],
     );
   }

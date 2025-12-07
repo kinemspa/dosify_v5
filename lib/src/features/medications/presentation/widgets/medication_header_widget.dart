@@ -38,7 +38,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
     // Adherence Data (stubbed for now or real if available)
     final adherenceData = [1.0, 1.0, 0.5, 1.0, 0.0, 1.0, 1.0]; // Example
 
-    final strengthPerLabel = 'Strength per ${_unitLabel(medication.strengthUnit)}';
+    final strengthPerLabel = 'Strength per ${_formLabel(medication.form)}';
     
     // Storage Label: Use actual location data
     final storageLabel = (medication.storageLocation?.isNotEmpty ?? false)
@@ -99,16 +99,18 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 value:
                     '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
                 textColor: onPrimary,
+                valueSize: 11,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
 
               // Storage
               if (storageLabel != null && storageLabel.isNotEmpty) ...[
                 _HeaderInfoTile(
                   icon: Icons.location_on_outlined,
-                  label: 'Storage',
+                  label: 'Storage Location',
                   value: storageLabel,
                   textColor: onPrimary,
+                  valueSize: 11,
                   trailingIcons: [
                     if (medication.activeVialRequiresFreezer || medication.requiresFreezer)
                       Icons.severe_cold,
@@ -189,6 +191,7 @@ class _HeaderInfoTile extends StatelessWidget {
   final IconData? icon;
   final Color? textColor;
   final List<IconData>? trailingIcons;
+  final double? valueSize;
 
   const _HeaderInfoTile({
     required this.label,
@@ -196,6 +199,7 @@ class _HeaderInfoTile extends StatelessWidget {
     this.icon,
     this.textColor,
     this.trailingIcons,
+    this.valueSize,
   });
 
   @override
@@ -233,7 +237,7 @@ class _HeaderInfoTile extends StatelessWidget {
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
+                  fontSize: valueSize ?? 13,
                   letterSpacing: 0.1,
                   height: 1.1,
                 ),

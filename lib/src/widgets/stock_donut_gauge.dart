@@ -235,7 +235,7 @@ class _StockDonutPainter extends CustomPainter {
     final center = size.center(Offset.zero);
     final radius = math.min(size.width, size.height) / 2;
     // The "thickness" of the donut if it were filled
-    final thickness = strokeWidth ?? (size.width >= 90 ? 10.0 : 5.0);
+    final thickness = strokeWidth ?? (size.width >= 90 ? 12.0 : 6.0);
     // The thin border line width
     final borderWidth = isOutline ? kBorderWidthThin : thickness;
 
