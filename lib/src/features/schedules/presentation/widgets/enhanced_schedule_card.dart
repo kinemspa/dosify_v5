@@ -277,6 +277,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           ],
         ],
       ),
+      ),
     );
   }
 
