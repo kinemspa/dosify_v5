@@ -153,7 +153,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     const SizedBox(height: kSpacingXS),
                     
                     // Adherence
-                    if (adherenceData['total'] > 0)
+                    if ((adherenceData['total'] as int) > 0)
                       Row(
                         children: [
                           Icon(
