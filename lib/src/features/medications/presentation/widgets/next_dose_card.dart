@@ -282,105 +282,177 @@ class _NextDoseCardState extends State<NextDoseCard> {
     final isSkipped = dose.status == DoseStatus.skipped;
     final isSnoozed = dose.status == DoseStatus.snoozed;
 
-    // Determine Icon
-    IconData statusIcon = Icons.notifications_outlined;
+    // Determine Icon and Colors
+    IconData statusIcon = Icons.notifications_active_rounded;
     Color iconColor = colorScheme.primary;
-    Color iconBg = colorScheme.primaryContainer;
+    Color cardGradientStart = colorScheme.primaryContainer.withValues(alpha: 0.3);
+    Color cardGradientEnd = colorScheme.surfaceContainerHighest.withValues(alpha: 0.2);
     
     // Dynamic status label
     String statusLabel = 'Next Dose';
     if (isTaken) {
-      statusIcon = Icons.check;
-      iconColor = Colors.green;
-      iconBg = Colors.green.withValues(alpha: 0.2);
-      statusLabel = 'Taken Dose';
+      statusIcon = Icons.check_circle_rounded;
+      iconColor = Colors.green.shade600;
+      cardGradientStart = Colors.green.withValues(alpha: 0.15);
+      cardGradientEnd = Colors.green.withValues(alpha: 0.05);
+      statusLabel = 'Taken';
     } else if (isSkipped) {
-      statusIcon = Icons.block;
-      iconColor = Colors.grey;
-      iconBg = Colors.grey.withValues(alpha: 0.2);
-      statusLabel = 'Skipped Dose';
+      statusIcon = Icons.cancel_rounded;
+      iconColor = Colors.grey.shade600;
+      cardGradientStart = Colors.grey.withValues(alpha: 0.15);
+      cardGradientEnd = Colors.grey.withValues(alpha: 0.05);
+      statusLabel = 'Skipped';
     } else if (isSnoozed) {
-      statusIcon = Icons.snooze;
-      iconColor = Colors.orange;
-      iconBg = Colors.orange.withValues(alpha: 0.2);
-      statusLabel = 'Snoozed Dose';
+      statusIcon = Icons.snooze_rounded;
+      iconColor = Colors.orange.shade600;
+      cardGradientStart = Colors.orange.withValues(alpha: 0.15);
+      cardGradientEnd = Colors.orange.withValues(alpha: 0.05);
+      statusLabel = 'Snoozed';
     } else if (isOverdue) {
-      statusIcon = Icons.warning_amber_rounded;
-      iconColor = colorScheme.error;
-      iconBg = colorScheme.errorContainer;
-      statusLabel = 'Missed Dose';
+      statusIcon = Icons.warning_rounded;
+      iconColor = Colors.red.shade600;
+      cardGradientStart = Colors.red.withValues(alpha: 0.15);
+      cardGradientEnd = Colors.red.withValues(alpha: 0.05);
+      statusLabel = 'Missed';
     }
 
     return InkWell(
       onTap: () => _showDoseActionSheet(dose),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
-        child: Row(
-          children: [
-            // Leading Circular Icon (all the way to left)
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: iconBg,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [cardGradientStart, cardGradientEnd],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: iconColor.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Leading Icon with Glow Effect
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: iconColor.withValues(alpha: 0.15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: iconColor.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+                child: Icon(statusIcon, size: 28, color: iconColor),
               ),
-              child: Icon(statusIcon, size: 24, color: iconColor),
-            ),
-            const SizedBox(width: 12),
+              const SizedBox(width: 16),
 
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Top Row: Dynamic Status Label + Date
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        statusLabel,
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Status Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: iconColor.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        statusLabel.toUpperCase(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                              color: iconColor,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                              letterSpacing: 0.8,
+                              fontSize: 10,
                             ),
                       ),
-                      Text(
-                        DateFormat('MMM d').format(dose.scheduledTime),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 1),
-                  // Time
-                  Text(
-                    DateFormat('h:mm a').format(dose.scheduledTime),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: isOverdue
-                              ? colorScheme.error
-                              : colorScheme.primary,
-                          height: 1.1,
-                          fontSize: 20,
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Time - Large and Bold
+                    Text(
+                      DateFormat('h:mm a').format(dose.scheduledTime),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: colorScheme.onSurface,
+                            height: 1.0,
+                            letterSpacing: -0.5,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    
+                    // Dose Amount
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.medication_rounded,
+                          size: 14,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                  ),
-                  const SizedBox(height: 1),
-                  // Value (without status text)
-                  Text(
-                    '${_formatNumber(dose.doseValue)} ${dose.doseUnit}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 4),
+                        Text(
+                          '${_formatNumber(dose.doseValue)} ${dose.doseUnit}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                         ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Right Side: Date Badge
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          DateFormat('MMM').format(dose.scheduledTime).toUpperCase(),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 9,
+                                letterSpacing: 0.5,
+                              ),
+                        ),
+                        Text(
+                          DateFormat('d').format(dose.scheduledTime),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w800,
+                                height: 1.0,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
