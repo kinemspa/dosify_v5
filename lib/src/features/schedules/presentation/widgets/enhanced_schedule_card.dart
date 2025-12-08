@@ -546,25 +546,229 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   }
 
   // Action handlers
-  void _takeDoseNow() {
-    // TODO: Implement take dose
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Take dose functionality coming soon')),
+  void _takeDoseNow() async {
+    final now = DateTime.now();
+    
+    // Show quick confirmation dialog with notes option
+    final result = await showDialog<Map<String, String?>>(
+      context: context,
+      builder: (context) {
+        final notesController = TextEditingController();
+        final siteController = TextEditingController();
+        
+        return AlertDialog(
+          title: const Text('Record Dose'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Recording ${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: notesController,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: siteController,
+                decoration: const InputDecoration(
+                  labelText: 'Injection site (optional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, {
+                  'notes': notesController.text.isEmpty ? null : notesController.text,
+                  'site': siteController.text.isEmpty ? null : siteController.text,
+                });
+              },
+              child: const Text('Record'),
+            ),
+          ],
+        );
+      },
     );
+    
+    if (result != null && mounted) {
+      // Create dose log
+      final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      final log = DoseLog(
+        id: logId,
+        scheduleId: widget.schedule.id,
+        scheduleName: widget.schedule.name,
+        medicationId: widget.medication.id,
+        medicationName: widget.medication.name,
+        scheduledTime: now,
+        doseValue: widget.schedule.doseValue,
+        doseUnit: widget.schedule.doseUnit,
+        action: DoseAction.taken,
+        notes: result['notes'],
+        injectionSite: result['site'],
+      );
+      
+      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      await repo.upsert(log);
+      
+      // Update medication stock
+      final medBox = Hive.box<Medication>('medications');
+      final currentMed = medBox.get(widget.medication.id);
+      if (currentMed != null) {
+        final newStockValue = (currentMed.stockValue - widget.schedule.doseValue).clamp(0.0, double.infinity);
+        await medBox.put(
+          currentMed.id,
+          currentMed.copyWith(stockValue: newStockValue),
+        );
+      }
+      
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                const Text('Dose recorded successfully'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
-  void _skipDose() {
-    // TODO: Implement skip dose
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Skip dose functionality coming soon')),
+  void _skipDose() async {
+    final now = DateTime.now();
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Skip Dose'),
+        content: Text('Skip ${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.grey,
+            ),
+            child: const Text('Skip'),
+          ),
+        ],
+      ),
     );
+    
+    if (confirmed == true && mounted) {
+      final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      final log = DoseLog(
+        id: logId,
+        scheduleId: widget.schedule.id,
+        scheduleName: widget.schedule.name,
+        medicationId: widget.medication.id,
+        medicationName: widget.medication.name,
+        scheduledTime: now,
+        doseValue: widget.schedule.doseValue,
+        doseUnit: widget.schedule.doseUnit,
+        action: DoseAction.skipped,
+      );
+      
+      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      await repo.upsert(log);
+      
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Dose skipped'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
-  void _snoozeDose() {
-    // TODO: Implement snooze dose
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Snooze dose functionality coming soon')),
+  void _snoozeDose() async {
+    final now = DateTime.now();
+    
+    final snoozeDuration = await showDialog<Duration>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Snooze Dose'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Remind me in:'),
+            const SizedBox(height: 16),
+            ListTile(
+              title: const Text('15 minutes'),
+              onTap: () => Navigator.pop(context, const Duration(minutes: 15)),
+            ),
+            ListTile(
+              title: const Text('30 minutes'),
+              onTap: () => Navigator.pop(context, const Duration(minutes: 30)),
+            ),
+            ListTile(
+              title: const Text('1 hour'),
+              onTap: () => Navigator.pop(context, const Duration(hours: 1)),
+            ),
+            ListTile(
+              title: const Text('2 hours'),
+              onTap: () => Navigator.pop(context, const Duration(hours: 2)),
+            ),
+          ],
+        ),
+      ),
     );
+    
+    if (snoozeDuration != null && mounted) {
+      final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      final log = DoseLog(
+        id: logId,
+        scheduleId: widget.schedule.id,
+        scheduleName: widget.schedule.name,
+        medicationId: widget.medication.id,
+        medicationName: widget.medication.name,
+        scheduledTime: now,
+        doseValue: widget.schedule.doseValue,
+        doseUnit: widget.schedule.doseUnit,
+        action: DoseAction.snoozed,
+        notes: 'Snoozed for ${snoozeDuration.inMinutes} minutes',
+      );
+      
+      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      await repo.upsert(log);
+      
+      // TODO: Schedule notification for snooze time
+      
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Dose snoozed for ${snoozeDuration.inMinutes} minutes'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _togglePause() {
@@ -584,13 +788,20 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       cycleAnchorDate: widget.schedule.cycleAnchorDate,
       daysOfMonth: widget.schedule.daysOfMonth,
       createdAt: widget.schedule.createdAt,
+      minutesOfDayUtc: widget.schedule.minutesOfDayUtc,
+      daysOfWeekUtc: widget.schedule.daysOfWeekUtc,
+      timesOfDayUtc: widget.schedule.timesOfDayUtc,
     );
     scheduleBox.put(widget.schedule.id, updated);
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(updated.active ? 'Schedule resumed' : 'Schedule paused'),
-      ),
-    );
+    if (mounted) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(updated.active ? 'Schedule resumed' : 'Schedule paused'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
