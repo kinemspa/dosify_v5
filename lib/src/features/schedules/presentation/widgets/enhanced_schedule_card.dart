@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Enhanced expandable schedule card for medication detail page
 /// Shows schedule summary by default, expands to show full details
@@ -38,162 +39,157 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     final nextDose = _getNextDose();
     final adherenceData = _getAdherenceData();
     
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Collapsed header (always visible)
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title row with expand/edit buttons
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.schedule,
-                        size: 18,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          widget.schedule.name,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: kSpacingS),
+      child: Container(
+        decoration: softWhiteCardDecoration(context),
+        child: Column(
+          children: [
+            // Collapsed header (always visible)
+            InkWell(
+              onTap: () => setState(() => _isExpanded = !_isExpanded),
+              borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+              child: Padding(
+                padding: const EdgeInsets.all(kCardPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title row with expand/edit buttons
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          size: kIconSizeMedium,
+                          color: colorScheme.primary,
                         ),
-                      ),
-                      // Status badge
-                      if (!widget.schedule.active)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                        const SizedBox(width: kSpacingS),
+                        Expanded(
                           child: Text(
-                            'PAUSED',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange.shade700,
-                            ),
+                            widget.schedule.name,
+                            style: bodyTextStyle(context)?.copyWith(
+                                  fontWeight: kFontWeightBold,
+                                ),
                           ),
                         ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        _isExpanded ? Icons.expand_less : Icons.expand_more,
-                        size: 20,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        onPressed: () => context.go('/schedules/\${widget.schedule.id}'),
-                        tooltip: 'Edit Schedule',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // Next dose info
-                  if (nextDose != null && widget.schedule.active)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.alarm,
-                          size: 14,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _formatNextDose(nextDose),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
+                        // Status badge
+                        if (!widget.schedule.active)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: kSpacingS,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                            ),
+                            child: Text(
+                              'PAUSED',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: kFontWeightBold,
+                                color: Colors.orange.shade700,
+                                letterSpacing: 0.6,
                               ),
+                            ),
+                          ),
+                        const SizedBox(width: kSpacingS),
+                        Icon(
+                          _isExpanded ? Icons.expand_less : Icons.expand_more,
+                          size: kIconSizeMedium,
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.edit_outlined, size: kIconSizeMedium - 2),
+                          onPressed: () => context.go('/schedules/${widget.schedule.id}'),
+                          tooltip: 'Edit Schedule',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
                       ],
                     ),
-                  const SizedBox(height: 4),
-                  
-                  // Dose info and frequency
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.medication,
-                        size: 14,
-                        color: colorScheme.onSurfaceVariant,
+                    const SizedBox(height: kSpacingS),
+                    
+                    // Next dose info
+                    if (nextDose != null && widget.schedule.active)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.alarm,
+                            size: kIconSizeSmall - 2,
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Text(
+                            _formatNextDose(nextDose),
+                            style: mutedTextStyle(context)?.copyWith(
+                                  fontWeight: kFontWeightMedium,
+                                ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      Text(
-                        ' • ${_getFrequencyText()}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  
-                  // Adherence
-                  if (adherenceData['total'] > 0)
+                    const SizedBox(height: kSpacingXS),
+                    
+                    // Dose info and frequency
                     Row(
                       children: [
                         Icon(
-                          Icons.check_circle_outline,
-                          size: 14,
-                          color: _getAdherenceColor(adherenceData['rate']),
+                          Icons.medication,
+                          size: kIconSizeSmall - 2,
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: kSpacingXS),
                         Text(
-                          '${adherenceData['rate'].toStringAsFixed(0)}% adherence',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: _getAdherenceColor(adherenceData['rate']),
-                                fontWeight: FontWeight.w500,
+                          '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                          style: bodyTextStyle(context)?.copyWith(
+                                fontWeight: kFontWeightSemiBold,
                               ),
                         ),
                         Text(
-                          ' (${adherenceData['taken']}/${adherenceData['total']} this week)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                                fontSize: 11,
-                              ),
+                          ' • ${_getFrequencyText()}',
+                          style: mutedTextStyle(context),
                         ),
                       ],
                     ),
-                ],
+                    const SizedBox(height: kSpacingXS),
+                    
+                    // Adherence
+                    if (adherenceData['total'] > 0)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: kIconSizeSmall - 2,
+                            color: _getAdherenceColor(adherenceData['rate']),
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Text(
+                            '${adherenceData['rate'].toStringAsFixed(0)}% adherence',
+                            style: mutedTextStyle(context)?.copyWith(
+                                  color: _getAdherenceColor(adherenceData['rate']),
+                                  fontWeight: kFontWeightMedium,
+                                ),
+                          ),
+                          Text(
+                            ' (${adherenceData['taken']}/${adherenceData['total']} this week)',
+                            style: mutedTextStyle(context)?.copyWith(
+                                  fontSize: kFontSizeSmall - 1,
+                                ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          
-          // Expanded content
-          if (_isExpanded) ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            
+            // Expanded content
+            if (_isExpanded) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(kCardPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // Schedule details
                   _buildExpandedSection(
                     context,

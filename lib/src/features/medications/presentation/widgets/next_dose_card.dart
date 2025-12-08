@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -282,78 +283,59 @@ class _NextDoseCardState extends State<NextDoseCard> {
     final isSkipped = dose.status == DoseStatus.skipped;
     final isSnoozed = dose.status == DoseStatus.snoozed;
 
-    // Determine Icon and Colors
+    // Determine Icon and Colors using design system
     IconData statusIcon = Icons.notifications_active_rounded;
     Color iconColor = colorScheme.primary;
-    Color cardGradientStart = colorScheme.primaryContainer.withValues(alpha: 0.3);
-    Color cardGradientEnd = colorScheme.surfaceContainerHighest.withValues(alpha: 0.2);
+    Color badgeBg = colorScheme.primary.withValues(alpha: 0.12);
     
     // Dynamic status label
     String statusLabel = 'Next Dose';
     if (isTaken) {
       statusIcon = Icons.check_circle_rounded;
       iconColor = Colors.green.shade600;
-      cardGradientStart = Colors.green.withValues(alpha: 0.15);
-      cardGradientEnd = Colors.green.withValues(alpha: 0.05);
+      badgeBg = Colors.green.withValues(alpha: 0.12);
       statusLabel = 'Taken';
     } else if (isSkipped) {
       statusIcon = Icons.cancel_rounded;
       iconColor = Colors.grey.shade600;
-      cardGradientStart = Colors.grey.withValues(alpha: 0.15);
-      cardGradientEnd = Colors.grey.withValues(alpha: 0.05);
+      badgeBg = Colors.grey.withValues(alpha: 0.12);
       statusLabel = 'Skipped';
     } else if (isSnoozed) {
       statusIcon = Icons.snooze_rounded;
       iconColor = Colors.orange.shade600;
-      cardGradientStart = Colors.orange.withValues(alpha: 0.15);
-      cardGradientEnd = Colors.orange.withValues(alpha: 0.05);
+      badgeBg = Colors.orange.withValues(alpha: 0.12);
       statusLabel = 'Snoozed';
     } else if (isOverdue) {
       statusIcon = Icons.warning_rounded;
       iconColor = Colors.red.shade600;
-      cardGradientStart = Colors.red.withValues(alpha: 0.15);
-      cardGradientEnd = Colors.red.withValues(alpha: 0.05);
+      badgeBg = Colors.red.withValues(alpha: 0.12);
       statusLabel = 'Missed';
     }
 
-    return InkWell(
-      onTap: () => _showDoseActionSheet(dose),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [cardGradientStart, cardGradientEnd],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: kSpacingS),
+      child: InkWell(
+        onTap: () => _showDoseActionSheet(dose),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        child: Container(
+          decoration: softWhiteCardDecoration(context),
+          padding: const EdgeInsets.symmetric(
+            horizontal: kCardPadding,
+            vertical: kCardPadding + 2,
           ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: iconColor.withValues(alpha: 0.2),
-            width: 1.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Leading Icon with Glow Effect
+              // Leading icon badge - matching medication type cards
               Container(
-                width: 56,
-                height: 56,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: iconColor.withValues(alpha: 0.15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: iconColor.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      spreadRadius: 0,
-                    ),
-                  ],
+                  color: badgeBg,
+                  borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                 ),
-                child: Icon(statusIcon, size: 28, color: iconColor),
+                child: Icon(statusIcon, size: 20, color: iconColor),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: kCardPadding),
 
               // Content
               Expanded(
@@ -362,53 +344,52 @@ class _NextDoseCardState extends State<NextDoseCard> {
                   children: [
                     // Status Badge
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingS - 1,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: iconColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: iconColor.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
+                        color: badgeBg,
+                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
                       ),
                       child: Text(
                         statusLabel.toUpperCase(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: iconColor,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.8,
-                              fontSize: 10,
+                              fontWeight: kFontWeightBold,
+                              letterSpacing: 0.6,
+                              fontSize: 9,
                             ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: kSpacingXS + 2),
                     
                     // Time - Large and Bold
                     Text(
                       DateFormat('h:mm a').format(dose.scheduledTime),
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: colorScheme.onSurface,
+                            fontWeight: kFontWeightExtraBold,
+                            color: colorScheme.onSurface.withValues(alpha: kOpacityHigh),
                             height: 1.0,
                             letterSpacing: -0.5,
                           ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: kSpacingXS - 1),
                     
                     // Dose Amount
                     Row(
                       children: [
                         Icon(
                           Icons.medication_rounded,
-                          size: 14,
-                          color: colorScheme.onSurfaceVariant,
+                          size: kIconSizeSmall - 2,
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: kSpacingXS),
                         Text(
                           '${_formatNumber(dose.doseValue)} ${dose.doseUnit}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurfaceVariant,
+                          style: bodyTextStyle(context)?.copyWith(
+                                fontWeight: kFontWeightSemiBold,
+                                color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
                               ),
                         ),
                       ],
@@ -417,37 +398,27 @@ class _NextDoseCardState extends State<NextDoseCard> {
                 ),
               ),
               
-              // Right Side: Date Badge
+              // Right Side: Date
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          DateFormat('MMM').format(dose.scheduledTime).toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 9,
-                                letterSpacing: 0.5,
-                              ),
+                  Text(
+                    DateFormat('MMM').format(dose.scheduledTime).toUpperCase(),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+                          fontWeight: kFontWeightBold,
+                          fontSize: 9,
+                          letterSpacing: 0.5,
                         ),
-                        Text(
-                          DateFormat('d').format(dose.scheduledTime),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: colorScheme.onSurface,
-                                fontWeight: FontWeight.w800,
-                                height: 1.0,
-                              ),
+                  ),
+                  Text(
+                    DateFormat('d').format(dose.scheduledTime),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: kOpacityHigh),
+                          fontWeight: kFontWeightExtraBold,
+                          height: 1.0,
                         ),
-                      ],
-                    ),
                   ),
                 ],
               ),
