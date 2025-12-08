@@ -773,8 +773,8 @@ class _NextDoseCardState extends State<NextDoseCard> {
         // When deleting/undoing a dose, restore the stock if it was taken
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
-        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        final existingLog = await repo.getById(logId);
+        final logBox = Hive.box<DoseLog>('dose_logs');
+        final existingLog = logBox.get(logId);
         
         if (existingLog != null && existingLog.action == DoseAction.taken) {
           // Restore stock when undoing a taken dose
@@ -789,6 +789,7 @@ class _NextDoseCardState extends State<NextDoseCard> {
           }
         }
 
+        final repo = DoseLogRepository(logBox);
         await repo.delete(logId);
 
         if (mounted) {
