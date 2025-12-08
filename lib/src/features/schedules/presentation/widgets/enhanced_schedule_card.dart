@@ -199,7 +199,18 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     context,
                     title: 'Schedule',
                     children: [
-                      _buildDetailRow(context, 'Times', _getTimesText()),
+                      _buildEditableDetailRow(
+                        context,
+                        'Dose',
+                        '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                        onEdit: _quickEditDose,
+                      ),
+                      _buildEditableDetailRow(
+                        context,
+                        'Times',
+                        _getTimesText(),
+                        onEdit: _quickEditTimes,
+                      ),
                       _buildDetailRow(context, 'Days', _getDaysText()),
                       _buildDetailRow(
                         context,
@@ -315,6 +326,50 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditableDetailRow(
+    BuildContext context,
+    String label,
+    String value, {
+    required VoidCallback onEdit,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ),
+          InkWell(
+            onTap: onEdit,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Icon(
+                Icons.edit,
+                size: 14,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
         ],
@@ -813,5 +868,114 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         ),
       );
     }
+  }
+
+  // Quick edit methods
+  void _quickEditDose() async {
+    final result = await showDialog<double>(
+      context: context,
+      builder: (context) {
+        final controller = TextEditingController(
+          text: _formatNumber(widget.schedule.doseValue),
+        );
+        
+        return AlertDialog(
+          title: const Text('Edit Dose Amount'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: 'Dose Amount',
+                  suffixText: widget.schedule.doseUnit,
+                  border: const OutlineInputBorder(),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      final current = double.tryParse(controller.text) ?? widget.schedule.doseValue;
+                      final newValue = (current - 0.5).clamp(0.1, 1000.0);
+                      controller.text = _formatNumber(newValue);
+                    },
+                    icon: const Icon(Icons.remove_circle_outline),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      final current = double.tryParse(controller.text) ?? widget.schedule.doseValue;
+                      final newValue = (current + 0.5).clamp(0.1, 1000.0);
+                      controller.text = _formatNumber(newValue);
+                    },
+                    icon: const Icon(Icons.add_circle_outline),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final value = double.tryParse(controller.text);
+                if (value != null && value > 0) {
+                  Navigator.pop(context, value);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+    
+    if (result != null && result != widget.schedule.doseValue && mounted) {
+      final scheduleBox = Hive.box<Schedule>('schedules');
+      final updated = Schedule(
+        id: widget.schedule.id,
+        name: widget.schedule.name,
+        medicationName: widget.schedule.medicationName,
+        doseValue: result,
+        doseUnit: widget.schedule.doseUnit,
+        minutesOfDay: widget.schedule.minutesOfDay,
+        daysOfWeek: widget.schedule.daysOfWeek,
+        active: widget.schedule.active,
+        medicationId: widget.schedule.medicationId,
+        timesOfDay: widget.schedule.timesOfDay,
+        cycleEveryNDays: widget.schedule.cycleEveryNDays,
+        cycleAnchorDate: widget.schedule.cycleAnchorDate,
+        daysOfMonth: widget.schedule.daysOfMonth,
+        createdAt: widget.schedule.createdAt,
+        minutesOfDayUtc: widget.schedule.minutesOfDayUtc,
+        daysOfWeekUtc: widget.schedule.daysOfWeekUtc,
+        timesOfDayUtc: widget.schedule.timesOfDayUtc,
+      );
+      scheduleBox.put(widget.schedule.id, updated);
+      
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Dose updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _quickEditTimes() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Time editing coming soon. Use the edit button to modify times.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }
