@@ -24,6 +24,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/widgets/medicati
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
@@ -815,62 +816,22 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   ) {
     final scheduleBox = Hive.box<Schedule>('schedules');
     final schedules = scheduleBox.values
-        .where((s) => s.medicationId == med.id && s.active)
+        .where((s) => s.medicationId == med.id)
         .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (schedules.isNotEmpty) ...[
-          NextDoseCard(medication: med, schedules: schedules),
+          NextDoseCard(medication: med, schedules: schedules.where((s) => s.active).toList()),
           const SizedBox(height: 16),
         ],
 
-        // Compact Schedule List
+        // Enhanced Schedule Cards
         if (schedules.isNotEmpty)
-          ...schedules.map((schedule) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(
-                        alpha: 0.5,
-                      ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.schedule,
-                    size: 18,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      schedule.name,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    onPressed: () {
-                      // Navigate directly to schedule edit
-                      context.go('/schedules/${schedule.id}');
-                    },
-                    tooltip: 'Edit Schedule',
-                  ),
-                ],
-              ),
-            ),
+          ...schedules.map((schedule) => EnhancedScheduleCard(
+            schedule: schedule,
+            medication: med,
           )),
       ],
     );
