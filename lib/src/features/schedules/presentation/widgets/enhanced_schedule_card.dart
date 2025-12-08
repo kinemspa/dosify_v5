@@ -606,6 +606,17 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     if (result != null && mounted) {
       // Create dose log
       final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      
+      // Combine notes and injection site
+      String? combinedNotes = result['notes'];
+      if (result['site'] != null && result['site']!.isNotEmpty) {
+        if (combinedNotes != null && combinedNotes.isNotEmpty) {
+          combinedNotes = '$combinedNotes\nInjection site: ${result['site']}';
+        } else {
+          combinedNotes = 'Injection site: ${result['site']}';
+        }
+      }
+      
       final log = DoseLog(
         id: logId,
         scheduleId: widget.schedule.id,
@@ -616,8 +627,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         doseValue: widget.schedule.doseValue,
         doseUnit: widget.schedule.doseUnit,
         action: DoseAction.taken,
-        notes: result['notes'],
-        injectionSite: result['site'],
+        notes: combinedNotes,
       );
       
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
