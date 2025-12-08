@@ -515,8 +515,9 @@ class _StockInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Stock Gauge (Reduced size to fix overflow)
-          Center(
+          // Stock Gauge (Right aligned)
+          Align(
+            alignment: Alignment.centerRight,
             child: SizedBox(
               height: 80,
               width: 80,
