@@ -2,6 +2,24 @@
 
 This document explains what can be deleted/moved safely vs what is required for building/running the app.
 
+## Repo root map (what each thing is)
+
+- `lib/`: App source code (required)
+- `assets/`: App assets (required)
+- `android/`: Android host project (required)
+- `test/`: Dart/Flutter tests (recommended)
+- `pubspec.yaml`, `pubspec.lock`: Dependencies (required)
+- `.metadata`: Flutter tool metadata (required)
+- `.gitignore`: Ignore rules (required)
+- `analysis_options.yaml`: Analyzer + lint rules (required)
+- `devtools_options.yaml`: DevTools config (optional, keep)
+- `import_sorter.yaml`: Import sorter config (optional, keep)
+- `docs/`: Canonical documentation (recommended)
+- `scripts/`, `tool/`: Dev scripts/tooling (keep if used)
+- `AGENTS.md`: Agent/workflow rules for this repo (keep)
+- `FutterTestMcp/`, `mcp_flutter/`: Submodules (external repos; not required to build the main app)
+- `.gitmodules`: Submodule mapping (required if submodules are present)
+
 ## Required for the Flutter app
 
 Keep these (they are part of the build/runtime or developer workflow):
@@ -17,6 +35,8 @@ These are git submodules (gitlinks), not normal folders:
 - `FutterTestMcp/` (external repo)
 
 This repo now includes a `.gitmodules` file so submodule commands work.
+
+Note: `analysis_options.yaml` excludes these submodule folders so `flutter analyze` only checks the main app package.
 
 ## Deleted (not needed)
 
