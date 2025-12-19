@@ -746,17 +746,11 @@ class _MedLargeCard extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (stockInfo.isMdv)
-          DualStockDonutGauge(
-            outerPercentage: stockInfo.percentage,
-            innerPercentage: stockInfo.backupPercentage,
-            primaryLabel: '$pctRounded%',
-          )
-        else
-          StockDonutGauge(
-            percentage: stockInfo.percentage,
-            primaryLabel: '$pctRounded%',
-          ),
+        // Single ring for all: shows Active Vial % for MDV, overall stock % for others
+        StockDonutGauge(
+          percentage: stockInfo.percentage,
+          primaryLabel: '$pctRounded%',
+        ),
         const SizedBox(height: kSpacingXS),
         Align(
           alignment: Alignment.centerRight,

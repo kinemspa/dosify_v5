@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/hive/hive_migration_manager.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -51,28 +52,52 @@ class HiveBootstrap {
 
     await _openBoxWithRetry<Supply>('supplies');
     await _openBoxWithRetry<StockMovement>('stock_movements');
+
+    // Inventory logs (refills, adjustments, usage tracking)
+    if (!Hive.isAdapterRegistered(43))
+      Hive.registerAdapter(InventoryLogAdapter());
+    if (!Hive.isAdapterRegistered(44))
+      Hive.registerAdapter(InventoryChangeTypeAdapter());
+    await _openBoxWithRetry<InventoryLog>('inventory_logs');
+
     print('HiveBootstrap: Initialization complete');
   }
 
   static Future<Box<T>> _openBoxWithRetry<T>(String name) async {
     try {
       print('HiveBootstrap: Opening box "$name"...');
-      // Timeout after 2 seconds to detect hangs
-      return await Hive.openBox<T>(name).timeout(const Duration(seconds: 2));
+      // Increased timeout to 15 seconds - slow devices need more time
+      return await Hive.openBox<T>(name).timeout(const Duration(seconds: 15));
     } catch (e) {
       print(
-        'HiveBootstrap: Failed to open box "$name" (Error: $e). Attempting recovery...',
+        'HiveBootstrap: Failed to open box "$name" (Error: $e).',
       );
-      try {
-        // Attempt to delete the box file directly if possible
-        await Hive.deleteBoxFromDisk(name);
-        print('HiveBootstrap: Deleted box "$name". Retrying open...');
-        return await Hive.openBox<T>(name);
-      } catch (e2) {
-        print(
-          'HiveBootstrap: CRITICAL ERROR: Could not recover box "$name": $e2',
-        );
-        rethrow;
+      
+      // Only delete and recreate on actual corruption errors (HiveError)
+      // Do NOT delete on timeouts or other transient errors - that causes data loss!
+      if (e is HiveError) {
+        print('HiveBootstrap: Detected HiveError (corruption). Attempting recovery by deleting box...');
+        try {
+          await Hive.deleteBoxFromDisk(name);
+          print('HiveBootstrap: Deleted corrupted box "$name". Retrying open...');
+          return await Hive.openBox<T>(name);
+        } catch (e2) {
+          print(
+            'HiveBootstrap: CRITICAL ERROR: Could not recover box "$name": $e2',
+          );
+          rethrow;
+        }
+      } else {
+        // For timeouts and other errors, just retry without deleting
+        print('HiveBootstrap: Retrying open without deletion...');
+        try {
+          return await Hive.openBox<T>(name);
+        } catch (e2) {
+          print(
+            'HiveBootstrap: CRITICAL ERROR: Could not open box "$name": $e2',
+          );
+          rethrow;
+        }
       }
     }
   }
@@ -82,6 +107,8 @@ class HiveBootstrap {
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(StockUnitAdapter());
     if (!Hive.isAdapterRegistered(3))
       Hive.registerAdapter(MedicationFormAdapter());
+    if (!Hive.isAdapterRegistered(4))
+      Hive.registerAdapter(VolumeUnitAdapter());
     if (!Hive.isAdapterRegistered(10))
       Hive.registerAdapter(MedicationAdapter());
   }

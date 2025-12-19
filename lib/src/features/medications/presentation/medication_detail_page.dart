@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
+
 // Dart imports:
 
 import 'dart:ui';
@@ -15,22 +17,22 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/services/expiry_tracking_service.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/controllers/medication_detail_controller.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+// DoseHistoryWidget replaced by MedicationReportsWidget
 
 /// Modern, revolutionized medication detail screen with:
 /// - Hero header with gradient and key stats
@@ -38,8 +40,8 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 /// - Visual stock progress indicators
 /// - Clean sectioned information display
 /// - Responsive layout for all screen sizes
-const double _kDetailHeaderExpandedHeight = 325;
-const double _kDetailHeaderCompactHeight = 245;
+const double _kDetailHeaderExpandedHeight = 280; // Content needs this height
+const double _kDetailHeaderCompactHeight = 220;
 const double _kDetailHeaderCollapsedHeight = 56;
 
 class MedicationDetailPage extends ConsumerStatefulWidget {
@@ -48,11 +50,13 @@ class MedicationDetailPage extends ConsumerStatefulWidget {
   final Medication? initial;
 
   @override
-  ConsumerState<MedicationDetailPage> createState() => _MedicationDetailPageState();
+  ConsumerState<MedicationDetailPage> createState() =>
+      _MedicationDetailPageState();
 }
 
 class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
+  bool _isDetailsExpanded = true; // Collapsible state for details card
 
   @override
   void initState() {
@@ -179,7 +183,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                           top: -scrollOffset,
                           left: 0,
                           right: 0,
-                          height: expandedHeight, // Fix: Ensure header has finite height for layout
+                          height:
+                              expandedHeight, // Fix: Ensure header has finite height for layout
                           child: Opacity(
                             opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
                             child: SafeArea(
@@ -192,7 +197,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 ),
                                 child: MedicationHeaderWidget(
                                   medication: updatedMed,
-                                  onRefill: () => _showRefillDialog(context, updatedMed),
+                                  onRefill: () =>
+                                      _showRefillDialog(context, updatedMed),
+                                  onAdHocDose: () =>
+                                      _showAdHocDoseDialog(context, updatedMed),
+                                  hasSchedules: Hive.box<Schedule>('schedules')
+                                      .values
+                                      .any(
+                                        (s) =>
+                                            s.medicationId == updatedMed.id &&
+                                            s.active,
+                                      ),
                                 ),
                               ),
                             ),
@@ -372,6 +387,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 SliverToBoxAdapter(
                   child: _buildReconstitutionCard(context, updatedMed),
                 ),
+
+              // Medication Reports Widget (History + Adherence tabs)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+                  child: MedicationReportsWidget(medication: updatedMed),
+                ),
+              ),
 
               // Unified Details Card
               SliverToBoxAdapter(
@@ -714,80 +737,94 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       (s) => s.medicationId == med.id && s.active,
     );
 
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        side: BorderSide(
-          color: Theme.of(
-            context,
-          ).colorScheme.outlineVariant.withValues(alpha: kCardBorderOpacity),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Schedule & Next Dose
-            if (hasSchedules) ...[
-              _buildSectionTitle(
-                context,
-                'Schedule',
-                icon: Icons.calendar_today,
-              ),
-              const SizedBox(height: 16),
-              _buildScheduleSection(context, med, nextDose),
-              const Divider(height: 32),
-            ],
-
-            // 2. Merged Medication Details
-            _buildSectionTitle(
-              context,
-              'Medication Details',
-              icon: Icons.medication,
-            ),
-            const SizedBox(height: 16),
-            _buildMergedDetailsSection(context, med),
-            const Divider(height: 32),
-
-            // 3. Active Vial (MDV Only)
-            if (med.form == MedicationForm.multiDoseVial) ...[
-              _buildSectionTitle(
-                context,
-                'Active Vial (In Use)',
-                icon: Icons.science,
-              ),
-              const SizedBox(height: 16),
-              _buildActiveVialSection(context, med),
-              const Divider(height: 32),
-            ],
-
-            // 4. Backup Stock (MDV Only)
-            if (med.form == MedicationForm.multiDoseVial) ...[
-              _buildSectionTitle(
-                context,
-                'Backup Stock (Sealed)',
-                icon: Icons.inventory_2,
-              ),
-              const SizedBox(height: 16),
-              _buildBackupStockSection(context, med),
-              const Divider(height: 32),
-            ],
-
-            const SizedBox(height: 24),
-            Center(
-              child: TextButton.icon(
-                onPressed: () => _deleteMedication(context, med),
-                icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                label: Text(
-                  'Delete Medication',
-                  style: TextStyle(color: colorScheme.error),
-                ),
+    return Container(
+      decoration: buildStandardCardDecoration(context: context),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Collapsible header
+          InkWell(
+            onTap: () =>
+                setState(() => _isDetailsExpanded = !_isDetailsExpanded),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Medication Details',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const Spacer(),
+                  AnimatedRotation(
+                    turns: _isDetailsExpanded ? 0 : -0.25,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 24,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Collapsible content
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _isDetailsExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Schedule & Next Dose
+                  if (hasSchedules) ...[
+                    _buildScheduleSection(context, med, nextDose),
+                    const Divider(height: 32),
+                  ],
+
+                  // 2. Merged Medication Details
+                  _buildMergedDetailsSection(context, med),
+                  const Divider(height: 32),
+
+                  // Sealed Vials (MDV Only) - separate card for backup stock
+                  if (med.form == MedicationForm.multiDoseVial) ...[
+                    _buildBackupStockSection(context, med),
+                    const SizedBox(height: 16),
+                  ],
+
+                  const SizedBox(height: 24),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => _deleteMedication(context, med),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: colorScheme.error,
+                      ),
+                      label: Text(
+                        'Delete Medication',
+                        style: TextStyle(color: colorScheme.error),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -823,16 +860,49 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (schedules.isNotEmpty) ...[
-          NextDoseCard(medication: med, schedules: schedules.where((s) => s.active).toList()),
-          const SizedBox(height: 16),
+          // Scheduled Doses Section Heading with Icon
+          Row(
+            children: [
+              Icon(
+                Icons.medication_rounded,
+                size: kIconSizeMedium,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: kSpacingS),
+              Text('Scheduled Doses', style: sectionTitleStyle(context)),
+            ],
+          ),
+          const SizedBox(height: kSpacingM),
+          // Show doses for active schedules only
+          NextDoseCard(
+            medication: med,
+            schedules: schedules.where((s) => s.active).toList(),
+          ),
+          const SizedBox(height: kSpacingL),
         ],
 
-        // Enhanced Schedule Cards
-        if (schedules.isNotEmpty)
-          ...schedules.map((schedule) => EnhancedScheduleCard(
-            schedule: schedule,
-            medication: med,
-          )),
+        // Schedules Section - show ALL schedules (including paused)
+        if (schedules.isNotEmpty) ...[
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: kIconSizeMedium,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: kSpacingS),
+              Text('Schedules', style: sectionTitleStyle(context)),
+            ],
+          ),
+          const SizedBox(height: kSpacingM),
+          // Show ALL schedules including paused ones
+          ...schedules.map(
+            (schedule) =>
+                EnhancedScheduleCard(schedule: schedule, medication: med),
+          ),
+          const SizedBox(height: kSpacingL),
+          // Adherence now moved to MedicationReportsWidget tabs
+        ],
       ],
     );
   }
@@ -849,95 +919,268 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   }
 
   Widget _buildMergedDetailsSection(BuildContext context, Medication med) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isMdv = med.form == MedicationForm.multiDoseVial;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildCompactGrid(context, [
-          _buildCompactInfoItem(
-            context,
-            label: 'Name',
-            value: med.name,
-            onTap: () => _editName(context, med),
+        // IDENTITY
+        _buildDetailTile(
+          context,
+          'Name',
+          med.name,
+          onTap: () => _editName(context, med),
+        ),
+        _buildDetailTile(context, 'Type', _formLabel(med.form)),
+        _buildDetailTile(
+          context,
+          'Strength',
+          '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+          onTap: () => _editStrength(context, med),
+        ),
+        _buildDetailTile(
+          context,
+          'Manufacturer',
+          med.manufacturer ?? 'Not set',
+          isPlaceholder: med.manufacturer == null,
+          onTap: () => _editManufacturer(context, med),
+        ),
+
+        const SizedBox(height: 8), // Section spacing (divider removed)
+        // ACTIVE VIAL (MDV only) - merged into this card since it's the tracked medicine for dosing
+        if (isMdv) ...[
+          // Section header for Active Vial
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.science_outlined,
+                  size: 14,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Active Vial',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
           ),
-          _buildCompactInfoItem(
+          // Volume remaining
+          if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
+            _buildDetailTile(
+              context,
+              'Volume',
+              '${_formatNumber(med.activeVialVolume ?? med.containerVolumeMl!)} / ${_formatNumber(med.containerVolumeMl!)} mL',
+            ),
+          // Diluent
+          if (med.diluentName != null && med.diluentName!.isNotEmpty)
+            _buildDetailTile(context, 'Diluent', med.diluentName!),
+          // Active vial batch & location
+          _buildDetailTile(
             context,
-            label: 'Manufacturer',
-            value: med.manufacturer ?? 'Tap to add',
-            onTap: () => _editManufacturer(context, med),
+            'Batch #',
+            med.activeVialBatchNumber ?? 'Not set',
+            isPlaceholder: med.activeVialBatchNumber == null,
+            onTap: () => _editActiveVialBatch(context, med),
           ),
-          _buildCompactInfoItem(
+          _buildDetailTile(
             context,
-            label: 'Strength',
-            value:
-                '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
-            onTap: () => _editStrength(context, med),
+            'Location',
+            med.activeVialStorageLocation ?? 'Not set',
+            isPlaceholder: med.activeVialStorageLocation == null,
+            onTap: () => _editActiveVialLocation(context, med),
           ),
-          _buildCompactInfoItem(
+          _buildDetailTile(
             context,
-            label: 'Type',
-            value: _formLabel(med.form),
-            onTap: () => _editForm(context, med),
+            'Low Alert',
+            med.activeVialLowStockMl != null
+                ? '${_formatNumber(med.activeVialLowStockMl!)} mL'
+                : 'Not set',
+            isPlaceholder: med.activeVialLowStockMl == null,
+            onTap: () => _editActiveVialLowStock(context, med),
           ),
-          _buildCompactInfoItem(
+          // Active vial storage conditions
+          _buildActiveVialConditionsRow(context, med),
+
+          const SizedBox(height: 8), // Section spacing (divider removed)
+        ],
+
+        // INVENTORY (for non-MDV or general inventory info)
+        if (!isMdv) ...[
+          _buildDetailTile(
             context,
-            label: 'Batch Number',
-            value: med.batchNumber ?? 'Tap to add',
+            'Batch #',
+            med.batchNumber ?? 'Not set',
+            isPlaceholder: med.batchNumber == null,
             onTap: () => _editBatchNumber(context, med),
           ),
-          _buildCompactInfoItem(
+          _buildDetailTile(
             context,
-            label: 'Expiry Date',
-            value: med.expiry != null
-                ? _formatExpiry(med.expiry!)
-                : 'Tap to set',
-            warning: med.expiry != null && _isExpiringSoon(med.expiry!),
+            'Expiry',
+            med.expiry != null ? _formatExpiry(med.expiry!) : 'Not set',
+            isPlaceholder: med.expiry == null,
+            isWarning: med.expiry != null && _isExpiringSoon(med.expiry!),
             onTap: () => _editExpiry(context, med),
           ),
-          _buildCompactInfoItem(
+          _buildDetailTile(
             context,
-            label: 'Low Stock Alert',
-            value: med.lowStockEnabled
+            'Low Stock',
+            med.lowStockEnabled
                 ? '${_formatNumber(med.lowStockThreshold ?? 0)} ${_stockUnitLabel(med.stockUnit)}'
                 : 'Disabled',
             onTap: () => _editLowStockThreshold(context, med),
           ),
-          _buildCompactInfoItem(
+
+          const SizedBox(height: 8), // Section spacing (divider removed)
+          // STORAGE (for non-MDV)
+          _buildDetailTile(
             context,
-            label: 'Storage Location',
-            value: med.storageLocation ?? 'Tap to add',
+            'Location',
+            med.storageLocation ?? 'Not set',
+            isPlaceholder: med.storageLocation == null,
             onTap: () => _editStorageLocation(context, med),
           ),
-        ]),
-        const SizedBox(height: 16),
-        if (med.description != null && med.description!.isNotEmpty) ...[
-          _buildCompactInfoItem(
-            context,
-            label: 'Description',
-            value: med.description!,
-            onTap: () => _editDescription(context, med),
-          ),
-          const SizedBox(height: 16),
+          _buildConditionsRow(context, med),
         ],
 
-        // Storage Conditions (Dialog Trigger)
-        _buildCompactInfoItem(
-          context,
-          label: 'Storage Conditions',
-          value: _getStorageConditionsLabel(med),
-          onTap: () => _showStorageConditionsDialog(context, med),
-        ),
-
-        if (med.notes != null && med.notes!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _buildCompactInfoItem(
+        // NOTES (optional)
+        if (med.description != null && med.description!.isNotEmpty) ...[
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+          ),
+          _buildDetailTile(
             context,
-            label: 'Notes',
-            value: med.notes!,
+            'Description',
+            med.description!,
+            onTap: () => _editDescription(context, med),
+          ),
+        ],
+        if (med.notes != null && med.notes!.isNotEmpty)
+          _buildDetailTile(
+            context,
+            'Notes',
+            med.notes!,
             isItalic: true,
             onTap: () => _editNotes(context, med),
           ),
-        ],
       ],
+    );
+  }
+
+  Widget _buildDetailTile(
+    BuildContext context,
+    String label,
+    String value, {
+    VoidCallback? onTap,
+    bool isPlaceholder = false,
+    bool isWarning = false,
+    bool isItalic = false,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    Widget content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontStyle: isItalic || isPlaceholder ? FontStyle.italic : null,
+                color: isWarning
+                    ? colorScheme.error
+                    : isPlaceholder
+                    ? colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                    : colorScheme.onSurface,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (onTap != null)
+            Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+        ],
+      ),
+    );
+
+    if (onTap != null) {
+      return InkWell(onTap: onTap, child: content);
+    }
+    return content;
+  }
+
+  Widget _buildConditionsRow(BuildContext context, Medication med) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final conditions = <Widget>[];
+
+    if (med.requiresRefrigeration)
+      conditions.add(_buildMiniChip(context, '❄️ Fridge'));
+    if (med.requiresFreezer)
+      conditions.add(_buildMiniChip(context, '🧊 Freeze'));
+    if (med.lightSensitive) conditions.add(_buildMiniChip(context, '☀️ Light'));
+    if (conditions.isEmpty) conditions.add(_buildMiniChip(context, '🌡️ Room'));
+
+    return InkWell(
+      onTap: () => _showStorageConditionsDialog(context, med),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text(
+                'Conditions',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Wrap(spacing: 6, children: conditions),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniChip(BuildContext context, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 11)),
     );
   }
 
@@ -951,12 +1194,104 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return conditions.join(', ');
   }
 
+  Widget _buildStorageConditionsDisplay(BuildContext context, Medication med) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Storage Conditions',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _showStorageConditionsDialog(context, med),
+              child: Icon(
+                Icons.edit_rounded,
+                size: kIconSizeSmall,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: kSpacingXS),
+        // Show each condition with icon
+        _buildStorageConditionRow(
+          context,
+          icon: Icons.ac_unit,
+          label: 'Refrigerate',
+          isEnabled: med.requiresRefrigeration,
+        ),
+        _buildStorageConditionRow(
+          context,
+          icon: Icons.severe_cold,
+          label: 'Freeze',
+          isEnabled: med.requiresFreezer,
+        ),
+        _buildStorageConditionRow(
+          context,
+          icon: Icons.dark_mode_outlined,
+          label: 'Protect from Light',
+          isEnabled: med.lightSensitive,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStorageConditionRow(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isEnabled,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: kIconSizeSmall,
+            color: isEnabled ? colorScheme.primary : colorScheme.outlineVariant,
+          ),
+          const SizedBox(width: kSpacingS),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isEnabled
+                  ? colorScheme.onSurface
+                  : colorScheme.outlineVariant,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            isEnabled ? 'On' : 'Off',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isEnabled
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
+              fontWeight: kFontWeightMedium,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showStorageConditionsDialog(BuildContext context, Medication med) {
     bool refrigerate = med.requiresRefrigeration;
     bool freeze = med.requiresFreezer;
     bool light = med.lightSensitive;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
@@ -1024,236 +1359,425 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   }
 
   Widget _buildActiveVialSection(BuildContext context, Medication med) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Info banner
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(kBorderRadiusLarge),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.science_outlined,
+                  size: 16,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Vial currently in use for injections',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Volume remaining (prominent display)
+          if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Text(
+                    'Volume',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${_formatNumber(med.activeVialVolume ?? med.containerVolumeMl!)} / ${_formatNumber(med.containerVolumeMl!)} mL',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+          ),
+
+          // Details
+          if (med.diluentName != null && med.diluentName!.isNotEmpty)
+            _buildDetailTile(context, 'Diluent', med.diluentName!),
+          _buildDetailTile(
+            context,
+            'Batch #',
+            med.activeVialBatchNumber ?? 'Not set',
+            isPlaceholder: med.activeVialBatchNumber == null,
+            onTap: () => _editActiveVialBatch(context, med),
+          ),
+          _buildDetailTile(
+            context,
+            'Location',
+            med.activeVialStorageLocation ?? 'Not set',
+            isPlaceholder: med.activeVialStorageLocation == null,
+            onTap: () => _editActiveVialLocation(context, med),
+          ),
+          _buildDetailTile(
+            context,
+            'Low Alert',
+            med.activeVialLowStockMl != null
+                ? '${_formatNumber(med.activeVialLowStockMl!)} mL'
+                : 'Not set',
+            isPlaceholder: med.activeVialLowStockMl == null,
+            onTap: () => _editActiveVialLowStock(context, med),
+          ),
+
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+          ),
+
+          // Storage conditions as tappable chips
+          _buildActiveVialConditionsRow(context, med),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveVialConditionsRow(BuildContext context, Medication med) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final conditions = <Widget>[];
+
+    // Only show chips for active conditions
+    if (med.activeVialRequiresRefrigeration)
+      conditions.add(_buildMiniChip(context, '❄️ Fridge'));
+    if (med.activeVialRequiresFreezer)
+      conditions.add(_buildMiniChip(context, '🧊 Freeze'));
+    if (med.activeVialLightSensitive)
+      conditions.add(_buildMiniChip(context, '☀️ Light'));
+    if (conditions.isEmpty) conditions.add(_buildMiniChip(context, '🌡️ Room'));
+
+    return InkWell(
+      onTap: () => _showActiveVialConditionsDialog(context, med),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text(
+                'Conditions',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Wrap(spacing: 6, children: conditions),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Dialog for editing Active Vial storage conditions
+  void _showActiveVialConditionsDialog(BuildContext context, Medication med) {
+    bool fridge = med.activeVialRequiresRefrigeration;
+    bool freezer = med.activeVialRequiresFreezer;
+    bool light = med.activeVialLightSensitive;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setState) {
+          final theme = Theme.of(ctx);
+          return AlertDialog(
+            title: Text(
+              'Active Vial Conditions',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CheckboxListTile(
+                  title: const Text('❄️ Requires Refrigeration'),
+                  value: fridge,
+                  onChanged: (v) => setState(() {
+                    fridge = v ?? false;
+                    if (fridge) freezer = false;
+                  }),
+                ),
+                CheckboxListTile(
+                  title: const Text('🧊 Requires Freezer'),
+                  value: freezer,
+                  onChanged: (v) => setState(() {
+                    freezer = v ?? false;
+                    if (freezer) fridge = false;
+                  }),
+                ),
+                CheckboxListTile(
+                  title: const Text('☀️ Light Sensitive'),
+                  value: light,
+                  onChanged: (v) => setState(() => light = v ?? false),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final box = Hive.box<Medication>('medications');
+                  box.put(
+                    med.id,
+                    med.copyWith(
+                      activeVialRequiresRefrigeration: fridge,
+                      activeVialRequiresFreezer: freezer,
+                      activeVialLightSensitive: light,
+                    ),
+                  );
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBackupStockConditionsRow(BuildContext context, Medication med) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final conditions = <Widget>[];
+
+    // Only show chips for active conditions
+    if (med.backupVialsRequiresRefrigeration)
+      conditions.add(_buildMiniChip(context, '❄️ Fridge'));
+    if (med.backupVialsRequiresFreezer)
+      conditions.add(_buildMiniChip(context, '🧊 Freeze'));
+    if (med.backupVialsLightSensitive)
+      conditions.add(_buildMiniChip(context, '☀️ Light'));
+    if (conditions.isEmpty) conditions.add(_buildMiniChip(context, '🌡️ Room'));
+
+    return InkWell(
+      onTap: () => _showBackupStockConditionsDialog(context, med),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text(
+                'Conditions',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Wrap(spacing: 6, children: conditions),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Dialog for editing Backup Stock storage conditions
+  void _showBackupStockConditionsDialog(BuildContext context, Medication med) {
+    bool fridge = med.backupVialsRequiresRefrigeration;
+    bool freezer = med.backupVialsRequiresFreezer;
+    bool light = med.backupVialsLightSensitive;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setState) {
+          final theme = Theme.of(ctx);
+          return AlertDialog(
+            title: Text(
+              'Sealed Vials Conditions',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CheckboxListTile(
+                  title: const Text('❄️ Requires Refrigeration'),
+                  value: fridge,
+                  onChanged: (v) => setState(() {
+                    fridge = v ?? false;
+                    if (fridge) freezer = false;
+                  }),
+                ),
+                CheckboxListTile(
+                  title: const Text('🧊 Requires Freezer'),
+                  value: freezer,
+                  onChanged: (v) => setState(() {
+                    freezer = v ?? false;
+                    if (freezer) fridge = false;
+                  }),
+                ),
+                CheckboxListTile(
+                  title: const Text('☀️ Light Sensitive'),
+                  value: light,
+                  onChanged: (v) => setState(() => light = v ?? false),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final box = Hive.box<Medication>('medications');
+                  box.put(
+                    med.id,
+                    med.copyWith(
+                      backupVialsRequiresRefrigeration: fridge,
+                      backupVialsRequiresFreezer: freezer,
+                      backupVialsLightSensitive: light,
+                    ),
+                  );
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBackupStockSection(BuildContext context, Medication med) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(8),
-          ),
+        // Section title with count
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
               Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Theme.of(context).colorScheme.primary,
+                Icons.inventory_2_outlined,
+                size: 18,
+                color: colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Medicine being drawn from for each injection',
-                  style: bodyTextStyle(context)?.copyWith(fontSize: 12),
+              Text('Backup Stock', style: sectionTitleStyle(context)),
+              const Spacer(),
+              Text(
+                '${_formatNumber(med.stockValue).split('.')[0]} vials',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
         ),
-        if (med.diluentName != null && med.diluentName!.isNotEmpty)
-          buildDetailInfoRow(
-            context,
-            label: 'Reconstitution Fluid',
-            value: med.diluentName!,
-            onTap: null,
-          ),
-        if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
-          buildDetailInfoRow(
-            context,
-            label: 'Volume Remaining',
-            value:
-                '${_formatNumber(med.activeVialVolume ?? med.containerVolumeMl!)} / ${_formatNumber(med.containerVolumeMl!)} mL',
-            highlighted: true,
-            onTap: null,
-          ),
-        _buildCompactGrid(context, [
-          _buildCompactInfoItem(
-            context,
-            label: 'Batch Number',
-            value: med.activeVialBatchNumber ?? 'Tap to add',
-            onTap: () => _editActiveVialBatch(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Location',
-            value: med.activeVialStorageLocation ?? 'Tap to add',
-            onTap: () => _editActiveVialLocation(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Low Stock Alert',
-            value: med.activeVialLowStockMl != null
-                ? '${_formatNumber(med.activeVialLowStockMl!)} mL'
-                : 'Tap to set',
-            onTap: () => _editActiveVialLowStock(context, med),
-          ),
-        ]),
-        const SizedBox(height: 8),
-        Column(
-          children: [
-            Row(
-              children: [
-                Checkbox(
-                  value: med.activeVialRequiresRefrigeration,
-                  onChanged: (bool? v) {
-                    final box = Hive.box<Medication>('medications');
-                    box.put(
-                      med.id,
-                      med.copyWith(
-                        activeVialRequiresRefrigeration: v ?? false,
-                        activeVialRequiresFreezer: (v ?? false)
-                            ? false
-                            : med.activeVialRequiresFreezer,
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Text(
-                    'Refrigerated',
-                    style: checkboxLabelStyle(context),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Checkbox(
-                  value: med.activeVialRequiresFreezer,
-                  onChanged: (bool? v) {
-                    final box = Hive.box<Medication>('medications');
-                    box.put(
-                      med.id,
-                      med.copyWith(
-                        activeVialRequiresFreezer: v ?? false,
-                        activeVialRequiresRefrigeration: (v ?? false)
-                            ? false
-                            : med.activeVialRequiresRefrigeration,
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Text('Frozen', style: checkboxLabelStyle(context)),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Checkbox(
-                  value: med.activeVialLightSensitive,
-                  onChanged: (bool? v) {
-                    final box = Hive.box<Medication>('medications');
-                    box.put(
-                      med.id,
-                      med.copyWith(activeVialLightSensitive: v ?? false),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Text(
-                    'Light Sensitive',
-                    style: checkboxLabelStyle(context),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
-  Widget _buildBackupStockSection(BuildContext context, Medication med) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildCompactGrid(context, [
-          _buildCompactInfoItem(
-            context,
-            label: 'Quantity',
-            value: '${_formatNumber(med.stockValue)} vials',
-            highlighted: true,
-            onTap: null,
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Batch Number',
-            value: med.backupVialsBatchNumber ?? 'Tap to add',
-            onTap: () => _editBackupVialBatch(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Expiry Date',
-            value: med.backupVialsExpiry != null
-                ? _formatExpiry(med.backupVialsExpiry!)
-                : 'Tap to set',
-            warning:
-                med.backupVialsExpiry != null &&
-                _isExpiringSoon(med.backupVialsExpiry!),
-            onTap: () => _editBackupVialExpiry(context, med),
-          ),
-          _buildCompactInfoItem(
-            context,
-            label: 'Location',
-            value: med.backupVialsStorageLocation ?? 'Tap to add',
-            onTap: () => _editBackupVialLocation(context, med),
-          ),
-        ]),
         const SizedBox(height: 8),
-        Column(
-          children: [
-            SwitchListTile(
-              title: const Text('Refrigerated'),
-              value: med.backupVialsRequiresRefrigeration,
-              onChanged: (bool v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(
-                  med.id,
-                  med.copyWith(
-                    backupVialsRequiresRefrigeration: v,
-                    backupVialsRequiresFreezer: v
-                        ? false
-                        : med.backupVialsRequiresFreezer,
-                  ),
-                );
-              },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+
+        // Restock button
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: OutlinedButton.icon(
+            onPressed: () => _showRestockSealedVialsDialog(context, med),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Restock'),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 36),
             ),
-            SwitchListTile(
-              title: const Text('Frozen'),
-              value: med.backupVialsRequiresFreezer,
-              onChanged: (bool v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(
-                  med.id,
-                  med.copyWith(
-                    backupVialsRequiresFreezer: v,
-                    backupVialsRequiresRefrigeration: v
-                        ? false
-                        : med.backupVialsRequiresRefrigeration,
-                  ),
-                );
-              },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-            SwitchListTile(
-              title: const Text('Light Sensitive'),
-              value: med.backupVialsLightSensitive,
-              onChanged: (bool v) {
-                final box = Hive.box<Medication>('medications');
-                box.put(med.id, med.copyWith(backupVialsLightSensitive: v));
-              },
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ],
+          ),
         ),
+
+        const SizedBox(height: 12),
+
+        // Details
+        _buildDetailTile(
+          context,
+          'Batch #',
+          med.backupVialsBatchNumber ?? 'Not set',
+          isPlaceholder: med.backupVialsBatchNumber == null,
+          onTap: () => _editBackupVialBatch(context, med),
+        ),
+        _buildDetailTile(
+          context,
+          'Expiry',
+          med.backupVialsExpiry != null
+              ? _formatExpiry(med.backupVialsExpiry!)
+              : 'Not set',
+          isPlaceholder: med.backupVialsExpiry == null,
+          isWarning:
+              med.backupVialsExpiry != null &&
+              _isExpiringSoon(med.backupVialsExpiry!),
+          onTap: () => _editBackupVialExpiry(context, med),
+        ),
+        _buildDetailTile(
+          context,
+          'Location',
+          med.backupVialsStorageLocation ?? 'Not set',
+          isPlaceholder: med.backupVialsStorageLocation == null,
+          onTap: () => _editBackupVialLocation(context, med),
+        ),
+
+        Divider(
+          height: 1,
+          indent: 16,
+          endIndent: 16,
+          color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+        ),
+
+        // Storage conditions
+        _buildBackupStockConditionsRow(context, med),
       ],
     );
   }
@@ -1353,58 +1877,68 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     bool isItalic = false,
   }) {
     final theme = Theme.of(context);
+    final isEditable = onTap != null;
+    final isPlaceholder = value.startsWith('Tap to');
 
-    Widget content = Column(
+    Widget content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontSize: 11,
+        // Label with fixed width for alignment
+        SizedBox(
+          width: 110,
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: highlighted ? FontWeight.bold : FontWeight.w500,
-            fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
-            color: warning
-                ? theme.colorScheme.error
-                : theme.colorScheme.onSurface.withValues(
-                    alpha: kOpacityMediumHigh,
-                  ),
-            fontSize: 13,
+        // Value
+        Expanded(
+          child: Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: highlighted ? FontWeight.bold : FontWeight.w500,
+              fontStyle: isItalic || isPlaceholder
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+              color: warning
+                  ? theme.colorScheme.error
+                  : isPlaceholder
+                  ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
+                  : theme.colorScheme.onSurface,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 2, // Increased from 1
-          overflow: TextOverflow.ellipsis,
         ),
+        // Subtle chevron for editable items
+        if (isEditable)
+          Icon(
+            Icons.chevron_right,
+            size: 18,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
       ],
     );
 
-    if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-          child: Row(
-            children: [
-              Expanded(child: content),
-              Icon(
-                Icons.edit_outlined,
-                size: 14,
-                color: theme.colorScheme.primary.withValues(alpha: 0.5),
-              ),
-            ],
+    if (isEditable) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: content,
           ),
         ),
       );
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       child: content,
     );
   }
@@ -1683,67 +2217,1174 @@ ScheduledDose? _nextDoseForMedication(String medId) {
 
 void _showRefillDialog(BuildContext context, Medication med) async {
   final isMdv = med.form == MedicationForm.multiDoseVial;
-  final unit = isMdv ? 'vials' : _stockUnitLabel(med.stockUnit);
-  final controller = TextEditingController(text: '1');
 
-  final result = await showDialog<double>(
+  if (isMdv) {
+    _showMdvRefillDialog(context, med);
+  } else {
+    _showSimpleRefillDialog(context, med);
+  }
+}
+
+/// Refill dialog for Tablets, Capsules, SDV, Syringes
+void _showSimpleRefillDialog(BuildContext context, Medication med) async {
+  final unit = _stockUnitLabel(med.stockUnit);
+  final controller = TextEditingController(text: '1');
+  final currentStock = med.stockValue;
+  final maxStock = med.initialStockValue ?? med.stockValue;
+
+  // Track selected mode: 'add' or 'fillToMax'
+  String selectedMode = 'add';
+
+  final result = await showDialog<Map<String, dynamic>>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Refill ${med.name}'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Add stock to your inventory.', style: bodyTextStyle(context)),
-          const SizedBox(height: 16),
-          StatefulBuilder(
-            builder: (context, setState) {
-              return StepperRow36(
-                controller: controller,
-                onDec: () {
-                  final v = double.tryParse(controller.text) ?? 0;
-                  if (v > 0) {
-                    controller.text = (v - 1).toStringAsFixed(0);
-                  }
-                },
-                onInc: () {
-                  final v = double.tryParse(controller.text) ?? 0;
-                  controller.text = (v + 1).toStringAsFixed(0);
-                },
-                decoration: buildCompactFieldDecoration(context: context),
-              );
-            },
+    useRootNavigator: true,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (stateContext, setState) {
+        final theme = Theme.of(stateContext);
+        final addAmount = double.tryParse(controller.text) ?? 0;
+        final previewTotal = selectedMode == 'add'
+            ? currentStock + addAmount
+            : maxStock;
+
+        return AlertDialog(
+          title: Text(
+            'Refill ${med.name}',
+            style: TextStyle(color: theme.colorScheme.primary),
           ),
-          const SizedBox(height: 8),
-          Text(unit, style: helperTextStyle(context)),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final val = double.tryParse(controller.text);
-            if (val != null && val > 0) {
-              Navigator.pop(context, val);
-            }
-          },
-          child: const Text('Add Stock'),
-        ),
-      ],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Helper text
+              Text(
+                'Add stock after receiving a new prescription or restocking. "Add" will increase the stock by a specific amount (and update your maximum if it exceeds the current max). "Fill to Max" restores stock to your original maximum level.',
+                style: helperTextStyle(stateContext),
+              ),
+              const SizedBox(height: 16),
+
+              // Current stock info
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Current Stock:'),
+                        Text(
+                          '${_formatNumber(currentStock)} $unit',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Maximum Stock:'),
+                        Text(
+                          '${_formatNumber(maxStock)} $unit',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Mode selection - Radio buttons instead of chips
+              Text(
+                'Refill Method:',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              RadioListTile<String>(
+                title: const Text('Add to current stock'),
+                subtitle: const Text('Specify amount to add'),
+                value: 'add',
+                groupValue: selectedMode,
+                onChanged: (v) => setState(() => selectedMode = v ?? 'add'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              RadioListTile<String>(
+                title: const Text('Fill to maximum'),
+                subtitle: Text('Set stock to ${_formatNumber(maxStock)} $unit'),
+                value: 'fillToMax',
+                groupValue: selectedMode,
+                onChanged: (v) => setState(() => selectedMode = v ?? 'add'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+
+              // Amount input (only for Add mode)
+              if (selectedMode == 'add') ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Amount to Add:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: StepperRow36(
+                    controller: controller,
+                    fixedFieldWidth: 80, // Required for dialog use
+                    onDec: () {
+                      final v = double.tryParse(controller.text) ?? 0;
+                      if (v > 0) {
+                        controller.text = (v - 1).toStringAsFixed(0);
+                        setState(() {});
+                      }
+                    },
+                    onInc: () {
+                      final v = double.tryParse(controller.text) ?? 0;
+                      controller.text = (v + 1).toStringAsFixed(0);
+                      setState(() {});
+                    },
+                    decoration: buildCompactFieldDecoration(
+                      context: stateContext,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Center(child: Text(unit, style: helperTextStyle(stateContext))),
+              ],
+              const SizedBox(height: 16),
+
+              // Preview
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer.withValues(
+                    alpha: 0.3,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('New Total:'),
+                    Text(
+                      '${_formatNumber(previewTotal)} $unit',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (selectedMode == 'add') {
+                  final val = double.tryParse(controller.text);
+                  if (val != null && val > 0) {
+                    Navigator.pop(dialogContext, {
+                      'mode': 'add',
+                      'amount': val,
+                    });
+                  }
+                } else {
+                  Navigator.pop(dialogContext, {'mode': 'fillToMax'});
+                }
+              },
+              child: const Text('Refill'),
+            ),
+          ],
+        );
+      },
     ),
   );
 
   if (result != null && context.mounted) {
     final box = Hive.box<Medication>('medications');
-    final newStock = med.stockValue + result;
+    final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
+    final now = DateTime.now();
+    double newStock;
+    String message;
+    InventoryChangeType changeType;
+    double changeAmount;
+
+    if (result['mode'] == 'add') {
+      final amount = result['amount'] as double;
+      newStock = med.stockValue + amount;
+      message = 'Added ${_formatNumber(amount)} $unit';
+      changeType = InventoryChangeType.refillAdd;
+      changeAmount = amount;
+    } else {
+      newStock = maxStock;
+      message = 'Refilled to max (${_formatNumber(newStock)} $unit)';
+      changeType = InventoryChangeType.refillToMax;
+      changeAmount = newStock - med.stockValue;
+    }
+
+    // Update stock
+    box.put(med.id, med.copyWith(stockValue: newStock));
+
+    // Log the refill for reporting
+    final inventoryLog = InventoryLog(
+      id: 'refill_${med.id}_${now.millisecondsSinceEpoch}',
+      medicationId: med.id,
+      medicationName: med.name,
+      changeType: changeType,
+      previousStock: med.stockValue,
+      newStock: newStock,
+      changeAmount: changeAmount,
+      notes: message,
+      timestamp: now,
+    );
+    inventoryLogBox.put(inventoryLog.id, inventoryLog);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+/// MDV Refill dialog - Open new vial with sealed vial management
+void _showMdvRefillDialog(BuildContext context, Medication med) async {
+  final controller = TextEditingController(text: '1');
+  final currentVolume = med.activeVialVolume ?? 0;
+  final vialSize = med.containerVolumeMl ?? 5.0;
+  final sealedVials = med.stockValue.toInt();
+
+  // Track options
+  String selectedMode = 'replace'; // 'replace' or 'topUp'
+  bool useFromStock = sealedVials > 0;
+
+  final result = await showDialog<Map<String, dynamic>>(
+    context: context,
+    useRootNavigator: true,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (context, setState) {
+        final theme = Theme.of(context);
+        final previewVolume = selectedMode == 'replace'
+            ? vialSize
+            : currentVolume + vialSize;
+
+        return AlertDialog(
+          title: Text(
+            'Open New Vial',
+            style: TextStyle(color: theme.colorScheme.primary),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Helper text
+              Text(
+                'Open a new vial from your sealed stock. Choose to replace the current vial or add to existing volume.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: 16),
+
+              // Current state
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Active Vial:'),
+                        Text(
+                          '${_formatNumber(currentVolume)} mL remaining',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Sealed Vials:'),
+                        Text(
+                          '$sealedVials in stock',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: sealedVials == 0 ? Colors.red : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Mode selection
+              const Text(
+                'Action:',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              ChoiceChip(
+                label: Text(
+                  'Replace (discard ${_formatNumber(currentVolume)} mL)',
+                ),
+                selected: selectedMode == 'replace',
+                onSelected: (_) => setState(() => selectedMode = 'replace'),
+              ),
+              const SizedBox(height: 4),
+              ChoiceChip(
+                label: Text('Top Up (add ${_formatNumber(vialSize)} mL)'),
+                selected: selectedMode == 'topUp',
+                onSelected: (_) => setState(() => selectedMode = 'topUp'),
+              ),
+              const SizedBox(height: 16),
+
+              // Use from stock checkbox
+              CheckboxListTile(
+                title: const Text('Use sealed vial from stock'),
+                subtitle: sealedVials == 0
+                    ? Text(
+                        'No sealed vials available',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      )
+                    : Text('Will deduct 1 vial (${sealedVials - 1} remaining)'),
+                value: useFromStock,
+                onChanged: (v) => setState(() => useFromStock = v ?? false),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Preview
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('New Volume:'),
+                    Text(
+                      '${_formatNumber(previewVolume)} mL',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, {
+                  'mode': selectedMode,
+                  'useFromStock': useFromStock,
+                });
+              },
+              child: const Text('Open Vial'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  if (result != null && context.mounted) {
+    final box = Hive.box<Medication>('medications');
+    final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
+    final now = DateTime.now();
+    final mode = result['mode'] as String;
+    final useStock = result['useFromStock'] as bool;
+
+    double newVolume;
+    double newSealedCount = med.stockValue;
+    final previousSealedCount = med.stockValue;
+
+    if (mode == 'replace') {
+      newVolume = vialSize;
+    } else {
+      newVolume = currentVolume + vialSize;
+    }
+
+    if (useStock && sealedVials > 0) {
+      newSealedCount = med.stockValue - 1;
+    }
+
+    box.put(
+      med.id,
+      med.copyWith(activeVialVolume: newVolume, stockValue: newSealedCount),
+    );
+
+    // Log the vial opening for reporting
+    final inventoryLog = InventoryLog(
+      id: 'vial_${med.id}_${now.millisecondsSinceEpoch}',
+      medicationId: med.id,
+      medicationName: med.name,
+      changeType: InventoryChangeType.vialOpened,
+      previousStock: previousSealedCount,
+      newStock: newSealedCount,
+      changeAmount: useStock ? -1 : 0,
+      notes:
+          '${mode == 'replace' ? 'Replaced' : 'Topped up'} vial to ${_formatNumber(newVolume)} mL',
+      timestamp: now,
+    );
+    inventoryLogBox.put(inventoryLog.id, inventoryLog);
+
+    final actionText = mode == 'replace' ? 'Replaced' : 'Topped up';
+    final stockText = useStock ? ' (1 sealed vial used)' : '';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$actionText vial - ${_formatNumber(newVolume)} mL$stockText',
+        ),
+      ),
+    );
+  }
+}
+
+/// Dialog to add sealed vials to MDV reserve stock
+void _showRestockSealedVialsDialog(BuildContext context, Medication med) async {
+  final controller = TextEditingController(text: '1');
+  final currentStock = med.stockValue.toInt();
+
+  final result = await showDialog<double>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (context, setState) {
+        final theme = Theme.of(context);
+        final addAmount = int.tryParse(controller.text) ?? 0;
+        final previewTotal = currentStock + addAmount;
+
+        return AlertDialog(
+          title: Text(
+            'Restock Sealed Vials',
+            style: TextStyle(color: theme.colorScheme.primary),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Helper text
+              Text(
+                'Add new sealed vials to your backup stock inventory.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: 16),
+
+              // Current stock
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Current Sealed Vials:'),
+                    Text(
+                      '$currentStock',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Amount input
+              Text('Add vials:', style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(height: 8),
+              Center(
+                child: StepperRow36(
+                  controller: controller,
+                  fixedFieldWidth: 80, // Required for dialog use
+                  onDec: () {
+                    final v = int.tryParse(controller.text) ?? 0;
+                    if (v > 0) {
+                      controller.text = (v - 1).toString();
+                      setState(() {});
+                    }
+                  },
+                  onInc: () {
+                    final v = int.tryParse(controller.text) ?? 0;
+                    controller.text = (v + 1).toString();
+                    setState(() {});
+                  },
+                  decoration: buildCompactFieldDecoration(context: context),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Preview
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('New Total:'),
+                    Text(
+                      '$previewTotal vials',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final val = double.tryParse(controller.text);
+                if (val != null && val > 0) {
+                  Navigator.pop(context, val);
+                }
+              },
+              child: const Text('Add Vials'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  if (result != null && context.mounted) {
+    final box = Hive.box<Medication>('medications');
+    final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
+    final now = DateTime.now();
+    final previousStock = med.stockValue;
+    final newStock = previousStock + result;
 
     box.put(med.id, med.copyWith(stockValue: newStock));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added ${_formatNumber(result)} $unit')),
+    // Log the restock for reporting
+    final inventoryLog = InventoryLog(
+      id: 'restock_${med.id}_${now.millisecondsSinceEpoch}',
+      medicationId: med.id,
+      medicationName: med.name,
+      changeType: InventoryChangeType.vialRestocked,
+      previousStock: previousStock,
+      newStock: newStock,
+      changeAmount: result,
+      notes: 'Added ${result.toInt()} sealed vials',
+      timestamp: now,
     );
+    inventoryLogBox.put(inventoryLog.id, inventoryLog);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Added ${result.toInt()} sealed vials (${newStock.toInt()} total)',
+        ),
+      ),
+    );
+  }
+}
+
+void _showAdHocDoseDialog(BuildContext context, Medication med) async {
+  final isMdv = med.form == MedicationForm.multiDoseVial;
+
+  // For MDV, use mL; for others, use stock unit
+  final String unit = isMdv ? 'mL' : _stockUnitLabel(med.stockUnit);
+  double syringeSize = 1.0; // Default to 1mL syringe
+  String selectedUnit = 'mL'; // Default to mL for input
+  final double maxVolume = med.activeVialVolume ?? med.containerVolumeMl ?? 3.0;
+
+  // Calculate concentration for strength-to-volume conversion
+  // concentration = mg per mL (or mcg per mL depending on strengthUnit)
+  final double? concentration =
+      (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
+      ? med.strengthValue / med.containerVolumeMl!
+      : null;
+  final String strengthUnit = _unitLabel(med.strengthUnit);
+
+  final volumeController = TextEditingController(text: isMdv ? '0.5' : '1');
+  final strengthController = TextEditingController();
+  final notesController = TextEditingController();
+
+  final result = await showDialog<Map<String, dynamic>>(
+    context: context,
+    useRootNavigator: true,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (stateContext, setState) {
+        final theme = Theme.of(stateContext);
+        final colorScheme = theme.colorScheme;
+
+        // Get input value and convert to mL based on selected unit
+        final inputValue = double.tryParse(volumeController.text) ?? 0;
+        double volumeInMl;
+        double doseInStrengthUnit;
+
+        if (selectedUnit == 'mL') {
+          // Input is in mL
+          volumeInMl = inputValue;
+          doseInStrengthUnit = concentration != null
+              ? volumeInMl * concentration
+              : 0;
+        } else if (selectedUnit == 'mg' || selectedUnit == 'mcg') {
+          // Input is in mg/mcg - convert to mL
+          doseInStrengthUnit = inputValue;
+          volumeInMl = concentration != null && concentration > 0
+              ? inputValue / concentration
+              : 0;
+        } else {
+          // Input is in units (IU) - assume 1 unit = 0.01mL or use concentration
+          volumeInMl = inputValue / 100; // 100 units = 1 mL
+          doseInStrengthUnit = concentration != null
+              ? volumeInMl * concentration
+              : 0;
+        }
+
+        final clampedVolume = volumeInMl.clamp(0.0, maxVolume);
+        final displayStrength = doseInStrengthUnit;
+
+        return AlertDialog(
+          title: Text(
+            'Record Ad-Hoc Dose',
+            style: TextStyle(color: colorScheme.primary),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Helper text
+                Text(
+                  'Record a dose taken outside of your regular schedule.',
+                  style: helperTextStyle(stateContext),
+                ),
+                const SizedBox(height: 12),
+
+                // Medication info card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        med.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      if (isMdv && concentration != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_formatNumber(med.strengthValue)} $strengthUnit / ${_formatNumber(med.containerVolumeMl!)} mL',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // MDV: Enhanced syringe input with size and unit selection
+                if (isMdv) ...[
+                  // Syringe size selection (compact)
+                  Row(
+                    children: [
+                      Text(
+                        'Syringe:',
+                        style: helperTextStyle(
+                          stateContext,
+                        )?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLowest,
+                          border: Border.all(
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: kCardBorderOpacity,
+                            ),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<double>(
+                            value: syringeSize,
+                            isDense: true,
+                            style: inputTextStyle(stateContext),
+                            items: [0.3, 0.5, 1.0, 3.0, 5.0].map((size) {
+                              return DropdownMenuItem<double>(
+                                value: size,
+                                child: Text('$size mL'),
+                              );
+                            }).toList(),
+                            onChanged: (newSize) {
+                              if (newSize != null) {
+                                syringeSize = newSize;
+                                setState(() {});
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Dose unit selection toggle buttons
+                  Row(
+                    children: [
+                      Text(
+                        'Input As:',
+                        style: helperTextStyle(
+                          stateContext,
+                        )?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ToggleButtons(
+                          isSelected: [
+                            selectedUnit == 'mL',
+                            selectedUnit == 'mcg' || selectedUnit == 'mg',
+                            selectedUnit == 'units',
+                          ],
+                          onPressed: (index) {
+                            setState(() {
+                              if (index == 0)
+                                selectedUnit = 'mL';
+                              else if (index == 1)
+                                selectedUnit = strengthUnit.contains('mcg')
+                                    ? 'mcg'
+                                    : 'mg';
+                              else
+                                selectedUnit = 'units';
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          constraints: const BoxConstraints(
+                            minHeight: 32,
+                            minWidth: 50,
+                          ),
+                          textStyle: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onSurface,
+                          ),
+                          children: [
+                            const Text('mL'),
+                            Text(strengthUnit.contains('mcg') ? 'mcg' : 'mg'),
+                            const Text('units'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Usage helper text
+                  Text(
+                    'Enter dose value or drag the syringe indicator.',
+                    style: helperTextStyle(stateContext),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Incremental input field (ABOVE syringe)
+                  Row(
+                    children: [
+                      Text(
+                        '$selectedUnit:',
+                        style: helperTextStyle(
+                          stateContext,
+                        )?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: StepperRow36(
+                          controller: volumeController,
+                          fixedFieldWidth: 80,
+                          onDec: () {
+                            final v =
+                                double.tryParse(volumeController.text) ?? 0;
+                            if (v > 0.01) {
+                              volumeController.text = (v - 0.1).toStringAsFixed(
+                                2,
+                              );
+                              setState(() {});
+                            }
+                          },
+                          onInc: () {
+                            final v =
+                                double.tryParse(volumeController.text) ?? 0;
+                            // Limit to min of syringe size and remaining volume
+                            final maxInputValue = selectedUnit == 'mL'
+                                ? syringeSize.clamp(0.0, maxVolume)
+                                : (selectedUnit == 'mg' ||
+                                          selectedUnit == 'mcg') &&
+                                      concentration != null
+                                ? syringeSize.clamp(0.0, maxVolume) *
+                                      concentration
+                                : syringeSize * 100;
+                            if (v < maxInputValue) {
+                              volumeController.text = (v + 0.1).toStringAsFixed(
+                                2,
+                              );
+                              setState(() {});
+                            }
+                          },
+                          decoration: buildCompactFieldDecoration(
+                            context: stateContext,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Show empty vial warning if applicable
+                  if (maxVolume <= 0)
+                    Text(
+                      '⚠️ Vial appears empty. You can still record doses to account for measurement variance.',
+                      style: helperTextStyle(
+                        stateContext,
+                      )?.copyWith(color: Colors.orange),
+                    )
+                  else
+                    Text(
+                      'Available: ${_formatNumber(maxVolume)} mL in active vial',
+                      style: helperTextStyle(stateContext),
+                    ),
+                  const SizedBox(height: 16),
+
+                  // Syringe visualization (clean - no text overlay)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: kReconBackgroundActive,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        // Syringe size label
+                        Text(
+                          '${_formatNumber(syringeSize)} mL Syringe',
+                          style: TextStyle(
+                            color: Colors.white.withValues(
+                              alpha: kReconTextMediumOpacity,
+                            ),
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Syringe gauge (single label only)
+                        WhiteSyringeGauge(
+                          totalUnits: syringeSize * 100,
+                          fillUnits: clampedVolume * 100,
+                          color: colorScheme.primary,
+                          interactive: true,
+                          maxConstraint: maxVolume * 100,
+                          showValueLabel: false, // Remove double label
+                          onChanged: (newValue) {
+                            volumeController.text = (newValue / 100)
+                                .toStringAsFixed(2);
+                            setState(() {});
+                          },
+                          onMaxConstraintHit: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Dose summary sentence
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: helperTextStyle(stateContext),
+                      children: [
+                        TextSpan(
+                          text: '${_formatNumber(clampedVolume)} mL',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const TextSpan(text: ' is equal to '),
+                        TextSpan(
+                          text: '${_formatNumber(clampedVolume * 100)} units',
+                          style: TextStyle(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              ' on a ${_formatNumber(syringeSize)} mL syringe',
+                        ),
+                        if (displayStrength != null) ...[
+                          const TextSpan(text: ' for a dose of '),
+                          TextSpan(
+                            text:
+                                '${_formatNumber(displayStrength)} $strengthUnit',
+                            style: TextStyle(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                        TextSpan(text: ' of ${med.name}.'),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  // Non-MDV: Standard stepper input - in same row as unit
+                  Row(
+                    children: [
+                      Text(
+                        'Dose:',
+                        style: helperTextStyle(
+                          stateContext,
+                        )?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: StepperRow36(
+                          controller: volumeController,
+                          fixedFieldWidth: 80,
+                          onDec: () {
+                            final v =
+                                double.tryParse(volumeController.text) ?? 0;
+                            if (v > 0) {
+                              volumeController.text = (v - 1).toStringAsFixed(
+                                0,
+                              );
+                              setState(() {});
+                            }
+                          },
+                          onInc: () {
+                            final v =
+                                double.tryParse(volumeController.text) ?? 0;
+                            volumeController.text = (v + 1).toStringAsFixed(0);
+                            setState(() {});
+                          },
+                          decoration: buildCompactFieldDecoration(
+                            context: stateContext,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        unit,
+                        style: helperTextStyle(
+                          stateContext,
+                        )?.copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 16),
+
+                // Notes section
+                Text(
+                  'Notes (optional):',
+                  style: helperTextStyle(
+                    stateContext,
+                  )?.copyWith(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: notesController,
+                  maxLines: 2,
+                  style: helperTextStyle(stateContext), // Smaller font
+                  decoration: InputDecoration(
+                    hintText: 'e.g., Taken for breakthrough pain',
+                    hintStyle: helperTextStyle(stateContext),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.all(10),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final val = double.tryParse(volumeController.text);
+                if (val != null && val > 0) {
+                  Navigator.pop(dialogContext, {
+                    'amount': val,
+                    'unit': unit,
+                    'notes': notesController.text.trim(),
+                  });
+                }
+              },
+              child: const Text('Record Dose'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  if (result != null && context.mounted) {
+    final now = DateTime.now();
+    final amount = result['amount'] as double;
+    final doseUnit = result['unit'] as String;
+    final notes = result['notes'] as String?;
+
+    if (isMdv) {
+      // For MDV: deduct from active vial volume
+      final previousVolume = med.activeVialVolume ?? med.containerVolumeMl ?? 0;
+      final newVolume = (previousVolume - amount).clamp(0.0, double.infinity);
+
+      // Create DoseLog
+      final doseLog = DoseLog(
+        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
+        scheduleId: 'ad_hoc',
+        scheduleName: 'Ad-hoc Dose',
+        medicationId: med.id,
+        medicationName: med.name,
+        scheduledTime: now,
+        actionTime: now,
+        doseValue: amount,
+        doseUnit: doseUnit,
+        action: DoseAction.taken,
+        notes: notes?.isNotEmpty == true ? notes : null,
+      );
+      Hive.box<DoseLog>('dose_logs').put(doseLog.id, doseLog);
+
+      // Log inventory change
+      final inventoryLog = InventoryLog(
+        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
+        medicationId: med.id,
+        medicationName: med.name,
+        changeType: InventoryChangeType.adHocDose,
+        previousStock: previousVolume,
+        newStock: newVolume,
+        changeAmount: -amount,
+        notes: notes?.isNotEmpty == true ? notes : 'Ad-hoc dose',
+        timestamp: now,
+      );
+      Hive.box<InventoryLog>(
+        'inventory_logs',
+      ).put(inventoryLog.id, inventoryLog);
+
+      // Update medication - deduct from activeVialVolume
+      Hive.box<Medication>(
+        'medications',
+      ).put(med.id, med.copyWith(activeVialVolume: newVolume));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Recorded ${_formatNumber(amount)} mL dose')),
+      );
+    } else {
+      // Non-MDV: deduct from stockValue
+      final previousStock = med.stockValue;
+      final newStock = (previousStock - amount).clamp(0.0, double.infinity);
+
+      final doseLog = DoseLog(
+        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
+        scheduleId: 'ad_hoc',
+        scheduleName: 'Ad-hoc Dose',
+        medicationId: med.id,
+        medicationName: med.name,
+        scheduledTime: now,
+        actionTime: now,
+        doseValue: amount,
+        doseUnit: doseUnit,
+        action: DoseAction.taken,
+        notes: notes?.isNotEmpty == true ? notes : null,
+      );
+      Hive.box<DoseLog>('dose_logs').put(doseLog.id, doseLog);
+
+      final inventoryLog = InventoryLog(
+        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
+        medicationId: med.id,
+        medicationName: med.name,
+        changeType: InventoryChangeType.adHocDose,
+        previousStock: previousStock,
+        newStock: newStock,
+        changeAmount: -amount,
+        notes: notes?.isNotEmpty == true ? notes : 'Ad-hoc dose',
+        timestamp: now,
+      );
+      Hive.box<InventoryLog>(
+        'inventory_logs',
+      ).put(inventoryLog.id, inventoryLog);
+
+      Hive.box<Medication>(
+        'medications',
+      ).put(med.id, med.copyWith(stockValue: newStock));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Recorded ${_formatNumber(amount)} $doseUnit dose'),
+        ),
+      );
+    }
   }
 }
 
@@ -1762,60 +3403,69 @@ Future<void> _showStepperEditDialog(
 
   final result = await showDialog<double>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StatefulBuilder(
-            builder: (context, setState) {
-              return StepperRow36(
-                controller: controller,
-                onDec: () {
-                  final v = double.tryParse(controller.text) ?? 0;
-                  final step = isInt ? 1.0 : 0.1;
-                  final newVal = (v - step).clamp(0.0, 1000000.0);
-                  controller.text = isInt
-                      ? newVal.toInt().toString()
-                      : newVal.toStringAsFixed(1);
-                },
-                onInc: () {
-                  final v = double.tryParse(controller.text) ?? 0;
-                  final step = isInt ? 1.0 : 0.1;
-                  final newVal = (v + step).clamp(0.0, 1000000.0);
-                  controller.text = isInt
-                      ? newVal.toInt().toString()
-                      : newVal.toStringAsFixed(1);
-                },
-                decoration: buildCompactFieldDecoration(context: context),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                ],
-              );
-            },
-          ),
-          if (unit != null) ...[
-            const SizedBox(height: 8),
-            Text(unit, style: helperTextStyle(context)),
+    useRootNavigator: true,
+    builder: (dialogContext) {
+      final theme = Theme.of(dialogContext);
+      return AlertDialog(
+        title: Text(title, style: TextStyle(color: theme.colorScheme.primary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            StatefulBuilder(
+              builder: (stateContext, setState) {
+                return StepperRow36(
+                  controller: controller,
+                  fixedFieldWidth: 80, // Required for dialog use
+                  onDec: () {
+                    final v = double.tryParse(controller.text) ?? 0;
+                    final step = isInt ? 1.0 : 0.1;
+                    final newVal = (v - step).clamp(0.0, 1000000.0);
+                    controller.text = isInt
+                        ? newVal.toInt().toString()
+                        : newVal.toStringAsFixed(1);
+                    setState(() {});
+                  },
+                  onInc: () {
+                    final v = double.tryParse(controller.text) ?? 0;
+                    final step = isInt ? 1.0 : 0.1;
+                    final newVal = (v + step).clamp(0.0, 1000000.0);
+                    controller.text = isInt
+                        ? newVal.toInt().toString()
+                        : newVal.toStringAsFixed(1);
+                    setState(() {});
+                  },
+                  decoration: buildCompactFieldDecoration(
+                    context: stateContext,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  ],
+                );
+              },
+            ),
+            if (unit != null) ...[
+              const SizedBox(height: 8),
+              Text(unit, style: helperTextStyle(dialogContext)),
+            ],
           ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final val = double.tryParse(controller.text);
+              if (val != null) {
+                Navigator.pop(dialogContext, val);
+              }
+            },
+            child: const Text('Save'),
+          ),
         ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final val = double.tryParse(controller.text);
-            if (val != null) {
-              Navigator.pop(context, val);
-            }
-          },
-          child: const Text('Save'),
-        ),
-      ],
-    ),
+      );
+    },
   );
 
   if (result != null && result != initialValue) {
@@ -2175,31 +3825,35 @@ void _deleteMedication(BuildContext context, Medication med) async {
   }
 }
 
-  // Calculate adherence data for the last 7 days
-  List<double> _calculateAdherenceData(Medication med) {
-    final doseLogBox = Hive.box<DoseLog>('dose_logs');
-    final now = DateTime.now();
-    final data = <double>[];
+// Calculate adherence data for the last 7 days
+List<double> _calculateAdherenceData(Medication med) {
+  final doseLogBox = Hive.box<DoseLog>('dose_logs');
+  final now = DateTime.now();
+  final data = <double>[];
 
-    for (int i = 6; i >= 0; i--) {
-      final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
-      final nextDay = day.add(const Duration(days: 1));
+  for (int i = 6; i >= 0; i--) {
+    final day = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: i));
+    final nextDay = day.add(const Duration(days: 1));
 
-      final logsForDay = doseLogBox.values.where((log) {
-        return log.medicationId == med.id &&
-            log.actionTime.isAfter(day) &&
-            log.actionTime.isBefore(nextDay);
-      }).toList();
+    final logsForDay = doseLogBox.values.where((log) {
+      return log.medicationId == med.id &&
+          log.actionTime.isAfter(day) &&
+          log.actionTime.isBefore(nextDay);
+    }).toList();
 
-      if (logsForDay.isEmpty) {
-        data.add(-1); // No data
-      } else {
-        data.add(1.0); // Taken (simplified - could calculate partial adherence)
-      }
+    if (logsForDay.isEmpty) {
+      data.add(-1); // No data
+    } else {
+      data.add(1.0); // Taken (simplified - could calculate partial adherence)
     }
-
-    return data;
   }
+
+  return data;
+}
 
 Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
   final doseBox = Hive.box<DoseLog>('dose_logs');

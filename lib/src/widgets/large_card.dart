@@ -19,16 +19,8 @@ class LargeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final card = Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
-          width: kBorderWidthThin,
-        ),
-      ),
+      decoration: buildStandardCardDecoration(context: context),
       padding: const EdgeInsets.all(kCardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

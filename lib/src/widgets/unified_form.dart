@@ -432,6 +432,8 @@ class _SyringePainter extends CustomPainter {
 }
 
 /// A [-] [ 120x36 Field36 TextField ] [+] row used for numeric steppers.
+/// 
+/// Use [fixedFieldWidth] when using in dialogs (LayoutBuilder doesn't work with IntrinsicWidth).
 class StepperRow36 extends StatelessWidget {
   const StepperRow36({
     required this.controller,
@@ -442,6 +444,7 @@ class StepperRow36 extends StatelessWidget {
     this.compact = false,
     this.enabled = true,
     this.inputFormatters,
+    this.fixedFieldWidth,
   });
 
   final TextEditingController controller;
@@ -451,9 +454,17 @@ class StepperRow36 extends StatelessWidget {
   final bool compact;
   final bool enabled;
   final List<TextInputFormatter>? inputFormatters;
+  /// When set, bypasses LayoutBuilder (required for use in dialogs).
+  final double? fixedFieldWidth;
 
   @override
   Widget build(BuildContext context) {
+    // If fixedFieldWidth is provided, use it directly (for dialogs)
+    if (fixedFieldWidth != null) {
+      return _buildRow(context, fixedFieldWidth!);
+    }
+    
+    // Otherwise use LayoutBuilder for responsive sizing
     return LayoutBuilder(
       builder: (context, constraints) {
         // Account for buttons and spacing in the available width
@@ -467,37 +478,41 @@ class StepperRow36 extends StatelessWidget {
           kMaxCompactControlWidth,
         );
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _pillBtn(context, '−', enabled ? onDec : () {}),
-            const SizedBox(width: 4),
-            SizedBox(
-              width: fieldWidth,
-              child: Field36(
-                child: Builder(
-                  builder: (context) {
-                    final style = compact
-                        ? inputTextStyle(context)
-                        : bodyTextStyle(context);
-                    return TextFormField(
-                      controller: controller,
-                      textAlign: TextAlign.center,
-                      style: style,
-                      decoration: decoration,
-                      enabled: enabled,
-                      inputFormatters: inputFormatters,
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            _pillBtn(context, '+', enabled ? onInc : () {}),
-          ],
-        );
+        return _buildRow(context, fieldWidth);
       },
+    );
+  }
+  
+  Widget _buildRow(BuildContext context, double fieldWidth) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _pillBtn(context, '−', enabled ? onDec : () {}),
+        const SizedBox(width: 4),
+        SizedBox(
+          width: fieldWidth,
+          child: Field36(
+            child: Builder(
+              builder: (context) {
+                final style = compact
+                    ? inputTextStyle(context)
+                    : bodyTextStyle(context);
+                return TextFormField(
+                  controller: controller,
+                  textAlign: TextAlign.center,
+                  style: style,
+                  decoration: decoration,
+                  enabled: enabled,
+                  inputFormatters: inputFormatters,
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        _pillBtn(context, '+', enabled ? onInc : () {}),
+      ],
     );
   }
 

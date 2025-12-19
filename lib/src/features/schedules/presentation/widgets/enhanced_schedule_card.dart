@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -12,7 +14,6 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Enhanced expandable schedule card for medication detail page
 /// Shows schedule summary by default, expands to show full details
@@ -36,249 +37,382 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     final nextDose = _getNextDose();
     final adherenceData = _getAdherenceData();
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingS),
-      child: Container(
-        decoration: softWhiteCardDecoration(context),
-        child: Column(
-          children: [
-            // Collapsed header (always visible)
-            InkWell(
-              onTap: () => setState(() => _isExpanded = !_isExpanded),
+    final adherenceRate = (adherenceData['total'] as int) > 0
+        ? adherenceData['rate'] as double
+        : 100.0;
+
+    return AnimatedContainer(
+      duration: kAnimationNormal,
+      curve: kCurveEmphasized,
+      margin: const EdgeInsets.only(bottom: kSpacingS),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          child: AnimatedContainer(
+            duration: kAnimationNormal,
+            curve: kCurveEmphasized,
+            padding: EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
+            decoration: BoxDecoration(
+              color: _isExpanded ? colorScheme.surface : Colors.transparent,
               borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-              child: Padding(
-                padding: const EdgeInsets.all(kCardPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              border: _isExpanded
+                  ? Border.all(
+                      color: colorScheme.outlineVariant.withValues(
+                        alpha: kCardBorderOpacity,
+                      ),
+                      width: kBorderWidthThin,
+                    )
+                  : null,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // COLLAPSED STATE - Ultra Clean Single Row
+                Row(
                   children: [
-                    // Title row with expand/edit buttons
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          size: kIconSizeMedium,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: kSpacingS),
-                        Expanded(
-                          child: Text(
-                            widget.schedule.name,
-                            style: bodyTextStyle(context)?.copyWith(
-                                  fontWeight: kFontWeightBold,
-                                ),
-                          ),
-                        ),
-                        // Status badge
-                        if (!widget.schedule.active)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: kSpacingS,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(kBorderRadiusChip),
-                            ),
+                    // Schedule name (primary info)
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Flexible(
                             child: Text(
-                              'PAUSED',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: kFontWeightBold,
-                                color: Colors.orange.shade700,
-                                letterSpacing: 0.6,
+                              widget.schedule.name,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: kFontWeightMedium,
+                                color: colorScheme.onSurface,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        const SizedBox(width: kSpacingS),
-                        Icon(
-                          _isExpanded ? Icons.expand_less : Icons.expand_more,
-                          size: kIconSizeMedium,
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit_outlined, size: kIconSizeMedium - 2),
-                          onPressed: () => context.go('/schedules/${widget.schedule.id}'),
-                          tooltip: 'Edit Schedule',
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: kSpacingS),
-                    
-                    // Next dose info
-                    if (nextDose != null && widget.schedule.active)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.alarm,
-                            size: kIconSizeSmall - 2,
-                            color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-                          ),
-                          const SizedBox(width: kSpacingXS),
-                          Text(
-                            _formatNextDose(nextDose),
-                            style: mutedTextStyle(context)?.copyWith(
-                                  fontWeight: kFontWeightMedium,
-                                ),
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: kSpacingXS),
-                    
-                    // Dose info and frequency
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.medication,
-                          size: kIconSizeSmall - 2,
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-                        ),
-                        const SizedBox(width: kSpacingXS),
-                        Text(
-                          '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                          style: bodyTextStyle(context)?.copyWith(
-                                fontWeight: kFontWeightSemiBold,
+                          if (!widget.schedule.active) ...[
+                            const SizedBox(width: kSpacingXS),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: kSpacingXS,
+                                vertical: 1,
                               ),
-                        ),
-                        Text(
-                          ' • ${_getFrequencyText()}',
-                          style: mutedTextStyle(context),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    
-                    // Adherence
-                    if ((adherenceData['total'] as int) > 0)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-                            size: kIconSizeSmall - 2,
-                            color: _getAdherenceColor(adherenceData['rate']),
-                          ),
-                          const SizedBox(width: kSpacingXS),
-                          Text(
-                            '${adherenceData['rate'].toStringAsFixed(0)}% adherence',
-                            style: mutedTextStyle(context)?.copyWith(
-                                  color: _getAdherenceColor(adherenceData['rate']),
-                                  fontWeight: kFontWeightMedium,
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(kSpacingXS),
+                              ),
+                              child: Text(
+                                'Paused',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
-                          ),
-                          Text(
-                            ' (${adherenceData['taken']}/${adherenceData['total']} this week)',
-                            style: mutedTextStyle(context)?.copyWith(
-                                  fontSize: kFontSizeSmall - 1,
-                                ),
-                          ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
+                    ),
+                    // Next dose time OR frequency (secondary info)
+                    if (widget.schedule.active && nextDose != null)
+                      Text(
+                        _formatNextDoseShort(nextDose),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: kFontWeightMedium,
+                        ),
+                      )
+                    else
+                      Text(_getFrequencyText(), style: mutedTextStyle(context)),
+                    const SizedBox(width: kSpacingS),
+                    // Expand indicator
+                    AnimatedRotation(
+                      turns: _isExpanded ? 0.5 : 0,
+                      duration: kAnimationFast,
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: kIconSizeMedium,
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: kOpacityMedium,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
+
+                // EXPANDED STATE - Premium Details
+                AnimatedCrossFade(
+                  duration: kAnimationNormal,
+                  crossFadeState: _isExpanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Padding(
+                    padding: const EdgeInsets.only(top: kSpacingL),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Dose & Frequency Row
+                        Row(
+                          children: [
+                            _buildInfoChip(
+                              context,
+                              icon: Icons.medication_rounded,
+                              label:
+                                  '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                              isPrimary: true,
+                            ),
+                            const SizedBox(width: kSpacingS),
+                            _buildInfoChip(
+                              context,
+                              icon: Icons.schedule_rounded,
+                              label: _getTimesText(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: kSpacingM),
+
+                        // Days Row
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: kIconSizeSmall,
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: kOpacityMedium,
+                              ),
+                            ),
+                            const SizedBox(width: kSpacingS),
+                            Expanded(
+                              child: Text(
+                                _getDaysText(),
+                                style: mutedTextStyle(
+                                  context,
+                                )?.copyWith(fontWeight: kFontWeightMedium),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Adherence (if data exists)
+                        if ((adherenceData['total'] as int) > 0) ...[
+                          const SizedBox(height: kSpacingM),
+                          Row(
+                            children: [
+                              // Progress bar
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    kSpacingXS,
+                                  ),
+                                  child: LinearProgressIndicator(
+                                    value: adherenceRate / 100,
+                                    minHeight: kSpacingXS,
+                                    backgroundColor:
+                                        colorScheme.surfaceContainerHighest,
+                                    valueColor: AlwaysStoppedAnimation(
+                                      _getAdherenceColor(adherenceRate),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: kSpacingM),
+                              Text(
+                                '${adherenceRate.toStringAsFixed(0)}%',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: _getAdherenceColor(adherenceRate),
+                                  fontWeight: kFontWeightBold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+
+                        const SizedBox(height: kSpacingL),
+
+                        // Schedule Details Section
+                        _buildExpandedSection(
+                          context,
+                          title: 'Schedule Details',
+                          children: [
+                            _buildEditableDetailRow(
+                              context,
+                              'Dose',
+                              '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                              onEdit: _quickEditDose,
+                            ),
+                            _buildEditableDetailRow(
+                              context,
+                              'Times',
+                              _getTimesText(),
+                              onEdit: _quickEditTimes,
+                            ),
+                            _buildDetailRow(context, 'Days', _getDaysText()),
+                            _buildDetailRow(
+                              context,
+                              'Started',
+                              DateFormat(
+                                'MMM d, yyyy',
+                              ).format(widget.schedule.createdAt),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: kSpacingM),
+
+                        // Recent Activity Section
+                        _buildExpandedSection(
+                          context,
+                          title: 'Recent Activity',
+                          children: [_buildRecentDoses()],
+                        ),
+                        const SizedBox(height: kSpacingL),
+
+                        // Action Buttons Row (Schedule-level actions only)
+                        Row(
+                          children: [
+                            // Pause/Resume toggle
+                            Expanded(
+                              child: _buildPrimaryAction(
+                                context,
+                                label: widget.schedule.active
+                                    ? 'Pause Schedule'
+                                    : 'Resume Schedule',
+                                onTap: _togglePause,
+                              ),
+                            ),
+                            const SizedBox(width: kSpacingS),
+                            // Edit button
+                            _buildSecondaryAction(
+                              context,
+                              icon: Icons.edit_rounded,
+                              onTap: () => context.push(
+                                '/schedules/detail/${widget.schedule.id}',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            
-            // Expanded content
-            if (_isExpanded) ...[
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.all(kCardPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  // Schedule details
-                  _buildExpandedSection(
-                    context,
-                    title: 'Schedule',
-                    children: [
-                      _buildEditableDetailRow(
-                        context,
-                        'Dose',
-                        '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                        onEdit: _quickEditDose,
-                      ),
-                      _buildEditableDetailRow(
-                        context,
-                        'Times',
-                        _getTimesText(),
-                        onEdit: _quickEditTimes,
-                      ),
-                      _buildDetailRow(context, 'Days', _getDaysText()),
-                      _buildDetailRow(
-                        context,
-                        'Started',
-                        DateFormat('MMM d, yyyy').format(widget.schedule.createdAt),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Recent activity
-                  _buildExpandedSection(
-                    context,
-                    title: 'Recent Activity',
-                    children: [
-                      _buildRecentDoses(),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Quick actions
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if (widget.schedule.active) ...[
-                        _buildActionButton(
-                          context,
-                          label: 'Take Now',
-                          icon: Icons.check_circle,
-                          color: Colors.green,
-                          onPressed: _takeDoseNow,
-                        ),
-                        _buildActionButton(
-                          context,
-                          label: 'Skip',
-                          icon: Icons.block,
-                          color: Colors.grey,
-                          onPressed: _skipDose,
-                        ),
-                        _buildActionButton(
-                          context,
-                          label: 'Snooze',
-                          icon: Icons.snooze,
-                          color: Colors.orange,
-                          onPressed: _snoozeDose,
-                        ),
-                        _buildActionButton(
-                          context,
-                          label: 'Pause',
-                          icon: Icons.pause_circle,
-                          color: Colors.blue,
-                          onPressed: _togglePause,
-                        ),
-                      ] else
-                        _buildActionButton(
-                          context,
-                          label: 'Resume',
-                          icon: Icons.play_circle,
-                          color: Colors.green,
-                          onPressed: _togglePause,
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
+          ),
+        ),
       ),
     );
+  }
+
+  // Premium info chip
+  Widget _buildInfoChip(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    bool isPrimary = false,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpacingM,
+        vertical: kSpacingS,
+      ),
+      decoration: BoxDecoration(
+        color: isPrimary
+            ? colorScheme.primaryContainer.withValues(alpha: kOpacityMediumLow)
+            : colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: kIconSizeSmall,
+            color: isPrimary
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: kSpacingXS),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: kFontWeightMedium,
+              color: isPrimary
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Primary action button
+  Widget _buildPrimaryAction(
+    BuildContext context, {
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.primary,
+      borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: kSpacingM),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: colorScheme.onPrimary,
+              fontWeight: kFontWeightSemiBold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Secondary action button
+  Widget _buildSecondaryAction(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+        child: Container(
+          padding: const EdgeInsets.all(kSpacingM),
+          child: Icon(
+            icon,
+            size: kIconSizeMedium,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatNextDoseShort(DateTime dt) {
+    final now = DateTime.now();
+    final diff = dt.difference(now);
+
+    if (diff.isNegative) {
+      return 'Overdue';
+    } else if (diff.inMinutes < 60) {
+      return 'in ${diff.inMinutes}m';
+    } else if (diff.inHours < 24) {
+      return DateFormat('h:mm a').format(dt);
+    } else if (diff.inDays == 1) {
+      return 'Tomorrow';
+    } else {
+      return DateFormat('EEE').format(dt);
+    }
   }
 
   Widget _buildExpandedSection(
@@ -292,9 +426,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         Text(
           title,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         const SizedBox(height: 8),
         ...children,
@@ -313,16 +447,18 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -346,16 +482,18 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
           InkWell(
@@ -376,53 +514,65 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   Widget _buildRecentDoses() {
     final logs = _getRecentLogs();
-    
+
     if (logs.isEmpty) {
       return Text(
         'No doses recorded yet',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              fontStyle: FontStyle.italic,
-            ),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+          fontStyle: FontStyle.italic,
+        ),
       );
     }
-    
+
     return Column(
       children: [
-        ...logs.take(3).map((log) => Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            children: [
-              Icon(
-                _getActionIcon(log.action),
-                size: 14,
-                color: _getActionColor(log.action),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${_formatLastTaken(log.actionTime)} • ${_getActionLabel(log.action)}',
-                  style: Theme.of(context).textTheme.bodySmall,
+        ...logs
+            .take(3)
+            .map(
+              (log) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      _getActionIcon(log.action),
+                      size: 14,
+                      color: _getActionColor(log.action),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${_formatLastTaken(log.actionTime)} • ${_getActionLabel(log.action)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                    if (log.notes != null && log.notes!.isNotEmpty)
+                      Icon(
+                        Icons.note_outlined,
+                        size: 12,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      ),
+                  ],
                 ),
               ),
-              if (log.notes != null && log.notes!.isNotEmpty)
-                Icon(
-                  Icons.note_outlined,
-                  size: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                ),
-            ],
-          ),
-        )),
+            ),
         if (logs.length > 3)
           TextButton(
-            onPressed: () => context.go('/schedules/${widget.schedule.id}'),
+            onPressed: () =>
+                context.push('/schedules/detail/${widget.schedule.id}'),
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: const Size(0, 0),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text('View all history →', style: TextStyle(fontSize: 12)),
+            child: const Text(
+              'View all history →',
+              style: TextStyle(fontSize: 12),
+            ),
           ),
       ],
     );
@@ -460,20 +610,17 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
     final now = DateTime.now();
     final weekAgo = now.subtract(const Duration(days: 7));
-    
-    final logs = repo.getByDateRange(weekAgo, now)
+
+    final logs = repo
+        .getByDateRange(weekAgo, now)
         .where((log) => log.scheduleId == widget.schedule.id)
         .toList();
-    
+
     final taken = logs.where((l) => l.action == DoseAction.taken).length;
     final total = logs.length;
     final rate = total > 0 ? (taken / total) * 100 : 0.0;
-    
-    return {
-      'taken': taken,
-      'total': total,
-      'rate': rate,
-    };
+
+    return {'taken': taken, 'total': total, 'rate': rate};
   }
 
   List<DoseLog> _getRecentLogs() {
@@ -486,7 +633,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   String _formatNextDose(DateTime dt) {
     final now = DateTime.now();
     final diff = dt.difference(now);
-    
+
     if (diff.inMinutes < 60) {
       return 'in ${diff.inMinutes}m';
     } else if (diff.inHours < 24) {
@@ -503,7 +650,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   String _formatLastTaken(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    
+
     if (diff.inMinutes < 60) {
       return '${diff.inMinutes} min ago';
     } else if (diff.inHours < 24) {
@@ -532,19 +679,23 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       return 'Every day';
     } else {
       final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      final days = widget.schedule.daysOfWeek.map((d) => dayNames[d - 1]).join(', ');
+      final days = widget.schedule.daysOfWeek
+          .map((d) => dayNames[d - 1])
+          .join(', ');
       return days;
     }
   }
 
   String _getTimesText() {
     if (widget.schedule.hasMultipleTimes) {
-      final times = widget.schedule.timesOfDay!.map((m) {
-        final hour = m ~/ 60;
-        final minute = m % 60;
-        final dt = DateTime(0, 0, 0, hour, minute);
-        return DateFormat('h:mm a').format(dt);
-      }).join(', ');
+      final times = widget.schedule.timesOfDay!
+          .map((m) {
+            final hour = m ~/ 60;
+            final minute = m % 60;
+            final dt = DateTime(0, 0, 0, hour, minute);
+            return DateFormat('h:mm a').format(dt);
+          })
+          .join(', ');
       return times;
     } else {
       final hour = widget.schedule.minutesOfDay ~/ 60;
@@ -600,14 +751,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   // Action handlers
   void _takeDoseNow() async {
     final now = DateTime.now();
-    
+
     // Show quick confirmation dialog with notes option
     final result = await showDialog<Map<String, String?>>(
       context: context,
       builder: (context) {
         final notesController = TextEditingController();
         final siteController = TextEditingController();
-        
+
         return AlertDialog(
           title: const Text('Record Dose'),
           content: Column(
@@ -644,8 +795,12 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             FilledButton(
               onPressed: () {
                 Navigator.pop(context, {
-                  'notes': notesController.text.isEmpty ? null : notesController.text,
-                  'site': siteController.text.isEmpty ? null : siteController.text,
+                  'notes': notesController.text.isEmpty
+                      ? null
+                      : notesController.text,
+                  'site': siteController.text.isEmpty
+                      ? null
+                      : siteController.text,
                 });
               },
               child: const Text('Record'),
@@ -654,11 +809,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         );
       },
     );
-    
+
     if (result != null && mounted) {
       // Create dose log
       final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
-      
+
       // Combine notes and injection site
       String? combinedNotes = result['notes'];
       if (result['site'] != null && result['site']!.isNotEmpty) {
@@ -668,7 +823,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           combinedNotes = 'Injection site: ${result['site']}';
         }
       }
-      
+
       final log = DoseLog(
         id: logId,
         scheduleId: widget.schedule.id,
@@ -681,21 +836,25 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         action: DoseAction.taken,
         notes: combinedNotes,
       );
-      
+
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
-      
+
       // Update medication stock
       final medBox = Hive.box<Medication>('medications');
       final currentMed = medBox.get(widget.medication.id);
       if (currentMed != null) {
-        final newStockValue = (currentMed.stockValue - widget.schedule.doseValue).clamp(0.0, double.infinity);
+        final newStockValue =
+            (currentMed.stockValue - widget.schedule.doseValue).clamp(
+              0.0,
+              double.infinity,
+            );
         await medBox.put(
           currentMed.id,
           currentMed.copyWith(stockValue: newStockValue),
         );
       }
-      
+
       if (mounted) {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(
@@ -717,12 +876,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   void _skipDose() async {
     final now = DateTime.now();
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Skip Dose'),
-        content: Text('Skip ${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}?'),
+        content: Text(
+          'Skip ${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -730,15 +891,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.grey,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.grey),
             child: const Text('Skip'),
           ),
         ],
       ),
     );
-    
+
     if (confirmed == true && mounted) {
       final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
       final log = DoseLog(
@@ -752,10 +911,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         doseUnit: widget.schedule.doseUnit,
         action: DoseAction.skipped,
       );
-      
+
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
-      
+
       if (mounted) {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(
@@ -770,7 +929,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   void _snoozeDose() async {
     final now = DateTime.now();
-    
+
     final snoozeDuration = await showDialog<Duration>(
       context: context,
       builder: (context) => AlertDialog(
@@ -800,7 +959,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         ),
       ),
     );
-    
+
     if (snoozeDuration != null && mounted) {
       final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
       final log = DoseLog(
@@ -815,17 +974,19 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         action: DoseAction.snoozed,
         notes: 'Snoozed for ${snoozeDuration.inMinutes} minutes',
       );
-      
+
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
-      
+
       // TODO: Schedule notification for snooze time
-      
+
       if (mounted) {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Dose snoozed for ${snoozeDuration.inMinutes} minutes'),
+            content: Text(
+              'Dose snoozed for ${snoozeDuration.inMinutes} minutes',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -855,12 +1016,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       timesOfDayUtc: widget.schedule.timesOfDayUtc,
     );
     scheduleBox.put(widget.schedule.id, updated);
-    
+
     if (mounted) {
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(updated.active ? 'Schedule resumed' : 'Schedule paused'),
+          content: Text(
+            updated.active ? 'Schedule resumed' : 'Schedule paused',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -875,7 +1038,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         final controller = TextEditingController(
           text: _formatNumber(widget.schedule.doseValue),
         );
-        
+
         return AlertDialog(
           title: const Text('Edit Dose Amount'),
           content: Column(
@@ -888,7 +1051,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                   suffixText: widget.schedule.doseUnit,
                   border: const OutlineInputBorder(),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 autofocus: true,
               ),
               const SizedBox(height: 8),
@@ -897,7 +1062,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      final current = double.tryParse(controller.text) ?? widget.schedule.doseValue;
+                      final current =
+                          double.tryParse(controller.text) ??
+                          widget.schedule.doseValue;
                       final newValue = (current - 0.5).clamp(0.1, 1000.0);
                       controller.text = _formatNumber(newValue);
                     },
@@ -905,7 +1072,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                   ),
                   IconButton(
                     onPressed: () {
-                      final current = double.tryParse(controller.text) ?? widget.schedule.doseValue;
+                      final current =
+                          double.tryParse(controller.text) ??
+                          widget.schedule.doseValue;
                       final newValue = (current + 0.5).clamp(0.1, 1000.0);
                       controller.text = _formatNumber(newValue);
                     },
@@ -933,7 +1102,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         );
       },
     );
-    
+
     if (result != null && result != widget.schedule.doseValue && mounted) {
       final scheduleBox = Hive.box<Schedule>('schedules');
       final updated = Schedule(
@@ -956,11 +1125,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         timesOfDayUtc: widget.schedule.timesOfDayUtc,
       );
       scheduleBox.put(widget.schedule.id, updated);
-      
+
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Dose updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}'),
+          content: Text(
+            'Dose updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -970,7 +1141,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   void _quickEditTimes() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Time editing coming soon. Use the edit button to modify times.'),
+        content: Text(
+          'Time editing coming soon. Use the edit button to modify times.',
+        ),
         behavior: SnackBarBehavior.floating,
       ),
     );

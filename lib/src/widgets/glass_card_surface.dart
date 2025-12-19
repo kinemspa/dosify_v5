@@ -19,33 +19,12 @@ class GlassCardSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final borderRadius = BorderRadius.circular(kBorderRadiusLarge);
 
     final card = Container(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        color: useGradient ? null : cs.surface.withValues(alpha: 0.95),
-        gradient: useGradient
-            ? LinearGradient(
-                colors: [
-                  cs.surface.withValues(alpha: 0.92),
-                  cs.primary.withValues(alpha: 0.08),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: cs.shadow.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
+      decoration: buildStandardCardDecoration(
+        context: context,
+        useGradient: useGradient,
       ),
       child: Padding(padding: const EdgeInsets.all(kCardPadding), child: child),
     );

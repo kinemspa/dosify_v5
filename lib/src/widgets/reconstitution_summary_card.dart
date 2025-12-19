@@ -67,17 +67,8 @@ class ReconstitutionSummaryCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header: "Multi-Dose Vial: Reconstitution" aligned left
-          Text(
-            'Multi-Dose Vial: Reconstitution',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w700,
-              fontSize: compact ? 12 : 14,
-            ),
-          ),
-          SizedBox(height: compact ? 8 : 12),
-          // Center the rest of the content
+          // Removed "Multi-Dose Vial: Reconstitution" header per user request
+          // Centered content
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -91,7 +82,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
               ],
-              // Medication strength and name with "Reconstituted" prefix and fluid
+              // New format: "Reconstituted X of MedName with ReconVolume of ReconFluidName"
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
@@ -113,7 +104,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: '  of  ',
+                      text: ' of ',
                       style: TextStyle(
                         fontSize: compact ? 12 : 14,
                         color: Colors.white.withValues(
@@ -130,9 +121,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    if (reconFluidName != null && reconFluidName!.isNotEmpty)
+                    if (reconFluidName != null && reconFluidName!.isNotEmpty && containerVolumeMl != null) ...[
                       TextSpan(
-                        text: '\nwith $reconFluidName',
+                        text: '\nwith ',
                         style: TextStyle(
                           fontSize: compact ? 11 : 13,
                           color: Colors.white.withValues(
@@ -141,6 +132,25 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      TextSpan(
+                        text: '${_formatNoTrailing(containerVolumeMl!)} mL',
+                        style: TextStyle(
+                          fontSize: compact ? 11 : 13,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' of $reconFluidName',
+                        style: TextStyle(
+                          fontSize: compact ? 11 : 13,
+                          color: Colors.white.withValues(
+                            alpha: kReconTextHighOpacity,
+                          ),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

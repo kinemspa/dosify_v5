@@ -786,6 +786,8 @@ class _AddSingleDoseVialWizardPageState
 
   @override
   Future<void> saveMedication() async {
+    print('DEBUG SDV: saveMedication called');
+    
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -808,68 +810,83 @@ class _AddSingleDoseVialWizardPageState
       ),
     );
 
+    print('DEBUG SDV: confirmed = $confirmed');
     if (confirmed != true) return;
 
-    final repo = ref.read(medicationRepositoryProvider);
-    final id = widget.initial?.id ?? _newId();
-    final concentration =
-        double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
-    final volume = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
-    final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-    final previous = widget.initial;
-    final initialStock = previous == null
-        ? stock
-        : (stock > previous.stockValue
-              ? stock
-              : (previous.initialStockValue ?? previous.stockValue));
+    try {
+      final repo = ref.read(medicationRepositoryProvider);
+      final id = widget.initial?.id ?? _newId();
+      final concentration =
+          double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
+      final volume = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
+      final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
+      final previous = widget.initial;
+      final initialStock = previous == null
+          ? stock
+          : (stock > previous.stockValue
+                ? stock
+                : (previous.initialStockValue ?? previous.stockValue));
 
-    final storageInstructions = [
-      if (_requiresFridge) 'Refrigerate (2-8°C)',
-      if (_requiresFreezer) 'Keep frozen',
-      if (_protectLight) 'Protect from light',
-    ].join('. ');
+      final storageInstructions = [
+        if (_requiresFridge) 'Refrigerate (2-8°C)',
+        if (_requiresFreezer) 'Keep frozen',
+        if (_protectLight) 'Protect from light',
+      ].join('. ');
 
-    final med = Medication(
-      id: id,
-      form: MedicationForm.singleDoseVial,
-      name: _nameCtrl.text.trim(),
-      manufacturer: _manufacturerCtrl.text.trim().isEmpty
-          ? null
-          : _manufacturerCtrl.text.trim(),
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
-      strengthValue: concentration,
-      strengthUnit: _concentrationUnit,
-      volumePerDose: volume,
-      volumeUnit: _volumeUnit,
-      stockValue: stock,
-      stockUnit: StockUnit.singleDoseVials,
-      initialStockValue: initialStock,
-      lowStockEnabled: _lowStockEnabled,
-      lowStockThreshold: _lowStockEnabled
-          ? double.tryParse(_lowStockThresholdCtrl.text.trim())
-          : null,
-      expiry: _expiry,
-      batchNumber: _batchCtrl.text.trim().isEmpty
-          ? null
-          : _batchCtrl.text.trim(),
-      storageLocation: _storageLocationCtrl.text.trim().isEmpty
-          ? null
-          : _storageLocationCtrl.text.trim(),
-      requiresRefrigeration: _requiresFridge,
-      storageInstructions: storageInstructions.isEmpty
-          ? null
-          : storageInstructions,
-    );
+      print('DEBUG SDV: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume');
+      
+      final med = Medication(
+        id: id,
+        form: MedicationForm.singleDoseVial,
+        name: _nameCtrl.text.trim(),
+        manufacturer: _manufacturerCtrl.text.trim().isEmpty
+            ? null
+            : _manufacturerCtrl.text.trim(),
+        description: _descriptionCtrl.text.trim().isEmpty
+            ? null
+            : _descriptionCtrl.text.trim(),
+        strengthValue: concentration,
+        strengthUnit: _concentrationUnit,
+        volumePerDose: volume,
+        volumeUnit: _volumeUnit,
+        stockValue: stock,
+        stockUnit: StockUnit.singleDoseVials,
+        initialStockValue: initialStock,
+        lowStockEnabled: _lowStockEnabled,
+        lowStockThreshold: _lowStockEnabled
+            ? double.tryParse(_lowStockThresholdCtrl.text.trim())
+            : null,
+        expiry: _expiry,
+        batchNumber: _batchCtrl.text.trim().isEmpty
+            ? null
+            : _batchCtrl.text.trim(),
+        storageLocation: _storageLocationCtrl.text.trim().isEmpty
+            ? null
+            : _storageLocationCtrl.text.trim(),
+        requiresRefrigeration: _requiresFridge,
+        storageInstructions: storageInstructions.isEmpty
+            ? null
+            : storageInstructions,
+      );
 
-    await repo.upsert(med);
+      print('DEBUG SDV: Saving medication...');
+      await repo.upsert(med);
+      print('DEBUG SDV: Save successful!');
 
-    if (mounted) {
-      if (widget.initial != null) {
-        context.pop();
-      } else {
-        context.go('/medications');
+      if (mounted) {
+        if (widget.initial != null) {
+          context.pop();
+        } else {
+          context.go('/medications');
+        }
+      }
+    } catch (e, stack) {
+      print('DEBUG SDV: ERROR during save: $e');
+      print('DEBUG SDV: Stack: $stack');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving: $e'), backgroundColor: Colors.red),
+        );
       }
     }
   }

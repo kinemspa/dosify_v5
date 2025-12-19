@@ -149,21 +149,22 @@ const BorderRadius kStandardBorderRadius = BorderRadius.all(kStandardRadius);
 // COLOR & OPACITY CONSTANTS
 // ============================================================================
 
-/// Text opacity levels
-const double kOpacityFull = 1.0;
-const double kOpacityHigh = 1.0; // Increased to full black
-const double kOpacityMediumHigh = 0.90; // Increased from 0.70
-const double kOpacityMedium = 0.80; // Increased from 0.60
-const double kOpacityMediumLow = 0.70; // Increased from 0.50
-const double kOpacityLow = 0.60; // Increased from 0.40
-const double kOpacityVeryLow = 0.50; // Increased from 0.35
-const double kOpacityMinimal = 0.40; // Increased from 0.25
+/// Text opacity levels - IMPORTANT: Max darkness should result in ~#343434
+/// On white background with pure black text: 0.80 opacity ≈ #343434
+const double kOpacityFull = 0.80; // Maximum text darkness (#343434)
+const double kOpacityHigh = 0.80; // Primary text (same as full)
+const double kOpacityMediumHigh = 0.70; // Important secondary text
+const double kOpacityMedium = 0.60; // Standard body text
+const double kOpacityMediumLow = 0.50; // Helper/support text
+const double kOpacityLow = 0.40; // Hint text, disabled states
+const double kOpacityVeryLow = 0.30; // Very subtle text
+const double kOpacityMinimal = 0.20; // Almost invisible
 
 /// Specific use case opacity
-const double kHelperTextOpacity = kOpacityMedium;
+const double kHelperTextOpacity = kOpacityMediumLow;
 const double kDisabledOpacity = kOpacityLow;
 const double kCardBorderOpacity = kOpacityLow;
-const double kHintTextOpacity = kOpacityMediumLow;
+const double kHintTextOpacity = kOpacityLow;
 
 /// Reconstitution calculator opacity (white text on dark background)
 const double kReconTextHighOpacity = 0.90; // Selected option details
@@ -205,6 +206,50 @@ const double kReconErrorOpacity = 0.15;
 /// Medication Detail Gradient
 const Color kMedicationDetailGradientStart = Color(0xFF09A8BD);
 const Color kMedicationDetailGradientEnd = Color(0xFF18537D);
+
+// ============================================================================
+// CARD STYLING (Centralized)
+// ============================================================================
+
+/// Standard card shadow for all cards on light backgrounds
+const double kCardShadowOpacity = 0.08;
+const double kCardShadowBlurRadius = 24.0;
+const Offset kCardShadowOffset = Offset(0, 8);
+
+/// Builds a standard card decoration with consistent styling across the app.
+/// Use this for all cards displayed on light backgrounds.
+BoxDecoration buildStandardCardDecoration({
+  required BuildContext context,
+  bool useGradient = false,
+  double borderRadius = kBorderRadiusLarge,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(borderRadius),
+    color: useGradient ? null : cs.surface,
+    gradient: useGradient
+        ? LinearGradient(
+            colors: [
+              cs.surface.withValues(alpha: 0.92),
+              cs.primary.withValues(alpha: 0.08),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : null,
+    border: Border.all(
+      color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+      width: kBorderWidthThin,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: cs.shadow.withValues(alpha: kCardShadowOpacity),
+        blurRadius: kCardShadowBlurRadius,
+        offset: kCardShadowOffset,
+      ),
+    ],
+  );
+}
 
 /// Color helper functions (NEVER use these - use theme colors)
 /// These are kept only for backward compatibility during migration

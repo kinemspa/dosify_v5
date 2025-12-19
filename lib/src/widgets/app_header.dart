@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:go_router/go_router.dart';
 
+// Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
+
 /// Simplified, unified app header with clean design
-/// - Lighter, more subtle gradient
+/// - Uses consistent gradient colors with medication detail page
 /// - No popup menu (use bottom navigation instead)
 /// - Consistent elevation and styling
 class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -23,7 +26,6 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final showBack = Navigator.of(context).canPop() || forceBackButton;
-    final theme = Theme.of(context);
     
     return AppBar(
       automaticallyImplyLeading: false,
@@ -31,13 +33,13 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       foregroundColor: Colors.white,
       flexibleSpace: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              theme.colorScheme.primary,
-              theme.colorScheme.primaryContainer,
+              kMedicationDetailGradientStart, // Use same colors as medication detail
+              kMedicationDetailGradientEnd,
             ],
           ),
         ),
@@ -69,3 +71,4 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+

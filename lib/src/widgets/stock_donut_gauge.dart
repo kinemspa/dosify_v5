@@ -17,6 +17,7 @@ class StockDonutGauge extends StatelessWidget {
     this.showGlow = true,
     this.isOutline = false,
     this.labelStyle,
+    this.strokeWidth,
   });
 
   /// Percentage remaining, in the range 0–100.
@@ -40,6 +41,9 @@ class StockDonutGauge extends StatelessWidget {
   /// Whether to render as an outline (thin borders) instead of a filled arc.
   final bool isOutline;
   final TextStyle? labelStyle;
+  
+  /// Custom stroke width for the donut arc. If null, defaults based on size.
+  final double? strokeWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -76,20 +80,25 @@ class StockDonutGauge extends StatelessWidget {
               baseColor:
                   backgroundColor ??
                   cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+              // Arc stays primary color
               fillColor: color ?? cs.primary,
               isOutline: isOutline,
+              strokeWidth: strokeWidth,
             ),
           ),
-          // Center label (percentage only).
+          // Center label (percentage) - color changes based on stock level
           Text(
             primaryLabel,
             style:
                 labelStyle ??
                 Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: kFontWeightExtraBold,
-                  color:
-                      textColor ??
-                      cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+                  // Text color changes based on stock level
+                  color: textColor ?? (clamped <= 0 
+                      ? cs.error  // Empty: red
+                      : clamped < 20 
+                          ? Colors.orange  // Low: orange
+                          : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh)),
                 ),
           ),
         ],
@@ -182,19 +191,19 @@ class DualStockDonutGauge extends StatelessWidget {
               isOutline: isOutline,
             ),
           ),
-          // Inner ring (sealed/backup vials) – same thickness, smaller radius
+          // Inner ring (sealed/backup vials) – smaller size, no overlap
           CustomPaint(
-            size: const Size.square(76), // Smaller size for inner ring
+            size: const Size.square(70), // Balanced size for clear separation
             painter: _StockDonutPainter(
               fraction: innerFraction,
               baseColor:
                   backgroundColor?.withValues(alpha: 0.5) ??
                   cs.outlineVariant.withValues(alpha: kCardBorderOpacity * 0.6),
               fillColor: effectiveColor.withValues(
-                alpha: 0.4,
-              ), // Low opacity primary color
+                alpha: 0.7,
+              ), // Higher opacity for visibility
               isOutline: isOutline,
-              strokeWidth: 10.0,
+              strokeWidth: 6.0, // Thinner stroke for smaller ring
             ),
           ),
           // Centre label.

@@ -27,7 +27,8 @@ class AddEditSchedulePage extends ConsumerStatefulWidget {
   final Schedule? initial;
 
   @override
-  ConsumerState<AddEditSchedulePage> createState() => _AddEditSchedulePageState();
+  ConsumerState<AddEditSchedulePage> createState() =>
+      _AddEditSchedulePageState();
 }
 
 class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
@@ -53,7 +54,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
     _medicationName = TextEditingController(text: s?.medicationName ?? '');
     _doseValue = TextEditingController(text: s?.doseValue.toString() ?? '');
     _doseUnit = TextEditingController(text: s?.doseUnit ?? 'mg');
-    
+
     // Cycle defaults
     final n = s?.cycleEveryNDays ?? 2;
     _cycleN = TextEditingController(text: n.toString());
@@ -77,7 +78,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
     _daysOn.removeListener(_onCycleChanged);
     _daysOff.removeListener(_onCycleChanged);
     _cycleN.removeListener(_onCycleChanged);
-    
+
     _name.dispose();
     _medicationName.dispose();
     _doseValue.dispose();
@@ -94,14 +95,15 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
 
   void _onDoseChanged() {
     final val = double.tryParse(_doseValue.text.trim()) ?? 0;
-    ref.read(scheduleFormProvider(widget.initial).notifier).updateDose(val, _doseUnit.text);
+    ref
+        .read(scheduleFormProvider(widget.initial).notifier)
+        .updateDose(val, _doseUnit.text);
   }
-  
+
   void _onCycleChanged() {
     final on = int.tryParse(_daysOn.text.trim()) ?? 5;
     final off = int.tryParse(_daysOff.text.trim()) ?? 2;
-    final n = int.tryParse(_cycleN.text.trim()) ?? 2;
-    
+
     final notifier = ref.read(scheduleFormProvider(widget.initial).notifier);
     notifier.setDaysOn(on);
     notifier.setDaysOff(off);
@@ -111,22 +113,23 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
   }
 
   Future<void> _pickTimeAt(int index, TimeOfDay current) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: current,
-    );
+    final picked = await showTimePicker(context: context, initialTime: current);
     if (picked != null) {
-      ref.read(scheduleFormProvider(widget.initial).notifier).updateTime(index, picked);
+      ref
+          .read(scheduleFormProvider(widget.initial).notifier)
+          .updateTime(index, picked);
     }
   }
 
   void _pickMedication(Medication selected) {
-    ref.read(scheduleFormProvider(widget.initial).notifier).setMedication(selected);
+    ref
+        .read(scheduleFormProvider(widget.initial).notifier)
+        .setMedication(selected);
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     final state = ref.read(scheduleFormProvider(widget.initial));
     final notifier = ref.read(scheduleFormProvider(widget.initial).notifier);
 
@@ -217,7 +220,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
 
     try {
       await notifier.save(widget.initial);
-      
+
       if (!mounted) return;
       await showDialog<void>(
         context: context,
@@ -264,24 +267,26 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
 
     // Listen for state changes that should update text fields
     ref.listen(scheduleFormProvider(widget.initial), (previous, next) {
-      if (previous?.doseUnit != next.doseUnit && _doseUnit.text != next.doseUnit) {
+      if (previous?.doseUnit != next.doseUnit &&
+          _doseUnit.text != next.doseUnit) {
         _doseUnit.text = next.doseUnit;
       }
       if (previous?.doseValue != next.doseValue) {
         final currentVal = double.tryParse(_doseValue.text) ?? 0;
         if ((currentVal - next.doseValue).abs() > 0.001) {
-           _doseValue.text = next.doseValue == next.doseValue.roundToDouble() 
-               ? next.doseValue.toStringAsFixed(0) 
-               : next.doseValue.toString();
+          _doseValue.text = next.doseValue == next.doseValue.roundToDouble()
+              ? next.doseValue.toStringAsFixed(0)
+              : next.doseValue.toString();
         }
       }
       if (previous?.name != next.name && next.nameAuto) {
-         // Only update name if it's auto-generated
-         if (_name.text != next.name) {
-           _name.text = next.name;
-         }
+        // Only update name if it's auto-generated
+        if (_name.text != next.name) {
+          _name.text = next.name;
+        }
       }
-      if (previous?.medicationName != next.medicationName && _medicationName.text != next.medicationName) {
+      if (previous?.medicationName != next.medicationName &&
+          _medicationName.text != next.medicationName) {
         _medicationName.text = next.medicationName;
       }
     });
@@ -333,9 +338,16 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
       floatingActionButton: SizedBox(
         width: 120,
         child: FilledButton(
-          onPressed: state.isSaving ? null : _save, 
-          child: state.isSaving 
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+          onPressed: state.isSaving ? null : _save,
+          child: state.isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
               : const Text('Save'),
         ),
       ),
@@ -351,16 +363,17 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                   // Medication row with label
                   LabelFieldRow(
                     label: 'Medication',
-                    field: state.selectedMed != null || state.medicationId != null
+                    field:
+                        state.selectedMed != null || state.medicationId != null
                         ? _MedicationSummaryDisplay(
                             medicationName: state.medicationName,
                             onClear: () {
-                               // We need a clear method in controller or just setMedication to null?
-                               // Controller doesn't have clear method yet, but we can implement it or just ignore for now as the original code allowed clearing.
-                               // Actually, original code: _selectedMed = null; _medicationId = null; _medicationName.clear();
-                               // We should probably add clearMedication to controller.
-                               // For now, let's just toggle selector.
-                               notifier.toggleMedSelector();
+                              // We need a clear method in controller or just setMedication to null?
+                              // Controller doesn't have clear method yet, but we can implement it or just ignore for now as the original code allowed clearing.
+                              // Actually, original code: _selectedMed = null; _medicationId = null; _medicationName.clear();
+                              // We should probably add clearMedication to controller.
+                              // For now, let's just toggle selector.
+                              notifier.toggleMedSelector();
                             },
                             onExpand: notifier.toggleMedSelector,
                             isExpanded: state.showMedSelector,
@@ -383,7 +396,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                           ),
                   ),
                   // Helper text
-                  _helperBelowLeft(context,
+                  _helperBelowLeft(
+                    context,
                     state.selectedMed == null && state.medicationId == null
                         ? 'Select a medication to schedule'
                         : 'Tap to change medication',
@@ -403,14 +417,24 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                   _section(context, 'Dose', [
                     DoseInputField(
                       medicationForm: state.selectedMed!.form,
-                      strengthPerUnitMcg: _getStrengthPerUnitMcg(state.selectedMed),
-                      volumePerUnitMicroliter: _getVolumePerUnitMicroliter(state.selectedMed),
+                      strengthPerUnitMcg: _getStrengthPerUnitMcg(
+                        state.selectedMed,
+                      ),
+                      volumePerUnitMicroliter: _getVolumePerUnitMicroliter(
+                        state.selectedMed,
+                      ),
                       strengthUnit: _getStrengthUnit(state.selectedMed),
                       // MDV-specific parameters
-                      totalVialStrengthMcg: _getTotalVialStrengthMcg(state.selectedMed),
-                      totalVialVolumeMicroliter:
-                          _getTotalVialVolumeMicroliter(state.selectedMed),
-                      syringeType: _getSyringeType(state.selectedMed, state.selectedSyringeType),
+                      totalVialStrengthMcg: _getTotalVialStrengthMcg(
+                        state.selectedMed,
+                      ),
+                      totalVialVolumeMicroliter: _getTotalVialVolumeMicroliter(
+                        state.selectedMed,
+                      ),
+                      syringeType: _getSyringeType(
+                        state.selectedMed,
+                        state.selectedSyringeType,
+                      ),
                       // Initial values from existing schedule or defaults
                       initialStrengthMcg: _getInitialStrengthMcg(),
                       initialTabletCount: _getInitialTabletCount(),
@@ -426,20 +450,25 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                           // Actually DoseInputField doesn't take controllers, it takes initial values and calls onDoseChanged.
                           // So we need to update our controllers/state.
                           _doseValue.text = result.doseMassMcg.toString();
-                          _doseUnit.text = 'mcg'; 
+                          _doseUnit.text = 'mcg';
                         }
                       },
                     ),
                     const SizedBox(height: 12),
                     // Helper for dose input - moved below
-                    _helperBelowLeft(context, _getDoseHelperText(state.selectedMed)),
+                    _helperBelowLeft(
+                      context,
+                      _getDoseHelperText(state.selectedMed),
+                    ),
                     const SizedBox(height: 8),
                     // Syringe size selector for MDV
                     if (state.selectedMed!.form == MedicationForm.multiDoseVial)
                       LabelFieldRow(
                         label: 'Syringe Size',
                         field: DropdownButtonFormField<SyringeType>(
-                          value: state.selectedSyringeType ?? _getSyringeType(state.selectedMed, null),
+                          value:
+                              state.selectedSyringeType ??
+                              _getSyringeType(state.selectedMed, null),
                           decoration: buildFieldDecoration(
                             context,
                             hint: 'Select syringe size',
@@ -454,14 +483,18 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                         ),
                       ),
                     if (state.selectedMed!.form == MedicationForm.multiDoseVial)
-                      _helperBelowLeft(context,
+                      _helperBelowLeft(
+                        context,
                         'Choose the syringe size for drawing from the vial',
                       ),
                     if (state.selectedMed!.form == MedicationForm.multiDoseVial)
                       const SizedBox(height: 8),
                     // Week 5: Show reconstitution info if available
                     if (_getReconstitutionHelper(state.selectedMed).isNotEmpty)
-                      _helperBelowLeft(context, _getReconstitutionHelper(state.selectedMed)),
+                      _helperBelowLeft(
+                        context,
+                        _getReconstitutionHelper(state.selectedMed),
+                      ),
                   ]),
                 const SizedBox(height: 10),
                 if (state.selectedMed != null || state.medicationId != null)
@@ -488,7 +521,10 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                             },
                           ),
                         ),
-                        _helperBelowLeft(context, _getScheduleModeDescription(state.mode)),
+                        _helperBelowLeft(
+                          context,
+                          _getScheduleModeDescription(state.mode),
+                        ),
                         // 2. Select start date
                         LabelFieldRow(
                           label: 'Start date',
@@ -503,7 +539,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                                   lastDate: DateTime(now.year + 10),
                                   initialDate: state.startDate,
                                 );
-                                if (picked != null) notifier.setStartDate(picked);
+                                if (picked != null)
+                                  notifier.setStartDate(picked);
                               },
                               icon: const Icon(Icons.calendar_today, size: 18),
                               label: Text(
@@ -515,7 +552,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                             ),
                           ),
                         ),
-                        _helperBelowLeft(context,
+                        _helperBelowLeft(
+                          context,
                           'Select when this schedule should start',
                         ),
                         // 3. Select days/months based on mode
@@ -558,7 +596,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                                     vertical: 2,
                                   ),
                                   selected: selected,
-                                  onSelected: (_) => notifier.toggleDay(dayIndex),
+                                  onSelected: (_) =>
+                                      notifier.toggleDay(dayIndex),
                                 );
                               }),
                             ),
@@ -617,12 +656,16 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                               ),
                             ),
                           ),
-                          _helperBelowLeft(context,
+                          _helperBelowLeft(
+                            context,
                             'Take doses for specified days on, then stop for days off. Cycle repeats continuously.',
                           ),
                         ],
                         if (state.mode == ScheduleMode.daysOfMonth) ...[
-                          _helperBelowLeft(context, 'Select days of the month (1-31)'),
+                          _helperBelowLeft(
+                            context,
+                            'Select days of the month (1-31)',
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Wrap(
@@ -630,7 +673,9 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                               runSpacing: 6,
                               children: List.generate(31, (i) {
                                 final day = i + 1;
-                                final selected = state.daysOfMonth.contains(day);
+                                final selected = state.daysOfMonth.contains(
+                                  day,
+                                );
                                 return FilterChip(
                                   label: Text(
                                     '$day',
@@ -651,7 +696,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                                     vertical: 2,
                                   ),
                                   selected: selected,
-                                  onSelected: (_) => notifier.toggleDayOfMonth(day),
+                                  onSelected: (_) =>
+                                      notifier.toggleDayOfMonth(day),
                                 );
                               }),
                             ),
@@ -667,14 +713,17 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children: List.generate(state.times.length, (i) {
+                                children: List.generate(state.times.length, (
+                                  i,
+                                ) {
                                   return Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Field36(
                                         width: 120,
                                         child: FilledButton.icon(
-                                          onPressed: () => _pickTimeAt(i, state.times[i]),
+                                          onPressed: () =>
+                                              _pickTimeAt(i, state.times[i]),
                                           icon: const Icon(
                                             Icons.schedule,
                                             size: 18,
@@ -694,7 +743,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                                       if (state.times.length > 1)
                                         IconButton(
                                           tooltip: 'Remove',
-                                          onPressed: () => notifier.removeTime(i),
+                                          onPressed: () =>
+                                              notifier.removeTime(i),
                                           visualDensity: VisualDensity.compact,
                                           icon: const Icon(
                                             Icons.remove_circle_outline,
@@ -707,14 +757,18 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                               ),
                               const SizedBox(height: 8),
                               OutlinedButton.icon(
-                                onPressed: () => notifier.addTime(state.times.last),
+                                onPressed: () =>
+                                    notifier.addTime(state.times.last),
                                 icon: const Icon(Icons.add),
                                 label: const Text('Add time'),
                               ),
                             ],
                           ),
                         ),
-                        _helperBelowLeft(context, 'Add one or more dosing times'),
+                        _helperBelowLeft(
+                          context,
+                          'Add one or more dosing times',
+                        ),
                         // 5. Select end date
                         LabelFieldRow(
                           label: 'End date',
@@ -731,7 +785,9 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                                             context: context,
                                             firstDate: DateTime(now.year - 1),
                                             lastDate: DateTime(now.year + 10),
-                                            initialDate: state.endDate ?? state.startDate,
+                                            initialDate:
+                                                state.endDate ??
+                                                state.startDate,
                                           );
                                           if (picked != null) {
                                             notifier.setEndDate(picked);
@@ -759,7 +815,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                             ],
                           ),
                         ),
-                        _helperBelowLeft(context,
+                        _helperBelowLeft(
+                          context,
                           'Optional end date (or leave as No end)',
                         ),
                       ],
@@ -783,7 +840,9 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
             top: 0,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: IgnorePointer(child: _buildFloatingSummary(context, state)),
+              child: IgnorePointer(
+                child: _buildFloatingSummary(context, state),
+              ),
             ),
           ),
         ],
@@ -842,7 +901,10 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
   };
 
   /// Builds the schedule description for the summary card
-  String? _buildScheduleDescription(BuildContext context, ScheduleFormState state) {
+  String? _buildScheduleDescription(
+    BuildContext context,
+    ScheduleFormState state,
+  ) {
     final med = state.selectedMed;
     if (med == null) return null;
 
@@ -1073,8 +1135,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
   }
 
   double? _getTotalVialStrengthMcg(Medication? med) {
-    if (med == null ||
-        med.form != MedicationForm.multiDoseVial) {
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
       return null;
     }
 
@@ -1096,8 +1157,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
   }
 
   double? _getTotalVialVolumeMicroliter(Medication? med) {
-    if (med == null ||
-        med.form != MedicationForm.multiDoseVial) {
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
       return null;
     }
 
@@ -1106,8 +1166,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
   }
 
   SyringeType? _getSyringeType(Medication? med, SyringeType? selected) {
-    if (med == null ||
-        med.form != MedicationForm.multiDoseVial) {
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
       return null;
     }
 

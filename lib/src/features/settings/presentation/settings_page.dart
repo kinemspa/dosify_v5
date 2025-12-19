@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class SettingsPage extends ConsumerWidget {
