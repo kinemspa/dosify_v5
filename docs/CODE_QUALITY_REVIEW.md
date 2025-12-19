@@ -456,7 +456,7 @@ lib/
 - [Dart Code Metrics](https://dartcodemetrics.dev/)
 - [Effective Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
 - [Flutter Architecture Samples](https://fluttersamples.com/)
-- [WARP.md](./WARP.md) - Project development guide
+- [WARP.md](./archive/WARP.md) - Project development guide
 
 ---
 

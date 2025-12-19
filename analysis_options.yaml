@@ -60,6 +60,8 @@ analyzer:
     use_named_constants: ignore
   exclude:
     - build/**
+    - FutterTestMcp/**
+    - mcp_flutter/**
     - "**/*.g.dart"
     - "**/*.freezed.dart"
 
