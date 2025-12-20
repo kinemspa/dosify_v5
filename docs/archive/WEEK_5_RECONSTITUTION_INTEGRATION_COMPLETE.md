@@ -181,7 +181,7 @@ Frequency: Daily
 ## Next Steps
 
 ### Week 6-10: Remaining Work
-According to SCHEDULE_FLOW_PLAN.md:
+Originally planned:
 - **Week 6**: Notification System (Polish & Bug Fixes)
 - **Week 7-8**: Calendar System (MVP Launch Prep)
 - **Week 9**: Testing & Polish

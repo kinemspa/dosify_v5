@@ -71,7 +71,7 @@
 - **Benefit**: Users can input whichever value is most natural
 
 ### 2. Always-Visible 3-Value Display
-- **Why**: Per SCHEDULE_FLOW_PLAN.md - "This is the killer feature"
+- **Why**: This is the core MDV UX: users must be able to confirm strength ↔ volume ↔ units at a glance.
 - **How**: Separate display showing all three values with bullets
 - **Benefit**: Visual confirmation of all three conversions
 
@@ -161,7 +161,7 @@ DoseInputField(
 - Auto-populate DoseInputField from reconstituted vial data
 - Handle vial expiry warnings
 
-### Weeks 6-10: Per SCHEDULE_FLOW_PLAN.md
+### Weeks 6-10: Original plan
 - Week 6: Notifications (grouping + actions)
 - Weeks 7-8: Calendar views
 - Week 9: Testing

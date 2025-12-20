@@ -278,7 +278,7 @@ The syringe graphic is now fully interactive, allowing users to:
 - **See** real-time updates in all three displays
 - **Feel** a natural, visual dose adjustment experience
 
-This completes the "killer feature" mentioned in the SCHEDULE_FLOW_PLAN.md:
+This completes the core MDV UX goal:
 > "This is the killer feature - precision dosing with visual feedback"
 
 **Test Coverage**: 12/12 MDV tests passing (100%)  

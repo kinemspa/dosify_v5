@@ -71,6 +71,28 @@ Medications module (unified architecture)
 - Shared components: unified_form.dart widgets, MedEditorTemplate, reconstitution calculator
 - Design spec reference: docs/product-design.md
 
+Medication inventory rules (implementation)
+- For count-based meds (tablets/capsules/PFS/single-dose vials): inventory decrements directly from `stockValue`.
+- For Multi-Dose Vials (MDV):
+  - `activeVialVolume` is the primary tracking target (mL remaining in the currently open vial).
+  - `stockValue` represents reserve sealed vials (count).
+  - When a draw drives `activeVialVolume <= 0`, the app should “open” a new vial (decrement reserve count and reset/add volume based on vial capacity).
+  - Legacy migration: if `form == MDV` and `activeVialVolume == null`, treat the old `stockValue` as active mL (and reserve count as 0) to avoid showing “0 mL”.
+
+Syringe terminology (UX + correctness)
+- Use **units (U)** for syringe markings (e.g., U-100 insulin syringes). Avoid labeling syringe markings as “IU” in UI; IU describes medication potency and can be misleading.
+
+Reconstitution calculator math (reference)
+- Concentration: $C = S / V_{add}$ (e.g., mg/mL or IU/mL)
+- Volume per dose: $V_{dose} = D / C$
+- Syringe markings are derived from volume (mL), not IU; only coincide at specific concentrations (e.g., U-100).
+
+Reconstitution calculator critical rules
+- Strength and dose must use the same unit (mg/mcg/g/IU); do not implicitly mix units.
+- IU (potency) is not the same thing as syringe markings (volume); they only coincide at special concentrations (e.g., U-100).
+- This calculator is for powder vials requiring reconstitution; pre-filled solutions should use their existing concentration.
+- Changes to reconstitution math should be treated as safety-critical: validate against known examples and do not modify without review.
+
 Conventions
 - Use package: imports for files under lib/
 - Keep sections ordered: General → Strength → Inventory → Storage
@@ -112,6 +134,11 @@ Notifications (architecture and delivery)
   - test_alarm (Max) for diagnostics with short delays
 
 Schedules Module Enhancements
+- Schedule dose entry rules (high-level)
+  - Schedule names should be auto-generated from dose + medication name, but user-editable.
+  - Tablet doses support quarter increments (0.25); capsule doses are whole numbers.
+  - Dose entry should show a summary that includes both discrete units and total strength when applicable (e.g., tablets + mg).
+  - Persist typed dose fields (e.g., mcg, microliters, tablet quarters) to keep calculations consistent across screens.
 - **Medication Selector Redesign**: Replaced navigation-based card selector with inline expandable UI
   - _MedicationSummaryDisplay widget shows selected medication details inline
   - _InlineMedicationSelector provides scrollable medication list (max 400px height)

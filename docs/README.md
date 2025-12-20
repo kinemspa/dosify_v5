@@ -19,6 +19,5 @@ This folder is the canonical home for project documentation.
 
 ## Archive
 - Historical progress notes that used to live at repo root: `archive/`
-- Legacy specs/plans/reviews moved out of the docs root: `archive/legacy/`
 - Screenshots/assets used for docs: `assets/`
 - Audit outputs: `audits/`
