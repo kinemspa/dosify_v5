@@ -40,7 +40,7 @@ import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 /// - Visual stock progress indicators
 /// - Clean sectioned information display
 /// - Responsive layout for all screen sizes
-const double _kDetailHeaderExpandedHeight = 280; // Keep header size consistent
+const double _kDetailHeaderExpandedHeight = 250; // Keep header size consistent (reduced empty space)
 const double _kDetailHeaderCollapsedHeight = 56;
 
 class MedicationDetailPage extends ConsumerStatefulWidget {
@@ -190,7 +190,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                   kPageHorizontalPadding,
                                   4, // Reduced from 12
                                   kPageHorizontalPadding,
-                                  kSpacingS,
+                                  kSpacingXS,
                                 ),
                                 child: MedicationHeaderWidget(
                                   medication: updatedMed,
