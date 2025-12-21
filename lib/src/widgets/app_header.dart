@@ -26,6 +26,17 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final showBack = Navigator.of(context).canPop() || forceBackButton;
+    final isSettings = title.trim().toLowerCase() == 'settings';
+
+    final effectiveActions = <Widget>[
+      ...?actions,
+      if (!isSettings)
+        IconButton(
+          tooltip: 'Settings',
+          icon: const Icon(Icons.settings),
+          onPressed: () => context.push('/settings'),
+        ),
+    ];
     
     return AppBar(
       automaticallyImplyLeading: false,
@@ -64,7 +75,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
           letterSpacing: 0.5,
         ),
       ),
-      actions: actions,
+      actions: effectiveActions,
     );
   }
 

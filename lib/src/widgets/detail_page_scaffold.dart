@@ -1,6 +1,9 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:go_router/go_router.dart';
+
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 
@@ -38,6 +41,11 @@ class DetailPageScaffold extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
+              IconButton(
+                tooltip: 'Settings',
+                icon: const Icon(Icons.settings, color: Colors.white),
+                onPressed: () => context.push('/settings'),
+              ),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 onSelected: (value) async {
