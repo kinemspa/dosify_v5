@@ -18,6 +18,5 @@ This folder is the canonical home for project documentation.
 - Linting: `engineering/linting.md`
 
 ## Archive
-- Historical progress notes that used to live at repo root: `archive/`
 - Screenshots/assets used for docs: `assets/`
 - Audit outputs: `audits/`

@@ -50,7 +50,7 @@ If you need analyzer/test output again, regenerate locally (`flutter analyze`, `
 ## Moved into docs/
 
 These were tracked progress notes that cluttered the repo root but are still useful as history:
-- Moved to `docs/archive/`:
+- Previously moved to `docs/archive/` (since removed as part of consolidation):
   - `CONSISTENCY_FIXES_COMPLETE.md`
   - `DOSE_RECORDING_ENHANCEMENTS.md`
   - `MEDICATION_PAGES_AUDIT.md`
