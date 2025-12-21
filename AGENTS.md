@@ -104,3 +104,15 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 - **Rule**: After applying a UI change, explicitly verify that:
     - The target change is correct.
     - **Surrounding elements** (headers, footers, adjacent cards) have NOT changed style, order, or content.
+
+---
+
+# Task Tracking Workflow (User_Requests.md)
+
+`User_Requests.md` is the single running task sheet for work requests.
+
+- **Always read `User_Requests.md` before starting new work**, unless the user explicitly provides a different task list in the prompt.
+- **When a task is implemented**, mark it as completed in `User_Requests.md` by appending ` [COMPLETED]` to the end of the bullet.
+- **Do not delete tasks** from `User_Requests.md` (the user will confirm completion or delete them).
+- **If the user says a task is not completed as desired**, the user will remove the `[COMPLETED]` label and may add notes; treat that as the authoritative re-opened requirement.
+- **Keep edits minimal**: only touch the specific bullets you completed and do not rewrite sections or reformat the file.
