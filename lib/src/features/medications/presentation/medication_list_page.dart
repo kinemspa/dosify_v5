@@ -36,6 +36,49 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   String _query = '';
   bool _searchExpanded = false;
 
+  ({int fieldPriority, int startsWithPriority, int indexPriority})
+  _searchRelevanceKey(Medication m, String qLower) {
+    final name = m.name.toLowerCase();
+    final manufacturer = (m.manufacturer ?? '').toLowerCase();
+    final description = (m.description ?? '').toLowerCase();
+
+    // Lower tuple values are higher priority.
+    // Field priority: name -> manufacturer -> description.
+    // Within a field: startsWith beats contains; earlier index beats later.
+    if (name.contains(qLower)) {
+      final idx = name.indexOf(qLower);
+      return (
+        fieldPriority: 0,
+        startsWithPriority: name.startsWith(qLower) ? 0 : 1,
+        indexPriority: idx < 0 ? 9999 : idx,
+      );
+    }
+    if (manufacturer.contains(qLower)) {
+      final idx = manufacturer.indexOf(qLower);
+      return (
+        fieldPriority: 1,
+        startsWithPriority: manufacturer.startsWith(qLower) ? 0 : 1,
+        indexPriority: idx < 0 ? 9999 : idx,
+      );
+    }
+    if (description.contains(qLower)) {
+      final idx = description.indexOf(qLower);
+      return (
+        fieldPriority: 2,
+        startsWithPriority: description.startsWith(qLower) ? 0 : 1,
+        indexPriority: idx < 0 ? 9999 : idx,
+      );
+    }
+
+    return (fieldPriority: 999, startsWithPriority: 1, indexPriority: 9999);
+  }
+
+  bool _matchesSearchQuery(Medication m, String qLower) {
+    return m.name.toLowerCase().contains(qLower) ||
+        (m.manufacturer ?? '').toLowerCase().contains(qLower) ||
+        (m.description ?? '').toLowerCase().contains(qLower);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -346,9 +389,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
     // Apply search filter
     if (_query.isNotEmpty) {
-      items = items
-          .where((m) => m.name.toLowerCase().contains(_query.toLowerCase()))
-          .toList();
+      final qLower = _query.toLowerCase();
+      items = items.where((m) => _matchesSearchQuery(m, qLower)).toList();
     }
 
     // Apply category filter
@@ -375,21 +417,41 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
     // Apply sorting
     int dir(int v) => _sortAsc ? v : -v;
-    switch (_sortBy) {
-      case _SortBy.name:
-        items.sort((a, b) => dir(a.name.compareTo(b.name)));
-      case _SortBy.stock:
-        items.sort((a, b) => dir(a.stockValue.compareTo(b.stockValue)));
-      case _SortBy.strength:
-        items.sort((a, b) => dir(a.strengthValue.compareTo(b.strengthValue)));
-      case _SortBy.expiry:
-        items.sort((a, b) {
+
+    int compareBySelectedSort(Medication a, Medication b) {
+      switch (_sortBy) {
+        case _SortBy.name:
+          return dir(a.name.compareTo(b.name));
+        case _SortBy.stock:
+          return dir(a.stockValue.compareTo(b.stockValue));
+        case _SortBy.strength:
+          return dir(a.strengthValue.compareTo(b.strengthValue));
+        case _SortBy.expiry:
           if (a.expiry == null && b.expiry == null) return 0;
           if (a.expiry == null) return dir(1);
           if (b.expiry == null) return dir(-1);
           return dir(a.expiry!.compareTo(b.expiry!));
-        });
+      }
     }
+
+    items.sort((a, b) {
+      if (_query.isNotEmpty) {
+        final qLower = _query.toLowerCase();
+        final ak = _searchRelevanceKey(a, qLower);
+        final bk = _searchRelevanceKey(b, qLower);
+        final byField = ak.fieldPriority.compareTo(bk.fieldPriority);
+        if (byField != 0) return byField;
+        final byStartsWith = ak.startsWithPriority.compareTo(
+          bk.startsWithPriority,
+        );
+        if (byStartsWith != 0) return byStartsWith;
+        final byIndex = ak.indexPriority.compareTo(bk.indexPriority);
+        if (byIndex != 0) return byIndex;
+      }
+      final bySelectedSort = compareBySelectedSort(a, b);
+      if (bySelectedSort != 0) return bySelectedSort;
+      return a.name.compareTo(b.name);
+    });
 
     return items;
   }
@@ -427,14 +489,14 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
       return theme.colorScheme.error;
     }
-    return theme.colorScheme.onSurface;
+    return theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh);
   }
 
   TextSpan _stockStatusTextSpanFor(BuildContext context, Medication m) {
     final theme = Theme.of(context);
     final baseStyle = theme.textTheme.bodySmall?.copyWith(
       fontWeight: FontWeight.w600,
-      color: theme.colorScheme.onSurface,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
     );
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
 
@@ -502,9 +564,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     if (m.manufacturer?.isNotEmpty ?? false)
                       TextSpan(
                         text: '  •  ${m.manufacturer!}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                        style: helperTextStyle(context),
                       ),
                   ],
                 ),
@@ -614,23 +674,23 @@ class _MedCard extends StatelessWidget {
                     m.manufacturer ?? 'Medication',
                     style: theme.textTheme.labelSmall?.copyWith(
                       letterSpacing: 1.1,
-                      color: cs.onSurfaceVariant,
+                      color: cs.onSurface.withValues(alpha: kOpacityMediumLow),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     m.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: cardTitleStyle(
+                      context,
+                    )?.copyWith(fontWeight: FontWeight.w800),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: kFieldSpacing),
                   Text(
                     '${stockInfo.label} · $strengthAndFormLabel',
-                    style: theme.textTheme.bodySmall,
+                    style: helperTextStyle(context),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

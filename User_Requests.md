@@ -12,8 +12,8 @@
 
 ## Medication Screen
 - Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better.
-- Search - Needs to prioritise Medname first, then Manufacturer, then description.
-- Seacrh results font is too dark. 
+- Search - Needs to prioritise Medname first, then Manufacturer, then description. [COMPLETED]
+- Seacrh results font is too dark.  [COMPLETED]
 
 ### Large Cards
 - Large Cards are a bit too spacious, how can we compact them a bit. 
