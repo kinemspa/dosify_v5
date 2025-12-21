@@ -279,49 +279,52 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                     GestureDetector(
                                       onTap: () =>
                                           _editName(context, updatedMed),
-                                      child: Row(
+                                      child: Column(
                                         mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Flexible(
-                                            child: Text(
-                                              updatedMed.name,
-                                              style: TextStyle(
-                                                color: onPrimary,
-                                                fontSize: lerpDouble(22, 17, t),
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
+                                          Text(
+                                            updatedMed.name,
+                                            style: TextStyle(
+                                              color: onPrimary,
+                                              fontSize: lerpDouble(22, 17, t),
+                                              fontWeight: FontWeight.w600,
                                             ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 1,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: onPrimary.withValues(
-                                                alpha: 0.2,
+                                          if (t < 0.8) ...[
+                                            const SizedBox(height: kSpacingXS),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 6,
+                                                vertical: 1,
                                               ),
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                              border: Border.all(
+                                              decoration: BoxDecoration(
                                                 color: onPrimary.withValues(
-                                                  alpha: 0.3,
+                                                  alpha: 0.2,
                                                 ),
-                                                width: 0.5,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                                border: Border.all(
+                                                  color: onPrimary.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                  width: 0.5,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                _formLabel(updatedMed.form),
+                                                style: TextStyle(
+                                                  color: onPrimary,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                               ),
                                             ),
-                                            child: Text(
-                                              _formLabel(updatedMed.form),
-                                              style: TextStyle(
-                                                color: onPrimary,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
+                                          ],
                                         ],
                                       ),
                                     ),
