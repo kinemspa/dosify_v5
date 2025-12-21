@@ -677,13 +677,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               SizedBox(
-                height: 100,
-                width: 100,
+                height: kMedicationDetailDonutSize,
+                width: kMedicationDetailDonutSize,
                 child: hasBackup
                     ? DualStockDonutGauge(
                         outerPercentage: pct,
                         innerPercentage: backupPct,
                         primaryLabel: primaryLabel,
+                        size: kMedicationDetailDonutSize,
                         color: gaugeColor,
                         backgroundColor: onPrimary.withValues(
                           alpha: 0.05,
@@ -691,10 +692,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         textColor: onPrimary,
                         showGlow: false,
                         isOutline: false,
+                        outerStrokeWidth: kMedicationDetailDonutStrokeWidth,
+                        innerStrokeWidth:
+                            kMedicationDetailDonutInnerStrokeWidth,
                       )
                     : StockDonutGauge(
                         percentage: pct,
                         primaryLabel: primaryLabel,
+                        size: kMedicationDetailDonutSize,
                         color: gaugeColor,
                         backgroundColor: onPrimary.withValues(
                           alpha: 0.05,
@@ -702,6 +707,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         textColor: onPrimary,
                         showGlow: false,
                         isOutline: false,
+                        strokeWidth: kMedicationDetailDonutStrokeWidth,
                       ),
               ),
               const SizedBox(height: 4),

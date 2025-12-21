@@ -797,15 +797,6 @@ class _MedCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  m.manufacturer?.trim().isNotEmpty == true
-                      ? m.manufacturer!.trim()
-                      : 'Medication',
-                  style: helperTextStyle(context)?.copyWith(letterSpacing: 1.1),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: kSpacingXS),
-                Text(
                   m.name,
                   style: cardTitleStyle(
                     context,
@@ -813,6 +804,15 @@ class _MedCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (m.manufacturer?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    m.manufacturer!.trim(),
+                    style: helperTextStyle(context),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 const SizedBox(height: kSpacingXS),
                 Text(
                   '${stockInfo.label} · $strengthAndFormLabel',

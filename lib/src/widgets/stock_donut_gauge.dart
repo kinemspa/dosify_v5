@@ -11,6 +11,7 @@ class StockDonutGauge extends StatelessWidget {
     super.key,
     required this.percentage,
     required this.primaryLabel,
+    this.size,
     this.color,
     this.backgroundColor,
     this.textColor,
@@ -25,6 +26,11 @@ class StockDonutGauge extends StatelessWidget {
 
   /// Main label inside the donut (e.g. `12` or `450 mL`).
   final String primaryLabel;
+
+  /// Square size of the donut gauge.
+  ///
+  /// Defaults to [kStockDonutGaugeSize].
+  final double? size;
 
   /// Color of the progress arc.
   final Color? color;
@@ -50,10 +56,11 @@ class StockDonutGauge extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final clamped = percentage.clamp(0, 100);
     final fraction = clamped / 100.0;
+    final gaugeSize = size ?? kStockDonutGaugeSize;
 
     return SizedBox(
-      width: 96,
-      height: 96,
+      width: gaugeSize,
+      height: gaugeSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -74,7 +81,7 @@ class StockDonutGauge extends StatelessWidget {
             ),
           // Donut ring.
           CustomPaint(
-            size: const Size.square(96),
+            size: Size.square(gaugeSize),
             painter: _StockDonutPainter(
               fraction: fraction,
               baseColor:
@@ -97,7 +104,7 @@ class StockDonutGauge extends StatelessWidget {
                   color: textColor ?? (clamped <= 0 
                       ? cs.error  // Empty: red
                       : clamped < 20 
-                          ? Colors.orange  // Low: orange
+                          ? cs.tertiary  // Low: warning
                           : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh)),
                 ),
           ),
@@ -118,12 +125,15 @@ class DualStockDonutGauge extends StatelessWidget {
     required this.outerPercentage,
     required this.innerPercentage,
     required this.primaryLabel,
+    this.size,
     this.color,
     this.backgroundColor,
     this.textColor,
     this.showGlow = true,
     this.isOutline = false,
     this.labelStyle,
+    this.outerStrokeWidth,
+    this.innerStrokeWidth,
   });
 
   /// Outer ring percentage (e.g. active vial volume), 0–100.
@@ -134,6 +144,11 @@ class DualStockDonutGauge extends StatelessWidget {
 
   /// Main label in the centre (typically the active vial percentage).
   final String primaryLabel;
+
+  /// Square size of the donut gauge.
+  ///
+  /// Defaults to [kStockDonutGaugeSize].
+  final double? size;
 
   /// Color of the outer progress arc.
   final Color? color;
@@ -151,16 +166,22 @@ class DualStockDonutGauge extends StatelessWidget {
   final bool isOutline;
   final TextStyle? labelStyle;
 
+  /// Optional custom stroke widths.
+  final double? outerStrokeWidth;
+  final double? innerStrokeWidth;
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final outerFraction = outerPercentage.clamp(0, 100) / 100.0;
     final innerFraction = innerPercentage.clamp(0, 100) / 100.0;
     final effectiveColor = color ?? cs.primary;
+    final gaugeSize = size ?? kStockDonutGaugeSize;
+    final innerSize = gaugeSize * kDualStockDonutInnerScale;
 
     return SizedBox(
-      width: 96,
-      height: 96,
+      width: gaugeSize,
+      height: gaugeSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -181,7 +202,7 @@ class DualStockDonutGauge extends StatelessWidget {
             ),
           // Outer ring (active vial).
           CustomPaint(
-            size: const Size.square(96),
+            size: Size.square(gaugeSize),
             painter: _StockDonutPainter(
               fraction: outerFraction,
               baseColor:
@@ -189,11 +210,12 @@ class DualStockDonutGauge extends StatelessWidget {
                   cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
               fillColor: effectiveColor,
               isOutline: isOutline,
+              strokeWidth: outerStrokeWidth,
             ),
           ),
           // Inner ring (sealed/backup vials) – smaller size, no overlap
           CustomPaint(
-            size: const Size.square(70), // Balanced size for clear separation
+            size: Size.square(innerSize),
             painter: _StockDonutPainter(
               fraction: innerFraction,
               baseColor:
@@ -203,7 +225,8 @@ class DualStockDonutGauge extends StatelessWidget {
                 alpha: 0.7,
               ), // Higher opacity for visibility
               isOutline: isOutline,
-              strokeWidth: 6.0, // Thinner stroke for smaller ring
+              strokeWidth:
+                  innerStrokeWidth ?? kDualStockDonutInnerStrokeWidth,
             ),
           ),
           // Centre label.

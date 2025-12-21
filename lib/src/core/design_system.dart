@@ -61,6 +61,16 @@ const double kIconSizeLarge = 24;
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
 
+/// Stock donut gauge sizing
+const double kStockDonutGaugeSize = 96;
+const double kDualStockDonutInnerScale = 0.73;
+const double kDualStockDonutInnerStrokeWidth = 6.0;
+
+/// Medication details header gauge sizing
+const double kMedicationDetailDonutSize = 112;
+const double kMedicationDetailDonutStrokeWidth = 14.0;
+const double kMedicationDetailDonutInnerStrokeWidth = 7.0;
+
 /// Calendar component sizing
 const double kCalendarDayHeight =
     60; // Height of day cell in month view (reduced from 80)
