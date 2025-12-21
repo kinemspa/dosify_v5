@@ -19,6 +19,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
     required this.onRefill,
     this.onAdHocDose,
     this.hasSchedules = false,
+    this.crossAxisAlignment = CrossAxisAlignment.stretch,
     super.key,
   });
 
@@ -26,6 +27,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
   final VoidCallback onRefill;
   final VoidCallback? onAdHocDose;
   final bool hasSchedules;
+  final CrossAxisAlignment crossAxisAlignment;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,7 +54,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
         : null;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: crossAxisAlignment,
       children: [
         Expanded(
           flex: 6,

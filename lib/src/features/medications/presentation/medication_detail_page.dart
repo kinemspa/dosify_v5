@@ -58,6 +58,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
   bool _isDetailsExpanded = true; // Collapsible state for details card
 
+  double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
+  final GlobalKey _headerMeasureKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -70,8 +73,31 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     super.dispose();
   }
 
+  void _scheduleHeaderHeightMeasurement(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final renderObject = _headerMeasureKey.currentContext?.findRenderObject();
+      if (renderObject is! RenderBox || !renderObject.hasSize) return;
+
+      final measuredHeight = renderObject.size.height;
+      final desired = measuredHeight.clamp(
+        _kDetailHeaderExpandedHeight,
+        double.infinity,
+      );
+
+      if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0) {
+        setState(() {
+          _measuredExpandedHeaderHeight = desired;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _scheduleHeaderHeightMeasurement(context);
+
     final box = Hive.box<Medication>('medications');
     final med =
         widget.initial ??
@@ -122,7 +148,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final hasSchedules = scheduleBox.values.any(
             (s) => s.medicationId == updatedMed.id && s.active,
           );
-          final headerHeight = _kDetailHeaderExpandedHeight;
+          final headerHeight = _measuredExpandedHeaderHeight;
 
           // Calculate scroll progress for title opacity
           final offset = _scrollController.hasClients
@@ -131,277 +157,319 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final maxOffset = headerHeight - _kDetailHeaderCollapsedHeight;
           final scrollProgress = (offset / maxOffset).clamp(0.0, 1.0);
 
-          return CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              // Combined AppBar and Stats Banner in one SliverAppBar
-              SliverAppBar(
-                toolbarHeight: _kDetailHeaderCollapsedHeight,
-                expandedHeight: headerHeight,
-                collapsedHeight: _kDetailHeaderCollapsedHeight,
-                floating: false,
-                pinned: true,
-                backgroundColor: Colors.transparent,
-                foregroundColor: onPrimary,
-                iconTheme: IconThemeData(color: onPrimary),
-                actionsIconTheme: IconThemeData(color: onPrimary),
-                elevation: 0,
-                flexibleSpace: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final top = MediaQuery.of(context).padding.top;
-                    final collapsedHeight = _kDetailHeaderCollapsedHeight + top;
-                    final expandedHeight = headerHeight;
-                    final currentHeight = constraints.maxHeight;
-                    final scrollOffset = expandedHeight - currentHeight;
+          return Stack(
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  // Combined AppBar and Stats Banner in one SliverAppBar
+                  SliverAppBar(
+                    toolbarHeight: _kDetailHeaderCollapsedHeight,
+                    expandedHeight: headerHeight,
+                    collapsedHeight: _kDetailHeaderCollapsedHeight,
+                    floating: false,
+                    pinned: true,
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: onPrimary,
+                    iconTheme: IconThemeData(color: onPrimary),
+                    actionsIconTheme: IconThemeData(color: onPrimary),
+                    elevation: 0,
+                    flexibleSpace: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final top = MediaQuery.of(context).padding.top;
+                        final collapsedHeight =
+                            _kDetailHeaderCollapsedHeight + top;
+                        final expandedHeight = headerHeight;
+                        final currentHeight = constraints.maxHeight;
+                        final scrollOffset = expandedHeight - currentHeight;
 
-                    // t goes from 0.0 (expanded) to 1.0 (collapsed)
-                    final t =
-                        (1.0 -
-                                (currentHeight - collapsedHeight) /
-                                    (expandedHeight - collapsedHeight))
-                            .clamp(0.0, 1.0);
+                        // t goes from 0.0 (expanded) to 1.0 (collapsed)
+                        final t =
+                            (1.0 -
+                                    (currentHeight - collapsedHeight) /
+                                        (expandedHeight - collapsedHeight))
+                                .clamp(0.0, 1.0);
 
-                    return Stack(
-                      children: [
-                        // Gradient Background
-                        Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                kMedicationDetailGradientStart,
-                                kMedicationDetailGradientEnd,
-                              ],
-                            ),
-                          ),
-                        ),
-                        // Content (minus Name)
-                        Positioned(
-                          top: -scrollOffset,
-                          left: 0,
-                          right: 0,
-                          height:
-                              expandedHeight, // Fix: Ensure header has finite height for layout
-                          child: Opacity(
-                            opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
-                            child: SafeArea(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  kPageHorizontalPadding,
-                                  4, // Reduced from 12
-                                  kPageHorizontalPadding,
-                                  kSpacingXS,
-                                ),
-                                child: MedicationHeaderWidget(
-                                  medication: updatedMed,
-                                  onRefill: () =>
-                                      _showRefillDialog(context, updatedMed),
-                                  onAdHocDose: () =>
-                                      _showAdHocDoseDialog(context, updatedMed),
-                                  hasSchedules: Hive.box<Schedule>('schedules')
-                                      .values
-                                      .any(
-                                        (s) =>
-                                            s.medicationId == updatedMed.id &&
-                                            s.active,
-                                      ),
+                        return Stack(
+                          children: [
+                            // Gradient Background
+                            Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    kMedicationDetailGradientStart,
+                                    kMedicationDetailGradientEnd,
+                                  ],
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                        // Animated Name & Manufacturer
-                        Positioned(
-                          top: lerpDouble(
-                            top + 48,
-                            top + (_kDetailHeaderCollapsedHeight - 26) / 2,
-                            t,
-                          ),
-                          left: lerpDouble(kPageHorizontalPadding, 0, t),
-                          right: lerpDouble(
-                            120,
-                            0,
-                            t,
-                          ), // Constrain width when expanded
-                          child: Align(
-                            alignment: Alignment.lerp(
-                              Alignment.centerLeft,
-                              Alignment.center,
-                              t,
-                            )!,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => _editName(context, updatedMed),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          updatedMed.name,
-                                          style: TextStyle(
-                                            color: onPrimary,
-                                            fontSize: lerpDouble(22, 17, t),
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                            // Content (minus Name)
+                            Positioned(
+                              top: -scrollOffset,
+                              left: 0,
+                              right: 0,
+                              height:
+                                  expandedHeight, // Ensure header has finite height for layout
+                              child: Opacity(
+                                opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
+                                child: SafeArea(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      kPageHorizontalPadding,
+                                      4, // Reduced from 12
+                                      kPageHorizontalPadding,
+                                      kSpacingXS,
+                                    ),
+                                    child: MedicationHeaderWidget(
+                                      medication: updatedMed,
+                                      onRefill: () => _showRefillDialog(
+                                        context,
+                                        updatedMed,
                                       ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 1,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: onPrimary.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                          border: Border.all(
-                                            color: onPrimary.withValues(
-                                              alpha: 0.3,
-                                            ),
-                                            width: 0.5,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          _formLabel(updatedMed.form),
-                                          style: TextStyle(
-                                            color: onPrimary,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
+                                      onAdHocDose: () => _showAdHocDoseDialog(
+                                        context,
+                                        updatedMed,
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                if (updatedMed.manufacturer != null &&
-                                    updatedMed.manufacturer!.isNotEmpty &&
-                                    t < 0.5)
-                                  GestureDetector(
-                                    onTap: () =>
-                                        _editManufacturer(context, updatedMed),
-                                    child: Opacity(
-                                      opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(top: 1),
-                                        child: Text(
-                                          updatedMed.manufacturer!,
-                                          style: TextStyle(
-                                            color: onPrimary.withValues(
-                                              alpha: 0.7,
-                                            ),
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.w400,
-                                            letterSpacing: 0.2,
-                                          ),
-                                        ),
-                                      ),
+                                      hasSchedules: hasSchedules,
                                     ),
                                   ),
-                              ],
+                                ),
+                              ),
                             ),
-                          ),
+                            // Animated Name & Manufacturer
+                            Positioned(
+                              top: lerpDouble(
+                                top + 48,
+                                top + (_kDetailHeaderCollapsedHeight - 26) / 2,
+                                t,
+                              ),
+                              left: lerpDouble(kPageHorizontalPadding, 0, t),
+                              right: lerpDouble(
+                                120,
+                                0,
+                                t,
+                              ), // Constrain width when expanded
+                              child: Align(
+                                alignment: Alignment.lerp(
+                                  Alignment.centerLeft,
+                                  Alignment.center,
+                                  t,
+                                )!,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () =>
+                                          _editName(context, updatedMed),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              updatedMed.name,
+                                              style: TextStyle(
+                                                color: onPrimary,
+                                                fontSize: lerpDouble(22, 17, t),
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 1,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: onPrimary.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              border: Border.all(
+                                                color: onPrimary.withValues(
+                                                  alpha: 0.3,
+                                                ),
+                                                width: 0.5,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              _formLabel(updatedMed.form),
+                                              style: TextStyle(
+                                                color: onPrimary,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (updatedMed.manufacturer != null &&
+                                        updatedMed.manufacturer!.isNotEmpty &&
+                                        t < 0.5)
+                                      GestureDetector(
+                                        onTap: () => _editManufacturer(
+                                          context,
+                                          updatedMed,
+                                        ),
+                                        child: Opacity(
+                                          opacity: (1.0 - t * 2.0).clamp(
+                                            0.0,
+                                            1.0,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 1,
+                                            ),
+                                            child: Text(
+                                              updatedMed.manufacturer!,
+                                              style: TextStyle(
+                                                color: onPrimary.withValues(
+                                                  alpha: 0.7,
+                                                ),
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w400,
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => context.pop(),
+                    ),
+                    title: Opacity(
+                      opacity: (1.0 - scrollProgress * 3).clamp(0.0, 1.0),
+                      child: Text(
+                        'Medication Details',
+                        style: TextStyle(
+                          color: onPrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    );
-                  },
-                ),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pop(),
-                ),
-                title: Opacity(
-                  opacity: (1.0 - scrollProgress * 3).clamp(0.0, 1.0),
-                  child: Text(
-                    'Medication Details',
-                    style: TextStyle(
-                      color: onPrimary,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    centerTitle: true,
+                    actions: [
+                      // Menu button
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.menu),
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'home':
+                              context.go('/');
+                            case 'medications':
+                              context.go('/medications');
+                            case 'supplies':
+                              context.go('/supplies');
+                            case 'schedules':
+                              context.go('/schedules');
+                            case 'calendar':
+                              context.go('/calendar');
+                            case 'reconstitution':
+                              context.push('/medications/reconstitution');
+                            case 'analytics':
+                              context.go('/analytics');
+                            case 'settings':
+                              context.go('/settings');
+                          }
+                        },
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(value: 'home', child: Text('Home')),
+                          PopupMenuItem(
+                            value: 'medications',
+                            child: Text('Medications'),
+                          ),
+                          PopupMenuItem(
+                            value: 'supplies',
+                            child: Text('Supplies'),
+                          ),
+                          PopupMenuItem(
+                            value: 'schedules',
+                            child: Text('Schedules'),
+                          ),
+                          PopupMenuItem(
+                            value: 'calendar',
+                            child: Text('Calendar'),
+                          ),
+                          PopupMenuItem(
+                            value: 'reconstitution',
+                            child: Text('Reconstitution Calculator'),
+                          ),
+                          PopupMenuItem(
+                            value: 'analytics',
+                            child: Text('Analytics'),
+                          ),
+                          PopupMenuItem(
+                            value: 'settings',
+                            child: Text('Settings'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // Reconstitution Card (if applicable)
+                  if (updatedMed.form == MedicationForm.multiDoseVial)
+                    SliverToBoxAdapter(
+                      child: _buildReconstitutionCard(context, updatedMed),
+                    ),
+
+                  // Medication Reports Widget (History + Adherence tabs)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+                      child: MedicationReportsWidget(medication: updatedMed),
                     ),
                   ),
-                ),
-                centerTitle: true,
-                actions: [
-                  // Menu button
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.menu),
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'home':
-                          context.go('/');
-                        case 'medications':
-                          context.go('/medications');
-                        case 'supplies':
-                          context.go('/supplies');
-                        case 'schedules':
-                          context.go('/schedules');
-                        case 'calendar':
-                          context.go('/calendar');
-                        case 'reconstitution':
-                          context.push('/medications/reconstitution');
-                        case 'analytics':
-                          context.go('/analytics');
-                        case 'settings':
-                          context.go('/settings');
-                      }
-                    },
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(value: 'home', child: Text('Home')),
-                      PopupMenuItem(
-                        value: 'medications',
-                        child: Text('Medications'),
+
+                  // Unified Details Card
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100),
+                      child: _buildUnifiedDetailsCard(
+                        context,
+                        updatedMed,
+                        _nextDoseForMedication(updatedMed.id),
                       ),
-                      PopupMenuItem(value: 'supplies', child: Text('Supplies')),
-                      PopupMenuItem(
-                        value: 'schedules',
-                        child: Text('Schedules'),
-                      ),
-                      PopupMenuItem(value: 'calendar', child: Text('Calendar')),
-                      PopupMenuItem(
-                        value: 'reconstitution',
-                        child: Text('Reconstitution Calculator'),
-                      ),
-                      PopupMenuItem(
-                        value: 'analytics',
-                        child: Text('Analytics'),
-                      ),
-                      PopupMenuItem(value: 'settings', child: Text('Settings')),
-                    ],
+                    ),
                   ),
                 ],
               ),
-              // Reconstitution Card (if applicable)
-              if (updatedMed.form == MedicationForm.multiDoseVial)
-                SliverToBoxAdapter(
-                  child: _buildReconstitutionCard(context, updatedMed),
-                ),
 
-              // Medication Reports Widget (History + Adherence tabs)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-                  child: MedicationReportsWidget(medication: updatedMed),
-                ),
-              ),
-
-              // Unified Details Card
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100),
-                  child: _buildUnifiedDetailsCard(
-                    context,
-                    updatedMed,
-                    _nextDoseForMedication(updatedMed.id),
+              // Offstage measurement to make SliverAppBar height match content.
+              Offstage(
+                offstage: true,
+                child: SafeArea(
+                  child: Padding(
+                    key: _headerMeasureKey,
+                    padding: const EdgeInsets.fromLTRB(
+                      kPageHorizontalPadding,
+                      4,
+                      kPageHorizontalPadding,
+                      kSpacingXS,
+                    ),
+                    child: MedicationHeaderWidget(
+                      medication: updatedMed,
+                      onRefill: () {},
+                      onAdHocDose: () {},
+                      hasSchedules: hasSchedules,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
                   ),
                 ),
               ),
