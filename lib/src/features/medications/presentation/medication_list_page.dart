@@ -630,6 +630,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         ],
       );
     }
+
     return TextSpan(
       style: baseStyle,
       children: [
@@ -647,6 +648,91 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
+  Widget _buildCompactListRow(BuildContext context, Medication m) {
+    final cs = Theme.of(context).colorScheme;
+
+    final strengthLabel =
+        '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
+        '${MedicationDisplayHelpers.formLabel(m.form, plural: true)}';
+    final manufacturer = (m.manufacturer ?? '').trim();
+    final detailLabel = manufacturer.isEmpty
+        ? strengthLabel
+        : '$manufacturer · $strengthLabel';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.push('/medications/${m.id}'),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingS,
+            vertical: kSpacingXS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      m.name,
+                      style: cardTitleStyle(context)?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      detailLabel,
+                      style: helperTextStyle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RichText(
+                    text: _stockStatusTextSpanFor(context, m),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                  ),
+                  if (m.expiry != null) ...[
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      _formatDateDdMm(m.expiry!),
+                      style: helperTextStyle(
+                        context,
+                        color:
+                            (m.expiry!.isBefore(
+                              DateTime.now().add(const Duration(days: 30)),
+                            ))
+                            ? cs.error
+                            : cs.onSurface.withValues(alpha: kOpacityMediumLow),
+                      )?.copyWith(fontSize: kFontSizeSmall),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMedList(BuildContext context, List<Medication> items) {
     switch (_view) {
       case _MedView.list:
@@ -657,80 +743,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final m = items[index];
-            final strengthLabel =
-                '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
-                '${MedicationDisplayHelpers.formLabel(m.form, plural: true)}';
-            return ListTile(
-              dense: true,
-              visualDensity: VisualDensity.compact,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 0,
-              ),
-              title: RichText(
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  text: m.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  children: [
-                    if (m.manufacturer?.isNotEmpty ?? false)
-                      TextSpan(
-                        text: '  •  ${m.manufacturer!}',
-                        style: helperTextStyle(context),
-                      ),
-                  ],
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    strengthLabel,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: kTextLightGrey(context),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RichText(
-                          text: _stockStatusTextSpanFor(context, m),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (m.expiry != null)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Text(
-                            _formatDateDdMm(m.expiry!),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color:
-                                      (m.expiry!.isBefore(
-                                        DateTime.now().add(
-                                          const Duration(days: 30),
-                                        ),
-                                      ))
-                                      ? Theme.of(context).colorScheme.error
-                                      : kTextLightGrey(context),
-                                ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-              onTap: () => context.push('/medications/${m.id}'),
-            );
+            return _buildCompactListRow(context, m);
           },
         );
       case _MedView.compact:
