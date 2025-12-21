@@ -661,9 +661,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
                 '${MedicationDisplayHelpers.formLabel(m.form, plural: true)}';
             return ListTile(
+              dense: true,
+              visualDensity: VisualDensity.compact,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 8,
-                vertical: 4,
+                vertical: 0,
               ),
               title: RichText(
                 maxLines: 1,

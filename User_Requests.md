@@ -23,7 +23,7 @@
 - Need to be restyled to be more in line with the app style
 
 ### List
-- Make the list items less tall
+- Make the list items less tall [COMPLETED]
 
 ==============
 
