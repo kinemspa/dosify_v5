@@ -58,10 +58,12 @@ class MedicationHeaderWidget extends ConsumerWidget {
       children: [
         Expanded(
           flex: 6,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
               // Space for the animated Name
               const SizedBox(height: 48),
 
@@ -221,7 +223,8 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 ],
               ),
               // Adherence graph moved to MedicationReportsWidget
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 12),

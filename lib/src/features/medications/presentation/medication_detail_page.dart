@@ -214,8 +214,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                   expandedHeight, // Ensure header has finite height for layout
                               child: Builder(
                                 builder: (context) {
-                                  final headerOpacity =
-                                      (1.0 - t * 2.0).clamp(0.0, 1.0);
+                                  final headerOpacity = (1.0 - t * 2.0).clamp(
+                                    0.0,
+                                    1.0,
+                                  );
                                   if (headerOpacity <= 0.0) {
                                     return const SizedBox.shrink();
                                   }
@@ -236,10 +238,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             context,
                                             updatedMed,
                                           ),
-                                          onAdHocDose: () => _showAdHocDoseDialog(
-                                            context,
-                                            updatedMed,
-                                          ),
+                                          onAdHocDose: () =>
+                                              _showAdHocDoseDialog(
+                                                context,
+                                                updatedMed,
+                                              ),
                                           hasSchedules: hasSchedules,
                                         ),
                                       ),
@@ -464,21 +467,24 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               // Offstage measurement to make SliverAppBar height match content.
               Offstage(
                 offstage: true,
-                child: SafeArea(
-                  child: Padding(
-                    key: _headerMeasureKey,
-                    padding: const EdgeInsets.fromLTRB(
-                      kPageHorizontalPadding,
-                      4,
-                      kPageHorizontalPadding,
-                      kSpacingXS,
-                    ),
-                    child: MedicationHeaderWidget(
-                      medication: updatedMed,
-                      onRefill: () {},
-                      onAdHocDose: () {},
-                      hasSchedules: hasSchedules,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: SafeArea(
+                    child: Padding(
+                      key: _headerMeasureKey,
+                      padding: const EdgeInsets.fromLTRB(
+                        kPageHorizontalPadding,
+                        4,
+                        kPageHorizontalPadding,
+                        kSpacingXS,
+                      ),
+                      child: MedicationHeaderWidget(
+                        medication: updatedMed,
+                        onRefill: () {},
+                        onAdHocDose: () {},
+                        hasSchedules: hasSchedules,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
                     ),
                   ),
                 ),
