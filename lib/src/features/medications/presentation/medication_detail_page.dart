@@ -212,30 +212,40 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                               right: 0,
                               height:
                                   expandedHeight, // Ensure header has finite height for layout
-                              child: Opacity(
-                                opacity: (1.0 - t * 2.0).clamp(0.0, 1.0),
-                                child: SafeArea(
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      kPageHorizontalPadding,
-                                      4, // Reduced from 12
-                                      kPageHorizontalPadding,
-                                      kSpacingXS,
-                                    ),
-                                    child: MedicationHeaderWidget(
-                                      medication: updatedMed,
-                                      onRefill: () => _showRefillDialog(
-                                        context,
-                                        updatedMed,
+                              child: Builder(
+                                builder: (context) {
+                                  final headerOpacity =
+                                      (1.0 - t * 2.0).clamp(0.0, 1.0);
+                                  if (headerOpacity <= 0.0) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return Opacity(
+                                    opacity: headerOpacity,
+                                    child: SafeArea(
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          kPageHorizontalPadding,
+                                          4, // Reduced from 12
+                                          kPageHorizontalPadding,
+                                          kSpacingXS,
+                                        ),
+                                        child: MedicationHeaderWidget(
+                                          medication: updatedMed,
+                                          onRefill: () => _showRefillDialog(
+                                            context,
+                                            updatedMed,
+                                          ),
+                                          onAdHocDose: () => _showAdHocDoseDialog(
+                                            context,
+                                            updatedMed,
+                                          ),
+                                          hasSchedules: hasSchedules,
+                                        ),
                                       ),
-                                      onAdHocDose: () => _showAdHocDoseDialog(
-                                        context,
-                                        updatedMed,
-                                      ),
-                                      hasSchedules: hasSchedules,
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
                               ),
                             ),
                             // Animated Name & Manufacturer
