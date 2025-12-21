@@ -40,8 +40,7 @@ import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 /// - Visual stock progress indicators
 /// - Clean sectioned information display
 /// - Responsive layout for all screen sizes
-const double _kDetailHeaderExpandedHeight = 280; // Content needs this height
-const double _kDetailHeaderCompactHeight = 220;
+const double _kDetailHeaderExpandedHeight = 280; // Keep header size consistent
 const double _kDetailHeaderCollapsedHeight = 56;
 
 class MedicationDetailPage extends ConsumerStatefulWidget {
@@ -117,14 +116,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final colorScheme = theme.colorScheme;
           final onPrimary = colorScheme.onPrimary;
 
-          // Check if we have schedules to determine header height
+          // Check if we have schedules for schedule-specific header content
           final scheduleBox = Hive.box<Schedule>('schedules');
           final hasSchedules = scheduleBox.values.any(
             (s) => s.medicationId == updatedMed.id && s.active,
           );
-          final headerHeight = hasSchedules
-              ? _kDetailHeaderExpandedHeight
-              : _kDetailHeaderCompactHeight;
+          final headerHeight = _kDetailHeaderExpandedHeight;
 
           // Calculate scroll progress for title opacity
           final offset = _scrollController.hasClients
