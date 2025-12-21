@@ -11,7 +11,7 @@
 ==============
 
 ## Medication Screen
-- Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better.
+- Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better. [COMPLETED]
 - Search - Needs to prioritise Medname first, then Manufacturer, then description. [COMPLETED]
 - Seacrh results font is too dark.  [COMPLETED]
 

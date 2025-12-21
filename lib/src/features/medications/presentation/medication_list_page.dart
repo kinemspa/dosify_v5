@@ -17,9 +17,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum _MedView { list, compact, large }
 
-enum _SortBy { name, stock, strength, expiry }
+enum _SortBy { name, manufacturer, form, stock, strength, expiry }
 
-enum _FilterBy { all, lowStock, expiringSoon, refrigerated }
+enum _FilterBy {
+  all,
+  lowStock,
+  expiringSoon,
+  refrigerated,
+  freezer,
+  lightSensitive,
+  formTablet,
+  formCapsule,
+  formPrefilledSyringe,
+  formSingleDoseVial,
+  formMultiDoseVial,
+}
 
 class MedicationListPage extends ConsumerStatefulWidget {
   const MedicationListPage({super.key});
@@ -77,6 +89,35 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     return m.name.toLowerCase().contains(qLower) ||
         (m.manufacturer ?? '').toLowerCase().contains(qLower) ||
         (m.description ?? '').toLowerCase().contains(qLower);
+  }
+
+  bool _isRefrigerated(Medication m) {
+    return m.requiresRefrigeration == true ||
+        m.activeVialRequiresRefrigeration ||
+        m.backupVialsRequiresRefrigeration;
+  }
+
+  bool _isFrozen(Medication m) {
+    return m.requiresFreezer == true ||
+        m.activeVialRequiresFreezer ||
+        m.backupVialsRequiresFreezer;
+  }
+
+  bool _isLightSensitive(Medication m) {
+    return m.lightSensitive == true ||
+        m.activeVialLightSensitive ||
+        m.backupVialsLightSensitive;
+  }
+
+  DateTime? _effectiveExpiry(Medication m) {
+    final candidates = <DateTime?>[
+      m.expiry,
+      m.reconstitutedVialExpiry,
+      m.backupVialsExpiry,
+    ].whereType<DateTime>().toList(growable: false);
+    if (candidates.isEmpty) return null;
+    candidates.sort();
+    return candidates.first;
   }
 
   @override
@@ -330,6 +371,35 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   value: _FilterBy.refrigerated,
                   child: Text('Refrigerated'),
                 ),
+                const PopupMenuItem(
+                  value: _FilterBy.freezer,
+                  child: Text('Freezer'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.lightSensitive,
+                  child: Text('Light sensitive'),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: _FilterBy.formTablet,
+                  child: Text('Tablets'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formCapsule,
+                  child: Text('Capsules'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formPrefilledSyringe,
+                  child: Text('Pre-filled syringes'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formSingleDoseVial,
+                  child: Text('Single dose vials'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formMultiDoseVial,
+                  child: Text('Multi-dose vials'),
+                ),
               ],
             ),
 
@@ -349,6 +419,14 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 const PopupMenuItem(
                   value: _SortBy.name,
                   child: Text('Sort by name'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.manufacturer,
+                  child: Text('Sort by manufacturer'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.form,
+                  child: Text('Sort by form'),
                 ),
                 const PopupMenuItem(
                   value: _SortBy.stock,
@@ -408,11 +486,32 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       case _FilterBy.expiringSoon:
         final now = DateTime.now();
         final soon = now.add(const Duration(days: 30));
-        items = items
-            .where((m) => m.expiry != null && m.expiry!.isBefore(soon))
-            .toList();
+        items = items.where((m) {
+          final exp = _effectiveExpiry(m);
+          return exp != null && exp.isBefore(soon);
+        }).toList();
       case _FilterBy.refrigerated:
-        items = items.where((m) => m.requiresRefrigeration == true).toList();
+        items = items.where(_isRefrigerated).toList();
+      case _FilterBy.freezer:
+        items = items.where(_isFrozen).toList();
+      case _FilterBy.lightSensitive:
+        items = items.where(_isLightSensitive).toList();
+      case _FilterBy.formTablet:
+        items = items.where((m) => m.form == MedicationForm.tablet).toList();
+      case _FilterBy.formCapsule:
+        items = items.where((m) => m.form == MedicationForm.capsule).toList();
+      case _FilterBy.formPrefilledSyringe:
+        items = items
+            .where((m) => m.form == MedicationForm.prefilledSyringe)
+            .toList();
+      case _FilterBy.formSingleDoseVial:
+        items = items
+            .where((m) => m.form == MedicationForm.singleDoseVial)
+            .toList();
+      case _FilterBy.formMultiDoseVial:
+        items = items
+            .where((m) => m.form == MedicationForm.multiDoseVial)
+            .toList();
     }
 
     // Apply sorting
@@ -422,15 +521,30 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       switch (_sortBy) {
         case _SortBy.name:
           return dir(a.name.compareTo(b.name));
+        case _SortBy.manufacturer:
+          final am = (a.manufacturer ?? '').trim();
+          final bm = (b.manufacturer ?? '').trim();
+          final aEmpty = am.isEmpty;
+          final bEmpty = bm.isEmpty;
+          if (aEmpty != bEmpty) {
+            return aEmpty ? dir(1) : dir(-1);
+          }
+          return dir(am.compareTo(bm));
+        case _SortBy.form:
+          final byForm = dir(a.form.index.compareTo(b.form.index));
+          if (byForm != 0) return byForm;
+          return dir(a.name.compareTo(b.name));
         case _SortBy.stock:
           return dir(a.stockValue.compareTo(b.stockValue));
         case _SortBy.strength:
           return dir(a.strengthValue.compareTo(b.strengthValue));
         case _SortBy.expiry:
-          if (a.expiry == null && b.expiry == null) return 0;
-          if (a.expiry == null) return dir(1);
-          if (b.expiry == null) return dir(-1);
-          return dir(a.expiry!.compareTo(b.expiry!));
+          final ae = _effectiveExpiry(a);
+          final be = _effectiveExpiry(b);
+          if (ae == null && be == null) return 0;
+          if (ae == null) return dir(1);
+          if (be == null) return dir(-1);
+          return dir(ae.compareTo(be));
       }
     }
 
