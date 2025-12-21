@@ -81,10 +81,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       if (renderObject is! RenderBox || !renderObject.hasSize) return;
 
       final measuredHeight = renderObject.size.height;
-      final measuredWithBuffer = measuredHeight + kSpacingL;
-      final desired = measuredWithBuffer < _kDetailHeaderExpandedHeight
+      final topInset = MediaQuery.of(context).padding.top;
+      final baseChildMax = _kDetailHeaderExpandedHeight - topInset;
+      final desired = measuredHeight <= baseChildMax
           ? _kDetailHeaderExpandedHeight
-          : measuredWithBuffer;
+          : (measuredHeight + topInset + kSpacingS);
 
       if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0) {
         setState(() {
@@ -225,6 +226,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                   return Opacity(
                                     opacity: headerOpacity,
                                     child: SafeArea(
+                                      bottom: false,
                                       child: Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                           kPageHorizontalPadding,
@@ -470,6 +472,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: SafeArea(
+                    bottom: false,
                     child: Padding(
                       key: _headerMeasureKey,
                       padding: const EdgeInsets.fromLTRB(
