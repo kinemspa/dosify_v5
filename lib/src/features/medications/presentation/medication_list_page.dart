@@ -745,7 +745,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
           itemBuilder: (context, i) => _MedLargeCard(m: items[i]),
         );
     }
@@ -829,6 +829,7 @@ class _MedLargeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LargeCard(
       onTap: () => context.push('/medications/${m.id}'),
+      dense: true,
       leading: _buildLeading(context),
       trailing: _buildTrailing(context),
       footer: _buildFooter(context),
@@ -973,8 +974,8 @@ class _MedLargeCard extends StatelessWidget {
     final backupCount = hasMdvUnit ? m.stockValue.floor() : null;
 
     if (backupCount != null && backupCount > 0) {
-      final total = backupCount;
-      return '$backupCount/$total reserve vials';
+      final label = backupCount == 1 ? 'sealed vial' : 'sealed vials';
+      return '$backupCount $label';
     }
 
     if (containerMl != null) {

@@ -10,18 +10,24 @@ class LargeCard extends StatelessWidget {
     required this.trailing,
     this.footer,
     this.onTap,
+    this.dense = false,
   });
 
   final Widget leading;
   final Widget trailing;
   final Widget? footer;
   final VoidCallback? onTap;
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
+    final padding = dense ? kSpacingS : kCardPadding;
+    final leadingTrailingGap = dense ? kSpacingM : kSpacingL;
+    final footerGap = dense ? kSpacingS : kSectionSpacing;
+
     final card = Container(
       decoration: buildStandardCardDecoration(context: context),
-      padding: const EdgeInsets.all(kCardPadding),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -29,14 +35,11 @@ class LargeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(child: leading),
-              const SizedBox(width: kSpacingL),
+              SizedBox(width: leadingTrailingGap),
               trailing,
             ],
           ),
-          if (footer != null) ...[
-            const SizedBox(height: kSectionSpacing),
-            footer!,
-          ],
+          if (footer != null) ...[SizedBox(height: footerGap), footer!],
         ],
       ),
     );

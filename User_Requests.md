@@ -16,8 +16,8 @@
 - Seacrh results font is too dark.  [COMPLETED]
 
 ### Large Cards
-- Large Cards are a bit too spacious, how can we compact them a bit. 
-- Large Cards MDV we can change the x/x reserve vials, change it to x sealed vials. 
+- Large Cards are a bit too spacious, how can we compact them a bit.  [COMPLETED]
+- Large Cards MDV we can change the x/x reserve vials, change it to x sealed vials.  [COMPLETED]
 
 ### Compact Cards
 - Need to be restyled to be more in line with the app style
