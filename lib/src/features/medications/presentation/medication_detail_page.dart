@@ -746,21 +746,20 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             onTap: () =>
                 setState(() => _isDetailsExpanded = !_isDetailsExpanded),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(kCardPadding),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    size: 20,
+                    size: 18,
                     color: colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: kSpacingS),
                   Text(
                     'Medication Details',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
-                    ),
+                    style: cardTitleStyle(
+                      context,
+                    )?.copyWith(color: colorScheme.primary),
                   ),
                   const Spacer(),
                   AnimatedRotation(
@@ -768,7 +767,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       Icons.keyboard_arrow_down,
-                      size: 24,
+                      size: 22,
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -784,27 +783,32 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 : CrossFadeState.showFirst,
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+              padding: const EdgeInsets.fromLTRB(
+                kCardPadding,
+                0,
+                kCardPadding,
+                kCardPadding,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 1. Schedule & Next Dose
                   if (hasSchedules) ...[
                     _buildScheduleSection(context, med, nextDose),
-                    const Divider(height: 32),
+                    const Divider(height: kSpacingXL),
                   ],
 
                   // 2. Merged Medication Details
                   _buildMergedDetailsSection(context, med),
-                  const Divider(height: 32),
+                  const Divider(height: kSpacingXL),
 
                   // Sealed Vials (MDV Only) - separate card for backup stock
                   if (med.form == MedicationForm.multiDoseVial) ...[
                     _buildBackupStockSection(context, med),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: kSpacingM),
                   ],
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: kSpacingL),
                   Center(
                     child: TextButton.icon(
                       onPressed: () => _deleteMedication(context, med),
