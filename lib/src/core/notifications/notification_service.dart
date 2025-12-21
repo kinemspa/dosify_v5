@@ -673,20 +673,46 @@ class NotificationService {
       ),
     );
     try {
-      _log(
-        'Attempting zonedSchedule with AndroidScheduleMode.alarmClock (local source)',
-      );
+      final canExact = Platform.isAndroid && await canScheduleExactAlarms();
+      final primaryMode = canExact
+          ? AndroidScheduleMode.alarmClock
+          : AndroidScheduleMode.inexact;
+
+      _log('Attempting zonedSchedule with $primaryMode (local source)');
       await _fln.zonedSchedule(
         id,
         title,
         body,
         tzTime,
         details,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        androidScheduleMode: primaryMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
-      _log('AlarmClock zonedSchedule call returned successfully');
+      _log('zonedSchedule call returned successfully (local source)');
+    } on PlatformException catch (e) {
+      if (e.code == 'exact_alarms_not_permitted') {
+        _log(
+          'Exact alarms not permitted; falling back to AndroidScheduleMode.inexact (local source)',
+        );
+        try {
+          await _fln.zonedSchedule(
+            id,
+            title,
+            body,
+            tzTime,
+            details,
+            androidScheduleMode: AndroidScheduleMode.inexact,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+          _log('Inexact fallback zonedSchedule returned successfully');
+          return;
+        } catch (fallbackError) {
+          _log('Inexact fallback schedule failed: $fallbackError');
+        }
+      }
+      _log('AlarmClock schedule (local source) failed: $e');
     } catch (e) {
       _log('AlarmClock schedule (local source) failed: $e');
     }
@@ -720,20 +746,48 @@ class NotificationService {
       ),
     );
     try {
-      _log(
-        'Attempting zonedSchedule with AndroidScheduleMode.alarmClock (UTC source)',
-      );
+      final canExact = Platform.isAndroid && await canScheduleExactAlarms();
+      final primaryMode = canExact
+          ? AndroidScheduleMode.alarmClock
+          : AndroidScheduleMode.inexact;
+
+      _log('Attempting zonedSchedule with $primaryMode (UTC source)');
       await _fln.zonedSchedule(
         id,
         title,
         body,
         tzTime,
         details,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        androidScheduleMode: primaryMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
-      _log('AlarmClock zonedSchedule (UTC source) returned successfully');
+      _log('zonedSchedule call returned successfully (UTC source)');
+    } on PlatformException catch (e) {
+      if (e.code == 'exact_alarms_not_permitted') {
+        _log(
+          'Exact alarms not permitted; falling back to AndroidScheduleMode.inexact (UTC source)',
+        );
+        try {
+          await _fln.zonedSchedule(
+            id,
+            title,
+            body,
+            tzTime,
+            details,
+            androidScheduleMode: AndroidScheduleMode.inexact,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+          _log(
+            'Inexact fallback zonedSchedule returned successfully (UTC source)',
+          );
+          return;
+        } catch (fallbackError) {
+          _log('Inexact fallback schedule failed (UTC source): $fallbackError');
+        }
+      }
+      _log('AlarmClock schedule (UTC source) failed: $e');
     } catch (e) {
       _log('AlarmClock schedule (UTC source) failed: $e');
     }

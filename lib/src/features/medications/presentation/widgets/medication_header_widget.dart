@@ -57,90 +57,133 @@ class MedicationHeaderWidget extends ConsumerWidget {
         Expanded(
           flex: 6,
           child: ClipRect(
-            // Clip overflow instead of showing error
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Space for the animated Name
-                const SizedBox(height: 48),
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Space for the animated Name
+                  const SizedBox(height: 48),
 
-                // Description & Notes
-                if (medication.description != null &&
-                    medication.description!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      medication.description!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.9),
-                        fontSize: 10,
-                        fontStyle: FontStyle.italic,
+                  // Description & Notes
+                  if (medication.description != null &&
+                      medication.description!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        medication.description!,
+                        style: TextStyle(
+                          color: onPrimary.withValues(alpha: 0.9),
+                          fontSize: 10,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
 
-                if (medication.notes != null && medication.notes!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      medication.notes!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.6),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 9,
+                  if (medication.notes != null && medication.notes!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        medication.notes!,
+                        style: TextStyle(
+                          color: onPrimary.withValues(alpha: 0.6),
+                          fontStyle: FontStyle.italic,
+                          fontSize: 9,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
 
-                const SizedBox(height: 4),
+                  const SizedBox(height: 4),
 
-                // Strength with Icon
-                _HeaderInfoTile(
-                  icon: Icons.medication_liquid,
-                  label: strengthPerLabel,
-                  value:
-                      '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
-                  textColor: onPrimary,
-                  valueSize: 11,
-                ),
-                const SizedBox(height: 4),
-
-                // Storage
-                if (storageLabel != null && storageLabel.isNotEmpty) ...[
+                  // Strength with Icon
                   _HeaderInfoTile(
-                    icon: Icons.location_on_outlined,
-                    label: 'Storage Location',
-                    value: storageLabel,
+                    icon: Icons.medication_liquid,
+                    label: strengthPerLabel,
+                    value:
+                        '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
                     textColor: onPrimary,
                     valueSize: 11,
-                    trailingIcons: [
-                      if (medication.activeVialRequiresFreezer ||
-                          medication.requiresFreezer)
-                        Icons.severe_cold,
-                      if (medication.requiresRefrigeration ||
-                          medication.activeVialRequiresRefrigeration)
-                        Icons.ac_unit,
-                      if (medication.activeVialLightSensitive ||
-                          medication.lightSensitive)
-                        Icons.dark_mode_outlined,
-                    ],
                   ),
                   const SizedBox(height: 4),
-                ],
 
-                const SizedBox(height: 6),
+                  // Storage
+                  if (storageLabel != null && storageLabel.isNotEmpty) ...[
+                    _HeaderInfoTile(
+                      icon: Icons.location_on_outlined,
+                      label: 'Storage Location',
+                      value: storageLabel,
+                      textColor: onPrimary,
+                      valueSize: 11,
+                      trailingIcons: [
+                        if (medication.activeVialRequiresFreezer ||
+                            medication.requiresFreezer)
+                          Icons.severe_cold,
+                        if (medication.requiresRefrigeration ||
+                            medication.activeVialRequiresRefrigeration)
+                          Icons.ac_unit,
+                        if (medication.activeVialLightSensitive ||
+                            medication.lightSensitive)
+                          Icons.dark_mode_outlined,
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
 
-                // Dose + Refill Buttons (moved from right side)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Quick Dose Button
-                    if (onAdHocDose != null) ...[
+                  const SizedBox(height: 6),
+
+                  // Dose + Refill Buttons (moved from right side)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Quick Dose Button
+                      if (onAdHocDose != null) ...[
+                        Material(
+                          color: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: onPrimary.withValues(alpha: 0.5),
+                              width: 1,
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: onAdHocDose,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 12,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.medication_rounded,
+                                    size: 14,
+                                    color: onPrimary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Dose',
+                                    style: TextStyle(
+                                      color: onPrimary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      // Refill Button
                       Material(
                         color: Colors.transparent,
                         shape: RoundedRectangleBorder(
@@ -151,7 +194,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                           ),
                         ),
                         child: InkWell(
-                          onTap: onAdHocDose,
+                          onTap: onRefill,
                           borderRadius: BorderRadius.circular(8),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -161,14 +204,10 @@ class MedicationHeaderWidget extends ConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  Icons.medication_rounded,
-                                  size: 14,
-                                  color: onPrimary,
-                                ),
+                                Icon(Icons.add, size: 14, color: onPrimary),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Dose',
+                                  'Refill',
                                   style: TextStyle(
                                     color: onPrimary,
                                     fontSize: 11,
@@ -180,48 +219,11 @@ class MedicationHeaderWidget extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
                     ],
-                    // Refill Button
-                    Material(
-                      color: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: onPrimary.withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: onRefill,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 6,
-                            horizontal: 12,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add, size: 14, color: onPrimary),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Refill',
-                                style: TextStyle(
-                                  color: onPrimary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Adherence graph moved to MedicationReportsWidget
-              ],
+                  ),
+                  // Adherence graph moved to MedicationReportsWidget
+                ],
+              ),
             ),
           ),
         ),
