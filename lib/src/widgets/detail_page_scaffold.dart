@@ -41,21 +41,49 @@ class DetailPageScaffold extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
-              IconButton(
-                tooltip: 'Settings',
-                icon: const Icon(Icons.settings, color: Colors.white),
-                onPressed: () => context.push('/settings'),
-              ),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, color: Colors.white),
+                tooltip: 'Menu',
+                icon: const Icon(Icons.menu, color: Colors.white),
                 onSelected: (value) async {
-                  if (value == 'edit') {
-                    onEdit();
-                  } else if (value == 'delete') {
-                    await onDelete();
+                  switch (value) {
+                    case 'home':
+                      context.go('/');
+                    case 'medications':
+                      context.go('/medications');
+                    case 'supplies':
+                      context.go('/supplies');
+                    case 'schedules':
+                      context.go('/schedules');
+                    case 'calendar':
+                      context.go('/calendar');
+                    case 'reconstitution':
+                      context.push('/medications/reconstitution');
+                    case 'analytics':
+                      context.go('/analytics');
+                    case 'settings':
+                      context.go('/settings');
+                    case 'edit':
+                      onEdit();
+                    case 'delete':
+                      await onDelete();
                   }
                 },
                 itemBuilder: (context) => const [
+                  PopupMenuItem(value: 'home', child: Text('Home')),
+                  PopupMenuItem(
+                    value: 'medications',
+                    child: Text('Medications'),
+                  ),
+                  PopupMenuItem(value: 'supplies', child: Text('Supplies')),
+                  PopupMenuItem(value: 'schedules', child: Text('Schedules')),
+                  PopupMenuItem(value: 'calendar', child: Text('Calendar')),
+                  PopupMenuItem(
+                    value: 'reconstitution',
+                    child: Text('Reconstitution Calculator'),
+                  ),
+                  PopupMenuItem(value: 'analytics', child: Text('Analytics')),
+                  PopupMenuItem(value: 'settings', child: Text('Settings')),
+                  PopupMenuDivider(),
                   PopupMenuItem(
                     value: 'edit',
                     child: Row(

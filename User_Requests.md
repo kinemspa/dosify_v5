@@ -1,7 +1,7 @@
 # Things To Fix
 
 ## Global
-- Settigns Menu has vanished from all the app headers across the app.  [COMPLETED]
+- Hamburger nav menu has vanished from all the app headers across the app. [COMPLETED]
 
 
 

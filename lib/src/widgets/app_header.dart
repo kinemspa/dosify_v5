@@ -26,18 +26,48 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final showBack = Navigator.of(context).canPop() || forceBackButton;
-    final isSettings = title.trim().toLowerCase() == 'settings';
 
     final effectiveActions = <Widget>[
       ...?actions,
-      if (!isSettings)
-        IconButton(
-          tooltip: 'Settings',
-          icon: const Icon(Icons.settings),
-          onPressed: () => context.push('/settings'),
-        ),
+      PopupMenuButton<String>(
+        tooltip: 'Menu',
+        icon: const Icon(Icons.menu),
+        onSelected: (value) {
+          switch (value) {
+            case 'home':
+              context.go('/');
+            case 'medications':
+              context.go('/medications');
+            case 'supplies':
+              context.go('/supplies');
+            case 'schedules':
+              context.go('/schedules');
+            case 'calendar':
+              context.go('/calendar');
+            case 'reconstitution':
+              context.push('/medications/reconstitution');
+            case 'analytics':
+              context.go('/analytics');
+            case 'settings':
+              context.go('/settings');
+          }
+        },
+        itemBuilder: (context) => const [
+          PopupMenuItem(value: 'home', child: Text('Home')),
+          PopupMenuItem(value: 'medications', child: Text('Medications')),
+          PopupMenuItem(value: 'supplies', child: Text('Supplies')),
+          PopupMenuItem(value: 'schedules', child: Text('Schedules')),
+          PopupMenuItem(value: 'calendar', child: Text('Calendar')),
+          PopupMenuItem(
+            value: 'reconstitution',
+            child: Text('Reconstitution Calculator'),
+          ),
+          PopupMenuItem(value: 'analytics', child: Text('Analytics')),
+          PopupMenuItem(value: 'settings', child: Text('Settings')),
+        ],
+      ),
     ];
-    
+
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
@@ -82,4 +112,3 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
-
