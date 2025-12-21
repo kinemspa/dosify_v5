@@ -81,10 +81,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       if (renderObject is! RenderBox || !renderObject.hasSize) return;
 
       final measuredHeight = renderObject.size.height;
-      final desired = measuredHeight.clamp(
-        _kDetailHeaderExpandedHeight,
-        double.infinity,
-      );
+      final measuredWithBuffer = measuredHeight + kSpacingL;
+      final desired = measuredWithBuffer < _kDetailHeaderExpandedHeight
+          ? _kDetailHeaderExpandedHeight
+          : measuredWithBuffer;
 
       if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0) {
         setState(() {
