@@ -65,8 +65,8 @@ class MedicationHeaderWidget extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Space for the animated Name
-                const SizedBox(height: 48),
+                // Space for the animated Name + form chip (rendered above in the SliverAppBar)
+                const SizedBox(height: 68),
 
                 // Description & Notes
                 if (medication.description != null &&
