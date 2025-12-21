@@ -1,0 +1,54 @@
+# Things To Fix
+
+## Global
+- Settigns Menu has vanished from all the app headers across the app.  [COMPLETED]
+
+
+
+## Home Screen
+
+
+==============
+
+## Medication Screen
+- Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better.
+- Search - Needs to prioritise Medname first, then Manufacturer, then description.
+- Seacrh results font is too dark. 
+
+### Large Cards
+- Large Cards are a bit too spacious, how can we compact them a bit. 
+- Large Cards MDV we can change the x/x reserve vials, change it to x sealed vials. 
+
+### Compact Cards
+- Need to be restyled to be more in line with the app style
+
+### List
+- Make the list items less tall
+
+==============
+
+## Medication Details Screen
+- The text under the DOnut graph, it needs some better alignment and styling. It looks not great. 
+
+### Reports Card
+- We need to have a more compact wat to display the history. 
+- What other graphs can we add?
+
+### Medication Details Card
+- Restyle the entire card. Make it look nice. The dialog cards on this screen are something to go by. 
+- Font is black. 
+- MDV Backup Stock - We need to unify the terminology across the app for this. We had reserve vials, sealed vials backup stock. Pick the best terminology for this and stikc with it. 
+- MDV Backup Stock - restock button is way too big. 
+
+==============
+## Add Medication Screen
+
+
+
+==============
+
+
+
+
+
+
