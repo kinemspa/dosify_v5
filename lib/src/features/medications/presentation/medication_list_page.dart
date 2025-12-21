@@ -824,7 +824,10 @@ class _MedCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: kSpacingS),
-          MiniStockGauge(percentage: stockInfo.percentage),
+          MiniStockGauge(
+            percentage: stockInfo.percentage,
+            size: kStandardFieldHeight,
+          ),
         ],
       ),
     );
