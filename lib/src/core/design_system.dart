@@ -94,6 +94,9 @@ const double kSectionSpacing = kSpacingM;
 const double kCardPadding = kSpacingM;
 const double kCardInnerSpacing = kSpacingS;
 
+/// Compact card spacing
+const EdgeInsets kCompactCardPadding = EdgeInsets.all(kSpacingS);
+
 /// Field spacing
 const double kFieldSpacing = 6; // Between label-field rows
 const double kFieldGroupSpacing = 12; // Between field groups

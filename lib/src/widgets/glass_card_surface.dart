@@ -10,12 +10,14 @@ class GlassCardSurface extends StatelessWidget {
     required this.child,
     this.onTap,
     this.useGradient = true,
+    this.padding = const EdgeInsets.all(kCardPadding),
     super.key,
   });
 
   final Widget child;
   final VoidCallback? onTap;
   final bool useGradient;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class GlassCardSurface extends StatelessWidget {
         context: context,
         useGradient: useGradient,
       ),
-      child: Padding(padding: const EdgeInsets.all(kCardPadding), child: child),
+      child: Padding(padding: padding, child: child),
     );
 
     if (onTap == null) {

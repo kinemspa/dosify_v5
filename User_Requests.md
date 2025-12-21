@@ -14,13 +14,14 @@
 - Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better. [COMPLETED]
 - Search - Needs to prioritise Medname first, then Manufacturer, then description. [COMPLETED]
 - Seacrh results font is too dark.  [COMPLETED]
+- All cards/lists have different text colours for the Med Name. Make the med name primary colour for all. 
 
 ### Large Cards
 - Large Cards are a bit too spacious, how can we compact them a bit.  [COMPLETED]
 - Large Cards MDV we can change the x/x reserve vials, change it to x sealed vials.  [COMPLETED]
 
 ### Compact Cards
-- Need to be restyled to be more in line with the app style
+- Need to be restyled to be more in line with the app style [COMPLETED]
 
 ### List
 - Make the list items less tall [COMPLETED]

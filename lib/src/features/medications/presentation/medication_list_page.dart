@@ -778,9 +778,6 @@ class _MedCard extends StatelessWidget {
       return _MedLargeCard(m: m);
     }
 
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
 
     final strengthAndFormLabel =
@@ -790,46 +787,45 @@ class _MedCard extends StatelessWidget {
     return GlassCardSurface(
       onTap: () => context.push('/medications/${m.id}'),
       useGradient: false,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    m.manufacturer ?? 'Medication',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      letterSpacing: 1.1,
-                      color: cs.onSurface.withValues(alpha: kOpacityMediumLow),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    m.name,
-                    style: cardTitleStyle(
-                      context,
-                    )?.copyWith(fontWeight: FontWeight.w800),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: kFieldSpacing),
-                  Text(
-                    '${stockInfo.label} · $strengthAndFormLabel',
-                    style: helperTextStyle(context),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+      padding: kCompactCardPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  m.manufacturer?.trim().isNotEmpty == true
+                      ? m.manufacturer!.trim()
+                      : 'Medication',
+                  style: helperTextStyle(context)?.copyWith(letterSpacing: 1.1),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  m.name,
+                  style: cardTitleStyle(
+                    context,
+                  )?.copyWith(fontWeight: FontWeight.w800),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  '${stockInfo.label} · $strengthAndFormLabel',
+                  style: helperTextStyle(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const SizedBox(width: kSpacingM),
-            MiniStockGauge(percentage: stockInfo.percentage),
-          ],
-        ),
+          ),
+          const SizedBox(width: kSpacingS),
+          MiniStockGauge(percentage: stockInfo.percentage),
+        ],
       ),
     );
   }
