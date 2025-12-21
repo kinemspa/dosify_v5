@@ -597,7 +597,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     if (baseline != null && baseline > 0) {
       final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
       if (pct <= 0.2) return theme.colorScheme.error;
-      if (pct <= 0.5) return Colors.orange;
+      if (pct <= 0.5) return theme.colorScheme.tertiary;
       return theme.colorScheme.primary;
     }
     if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
@@ -778,6 +778,8 @@ class _MedCard extends StatelessWidget {
       return _MedLargeCard(m: m);
     }
 
+    final cs = Theme.of(context).colorScheme;
+
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
 
     final strengthAndFormLabel =
@@ -800,7 +802,10 @@ class _MedCard extends StatelessWidget {
                   m.name,
                   style: cardTitleStyle(
                     context,
-                  )?.copyWith(fontWeight: FontWeight.w800),
+                  )?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.primary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -851,6 +856,7 @@ class _MedLargeCard extends StatelessWidget {
   }
 
   Widget _buildLeading(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final primaryStorage = m.storageLocation;
     final fallbackStorage = m.activeVialStorageLocation;
     final storageLabel = (primaryStorage?.isNotEmpty ?? false)
@@ -865,7 +871,10 @@ class _MedLargeCard extends StatelessWidget {
       children: [
         Text(
           m.name,
-          style: cardTitleStyle(context)?.copyWith(fontWeight: FontWeight.w800),
+          style: cardTitleStyle(context)?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: cs.primary,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

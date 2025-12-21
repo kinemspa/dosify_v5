@@ -14,7 +14,7 @@
 - Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better. [COMPLETED]
 - Search - Needs to prioritise Medname first, then Manufacturer, then description. [COMPLETED]
 - Seacrh results font is too dark.  [COMPLETED]
-- All cards/lists have different text colours for the Med Name. Make the med name primary colour for all. 
+- All cards/lists have different text colours for the Med Name. Make the med name primary colour for all. [COMPLETED]
 
 ### Large Cards
 - Large Cards are a bit too spacious, how can we compact them a bit.  [COMPLETED]
@@ -42,7 +42,19 @@
 - MDV Backup Stock - restock button is way too big. 
 
 ==============
-## Add Medication Screen
+## Add Medication
+
+### Choose Medicaiotn Type Screen
+- Can we restyle this to suit the remaining app style. 
+
+### Choose Injection Type Screen
+- Can we restyle this to suit the remaining app style. 
+
+### Add Medicaiton Tablet
+- Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
+- Default Expires date for all Meds should be 90 days, not 364. 
+
+
 
 
 
