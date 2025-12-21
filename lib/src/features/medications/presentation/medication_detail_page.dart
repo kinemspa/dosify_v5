@@ -1140,12 +1140,24 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final conditions = <Widget>[];
 
-    if (med.requiresRefrigeration)
-      conditions.add(_buildMiniChip(context, '❄️ Fridge'));
-    if (med.requiresFreezer)
-      conditions.add(_buildMiniChip(context, '🧊 Freeze'));
-    if (med.lightSensitive) conditions.add(_buildMiniChip(context, '☀️ Light'));
-    if (conditions.isEmpty) conditions.add(_buildMiniChip(context, '🌡️ Room'));
+    if (med.requiresRefrigeration) {
+      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
+    }
+    if (med.requiresFreezer) {
+      conditions.add(
+        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
+      );
+    }
+    if (med.lightSensitive) {
+      conditions.add(
+        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
+      );
+    }
+    if (conditions.isEmpty) {
+      conditions.add(
+        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
+      );
+    }
 
     return InkWell(
       onTap: () => _showStorageConditionsDialog(context, med),
@@ -1175,14 +1187,35 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  Widget _buildMiniChip(BuildContext context, String label) {
+  Widget _buildMiniChip(BuildContext context, String label, {IconData? icon}) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpacingS,
+        vertical: kSpacingXS,
       ),
-      child: Text(label, style: const TextStyle(fontSize: 11)),
+      decoration: BoxDecoration(
+        color: colorScheme.primary,
+        borderRadius: BorderRadius.circular(kBorderRadiusChip),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: colorScheme.onPrimary),
+            const SizedBox(width: kSpacingXS),
+          ],
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontSize: kFontSizeSmall,
+              fontWeight: kFontWeightSemiBold,
+              color: colorScheme.onPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1481,13 +1514,24 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final conditions = <Widget>[];
 
     // Only show chips for active conditions
-    if (med.activeVialRequiresRefrigeration)
-      conditions.add(_buildMiniChip(context, '❄️ Fridge'));
-    if (med.activeVialRequiresFreezer)
-      conditions.add(_buildMiniChip(context, '🧊 Freeze'));
-    if (med.activeVialLightSensitive)
-      conditions.add(_buildMiniChip(context, '☀️ Light'));
-    if (conditions.isEmpty) conditions.add(_buildMiniChip(context, '🌡️ Room'));
+    if (med.activeVialRequiresRefrigeration) {
+      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
+    }
+    if (med.activeVialRequiresFreezer) {
+      conditions.add(
+        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
+      );
+    }
+    if (med.activeVialLightSensitive) {
+      conditions.add(
+        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
+      );
+    }
+    if (conditions.isEmpty) {
+      conditions.add(
+        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
+      );
+    }
 
     return InkWell(
       onTap: () => _showActiveVialConditionsDialog(context, med),
@@ -1591,13 +1635,24 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final conditions = <Widget>[];
 
     // Only show chips for active conditions
-    if (med.backupVialsRequiresRefrigeration)
-      conditions.add(_buildMiniChip(context, '❄️ Fridge'));
-    if (med.backupVialsRequiresFreezer)
-      conditions.add(_buildMiniChip(context, '🧊 Freeze'));
-    if (med.backupVialsLightSensitive)
-      conditions.add(_buildMiniChip(context, '☀️ Light'));
-    if (conditions.isEmpty) conditions.add(_buildMiniChip(context, '🌡️ Room'));
+    if (med.backupVialsRequiresRefrigeration) {
+      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
+    }
+    if (med.backupVialsRequiresFreezer) {
+      conditions.add(
+        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
+      );
+    }
+    if (med.backupVialsLightSensitive) {
+      conditions.add(
+        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
+      );
+    }
+    if (conditions.isEmpty) {
+      conditions.add(
+        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
+      );
+    }
 
     return InkWell(
       onTap: () => _showBackupStockConditionsDialog(context, med),

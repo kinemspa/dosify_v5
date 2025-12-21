@@ -45,6 +45,7 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ### 4. FORBIDDEN – Never Do This In Feature Code
 - ❌ `Colors.blue`, `Color(0xFF...)` – use colors from `design_system.dart`.
+- ❌ `Colors.black`, `Colors.black87`, or any hardcoded “black text” color – always use `Theme.of(context).colorScheme.*`.
 - ❌ `EdgeInsets.all(12)` – use `kSpacingS`, `kSpacingM`, etc.
 - ❌ `BorderRadius.circular(8)` – use `kBorderRadiusS`, `kBorderRadiusM`, etc.
 - ❌ Hardcoded `TextStyle(...)` – use `bodyTextStyle`, `helperTextStyle`, `cardTitleStyle`, or add a new style centrally.
@@ -59,6 +60,7 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 - ✅ Use radius constants: `borderRadius: BorderRadius.circular(kBorderRadiusM)`.
 - ✅ Use design-system text styles: e.g., `style: bodyTextStyle(context)`.
 - ✅ Use theme colors only through centrally defined helpers or constants.
+- ✅ For “primary chips/badges”: background `colorScheme.primary`, content `colorScheme.onPrimary` (text + icons).
 - ✅ Import widgets: `import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';`.
 - ✅ Reuse widgets: `DetailPageScaffold(...)`, `buildDetailInfoRow(...)`, and any central card/row widgets.
 - ✅ Use border width constants: `width: kBorderWidthThin`.
