@@ -290,7 +290,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
         if (!schedule.daysOfWeek.contains(day.weekday)) continue;
 
         // Count times per day - use timesOfDay if available, otherwise 1
-        final timesPerDay = schedule.timesOfDay?.length ?? 1;
+        final int timesPerDay = schedule.timesOfDay?.length ?? 1;
         expectedDoses += timesPerDay;
       }
 
