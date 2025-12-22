@@ -285,6 +285,28 @@ BoxDecoration buildStandardCardDecoration({
   );
 }
 
+/// Padding used for inset/section surfaces inside larger cards.
+const EdgeInsets kInsetSectionPadding = EdgeInsets.all(kSpacingS);
+
+/// Builds a lightweight inset section surface (used inside cards).
+///
+/// This matches the compact "dialog card" feel used across Medication flows.
+BoxDecoration buildInsetSectionDecoration({
+  required BuildContext context,
+  double borderRadius = kBorderRadiusMedium,
+  double backgroundOpacity = 0.5,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(borderRadius),
+    color: cs.surfaceContainerHighest.withValues(alpha: backgroundOpacity),
+    border: Border.all(
+      color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+      width: kBorderWidthThin,
+    ),
+  );
+}
+
 /// Color helper functions (NEVER use these - use theme colors)
 /// These are kept only for backward compatibility during migration
 @Deprecated('Use Theme.of(context).colorScheme instead')

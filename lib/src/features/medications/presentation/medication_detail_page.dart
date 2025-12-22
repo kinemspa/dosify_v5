@@ -27,6 +27,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
@@ -846,9 +847,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       (s) => s.medicationId == med.id && s.active,
     );
 
-    return Container(
-      decoration: buildStandardCardDecoration(context: context),
-      clipBehavior: Clip.antiAlias,
+    return GlassCardSurface(
+      useGradient: false,
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -903,20 +904,24 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Schedule & Next Dose
                   if (hasSchedules) ...[
-                    _buildScheduleSection(context, med, nextDose),
-                    const Divider(height: kSpacingXL),
+                    Container(
+                      decoration: buildInsetSectionDecoration(context: context),
+                      padding: kInsetSectionPadding,
+                      child: _buildScheduleSection(context, med, nextDose),
+                    ),
+                    const SizedBox(height: kSpacingM),
                   ],
 
-                  // 2. Merged Medication Details
-                  _buildMergedDetailsSection(context, med),
-                  const Divider(height: kSpacingXL),
+                  Container(
+                    decoration: buildInsetSectionDecoration(context: context),
+                    padding: kInsetSectionPadding,
+                    child: _buildMergedDetailsSection(context, med),
+                  ),
 
-                  // Sealed Vials (MDV Only) - separate card for sealed vial stock
                   if (med.form == MedicationForm.multiDoseVial) ...[
-                    _buildBackupStockSection(context, med),
                     const SizedBox(height: kSpacingM),
+                    _buildBackupStockSection(context, med),
                   ],
 
                   const SizedBox(height: kSpacingL),
