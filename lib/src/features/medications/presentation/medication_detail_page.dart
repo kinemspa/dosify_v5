@@ -1194,34 +1194,42 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     bool isWarning = false,
     bool isItalic = false,
   }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final labelStyle = helperTextStyle(
+      context,
+      color: colorScheme.onSurfaceVariant,
+    )?.copyWith(fontSize: kFontSizeSmall);
+
+    final valueBaseStyle = bodyTextStyle(
+      context,
+    )?.copyWith(fontWeight: kFontWeightMedium);
+
+    final placeholderStyle = helperTextStyle(
+      context,
+      color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+    )?.copyWith(fontStyle: FontStyle.italic);
+
+    final warningStyle = valueBaseStyle?.copyWith(color: colorScheme.error);
 
     Widget content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpacingL,
+        vertical: kSpacingS,
+      ),
       child: Row(
         children: [
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
+          SizedBox(width: 90, child: Text(label, style: labelStyle)),
           Expanded(
             child: Text(
               value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontStyle: isItalic || isPlaceholder ? FontStyle.italic : null,
-                color: isWarning
-                    ? colorScheme.error
-                    : isPlaceholder
-                    ? colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                    : colorScheme.onSurface,
-              ),
+              style: isWarning
+                  ? warningStyle
+                  : isPlaceholder
+                  ? placeholderStyle
+                  : valueBaseStyle?.copyWith(
+                      fontStyle: isItalic ? FontStyle.italic : null,
+                    ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -1229,8 +1237,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           if (onTap != null)
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(
+                alpha: kOpacityLow,
+              ),
             ),
         ],
       ),
@@ -1268,24 +1278,30 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showStorageConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingL,
+          vertical: kSpacingS,
+        ),
         child: Row(
           children: [
             SizedBox(
               width: 90,
               child: Text(
                 'Conditions',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: helperTextStyle(
+                  context,
                   color: colorScheme.onSurfaceVariant,
-                ),
+                )?.copyWith(fontSize: kFontSizeSmall),
               ),
             ),
             Wrap(spacing: 6, children: conditions),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(
+                alpha: kOpacityLow,
+              ),
             ),
           ],
         ),
@@ -1314,11 +1330,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           ],
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: kFontSizeSmall,
-              fontWeight: kFontWeightSemiBold,
-              color: colorScheme.onPrimary,
-            ),
+            style: helperTextStyle(context, color: colorScheme.onPrimary)
+                ?.copyWith(
+                  fontSize: kFontSizeSmall,
+                  fontWeight: kFontWeightSemiBold,
+                ),
           ),
         ],
       ),
@@ -1879,9 +1895,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               const Spacer(),
               Text(
                 '${_formatNumber(med.stockValue).split('.')[0]} vials',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: bodyTextStyle(
+                  context,
+                )?.copyWith(fontWeight: kFontWeightBold),
               ),
             ],
           ),

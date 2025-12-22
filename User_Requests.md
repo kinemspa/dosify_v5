@@ -32,6 +32,7 @@
 
 ## Medication Details Screen
 - The text under the DOnut graph, it needs some better alignment and styling. It looks not great. [COMPLETED]
+- When medicaiton is at 0% the 5percentage number nees to be red, same with the remaining value.
 
 ### Reports Card
 - We need to have a more compact wat to display the history. [COMPLETED]
@@ -39,7 +40,7 @@
 
 ### Medication Details Card
 - Restyle the entire card. Make it look nice. The dialog cards on this screen are something to go by. 
-- Font is black. 
+- Font is black. [COMPLETED]
 - MDV Backup Stock - We need to unify the terminology across the app for this. We had reserve vials, sealed vials backup stock. Pick the best terminology for this and stikc with it. 
 - MDV Backup Stock - restock button is way too big. 
 
