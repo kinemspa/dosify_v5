@@ -707,44 +707,39 @@ class _StockInfoCard extends StatelessWidget {
           const SizedBox(height: kSpacingS),
 
           // Action Buttons (Bottom-right aligned)
-          SizedBox(
-            width: double.infinity,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final maxWidth = constraints.maxWidth;
-                final targetWidth = maxWidth.isFinite
-                    ? maxWidth.clamp(0.0, kCompactControlMinWidth)
-                    : kCompactControlMinWidth;
-
-                return Align(
-                  alignment: Alignment.centerRight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (onAdHocDose != null) ...[
-                        SizedBox(
-                          width: targetWidth,
-                          child: OutlinedButton(
-                            onPressed: onAdHocDose,
-                            style: actionButtonStyle,
-                            child: const Text('Dose'),
-                          ),
-                        ),
-                        const SizedBox(height: kButtonSpacing),
-                      ],
-                      SizedBox(
-                        width: targetWidth,
-                        child: OutlinedButton(
-                          onPressed: onRefill,
-                          style: actionButtonStyle,
-                          child: const Text('Refill'),
-                        ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onAdHocDose != null) ...[
+                    OutlinedButton.icon(
+                      onPressed: onAdHocDose,
+                      style: actionButtonStyle,
+                      icon: Icon(
+                        Icons.medication_rounded,
+                        size: kIconSizeSmall,
+                        color: onPrimary,
                       ),
-                    ],
+                      label: const Text('Dose'),
+                    ),
+                    const SizedBox(width: kButtonSpacing),
+                  ],
+                  OutlinedButton.icon(
+                    onPressed: onRefill,
+                    style: actionButtonStyle,
+                    icon: Icon(
+                      Icons.add,
+                      size: kIconSizeSmall,
+                      color: onPrimary,
+                    ),
+                    label: const Text('Refill'),
                   ),
-                );
-              },
+                ],
+              ),
             ),
           ),
         ],
