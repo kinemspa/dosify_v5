@@ -107,8 +107,7 @@ class StockDonutGauge extends StatelessWidget {
                 Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: kFontWeightExtraBold,
                   // Text color changes based on stock level
-                  color:
-                      textColor ?? defaultLabelColor(),
+                  color: textColor ?? defaultLabelColor(),
                 ),
           ),
         ],
@@ -245,8 +244,7 @@ class DualStockDonutGauge extends StatelessWidget {
                 labelStyle ??
                 Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: kFontWeightExtraBold,
-                  color:
-                      textColor ?? defaultLabelColor(),
+                  color: textColor ?? defaultLabelColor(),
                 ),
           ),
         ],

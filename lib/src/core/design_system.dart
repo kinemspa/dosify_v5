@@ -307,6 +307,20 @@ BoxDecoration buildInsetSectionDecoration({
   );
 }
 
+/// How much to blend a status color toward `onPrimary` when rendering it
+/// on top of strong primary/gradient headers.
+///
+/// 0.0 = raw status color, 1.0 = pure onPrimary.
+const double kOnPrimaryStatusColorBlendT = 0.35;
+
+/// Returns a status color adjusted for readability on top of a primary header
+/// background (e.g. Medication Details gradient).
+Color statusColorOnPrimary(BuildContext context, Color statusColor) {
+  final cs = Theme.of(context).colorScheme;
+  return Color.lerp(statusColor, cs.onPrimary, kOnPrimaryStatusColorBlendT) ??
+      statusColor;
+}
+
 /// Color helper functions (NEVER use these - use theme colors)
 /// These are kept only for backward compatibility during migration
 @Deprecated('Use Theme.of(context).colorScheme instead')

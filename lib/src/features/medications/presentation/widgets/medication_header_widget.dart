@@ -197,7 +197,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                           size: kIconSizeSmall,
                           color: onPrimary,
                         ),
-                          label: const Text('Log dose'),
+                        label: const Text('Log dose'),
                       ),
               ),
               const SizedBox(width: kButtonSpacing),
@@ -605,12 +605,15 @@ class _StockInfoCard extends StatelessWidget {
         ? '${stockInfo.percentage.round()}%'
         : '${(pct * 100).round()}%';
 
-    final labelPct = (isMdv ? stockInfo.percentage : (pct * 100)).clamp(0.0, 100.0);
+    final labelPct = (isMdv ? stockInfo.percentage : (pct * 100)).clamp(
+      0.0,
+      100.0,
+    );
     final Color gaugeLabelColor;
     if (labelPct <= 0) {
-      gaugeLabelColor = cs.error;
+      gaugeLabelColor = statusColorOnPrimary(context, cs.error);
     } else if (labelPct < 20) {
-      gaugeLabelColor = cs.tertiary;
+      gaugeLabelColor = statusColorOnPrimary(context, cs.tertiary);
     } else {
       gaugeLabelColor = onPrimary;
     }

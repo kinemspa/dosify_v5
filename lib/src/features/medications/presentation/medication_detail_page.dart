@@ -587,16 +587,18 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     // Determine gauge + label colors based on percentage.
     // Requirement: 0% should be red; 20% should be orange.
-    final Color gaugeColor;
+    // On the gradient header, keep the arc `onPrimary` and only color-code
+    // the label/values (blended toward onPrimary for readability).
+    final Color gaugeColor = onPrimary.withValues(alpha: kOpacityEmphasis);
     final Color gaugeLabelColor;
     if (pct <= 0) {
-      gaugeColor = theme.colorScheme.error;
-      gaugeLabelColor = theme.colorScheme.error;
+      gaugeLabelColor = statusColorOnPrimary(context, theme.colorScheme.error);
     } else if (pct <= 20) {
-      gaugeColor = theme.colorScheme.tertiary;
-      gaugeLabelColor = theme.colorScheme.tertiary;
+      gaugeLabelColor = statusColorOnPrimary(
+        context,
+        theme.colorScheme.tertiary,
+      );
     } else {
-      gaugeColor = onPrimary.withValues(alpha: kOpacityEmphasis);
       gaugeLabelColor = onPrimary;
     }
 
@@ -742,7 +744,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                           )?.copyWith(
                             fontSize: kFontSizeSmall,
                             fontWeight: FontWeight.w800,
-                            color: gaugeColor,
+                            color: gaugeLabelColor,
                           ),
                     ),
                     const TextSpan(text: ' / '),
