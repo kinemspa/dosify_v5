@@ -19,10 +19,8 @@
 - The donut graph and the text underneath needs to be right aligned. [COMPLETED]
 
 ### Compact Cards
-- Need to be restyled to be more in line with the app style [COMPLETED]
 
 ### List
-- Make the list items less tall [COMPLETED]
 
 ==============
 
