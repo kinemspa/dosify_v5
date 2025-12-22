@@ -35,6 +35,22 @@ class MedicationHeaderWidget extends ConsumerWidget {
     final theme = Theme.of(context);
     final onPrimary = theme.colorScheme.onPrimary;
 
+    final headerActionButtonStyle = OutlinedButton.styleFrom(
+      foregroundColor: onPrimary,
+      textStyle: buttonTextStyle(context),
+      side: BorderSide(
+        color: onPrimary.withValues(alpha: kOpacityMediumLow),
+        width: kBorderWidthThin,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      ),
+      padding: kButtonContentPadding,
+      minimumSize: const Size(0, kStandardButtonHeight),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
+    );
+
     // Watch the controller state to get calculated values
     final state = ref.watch(medicationDetailControllerProvider(medication.id));
 
@@ -54,107 +70,141 @@ class MedicationHeaderWidget extends ConsumerWidget {
         ? medication.activeVialStorageLocation
         : null;
 
-    return Row(
-      crossAxisAlignment: crossAxisAlignment,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          flex: 6,
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Space for the animated Name + form chip (rendered above in the SliverAppBar)
-                const SizedBox(height: 68),
+        Row(
+          crossAxisAlignment: crossAxisAlignment,
+          children: [
+            Expanded(
+              flex: 6,
+              child: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Space for the animated Name + form chip (rendered above in the SliverAppBar)
+                    const SizedBox(height: 68),
 
-                // Description & Notes
-                if (medication.description != null &&
-                    medication.description!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
-                    child: Text(
-                      medication.description!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.9),
-                        fontSize: 10,
-                        fontStyle: FontStyle.italic,
+                    // Description & Notes
+                    if (medication.description != null &&
+                        medication.description!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Text(
+                          medication.description!,
+                          style: TextStyle(
+                            color: onPrimary.withValues(alpha: 0.9),
+                            fontSize: 10,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
 
-                if (medication.notes != null && medication.notes!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      medication.notes!,
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.6),
-                        fontStyle: FontStyle.italic,
-                        fontSize: 9,
+                    if (medication.notes != null &&
+                        medication.notes!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          medication.notes!,
+                          style: TextStyle(
+                            color: onPrimary.withValues(alpha: 0.6),
+                            fontStyle: FontStyle.italic,
+                            fontSize: 9,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+
+                    const SizedBox(height: 4),
+
+                    // Strength with Icon
+                    _HeaderInfoTile(
+                      icon: Icons.medication_liquid,
+                      label: strengthPerLabel,
+                      value:
+                          '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
+                      textColor: onPrimary,
+                      valueSize: 11,
                     ),
-                  ),
+                    const SizedBox(height: kSpacingS),
 
-                const SizedBox(height: 4),
-
-                // Strength with Icon
-                _HeaderInfoTile(
-                  icon: Icons.medication_liquid,
-                  label: strengthPerLabel,
-                  value:
-                      '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
-                  textColor: onPrimary,
-                  valueSize: 11,
-                ),
-                const SizedBox(height: kSpacingS),
-
-                // Storage
-                if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                  _HeaderInfoTile(
-                    icon: Icons.location_on_outlined,
-                    label: 'Storage Location',
-                    value: storageLabel,
-                    textColor: onPrimary,
-                    valueSize: 11,
-                    trailingIcons: [
-                      if (medication.activeVialRequiresFreezer ||
-                          medication.requiresFreezer)
-                        Icons.severe_cold,
-                      if (medication.requiresRefrigeration ||
-                          medication.activeVialRequiresRefrigeration)
-                        Icons.ac_unit,
-                      if (medication.activeVialLightSensitive ||
-                          medication.lightSensitive)
-                        Icons.dark_mode_outlined,
+                    // Storage
+                    if (storageLabel != null && storageLabel.isNotEmpty) ...[
+                      _HeaderInfoTile(
+                        icon: Icons.location_on_outlined,
+                        label: 'Storage Location',
+                        value: storageLabel,
+                        textColor: onPrimary,
+                        valueSize: 11,
+                        trailingIcons: [
+                          if (medication.activeVialRequiresFreezer ||
+                              medication.requiresFreezer)
+                            Icons.severe_cold,
+                          if (medication.requiresRefrigeration ||
+                              medication.activeVialRequiresRefrigeration)
+                            Icons.ac_unit,
+                          if (medication.activeVialLightSensitive ||
+                              medication.lightSensitive)
+                            Icons.dark_mode_outlined,
+                        ],
+                      ),
+                      const SizedBox(height: kSpacingS),
                     ],
-                  ),
-                  const SizedBox(height: kSpacingS),
-                ],
 
-                const SizedBox(height: 6),
-                // Adherence graph moved to MedicationReportsWidget
-              ],
+                    const SizedBox(height: 6),
+                    // Adherence graph moved to MedicationReportsWidget
+                  ],
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            // StockInfoCard 40% Width
+            Expanded(
+              flex: 4,
+              child: _StockInfoCard(
+                medication: medication,
+                onPrimary: onPrimary,
+                stockRatio: stockRatio,
+                daysRemaining: daysRemaining,
+                stockoutDate: stockoutDate,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        // StockInfoCard 40% Width
-        Expanded(
-          flex: 4,
-          child: _StockInfoCard(
-            medication: medication,
-            theme: theme,
-            onPrimary: onPrimary,
-            stockRatio: stockRatio,
-            daysRemaining: daysRemaining,
-            stockoutDate: stockoutDate,
-            onRefill: onRefill,
-            onAdHocDose: onAdHocDose,
+        const SizedBox(height: kSpacingS),
+        SizedBox(
+          height: kStandardButtonHeight,
+          child: Row(
+            children: [
+              if (onAdHocDose != null) ...[
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onAdHocDose,
+                    style: headerActionButtonStyle,
+                    icon: Icon(
+                      Icons.medication_rounded,
+                      size: kIconSizeSmall,
+                      color: onPrimary,
+                    ),
+                    label: const Text('Dose'),
+                  ),
+                ),
+                const SizedBox(width: kButtonSpacing),
+              ],
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: onRefill,
+                  style: headerActionButtonStyle,
+                  icon: Icon(Icons.add, size: kIconSizeSmall, color: onPrimary),
+                  label: const Text('Refill'),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -517,43 +567,21 @@ class _AdherenceLinePainter extends CustomPainter {
 class _StockInfoCard extends StatelessWidget {
   const _StockInfoCard({
     required this.medication,
-    required this.theme,
     required this.onPrimary,
     required this.stockRatio,
     required this.daysRemaining,
     required this.stockoutDate,
-    required this.onRefill,
-    this.onAdHocDose,
   });
 
   final Medication medication;
-  final ThemeData theme;
   final Color onPrimary;
   final double stockRatio;
   final double? daysRemaining;
   final DateTime? stockoutDate;
-  final VoidCallback onRefill;
-  final VoidCallback? onAdHocDose;
 
   @override
   Widget build(BuildContext context) {
     final pct = stockRatio.clamp(0.0, 1.0);
-
-    final actionButtonStyle = OutlinedButton.styleFrom(
-      foregroundColor: onPrimary,
-      textStyle: buttonTextStyle(context),
-      side: BorderSide(
-        color: onPrimary.withValues(alpha: kOpacityMediumLow),
-        width: kBorderWidthThin,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-      ),
-      padding: kButtonContentPadding,
-      minimumSize: const Size(0, kStandardButtonHeight),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
-    );
 
     // Use centralized helper for consistent stock calculations
     final stockInfo = MedicationDisplayHelpers.calculateStock(medication);
@@ -703,45 +731,6 @@ class _StockInfoCard extends StatelessWidget {
               textAlign: TextAlign.end,
             ),
           ],
-
-          const SizedBox(height: kSpacingS),
-
-          // Action Buttons (Bottom-right aligned)
-          Align(
-            alignment: Alignment.centerRight,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (onAdHocDose != null) ...[
-                    OutlinedButton.icon(
-                      onPressed: onAdHocDose,
-                      style: actionButtonStyle,
-                      icon: Icon(
-                        Icons.medication_rounded,
-                        size: kIconSizeSmall,
-                        color: onPrimary,
-                      ),
-                      label: const Text('Dose'),
-                    ),
-                    const SizedBox(width: kButtonSpacing),
-                  ],
-                  OutlinedButton.icon(
-                    onPressed: onRefill,
-                    style: actionButtonStyle,
-                    icon: Icon(
-                      Icons.add,
-                      size: kIconSizeSmall,
-                      color: onPrimary,
-                    ),
-                    label: const Text('Refill'),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
