@@ -11,12 +11,9 @@
 
 ## Medication Screen
 - Seacrh results "no medications found " font is too dark.
-
+- Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red. 
 ### Large Cards
-- Large Cards are a bit too spacious, how can we compact them a bit.  [COMPLETED]
-- Large Cards MDV we can change the x/x reserve vials, change it to x sealed vials.  [COMPLETED]
-- Expiry needs to change colour to indicate. [COMPLETED]
-- The donut graph and the text underneath needs to be right aligned. [COMPLETED]
+
 
 ### Compact Cards
 
@@ -25,14 +22,9 @@
 ==============
 
 ## Medication Details Screen
-- The text under the DOnut graph, it needs some better alignment and styling. It looks not great. [COMPLETED]
-- When medicaiton is at 0% the percentage number nees to be red, same with the remaining value. make an orange for 20%. [COMPLETED]
-- Move the dose and refill buttons to the right side of app header. [COMPLETED]
-- Dont graph number values need to match colour coding of cards on med list screen (make sure not direct coded, colour blind options will be implemented at later stage) [COMPLETED]
-- Donut graph number needs an orange for coming close to empty. can we make sure this is matching for all donut graphs, large cards, compact cards and med details screen.
-- Dose button, is there another term we can use for this unscheduled dose? dose sounds like its part of the schedule [COMPLETED]
 ### Reports Card
-- We need to have a more compact wat to display the history. [COMPLETED]
+- History: cane paginate it? is that advisable?
+- How do other task apps display task history, is there a way to it vial a calend
 - What other graphs can we add?
 	- Doses taken vs missed (stacked bar per day/week)
 	- Time-of-day consistency (histogram of taken times)
@@ -51,7 +43,7 @@
 ## Add Medication
 
 ### Choose Medicaiotn Type Screen
-- Can we restyle this to suit the remaining app style. 
+- Can we restyle this to suit the remaining app style.  [COMPLETED]
 
 ### Choose Injection Type Screen
 - Can we restyle this to suit the remaining app style. 
