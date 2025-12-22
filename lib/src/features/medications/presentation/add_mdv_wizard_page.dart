@@ -337,7 +337,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             child: SingleChildScrollView(
               controller: _scrollController,
               padding: kPagePadding,
-              child: _buildStepContent(),
+              child: KeyedSubtree(
+                key: ValueKey<int>(_currentStep),
+                child: _buildStepContent(),
+              ),
             ),
           ),
           _buildNavigationBar(),

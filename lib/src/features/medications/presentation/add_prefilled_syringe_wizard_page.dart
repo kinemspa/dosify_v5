@@ -791,7 +791,7 @@ class _AddPrefilledSyringeWizardPageState
   @override
   Future<void> saveMedication() async {
     print('DEBUG PFS: saveMedication called');
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -837,8 +837,10 @@ class _AddPrefilledSyringeWizardPageState
         if (_protectLight) 'Protect from light',
       ].join('. ');
 
-      print('DEBUG PFS: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume');
-      
+      print(
+        'DEBUG PFS: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume',
+      );
+
       final med = Medication(
         id: id,
         form: MedicationForm.prefilledSyringe,
@@ -889,7 +891,10 @@ class _AddPrefilledSyringeWizardPageState
       print('DEBUG PFS: Stack: $stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error saving: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

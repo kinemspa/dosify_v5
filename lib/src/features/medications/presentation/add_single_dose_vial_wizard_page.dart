@@ -791,7 +791,7 @@ class _AddSingleDoseVialWizardPageState
   @override
   Future<void> saveMedication() async {
     print('DEBUG SDV: saveMedication called');
-    
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -837,8 +837,10 @@ class _AddSingleDoseVialWizardPageState
         if (_protectLight) 'Protect from light',
       ].join('. ');
 
-      print('DEBUG SDV: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume');
-      
+      print(
+        'DEBUG SDV: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume',
+      );
+
       final med = Medication(
         id: id,
         form: MedicationForm.singleDoseVial,
@@ -889,7 +891,10 @@ class _AddSingleDoseVialWizardPageState
       print('DEBUG SDV: Stack: $stack');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error saving: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

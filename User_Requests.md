@@ -10,9 +10,7 @@
 ==============
 
 ## Medication Screen
-- Search - Needs to prioritise Medname first, then Manufacturer, then description. [COMPLETED]
-- Seacrh results font is too dark.  [COMPLETED]
-- All cards/lists have different text colours for the Med Name. Make the med name primary colour for all. [COMPLETED]
+- Seacrh results "no medications found " font is too dark.
 
 ### Large Cards
 - Large Cards are a bit too spacious, how can we compact them a bit.  [COMPLETED]
@@ -65,7 +63,7 @@
 - Default Expires date for all Meds should be 90 days, not 364.  [COMPLETED]
 
 ### Add Medicaiton - Multi Dose Vial
-- Step 4, Sealed VIals, when landing on this screen, the Track Invnetory Check box shows ched for a split second then it vanishes. 
+- Step 4, Sealed VIals, when landing on this screen, the Track Invnetory Check box shows ched for a split second then it vanishes.  [COMPLETED]
 
 
 ==============
