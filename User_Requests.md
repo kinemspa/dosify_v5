@@ -24,7 +24,8 @@
 ## Medication Details Screen
 ### Reports Card
 - History: cane paginate it? is that advisable?
-- How do other task apps display task history, is there a way to it vial a calend
+    - How do other task apps display task history, is there a way to it vial a calendr view aswell? or not advisable?
+    - Can we expad
 - What other graphs can we add?
 	- Doses taken vs missed (stacked bar per day/week)
 	- Time-of-day consistency (histogram of taken times)
@@ -46,7 +47,7 @@
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
 
 ### Choose Injection Type Screen
-- Can we restyle this to suit the remaining app style. 
+- Can we restyle this to suit the remaining app style.  [COMPLETED]
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
