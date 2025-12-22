@@ -584,14 +584,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         strengthPerLabel = 'Strength per Vial';
     }
 
-    // Determine gauge color based on percentage
-    Color gaugeColor = onPrimary;
-    if (pct <= 10) {
-      gaugeColor = theme.colorScheme.errorContainer;
-    } else if (pct <= 25) {
-      gaugeColor = theme.colorScheme.tertiaryContainer;
+    // Determine gauge + label colors based on percentage.
+    // Requirement: 0% should be red; 20% should be orange.
+    final Color gaugeColor;
+    final Color gaugeLabelColor;
+    if (pct <= 0) {
+      gaugeColor = theme.colorScheme.error;
+      gaugeLabelColor = theme.colorScheme.error;
+    } else if (pct <= 20) {
+      gaugeColor = theme.colorScheme.tertiary;
+      gaugeLabelColor = theme.colorScheme.tertiary;
     } else {
-      gaugeColor = onPrimary.withValues(alpha: 0.9);
+      gaugeColor = onPrimary.withValues(alpha: kOpacityEmphasis);
+      gaugeLabelColor = onPrimary;
     }
 
     return IntrinsicHeight(
@@ -687,9 +692,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         size: kMedicationDetailDonutSize,
                         color: gaugeColor,
                         backgroundColor: onPrimary.withValues(
-                          alpha: 0.05,
+                          alpha: kOpacityFaint,
                         ), // Almost invisible
-                        textColor: onPrimary,
+                        textColor: gaugeLabelColor,
                         showGlow: false,
                         isOutline: false,
                         outerStrokeWidth: kMedicationDetailDonutStrokeWidth,
@@ -702,9 +707,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         size: kMedicationDetailDonutSize,
                         color: gaugeColor,
                         backgroundColor: onPrimary.withValues(
-                          alpha: 0.05,
+                          alpha: kOpacityFaint,
                         ), // Almost invisible
-                        textColor: onPrimary,
+                        textColor: gaugeLabelColor,
                         showGlow: false,
                         isOutline: false,
                         strokeWidth: kMedicationDetailDonutStrokeWidth,

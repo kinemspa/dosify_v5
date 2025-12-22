@@ -30,7 +30,8 @@
 
 ## Medication Details Screen
 - The text under the DOnut graph, it needs some better alignment and styling. It looks not great. [COMPLETED]
-- When medicaiton is at 0% the 5percentage number nees to be red, same with the remaining value.
+- When medicaiton is at 0% the percentage number nees to be red, same with the remaining value. make an orange for 20%. [COMPLETED]
+- Move the dose and refill buttons to the right side of app header. 
 
 ### Reports Card
 - We need to have a more compact wat to display the history. [COMPLETED]
