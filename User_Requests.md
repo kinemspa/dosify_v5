@@ -33,7 +33,7 @@
 - When medicaiton is at 0% the percentage number nees to be red, same with the remaining value. make an orange for 20%. [COMPLETED]
 - Move the dose and refill buttons to the right side of app header. [COMPLETED]
 - Dont graph number values need to match colour coding of cards on med list screen (make sure not direct coded, colour blind options will be implemented at later stage) [COMPLETED]
-- Dose button, is there another term we can use for this unscheduled dose? dose sounds like its part of the schedule
+- Dose button, is there another term we can use for this unscheduled dose? dose sounds like its part of the schedule [COMPLETED]
 ### Reports Card
 - We need to have a more compact wat to display the history. [COMPLETED]
 - What other graphs can we add?

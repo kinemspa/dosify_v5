@@ -197,7 +197,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                           size: kIconSizeSmall,
                           color: onPrimary,
                         ),
-                        label: const Text('Dose'),
+                          label: const Text('Log dose'),
                       ),
               ),
               const SizedBox(width: kButtonSpacing),
