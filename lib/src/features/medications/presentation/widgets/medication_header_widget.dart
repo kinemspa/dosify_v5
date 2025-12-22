@@ -182,21 +182,29 @@ class MedicationHeaderWidget extends ConsumerWidget {
           height: kStandardButtonHeight,
           child: Row(
             children: [
-              if (onAdHocDose != null) ...[
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onAdHocDose,
-                    style: headerActionButtonStyle,
-                    icon: Icon(
-                      Icons.medication_rounded,
-                      size: kIconSizeSmall,
-                      color: onPrimary,
-                    ),
-                    label: const Text('Dose'),
-                  ),
-                ),
-                const SizedBox(width: kButtonSpacing),
-              ],
+              // Slot 1 (reserved)
+              const Expanded(child: SizedBox.shrink()),
+              const SizedBox(width: kButtonSpacing),
+              // Slot 2 (reserved)
+              const Expanded(child: SizedBox.shrink()),
+              const SizedBox(width: kButtonSpacing),
+              // Slot 3 (Dose)
+              Expanded(
+                child: onAdHocDose == null
+                    ? const SizedBox.shrink()
+                    : OutlinedButton.icon(
+                        onPressed: onAdHocDose,
+                        style: headerActionButtonStyle,
+                        icon: Icon(
+                          Icons.medication_rounded,
+                          size: kIconSizeSmall,
+                          color: onPrimary,
+                        ),
+                        label: const Text('Dose'),
+                      ),
+              ),
+              const SizedBox(width: kButtonSpacing),
+              // Slot 4 (Refill)
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onRefill,
