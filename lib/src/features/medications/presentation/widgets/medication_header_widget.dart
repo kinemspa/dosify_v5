@@ -137,92 +137,6 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 ],
 
                 const SizedBox(height: 6),
-
-                // Dose + Refill Buttons (moved from right side)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Quick Dose Button
-                    if (onAdHocDose != null) ...[
-                      Material(
-                        color: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(
-                            color: onPrimary.withValues(alpha: 0.5),
-                            width: 1,
-                          ),
-                        ),
-                        child: InkWell(
-                          onTap: onAdHocDose,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 6,
-                              horizontal: 12,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.medication_rounded,
-                                  size: 14,
-                                  color: onPrimary,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Dose',
-                                  style: TextStyle(
-                                    color: onPrimary,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    // Refill Button
-                    Material(
-                      color: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: onPrimary.withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: onRefill,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 6,
-                            horizontal: 12,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add, size: 14, color: onPrimary),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Refill',
-                                style: TextStyle(
-                                  color: onPrimary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 // Adherence graph moved to MedicationReportsWidget
               ],
             ),
@@ -625,6 +539,22 @@ class _StockInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = stockRatio.clamp(0.0, 1.0);
 
+    final actionButtonStyle = OutlinedButton.styleFrom(
+      foregroundColor: onPrimary,
+      textStyle: buttonTextStyle(context),
+      side: BorderSide(
+        color: onPrimary.withValues(alpha: kOpacityMediumLow),
+        width: kBorderWidthThin,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      ),
+      padding: kButtonContentPadding,
+      minimumSize: const Size(0, kStandardButtonHeight),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
+    );
+
     // Use centralized helper for consistent stock calculations
     final stockInfo = MedicationDisplayHelpers.calculateStock(medication);
     final isMdv = stockInfo.isMdv;
@@ -773,6 +703,37 @@ class _StockInfoCard extends StatelessWidget {
               textAlign: TextAlign.end,
             ),
           ],
+
+          const SizedBox(height: kSpacingS),
+
+          // Action Buttons (Bottom-right aligned)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onAdHocDose != null) ...[
+                  OutlinedButton.icon(
+                    onPressed: onAdHocDose,
+                    style: actionButtonStyle,
+                    icon: Icon(
+                      Icons.medication_rounded,
+                      size: kIconSizeSmall,
+                      color: onPrimary,
+                    ),
+                    label: const Text('Dose'),
+                  ),
+                  const SizedBox(width: kButtonSpacing),
+                ],
+                OutlinedButton.icon(
+                  onPressed: onRefill,
+                  style: actionButtonStyle,
+                  icon: Icon(Icons.add, size: kIconSizeSmall, color: onPrimary),
+                  label: const Text('Refill'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
