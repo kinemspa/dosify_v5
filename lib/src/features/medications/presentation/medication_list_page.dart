@@ -672,11 +672,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       style: helperTextStyle(
                         context,
                         color:
-                            (m.expiry!.isBefore(
-                              DateTime.now().add(const Duration(days: 30)),
-                            ))
-                            ? cs.error
-                            : cs.onSurface.withValues(alpha: kOpacityMediumLow),
+                            (m.expiry!.isBefore(DateTime.now()))
+                                ? cs.error
+                                : (m.expiry!.isBefore(
+                                      DateTime.now().add(
+                                        const Duration(days: 30),
+                                      ),
+                                    ))
+                                    ? cs.tertiary
+                                    : cs.onSurface.withValues(
+                                      alpha: kOpacityMediumLow,
+                                    ),
                       )?.copyWith(fontSize: kFontSizeSmall),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1000,12 +1006,16 @@ class _MedLargeCard extends StatelessWidget {
     final baseStyle = helperTextStyle(context)?.copyWith(fontSize: 9);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
         // Single ring for all: shows Active Vial % for MDV, overall stock % for others
-        StockDonutGauge(
-          percentage: stockInfo.percentage,
-          primaryLabel: '$pctRounded%',
+        Align(
+          alignment: Alignment.centerRight,
+          child: StockDonutGauge(
+            percentage: stockInfo.percentage,
+            primaryLabel: '$pctRounded%',
+          ),
         ),
         const SizedBox(height: kSpacingXS),
         Align(
@@ -1068,7 +1078,7 @@ class _MedLargeCard extends StatelessWidget {
       return cs.error;
     }
     if (expiry.isBefore(now.add(const Duration(days: 30)))) {
-      return cs.error;
+      return cs.tertiary;
     }
     return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
   }
