@@ -58,6 +58,12 @@ class StockDonutGauge extends StatelessWidget {
     final fraction = clamped / 100.0;
     final gaugeSize = size ?? kStockDonutGaugeSize;
 
+    Color defaultLabelColor() {
+      if (clamped <= 0) return cs.error;
+      if (clamped < 20) return cs.tertiary;
+      return cs.primary;
+    }
+
     return SizedBox(
       width: gaugeSize,
       height: gaugeSize,
@@ -102,16 +108,7 @@ class StockDonutGauge extends StatelessWidget {
                   fontWeight: kFontWeightExtraBold,
                   // Text color changes based on stock level
                   color:
-                      textColor ??
-                      (clamped <= 0
-                          ? cs
-                                .error // Empty: red
-                          : clamped < 20
-                          ? cs
-                                .tertiary // Low: warning
-                          : cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMediumHigh,
-                            )),
+                      textColor ?? defaultLabelColor(),
                 ),
           ),
         ],
@@ -185,6 +182,13 @@ class DualStockDonutGauge extends StatelessWidget {
     final gaugeSize = size ?? kStockDonutGaugeSize;
     final innerSize = gaugeSize * kDualStockDonutInnerScale;
 
+    final outerClamped = outerPercentage.clamp(0, 100);
+    Color defaultLabelColor() {
+      if (outerClamped <= 0) return cs.error;
+      if (outerClamped < 20) return cs.tertiary;
+      return cs.primary;
+    }
+
     return SizedBox(
       width: gaugeSize,
       height: gaugeSize,
@@ -242,8 +246,7 @@ class DualStockDonutGauge extends StatelessWidget {
                 Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: kFontWeightExtraBold,
                   color:
-                      textColor ??
-                      cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+                      textColor ?? defaultLabelColor(),
                 ),
           ),
         ],

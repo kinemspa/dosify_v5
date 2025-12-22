@@ -587,6 +587,7 @@ class _StockInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final pct = stockRatio.clamp(0.0, 1.0);
 
     // Use centralized helper for consistent stock calculations
@@ -603,6 +604,16 @@ class _StockInfoCard extends StatelessWidget {
     final primaryLabel = isMdv
         ? '${stockInfo.percentage.round()}%'
         : '${(pct * 100).round()}%';
+
+    final labelPct = (isMdv ? stockInfo.percentage : (pct * 100)).clamp(0.0, 100.0);
+    final Color gaugeLabelColor;
+    if (labelPct <= 0) {
+      gaugeLabelColor = cs.error;
+    } else if (labelPct < 20) {
+      gaugeLabelColor = cs.tertiary;
+    } else {
+      gaugeLabelColor = onPrimary;
+    }
 
     // User requested White Donut with Thick Line (Large Card Style)
     // Large Card uses defaults: isOutline=false (Thick), showGlow=true
@@ -651,7 +662,7 @@ class _StockInfoCard extends StatelessWidget {
                 primaryLabel: primaryLabel,
                 color: onPrimary, // White arc
                 backgroundColor: onPrimary.withValues(alpha: 0.15),
-                textColor: onPrimary,
+                textColor: gaugeLabelColor,
                 showGlow: false,
                 isOutline: false,
                 strokeWidth: 10, // Slightly thicker stroke
@@ -678,7 +689,7 @@ class _StockInfoCard extends StatelessWidget {
                     ),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: onPrimary,
+                      color: gaugeLabelColor,
                     ),
                   ),
                   const TextSpan(text: ' / '),
