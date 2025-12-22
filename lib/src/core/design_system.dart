@@ -241,6 +241,11 @@ const double kReconErrorOpacity = 0.15;
 const Color kMedicationDetailGradientStart = Color(0xFF09A8BD);
 const Color kMedicationDetailGradientEnd = Color(0xFF18537D);
 
+/// Default expiry offset for newly added medications.
+///
+/// Used when the user hasn't selected an expiry yet.
+const int kDefaultMedicationExpiryDays = 90;
+
 // ============================================================================
 // CARD STYLING (Centralized)
 // ============================================================================

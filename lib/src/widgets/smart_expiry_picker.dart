@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import 'package:dosifi_v5/src/core/design_system.dart';
+
 class SmartExpiryPicker extends StatefulWidget {
   final DateTime initialDate;
   final DateTime firstDate;
@@ -24,7 +26,9 @@ class SmartExpiryPicker extends StatefulWidget {
     return showDialog<DateTime>(
       context: context,
       builder: (context) => SmartExpiryPicker(
-        initialDate: initialDate ?? now.add(const Duration(days: 365)),
+        initialDate:
+            initialDate ??
+            now.add(const Duration(days: kDefaultMedicationExpiryDays)),
         firstDate: firstDate ?? now.subtract(const Duration(days: 365)),
         lastDate: lastDate ?? now.add(const Duration(days: 365 * 10)),
       ),

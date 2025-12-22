@@ -33,6 +33,7 @@
 - When medicaiton is at 0% the percentage number nees to be red, same with the remaining value. make an orange for 20%. [COMPLETED]
 - Move the dose and refill buttons to the right side of app header. [COMPLETED]
 - Dont graph number values need to match colour coding of cards on med list screen (make sure not direct coded, colour blind options will be implemented at later stage) [COMPLETED]
+- Donut graph number needs an orange for coming close to empty. can we make sure this is matching for all donut graphs, large cards, compact cards and med details screen.
 - Dose button, is there another term we can use for this unscheduled dose? dose sounds like its part of the schedule [COMPLETED]
 ### Reports Card
 - We need to have a more compact wat to display the history. [COMPLETED]
@@ -61,7 +62,7 @@
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
-- Default Expires date for all Meds should be 90 days, not 364. 
+- Default Expires date for all Meds should be 90 days, not 364.  [COMPLETED]
 
 ### Add Medicaiton - Multi Dose Vial
 - Step 4, Sealed VIals, when landing on this screen, the Track Invnetory Check box shows ched for a split second then it vanishes. 

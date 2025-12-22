@@ -668,7 +668,11 @@ class _AddPrefilledSyringeWizardPageState
                     context,
                     firstDate: now,
                     lastDate: DateTime(now.year + 10),
-                    initialDate: _expiry ?? now.add(const Duration(days: 365)),
+                    initialDate:
+                        _expiry ??
+                        now.add(
+                          const Duration(days: kDefaultMedicationExpiryDays),
+                        ),
                   );
                   if (picked != null) {
                     setState(() => _expiry = picked);
