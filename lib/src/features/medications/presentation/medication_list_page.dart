@@ -727,16 +727,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 }
 
 class _MedicationStockStatusText {
-  static final NumberFormat _mlFormat2 = NumberFormat('0.00');
-
   static Color colorFor(BuildContext context, Medication m) {
     final theme = Theme.of(context);
 
     if (m.form == MedicationForm.multiDoseVial &&
         m.containerVolumeMl != null &&
         m.containerVolumeMl! > 0) {
-      final stockInfo = MedicationDisplayHelpers.calculateStock(m);
-      final pct = stockInfo.percentage.clamp(0, 100);
+      final totalMl = m.containerVolumeMl!.toDouble();
+      final currentRaw = (m.activeVialVolume ?? totalMl).toDouble();
+      final currentMl = currentRaw.clamp(0.0, totalMl);
+
+      final pct = ((currentMl / totalMl) * 100).clamp(0.0, 100.0);
       if (pct <= 0) return theme.colorScheme.error;
       if (pct < 20) return theme.colorScheme.tertiary;
       return theme.colorScheme.primary;
@@ -779,12 +780,10 @@ class _MedicationStockStatusText {
         style: resolvedBaseStyle,
         children: [
           TextSpan(
-            text: _mlFormat2.format(currentMl),
+            text: fmt2(currentMl),
             style: TextStyle(fontWeight: FontWeight.w800, color: colored),
           ),
-          TextSpan(
-            text: '/${_mlFormat2.format(totalMl)} mL of active vial',
-          ),
+          TextSpan(text: '/${fmt2(totalMl)} mL of vial'),
         ],
       );
     }

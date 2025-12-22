@@ -36,6 +36,7 @@ Normal (Controls and actions)
 Card behavior
 - Large card height: fixed height for consistent scan rhythm (current standard: 140 px).
 - Inventory fraction should show **Remaining / Originally Entered** (e.g., 18/30 tablets), not Remaining / Low-stock threshold.
+- MDV inventory fraction should show `current/total mL of vial` using up to 2 decimals (trim trailing zeros). Only the `current` value is color-coded: 0% = error, <20% = warning, otherwise primary.
 
 Select Medication Type Screen
 
