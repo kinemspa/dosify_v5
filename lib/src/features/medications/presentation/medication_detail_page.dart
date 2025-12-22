@@ -908,7 +908,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   _buildMergedDetailsSection(context, med),
                   const Divider(height: kSpacingXL),
 
-                  // Sealed Vials (MDV Only) - separate card for backup stock
+                  // Sealed Vials (MDV Only) - separate card for sealed vial stock
                   if (med.form == MedicationForm.multiDoseVial) ...[
                     _buildBackupStockSection(context, med),
                     const SizedBox(height: kSpacingM),
@@ -1804,7 +1804,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  /// Dialog for editing Backup Stock storage conditions
+  /// Dialog for editing sealed vial storage conditions
   void _showBackupStockConditionsDialog(BuildContext context, Medication med) {
     bool fridge = med.backupVialsRequiresRefrigeration;
     bool freezer = med.backupVialsRequiresFreezer;
@@ -1817,7 +1817,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final theme = Theme.of(ctx);
           return AlertDialog(
             title: Text(
-              'Sealed Vials Conditions',
+              'Sealed Vial Storage Conditions',
               style: TextStyle(color: theme.colorScheme.primary),
             ),
             content: Column(
@@ -1891,10 +1891,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 color: colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Text('Backup Stock', style: sectionTitleStyle(context)),
+              Text('Sealed Vials', style: sectionTitleStyle(context)),
               const Spacer(),
               Text(
-                '${_formatNumber(med.stockValue).split('.')[0]} vials',
+                '${_formatNumber(med.stockValue).split('.')[0]} sealed vials',
                 style: bodyTextStyle(
                   context,
                 )?.copyWith(fontWeight: kFontWeightBold),
@@ -2855,7 +2855,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   }
 }
 
-/// Dialog to add sealed vials to MDV reserve stock
+/// Dialog to add sealed vials to sealed vial stock
 void _showRestockSealedVialsDialog(BuildContext context, Medication med) async {
   final controller = TextEditingController(text: '1');
   final currentStock = med.stockValue.toInt();
@@ -2879,7 +2879,7 @@ void _showRestockSealedVialsDialog(BuildContext context, Medication med) async {
             children: [
               // Helper text
               Text(
-                'Add new sealed vials to your backup stock inventory.',
+                'Add new sealed vials to your sealed vial stock.',
                 style: helperTextStyle(context),
               ),
               const SizedBox(height: 16),

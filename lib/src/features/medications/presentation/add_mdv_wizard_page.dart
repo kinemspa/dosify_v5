@@ -1345,13 +1345,13 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           ],
         ),
         const SizedBox(height: 16),
-        // Backup Vials
+        // Sealed Vials
         SectionFormCard(
           title: 'Step 4: Sealed Inventory',
           neutral: true,
           children: [
             _reviewRow(
-              'Backup Vials',
+              'Sealed Vials',
               _hasBackupVials ? '$backupQty sealed vials' : '(None)',
             ),
             if (_hasBackupVials) ...[
