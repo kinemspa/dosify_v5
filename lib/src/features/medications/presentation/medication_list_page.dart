@@ -727,8 +727,21 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 }
 
 class _MedicationStockStatusText {
+  static final NumberFormat _mlFormat2 = NumberFormat('0.00');
+
   static Color colorFor(BuildContext context, Medication m) {
     final theme = Theme.of(context);
+
+    if (m.form == MedicationForm.multiDoseVial &&
+        m.containerVolumeMl != null &&
+        m.containerVolumeMl! > 0) {
+      final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+      final pct = stockInfo.percentage.clamp(0, 100);
+      if (pct <= 0) return theme.colorScheme.error;
+      if (pct < 20) return theme.colorScheme.tertiary;
+      return theme.colorScheme.primary;
+    }
+
     final baseline = m.lowStockThreshold;
     if (baseline != null && baseline > 0) {
       final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
@@ -748,14 +761,33 @@ class _MedicationStockStatusText {
     TextStyle? baseStyle,
   }) {
     final theme = Theme.of(context);
-    final resolvedBaseStyle =
-        (baseStyle ?? helperTextStyle(context))?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface.withValues(
-            alpha: kOpacityMediumHigh,
-          ),
-        );
+    final resolvedBaseStyle = (baseStyle ?? helperTextStyle(context))?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+    );
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+
+    if (m.form == MedicationForm.multiDoseVial &&
+        m.containerVolumeMl != null &&
+        m.containerVolumeMl! > 0) {
+      final totalMl = m.containerVolumeMl!.toDouble();
+      final currentRaw = (m.activeVialVolume ?? totalMl).toDouble();
+      final currentMl = currentRaw.clamp(0.0, totalMl);
+      final colored = colorFor(context, m);
+
+      return TextSpan(
+        style: resolvedBaseStyle,
+        children: [
+          TextSpan(
+            text: _mlFormat2.format(currentMl),
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(
+            text: '/${_mlFormat2.format(totalMl)} mL of active vial',
+          ),
+        ],
+      );
+    }
 
     if (stockInfo.isCountUnit) {
       final colored = colorFor(context, m);
