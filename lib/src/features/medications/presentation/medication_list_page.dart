@@ -591,60 +591,15 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   // Helpers for list view formatting (duplicated from card helpers)
   String _formatDateDdMm(DateTime d) => DateFormat('dd/MM').format(d);
 
-  Color _stockStatusColorFor(BuildContext context, Medication m) {
-    final theme = Theme.of(context);
-    final baseline = m.lowStockThreshold;
-    if (baseline != null && baseline > 0) {
-      final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
-      if (pct <= 0.2) return theme.colorScheme.error;
-      if (pct <= 0.5) return theme.colorScheme.tertiary;
-      return theme.colorScheme.primary;
-    }
-    if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
-      return theme.colorScheme.error;
-    }
-    return theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh);
-  }
-
-  TextSpan _stockStatusTextSpanFor(BuildContext context, Medication m) {
-    final theme = Theme.of(context);
-    final baseStyle = theme.textTheme.bodySmall?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
-    );
-    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
-
-    if (stockInfo.isCountUnit) {
-      final colored = _stockStatusColorFor(context, m);
-      return TextSpan(
-        style: baseStyle,
-        children: [
-          TextSpan(
-            text: '${stockInfo.current.floor()}',
-            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
-          ),
-          TextSpan(
-            text:
-                '/${stockInfo.total.floor()} ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
-          ),
-        ],
-      );
-    }
-
-    return TextSpan(
-      style: baseStyle,
-      children: [
-        TextSpan(
-          text: fmt2(m.stockValue),
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: _stockStatusColorFor(context, m),
-          ),
-        ),
-        TextSpan(
-          text: ' ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
-        ),
-      ],
+  TextSpan _stockStatusTextSpanFor(
+    BuildContext context,
+    Medication m, {
+    TextStyle? baseStyle,
+  }) {
+    return _MedicationStockStatusText.textSpanFor(
+      context,
+      m,
+      baseStyle: baseStyle,
     );
   }
 
@@ -701,7 +656,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   RichText(
-                    text: _stockStatusTextSpanFor(context, m),
+                    text: _stockStatusTextSpanFor(
+                      context,
+                      m,
+                      baseStyle: helperTextStyle(context),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
@@ -767,6 +726,72 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 }
 
+class _MedicationStockStatusText {
+  static Color colorFor(BuildContext context, Medication m) {
+    final theme = Theme.of(context);
+    final baseline = m.lowStockThreshold;
+    if (baseline != null && baseline > 0) {
+      final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
+      if (pct <= 0.2) return theme.colorScheme.error;
+      if (pct <= 0.5) return theme.colorScheme.tertiary;
+      return theme.colorScheme.primary;
+    }
+    if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
+      return theme.colorScheme.error;
+    }
+    return theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh);
+  }
+
+  static TextSpan textSpanFor(
+    BuildContext context,
+    Medication m, {
+    TextStyle? baseStyle,
+  }) {
+    final theme = Theme.of(context);
+    final resolvedBaseStyle =
+        (baseStyle ?? helperTextStyle(context))?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface.withValues(
+            alpha: kOpacityMediumHigh,
+          ),
+        );
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+
+    if (stockInfo.isCountUnit) {
+      final colored = colorFor(context, m);
+      return TextSpan(
+        style: resolvedBaseStyle,
+        children: [
+          TextSpan(
+            text: '${stockInfo.current.floor()}',
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(
+            text:
+                '/${stockInfo.total.floor()} ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
+          ),
+        ],
+      );
+    }
+
+    return TextSpan(
+      style: resolvedBaseStyle,
+      children: [
+        TextSpan(
+          text: fmt2(m.stockValue),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: colorFor(context, m),
+          ),
+        ),
+        TextSpan(
+          text: ' ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
+        ),
+      ],
+    );
+  }
+}
+
 class _MedCard extends StatelessWidget {
   const _MedCard({required this.m, required this.dense});
   final Medication m;
@@ -802,10 +827,7 @@ class _MedCard extends StatelessWidget {
                   m.name,
                   style: cardTitleStyle(
                     context,
-                  )?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: cs.primary,
-                  ),
+                  )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -819,11 +841,20 @@ class _MedCard extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: kSpacingXS),
-                Text(
-                  '${stockInfo.label} · $strengthAndFormLabel',
-                  style: helperTextStyle(context),
+                RichText(
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: helperTextStyle(context),
+                    children: [
+                      _MedicationStockStatusText.textSpanFor(
+                        context,
+                        m,
+                        baseStyle: helperTextStyle(context),
+                      ),
+                      TextSpan(text: ' · $strengthAndFormLabel'),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -871,10 +902,9 @@ class _MedLargeCard extends StatelessWidget {
       children: [
         Text(
           m.name,
-          style: cardTitleStyle(context)?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: cs.primary,
-          ),
+          style: cardTitleStyle(
+            context,
+          )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -936,10 +966,7 @@ class _MedLargeCard extends StatelessWidget {
   Widget _buildTrailing(BuildContext context) {
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
     final pctRounded = stockInfo.percentage.clamp(0, 100).round();
-
-    final cs = Theme.of(context).colorScheme;
-    final fractionText = stockInfo.fractionPart;
-    final trailingUnitText = stockInfo.unitPart;
+    final baseStyle = helperTextStyle(context)?.copyWith(fontSize: 9);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -954,19 +981,10 @@ class _MedLargeCard extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: RichText(
             textAlign: TextAlign.right,
-            text: TextSpan(
-              style: helperTextStyle(context)?.copyWith(fontSize: 9),
-              children: [
-                TextSpan(
-                  text: fractionText,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: cs.primary,
-                  ),
-                ),
-                if (trailingUnitText.isNotEmpty)
-                  TextSpan(text: ' $trailingUnitText'),
-              ],
+            text: _MedicationStockStatusText.textSpanFor(
+              context,
+              m,
+              baseStyle: baseStyle,
             ),
           ),
         ),
