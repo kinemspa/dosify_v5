@@ -3093,7 +3093,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
               children: [
                 // Helper text
                 Text(
-                  'Record a dose taken outside of your regular schedule.',
+                  'Record an adhoc (unscheduled) dose — an extra dose taken outside your regular schedule.',
                   style: helperTextStyle(stateContext),
                 ),
                 const SizedBox(height: 12),

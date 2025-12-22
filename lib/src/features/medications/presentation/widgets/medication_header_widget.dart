@@ -185,7 +185,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
               // Slot 2 (reserved)
               const Expanded(child: SizedBox.shrink()),
               const SizedBox(width: kButtonSpacing),
-              // Slot 3 (Extra)
+              // Slot 3 (Adhoc)
               Expanded(
                 child: onAdHocDose == null
                     ? const SizedBox.shrink()
@@ -197,7 +197,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                           size: kIconSizeSmall,
                           color: onPrimary,
                         ),
-                        label: const Text('Extra'),
+                        label: const Text('Adhoc'),
                       ),
               ),
               const SizedBox(width: kButtonSpacing),
