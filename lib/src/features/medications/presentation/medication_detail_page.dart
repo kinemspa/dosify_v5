@@ -714,10 +714,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               RichText(
                 textAlign: TextAlign.right,
                 text: TextSpan(
-                  style: TextStyle(
-                    color: onPrimary,
-                    fontSize: 10,
-                  ), // Reduced from 12
+                  style: helperTextStyle(
+                    context,
+                    color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+                  )?.copyWith(fontSize: kFontSizeSmall),
                   children: [
                     TextSpan(
                       text: _formatNumber(
@@ -727,15 +727,26 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             ? (med.activeVialVolume ?? med.containerVolumeMl!)
                             : med.stockValue,
                       ),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primaryContainer,
-                      ),
+                      style:
+                          helperTextStyle(
+                            context,
+                            color: onPrimary.withValues(
+                              alpha: kOpacityMediumHigh,
+                            ),
+                          )?.copyWith(
+                            fontSize: kFontSizeSmall,
+                            fontWeight: FontWeight.w800,
+                            color: gaugeColor,
+                          ),
                     ),
                     const TextSpan(text: ' / '),
                     TextSpan(
                       text: _formatNumber(initial),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: helperTextStyle(context, color: onPrimary)
+                          ?.copyWith(
+                            fontSize: kFontSizeSmall,
+                            fontWeight: FontWeight.w800,
+                          ),
                     ),
                     TextSpan(text: ' $unit'),
                   ],
@@ -743,21 +754,20 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               ),
               Text(
                 helperLabel,
-                style: TextStyle(
-                  color: onPrimary.withValues(alpha: 0.7),
-                  fontSize: 9, // Reduced
-                ),
+                style: helperTextStyle(
+                  context,
+                  color: onPrimary.withValues(alpha: kOpacityMediumLow),
+                )?.copyWith(fontSize: kFontSizeSmall),
                 textAlign: TextAlign.right,
               ),
               if (extraStockLabel != null) ...[
                 const SizedBox(height: 2),
                 Text(
                   extraStockLabel,
-                  style: TextStyle(
-                    color: onPrimary.withValues(alpha: 0.9),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: helperTextStyle(
+                    context,
+                    color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+                  )?.copyWith(fontWeight: FontWeight.w700),
                   textAlign: TextAlign.right,
                 ),
               ],
