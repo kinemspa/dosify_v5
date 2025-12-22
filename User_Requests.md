@@ -1,7 +1,6 @@
 # Things To Fix
 
 ## Global
-- Hamburger nav menu has vanished from all the app headers across the app. [COMPLETED]
 
 
 
@@ -11,7 +10,6 @@
 ==============
 
 ## Medication Screen
-- Filters and sorting. I need to be able filter on any filed and then sort on it. The Buttons are perfect, just need them to work better. [COMPLETED]
 - Search - Needs to prioritise Medname first, then Manufacturer, then description. [COMPLETED]
 - Seacrh results font is too dark.  [COMPLETED]
 - All cards/lists have different text colours for the Med Name. Make the med name primary colour for all. [COMPLETED]
@@ -37,12 +35,18 @@
 ### Reports Card
 - We need to have a more compact wat to display the history. [COMPLETED]
 - What other graphs can we add?
+	- Doses taken vs missed (stacked bar per day/week)
+	- Time-of-day consistency (histogram of taken times)
+	- Streaks / consistency score (sparkline)
+	- Action breakdown (taken / skipped / snoozed)
+	- Dose amount trend (actual dose over time)
+	- Inventory events timeline (refill/restock/vial opened markers)
 
 ### Medication Details Card
 - Restyle the entire card. Make it look nice. The dialog cards on this screen are something to go by. 
 - Font is black. [COMPLETED]
 - MDV Backup Stock - We need to unify the terminology across the app for this. We had reserve vials, sealed vials backup stock. Pick the best terminology for this and stikc with it. [COMPLETED]
-- MDV Backup Stock - restock button is way too big. 
+- MDV Backup Stock - restock button is way too big. [COMPLETED]
 
 ==============
 ## Add Medication

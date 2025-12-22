@@ -1907,13 +1907,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
         // Restock button
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: OutlinedButton.icon(
-            onPressed: () => _showRestockSealedVialsDialog(context, med),
-            icon: const Icon(Icons.add, size: 16),
-            label: const Text('Restock'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 36),
+          padding: const EdgeInsets.symmetric(horizontal: kSpacingL),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: () => _showRestockSealedVialsDialog(context, med),
+              icon: const Icon(Icons.add, size: kIconSizeSmall),
+              label: const Text('Restock'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, kStandardButtonHeight),
+              ),
             ),
           ),
         ),
