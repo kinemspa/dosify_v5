@@ -70,96 +70,97 @@ class MedicationHeaderWidget extends ConsumerWidget {
         ? medication.activeVialStorageLocation
         : null;
 
+    final effectiveRowCrossAxisAlignment =
+        crossAxisAlignment == CrossAxisAlignment.stretch
+        ? CrossAxisAlignment.start
+        : crossAxisAlignment;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
-          crossAxisAlignment: crossAxisAlignment,
+          crossAxisAlignment: effectiveRowCrossAxisAlignment,
           children: [
             Expanded(
               flex: 6,
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Space for the animated Name + form chip (rendered above in the SliverAppBar)
-                    const SizedBox(height: 68),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Space for the animated Name + form chip (rendered above in the SliverAppBar)
+                  const SizedBox(height: 68),
 
-                    // Description & Notes
-                    if (medication.description != null &&
-                        medication.description!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 2),
-                        child: Text(
-                          medication.description!,
-                          style: TextStyle(
-                            color: onPrimary.withValues(alpha: 0.9),
-                            fontSize: 10,
-                            fontStyle: FontStyle.italic,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  // Description & Notes
+                  if (medication.description != null &&
+                      medication.description!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        medication.description!,
+                        style: TextStyle(
+                          color: onPrimary.withValues(alpha: 0.9),
+                          fontSize: 10,
+                          fontStyle: FontStyle.italic,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
 
-                    if (medication.notes != null &&
-                        medication.notes!.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          medication.notes!,
-                          style: TextStyle(
-                            color: onPrimary.withValues(alpha: 0.6),
-                            fontStyle: FontStyle.italic,
-                            fontSize: 9,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  if (medication.notes != null && medication.notes!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        medication.notes!,
+                        style: TextStyle(
+                          color: onPrimary.withValues(alpha: 0.6),
+                          fontStyle: FontStyle.italic,
+                          fontSize: 9,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
 
-                    const SizedBox(height: 4),
+                  const SizedBox(height: 4),
 
-                    // Strength with Icon
+                  // Strength with Icon
+                  _HeaderInfoTile(
+                    icon: Icons.medication_liquid,
+                    label: strengthPerLabel,
+                    value:
+                        '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
+                    textColor: onPrimary,
+                    valueSize: 11,
+                  ),
+                  const SizedBox(height: kSpacingS),
+
+                  // Storage
+                  if (storageLabel != null && storageLabel.isNotEmpty) ...[
                     _HeaderInfoTile(
-                      icon: Icons.medication_liquid,
-                      label: strengthPerLabel,
-                      value:
-                          '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
+                      icon: Icons.location_on_outlined,
+                      label: 'Storage Location',
+                      value: storageLabel,
                       textColor: onPrimary,
                       valueSize: 11,
+                      trailingIcons: [
+                        if (medication.activeVialRequiresFreezer ||
+                            medication.requiresFreezer)
+                          Icons.severe_cold,
+                        if (medication.requiresRefrigeration ||
+                            medication.activeVialRequiresRefrigeration)
+                          Icons.ac_unit,
+                        if (medication.activeVialLightSensitive ||
+                            medication.lightSensitive)
+                          Icons.dark_mode_outlined,
+                      ],
                     ),
                     const SizedBox(height: kSpacingS),
-
-                    // Storage
-                    if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                      _HeaderInfoTile(
-                        icon: Icons.location_on_outlined,
-                        label: 'Storage Location',
-                        value: storageLabel,
-                        textColor: onPrimary,
-                        valueSize: 11,
-                        trailingIcons: [
-                          if (medication.activeVialRequiresFreezer ||
-                              medication.requiresFreezer)
-                            Icons.severe_cold,
-                          if (medication.requiresRefrigeration ||
-                              medication.activeVialRequiresRefrigeration)
-                            Icons.ac_unit,
-                          if (medication.activeVialLightSensitive ||
-                              medication.lightSensitive)
-                            Icons.dark_mode_outlined,
-                        ],
-                      ),
-                      const SizedBox(height: kSpacingS),
-                    ],
-
-                    const SizedBox(height: 6),
-                    // Adherence graph moved to MedicationReportsWidget
                   ],
-                ),
+
+                  const SizedBox(height: 6),
+                  // Adherence graph moved to MedicationReportsWidget
+                ],
               ),
             ),
             const SizedBox(width: 12),
