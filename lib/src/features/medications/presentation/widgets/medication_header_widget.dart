@@ -177,7 +177,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         SizedBox(
           height: kStandardButtonHeight,
           child: Row(
