@@ -232,7 +232,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                           kPageHorizontalPadding,
                                           4, // Reduced from 12
                                           kPageHorizontalPadding,
-                                          kSpacingXS,
+                                          0,
                                         ),
                                         child: MedicationHeaderWidget(
                                           medication: updatedMed,
@@ -482,7 +482,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         kPageHorizontalPadding,
                         4,
                         kPageHorizontalPadding,
-                        kSpacingXS,
+                        0,
                       ),
                       child: MedicationHeaderWidget(
                         medication: updatedMed,
