@@ -10,7 +10,7 @@
 ==============
 
 ## Medication Screen
-- Seacrh results "no medications found " font is too dark.
+- Seacrh results "no medications found " font is too dark. [COMPLETED]
 - Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red. 
 ### Large Cards
 
@@ -25,7 +25,7 @@
 ### Reports Card
 - History: cane paginate it? is that advisable?
     - How do other task apps display task history, is there a way to it vial a calendr view aswell? or not advisable?
-    - Can we expad
+    - Can we expad an entry with all its details when selected?
 - What other graphs can we add?
 	- Doses taken vs missed (stacked bar per day/week)
 	- Time-of-day consistency (histogram of taken times)
@@ -35,7 +35,7 @@
 	- Inventory events timeline (refill/restock/vial opened markers)
 
 ### Medication Details Card
-- Restyle the entire card. Make it look nice. The dialog cards on this screen are something to go by.  [COMPLETED]
+- Remove the grey background. never use this anywhere.
 - Font is black. [COMPLETED]
 - MDV Backup Stock - We need to unify the terminology across the app for this. We had reserve vials, sealed vials backup stock. Pick the best terminology for this and stikc with it. [COMPLETED]
 - MDV Backup Stock - restock button is way too big. [COMPLETED]

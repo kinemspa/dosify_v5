@@ -217,9 +217,20 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.search_off, size: 48),
-                          const SizedBox(height: 12),
-                          Text('No medications found for "$_query"'),
+                          Icon(
+                            Icons.search_off,
+                            size: kEmptyStateIconSize,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                          ),
+                          const SizedBox(height: kSpacingM),
+                          Text(
+                            'No medications found for "$_query"',
+                            style: mutedTextStyle(context),
+                          ),
                           const SizedBox(height: 8),
                           TextButton(
                             onPressed: () => setState(() {

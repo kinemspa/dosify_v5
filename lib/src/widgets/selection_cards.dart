@@ -38,9 +38,9 @@ class SelectionHeaderCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: bodyTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightBold,
-                  ),
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightBold),
                 ),
                 const SizedBox(height: kSpacingXS),
                 Text(subtitle, style: mutedTextStyle(context)),
@@ -96,9 +96,9 @@ class SelectionOptionCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: bodyTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightBold,
-                  ),
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightBold),
                 ),
                 const SizedBox(height: kSpacingXS),
                 Text(subtitle, style: mutedTextStyle(context)),
