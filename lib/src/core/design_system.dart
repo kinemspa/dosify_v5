@@ -57,9 +57,23 @@ const double kIconSizeSmall = 16;
 const double kIconSizeMedium = 20;
 const double kIconSizeLarge = 24;
 
+/// Empty state icon size
+const double kEmptyStateIconSize = 48;
+
 /// Card/Container constraints
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
+
+/// Medication details reports card
+const double kMedicationReportsTabHeight = 280;
+
+/// Adherence chart (reports)
+const double kAdherenceChartLineStrokeWidth = 2.5;
+const double kAdherenceChartGridStrokeWidth = 0.5;
+const double kAdherenceChartPointOuterRadius = 4;
+const double kAdherenceChartPointInnerRadius = 2;
+const double kAdherenceChartValueScale = 0.8;
+const double kAdherenceChartVerticalPaddingFraction = 0.1;
 
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
@@ -172,6 +186,13 @@ const double kOpacityMediumLow = 0.50; // Helper/support text
 const double kOpacityLow = 0.40; // Hint text, disabled states
 const double kOpacityVeryLow = 0.30; // Very subtle text
 const double kOpacityMinimal = 0.20; // Almost invisible
+
+/// Decorative opacities (for subtle fills/gradients)
+const double kOpacityTransparent = 0.0;
+const double kOpacityFaint = 0.05;
+const double kOpacitySubtleLow = 0.10;
+const double kOpacitySubtle = 0.15;
+const double kOpacityEmphasis = 0.90;
 
 /// Specific use case opacity
 const double kHelperTextOpacity = kOpacityMediumLow;

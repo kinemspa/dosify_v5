@@ -14,26 +14,27 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
 /// Replaces DoseHistoryWidget with expanded functionality
 class MedicationReportsWidget extends StatefulWidget {
-  const MedicationReportsWidget({
-    required this.medication,
-    super.key,
-  });
+  const MedicationReportsWidget({required this.medication, super.key});
 
   final Medication medication;
 
   @override
-  State<MedicationReportsWidget> createState() => _MedicationReportsWidgetState();
+  State<MedicationReportsWidget> createState() =>
+      _MedicationReportsWidgetState();
 }
 
 class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isExpanded = true;  // Collapsible state
+  bool _isExpanded = true; // Collapsible state
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this); // History + Adherence
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+    ); // History + Adherence
   }
 
   @override
@@ -45,7 +46,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
 
     return Container(
       decoration: buildStandardCardDecoration(context: context),
@@ -58,22 +58,31 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingL,
+                vertical: kSpacingM,
+              ),
               child: Row(
                 children: [
-                  Icon(Icons.bar_chart_rounded, size: 20, color: cs.primary),
-                  const SizedBox(width: 8),
-                  Text('Reports', style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  Icon(
+                    Icons.bar_chart_rounded,
+                    size: kIconSizeMedium,
                     color: cs.primary,
-                  )),
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  Text(
+                    'Reports',
+                    style: cardTitleStyle(
+                      context,
+                    )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+                  ),
                   const Spacer(),
                   AnimatedRotation(
                     turns: _isExpanded ? 0 : -0.25,
-                    duration: const Duration(milliseconds: 200),
+                    duration: kAnimationNormal,
                     child: Icon(
                       Icons.keyboard_arrow_down,
-                      size: 24,
+                      size: kIconSizeLarge,
                       color: cs.onSurfaceVariant,
                     ),
                   ),
@@ -83,8 +92,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           ),
           // Collapsible content
           AnimatedCrossFade(
-            duration: const Duration(milliseconds: 200),
-            crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: kAnimationNormal,
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             firstChild: const SizedBox.shrink(),
             secondChild: Column(
               mainAxisSize: MainAxisSize.min,
@@ -95,16 +106,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   labelColor: cs.primary,
                   unselectedLabelColor: cs.onSurfaceVariant,
                   indicatorColor: cs.primary,
-                  dividerColor: Colors.transparent,
-                  labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  dividerColor: cs.surface.withValues(
+                    alpha: kOpacityTransparent,
+                  ),
+                  labelStyle: helperTextStyle(context)?.copyWith(
+                    fontSize: kFontSizeMedium,
+                    fontWeight: kFontWeightSemiBold,
+                  ),
                   tabs: const [
-                    Tab(text: 'History', icon: Icon(Icons.history, size: 18)),
-                    Tab(text: 'Adherence', icon: Icon(Icons.analytics_outlined, size: 18)),
+                    Tab(
+                      text: 'History',
+                      icon: Icon(Icons.history, size: kIconSizeMedium),
+                    ),
+                    Tab(
+                      text: 'Adherence',
+                      icon: Icon(
+                        Icons.analytics_outlined,
+                        size: kIconSizeMedium,
+                      ),
+                    ),
                   ],
                 ),
                 // Tab content
                 SizedBox(
-                  height: 280,
+                  height: kMedicationReportsTabHeight,
                   child: TabBarView(
                     controller: _tabController,
                     children: [
@@ -126,11 +151,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
 
     // Get dose logs for this medication (limit to 50 for performance)
-    final logs = doseLogBox.values
-        .where((log) => log.medicationId == widget.medication.id)
-        .toList()
-      ..sort((a, b) => b.actionTime.compareTo(a.actionTime));
-    
+    final logs =
+        doseLogBox.values
+            .where((log) => log.medicationId == widget.medication.id)
+            .toList()
+          ..sort((a, b) => b.actionTime.compareTo(a.actionTime));
+
     final displayLogs = logs.take(50).toList();
 
     if (displayLogs.isEmpty) {
@@ -140,15 +166,17 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           children: [
             Icon(
               Icons.history_outlined,
-              size: 48,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: kEmptyStateIconSize,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: kSpacingM),
             Text('No dose history', style: helperTextStyle(context)),
-            const SizedBox(height: 4),
+            const SizedBox(height: kSpacingXS),
             Text(
               'Recorded doses will appear here',
-              style: helperTextStyle(context)?.copyWith(fontSize: 11),
+              style: helperTextStyle(
+                context,
+              )?.copyWith(fontSize: kFontSizeSmall),
             ),
           ],
         ),
@@ -156,11 +184,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(kSpacingS),
       itemCount: displayLogs.length,
       separatorBuilder: (context, index) => Divider(
         height: 1,
-        color: cs.outlineVariant.withValues(alpha: 0.3),
+        color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
       ),
       itemBuilder: (context, index) {
         final log = displayLogs[index];
@@ -183,11 +211,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         break;
       case DoseAction.skipped:
         icon = Icons.cancel_outlined;
-        iconColor = Colors.orange;
+        iconColor = cs.tertiary;
         break;
       case DoseAction.snoozed:
         icon = Icons.snooze;
-        iconColor = Colors.amber;
+        iconColor = cs.secondary;
         break;
     }
 
@@ -195,19 +223,19 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: kStepperButtonSize,
+            height: kStepperButtonSize,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
+              color: iconColor.withValues(alpha: kOpacitySubtle),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 18, color: iconColor),
+            child: Icon(icon, size: kIconSizeSmall, color: iconColor),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: kSpacingS),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,53 +244,58 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   children: [
                     Text(
                       _formatAmount(displayValue),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                        fontSize: 14,
-                      ),
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightBold),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: kSpacingXS),
                     Text(displayUnit, style: helperTextStyle(context)),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingXS,
+                        vertical: kSpacingXS / 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: iconColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(4),
+                        color: iconColor.withValues(alpha: kOpacitySubtle),
+                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
                       ),
                       child: Text(
                         log.action.name,
-                        style: TextStyle(
-                          color: iconColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: helperTextStyle(context, color: iconColor)
+                            ?.copyWith(
+                              fontSize: kFontSizeHint,
+                              fontWeight: kFontWeightBold,
+                            ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: kSpacingXS),
                 Row(
                   children: [
                     Text(
                       dateFormat.format(log.actionTime),
-                      style: helperTextStyle(context)?.copyWith(fontSize: 11),
+                      style: helperTextStyle(
+                        context,
+                      )?.copyWith(fontSize: kFontSizeSmall),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: kSpacingS),
                     Text(
                       timeFormat.format(log.actionTime),
-                      style: helperTextStyle(context)?.copyWith(fontSize: 11),
+                      style: helperTextStyle(
+                        context,
+                      )?.copyWith(fontSize: kFontSizeSmall),
                     ),
                   ],
                 ),
                 if (log.notes != null && log.notes!.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: kSpacingXS),
                   Text(
                     log.notes!,
                     style: helperTextStyle(context)?.copyWith(
                       fontStyle: FontStyle.italic,
-                      fontSize: 11,
+                      fontSize: kFontSizeSmall,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -277,9 +310,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   }
 
   Widget _buildAdherenceTab(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final adherenceData = _calculateAdherenceData();
+    final avgPct = _getAveragePercentage(adherenceData);
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -289,15 +322,17 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           children: [
             Icon(
               Icons.analytics_outlined,
-              size: 48,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: kEmptyStateIconSize,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: kSpacingM),
             Text('No schedule data', style: helperTextStyle(context)),
-            const SizedBox(height: 4),
+            const SizedBox(height: kSpacingXS),
             Text(
               'Create a schedule to track adherence',
-              style: helperTextStyle(context)?.copyWith(fontSize: 11),
+              style: helperTextStyle(
+                context,
+              )?.copyWith(fontSize: kFontSizeSmall),
             ),
           ],
         ),
@@ -305,7 +340,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(kSpacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -315,42 +350,53 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               Text('Last 7 Days', style: helperTextStyle(context)),
               const Spacer(),
               Text(
-                '${_getAveragePercentage(adherenceData)}% avg',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: _getAdherenceColor(_getAveragePercentage(adherenceData)),
-                  fontWeight: FontWeight.w600,
+                '${avgPct}% avg',
+                style: bodyTextStyle(context)?.copyWith(
+                  color: _getAdherenceColor(cs, avgPct),
+                  fontWeight: kFontWeightSemiBold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: kSpacingL),
 
           // Adherence graph
           Expanded(
             child: CustomPaint(
-              painter: _AdherenceLinePainter(data: adherenceData, color: cs.primary),
+              painter: _AdherenceLinePainter(
+                data: adherenceData,
+                color: cs.primary,
+              ),
               child: Container(),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
 
           // Day labels
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (i) {
               final day = DateTime.now().subtract(Duration(days: 6 - i));
-              final dayName = ['M', 'T', 'W', 'T', 'F', 'S', 'S'][day.weekday - 1];
+              final dayName = [
+                'M',
+                'T',
+                'W',
+                'T',
+                'F',
+                'S',
+                'S',
+              ][day.weekday - 1];
               return Text(
                 dayName,
-                style: TextStyle(
-                  color: cs.onSurfaceVariant,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                    ?.copyWith(
+                      fontSize: kFontSizeHint,
+                      fontWeight: kFontWeightMedium,
+                    ),
               );
             }),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingM),
 
           // Summary stats row
           _buildSummaryStats(context, adherenceData),
@@ -360,11 +406,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   }
 
   Widget _buildSummaryStats(BuildContext context, List<double> data) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     final validDays = data.where((v) => v >= 0).toList();
-    final average = validDays.isEmpty ? 0.0 : validDays.reduce((a, b) => a + b) / validDays.length;
+    final average = validDays.isEmpty
+        ? 0.0
+        : validDays.reduce((a, b) => a + b) / validDays.length;
     final perfectDays = data.where((v) => v >= 1.0).length;
 
     return Row(
@@ -374,10 +421,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             context,
             label: 'Average',
             value: '${(average * 100).toInt()}%',
-            color: _getAdherenceColor((average * 100).toInt()),
+            color: _getAdherenceColor(cs, (average * 100).toInt()),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: kSpacingS),
         Expanded(
           child: _buildStatChip(
             context,
@@ -396,24 +443,22 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     required String value,
     required Color color,
   }) {
-    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: kFieldContentPadding,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: kOpacitySubtleLow),
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(label, style: theme.textTheme.bodySmall?.copyWith(color: color)),
-          const SizedBox(width: 6),
+          Text(label, style: helperTextStyle(context, color: color)),
+          const SizedBox(width: kFieldSpacing),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: bodyTextStyle(
+              context,
+            )?.copyWith(color: color, fontWeight: kFontWeightSemiBold),
           ),
         ],
       ),
@@ -423,13 +468,14 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   int _getAveragePercentage(List<double> data) {
     final validDays = data.where((v) => v >= 0).toList();
     if (validDays.isEmpty) return 0;
-    return ((validDays.reduce((a, b) => a + b) / validDays.length) * 100).toInt();
+    return ((validDays.reduce((a, b) => a + b) / validDays.length) * 100)
+        .toInt();
   }
 
-  Color _getAdherenceColor(int percentage) {
-    if (percentage >= 80) return Colors.green;
-    if (percentage >= 50) return Colors.orange;
-    return Colors.red;
+  Color _getAdherenceColor(ColorScheme cs, int percentage) {
+    if (percentage >= 80) return cs.primary;
+    if (percentage >= 50) return cs.tertiary;
+    return cs.error;
   }
 
   List<double> _calculateAdherenceData() {
@@ -446,7 +492,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final adherenceData = <double>[];
 
     for (int i = 6; i >= 0; i--) {
-      final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
+      final day = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: i));
       final dayEnd = day.add(const Duration(days: 1));
 
       int expectedDoses = 0;
@@ -458,12 +508,18 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         expectedDoses += timesPerDay;
       }
 
-      final dayLogs = doseLogBox.values.where((log) =>
-          log.medicationId == widget.medication.id &&
-          log.scheduledTime.isAfter(day.subtract(const Duration(seconds: 1))) &&
-          log.scheduledTime.isBefore(dayEnd));
+      final dayLogs = doseLogBox.values.where(
+        (log) =>
+            log.medicationId == widget.medication.id &&
+            log.scheduledTime.isAfter(
+              day.subtract(const Duration(seconds: 1)),
+            ) &&
+            log.scheduledTime.isBefore(dayEnd),
+      );
 
-      takenDoses = dayLogs.where((log) => log.action == DoseAction.taken).length;
+      takenDoses = dayLogs
+          .where((log) => log.action == DoseAction.taken)
+          .length;
 
       if (expectedDoses == 0) {
         adherenceData.add(-1.0);
@@ -477,7 +533,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   String _formatAmount(double value) {
     if (value == value.toInt()) return value.toInt().toString();
-    return value.toStringAsFixed(2).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    return value
+        .toStringAsFixed(2)
+        .replaceAll(RegExp(r'0+$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
   }
 }
 
@@ -493,7 +552,7 @@ class _AdherenceLinePainter extends CustomPainter {
 
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = kAdherenceChartLineStrokeWidth
       ..strokeCap = StrokeCap.round;
 
     final fillPaint = Paint()..style = PaintingStyle.fill;
@@ -504,8 +563,8 @@ class _AdherenceLinePainter extends CustomPainter {
 
     // Draw background grid
     final gridPaint = Paint()
-      ..color = color.withValues(alpha: 0.1)
-      ..strokeWidth = 0.5;
+      ..color = color.withValues(alpha: kOpacitySubtleLow)
+      ..strokeWidth = kAdherenceChartGridStrokeWidth;
 
     for (int i = 0; i <= 4; i++) {
       final y = height * (i / 4);
@@ -522,7 +581,10 @@ class _AdherenceLinePainter extends CustomPainter {
       if (value < 0) continue;
 
       final x = i * spacing;
-      final y = height - (value * height * 0.8) - (height * 0.1);
+      final y =
+          height -
+          (value * height * kAdherenceChartValueScale) -
+          (height * kAdherenceChartVerticalPaddingFraction);
 
       if (!hasStarted) {
         linePath.moveTo(x, y);
@@ -542,13 +604,18 @@ class _AdherenceLinePainter extends CustomPainter {
       final gradient = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.05)],
+        colors: [
+          color.withValues(alpha: kOpacityVeryLow),
+          color.withValues(alpha: kOpacityFaint),
+        ],
       );
 
-      fillPaint.shader = gradient.createShader(Rect.fromLTWH(0, 0, width, height));
+      fillPaint.shader = gradient.createShader(
+        Rect.fromLTWH(0, 0, width, height),
+      );
       canvas.drawPath(areaPath, fillPaint);
 
-      paint.color = color.withValues(alpha: 0.9);
+      paint.color = color.withValues(alpha: kOpacityEmphasis);
       canvas.drawPath(linePath, paint);
 
       // Draw points
@@ -557,18 +624,21 @@ class _AdherenceLinePainter extends CustomPainter {
         if (value < 0) continue;
 
         final x = i * spacing;
-        final y = height - (value * height * 0.8) - (height * 0.1);
+        final y =
+            height -
+            (value * height * kAdherenceChartValueScale) -
+            (height * kAdherenceChartVerticalPaddingFraction);
 
         canvas.drawCircle(
           Offset(x, y),
-          4,
+          kAdherenceChartPointOuterRadius,
           Paint()
-            ..color = color.withValues(alpha: 0.9)
+            ..color = color.withValues(alpha: kOpacityEmphasis)
             ..style = PaintingStyle.fill,
         );
         canvas.drawCircle(
           Offset(x, y),
-          2,
+          kAdherenceChartPointInnerRadius,
           Paint()
             ..color = color
             ..style = PaintingStyle.fill,

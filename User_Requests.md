@@ -34,7 +34,7 @@
 - The text under the DOnut graph, it needs some better alignment and styling. It looks not great. [COMPLETED]
 
 ### Reports Card
-- We need to have a more compact wat to display the history. 
+- We need to have a more compact wat to display the history. [COMPLETED]
 - What other graphs can we add?
 
 ### Medication Details Card
