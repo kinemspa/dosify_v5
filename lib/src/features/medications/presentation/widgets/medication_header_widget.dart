@@ -155,10 +155,8 @@ class MedicationHeaderWidget extends ConsumerWidget {
                           Icons.dark_mode_outlined,
                       ],
                     ),
-                    const SizedBox(height: kSpacingS),
                   ],
 
-                  const SizedBox(height: 6),
                   // Adherence graph moved to MedicationReportsWidget
                 ],
               ),
@@ -177,7 +175,6 @@ class MedicationHeaderWidget extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: kSpacingXS),
         SizedBox(
           height: kStandardButtonHeight,
           child: Row(
