@@ -299,9 +299,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 1,
-                                              ),
+                                                    horizontal: 6,
+                                                    vertical: 1,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: onPrimary.withValues(
                                                   alpha: 0.2,

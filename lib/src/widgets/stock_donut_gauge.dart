@@ -47,7 +47,7 @@ class StockDonutGauge extends StatelessWidget {
   /// Whether to render as an outline (thin borders) instead of a filled arc.
   final bool isOutline;
   final TextStyle? labelStyle;
-  
+
   /// Custom stroke width for the donut arc. If null, defaults based on size.
   final double? strokeWidth;
 
@@ -101,11 +101,17 @@ class StockDonutGauge extends StatelessWidget {
                 Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: kFontWeightExtraBold,
                   // Text color changes based on stock level
-                  color: textColor ?? (clamped <= 0 
-                      ? cs.error  // Empty: red
-                      : clamped < 20 
-                          ? cs.tertiary  // Low: warning
-                          : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh)),
+                  color:
+                      textColor ??
+                      (clamped <= 0
+                          ? cs
+                                .error // Empty: red
+                          : clamped < 20
+                          ? cs
+                                .tertiary // Low: warning
+                          : cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumHigh,
+                            )),
                 ),
           ),
         ],
@@ -225,8 +231,7 @@ class DualStockDonutGauge extends StatelessWidget {
                 alpha: 0.7,
               ), // Higher opacity for visibility
               isOutline: isOutline,
-              strokeWidth:
-                  innerStrokeWidth ?? kDualStockDonutInnerStrokeWidth,
+              strokeWidth: innerStrokeWidth ?? kDualStockDonutInnerStrokeWidth,
             ),
           ),
           // Centre label.

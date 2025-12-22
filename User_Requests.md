@@ -54,8 +54,8 @@
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
 - Default Expires date for all Meds should be 90 days, not 364. 
 
-
-
+### Add Medicaiton - Multi Dose Vial
+- Step 4, Sealed VIals, when landing on this screen, the Track Invnetory Check box shows ched for a split second then it vanishes. 
 
 
 ==============
