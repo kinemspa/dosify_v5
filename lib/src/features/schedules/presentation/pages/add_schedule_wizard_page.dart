@@ -328,33 +328,28 @@ class _AddScheduleWizardPageState
         }
 
         if (medications.isEmpty) {
+          final cs = Theme.of(context).colorScheme;
           return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-              border: Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.outline.withValues(alpha: 0.2),
-              ),
-            ),
+            padding: kInsetSectionPadding,
+            decoration: buildInsetSectionDecoration(context: context),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.medication_outlined,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: kIconSizeLarge,
+                  color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: kSpacingS),
                 Text(
                   'No medications available',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: cardTitleStyle(context),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: kSpacingXS),
                 Text(
                   'Add a medication first to create a schedule',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: helperTextStyle(context),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -362,19 +357,22 @@ class _AddScheduleWizardPageState
           );
         }
 
-        return ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: medications.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final med = medications[index];
-            return _MedicationListRow(
-              medication: med,
-              isSelected: false,
-              onTap: () => _selectMedication(med),
-            );
-          },
+        // Keep the selector usable with long medication lists.
+        final maxHeight = MediaQuery.sizeOf(context).height * 0.45;
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: ListView.separated(
+            itemCount: medications.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final med = medications[index];
+              return _MedicationListRow(
+                medication: med,
+                isSelected: false,
+                onTap: () => _selectMedication(med),
+              );
+            },
+          ),
         );
       },
     );
