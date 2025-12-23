@@ -71,7 +71,7 @@
 
 ==============
 # Add Schedule
-- Select Medication screen, Use the list view to display the meds. 
+- Select Medication screen, Use the list view to display the meds. [COMPLETED]
 - What happens on this screen if there are 20, 30, 100 medicatinos. How will this display?
 - Once the med is selected, we need to restyle all of this. It looks disgusting. Look at the edit dialgos on the medicaiont details screens that are used to edit an existing medication. 
 - Needs helper text to instruct the user what to do, what the options do. 
