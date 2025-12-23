@@ -8,8 +8,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -311,7 +313,7 @@ class _AddScheduleWizardPageState
         final medications = box.values.where((m) => m.stockValue > 0).toList();
 
         if (_selectedMed != null) {
-          return _MedicationCard(
+          return _MedicationListRow(
             medication: _selectedMed!,
             isSelected: true,
             onTap: () => setState(() {
@@ -360,17 +362,19 @@ class _AddScheduleWizardPageState
           );
         }
 
-        return Column(
-          children: medications.map((med) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _MedicationCard(
-                medication: med,
-                isSelected: false,
-                onTap: () => _selectMedication(med),
-              ),
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: medications.length,
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemBuilder: (context, index) {
+            final med = medications[index];
+            return _MedicationListRow(
+              medication: med,
+              isSelected: false,
+              onTap: () => _selectMedication(med),
             );
-          }).toList(),
+          },
         );
       },
     );
@@ -424,98 +428,163 @@ class _AddScheduleWizardPageState
     });
   }
 
+  void _syncLegacyDoseFieldsFromResult(DoseCalculationResult result) {
+    if (!result.success) return;
+
+    if (result.doseTabletQuarters != null) {
+      final tabletCount = result.doseTabletQuarters! / 4;
+      _doseValue.text = fmt2(tabletCount);
+      _doseUnit.text = 'tablets';
+      return;
+    }
+
+    if (result.doseCapsules != null) {
+      _doseValue.text = result.doseCapsules!.toString();
+      _doseUnit.text = 'capsules';
+      return;
+    }
+
+    if (result.doseSyringes != null) {
+      _doseValue.text = result.doseSyringes!.toString();
+      _doseUnit.text = 'syringes';
+      return;
+    }
+
+    if (result.doseVials != null) {
+      _doseValue.text = result.doseVials!.toString();
+      _doseUnit.text = 'vials';
+      return;
+    }
+
+    if (result.doseVolumeMicroliter != null) {
+      // Keep existing unit choice when possible.
+      if (_doseUnit.text.trim().toLowerCase() == 'ml') {
+        _doseValue.text = fmt2(result.doseVolumeMicroliter! / 1000);
+        return;
+      }
+    }
+
+    if (result.doseMassMcg != null) {
+      final unit = _doseUnit.text.trim().toLowerCase();
+      final mcg = result.doseMassMcg!;
+      if (unit == 'mg') {
+        _doseValue.text = fmt2(mcg / 1000);
+        return;
+      }
+      if (unit == 'g') {
+        _doseValue.text = fmt2(mcg / 1000000);
+        return;
+      }
+      _doseValue.text = fmt2(mcg);
+      if (_doseUnit.text.trim().isEmpty) {
+        _doseUnit.text = 'mcg';
+      }
+    }
+  }
+
   Widget _buildDoseConfiguration() {
-    return DoseInputField(
-      medicationForm: _selectedMed!.form,
-      strengthPerUnitMcg: _getStrengthPerUnitMcg() ?? 0,
-      volumePerUnitMicroliter: _getVolumePerUnitMicroliter(),
-      strengthUnit: _getStrengthUnit() ?? '',
-      totalVialStrengthMcg: _getTotalVialStrengthMcg(),
-      totalVialVolumeMicroliter: _getTotalVialVolumeMicroliter(),
-      syringeType: _getSyringeType(),
-      initialStrengthMcg: _getInitialStrengthMcg(),
-      initialTabletCount: _getInitialTabletCount(),
-      initialCapsuleCount: _getInitialCapsuleCount(),
-      initialInjectionCount: _getInitialInjectionCount(),
-      initialVialCount: _getInitialVialCount(),
-      onDoseChanged: (result) {
-        setState(() {
-          _doseResult = result;
-          _doseValue.text = result.displayText.split(' ').first;
-          _doseUnit.text = result.displayText.split(' ').skip(1).join(' ');
-          _maybeAutoName();
-        });
-      },
+    return Column(
+      children: [
+        DoseInputField(
+          medicationForm: _selectedMed!.form,
+          strengthPerUnitMcg: _getStrengthPerUnitMcg() ?? 0,
+          volumePerUnitMicroliter: _getVolumePerUnitMicroliter(),
+          strengthUnit: _getStrengthUnit() ?? '',
+          totalVialStrengthMcg: _getTotalVialStrengthMcg(),
+          totalVialVolumeMicroliter: _getTotalVialVolumeMicroliter(),
+          syringeType: _getSyringeType(),
+          initialStrengthMcg: _getInitialStrengthMcg(),
+          initialTabletCount: _getInitialTabletCount(),
+          initialCapsuleCount: _getInitialCapsuleCount(),
+          initialInjectionCount: _getInitialInjectionCount(),
+          onDoseChanged: (result) {
+            setState(() {
+              _doseResult = result;
+              _syncLegacyDoseFieldsFromResult(result);
+              _maybeAutoName();
+            });
+          },
+        ),
+        const SizedBox(height: kSpacingL),
+        _buildSection(context, 'Dosing Times', [_buildTimesList()]),
+      ],
     );
   }
 
-  // Dose calculation helpers
-  double? _getStrengthPerUnitMcg() {
-    if (_selectedMed == null) return null;
-    final med = _selectedMed!;
+  // ==================== STEP 2: SCHEDULE PATTERN ====================
 
-    if (med.form == MedicationForm.tablet ||
-        med.form == MedicationForm.capsule) {
-      return switch (med.strengthUnit) {
-        Unit.mcg => med.strengthValue,
-        Unit.mg => med.strengthValue * 1000,
-        Unit.g => med.strengthValue * 1e6,
-        Unit.units => med.strengthValue,
-        _ => null,
-      };
+  Widget _buildSchedulePatternStep() {
+    return Column(
+      children: [
+        _buildSection(context, 'Schedule Pattern', [
+          _buildScheduleModeSelector(),
+          _buildScheduleModeFields(),
+        ]),
+      ],
+    );
+  }
+
+  // ==================== DOSE HELPERS (DoseInputField) ====================
+
+  double? _getStrengthPerUnitMcg() {
+    final med = _selectedMed;
+    if (med == null) return null;
+
+    switch (med.form) {
+      case MedicationForm.tablet:
+      case MedicationForm.capsule:
+      case MedicationForm.prefilledSyringe:
+      case MedicationForm.singleDoseVial:
+        final value = med.strengthValue;
+        return switch (med.strengthUnit) {
+          Unit.mcg || Unit.mcgPerMl => value,
+          Unit.mg || Unit.mgPerMl => value * 1000,
+          Unit.g || Unit.gPerMl => value * 1000000,
+          Unit.units || Unit.unitsPerMl => value,
+        };
+      case MedicationForm.multiDoseVial:
+        return 0;
     }
-    return null;
   }
 
   double? _getVolumePerUnitMicroliter() {
-    if (_selectedMed == null) return null;
-    final med = _selectedMed!;
+    final med = _selectedMed;
+    if (med == null) return null;
 
-    if (med.form == MedicationForm.prefilledSyringe ||
-        med.form == MedicationForm.singleDoseVial) {
-      final volumeMl = med.containerVolumeMl ?? 1.0;
-      return volumeMl * 1000;
+    if (med.volumePerDose != null) {
+      final volume = med.volumePerDose!;
+      return switch (med.volumeUnit) {
+        VolumeUnit.ml => volume * 1000,
+        VolumeUnit.l => volume * 1000000,
+        null => volume * 1000,
+      };
     }
+
     return null;
   }
 
   String? _getStrengthUnit() {
-    if (_selectedMed == null) return null;
-    return _unitDisplayName(_selectedMed!.strengthUnit);
-  }
+    final med = _selectedMed;
+    if (med == null) return null;
 
-  String _unitDisplayName(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'IU';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'IU/mL';
-    }
+    return switch (med.strengthUnit) {
+      Unit.mcg || Unit.mcgPerMl => 'mcg',
+      Unit.mg || Unit.mgPerMl => 'mg',
+      Unit.g || Unit.gPerMl => 'g',
+      Unit.units || Unit.unitsPerMl => 'units',
+    };
   }
 
   double? _getTotalVialStrengthMcg() {
-    if (_selectedMed == null ||
-        _selectedMed!.form != MedicationForm.multiDoseVial) {
+    final med = _selectedMed;
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
       return null;
     }
 
-    final strength = _selectedMed!.strengthValue;
-    final perMl = _selectedMed!.perMlValue ?? strength;
-    final volume = _selectedMed!.containerVolumeMl ?? 1.0;
+    final perMl = med.perMlValue ?? med.strengthValue;
+    final volumeMl = med.containerVolumeMl ?? 1.0;
 
-    final mcgPerMl = switch (_selectedMed!.strengthUnit) {
+    final mcgPerMl = switch (med.strengthUnit) {
       Unit.mcgPerMl => perMl,
       Unit.mgPerMl => perMl * 1000,
       Unit.gPerMl => perMl * 1000000,
@@ -523,27 +592,30 @@ class _AddScheduleWizardPageState
       _ => perMl,
     };
 
-    return mcgPerMl * volume * 1000;
+    return mcgPerMl * volumeMl * 1000;
   }
 
   double? _getTotalVialVolumeMicroliter() {
-    if (_selectedMed == null ||
-        _selectedMed!.form != MedicationForm.multiDoseVial) {
+    final med = _selectedMed;
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
       return null;
     }
-    final volumeMl = _selectedMed!.containerVolumeMl ?? 1.0;
+
+    final volumeMl = med.containerVolumeMl ?? 1.0;
     return volumeMl * 1000;
   }
 
   SyringeType? _getSyringeType() {
-    if (_selectedMed == null ||
-        _selectedMed!.form != MedicationForm.multiDoseVial) {
+    final med = _selectedMed;
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
       return null;
     }
 
-    if (_selectedSyringeType != null) return _selectedSyringeType;
+    if (_selectedSyringeType != null) {
+      return _selectedSyringeType;
+    }
 
-    final volumeMl = _selectedMed!.containerVolumeMl ?? 1.0;
+    final volumeMl = med.containerVolumeMl ?? 1.0;
     if (volumeMl <= 0.3) return SyringeType.ml_0_3;
     if (volumeMl <= 0.5) return SyringeType.ml_0_5;
     if (volumeMl <= 1.0) return SyringeType.ml_1_0;
@@ -573,26 +645,6 @@ class _AddScheduleWizardPageState
   int? _getInitialInjectionCount() {
     if (widget.initial == null) return null;
     return widget.initial!.doseSyringes;
-  }
-
-  int? _getInitialVialCount() {
-    if (widget.initial == null) return null;
-    return widget.initial!.doseVials;
-  }
-
-  // ==================== STEP 2: SCHEDULE PATTERN ====================
-
-  Widget _buildSchedulePatternStep() {
-    return Column(
-      children: [
-        _buildSection(context, 'Schedule Pattern', [
-          _buildScheduleModeSelector(),
-          _buildScheduleModeFields(),
-        ]),
-        const SizedBox(height: 16),
-        _buildSection(context, 'Dosing Times', [_buildTimesList()]),
-      ],
-    );
   }
 
   Widget _buildScheduleModeSelector() {
@@ -1158,10 +1210,10 @@ class _AddScheduleWizardPageState
   }
 }
 
-// ==================== MEDICATION CARD ====================
+// ==================== MEDICATION LIST ROW ====================
 
-class _MedicationCard extends StatelessWidget {
-  const _MedicationCard({
+class _MedicationListRow extends StatelessWidget {
+  const _MedicationListRow({
     required this.medication,
     required this.isSelected,
     required this.onTap,
@@ -1171,140 +1223,91 @@ class _MedicationCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  String _formatStrength() {
-    final value = medication.strengthValue;
-    final formattedValue = value == value.roundToDouble()
-        ? value.toInt().toString()
-        : value.toString();
-    return '$formattedValue ${_unitDisplayName(medication.strengthUnit)}';
-  }
-
-  String _unitDisplayName(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'IU';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'IU/mL';
+  Color _stockColorFor(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    if (medication.stockValue <= 0) return cs.error;
+    final low = medication.lowStockThreshold?.toInt() ?? 5;
+    if (medication.lowStockEnabled && medication.stockValue <= low) {
+      return cs.tertiary;
     }
-  }
-
-  String _formatStock() {
-    switch (medication.form) {
-      case MedicationForm.tablet:
-        final qty = medication.stockValue.toInt();
-        return '$qty tablet${qty == 1 ? '' : 's'}';
-      case MedicationForm.capsule:
-        final qty = medication.stockValue.toInt();
-        return '$qty capsule${qty == 1 ? '' : 's'}';
-      case MedicationForm.prefilledSyringe:
-        final qty = medication.stockValue.toInt();
-        return '$qty syringe${qty == 1 ? '' : 's'}';
-      case MedicationForm.singleDoseVial:
-        final qty = medication.stockValue.toInt();
-        return '$qty vial${qty == 1 ? '' : 's'}';
-      case MedicationForm.multiDoseVial:
-        final qty = medication.stockValue.toInt();
-        return '$qty vial${qty == 1 ? '' : 's'}';
-    }
-  }
-
-  IconData _getFormIcon(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return Icons.medication;
-      case MedicationForm.capsule:
-        return Icons.medication;
-      case MedicationForm.prefilledSyringe:
-        return Icons.vaccines;
-      case MedicationForm.singleDoseVial:
-        return Icons.science;
-      case MedicationForm.multiDoseVial:
-        return Icons.science;
-    }
+    return cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          border: Border.all(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
+    final cs = Theme.of(context).colorScheme;
+    final manufacturer = (medication.manufacturer ?? '').trim();
+    final strengthLabel =
+        '${fmt2(medication.strengthValue)} ${MedicationDisplayHelpers.unitLabel(medication.strengthUnit)} '
+        '${MedicationDisplayHelpers.formLabel(medication.form, plural: true)}';
+    final detailLabel = manufacturer.isEmpty
+        ? strengthLabel
+        : '$manufacturer · $strengthLabel';
+
+    final stockInfo = MedicationDisplayHelpers.calculateStock(medication);
+    final stockColor = _stockColorFor(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingS,
+            vertical: kSpacingXS,
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      medication.name,
+                      style: cardTitleStyle(context)?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      detailLabel,
+                      style: helperTextStyle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              child: Icon(
-                _getFormIcon(medication.form),
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: kSpacingS),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    medication.name,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(_formatStrength(), style: theme.textTheme.bodySmall),
-                  Text(
-                    _formatStock(),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                    stockInfo.label,
+                    style: helperTextStyle(
+                      context,
+                      color: stockColor,
+                    )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
                   ),
                 ],
               ),
-            ),
-            if (isSelected)
+              const SizedBox(width: kSpacingXS),
               Icon(
-                Icons.check_circle,
-                color: theme.colorScheme.primary,
-                size: 24,
-              )
-            else
-              Icon(
-                Icons.circle_outlined,
-                color: theme.colorScheme.outlineVariant,
-                size: 24,
+                isSelected ? Icons.close : Icons.chevron_right,
+                size: kIconSizeMedium,
+                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
