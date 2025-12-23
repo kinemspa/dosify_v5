@@ -354,7 +354,7 @@ const EdgeInsets kInsetSectionPadding = EdgeInsets.all(kSpacingS);
 BoxDecoration buildInsetSectionDecoration({
   required BuildContext context,
   double borderRadius = kBorderRadiusMedium,
-  double backgroundOpacity = 0.5,
+  double backgroundOpacity = 1.0,
 }) {
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
@@ -495,7 +495,7 @@ InputDecoration buildFieldDecoration(
     // Suppress error text to keep field height stable
     errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
     filled: true,
-    fillColor: cs.surfaceContainerLowest,
+    fillColor: cs.surface,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -552,7 +552,7 @@ InputDecoration buildCompactFieldDecoration({
     constraints: const BoxConstraints(minHeight: kFieldHeight),
     errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
     filled: true,
-    fillColor: cs.surfaceContainerLowest,
+    fillColor: cs.surface,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),

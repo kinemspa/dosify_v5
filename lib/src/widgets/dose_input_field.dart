@@ -674,7 +674,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     required ColorScheme cs,
   }) {
     return Material(
-      color: isSelected ? cs.surfaceContainerHigh : cs.surfaceContainerLowest,
+      color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surface,
       borderRadius: BorderRadius.circular(kBorderRadiusMedium),
       child: InkWell(
         onTap: onTap,
@@ -773,7 +773,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
         padding: EdgeInsets.zero,
         iconSize: kIconSizeMedium,
         style: IconButton.styleFrom(
-          backgroundColor: cs.surfaceContainerHigh,
+          backgroundColor: cs.surface,
           foregroundColor: cs.onSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusSmall),
@@ -797,7 +797,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
             horizontal: kCardInnerSpacing,
             vertical: 0,
           ),
-          backgroundColor: cs.surfaceContainerHighest,
+          backgroundColor: cs.surface,
           labelStyle: Theme.of(
             context,
           ).textTheme.labelMedium?.copyWith(fontWeight: kFontWeightMedium),
@@ -845,7 +845,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
       width: double.infinity,
       padding: const EdgeInsets.all(kCardPadding),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         border: Border.all(
           color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
@@ -894,6 +894,8 @@ class _DoseInputFieldState extends State<DoseInputField> {
   Widget _buildResultDisplay(ColorScheme cs) {
     if (_result == null) return const SizedBox.shrink();
 
+    final warningTint = cs.tertiary;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(kCardPadding),
@@ -901,14 +903,14 @@ class _DoseInputFieldState extends State<DoseInputField> {
         color: _result!.hasError
             ? cs.errorContainer
             : (_result!.hasWarning
-                  ? Colors.orange.withValues(alpha: 0.1)
-                  : cs.surfaceContainerHigh),
+                  ? warningTint.withValues(alpha: 0.10)
+                  : cs.surface),
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         border: Border.all(
           color: _result!.hasError
               ? cs.error
               : (_result!.hasWarning
-                    ? Colors.orange
+                    ? warningTint
                     : cs.outlineVariant.withValues(alpha: kCardBorderOpacity)),
           width: kBorderWidthThin,
         ),
@@ -923,9 +925,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               fontWeight: kFontWeightSemiBold,
               color: _result!.hasError
                   ? cs.onErrorContainer
-                  : (_result!.hasWarning
-                        ? Colors.orange.shade900
-                        : cs.onSurface),
+                  : (_result!.hasWarning ? warningTint : cs.onSurface),
             ),
           ),
 
@@ -938,7 +938,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
                 Icon(
                   Icons.warning_amber_rounded,
                   size: kIconSizeSmall,
-                  color: Colors.orange,
+                  color: warningTint,
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -946,7 +946,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
                     _result!.warning!,
                     style: helperTextStyle(
                       context,
-                    )?.copyWith(color: Colors.orange.shade900),
+                    )?.copyWith(color: warningTint),
                   ),
                 ),
               ],
