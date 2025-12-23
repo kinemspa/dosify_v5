@@ -526,9 +526,12 @@ class _DoseInputFieldState extends State<DoseInputField> {
         widget.syringeType == null)
       return;
 
+    final clamped = newUnits.clamp(0, widget.syringeType!.maxUnits.toDouble());
+    final snapped = double.parse(clamped.toStringAsFixed(1));
+
     // Calculate from units
     final result = DoseCalculator.calculateFromUnitsMDV(
-      syringeUnits: newUnits,
+      syringeUnits: snapped,
       totalVialStrengthMcg: widget.totalVialStrengthMcg!,
       totalVialVolumeMicroliter: widget.totalVialVolumeMicroliter!,
       syringeType: widget.syringeType!,
@@ -551,7 +554,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
           _controller.text = volumeMl.toString();
           break;
         case MdvInputMode.units:
-          _controller.text = newUnits.toString();
+          _controller.text = _formatUnits(snapped);
           break;
       }
     }
@@ -588,6 +591,14 @@ class _DoseInputFieldState extends State<DoseInputField> {
           const SizedBox(height: kCardInnerSpacing),
         ],
 
+        // MDV units mode: show syringe gauge as the primary input affordance
+        if (widget.medicationForm == MedicationForm.multiDoseVial &&
+            _mdvMode == MdvInputMode.units &&
+            widget.syringeType != null) ...[
+          _buildMdvUnitsSyringeRow(cs),
+          const SizedBox(height: kCardInnerSpacing),
+        ],
+
         // MDV syringe graphic (when result available)
         if (widget.medicationForm == MedicationForm.multiDoseVial &&
             _result != null &&
@@ -610,6 +621,12 @@ class _DoseInputFieldState extends State<DoseInputField> {
         if (_result != null) _buildResultDisplay(cs),
       ],
     );
+  }
+
+  String _formatUnits(double v) {
+    final s = v.toStringAsFixed(1);
+    if (s.endsWith('.0')) return s.substring(0, s.length - 2);
+    return s;
   }
 
   bool _supportsModeToggle() {
@@ -846,6 +863,51 @@ class _DoseInputFieldState extends State<DoseInputField> {
       interactive: true, // Week 4: Interactive fine-tuning
       onChanged: _onSyringeDragChanged,
       showValueLabel: true, // Show value during drag
+    );
+  }
+
+  Widget _buildMdvUnitsSyringeRow(ColorScheme cs) {
+    final totalUnits = widget.syringeType!.maxUnits;
+    final parsedUnits = double.tryParse(_controller.text.trim()) ?? 0;
+    final fillUnits = (_result?.syringeUnits ?? parsedUnits)
+        .clamp(0, totalUnits.toDouble())
+        .toDouble();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Drag the syringe or use +/- for fine adjustments (U = Units)',
+          style: helperTextStyle(context),
+        ),
+        const SizedBox(height: kSpacingS),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildStepperButton(
+              icon: Icons.remove,
+              onPressed: () => _decrement(customStep: 1),
+              cs: cs,
+            ),
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: WhiteSyringeGauge(
+                totalUnits: totalUnits.toDouble(),
+                fillUnits: fillUnits,
+                interactive: true,
+                onChanged: _onSyringeDragChanged,
+                showValueLabel: true,
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            _buildStepperButton(
+              icon: Icons.add,
+              onPressed: () => _increment(customStep: 1),
+              cs: cs,
+            ),
+          ],
+        ),
+      ],
     );
   }
 

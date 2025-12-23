@@ -667,7 +667,8 @@ class _AddScheduleWizardPageState
       _ => perMl,
     };
 
-    return mcgPerMl * volumeMl * 1000;
+    // total mcg in vial = (mcg/mL) * (mL)
+    return mcgPerMl * volumeMl;
   }
 
   double? _getTotalVialVolumeMicroliter() {

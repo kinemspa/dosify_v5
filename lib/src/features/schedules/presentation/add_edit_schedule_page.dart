@@ -1153,7 +1153,8 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
       _ => perMl,
     };
 
-    return mcgPerMl * volume * 1000; // Total mcg in vial
+    // total mcg in vial = (mcg/mL) * (mL)
+    return mcgPerMl * volume;
   }
 
   double? _getTotalVialVolumeMicroliter(Medication? med) {
