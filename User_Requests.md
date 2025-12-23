@@ -73,8 +73,8 @@
 # Add Schedule
 - Select Medication screen, Use the list view to display the meds. [COMPLETED]
 - What happens on this screen if there are 20, 30, 100 medicatinos. How will this display? [COMPLETED]
-- Once the med is selected, we need to restyle all of this. It looks disgusting. Look at the edit dialgos on the medicaiont details screens that are used to edit an existing medication. 
-- Needs helper text to instruct the user what to do, what the options do. 
+- Once the med is selected, we need to restyle all of this. It looks disgusting. Look at the edit dialgos on the medicaiont details screens that are used to edit an existing medication.  [COMPLETED]
+- Needs helper text to instruct the user what to do, what the options do.  [COMPLETED]
 - Remove trailing 0s. 
 - Dynamic summary, Example = Dose: 1 tablets x 50.0mg = 50.mg total. This needs to be more consise. Also when its s singular remove the plural s. 
 - If a tbalet is selected, incrementing the strenght optino should only increment in units of the med unit that are avaiable as a calculaiton to the unit x strenght per unit. SO if 1 tablet = 10mg. 1st increment will be 2.5mg = 1/4 tablet, 5mg = 1/2 tablet and so forth. Same for all med types. Capsules are whole numbers only, same with single dose vials and pre filled syringes. 

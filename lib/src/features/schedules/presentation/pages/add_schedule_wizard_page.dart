@@ -297,12 +297,25 @@ class _AddScheduleWizardPageState
       children: [
         _buildSection(context, 'Select Medication', [
           _buildMedicationSelector(),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft(
+            _selectedMed == null
+                ? 'Tap a medication to select it. Only medications with stock are shown.'
+                : 'Tap the selected medication to change it.',
+          ),
         ]),
         if (_selectedMed != null) ...[
           const SizedBox(height: 16),
           _buildSection(context, 'Configure Dose', [_buildDoseConfiguration()]),
         ],
       ],
+    );
+  }
+
+  Widget _helperBelowLeft(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(text, style: helperTextStyle(context)),
     );
   }
 
@@ -503,8 +516,16 @@ class _AddScheduleWizardPageState
             });
           },
         ),
+        const SizedBox(height: kSpacingS),
+        _helperBelowLeft(
+          'Set the per-dose amount. You can fine-tune later if needed.',
+        ),
         const SizedBox(height: kSpacingL),
-        _buildSection(context, 'Dosing Times', [_buildTimesList()]),
+        _buildSection(context, 'Dosing Times', [
+          _buildTimesList(),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft('Tap a time to edit it.'),
+        ]),
       ],
     );
   }
@@ -515,7 +536,39 @@ class _AddScheduleWizardPageState
     return Column(
       children: [
         _buildSection(context, 'Schedule Pattern', [
-          _buildScheduleModeSelector(),
+          LabelFieldRow(
+            label: 'Schedule Type',
+            field: Field36(
+              child: DropdownButtonFormField<ScheduleMode>(
+                value: _mode,
+                decoration: buildFieldDecoration(
+                  context,
+                  hint: 'Select schedule type',
+                ),
+                items: ScheduleMode.values.map((mode) {
+                  return DropdownMenuItem(
+                    value: mode,
+                    child: Text(_modeLabel(mode)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _mode = value ?? ScheduleMode.everyDay;
+                    _days.clear();
+                    _daysOfMonth.clear();
+                    _useCycle = false;
+
+                    if (_mode == ScheduleMode.everyDay) {
+                      _days.addAll([1, 2, 3, 4, 5, 6, 7]);
+                    }
+                    _maybeAutoName();
+                  });
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft('Choose how often this schedule repeats.'),
           _buildScheduleModeFields(),
         ]),
       ],
@@ -645,31 +698,6 @@ class _AddScheduleWizardPageState
     return widget.initial!.doseSyringes;
   }
 
-  Widget _buildScheduleModeSelector() {
-    return DropdownButtonFormField<ScheduleMode>(
-      value: _mode,
-      decoration: const InputDecoration(
-        labelText: 'Schedule Type',
-        border: OutlineInputBorder(),
-      ),
-      items: ScheduleMode.values.map((mode) {
-        return DropdownMenuItem(value: mode, child: Text(_modeLabel(mode)));
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _mode = value ?? ScheduleMode.everyDay;
-          _days.clear();
-          _daysOfMonth.clear();
-          _useCycle = false;
-
-          if (_mode == ScheduleMode.everyDay) {
-            _days.addAll([1, 2, 3, 4, 5, 6, 7]);
-          }
-        });
-      },
-    );
-  }
-
   String _modeLabel(ScheduleMode m) => switch (m) {
     ScheduleMode.everyDay => 'Every day',
     ScheduleMode.daysOfWeek => 'Days of the week',
@@ -681,12 +709,10 @@ class _AddScheduleWizardPageState
     switch (_mode) {
       case ScheduleMode.everyDay:
         return Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: kSpacingS),
           child: Text(
             'Schedule will repeat every day',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: helperTextStyle(context),
           ),
         );
 
@@ -769,9 +795,7 @@ class _AddScheduleWizardPageState
             const SizedBox(height: 8),
             Text(
               'Take medication for ${_daysOn.text} days, then pause for ${_daysOff.text} days',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              style: helperTextStyle(context),
             ),
           ],
         );
@@ -814,22 +838,30 @@ class _AddScheduleWizardPageState
           final i = entry.key;
           final time = entry.value;
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              dense: true,
-              leading: const Icon(Icons.access_time),
-              title: Text(time.format(context)),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: _times.length > 1
-                    ? () => setState(() => _times.removeAt(i))
-                    : null,
-              ),
-              onTap: () => _pickTimeAt(i),
-              tileColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            padding: const EdgeInsets.only(bottom: kSpacingS),
+            child: Container(
+              decoration: buildInsetSectionDecoration(context: context),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: kSpacingS,
+                ),
+                dense: true,
+                leading: Icon(
+                  Icons.access_time,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant
+                      .withValues(alpha: kOpacityMedium),
+                ),
+                title: Text(
+                  time.format(context),
+                  style: bodyTextStyle(context),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: _times.length > 1
+                      ? () => setState(() => _times.removeAt(i))
+                      : null,
+                ),
+                onTap: () => _pickTimeAt(i),
               ),
             ),
           );
@@ -887,15 +919,20 @@ class _AddScheduleWizardPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
-          controller: _name,
-          decoration: const InputDecoration(
-            labelText: 'Schedule Name',
-            border: OutlineInputBorder(),
-            hintText: 'e.g., Morning Dose',
+        LabelFieldRow(
+          label: 'Schedule Name',
+          field: Field36(
+            child: TextFormField(
+              controller: _name,
+              style: bodyTextStyle(context),
+              decoration: buildFieldDecoration(
+                context,
+                hint: 'e.g., Morning Dose',
+              ).copyWith(border: InputBorder.none),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: kSpacingS),
         Row(
           children: [
             Checkbox(
@@ -910,7 +947,7 @@ class _AddScheduleWizardPageState
             Expanded(
               child: Text(
                 'Auto-generate name',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: helperTextStyle(context),
               ),
             ),
           ],
@@ -961,7 +998,7 @@ class _AddScheduleWizardPageState
 
   Widget _buildReviewRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: kSpacingM),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -969,14 +1006,12 @@ class _AddScheduleWizardPageState
             width: 100,
             child: Text(
               label,
-              style: Theme.of(
+              style: bodyTextStyle(
                 context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              )?.copyWith(fontWeight: kFontWeightSemiBold),
             ),
           ),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(value, style: bodyTextStyle(context))),
         ],
       ),
     );
@@ -1183,24 +1218,18 @@ class _AddScheduleWizardPageState
     List<Widget> children,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
+      padding: const EdgeInsets.all(kSpacingL),
+      decoration: buildInsetSectionDecoration(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(
+            style: cardTitleStyle(
               context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+            )?.copyWith(fontWeight: kFontWeightSemiBold),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingM),
           ...children,
         ],
       ),
