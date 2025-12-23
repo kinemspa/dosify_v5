@@ -410,38 +410,64 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
   void _increment({double? customStep}) {
     final current = double.tryParse(_controller.text) ?? 0;
-    double step;
-
-    if (customStep != null) {
-      step = customStep;
-    } else if (widget.medicationForm == MedicationForm.tablet && _isCountMode) {
-      step = 0.25; // 1/4 tablet increments
-    } else {
-      step = 1;
-    }
-
-    final newValue = current + step;
+    final step = _defaultStepperStep(customStep: customStep);
+    final newValue = _snapToReasonablePrecision(current + step);
     _controller.text = _formatStepperValue(newValue);
     _calculate();
   }
 
   void _decrement({double? customStep}) {
     final current = double.tryParse(_controller.text) ?? 0;
-    double step;
-
-    if (customStep != null) {
-      step = customStep;
-    } else if (widget.medicationForm == MedicationForm.tablet && _isCountMode) {
-      step = 0.25; // 1/4 tablet increments
-    } else {
-      step = 1;
-    }
-
-    final newValue = current - step;
+    final step = _defaultStepperStep(customStep: customStep);
+    final newValue = _snapToReasonablePrecision(current - step);
     if (newValue >= 0) {
       _controller.text = _formatStepperValue(newValue);
       _calculate();
     }
+  }
+
+  double _defaultStepperStep({double? customStep}) {
+    if (customStep != null) {
+      return customStep;
+    }
+
+    // MDV uses its own 3-way mode; keep steppers simple here.
+    if (widget.medicationForm == MedicationForm.multiDoseVial) {
+      return 1;
+    }
+
+    // Count mode: tablets allow quarter-tablet steps; other unit-count forms are whole numbers.
+    if (_isCountMode) {
+      if (widget.medicationForm == MedicationForm.tablet) {
+        return 0.25;
+      }
+      return 1;
+    }
+
+    // Strength mode: step in increments that correspond to valid unit counts.
+    switch (widget.medicationForm) {
+      case MedicationForm.tablet:
+        // 1/4 tablet strength steps (e.g., 10mg tablet => 2.5mg increments).
+        final stepMcg = widget.strengthPerUnitMcg * 0.25;
+        final stepDisplay = _convertMcgToDisplayUnit(stepMcg);
+        return stepDisplay > 0 ? stepDisplay : 1;
+
+      case MedicationForm.capsule:
+        // Whole capsules only.
+        final stepDisplay = _convertMcgToDisplayUnit(widget.strengthPerUnitMcg);
+        return stepDisplay > 0 ? stepDisplay : 1;
+
+      case MedicationForm.prefilledSyringe:
+      case MedicationForm.singleDoseVial:
+      case MedicationForm.multiDoseVial:
+        // Strength mode not supported for these forms.
+        return 1;
+    }
+  }
+
+  double _snapToReasonablePrecision(double value) {
+    // Avoid displaying floating-point artifacts like 0.30000000000004.
+    return double.parse(value.toStringAsFixed(6));
   }
 
   void _setQuickValue(double value) {
