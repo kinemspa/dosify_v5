@@ -12,6 +12,9 @@
 ## Medication Screen
 - Seacrh results "no medications found " font is too dark. [COMPLETED]
 - Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red.  [COMPLETED]
+- Stock Level needs to change colour to indicate percentage of 25% orange, 10%-0% red.
+- Search, clear results is not needed as it automatically clears it already.
+
 ### Large Cards
 
 
@@ -37,6 +40,9 @@
 ### Medication Details Card
 - Remove the grey background. never use this anywhere. [COMPLETED]
 - Font is black. [COMPLETED]
+- Can you not bring in a little flare and style to all the different text elements?
+- Remove the card border.
+- Edit Dialogs are all shwoing black font. 
 - MDV Backup Stock - We need to unify the terminology across the app for this. We had reserve vials, sealed vials backup stock. Pick the best terminology for this and stikc with it. [COMPLETED]
 - MDV Backup Stock - restock button is way too big. [COMPLETED]
 
@@ -59,8 +65,8 @@
 
 ==============
 # Schedules List
-- Cards Need to be restyled exactly like the medication screen ones. Large, Compact and list. 
-- This doesnt need to have the actual time and dose details. Its the saved object of a schedule of doses. Provide the best informaiotn you can for being concise and explicit. 
+- Cards Need to be restyled exactly like the medication screen ones. Large, Compact and list. [COMPLETED]
+- This doesnt need to have the actual time and dose details. Its the saved object of a schedule of doses. Provide the best informaiotn you can for being concise and explicit. [COMPLETED]
 
 
 ==============

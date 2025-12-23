@@ -7,14 +7,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
+import 'package:dosifi_v5/src/widgets/large_card.dart';
 
 enum _SchedView { list, compact, large }
 
@@ -81,11 +78,61 @@ class _SchedulesPageState extends State<SchedulesPage> {
           });
 
           if (items.isEmpty) {
+            if (_query.isEmpty && b.values.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_month,
+                      size: kEmptyStateIconSize,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant
+                          .withValues(alpha: kOpacityMedium),
+                    ),
+                    const SizedBox(height: kSpacingM),
+                    Text(
+                      'Add a schedule to begin tracking',
+                      style: mutedTextStyle(context),
+                    ),
+                    const SizedBox(height: kSpacingM),
+                    FilledButton(
+                      onPressed: () => context.push('/schedules/add'),
+                      child: const Text('Add Schedule'),
+                    ),
+                  ],
+                ),
+              );
+            }
             return Column(
               children: [
                 _buildToolbar(context),
-                const Expanded(
-                  child: Center(child: Text('No schedules match your query')),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: kEmptyStateIconSize,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
+                              .withValues(alpha: kOpacityMedium),
+                        ),
+                        const SizedBox(height: kSpacingM),
+                        Text(
+                          'No schedules found for "$_query"',
+                          style: mutedTextStyle(context),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => setState(() {
+                            _query = '';
+                            _searchExpanded = false;
+                          }),
+                          child: const Text('Clear search'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             );
@@ -107,20 +154,24 @@ class _SchedulesPageState extends State<SchedulesPage> {
   }
 
   Widget _buildToolbar(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+    final cs = Theme.of(context).colorScheme;
+    final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
       child: Row(
         children: [
           if (_searchExpanded)
             Expanded(
               child: TextField(
                 autofocus: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Search schedules',
-                  isDense: true,
+                decoration: buildFieldDecoration(
+                  context,
+                  hint: 'Search schedules',
+                  prefixIcon: Icon(Icons.search, size: 20, color: iconColor),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.close),
+                    iconSize: 20,
+                    icon: Icon(Icons.close, color: iconColor),
                     onPressed: () => setState(() {
                       _searchExpanded = false;
                       _query = '';
@@ -132,21 +183,21 @@ class _SchedulesPageState extends State<SchedulesPage> {
             )
           else
             IconButton(
-              icon: Icon(Icons.search, color: Colors.grey.shade400),
+              icon: Icon(Icons.search, color: iconColor),
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search schedules',
             ),
           if (_searchExpanded) const SizedBox(width: 8),
           if (_searchExpanded)
             IconButton(
-              icon: Icon(_viewIcon(_view), color: Colors.grey.shade400),
+              icon: Icon(_viewIcon(_view), color: iconColor),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
           if (!_searchExpanded) const Spacer(),
           if (!_searchExpanded)
             IconButton(
-              icon: Icon(_viewIcon(_view), color: Colors.grey.shade400),
+              icon: Icon(_viewIcon(_view), color: iconColor),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
@@ -155,9 +206,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
             PopupMenuButton<_SchedFilter>(
               icon: Icon(
                 Icons.filter_list,
-                color: _filter != _SchedFilter.all
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.shade400,
+                color: _filter != _SchedFilter.all ? cs.primary : iconColor,
               ),
               tooltip: 'Filter schedules',
               onSelected: (f) => setState(() => _filter = f),
@@ -178,7 +227,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
             ),
           if (!_searchExpanded)
             PopupMenuButton<_SchedSort>(
-              icon: Icon(Icons.sort, color: Colors.grey.shade400),
+              icon: Icon(Icons.sort, color: iconColor),
               tooltip: 'Sort schedules',
               onSelected: (s) => setState(() => _sort = s),
               itemBuilder: (context) => const [
@@ -224,7 +273,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
           padding: const EdgeInsets.all(16),
           itemCount: items.length,
           separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, i) => _ScheduleTile(s: items[i]),
+          itemBuilder: (context, i) => _ScheduleListRow(s: items[i]),
         );
       case _SchedView.compact:
         return ListView.separated(
@@ -248,133 +297,93 @@ class _SchedulesPageState extends State<SchedulesPage> {
   }
 }
 
-class _ScheduleTile extends StatelessWidget {
-  const _ScheduleTile({required this.s});
+class _ScheduleListRow extends StatelessWidget {
+  const _ScheduleListRow({required this.s});
+
   final Schedule s;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final next = _nextOccurrence(s);
+    final cs = Theme.of(context).colorScheme;
+    final next = ScheduleOccurrenceService.nextOccurrence(s);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.3),
-        ),
-      ),
+    final cadence = _ScheduleText.cadenceLabel(s);
+    final timesPerDay = _ScheduleText.timesPerDayLabel(s);
+    final detailLabel = '${s.medicationName} · $cadence · $timesPerDay';
+
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push('/schedules/detail/${s.id}'),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingS,
+            vertical: kSpacingXS,
+          ),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.secondaryContainer,
-                      theme.colorScheme.secondary,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.notifications_active,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       s.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                      style: cardTitleStyle(context)?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.primary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXS),
                     Text(
-                      s.medicationName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                      detailLabel,
+                      style: helperTextStyle(context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.medication,
-                          size: 14,
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${s.doseValue} ${s.doseUnit}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.schedule,
-                          size: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            next == null
-                                ? '—'
-                                : 'Next: ${TimeOfDay.fromDateTime(next).format(context)}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () async {
-                  final ok = await _confirmDelete(context, s);
-                  if (!ok) return;
-                  await ScheduleScheduler.cancelFor(s.id);
-                  await Hive.box<Schedule>('schedules').delete(s.id);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Deleted "${s.name}"')),
-                    );
-                  }
-                },
+              const SizedBox(width: kSpacingS),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _ScheduleText.nextDayLabel(context, next),
+                    style: helperTextStyle(
+                      context,
+                      color: s.active && next != null
+                          ? cs.primary
+                          : cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                    )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (!s.active) ...[
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      'Paused',
+                      style: helperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMedium,
+                        ),
+                      )?.copyWith(fontSize: kFontSizeSmall),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  DateTime? _nextOccurrence(Schedule s) {
-    return ScheduleOccurrenceService.nextOccurrence(s);
   }
 }
 
@@ -385,382 +394,156 @@ class _ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final next = _nextOccurrence(s);
-    final last = _lastOccurrence(s);
+    final cs = Theme.of(context).colorScheme;
+    final next = ScheduleOccurrenceService.nextOccurrence(s);
+    final cadence = _ScheduleText.cadenceLabel(s);
+    final timesPerDay = _ScheduleText.timesPerDayLabel(s);
 
     if (dense) {
-      // Compact Card (Concept 9)
-      final timeLabel = s.timesOfDay != null && s.timesOfDay!.isNotEmpty
-          ? TimeOfDay(
-              hour: s.timesOfDay!.first ~/ 60,
-              minute: s.timesOfDay!.first % 60,
-            ).format(context)
-          : TimeOfDay(
-              hour: s.minutesOfDay ~/ 60,
-              minute: s.minutesOfDay % 60,
-            ).format(context);
-
       return GlassCardSurface(
         onTap: () => context.push('/schedules/detail/${s.id}'),
         useGradient: false,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Time Column
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: cs.primaryContainer.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      timeLabel,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: cs.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: kSpacingM),
-              // Info Column
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      s.medicationName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${s.doseValue} ${s.doseUnit}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Action
-              Center(
-                child: IconButton.filledTonal(
-                  icon: const Icon(Icons.check, size: 20),
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(36, 36),
-                    padding: EdgeInsets.zero,
+        padding: kCompactCardPadding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    s.name,
+                    style: cardTitleStyle(
+                      context,
+                    )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  onPressed: () async {
-                    final ok = await _confirmTake(context, s);
-                    if (!ok) return;
-                    final success = await _applyStockDecrement(context, s);
-                    if (success && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Marked as taken: ${s.name}')),
-                      );
-                    }
-                  },
-                ),
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    '${s.medicationName} · $cadence · $timesPerDay',
+                    style: helperTextStyle(context),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (!s.active) ...[
+                    const SizedBox(height: kSpacingXS),
+                    Text('Paused', style: mutedTextStyle(context)),
+                  ],
+                ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _ScheduleText.nextDayLabel(context, next),
+                  style: helperTextStyle(
+                    context,
+                    color: s.active && next != null
+                        ? cs.primary
+                        : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
         ),
       );
     }
 
-    // Large Card (Existing Logic with Glass Surface)
-    return GlassCardSurface(
+    return LargeCard(
       onTap: () => context.push('/schedules/detail/${s.id}'),
-      child: Column(
+      dense: true,
+      leading: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            s.medicationName,
-            style: theme.textTheme.labelSmall?.copyWith(
-              letterSpacing: 1.1,
-              color: cs.onSurfaceVariant,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
             s.name,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: kFieldSpacing),
+          const SizedBox(height: kSpacingS),
           Text(
-            '${_doseLine(s)} · ${_timesLine(context, s)}',
-            style: theme.textTheme.bodySmall,
-            maxLines: 2,
+            s.medicationName,
+            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: kFieldSpacing),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      next == null
-                          ? 'No upcoming dose'
-                          : 'Next: ${_fmtWhen(context, next)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (!dense && last != null)
-                      Text(
-                        'Last: ${_fmtWhen(context, last)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: kFieldSpacing),
-              if (!dense)
-                FilledButton.tonal(
-                  onPressed: () async {
-                    final ok = await _confirmTake(context, s);
-                    if (!ok) return;
-                    final success = await _applyStockDecrement(context, s);
-                    if (success && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Marked as taken: ${s.name}')),
-                      );
-                    }
-                  },
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 0,
-                    ),
-                    minimumSize: const Size(0, 32),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text('Take'),
-                )
-              else
-                FilledButton.tonal(
-                  onPressed: () => context.push('/schedules/detail/${s.id}'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 0,
-                    ),
-                    minimumSize: const Size(0, 32),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text('View'),
-                ),
-            ],
+          const SizedBox(height: kSpacingXS),
+          Text(
+            '$cadence · $timesPerDay',
+            style: bodyTextStyle(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (!s.active) ...[
+            const SizedBox(height: kSpacingXS),
+            Text('Paused', style: mutedTextStyle(context)),
+          ],
+        ],
+      ),
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _ScheduleText.nextDayLabel(context, next),
+            style: helperTextStyle(
+              context,
+              color: s.active && next != null
+                  ? cs.primary
+                  : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+            )?.copyWith(fontWeight: kFontWeightSemiBold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
+}
 
-  String _doseLine(Schedule s) {
-    final v = s.doseValue;
-    final vf = (v == v.roundToDouble())
-        ? v.toStringAsFixed(0)
-        : v.toStringAsFixed(2);
-    return '$vf ${s.doseUnit}';
-  }
-
-  String _timesLine(BuildContext context, Schedule s) {
-    final ts = s.timesOfDay ?? [s.minutesOfDay];
-    final label = ts
-        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
-        .join(', ');
-    if (s.hasCycle && s.cycleEveryNDays != null) {
+class _ScheduleText {
+  static String cadenceLabel(Schedule s) {
+    if (s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0) {
       final n = s.cycleEveryNDays!;
-      return 'Every $n day${n == 1 ? '' : 's'} at $label';
+      return 'Every $n day${n == 1 ? '' : 's'}';
     }
+
     const dlabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final ds = s.daysOfWeek.toList()..sort();
-
-    // Show "Every day" if all 7 days are selected
-    if (ds.length == 7) {
-      return 'Every day at $label';
-    }
-
-    final dtext = ds.map((i) => dlabels[i - 1]).join(', ');
-    return '$dtext at $label';
+    if (ds.length == 7) return 'Daily';
+    return ds.map((i) => dlabels[i - 1]).join(', ');
   }
 
-  String _fmtWhen(BuildContext context, DateTime dt) {
+  static String timesPerDayLabel(Schedule s) {
+    final times = s.timesOfDay ?? [s.minutesOfDay];
+    final count = times.isEmpty ? 1 : times.length;
+    return '$count×/day';
+  }
+
+  static String nextDayLabel(BuildContext context, DateTime? dt) {
+    if (dt == null) return 'No upcoming';
     final now = DateTime.now();
-    final time = TimeOfDay.fromDateTime(dt).format(context);
     final sameDay =
         dt.year == now.year && dt.month == now.month && dt.day == now.day;
-    if (sameDay) return 'Today $time';
+    if (sameDay) return 'Today';
     final tomorrow = now.add(const Duration(days: 1));
     final isTomorrow =
         dt.year == tomorrow.year &&
         dt.month == tomorrow.month &&
         dt.day == tomorrow.day;
-    if (isTomorrow) return 'Tomorrow $time';
-    return '${dt.day}/${dt.month} $time';
+    if (isTomorrow) return 'Tomorrow';
+    return '${dt.day}/${dt.month}';
   }
-
-  DateTime? _nextOccurrence(Schedule s) {
-    return ScheduleOccurrenceService.nextOccurrence(s);
-  }
-
-  DateTime? _lastOccurrence(Schedule s) {
-    final now = DateTime.now();
-    final times = s.timesOfDay ?? [s.minutesOfDay];
-    for (var d = 0; d < 60; d++) {
-      final date = DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ).subtract(Duration(days: d));
-      final onDay =
-          s.hasCycle && s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-          ? (() {
-              final anchor = s.cycleAnchorDate ?? now;
-              final a = DateTime(anchor.year, anchor.month, anchor.day);
-              final d0 = DateTime(date.year, date.month, date.day);
-              final diff = d0.difference(a).inDays;
-              return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-            })()
-          : s.daysOfWeek.contains(date.weekday);
-      if (onDay) {
-        for (final minutes in times) {
-          final dt = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            minutes ~/ 60,
-            minutes % 60,
-          );
-          if (dt.isBefore(now)) return dt;
-        }
-      }
-    }
-    return null;
-  }
-}
-
-Future<bool> _confirmDelete(BuildContext context, Schedule s) async {
-  return await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Delete schedule?'),
-          content: Text(
-            'Delete "${s.name}"? This will cancel its notifications.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
-      ) ??
-      false;
-}
-
-Future<bool> _confirmTake(BuildContext context, Schedule s) async {
-  return await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Mark dose as taken?'),
-          content: Text('${s.medicationName} • ${s.doseValue} ${s.doseUnit}'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Mark taken'),
-            ),
-          ],
-        ),
-      ) ??
-      false;
-}
-
-Future<bool> _applyStockDecrement(BuildContext context, Schedule s) async {
-  if (s.medicationId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'This schedule is not linked to a saved medication. Edit it to link a medication first.',
-        ),
-      ),
-    );
-    return false;
-  }
-  final medsBox = Hive.box<Medication>('medications');
-  final med = medsBox.get(s.medicationId);
-  if (med == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Linked medication not found. It may have been deleted.'),
-      ),
-    );
-    return false;
-  }
-
-  // Defer to centralized helper for stock decrement logic
-  final updated = applyDoseTakenUpdate(med, s);
-  if (updated == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Could not compute stock decrement for this dose. Check medication strength/units.',
-        ),
-      ),
-    );
-    return false;
-  }
-  final prevStock = med.stockValue;
-  await medsBox.put(updated.id, updated);
-  if (med.form == MedicationForm.multiDoseVial &&
-      updated.stockValue < prevStock) {
-    if (context.mounted)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Active vial depleted. Opened new vial.')),
-      );
-  }
-  return true;
 }
