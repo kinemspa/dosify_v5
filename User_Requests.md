@@ -81,7 +81,7 @@
 - MDV, this will need the syringe graphic and slider functionality that exists in the Reconstitution calculator. AT the end of the day its how many units in a syringe, which is calculated on the vial concetnraiton that was reconsituted.  [COMPLETED]
 - MDV should also default to the reconstituted value. As this is what the recon value was originally set to.  [COMPLETED]
 
-- Time selector has violet colour in the AM and PM Selector. 
+- Time selector has violet colour in the AM and PM Selector.  [COMPLETED]
 - Name of Schedule needs to be extremely brief. The dynamic initial of it needs to be for example "1 Tablet - Daily - 9am" 
 
 ==============

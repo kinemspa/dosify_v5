@@ -43,6 +43,14 @@ class DosifiApp extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
       ),
+      timePickerTheme: TimePickerThemeData(
+        dayPeriodColor: schemeLight.primary,
+        dayPeriodTextColor: schemeLight.onPrimary,
+        dayPeriodBorderSide: BorderSide(
+          color: schemeLight.outlineVariant.withValues(alpha: 0.50),
+          width: 0.75,
+        ),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F3D5B),
         indicatorColor: Colors.transparent,
@@ -202,6 +210,14 @@ class DosifiApp extends ConsumerWidget {
         toolbarHeight: 48,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+      ),
+      timePickerTheme: TimePickerThemeData(
+        dayPeriodColor: schemeDark.primary,
+        dayPeriodTextColor: schemeDark.onPrimary,
+        dayPeriodBorderSide: BorderSide(
+          color: schemeDark.outlineVariant.withValues(alpha: 0.50),
+          width: 0.75,
+        ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F3D5B),
