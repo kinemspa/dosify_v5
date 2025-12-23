@@ -359,7 +359,7 @@ BoxDecoration buildInsetSectionDecoration({
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
     borderRadius: BorderRadius.circular(borderRadius),
-    color: cs.surfaceContainerHighest.withValues(alpha: backgroundOpacity),
+    color: cs.surface.withValues(alpha: backgroundOpacity),
     border: Border.all(
       color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
       width: kBorderWidthThin,

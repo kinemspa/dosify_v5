@@ -35,7 +35,7 @@
 	- Inventory events timeline (refill/restock/vial opened markers)
 
 ### Medication Details Card
-- Remove the grey background. never use this anywhere.
+- Remove the grey background. never use this anywhere. [COMPLETED]
 - Font is black. [COMPLETED]
 - MDV Backup Stock - We need to unify the terminology across the app for this. We had reserve vials, sealed vials backup stock. Pick the best terminology for this and stikc with it. [COMPLETED]
 - MDV Backup Stock - restock button is way too big. [COMPLETED]

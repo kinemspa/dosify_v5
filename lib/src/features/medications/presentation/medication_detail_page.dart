@@ -2459,13 +2459,8 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
               // Current stock info
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                padding: const EdgeInsets.all(kSpacingM),
+                decoration: buildInsetSectionDecoration(context: stateContext),
                 child: Column(
                   children: [
                     Row(
@@ -2694,13 +2689,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               // Current state
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                padding: const EdgeInsets.all(kSpacingM),
+                decoration: buildInsetSectionDecoration(context: context),
                 child: Column(
                   children: [
                     Row(
@@ -2722,7 +2712,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                           '$sealedVials in stock',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: sealedVials == 0 ? Colors.red : null,
+                            color: sealedVials == 0
+                                ? theme.colorScheme.error
+                                : null,
                           ),
                         ),
                       ],
@@ -2902,13 +2894,8 @@ void _showRestockSealedVialsDialog(BuildContext context, Medication med) async {
               // Current stock
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                padding: const EdgeInsets.all(kSpacingM),
+                decoration: buildInsetSectionDecoration(context: context),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -3101,12 +3088,9 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                 // Medication info card
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
+                  padding: const EdgeInsets.all(kSpacingM),
+                  decoration: buildInsetSectionDecoration(
+                    context: stateContext,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
