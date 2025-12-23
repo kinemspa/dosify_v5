@@ -246,6 +246,61 @@ const Color kMedicationDetailGradientEnd = Color(0xFF18537D);
 /// Used when the user hasn't selected an expiry yet.
 const int kDefaultMedicationExpiryDays = 90;
 
+/// Expiry status thresholds based on *percentage of shelf-life remaining*.
+///
+/// - `<= 10%` remaining: critical (red)
+/// - `<= 25%` remaining: warning (orange)
+const double kExpiryCriticalRemainingRatio = 0.10;
+const double kExpiryWarningRemainingRatio = 0.25;
+
+/// Returns the fraction of shelf-life remaining in the range 0–1.
+///
+/// Uses `createdAt → expiry` as the total shelf-life window.
+double expiryRemainingRatio({
+  required DateTime createdAt,
+  required DateTime expiry,
+  DateTime? now,
+}) {
+  final effectiveNow = now ?? DateTime.now();
+  if (!expiry.isAfter(effectiveNow)) return 0.0;
+
+  final total = expiry.difference(createdAt).inSeconds;
+  if (total <= 0) return 0.0;
+
+  final remaining = expiry.difference(effectiveNow).inSeconds;
+  return (remaining / total).clamp(0.0, 1.0);
+}
+
+/// Semantic expiry color based on percentage remaining.
+Color expiryStatusColor(
+  BuildContext context, {
+  required DateTime createdAt,
+  required DateTime expiry,
+  DateTime? now,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  final effectiveNow = now ?? DateTime.now();
+
+  if (!expiry.isAfter(effectiveNow)) {
+    return cs.error;
+  }
+
+  final ratio = expiryRemainingRatio(
+    createdAt: createdAt,
+    expiry: expiry,
+    now: effectiveNow,
+  );
+
+  if (ratio <= kExpiryCriticalRemainingRatio) {
+    return cs.error;
+  }
+  if (ratio <= kExpiryWarningRemainingRatio) {
+    return cs.tertiary;
+  }
+
+  return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+}
+
 // ============================================================================
 // CARD STYLING (Centralized)
 // ============================================================================

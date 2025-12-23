@@ -11,7 +11,7 @@
 
 ## Medication Screen
 - Seacrh results "no medications found " font is too dark. [COMPLETED]
-- Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red. 
+- Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red.  [COMPLETED]
 ### Large Cards
 
 

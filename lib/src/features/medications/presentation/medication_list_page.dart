@@ -220,11 +220,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                           Icon(
                             Icons.search_off,
                             size: kEmptyStateIconSize,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
-                            ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: kOpacityMedium),
                           ),
                           const SizedBox(height: kSpacingM),
                           Text(
@@ -682,18 +681,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       _formatDateDdMm(m.expiry!),
                       style: helperTextStyle(
                         context,
-                        color:
-                            (m.expiry!.isBefore(DateTime.now()))
-                                ? cs.error
-                                : (m.expiry!.isBefore(
-                                      DateTime.now().add(
-                                        const Duration(days: 30),
-                                      ),
-                                    ))
-                                    ? cs.tertiary
-                                    : cs.onSurface.withValues(
-                                      alpha: kOpacityMediumLow,
-                                    ),
+                        color: expiryStatusColor(
+                          context,
+                          createdAt: m.createdAt,
+                          expiry: m.expiry!,
+                        ),
                       )?.copyWith(fontSize: kFontSizeSmall),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1082,18 +1074,6 @@ class _MedLargeCard extends StatelessWidget {
     return DateFormat('dd MMM').format(expiry);
   }
 
-  Color _expiryTextColor(BuildContext context, DateTime expiry) {
-    final cs = Theme.of(context).colorScheme;
-    final now = DateTime.now();
-    if (expiry.isBefore(now)) {
-      return cs.error;
-    }
-    if (expiry.isBefore(now.add(const Duration(days: 30)))) {
-      return cs.tertiary;
-    }
-    return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
-  }
-
   Widget _buildFooter(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -1140,7 +1120,11 @@ class _MedLargeCard extends StatelessWidget {
             'Exp ${_formatExpiryLabel(m.expiry!)}',
             style: helperTextStyle(context)?.copyWith(
               fontSize: 9,
-              color: _expiryTextColor(context, m.expiry!),
+              color: expiryStatusColor(
+                context,
+                createdAt: m.createdAt,
+                expiry: m.expiry!,
+              ),
             ),
           ),
       ],
