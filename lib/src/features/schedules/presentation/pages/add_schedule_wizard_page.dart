@@ -84,7 +84,7 @@ class _AddScheduleWizardPageState
     final medBox = Hive.box<Medication>('medications');
     _selectedMed = medBox.get(s.medicationId);
     _medicationId = s.medicationId;
-    _doseValue.text = s.doseValue.toString();
+    _doseValue.text = fmt2(s.doseValue);
     _doseUnit.text = s.doseUnit;
 
     final times = s.timesOfDay ?? [s.minutesOfDay];
@@ -214,7 +214,7 @@ class _AddScheduleWizardPageState
                   ),
                   if (_selectedMed != null && _doseValue.text.isNotEmpty)
                     Text(
-                      'Dose: ${_doseValue.text} ${_doseUnit.text}',
+                      'Dose: ${_doseSummaryLabel()}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(
                           context,
@@ -239,6 +239,30 @@ class _AddScheduleWizardPageState
         ],
       ],
     );
+  }
+
+  String _doseSummaryLabel() {
+    final rawValue = double.tryParse(_doseValue.text.trim());
+    final value = rawValue ?? 0;
+    final unit = _doseUnit.text.trim();
+    if (unit.isEmpty) return fmt2(value);
+
+    String singularize(String plural) {
+      final t = plural.trim();
+      if (t.endsWith('s')) return t.substring(0, t.length - 1);
+      return t;
+    }
+
+    String pluralize(String base) {
+      final t = base.trim();
+      if (t.endsWith('s')) return t;
+      return '${t}s';
+    }
+
+    final prettyValue = fmt2(value);
+    final isExactlyOne = (value - 1).abs() < 0.000001;
+    final prettyUnit = isExactlyOne ? singularize(unit) : pluralize(unit);
+    return '$prettyValue $prettyUnit';
   }
 
   String _getPatternSummary() {
@@ -419,16 +443,16 @@ class _AddScheduleWizardPageState
           }
           if (_doseValue.text.trim().isEmpty) {
             if (u == Unit.mcgPerMl) {
-              _doseValue.text = med.strengthValue.toString();
+              _doseValue.text = fmt2(med.strengthValue);
               _doseUnit.text = 'mcg';
             } else if (u == Unit.mgPerMl) {
-              _doseValue.text = med.strengthValue.toString();
+              _doseValue.text = fmt2(med.strengthValue);
               _doseUnit.text = 'mg';
             } else if (u == Unit.gPerMl) {
-              _doseValue.text = med.strengthValue.toString();
+              _doseValue.text = fmt2(med.strengthValue);
               _doseUnit.text = 'g';
             } else if (u == Unit.unitsPerMl) {
-              _doseValue.text = med.strengthValue.toString();
+              _doseValue.text = fmt2(med.strengthValue);
               _doseUnit.text = 'IU';
             } else {
               _doseValue.text = '1';
@@ -985,7 +1009,7 @@ class _AddScheduleWizardPageState
     return Column(
       children: [
         _buildReviewRow('Medication', _selectedMed?.name ?? ''),
-        _buildReviewRow('Dose', '${_doseValue.text} ${_doseUnit.text}'),
+        _buildReviewRow('Dose', _doseSummaryLabel()),
         _buildReviewRow('Pattern', _getPatternSummary()),
         if (_mode == ScheduleMode.daysOnOff)
           _buildReviewRow(
