@@ -737,32 +737,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
 class _MedicationStockStatusText {
   static Color colorFor(BuildContext context, Medication m) {
-    final theme = Theme.of(context);
-
-    if (m.form == MedicationForm.multiDoseVial &&
-        m.containerVolumeMl != null &&
-        m.containerVolumeMl! > 0) {
-      final totalMl = m.containerVolumeMl!.toDouble();
-      final currentRaw = (m.activeVialVolume ?? totalMl).toDouble();
-      final currentMl = currentRaw.clamp(0.0, totalMl);
-
-      final pct = ((currentMl / totalMl) * 100).clamp(0.0, 100.0);
-      if (pct <= 0) return theme.colorScheme.error;
-      if (pct < 20) return theme.colorScheme.tertiary;
-      return theme.colorScheme.primary;
-    }
-
-    final baseline = m.lowStockThreshold;
-    if (baseline != null && baseline > 0) {
-      final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
-      if (pct <= 0.2) return theme.colorScheme.error;
-      if (pct <= 0.5) return theme.colorScheme.tertiary;
-      return theme.colorScheme.primary;
-    }
-    if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
-      return theme.colorScheme.error;
-    }
-    return theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh);
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    return stockStatusColorFromPercentage(context, percentage: stockInfo.percentage);
   }
 
   static TextSpan textSpanFor(
@@ -1007,6 +983,10 @@ class _MedLargeCard extends StatelessWidget {
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
     final pctRounded = stockInfo.percentage.clamp(0, 100).round();
     final baseStyle = helperTextStyle(context)?.copyWith(fontSize: 9);
+    final stockColor = stockStatusColorFromPercentage(
+      context,
+      percentage: stockInfo.percentage,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -1018,6 +998,8 @@ class _MedLargeCard extends StatelessWidget {
           child: StockDonutGauge(
             percentage: stockInfo.percentage,
             primaryLabel: '$pctRounded%',
+            color: stockColor,
+            textColor: stockColor,
           ),
         ),
         const SizedBox(height: kSpacingXS),

@@ -54,14 +54,12 @@ class StockDonutGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final clamped = percentage.clamp(0, 100);
+    final clamped = percentage.clamp(0.0, 100.0);
     final fraction = clamped / 100.0;
     final gaugeSize = size ?? kStockDonutGaugeSize;
 
     Color defaultLabelColor() {
-      if (clamped <= 0) return cs.error;
-      if (clamped < 20) return cs.tertiary;
-      return cs.primary;
+      return stockStatusColorFromPercentage(context, percentage: clamped);
     }
 
     return SizedBox(
@@ -181,11 +179,9 @@ class DualStockDonutGauge extends StatelessWidget {
     final gaugeSize = size ?? kStockDonutGaugeSize;
     final innerSize = gaugeSize * kDualStockDonutInnerScale;
 
-    final outerClamped = outerPercentage.clamp(0, 100);
+    final outerClamped = outerPercentage.clamp(0.0, 100.0);
     Color defaultLabelColor() {
-      if (outerClamped <= 0) return cs.error;
-      if (outerClamped < 20) return cs.tertiary;
-      return cs.primary;
+      return stockStatusColorFromPercentage(context, percentage: outerClamped);
     }
 
     return SizedBox(

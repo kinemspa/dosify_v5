@@ -253,6 +253,13 @@ const int kDefaultMedicationExpiryDays = 90;
 const double kExpiryCriticalRemainingRatio = 0.10;
 const double kExpiryWarningRemainingRatio = 0.25;
 
+/// Stock status thresholds based on *percentage of stock remaining*.
+///
+/// - `<= 10%` remaining: critical (red)
+/// - `<= 25%` remaining: warning (orange)
+const double kStockCriticalRemainingRatio = 0.10;
+const double kStockWarningRemainingRatio = 0.25;
+
 /// Returns the fraction of shelf-life remaining in the range 0–1.
 ///
 /// Uses `createdAt → expiry` as the total shelf-life window.
@@ -299,6 +306,30 @@ Color expiryStatusColor(
   }
 
   return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+}
+
+/// Semantic stock color based on percentage remaining.
+///
+/// Accepts a ratio in the range 0–1.
+Color stockStatusColorFromRatio(BuildContext context, double remainingRatio) {
+  final cs = Theme.of(context).colorScheme;
+  final ratio = remainingRatio.clamp(0.0, 1.0);
+
+  if (ratio <= 0) return cs.error;
+  if (ratio <= kStockCriticalRemainingRatio) return cs.error;
+  if (ratio <= kStockWarningRemainingRatio) return cs.tertiary;
+  return cs.primary;
+}
+
+/// Convenience wrapper for stock % remaining.
+///
+/// Accepts a percentage in the range 0–100.
+Color stockStatusColorFromPercentage(
+  BuildContext context, {
+  required double percentage,
+}) {
+  final clamped = percentage.clamp(0.0, 100.0);
+  return stockStatusColorFromRatio(context, clamped / 100.0);
 }
 
 // ============================================================================
