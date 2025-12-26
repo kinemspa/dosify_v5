@@ -817,6 +817,10 @@ class _MedCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    final stockColor = stockStatusColorFromPercentage(
+      context,
+      percentage: stockInfo.percentage,
+    );
 
     final strengthAndFormLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
@@ -873,6 +877,7 @@ class _MedCard extends StatelessWidget {
           const SizedBox(width: kSpacingS),
           MiniStockGauge(
             percentage: stockInfo.percentage,
+            color: stockColor,
             size: kStandardFieldHeight,
           ),
         ],

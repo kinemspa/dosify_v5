@@ -2,7 +2,7 @@
 
 ## Global
 - Medicaiont stock under 25% is showing as purple.  I want orange.  [COMPLETED]
-- Above item is not showing for compact cards donut.
+- Above item is not showing for compact cards donut.  [COMPLETED]
 
 
 ## Home Screen
@@ -11,9 +11,6 @@
 ==============
 
 ## Medication Screen
-- Medicaiont stock under 25% is showing as purple.  I want orange.  [COMPLETED]
-- Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red.  [COMPLETED]
-- Stock Level needs to change colour to indicate percentage of 25% orange, 10%-0% red. [COMPLETED]
 - Search, clear results is not needed as it automatically clears it already. [COMPLETED]
 - I stated remove the Clear search text in the window on a search. The search field is already blanked out on a search that results in nothing.  [COMPLETED]
 
