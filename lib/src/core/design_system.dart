@@ -64,6 +64,10 @@ const double kEmptyStateIconSize = 48;
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
 
+/// Next-dose date badge sizing (Schedules list)
+const double kNextDoseDateCircleSizeCompact = 44;
+const double kNextDoseDateCircleSizeLarge = 54;
+
 /// Medication details reports card
 const double kMedicationReportsTabHeight = 280;
 
@@ -433,6 +437,11 @@ const double kFontSizeSmall = 11;
 const double kFontSizeMedium = 13;
 const double kFontSizeLarge = 15;
 const double kFontSizeXLarge = 17;
+
+/// Next-dose date badge typography (Schedules list)
+const double kNextDoseDateCircleDayFontSizeCompact = 18;
+const double kNextDoseDateCircleDayFontSizeLarge = 20;
+const double kNextDoseDateCircleMonthFontSize = kFontSizeSmall;
 
 /// Specific component font sizes
 const double kFontSizeInput = kInputFontSize; // 13

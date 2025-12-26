@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
@@ -435,23 +436,7 @@ class _ScheduleCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: kSpacingS),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _ScheduleText.nextDayLabel(context, next),
-                  style: helperTextStyle(
-                    context,
-                    color: s.active && next != null
-                        ? cs.primary
-                        : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-                  )?.copyWith(fontWeight: kFontWeightSemiBold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+            NextDoseDateBadge(nextDose: next, isActive: s.active, dense: true),
           ],
         ),
       );
@@ -496,17 +481,7 @@ class _ScheduleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            _ScheduleText.nextDayLabel(context, next),
-            style: helperTextStyle(
-              context,
-              color: s.active && next != null
-                  ? cs.primary
-                  : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-            )?.copyWith(fontWeight: kFontWeightSemiBold),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          NextDoseDateBadge(nextDose: next, isActive: s.active, dense: false),
         ],
       ),
     );

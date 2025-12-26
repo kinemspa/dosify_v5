@@ -61,7 +61,7 @@
 # Schedules List
 - Cards Need to be restyled exactly like the medication screen ones. Large, Compact and list. [COMPLETED]
 - This doesnt need to have the actual time and dose details. Its the saved object of a schedule of doses. Provide the best informaiotn you can for being concise and explicit. [COMPLETED]
-- Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath. 
+- Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
 
 ==============
 # Add Schedule
