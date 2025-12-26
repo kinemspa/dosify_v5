@@ -37,7 +37,7 @@
 - Remove the card border. [COMPLETED]
 - Edit Dialogs are all shwoing black font.  [COMPLETED]
 - Edit dialogs for intege values and text have different sizing fonts. Make them the same.  [COMPLETED]
-- Edit dialog for strenght, need to be able to change the unit type aswell as the value. Same with any other integer entry dialogs that have a corresp
+- Edit dialog for strenght, need to be able to change the unit type aswell as the value. Same with any other integer entry dialogs that have a corresp  [COMPLETED]
 - Sealed Vials Card needs a little helper text on sealed vials. Used for reconstitution.  [COMPLETED]
 
 ==============

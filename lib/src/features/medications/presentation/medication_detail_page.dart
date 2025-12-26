@@ -3748,17 +3748,150 @@ void _editManufacturer(BuildContext context, Medication med) {
 }
 
 void _editStrength(BuildContext context, Medication med) {
-  _showStepperEditDialog(
+  _showStepperEditWithUnitDialog(
     context,
-    med,
-    'Strength Value',
-    med.strengthValue,
-    (val) {
+    title: 'Strength',
+    initialValue: med.strengthValue,
+    initialUnit: med.strengthUnit,
+    allowedUnits: Unit.values,
+    onSave: (value, unit) {
       final box = Hive.box<Medication>('medications');
-      box.put(med.id, med.copyWith(strengthValue: val));
+      box.put(med.id, med.copyWith(strengthValue: value, strengthUnit: unit));
     },
-    unit: _unitLabel(med.strengthUnit),
   );
+}
+
+Future<void> _showStepperEditWithUnitDialog(
+  BuildContext context, {
+  required String title,
+  required double initialValue,
+  required Unit initialUnit,
+  required void Function(double value, Unit unit) onSave,
+  List<Unit>? allowedUnits,
+  bool isInt = false,
+}) async {
+  final controller = TextEditingController(
+    text: isInt ? initialValue.toInt().toString() : initialValue.toString(),
+  );
+  var selectedUnit = initialUnit;
+  final units = (allowedUnits ?? Unit.values).toList();
+
+  final result = await showDialog<Map<String, dynamic>>(
+    context: context,
+    useRootNavigator: true,
+    builder: (dialogContext) {
+      final theme = Theme.of(dialogContext);
+      final cs = theme.colorScheme;
+
+      return AlertDialog(
+        titleTextStyle: cardTitleStyle(
+          dialogContext,
+        )?.copyWith(color: cs.primary),
+        contentTextStyle: bodyTextStyle(dialogContext),
+        title: Text(title),
+        content: StatefulBuilder(
+          builder: (stateContext, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Value',
+                  style: helperTextStyle(
+                    stateContext,
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                ),
+                const SizedBox(height: kSpacingS),
+                Center(
+                  child: StepperRow36(
+                    controller: controller,
+                    fixedFieldWidth: 80, // Required for dialog use
+                    onDec: () {
+                      final v = double.tryParse(controller.text) ?? 0;
+                      final step = isInt ? 1.0 : 0.1;
+                      final newVal = (v - step).clamp(0.0, 1000000.0);
+                      controller.text = isInt
+                          ? newVal.toInt().toString()
+                          : newVal.toStringAsFixed(1);
+                      setState(() {});
+                    },
+                    onInc: () {
+                      final v = double.tryParse(controller.text) ?? 0;
+                      final step = isInt ? 1.0 : 0.1;
+                      final newVal = (v + step).clamp(0.0, 1000000.0);
+                      controller.text = isInt
+                          ? newVal.toInt().toString()
+                          : newVal.toStringAsFixed(1);
+                      setState(() {});
+                    },
+                    decoration: buildCompactFieldDecoration(
+                      context: stateContext,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d*'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: kSpacingL),
+                Text(
+                  'Unit',
+                  style: helperTextStyle(
+                    stateContext,
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                ),
+                const SizedBox(height: kSpacingS),
+                Center(
+                  child: SmallDropdown36<Unit>(
+                    width: kMinCompactControlWidth,
+                    value: selectedUnit,
+                    items: units
+                        .map(
+                          (u) => DropdownMenuItem<Unit>(
+                            value: u,
+                            child: Text(_unitLabel(u)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setState(() => selectedUnit = v);
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final val = double.tryParse(controller.text);
+              if (val != null && val > 0) {
+                Navigator.pop(dialogContext, {
+                  'value': val,
+                  'unit': selectedUnit,
+                });
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (result == null) return;
+  final value = result['value'] as double?;
+  final unit = result['unit'] as Unit?;
+  if (value == null || unit == null) return;
+  if (value == initialValue && unit == initialUnit) return;
+  onSave(value, unit);
 }
 
 void _editForm(BuildContext context, Medication med) async {
