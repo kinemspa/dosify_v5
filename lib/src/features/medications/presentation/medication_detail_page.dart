@@ -3446,14 +3446,10 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                 TextField(
                   controller: notesController,
                   maxLines: 2,
-                  style: helperTextStyle(stateContext), // Smaller font
-                  decoration: InputDecoration(
-                    hintText: 'e.g., Taken for breakthrough pain',
-                    hintStyle: helperTextStyle(stateContext),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.all(10),
+                  style: bodyTextStyle(stateContext),
+                  decoration: buildFieldDecoration(
+                    stateContext,
+                    hint: 'e.g., Taken for breakthrough pain',
                   ),
                 ),
               ],
@@ -3694,6 +3690,7 @@ Future<void> _showEditDialog(
         title: Text(title),
         content: TextField(
           controller: controller,
+          style: bodyTextStyle(dialogContext),
           decoration: buildFieldDecoration(dialogContext, hint: 'Enter $title'),
           maxLines: maxLines,
           keyboardType: keyboardType,

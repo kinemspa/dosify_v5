@@ -36,7 +36,7 @@
 - Can you not bring in a little flare and style to all the different text elements?  [COMPLETED]
 - Remove the card border. [COMPLETED]
 - Edit Dialogs are all shwoing black font.  [COMPLETED]
-- Edit dialogs for intege values and text have different sizing fonts. Make them the same.
+- Edit dialogs for intege values and text have different sizing fonts. Make them the same.  [COMPLETED]
 - Edit dialog for strenght, need to be able to change the unit type aswell as the value. Same with any other integer entry dialogs that have a corresp
 - Sealed Vials Card needs a little helper text on sealed vials. Used for reconstitution.  [COMPLETED]
 
@@ -45,11 +45,11 @@
 
 ### Choose Medicaiotn Type Screen
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
-- Dont like the gradient for the Choose card at the top.  [COMPLETED]
+- Dont like the style for the Choose card at the top. Looks too similar to the selectable items.  
 
 ### Choose Injection Type Screen
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
-- Dont like the gradient for the Select card at the top.  [COMPLETED]
+- Dont like the style for the Select card at the top.  Looks too similar to the selectable items.  
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
