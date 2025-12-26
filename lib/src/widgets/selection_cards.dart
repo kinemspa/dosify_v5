@@ -18,8 +18,16 @@ class SelectionHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return GlassCardSurface(
-      useGradient: false,
+    // Header should not look like a selectable card.
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: kCardPadding,
+        vertical: kSpacingL,
+      ),
+      decoration: buildInsetSectionDecoration(
+        context: context,
+        backgroundOpacity: 0.85,
+      ),
       child: Row(
         children: [
           Container(

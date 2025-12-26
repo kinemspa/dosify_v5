@@ -45,11 +45,11 @@
 
 ### Choose Medicaiotn Type Screen
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
-- Dont like the style for the Choose card at the top. Looks too similar to the selectable items.  
+- Dont like the style for the Choose card at the top. Looks too similar to the selectable items.  [COMPLETED]
 
 ### Choose Injection Type Screen
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
-- Dont like the style for the Select card at the top.  Looks too similar to the selectable items.  
+- Dont like the style for the Select card at the top.  Looks too similar to the selectable items.  [COMPLETED]
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 

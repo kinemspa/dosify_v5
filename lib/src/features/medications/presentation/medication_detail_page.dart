@@ -3828,9 +3828,7 @@ Future<void> _showStepperEditWithUnitDialog(
                       context: stateContext,
                     ),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d*'),
-                      ),
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                     ],
                   ),
                 ),
