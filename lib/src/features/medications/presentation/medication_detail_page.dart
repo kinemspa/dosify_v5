@@ -1714,9 +1714,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final theme = Theme.of(ctx);
           final cs = theme.colorScheme;
           return AlertDialog(
-            titleTextStyle: cardTitleStyle(
-              ctx,
-            )?.copyWith(color: cs.primary),
+            titleTextStyle: cardTitleStyle(ctx)?.copyWith(color: cs.primary),
             contentTextStyle: bodyTextStyle(ctx),
             title: const Text('Active Vial Conditions'),
             content: Column(
@@ -1837,9 +1835,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final theme = Theme.of(ctx);
           final cs = theme.colorScheme;
           return AlertDialog(
-            titleTextStyle: cardTitleStyle(
-              ctx,
-            )?.copyWith(color: cs.primary),
+            titleTextStyle: cardTitleStyle(ctx)?.copyWith(color: cs.primary),
             contentTextStyle: bodyTextStyle(ctx),
             title: const Text('Sealed Vial Storage Conditions'),
             content: Column(
@@ -1922,6 +1918,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 )?.copyWith(fontWeight: kFontWeightBold),
               ),
             ],
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'Used for reconstitution.',
+            style: helperTextStyle(context),
           ),
         ),
 
@@ -3111,9 +3115,9 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                     children: [
                       Text(
                         med.name,
-                        style: cardTitleStyle(stateContext)?.copyWith(
-                          fontWeight: kFontWeightExtraBold,
-                        ),
+                        style: cardTitleStyle(
+                          stateContext,
+                        )?.copyWith(fontWeight: kFontWeightExtraBold),
                       ),
                       if (isMdv && concentration != null) ...[
                         const SizedBox(height: 4),

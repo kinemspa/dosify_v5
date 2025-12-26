@@ -2,6 +2,7 @@
 
 ## Global
 - Medicaiont stock under 25% is showing as purple.  I want orange.  [COMPLETED]
+- Above item is not showing for compact cards donut.
 
 
 ## Home Screen
@@ -42,7 +43,7 @@
 - Can you not bring in a little flare and style to all the different text elements?
 - Remove the card border. [COMPLETED]
 - Edit Dialogs are all shwoing black font.  [COMPLETED]
-- Sealed Vials Card needs a little helper text on sealed vials. Used for reconstitution. 
+- Sealed Vials Card needs a little helper text on sealed vials. Used for reconstitution.  [COMPLETED]
 
 ==============
 ## Add Medication
