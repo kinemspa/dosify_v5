@@ -230,14 +230,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                             'No medications found for "$_query"',
                             style: mutedTextStyle(context),
                           ),
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: () => setState(() {
-                              _query = '';
-                              _searchExpanded = false;
-                            }),
-                            child: const Text('Clear search'),
-                          ),
                         ],
                       ),
                     ),
@@ -738,7 +730,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 class _MedicationStockStatusText {
   static Color colorFor(BuildContext context, Medication m) {
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
-    return stockStatusColorFromPercentage(context, percentage: stockInfo.percentage);
+    return stockStatusColorFromPercentage(
+      context,
+      percentage: stockInfo.percentage,
+    );
   }
 
   static TextSpan textSpanFor(

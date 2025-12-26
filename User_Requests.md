@@ -13,7 +13,7 @@
 - Seacrh results "no medications found " font is too dark. [COMPLETED]
 - Expiry needs to change colour to indicate percentage of 25% orange, 10%-0% red.  [COMPLETED]
 - Stock Level needs to change colour to indicate percentage of 25% orange, 10%-0% red. [COMPLETED]
-- Search, clear results is not needed as it automatically clears it already.
+- Search, clear results is not needed as it automatically clears it already. [COMPLETED]
 
 ### Large Cards
 
