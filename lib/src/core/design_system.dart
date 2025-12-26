@@ -346,6 +346,7 @@ const Offset kCardShadowOffset = Offset(0, 8);
 BoxDecoration buildStandardCardDecoration({
   required BuildContext context,
   bool useGradient = false,
+  bool showBorder = true,
   double borderRadius = kBorderRadiusLarge,
 }) {
   final cs = Theme.of(context).colorScheme;
@@ -362,10 +363,12 @@ BoxDecoration buildStandardCardDecoration({
             end: Alignment.bottomRight,
           )
         : null,
-    border: Border.all(
-      color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
-      width: kBorderWidthThin,
-    ),
+    border: showBorder
+        ? Border.all(
+            color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+            width: kBorderWidthThin,
+          )
+        : null,
     boxShadow: [
       BoxShadow(
         color: cs.shadow.withValues(alpha: kCardShadowOpacity),

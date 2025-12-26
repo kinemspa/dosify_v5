@@ -40,7 +40,7 @@
 
 ### Medication Details Card
 - Can you not bring in a little flare and style to all the different text elements?
-- Remove the card border.
+- Remove the card border. [COMPLETED]
 - Edit Dialogs are all shwoing black font. 
 - Sealed Vials Card needs a little helper text on sealed vials. Used for reconstitution. 
 

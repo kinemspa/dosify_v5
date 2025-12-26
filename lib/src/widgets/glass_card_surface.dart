@@ -10,6 +10,7 @@ class GlassCardSurface extends StatelessWidget {
     required this.child,
     this.onTap,
     this.useGradient = true,
+    this.showBorder = true,
     this.padding = const EdgeInsets.all(kCardPadding),
     super.key,
   });
@@ -17,6 +18,7 @@ class GlassCardSurface extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final bool useGradient;
+  final bool showBorder;
   final EdgeInsets padding;
 
   @override
@@ -27,6 +29,7 @@ class GlassCardSurface extends StatelessWidget {
       decoration: buildStandardCardDecoration(
         context: context,
         useGradient: useGradient,
+        showBorder: showBorder,
       ),
       child: Padding(padding: padding, child: child),
     );

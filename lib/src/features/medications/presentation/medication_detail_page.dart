@@ -851,6 +851,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     return GlassCardSurface(
       useGradient: false,
+      showBorder: false,
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
