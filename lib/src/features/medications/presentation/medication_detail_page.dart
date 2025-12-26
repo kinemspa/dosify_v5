@@ -1465,7 +1465,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
+          final cs = Theme.of(context).colorScheme;
           return AlertDialog(
+            titleTextStyle: cardTitleStyle(
+              context,
+            )?.copyWith(color: cs.primary),
+            contentTextStyle: bodyTextStyle(context),
             title: const Text('Storage Conditions'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1707,11 +1712,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, setState) {
           final theme = Theme.of(ctx);
+          final cs = theme.colorScheme;
           return AlertDialog(
-            title: Text(
-              'Active Vial Conditions',
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
+            titleTextStyle: cardTitleStyle(
+              ctx,
+            )?.copyWith(color: cs.primary),
+            contentTextStyle: bodyTextStyle(ctx),
+            title: const Text('Active Vial Conditions'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1828,11 +1835,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, setState) {
           final theme = Theme.of(ctx);
+          final cs = theme.colorScheme;
           return AlertDialog(
-            title: Text(
-              'Sealed Vial Storage Conditions',
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
+            titleTextStyle: cardTitleStyle(
+              ctx,
+            )?.copyWith(color: cs.primary),
+            contentTextStyle: bodyTextStyle(ctx),
+            title: const Text('Sealed Vial Storage Conditions'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -2442,10 +2451,11 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
             : maxStock;
 
         return AlertDialog(
-          title: Text(
-            'Refill ${med.name}',
-            style: TextStyle(color: theme.colorScheme.primary),
-          ),
+          titleTextStyle: cardTitleStyle(
+            stateContext,
+          )?.copyWith(color: theme.colorScheme.primary),
+          contentTextStyle: bodyTextStyle(stateContext),
+          title: Text('Refill ${med.name}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2672,10 +2682,11 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             : currentVolume + vialSize;
 
         return AlertDialog(
-          title: Text(
-            'Open New Vial',
-            style: TextStyle(color: theme.colorScheme.primary),
-          ),
+          titleTextStyle: cardTitleStyle(
+            context,
+          )?.copyWith(color: theme.colorScheme.primary),
+          contentTextStyle: bodyTextStyle(context),
+          title: const Text('Open New Vial'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2877,10 +2888,11 @@ void _showRestockSealedVialsDialog(BuildContext context, Medication med) async {
         final previewTotal = currentStock + addAmount;
 
         return AlertDialog(
-          title: Text(
-            'Restock Sealed Vials',
-            style: TextStyle(color: theme.colorScheme.primary),
-          ),
+          titleTextStyle: cardTitleStyle(
+            context,
+          )?.copyWith(color: theme.colorScheme.primary),
+          contentTextStyle: bodyTextStyle(context),
+          title: const Text('Restock Sealed Vials'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -3070,10 +3082,11 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
         final displayStrength = doseInStrengthUnit;
 
         return AlertDialog(
-          title: Text(
-            'Record Ad-Hoc Dose',
-            style: TextStyle(color: colorScheme.primary),
-          ),
+          titleTextStyle: cardTitleStyle(
+            stateContext,
+          )?.copyWith(color: colorScheme.primary),
+          contentTextStyle: bodyTextStyle(stateContext),
+          title: const Text('Record Ad-Hoc Dose'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -3098,10 +3111,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                     children: [
                       Text(
                         med.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: colorScheme.onSurface,
+                        style: cardTitleStyle(stateContext)?.copyWith(
+                          fontWeight: kFontWeightExtraBold,
                         ),
                       ),
                       if (isMdv && concentration != null) ...[
@@ -3585,8 +3596,13 @@ Future<void> _showStepperEditDialog(
     useRootNavigator: true,
     builder: (dialogContext) {
       final theme = Theme.of(dialogContext);
+      final cs = theme.colorScheme;
       return AlertDialog(
-        title: Text(title, style: TextStyle(color: theme.colorScheme.primary)),
+        titleTextStyle: cardTitleStyle(
+          dialogContext,
+        )?.copyWith(color: cs.primary),
+        contentTextStyle: bodyTextStyle(dialogContext),
+        title: Text(title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -3664,26 +3680,33 @@ Future<void> _showEditDialog(
   final controller = TextEditingController(text: initialValue);
   final result = await showDialog<String>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: TextField(
-        controller: controller,
-        decoration: buildFieldDecoration(context, hint: 'Enter $title'),
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        autofocus: true,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+    builder: (dialogContext) {
+      final cs = Theme.of(dialogContext).colorScheme;
+      return AlertDialog(
+        titleTextStyle: cardTitleStyle(
+          dialogContext,
+        )?.copyWith(color: cs.primary),
+        contentTextStyle: bodyTextStyle(dialogContext),
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          decoration: buildFieldDecoration(dialogContext, hint: 'Enter $title'),
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          autofocus: true,
         ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, controller.text),
-          child: const Text('Save'),
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      );
+    },
   );
 
   if (result != null && result != initialValue) {
@@ -3807,7 +3830,12 @@ void _editStorageConditions(BuildContext context, Medication med) async {
 
       return StatefulBuilder(
         builder: (context, setState) {
+          final cs = Theme.of(context).colorScheme;
           return AlertDialog(
+            titleTextStyle: cardTitleStyle(
+              context,
+            )?.copyWith(color: cs.primary),
+            contentTextStyle: bodyTextStyle(context),
             title: const Text('Storage Conditions'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -3974,25 +4002,30 @@ void _editBackupVialExpiry(BuildContext context, Medication med) {
 void _deleteMedication(BuildContext context, Medication med) async {
   final confirm = await showDialog<bool>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Delete Medication'),
-      content: Text(
-        'Are you sure you want to delete ${med.name}? This action cannot be undone.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+    builder: (dialogContext) {
+      final cs = Theme.of(dialogContext).colorScheme;
+      return AlertDialog(
+        titleTextStyle: cardTitleStyle(
+          dialogContext,
+        )?.copyWith(color: cs.primary),
+        contentTextStyle: bodyTextStyle(dialogContext),
+        title: const Text('Delete Medication'),
+        content: Text(
+          'Are you sure you want to delete ${med.name}? This action cannot be undone.',
         ),
-        FilledButton(
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
           ),
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Delete'),
-        ),
-      ],
-    ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: cs.error),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      );
+    },
   );
 
   if (confirm == true) {
