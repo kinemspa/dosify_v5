@@ -214,7 +214,7 @@ class _AddScheduleWizardPageState
                   ),
                   if (_selectedMed != null && _doseValue.text.isNotEmpty)
                     Text(
-                      'Dose: ${_doseSummaryLabel()}',
+                      'Dose: ${_doseMetricsSummaryLabel()}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(
                           context,
@@ -263,6 +263,86 @@ class _AddScheduleWizardPageState
     final isExactlyOne = (value - 1).abs() < 0.000001;
     final prettyUnit = isExactlyOne ? singularize(unit) : pluralize(unit);
     return '$prettyValue $prettyUnit';
+  }
+
+  String _doseMetricsSummaryLabel() {
+    final med = _selectedMed;
+    final r = _doseResult;
+    if (med == null || r == null || r.hasError) {
+      return _doseSummaryLabel();
+    }
+
+    String formatTabletCountFromQuarters(int quarters) {
+      if (quarters == 1) return '1/4';
+      if (quarters == 2) return '1/2';
+      if (quarters == 3) return '3/4';
+      final count = quarters / 4.0;
+      if (count % 1 == 0) return count.toInt().toString();
+      return fmt2(count);
+    }
+
+    String formatStrengthFromRawDouble(double raw) {
+      switch (med.strengthUnit) {
+        case Unit.mcg:
+        case Unit.mcgPerMl:
+          return '${fmt2(raw)} mcg';
+        case Unit.mg:
+        case Unit.mgPerMl:
+          return '${fmt2(raw / 1000)} mg';
+        case Unit.g:
+        case Unit.gPerMl:
+          return '${fmt2(raw / 1000000)} g';
+        case Unit.units:
+        case Unit.unitsPerMl:
+          return '${fmt2(raw)} units';
+      }
+    }
+
+    final metrics = <String>[];
+
+    switch (med.form) {
+      case MedicationForm.tablet:
+        if (r.doseTabletQuarters != null) {
+          final count = r.doseTabletQuarters! / 4.0;
+          final unit = (count - 1.0).abs() < 0.0001 || count < 1
+              ? 'tablet'
+              : 'tablets';
+          metrics.add('${formatTabletCountFromQuarters(r.doseTabletQuarters!)} $unit');
+        }
+      case MedicationForm.capsule:
+        if (r.doseCapsules != null) {
+          final n = r.doseCapsules!;
+          metrics.add('$n ${n == 1 ? 'capsule' : 'capsules'}');
+        }
+      case MedicationForm.prefilledSyringe:
+        if (r.doseSyringes != null) {
+          final n = r.doseSyringes!;
+          metrics.add('$n ${n == 1 ? 'syringe' : 'syringes'}');
+        }
+      case MedicationForm.singleDoseVial:
+        if (r.doseVials != null) {
+          final n = r.doseVials!;
+          metrics.add('$n ${n == 1 ? 'vial' : 'vials'}');
+        }
+      case MedicationForm.multiDoseVial:
+        break;
+    }
+
+    if (r.doseMassMcg != null) {
+      metrics.add(formatStrengthFromRawDouble(r.doseMassMcg!));
+    }
+
+    if (r.doseVolumeMicroliter != null) {
+      metrics.add('${fmt2(r.doseVolumeMicroliter! / 1000)} mL');
+    }
+
+    if (r.syringeUnits != null) {
+      final u = r.syringeUnits!;
+      metrics.add('${fmt2(u)} ${u == 1 ? 'unit' : 'units'}');
+    }
+
+    if (metrics.isEmpty) return _doseSummaryLabel();
+    return metrics.join(', ');
   }
 
   String _getPatternSummary() {
@@ -1066,7 +1146,7 @@ class _AddScheduleWizardPageState
     return Column(
       children: [
         _buildReviewRow('Medication', _selectedMed?.name ?? ''),
-        _buildReviewRow('Dose', _doseSummaryLabel()),
+        _buildReviewRow('Dose', _doseMetricsSummaryLabel()),
         _buildReviewRow('Pattern', _getPatternSummary()),
         if (_mode == ScheduleMode.daysOnOff)
           _buildReviewRow(
