@@ -1,8 +1,6 @@
 # Things To Fix
 
 ## Global
-- Medicaiont stock under 25% is showing as purple.  I want orange.  [COMPLETED]
-- Above item is not showing for compact cards donut.  [COMPLETED]
 
 
 ## Home Screen
@@ -11,8 +9,6 @@
 ==============
 
 ## Medication Screen
-- Search, clear results is not needed as it automatically clears it already. [COMPLETED]
-- I stated remove the Clear search text in the window on a search. The search field is already blanked out on a search that results in nothing.  [COMPLETED]
 
 ### Large Cards
 
@@ -47,11 +43,11 @@
 
 ### Choose Medicaiotn Type Screen
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
-- Dont like the gradient for the Choose card at the top. 
+- Dont like the gradient for the Choose card at the top.  [COMPLETED]
 
 ### Choose Injection Type Screen
 - Can we restyle this to suit the remaining app style.  [COMPLETED]
-- Dont like the gradient for the Select card at the top.
+- Dont like the gradient for the Select card at the top.  [COMPLETED]
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 

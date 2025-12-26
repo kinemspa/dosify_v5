@@ -19,7 +19,7 @@ class SelectionHeaderCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return GlassCardSurface(
-      useGradient: true,
+      useGradient: false,
       child: Row(
         children: [
           Container(
