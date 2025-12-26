@@ -1211,19 +1211,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final labelStyle = helperTextStyle(
       context,
-      color: colorScheme.onSurfaceVariant,
-    )?.copyWith(fontSize: kFontSizeSmall);
+      color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+    )?.copyWith(fontSize: kFontSizeSmall, fontWeight: kFontWeightSemiBold);
 
-    final valueBaseStyle = bodyTextStyle(
-      context,
-    )?.copyWith(fontWeight: kFontWeightMedium);
+    final valueBaseStyle = bodyTextStyle(context)?.copyWith(
+      fontWeight: kFontWeightSemiBold,
+      color: colorScheme.onSurface.withValues(alpha: kOpacityHigh),
+    );
 
-    final placeholderStyle = helperTextStyle(
+    final placeholderStyle = mutedTextStyle(
       context,
-      color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
     )?.copyWith(fontStyle: FontStyle.italic);
 
-    final warningStyle = valueBaseStyle?.copyWith(color: colorScheme.error);
+    final warningStyle = valueBaseStyle?.copyWith(color: colorScheme.secondary);
 
     Widget content = Padding(
       padding: const EdgeInsets.symmetric(

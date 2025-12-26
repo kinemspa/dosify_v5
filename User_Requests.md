@@ -21,10 +21,10 @@
 
 ## Medication Details Screen
 ### Reports Card
-- History: cane paginate it? is that advisable?
-    - How do other task apps display task history, is there a way to it vial a calendr view aswell? or not advisable?
-    - Can we expad an entry with all its details when selected?
-- What other graphs can we add?
+- History: 
+    - Paginate it
+	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page.
+- Additional reports
 	- Doses taken vs missed (stacked bar per day/week)
 	- Time-of-day consistency (histogram of taken times)
 	- Streaks / consistency score (sparkline)
@@ -33,9 +33,11 @@
 	- Inventory events timeline (refill/restock/vial opened markers)
 
 ### Medication Details Card
-- Can you not bring in a little flare and style to all the different text elements?
+- Can you not bring in a little flare and style to all the different text elements?  [COMPLETED]
 - Remove the card border. [COMPLETED]
 - Edit Dialogs are all shwoing black font.  [COMPLETED]
+- Edit dialogs for intege values and text have different sizing fonts. Make them the same.
+- Edit dialog for strenght, need to be able to change the unit type aswell as the value. Same with any other integer entry dialogs that have a corresp
 - Sealed Vials Card needs a little helper text on sealed vials. Used for reconstitution.  [COMPLETED]
 
 ==============
