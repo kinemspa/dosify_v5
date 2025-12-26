@@ -302,7 +302,7 @@ Color expiryStatusColor(
     return cs.error;
   }
   if (ratio <= kExpiryWarningRemainingRatio) {
-    return cs.tertiary;
+    return cs.secondary;
   }
 
   return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
@@ -317,7 +317,7 @@ Color stockStatusColorFromRatio(BuildContext context, double remainingRatio) {
 
   if (ratio <= 0) return cs.error;
   if (ratio <= kStockCriticalRemainingRatio) return cs.error;
-  if (ratio <= kStockWarningRemainingRatio) return cs.tertiary;
+  if (ratio <= kStockWarningRemainingRatio) return cs.secondary;
   return cs.primary;
 }
 

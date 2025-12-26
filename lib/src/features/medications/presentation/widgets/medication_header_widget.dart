@@ -615,7 +615,7 @@ class _StockInfoCard extends StatelessWidget {
     } else if ((labelPct / 100.0) <= kStockCriticalRemainingRatio) {
       gaugeLabelColor = statusColorOnPrimary(context, cs.error);
     } else if ((labelPct / 100.0) <= kStockWarningRemainingRatio) {
-      gaugeLabelColor = statusColorOnPrimary(context, cs.tertiary);
+      gaugeLabelColor = statusColorOnPrimary(context, cs.secondary);
     } else {
       gaugeLabelColor = onPrimary;
     }

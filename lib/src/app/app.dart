@@ -14,11 +14,12 @@ class DosifiApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const primarySeed = Color(0xFF09A8BD);
-    // const secondary = Color(0xFFEC873F);
+    const secondarySeed = Color(0xFFEC873F);
 
     final schemeLight = ColorScheme.fromSeed(seedColor: primarySeed).copyWith(
-      // Pin the primary color exactly to the brand seed to avoid tonal shifts
+      // Pin the primary/secondary colors exactly to the brand seeds to avoid tonal shifts
       primary: primarySeed,
+      secondary: secondarySeed,
     );
     final baseLight = ThemeData(
       colorScheme: schemeLight,
@@ -187,7 +188,7 @@ class DosifiApp extends ConsumerWidget {
     final schemeDark = ColorScheme.fromSeed(
       seedColor: primarySeed,
       brightness: Brightness.dark,
-    ).copyWith(primary: primarySeed);
+    ).copyWith(primary: primarySeed, secondary: secondarySeed);
     final baseDark = ThemeData(
       colorScheme: schemeDark,
       useMaterial3: true,
