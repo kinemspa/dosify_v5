@@ -82,7 +82,7 @@
 - MDV should also default to the reconstituted value. As this is what the recon value was originally set to.  [COMPLETED]
 
 - Time selector has violet colour in the AM and PM Selector.  [COMPLETED]
-- Name of Schedule needs to be extremely brief. The dynamic initial of it needs to be for example "1 Tablet - Daily - 9am" 
+- Name of Schedule needs to be extremely brief. The dynamic initial of it needs to be for example "1 Tablet - Daily - 9am"  [COMPLETED]
 
 ==============
 # Calendar

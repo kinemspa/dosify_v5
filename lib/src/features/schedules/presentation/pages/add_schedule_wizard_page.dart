@@ -988,22 +988,78 @@ class _AddScheduleWizardPageState
       return;
     }
 
-    final medName = _selectedMed!.name;
-    final dose = _doseValue.text.isNotEmpty
-        ? '${_doseValue.text} ${_doseUnit.text}'
-        : '';
+    final dose = _autoNameDoseSegment();
     final pattern = _mode == ScheduleMode.everyDay
         ? 'Daily'
         : _mode == ScheduleMode.daysOfWeek
         ? 'Weekly'
         : _mode == ScheduleMode.daysOnOff
-        ? 'Cycled'
+        ? 'Cycle'
         : 'Monthly';
+    final time = _times.isEmpty ? '' : _formatTimeShort(_times.first);
 
-    final times = _times.isEmpty ? '' : _times.first.format(context);
+    final parts = <String>[];
+    if (dose.isNotEmpty) parts.add(dose);
+    parts.add(pattern);
+    if (time.isNotEmpty) parts.add(time);
 
-    _name.text =
-        '$medName ${dose.isNotEmpty ? '($dose) ' : ''}$pattern${times.isNotEmpty ? ' at $times' : ''}';
+    _name.text = parts.join(' - ');
+  }
+
+  String _autoNameDoseSegment() {
+    // Prefer typed dose result when available.
+    final r = _doseResult;
+    if (r != null && !r.hasError) {
+      if (r.doseTabletQuarters != null) {
+        final quarters = r.doseTabletQuarters!;
+        final tablets = quarters / 4.0;
+        final count = fmt2(tablets);
+        final label = (tablets - 1.0).abs() < 0.0001 ? 'Tablet' : 'Tablets';
+        return '$count $label';
+      }
+
+      if (r.doseCapsules != null) {
+        final n = r.doseCapsules!;
+        return '$n ${n == 1 ? 'Capsule' : 'Capsules'}';
+      }
+
+      if (r.doseSyringes != null) {
+        final n = r.doseSyringes!;
+        return '$n ${n == 1 ? 'Injection' : 'Injections'}';
+      }
+
+      if (r.doseVials != null) {
+        final n = r.doseVials!;
+        return '$n ${n == 1 ? 'Vial' : 'Vials'}';
+      }
+
+      if (_selectedMed?.form == MedicationForm.multiDoseVial &&
+          r.syringeUnits != null) {
+        return '${fmt2(r.syringeUnits!)}U';
+      }
+
+      if (r.doseMassMcg != null) {
+        // Fall back to the user-facing dose label for strength-based entries.
+        return _doseSummaryLabel();
+      }
+    }
+
+    // Fall back to legacy fields.
+    final value = _doseValue.text.trim();
+    final unit = _doseUnit.text.trim();
+    if (value.isEmpty) return '';
+    if (unit.isEmpty) return value;
+    return '$value $unit';
+  }
+
+  String _formatTimeShort(TimeOfDay t) {
+    final isPm = t.hour >= 12;
+    var hour12 = t.hour % 12;
+    if (hour12 == 0) hour12 = 12;
+
+    final mm = t.minute;
+    final minutes = mm == 0 ? '' : ':${mm.toString().padLeft(2, '0')}';
+    return '$hour12$minutes${isPm ? 'pm' : 'am'}';
   }
 
   Widget _buildSummaryDisplay() {
