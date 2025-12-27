@@ -66,6 +66,7 @@ class _AddScheduleWizardPageState
   bool _active = true;
   final _name = TextEditingController();
   bool _nameAuto = true;
+  bool _isApplyingAutoName = false;
 
   @override
   void initState() {
@@ -74,9 +75,8 @@ class _AddScheduleWizardPageState
       _loadInitialData(widget.initial!);
     }
     _name.addListener(() {
-      if (_nameAuto && _name.text.isNotEmpty) {
-        _nameAuto = false;
-      }
+      if (_isApplyingAutoName) return;
+      if (_nameAuto) _nameAuto = false;
     });
   }
 
@@ -1061,30 +1061,15 @@ class _AddScheduleWizardPageState
               style: bodyTextStyle(context),
               decoration: buildFieldDecoration(
                 context,
-                hint: 'e.g., Morning Dose',
+                hint: 'e.g., 1 Tablet',
               ).copyWith(border: InputBorder.none),
             ),
           ),
         ),
         const SizedBox(height: kSpacingS),
-        Row(
-          children: [
-            Checkbox(
-              value: _nameAuto,
-              onChanged: (value) {
-                setState(() {
-                  _nameAuto = value ?? false;
-                  if (_nameAuto) _maybeAutoName();
-                });
-              },
-            ),
-            Expanded(
-              child: Text(
-                'Auto-generate name',
-                style: helperTextStyle(context),
-              ),
-            ),
-          ],
+        Text(
+          'Auto-filled based on the dose. You can rename it.',
+          style: helperTextStyle(context),
         ),
       ],
     );
@@ -1093,26 +1078,17 @@ class _AddScheduleWizardPageState
   void _maybeAutoName() {
     if (!_nameAuto) return;
     if (_selectedMed == null) {
+      _isApplyingAutoName = true;
       _name.text = '';
+      _isApplyingAutoName = false;
       return;
     }
 
     final dose = _autoNameDoseSegment();
-    final pattern = _mode == ScheduleMode.everyDay
-        ? 'Daily'
-        : _mode == ScheduleMode.daysOfWeek
-        ? 'Weekly'
-        : _mode == ScheduleMode.daysOnOff
-        ? 'Cycle'
-        : 'Monthly';
-    final time = _times.isEmpty ? '' : _formatTimeShort(_times.first);
 
-    final parts = <String>[];
-    if (dose.isNotEmpty) parts.add(dose);
-    parts.add(pattern);
-    if (time.isNotEmpty) parts.add(time);
-
-    _name.text = parts.join(' - ');
+    _isApplyingAutoName = true;
+    _name.text = dose;
+    _isApplyingAutoName = false;
   }
 
   String _autoNameDoseSegment() {
@@ -1122,8 +1098,19 @@ class _AddScheduleWizardPageState
       if (r.doseTabletQuarters != null) {
         final quarters = r.doseTabletQuarters!;
         final tablets = quarters / 4.0;
-        final count = fmt2(tablets);
-        final label = (tablets - 1.0).abs() < 0.0001 ? 'Tablet' : 'Tablets';
+        String count;
+        if (quarters == 1) {
+          count = '1/4';
+        } else if (quarters == 2) {
+          count = '1/2';
+        } else if (quarters == 3) {
+          count = '3/4';
+        } else {
+          count = fmt2(tablets);
+        }
+        final label = (tablets - 1.0).abs() < 0.0001 || tablets < 1
+            ? 'Tablet'
+            : 'Tablets';
         return '$count $label';
       }
 
@@ -1144,7 +1131,8 @@ class _AddScheduleWizardPageState
 
       if (_selectedMed?.form == MedicationForm.multiDoseVial &&
           r.syringeUnits != null) {
-        return '${fmt2(r.syringeUnits!)}U';
+        final u = r.syringeUnits!;
+        return '${fmt2(u)} ${u == 1 ? 'Unit' : 'Units'}';
       }
 
       if (r.doseMassMcg != null) {
@@ -1159,16 +1147,6 @@ class _AddScheduleWizardPageState
     if (value.isEmpty) return '';
     if (unit.isEmpty) return value;
     return '$value $unit';
-  }
-
-  String _formatTimeShort(TimeOfDay t) {
-    final isPm = t.hour >= 12;
-    var hour12 = t.hour % 12;
-    if (hour12 == 0) hour12 = 12;
-
-    final mm = t.minute;
-    final minutes = mm == 0 ? '' : ':${mm.toString().padLeft(2, '0')}';
-    return '$hour12$minutes${isPm ? 'pm' : 'am'}';
   }
 
   Widget _buildSummaryDisplay() {
