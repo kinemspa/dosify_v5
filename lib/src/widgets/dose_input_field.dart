@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
@@ -157,7 +158,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
         case MdvInputMode.strength:
           if (widget.initialStrengthMcg != null) {
             final value = _convertMcgToDisplayUnit(widget.initialStrengthMcg!);
-            _controller.text = value.toString();
+            _controller.text = fmt2(value);
           } else {
             _controller.text = '';
           }
@@ -166,14 +167,14 @@ class _DoseInputFieldState extends State<DoseInputField> {
           if (widget.initialVolumeMicroliter != null) {
             // Convert microliters to ml
             final ml = widget.initialVolumeMicroliter! / 1000;
-            _controller.text = ml.toString();
+            _controller.text = fmt2(ml);
           } else {
             _controller.text = '';
           }
           break;
         case MdvInputMode.units:
           if (widget.initialSyringeUnits != null) {
-            _controller.text = widget.initialSyringeUnits.toString();
+            _controller.text = fmt2(widget.initialSyringeUnits!);
           } else {
             _controller.text = '';
           }
@@ -527,7 +528,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
       return;
 
     final clamped = newUnits.clamp(0, widget.syringeType!.maxUnits.toDouble());
-    final snapped = double.parse(clamped.toStringAsFixed(1));
+    final snapped = double.parse(clamped.toStringAsFixed(2));
 
     // Calculate from units
     final result = DoseCalculator.calculateFromUnitsMDV(
@@ -547,11 +548,11 @@ class _DoseInputFieldState extends State<DoseInputField> {
         case MdvInputMode.strength:
           final strengthMcg = result.doseMassMcg ?? 0;
           final displayValue = _convertMcgToDisplayUnit(strengthMcg);
-          _controller.text = displayValue.toString();
+          _controller.text = fmt2(displayValue);
           break;
         case MdvInputMode.volume:
           final volumeMl = (result.doseVolumeMicroliter ?? 0) / 1000;
-          _controller.text = volumeMl.toString();
+          _controller.text = fmt2(volumeMl);
           break;
         case MdvInputMode.units:
           _controller.text = _formatUnits(snapped);
@@ -624,9 +625,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   String _formatUnits(double v) {
-    final s = v.toStringAsFixed(1);
-    if (s.endsWith('.0')) return s.substring(0, s.length - 2);
-    return s;
+    return fmt2(v);
   }
 
   bool _supportsModeToggle() {
@@ -921,13 +920,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
     // Format values
     String strengthStr;
     if (strengthMcg >= 1000) {
-      strengthStr = '${(strengthMcg / 1000).toStringAsFixed(2)}mg';
+      strengthStr = '${fmt2(strengthMcg / 1000)}mg';
     } else {
       strengthStr = '${strengthMcg.toStringAsFixed(0)}mcg';
     }
 
-    final volumeStr = '${volumeMl.toStringAsFixed(2)}ml';
-    final unitsStr = '${units.toStringAsFixed(1)} Units';
+    final volumeStr = '${fmt2(volumeMl)}ml';
+    final unitsStr = '${fmt2(units)} Units';
 
     return Container(
       width: double.infinity,

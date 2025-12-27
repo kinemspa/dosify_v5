@@ -73,7 +73,7 @@
 			- If I select the 31st day, how does this translate for 30 day or less months?
 			- compact the grid, its too spacious.
 - Add MDV:
-	- Dose needs to only show 2 decimals. 
+	- Dose needs to only show 2 decimals.  [COMPLETED]
 
 
 - Once the med is selected, we need to restyle all of this. It looks disgusting. Look at the edit dialgos on the medicaiont details screens that are used to edit an existing medication.  [COMPLETED]
