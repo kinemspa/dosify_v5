@@ -63,8 +63,8 @@
 - Add Tablet:
 	- Configure Dose:
 		- the unit type to use should be a dropdown and incremental like the add med wizard objects. 
-		- needs helper text to instruct user to seletc  dose via tablets ot med strenght and it will be calculated to show how much is being taken
-		- centre the shortcut buttons.
+		- needs helper text to instruct user to seletc  dose via tablets ot med strenght and it will be calculated to show how much is being taken [COMPLETED]
+		- centre the shortcut buttons. [COMPLETED]
 		- Incrementaning via med strenght is only incrementing in full tablet calculations, it needs to go in 1/4 tablet calculations.
 		- Dosing times should be on the next page along with the schedule type selection. [COMPLETED]
 	- Schedule Type:

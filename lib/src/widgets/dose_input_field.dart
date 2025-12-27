@@ -573,6 +573,8 @@ class _DoseInputFieldState extends State<DoseInputField> {
         // Mode toggle (tablets/capsules OR MDV)
         if (_supportsModeToggle()) ...[
           _buildModeToggle(cs),
+          const SizedBox(height: kSpacingS),
+          _buildTabletCapsuleHelperText(),
           const SizedBox(height: kFieldGroupSpacing),
         ],
 
@@ -621,6 +623,20 @@ class _DoseInputFieldState extends State<DoseInputField> {
         // Live calculation display
         if (_result != null) _buildResultDisplay(cs),
       ],
+    );
+  }
+
+  Widget _buildTabletCapsuleHelperText() {
+    if (widget.medicationForm != MedicationForm.tablet &&
+        widget.medicationForm != MedicationForm.capsule) {
+      return const SizedBox.shrink();
+    }
+
+    return Text(
+      _isCountMode
+          ? 'Enter how many you take. Use shortcuts for common doses.'
+          : "Enter strength instead and we'll calculate the equivalent dose.",
+      style: helperTextStyle(context),
     );
   }
 
@@ -829,6 +845,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     final buttons = [('1/4', 0.25), ('1/2', 0.5), ('1', 1.0), ('2', 2.0)];
 
     return Wrap(
+      alignment: WrapAlignment.center,
       spacing: kButtonSpacing,
       runSpacing: kButtonSpacing,
       children: buttons.map((btn) {
@@ -840,9 +857,9 @@ class _DoseInputFieldState extends State<DoseInputField> {
             vertical: 0,
           ),
           backgroundColor: cs.surface,
-          labelStyle: Theme.of(
+          labelStyle: bodyTextStyle(
             context,
-          ).textTheme.labelMedium?.copyWith(fontWeight: kFontWeightMedium),
+          )?.copyWith(fontWeight: kFontWeightMedium),
         );
       }).toList(),
     );
