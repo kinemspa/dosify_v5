@@ -664,7 +664,7 @@ class _AddScheduleWizardPageState
       children: [
         _buildSection(context, 'Schedule Pattern', [
           LabelFieldRow(
-            label: 'Schedule Type',
+            label: 'Type',
             field: Field36(
               child: DropdownButtonFormField<ScheduleMode>(
                 value: _mode,
@@ -942,10 +942,10 @@ class _AddScheduleWizardPageState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: kSpacingS),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: kSpacingXS,
+              runSpacing: kSpacingXS,
               children: List.generate(31, (i) {
                 final day = i + 1;
                 final isSelected = _daysOfMonth.contains(day);
@@ -964,6 +964,10 @@ class _AddScheduleWizardPageState
                   },
                 );
               }),
+            ),
+            const SizedBox(height: kSpacingS),
+            _helperBelowLeft(
+              'Months without selected days (e.g., 31st) will be skipped.',
             ),
           ],
         );

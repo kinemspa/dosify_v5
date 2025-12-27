@@ -68,10 +68,10 @@
 		- Incrementaning via med strenght is only incrementing in full tablet calculations, it needs to go in 1/4 tablet calculations. [COMPLETED]
 		- Dosing times should be on the next page along with the schedule type selection. [COMPLETED]
 	- Schedule Type:
-		- Change name to type
+		- Change name to type [COMPLETED]
 		- Days of the month:
-			- If I select the 31st day, how does this translate for 30 day or less months?
-			- compact the grid, its too spacious.
+			- If I select the 31st day, how does this translate for 30 day or less months? [COMPLETED]
+			- compact the grid, its too spacious. [COMPLETED]
 - Add MDV:
 	- Dose needs to only show 2 decimals.  [COMPLETED]
 
