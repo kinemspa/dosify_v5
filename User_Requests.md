@@ -66,7 +66,7 @@
 		- needs helper text to instruct user to seletc  dose via tablets ot med strenght and it will be calculated to show how much is being taken
 		- centre the shortcut buttons.
 		- Incrementaning via med strenght is only incrementing in full tablet calculations, it needs to go in 1/4 tablet calculations.
-		- Dosing times should be on the next page along with the schedule type selection.
+		- Dosing times should be on the next page along with the schedule type selection. [COMPLETED]
 	- Schedule Type:
 		- Change name to type
 		- Days of the month:

@@ -612,10 +612,7 @@ class _AddScheduleWizardPageState
                   .map(
                     (t) => DropdownMenuItem<SyringeType>(
                       value: t,
-                      child: Text(
-                        t.name,
-                        style: bodyTextStyle(context),
-                      ),
+                      child: Text(t.name, style: bodyTextStyle(context)),
                     ),
                   )
                   .toList(),
@@ -656,12 +653,6 @@ class _AddScheduleWizardPageState
         _helperBelowLeft(
           'Set the per-dose amount. You can fine-tune later if needed.',
         ),
-        const SizedBox(height: kSpacingL),
-        _buildSection(context, 'Dosing Times', [
-          _buildTimesList(),
-          const SizedBox(height: kSpacingS),
-          _helperBelowLeft('Tap a time to edit it.'),
-        ]),
       ],
     );
   }
@@ -709,6 +700,12 @@ class _AddScheduleWizardPageState
           const SizedBox(height: kSpacingS),
           _helperBelowLeft('Choose how often this schedule repeats.'),
           _buildScheduleModeFields(),
+        ]),
+        const SizedBox(height: kSpacingL),
+        _buildSection(context, 'Dosing Times', [
+          _buildTimesList(),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft('Tap a time to edit it.'),
         ]),
       ],
     );
@@ -1198,7 +1195,10 @@ class _AddScheduleWizardPageState
       children: [
         SwitchListTile(
           title: Text('Active', style: bodyTextStyle(context)),
-          subtitle: Text('Schedule is enabled', style: helperTextStyle(context)),
+          subtitle: Text(
+            'Schedule is enabled',
+            style: helperTextStyle(context),
+          ),
           value: _active,
           onChanged: (value) => setState(() => _active = value),
         ),
