@@ -7,6 +7,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 /// MDV input mode for 3-way conversion
@@ -386,17 +387,6 @@ class _DoseInputFieldState extends State<DoseInputField> {
     widget.onDoseChanged(result);
   }
 
-  void _toggleMode() {
-    setState(() {
-      _isCountMode = !_isCountMode;
-      _controller.clear();
-      _result = null;
-    });
-    widget.onDoseChanged(
-      DoseCalculationResult.error('Mode changed - enter new dose'),
-    );
-  }
-
   void _toggleMdvMode(MdvInputMode newMode) {
     if (_mdvMode == newMode) return;
     setState(() {
@@ -650,30 +640,37 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   Widget _buildModeToggle(ColorScheme cs) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildModeButton(
-            label: _getCountModeLabel(),
-            isSelected: _isCountMode,
-            onTap: () {
-              if (!_isCountMode) _toggleMode();
-            },
-            cs: cs,
+    final value = _isCountMode ? 'count' : 'strength';
+
+    return LabelFieldRow(
+      label: 'Dose Type',
+      field: SmallDropdown36<String>(
+        value: value,
+        items: [
+          DropdownMenuItem(
+            value: 'count',
+            child: Text(_getCountModeLabel(), style: bodyTextStyle(context)),
           ),
-        ),
-        const SizedBox(width: kButtonSpacing),
-        Expanded(
-          child: _buildModeButton(
-            label: 'Strength',
-            isSelected: !_isCountMode,
-            onTap: () {
-              if (_isCountMode) _toggleMode();
-            },
-            cs: cs,
+          DropdownMenuItem(
+            value: 'strength',
+            child: Text('Strength', style: bodyTextStyle(context)),
           ),
-        ),
-      ],
+        ],
+        onChanged: (newValue) {
+          final shouldCount = newValue == 'count';
+          if (shouldCount == _isCountMode) return;
+
+          setState(() {
+            _isCountMode = shouldCount;
+            _controller.clear();
+            _result = null;
+          });
+
+          widget.onDoseChanged(
+            DoseCalculationResult.error('Mode changed - enter new dose'),
+          );
+        },
+      ),
     );
   }
 
