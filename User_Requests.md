@@ -59,7 +59,7 @@
 
 ==============
 # Add Schedule
-- Alot of black text on this screen.
+- Alot of black text on this screen. [COMPLETED]
 - Add Tablet:
 	- Configure Dose:
 		- the unit type to use should be a dropdown and incremental like the add med wizard objects. 

@@ -612,7 +612,10 @@ class _AddScheduleWizardPageState
                   .map(
                     (t) => DropdownMenuItem<SyringeType>(
                       value: t,
-                      child: Text(t.name),
+                      child: Text(
+                        t.name,
+                        style: bodyTextStyle(context),
+                      ),
                     ),
                   )
                   .toList(),
@@ -681,7 +684,10 @@ class _AddScheduleWizardPageState
                 items: ScheduleMode.values.map((mode) {
                   return DropdownMenuItem(
                     value: mode,
-                    child: Text(_modeLabel(mode)),
+                    child: Text(
+                      _modeLabel(mode),
+                      style: bodyTextStyle(context),
+                    ),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -863,6 +869,7 @@ class _AddScheduleWizardPageState
                 final isSelected = _days.contains(day);
                 return FilterChip(
                   label: Text(_getDayName(day)),
+                  labelStyle: bodyTextStyle(context),
                   selected: isSelected,
                   onSelected: (selected) {
                     setState(() {
@@ -947,6 +954,7 @@ class _AddScheduleWizardPageState
                 final isSelected = _daysOfMonth.contains(day);
                 return FilterChip(
                   label: Text('$day'),
+                  labelStyle: bodyTextStyle(context),
                   selected: isSelected,
                   onSelected: (selected) {
                     setState(() {
@@ -1189,17 +1197,18 @@ class _AddScheduleWizardPageState
     return Column(
       children: [
         SwitchListTile(
-          title: const Text('Active'),
-          subtitle: const Text('Schedule is enabled'),
+          title: Text('Active', style: bodyTextStyle(context)),
+          subtitle: Text('Schedule is enabled', style: helperTextStyle(context)),
           value: _active,
           onChanged: (value) => setState(() => _active = value),
         ),
         if (_mode == ScheduleMode.daysOnOff) ...[
           const SizedBox(height: 12),
           ListTile(
-            title: const Text('Cycle Start Date'),
+            title: Text('Cycle Start Date', style: bodyTextStyle(context)),
             subtitle: Text(
               '${_cycleAnchor.year}-${_cycleAnchor.month}-${_cycleAnchor.day}',
+              style: helperTextStyle(context),
             ),
             trailing: const Icon(Icons.calendar_today),
             onTap: () async {
