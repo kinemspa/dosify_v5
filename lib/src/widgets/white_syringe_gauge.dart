@@ -1,6 +1,9 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
+
 /// Syringe gauge widget used for reconstitution visualization
 /// Shows a horizontal line with unit markers and thick fill line
 /// Can be interactive - drag the fill line to adjust value
@@ -112,7 +115,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
         duration: const Duration(milliseconds: 150),
         decoration: null, // Removed glow animation entirely
         child: CustomPaint(
-          size: const Size(double.infinity, 44),
+          size: const Size(double.infinity, kWhiteSyringeGaugeHeight),
           painter: _WhiteSyringePainter(
             totalUnits: widget.totalUnits,
             fillUnits: currentFill,
@@ -146,8 +149,8 @@ class _WhiteSyringePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Baseline is at bottom of canvas
-    final baselineY = size.height - 4;
+    // Reserve bottom space so tick labels are not clipped.
+    final baselineY = size.height - kWhiteSyringeGaugeBottomLabelPadding;
 
     // Draw horizontal baseline (entire width)
     final baselinePaint = Paint()
@@ -252,20 +255,28 @@ class _WhiteSyringePainter extends CustomPainter {
         // Larger handle when actively dragging
         final handleRadius = isActivelyDragging ? 8.0 : 6.0;
         final centerRadius = isActivelyDragging ? 4.0 : 3.0;
-        
+
         final handlePaint = Paint()
           ..color = color
           ..style = PaintingStyle.fill;
 
         // Draw a circular handle at the end of the fill line
-        canvas.drawCircle(Offset(fillEndX, baselineY), handleRadius, handlePaint);
+        canvas.drawCircle(
+          Offset(fillEndX, baselineY),
+          handleRadius,
+          handlePaint,
+        );
 
         // Draw white center to make it more visible
         final centerPaint = Paint()
           ..color = Colors.white
           ..style = PaintingStyle.fill;
-        canvas.drawCircle(Offset(fillEndX, baselineY), centerRadius, centerPaint);
-        
+        canvas.drawCircle(
+          Offset(fillEndX, baselineY),
+          centerRadius,
+          centerPaint,
+        );
+
         // Draw numeric unit indicator on handle (interactive only)
         if (interactive) {
           final unitsText = fillUnits.round().toString();
@@ -280,30 +291,32 @@ class _WhiteSyringePainter extends CustomPainter {
             ),
             textDirection: TextDirection.ltr,
           )..layout();
-          
+
           // Position above the handle
           final textX = fillEndX - unitPainter.width / 2;
           final textY = baselineY - handleRadius - unitPainter.height - 6;
-          
+
           // Draw dark background circle behind number for contrast
-          final backgroundRadius = (unitPainter.width > unitPainter.height
-                  ? unitPainter.width
-                  : unitPainter.height) /
-              2 +
+          final backgroundRadius =
+              (unitPainter.width > unitPainter.height
+                      ? unitPainter.width
+                      : unitPainter.height) /
+                  2 +
               3;
           final backgroundPaint = Paint()
-            ..color = const Color(0xFF1A1E37) // kReconBackgroundActive
+            ..color =
+                const Color(0xFF1A1E37) // kReconBackgroundActive
             ..style = PaintingStyle.fill;
           canvas.drawCircle(
             Offset(fillEndX, textY + unitPainter.height / 2),
             backgroundRadius,
             backgroundPaint,
           );
-          
+
           unitPainter.paint(canvas, Offset(textX, textY));
         }
       }
-      
+
       // Draw value label for non-interactive gauges
       if (showValueLabel && fillEndX > 0) {
         final unitsText = '${fillUnits.round()} U';
@@ -318,7 +331,7 @@ class _WhiteSyringePainter extends CustomPainter {
           ),
           textDirection: TextDirection.ltr,
         )..layout();
-        
+
         // Position above the fill line
         final textX = fillEndX - unitPainter.width / 2;
         final textY = baselineY - 20 - unitPainter.height;

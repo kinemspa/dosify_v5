@@ -307,7 +307,9 @@ class _AddScheduleWizardPageState
           final unit = (count - 1.0).abs() < 0.0001 || count < 1
               ? 'tablet'
               : 'tablets';
-          metrics.add('${formatTabletCountFromQuarters(r.doseTabletQuarters!)} $unit');
+          metrics.add(
+            '${formatTabletCountFromQuarters(r.doseTabletQuarters!)} $unit',
+          );
         }
       case MedicationForm.capsule:
         if (r.doseCapsules != null) {
@@ -499,6 +501,7 @@ class _AddScheduleWizardPageState
     setState(() {
       _selectedMed = med;
       _medicationId = med.id;
+      _selectedSyringeType = null;
 
       // Set defaults based on form
       switch (med.form) {
@@ -600,6 +603,32 @@ class _AddScheduleWizardPageState
   Widget _buildDoseConfiguration() {
     return Column(
       children: [
+        if (_selectedMed!.form == MedicationForm.multiDoseVial) ...[
+          LabelFieldRow(
+            label: 'Syringe',
+            field: SmallDropdown36<SyringeType>(
+              value: _selectedSyringeType ?? _getSyringeType(),
+              items: SyringeType.values
+                  .map(
+                    (t) => DropdownMenuItem<SyringeType>(
+                      value: t,
+                      child: Text(t.name),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedSyringeType = value;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft(
+            'Choose the syringe size so the unit markings match what you use.',
+          ),
+          const SizedBox(height: kSpacingS),
+        ],
         DoseInputField(
           medicationForm: _selectedMed!.form,
           strengthPerUnitMcg: _getStrengthPerUnitMcg() ?? 0,

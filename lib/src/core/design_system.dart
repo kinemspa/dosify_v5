@@ -84,6 +84,10 @@ const double kStockDonutGaugeSize = 96;
 const double kDualStockDonutInnerScale = 0.73;
 const double kDualStockDonutInnerStrokeWidth = 6.0;
 
+/// White syringe gauge sizing (MDV / reconstitution)
+const double kWhiteSyringeGaugeHeight = 56;
+const double kWhiteSyringeGaugeBottomLabelPadding = 22;
+
 /// Medication details header gauge sizing
 const double kMedicationDetailDonutSize = 112;
 const double kMedicationDetailDonutStrokeWidth = 14.0;
