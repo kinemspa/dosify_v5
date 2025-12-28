@@ -56,9 +56,12 @@
 - Cards Need to be restyled exactly like the medication screen ones. Large, Compact and list. [COMPLETED]
 - This doesnt need to have the actual time and dose details. Its the saved object of a schedule of doses. Provide the best informaiotn you can for being concise and explicit. [COMPLETED]
 - Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
+- COmpact Cards date circle has made the compact card just as big as the large card. Need to fix this. The Large card purpose is to show mroe infoarmation. COmpact shows less. list shows the least.  [COMPLETED]
 
 ==============
 # Add Schedule
+- Adding a schedule seems to be adding events in the past. SHould not do this. Maybe have a start from setting, Now, or selected date. 
+- Needs an end date picker too. 
 - Alot of black text on this screen. [COMPLETED]
 - Add Tablet:
 	- Configure Dose:

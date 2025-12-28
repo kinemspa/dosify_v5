@@ -45,48 +45,50 @@ class NextDoseDateBadge extends StatelessWidget {
         ? TimeOfDay.fromDateTime(nextDose!).format(context)
         : 'No upcoming';
 
+    final circle = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: circleBg,
+        border: Border.all(width: kBorderWidthThin, color: circleBorder),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              dayText,
+              style: TextStyle(
+                fontSize: dense
+                    ? kNextDoseDateCircleDayFontSizeCompact
+                    : kNextDoseDateCircleDayFontSizeLarge,
+                fontWeight: kFontWeightExtraBold,
+                height: 1,
+                color: primaryTextColor,
+              ),
+            ),
+            if (monthText.isNotEmpty)
+              Text(
+                monthText,
+                style: TextStyle(
+                  fontSize: kNextDoseDateCircleMonthFontSize,
+                  fontWeight: kFontWeightSemiBold,
+                  height: 1,
+                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (dense) return circle;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: circleBg,
-            border: Border.all(width: kBorderWidthThin, color: circleBorder),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  dayText,
-                  style: TextStyle(
-                    fontSize: dense
-                        ? kNextDoseDateCircleDayFontSizeCompact
-                        : kNextDoseDateCircleDayFontSizeLarge,
-                    fontWeight: kFontWeightExtraBold,
-                    height: 1,
-                    color: primaryTextColor,
-                  ),
-                ),
-                if (monthText.isNotEmpty)
-                  Text(
-                    monthText,
-                    style: TextStyle(
-                      fontSize: kNextDoseDateCircleMonthFontSize,
-                      fontWeight: kFontWeightSemiBold,
-                      height: 1,
-                      color: primaryTextColor.withValues(
-                        alpha: kOpacityMediumHigh,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
+        circle,
         const SizedBox(height: kSpacingXS),
         Text(
           timeText,
