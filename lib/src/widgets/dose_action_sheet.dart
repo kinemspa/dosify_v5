@@ -81,9 +81,12 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         medicationId: widget.dose.existingLog!.medicationId,
         medicationName: widget.dose.existingLog!.medicationName,
         scheduledTime: widget.dose.existingLog!.scheduledTime,
+        actionTime: widget.dose.existingLog!.actionTime,
         doseValue: widget.dose.existingLog!.doseValue,
         doseUnit: widget.dose.existingLog!.doseUnit,
         action: widget.dose.existingLog!.action,
+        actualDoseValue: widget.dose.existingLog!.actualDoseValue,
+        actualDoseUnit: widget.dose.existingLog!.actualDoseUnit,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
       );
 
@@ -107,8 +110,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   Future<void> _saveChanges() async {
     // If status changed, call appropriate callback
     if (_selectedStatus != widget.dose.status) {
-      final notes = _notesController.text.isEmpty ? null : _notesController.text;
-      
+      final notes = _notesController.text.isEmpty
+          ? null
+          : _notesController.text;
+
       switch (_selectedStatus) {
         case DoseStatus.taken:
           widget.onMarkTaken(notes);
@@ -336,12 +341,12 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       children: [
         // Take button - toggles between taken and pending
         Expanded(
-          child: takePrimary 
+          child: takePrimary
               ? FilledButton.icon(
                   onPressed: () {
                     setState(() {
-                      _selectedStatus = widget.dose.status == DoseStatus.taken 
-                          ? DoseStatus.pending 
+                      _selectedStatus = widget.dose.status == DoseStatus.taken
+                          ? DoseStatus.pending
                           : widget.dose.status;
                       _hasChanged = true;
                     });
@@ -349,7 +354,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   icon: const Icon(Icons.check_circle, size: 18),
                   label: const Text('Taken'),
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                   ),
@@ -364,19 +372,22 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   icon: const Icon(Icons.check_circle_outline, size: 18),
                   label: const Text('Take'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                 ),
         ),
         const SizedBox(width: 8),
         // Snooze button - toggles between snoozed and pending
         Expanded(
-          child: snoozePrimary 
+          child: snoozePrimary
               ? FilledButton.icon(
                   onPressed: () {
                     setState(() {
-                      _selectedStatus = widget.dose.status == DoseStatus.snoozed 
-                          ? DoseStatus.pending 
+                      _selectedStatus = widget.dose.status == DoseStatus.snoozed
+                          ? DoseStatus.pending
                           : widget.dose.status;
                       _hasChanged = true;
                     });
@@ -384,7 +395,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   icon: const Icon(Icons.snooze, size: 18),
                   label: const Text('Snoozed'),
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     backgroundColor: Colors.amber,
                     foregroundColor: Colors.black87,
                   ),
@@ -399,19 +413,22 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   icon: const Icon(Icons.snooze_outlined, size: 18),
                   label: const Text('Snooze'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                 ),
         ),
         const SizedBox(width: 8),
         // Skip button - toggles between skipped and pending
         Expanded(
-          child: skipPrimary 
+          child: skipPrimary
               ? FilledButton.icon(
                   onPressed: () {
                     setState(() {
-                      _selectedStatus = widget.dose.status == DoseStatus.skipped 
-                          ? DoseStatus.pending 
+                      _selectedStatus = widget.dose.status == DoseStatus.skipped
+                          ? DoseStatus.pending
                           : widget.dose.status;
                       _hasChanged = true;
                     });
@@ -419,7 +436,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   icon: const Icon(Icons.cancel, size: 18),
                   label: const Text('Skipped'),
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
                   ),
@@ -434,7 +454,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   icon: const Icon(Icons.cancel_outlined, size: 18),
                   label: const Text('Skip'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                 ),
         ),

@@ -33,7 +33,7 @@
 	- Paginate it [COMPLETED]
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
 	- Can we do a  viea change button on this? Make the dose appear horizontal. The day componant is the most important. So we need that sorted and viewable in that state. [COMPLETED]
-	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. 
+	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. [COMPLETED]
 - Add reports
 	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
 	- Time-of-day consistency (histogram of taken times) [COMPLETED]

@@ -9,8 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
 /// Replaces DoseHistoryWidget with expanded functionality
@@ -454,7 +456,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
-                        onPressed: () => _showEditDoseLogSheet(context, log),
+                        onPressed: () =>
+                            _showUniversalDoseActionSheetForLog(context, log),
                         icon: Icon(
                           Icons.edit_outlined,
                           size: kIconSizeSmall,
@@ -704,7 +707,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
-                        onPressed: () => _showEditDoseLogSheet(context, log),
+                        onPressed: () =>
+                            _showUniversalDoseActionSheetForLog(context, log),
                         icon: Icon(
                           Icons.edit_outlined,
                           size: kIconSizeSmall,
@@ -729,173 +733,110 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     );
   }
 
-  Future<void> _showEditDoseLogSheet(BuildContext context, DoseLog log) {
-    final cs = Theme.of(context).colorScheme;
+  Future<void> _showUniversalDoseActionSheetForLog(
+    BuildContext context,
+    DoseLog log,
+  ) {
     final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
 
-    final notesController = TextEditingController(text: log.notes ?? '');
-    final actualDoseController = TextEditingController(
-      text: _formatAmount(log.actualDoseValue ?? log.doseValue),
+    final dose = CalculatedDose(
+      scheduleId: log.scheduleId,
+      scheduleName: log.scheduleName,
+      medicationName: log.medicationName,
+      scheduledTime: log.scheduledTime,
+      doseValue: log.doseValue,
+      doseUnit: log.doseUnit,
+      existingLog: log,
     );
 
-    DoseAction selectedAction = log.action;
+    void showUpdatedSnackBar(String message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        this.context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
 
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            Future<void> save() async {
-              final rawActual = actualDoseController.text.trim();
-              final parsedActual = double.tryParse(rawActual);
-              if (selectedAction == DoseAction.taken && parsedActual == null) {
-                ScaffoldMessenger.of(sheetContext).showSnackBar(
-                  const SnackBar(content: Text('Enter a valid dose amount')),
-                );
-                return;
-              }
-
-              final unit = log.actualDoseUnit ?? log.doseUnit;
-
-              final updated = DoseLog(
-                id: log.id,
-                scheduleId: log.scheduleId,
-                scheduleName: log.scheduleName,
-                medicationId: log.medicationId,
-                medicationName: log.medicationName,
-                scheduledTime: log.scheduledTime,
-                actionTime: log.actionTime,
-                doseValue: log.doseValue,
-                doseUnit: log.doseUnit,
-                action: selectedAction,
-                actualDoseValue: selectedAction == DoseAction.taken
-                    ? (parsedActual == log.doseValue ? null : parsedActual)
-                    : null,
-                actualDoseUnit: selectedAction == DoseAction.taken
-                    ? unit
-                    : null,
-                notes: notesController.text.trim().isEmpty
-                    ? null
-                    : notesController.text.trim(),
-              );
-
-              await repo.upsert(updated);
-
-              if (sheetContext.mounted) {
-                Navigator.pop(sheetContext);
-                ScaffoldMessenger.of(
-                  sheetContext,
-                ).showSnackBar(const SnackBar(content: Text('Dose updated')));
-              }
-            }
-
-            return Padding(
-              padding: EdgeInsets.only(
-                left: kSpacingL,
-                right: kSpacingL,
-                top: kSpacingM,
-                bottom:
-                    MediaQuery.of(sheetContext).viewInsets.bottom + kSpacingL,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Edit dose',
-                          style: cardTitleStyle(context)?.copyWith(
-                            color: cs.primary,
-                            fontWeight: kFontWeightBold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(sheetContext),
-                        icon: Icon(Icons.close, color: cs.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: kSpacingM),
-                  DropdownButtonFormField<DoseAction>(
-                    value: selectedAction,
-                    decoration: InputDecoration(
-                      labelText: 'Action',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          kBorderRadiusMedium,
-                        ),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: DoseAction.taken,
-                        child: Text('Taken'),
-                      ),
-                      DropdownMenuItem(
-                        value: DoseAction.skipped,
-                        child: Text('Skipped'),
-                      ),
-                      DropdownMenuItem(
-                        value: DoseAction.snoozed,
-                        child: Text('Snoozed'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setSheetState(() {
-                        selectedAction = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: kSpacingM),
-                  if (selectedAction == DoseAction.taken) ...[
-                    TextField(
-                      controller: actualDoseController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText:
-                            'Actual dose (${log.actualDoseUnit ?? log.doseUnit})',
-                        hintText: _formatAmount(log.doseValue),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadiusMedium,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: kSpacingM),
-                  ],
-                  TextField(
-                    controller: notesController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Notes (optional)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          kBorderRadiusMedium,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: kSpacingM),
-                  FilledButton(onPressed: save, child: const Text('Save')),
-                  const SizedBox(height: kSpacingS),
-                ],
-              ),
-            );
-          },
+    return DoseActionSheet.show(
+      context,
+      dose: dose,
+      onMarkTaken: (notes) {
+        final trimmed = notes?.trim();
+        final updated = DoseLog(
+          id: log.id,
+          scheduleId: log.scheduleId,
+          scheduleName: log.scheduleName,
+          medicationId: log.medicationId,
+          medicationName: log.medicationName,
+          scheduledTime: log.scheduledTime,
+          actionTime: log.actionTime,
+          doseValue: log.doseValue,
+          doseUnit: log.doseUnit,
+          action: DoseAction.taken,
+          actualDoseValue: log.actualDoseValue,
+          actualDoseUnit: log.actualDoseUnit,
+          notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
+
+        repo.upsert(updated).then((_) {
+          if (!mounted) return;
+          setState(() {});
+          showUpdatedSnackBar('Dose updated');
+        });
       },
-    ).whenComplete(() {
-      notesController.dispose();
-      actualDoseController.dispose();
-    });
+      onSnooze: () {
+        final updated = DoseLog(
+          id: log.id,
+          scheduleId: log.scheduleId,
+          scheduleName: log.scheduleName,
+          medicationId: log.medicationId,
+          medicationName: log.medicationName,
+          scheduledTime: log.scheduledTime,
+          actionTime: log.actionTime,
+          doseValue: log.doseValue,
+          doseUnit: log.doseUnit,
+          action: DoseAction.snoozed,
+          notes: log.notes,
+        );
+
+        repo.upsert(updated).then((_) {
+          if (!mounted) return;
+          setState(() {});
+          showUpdatedSnackBar('Dose updated');
+        });
+      },
+      onSkip: () {
+        final updated = DoseLog(
+          id: log.id,
+          scheduleId: log.scheduleId,
+          scheduleName: log.scheduleName,
+          medicationId: log.medicationId,
+          medicationName: log.medicationName,
+          scheduledTime: log.scheduledTime,
+          actionTime: log.actionTime,
+          doseValue: log.doseValue,
+          doseUnit: log.doseUnit,
+          action: DoseAction.skipped,
+          notes: log.notes,
+        );
+
+        repo.upsert(updated).then((_) {
+          if (!mounted) return;
+          setState(() {});
+          showUpdatedSnackBar('Dose updated');
+        });
+      },
+      onDelete: () {
+        repo.delete(log.id).then((_) {
+          if (!mounted) return;
+          setState(() {
+            if (_expandedHistoryLogId == log.id) {
+              _expandedHistoryLogId = null;
+            }
+          });
+          showUpdatedSnackBar('Dose log removed');
+        });
+      },
+    );
   }
 
   Widget _buildAdherenceTab(BuildContext context) {
