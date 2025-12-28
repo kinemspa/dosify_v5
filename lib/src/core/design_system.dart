@@ -84,6 +84,11 @@ const double kTakenMissedChartHeight = 44;
 const double kTakenMissedChartBarSpacing = kSpacingS;
 const double kTakenMissedChartBarRadius = 4;
 
+/// Time-of-day histogram (reports)
+const double kTimeOfDayHistogramHeight = 36;
+const double kTimeOfDayHistogramBarSpacing = 2;
+const double kTimeOfDayHistogramBarRadius = 3;
+
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
 const double kDualStockDonutInnerScale = 0.73;

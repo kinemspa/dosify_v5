@@ -616,6 +616,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final adherenceData = _calculateAdherenceData();
     final avgPct = _getAveragePercentage(adherenceData);
     final takenMissed = _calculateTakenMissedData();
+    final timeOfDayHistogram = _calculateTakenTimeOfDayHistogram();
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -722,6 +723,62 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     ),
               );
             }),
+          ),
+
+          const SizedBox(height: kSpacingM),
+
+          Text(
+            'Time of day',
+            style: helperTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightSemiBold,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+
+          SizedBox(
+            height: kTimeOfDayHistogramHeight,
+            child: CustomPaint(
+              painter: _TimeOfDayHistogramPainter(
+                counts: timeOfDayHistogram,
+                barColor: cs.secondary,
+                emptyColor: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacitySubtleLow,
+                ),
+              ),
+              child: Container(),
+            ),
+          ),
+          const SizedBox(height: kSpacingXS),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '12a',
+                style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                    ?.copyWith(fontSize: kFontSizeHint),
+              ),
+              Text(
+                '6a',
+                style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                    ?.copyWith(fontSize: kFontSizeHint),
+              ),
+              Text(
+                '12p',
+                style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                    ?.copyWith(fontSize: kFontSizeHint),
+              ),
+              Text(
+                '6p',
+                style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                    ?.copyWith(fontSize: kFontSizeHint),
+              ),
+              Text(
+                '12a',
+                style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                    ?.copyWith(fontSize: kFontSizeHint),
+              ),
+            ],
           ),
           const SizedBox(height: kSpacingM),
 
@@ -868,14 +925,20 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         .toList();
 
     if (schedules.isEmpty) {
-      return List.generate(7, (_) => const _TakenMissedDay(expected: 0, taken: 0));
+      return List.generate(
+        7,
+        (_) => const _TakenMissedDay(expected: 0, taken: 0),
+      );
     }
 
     final days = <_TakenMissedDay>[];
 
     for (int i = 6; i >= 0; i--) {
-      final day = DateTime(now.year, now.month, now.day)
-          .subtract(Duration(days: i));
+      final day = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: i));
       final dayEnd = day.add(const Duration(days: 1));
 
       int expectedDoses = 0;
@@ -888,7 +951,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       final dayLogs = doseLogBox.values.where(
         (log) =>
             log.medicationId == widget.medication.id &&
-            log.scheduledTime.isAfter(day.subtract(const Duration(seconds: 1))) &&
+            log.scheduledTime.isAfter(
+              day.subtract(const Duration(seconds: 1)),
+            ) &&
             log.scheduledTime.isBefore(dayEnd),
       );
 
@@ -902,6 +967,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     }
 
     return days;
+  }
+
+  List<int> _calculateTakenTimeOfDayHistogram() {
+    final now = DateTime.now();
+    final cutoff = now.subtract(const Duration(days: 30));
+    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+
+    final counts = List<int>.filled(24, 0);
+
+    final takenLogs = doseLogBox.values.where(
+      (log) =>
+          log.medicationId == widget.medication.id &&
+          log.action == DoseAction.taken &&
+          log.actionTime.isAfter(cutoff),
+    );
+
+    for (final log in takenLogs) {
+      final hour = log.actionTime.hour;
+      if (hour >= 0 && hour < 24) {
+        counts[hour] = counts[hour] + 1;
+      }
+    }
+
+    return counts;
   }
 
   String _formatAmount(double value) {
@@ -1058,7 +1147,8 @@ class _TakenMissedStackedBarPainter extends CustomPainter {
         (size.width - (spacing * (totalBars - 1))) / totalBars.toDouble();
     final radius = Radius.circular(kTakenMissedChartBarRadius);
 
-    final takenPaint = Paint()..color = takenColor.withValues(alpha: kOpacityEmphasis);
+    final takenPaint = Paint()
+      ..color = takenColor.withValues(alpha: kOpacityEmphasis);
     final missedPaint = Paint()
       ..color = missedColor.withValues(alpha: kOpacityMediumHigh);
     final emptyPaint = Paint()..color = emptyColor;
@@ -1122,6 +1212,56 @@ class _TakenMissedStackedBarPainter extends CustomPainter {
     return oldDelegate.data != data ||
         oldDelegate.takenColor != takenColor ||
         oldDelegate.missedColor != missedColor ||
+        oldDelegate.emptyColor != emptyColor;
+  }
+}
+
+class _TimeOfDayHistogramPainter extends CustomPainter {
+  _TimeOfDayHistogramPainter({
+    required this.counts,
+    required this.barColor,
+    required this.emptyColor,
+  });
+
+  final List<int> counts;
+  final Color barColor;
+  final Color emptyColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (counts.isEmpty) return;
+    final bars = counts.length;
+    if (bars <= 1) return;
+
+    final spacing = kTimeOfDayHistogramBarSpacing;
+    final barWidth =
+        (size.width - (spacing * (bars - 1))) / bars.toDouble();
+    final radius = Radius.circular(kTimeOfDayHistogramBarRadius);
+
+    final maxCount = counts.fold<int>(0, (m, v) => v > m ? v : m);
+
+    final emptyPaint = Paint()..color = emptyColor;
+    final barPaint = Paint()..color = barColor.withValues(alpha: kOpacityEmphasis);
+
+    for (int i = 0; i < bars; i++) {
+      final x = i * (barWidth + spacing);
+      final fullRect = Rect.fromLTWH(x, 0, barWidth, size.height);
+      canvas.drawRRect(RRect.fromRectAndRadius(fullRect, radius), emptyPaint);
+
+      final c = counts[i];
+      if (c <= 0 || maxCount <= 0) continue;
+
+      final frac = c / maxCount;
+      final h = (size.height * frac).clamp(1.0, size.height);
+      final barRect = Rect.fromLTWH(x, size.height - h, barWidth, h);
+      canvas.drawRRect(RRect.fromRectAndRadius(barRect, radius), barPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TimeOfDayHistogramPainter oldDelegate) {
+    return oldDelegate.counts != counts ||
+        oldDelegate.barColor != barColor ||
         oldDelegate.emptyColor != emptyColor;
   }
 }
