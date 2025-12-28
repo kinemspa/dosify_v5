@@ -112,12 +112,8 @@ class CalendarMonthView extends StatelessWidget {
             selectedWeekday: selectedDate?.weekday,
           ),
           // Calendar grid
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: 280, // Compact grid height, panel hugs below
-            ),
+          Expanded(
             child: GridView.builder(
-              shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 7,
