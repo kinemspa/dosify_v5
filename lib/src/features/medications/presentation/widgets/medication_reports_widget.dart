@@ -32,6 +32,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   static const int _historyPageStep = 25;
   int _historyMaxItems = _historyPageStep;
   String? _expandedHistoryLogId;
+  bool _historyHorizontalView = false;
 
   @override
   void initState() {
@@ -189,42 +190,78 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(kSpacingS),
-      itemCount: displayLogs.length + (hasMore ? 1 : 0),
-      separatorBuilder: (context, index) => Divider(
-        height: 1,
-        color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
-      ),
-      itemBuilder: (context, index) {
-        if (hasMore && index == displayLogs.length) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: kSpacingS),
-            child: Center(
-              child: TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _historyMaxItems += _historyPageStep;
-                  });
-                },
-                icon: const Icon(Icons.expand_more, size: kIconSizeSmall),
-                label: Text(
-                  'Load more',
-                  style: helperTextStyle(
-                    context,
-                  )?.copyWith(fontWeight: kFontWeightSemiBold),
-                ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            kSpacingS,
+            kSpacingXS,
+            kSpacingS,
+            kSpacingXS,
+          ),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              tooltip: 'Change view',
+              onPressed: () {
+                setState(() {
+                  _historyHorizontalView = !_historyHorizontalView;
+                });
+              },
+              icon: Icon(
+                _historyHorizontalView
+                    ? Icons.view_day_outlined
+                    : Icons.view_agenda_outlined,
+                size: kIconSizeMedium,
+                color: cs.onSurfaceVariant,
               ),
             ),
-          );
-        }
-        final log = displayLogs[index];
-        return _buildDoseLogItem(context, log);
-      },
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(kSpacingS),
+            itemCount: displayLogs.length + (hasMore ? 1 : 0),
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
+            ),
+            itemBuilder: (context, index) {
+              if (hasMore && index == displayLogs.length) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: kSpacingS),
+                  child: Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _historyMaxItems += _historyPageStep;
+                        });
+                      },
+                      icon: const Icon(Icons.expand_more, size: kIconSizeSmall),
+                      label: Text(
+                        'Load more',
+                        style: helperTextStyle(
+                          context,
+                        )?.copyWith(fontWeight: kFontWeightSemiBold),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final log = displayLogs[index];
+              return _buildDoseLogItem(context, log);
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildDoseLogItem(BuildContext context, DoseLog log) {
+    if (_historyHorizontalView) {
+      return _buildDoseLogItemHorizontal(context, log);
+    }
+
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
@@ -368,6 +405,256 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               secondChild: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   kStepperButtonSize + kSpacingS,
+                  kSpacingS,
+                  0,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      log.scheduleName,
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
+                      style: helperTextStyle(context),
+                    ),
+                    Text(
+                      'Recorded: ${dateFormat.format(log.actionTime)} • ${timeFormat.format(log.actionTime)}',
+                      style: helperTextStyle(context),
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      log.action == DoseAction.taken
+                          ? (log.wasOnTime
+                                ? 'On time'
+                                : 'Offset: ${log.minutesOffset} min')
+                          : 'Action: ${log.action.name}',
+                      style: helperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumHigh,
+                        ),
+                      ),
+                    ),
+                    if (log.notes != null && log.notes!.isNotEmpty) ...[
+                      const SizedBox(height: kSpacingS),
+                      Text(
+                        log.notes!,
+                        style: helperTextStyle(
+                          context,
+                        )?.copyWith(fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                    const SizedBox(height: kSpacingS),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => _showEditDoseLogSheet(context, log),
+                        icon: Icon(
+                          Icons.edit_outlined,
+                          size: kIconSizeSmall,
+                          color: cs.primary,
+                        ),
+                        label: Text(
+                          'Edit',
+                          style: helperTextStyle(
+                            context,
+                            color: cs.primary,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDoseLogItemHorizontal(BuildContext context, DoseLog log) {
+    final cs = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final timeFormat = DateFormat('h:mm a');
+
+    final isExpanded = _expandedHistoryLogId == log.id;
+
+    final IconData icon;
+    final Color iconColor;
+    switch (log.action) {
+      case DoseAction.taken:
+        icon = Icons.check_circle_outline;
+        iconColor = cs.primary;
+        break;
+      case DoseAction.skipped:
+        icon = Icons.cancel_outlined;
+        iconColor = cs.tertiary;
+        break;
+      case DoseAction.snoozed:
+        icon = Icons.snooze;
+        iconColor = cs.secondary;
+        break;
+    }
+
+    final displayValue = log.actualDoseValue ?? log.doseValue;
+    final displayUnit = log.actualDoseUnit ?? log.doseUnit;
+
+    final dayNumber = DateFormat('d').format(log.actionTime);
+    final monthName = DateFormat('MMM').format(log.actionTime);
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _expandedHistoryLogId = isExpanded ? null : log.id;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: kNextDoseDateCircleSizeCompact,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: kNextDoseDateCircleSizeCompact,
+                        height: kNextDoseDateCircleSizeCompact,
+                        decoration: BoxDecoration(
+                          color: iconColor.withValues(alpha: kOpacitySubtle),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          dayNumber,
+                          style: cardTitleStyle(context)?.copyWith(
+                            fontWeight: kFontWeightBold,
+                            color: iconColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: kSpacingXS),
+                      Text(
+                        monthName,
+                        style:
+                            helperTextStyle(
+                              context,
+                              color: cs.onSurfaceVariant,
+                            )?.copyWith(
+                              fontSize: kFontSizeHint,
+                              fontWeight: kFontWeightSemiBold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: kSpacingS),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(icon, size: kIconSizeSmall, color: iconColor),
+                          const SizedBox(width: kSpacingXS),
+                          Text(
+                            _formatAmount(displayValue),
+                            style: bodyTextStyle(
+                              context,
+                            )?.copyWith(fontWeight: kFontWeightBold),
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Text(displayUnit, style: helperTextStyle(context)),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: kSpacingXS,
+                              vertical: kSpacingXS / 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: iconColor.withValues(
+                                alpha: kOpacitySubtle,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                kBorderRadiusChip,
+                              ),
+                            ),
+                            child: Text(
+                              log.action.name,
+                              style: helperTextStyle(context, color: iconColor)
+                                  ?.copyWith(
+                                    fontSize: kFontSizeHint,
+                                    fontWeight: kFontWeightBold,
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: kIconSizeMedium,
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumLow,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: kSpacingXS),
+                      Row(
+                        children: [
+                          Text(
+                            timeFormat.format(log.actionTime),
+                            style: helperTextStyle(
+                              context,
+                            )?.copyWith(fontSize: kFontSizeSmall),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Text(
+                            dateFormat.format(log.actionTime),
+                            style: helperTextStyle(
+                              context,
+                            )?.copyWith(fontSize: kFontSizeSmall),
+                          ),
+                        ],
+                      ),
+                      if (!isExpanded &&
+                          log.notes != null &&
+                          log.notes!.isNotEmpty) ...[
+                        const SizedBox(height: kSpacingXS),
+                        Text(
+                          log.notes!,
+                          style: helperTextStyle(context)?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            fontSize: kFontSizeSmall,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            AnimatedCrossFade(
+              duration: kAnimationFast,
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  kNextDoseDateCircleSizeCompact + kSpacingS,
                   kSpacingS,
                   0,
                   0,

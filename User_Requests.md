@@ -1,6 +1,7 @@
 # Things To Fix
 
 ## Global
+- How does changign the text size in the Android Phone settings impact the app layout and text styling?
 
 ## Home Screen
 
@@ -10,6 +11,9 @@
 ## Medication Screen
 
 ### Large Cards
+- Move the stoargae icons up. We need to make room for next dose buttons. 
+- Multi Dose VIals have storager icons for both active and sealed vials. Can we represent both on the large cards?
+
 
 
 ### Compact Cards
@@ -19,10 +23,17 @@
 ==============
 
 ## Medication Details Screen
+- There must be some animation issues on this scren as it seems to lag a little. 
+- Remove the Scheduled Doses from the Medicaiont Details Card, and make itys own card.
+- We should have the following cards. Reports, Schedule, Details. You can rename these to bettere terms if they seem fit. 
+- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too. 
+
 ### Reports Card
 - History: 
 	- Paginate it [COMPLETED]
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
+	- Can we do a  viea change button on this? Make the dose appear horizontal. The day componant is the most important. So we need that sorted and viewable in that state. [COMPLETED]
+	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. 
 - Add reports
 	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
 	- Time-of-day consistency (histogram of taken times) [COMPLETED]
@@ -56,6 +67,8 @@
 - This doesnt need to have the actual time and dose details. Its the saved object of a schedule of doses. Provide the best informaiotn you can for being concise and explicit. [COMPLETED]
 - Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
 - COmpact Cards date circle has made the compact card just as big as the large card. Need to fix this. The Large card purpose is to show mroe infoarmation. COmpact shows less. list shows the least.  [COMPLETED]
+- On the cards, Schedule Name needs to Merge the Med Name into it. If the Schedule is named "1 Tablet" it should show "Panadol - 1 Tablet"
+- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think. 
 
 ==============
 # Add Schedule
@@ -94,6 +107,11 @@
 ==============
 # Schedule Details Screen
 - Needs a full rework to align with the med details screen. [COMPLETED]
+- Needs the Med Name at the top as part of the Shedule Name
+- Dose needs to show all the calulations. The Unit amount, the strenght and the volume if a liquid. Remove all trailing 0s. Remove plurality on single. 
+- Status needs to be a toggle button. 
+- Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense. 
+
 
 
 ==============
@@ -102,6 +120,26 @@
 - Style this to look similar to the calendar widget that exists in the medication details screen.  [COMPLETED]
 - Bottom of calendar is cropped byt the doses area.  [COMPLETED]
 - FAB Button, It has text for the instruction, piut this on all the FABS.  [COMPLETED]
+- The bottom part which shows all the doses, use the same widget as the Med details screen. 
+- Make the calendar section a set size, so it fits the month view, week view and day view. 
+- The Days on the calnedar are no longer showing if they have a scheduled dose. Can we implement a tiny little number? We had some colour codeing for all the dose status, coming, skipped, missed and snoozed. 
+- Style the month view a little nicer, its actually looking really good. 
+- It might be good to have a little up next display up the top for the next dose. (These kinds of widgets will be used on the home page aswell.)
+
+
+==============
+# Reconstitutio  Calculator
+
+## Add Med Wizard - Recon Calc
+
+## Stand Alone - Recon Calc
+- This is a stand alone version of the recon calculator used in the Add Med MDV wizard. I want it to be exactly the same as that one in an operations perspective. The only difference is that you will have the ability to enter a manual medicaiont name and medicaiont strenght. 
+- The standalone one will allow for the saving of reconstitution calculations. Which can be opened up and viewe and editied, and or sourced in the add med wizard. 
+
+==============
+# Analytics
+- This will have the same widgets as the medicaiont details screen but it will allow for viewing data from all meds and schedules. It will also allow for exporting of data. 
+
 
 
 
