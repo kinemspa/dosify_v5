@@ -1206,6 +1206,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             context,
             'Description',
             med.description!,
+            maxLines: null,
+            showEllipsis: false,
             onTap: () => _editDescription(context, med),
           ),
         ],
@@ -1230,7 +1232,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     bool isWarning = false,
     bool isItalic = false,
     bool emphasized = false,
-    int maxLines = 2,
+    int? maxLines = 2,
+    bool showEllipsis = true,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -1272,7 +1275,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       fontStyle: isItalic ? FontStyle.italic : null,
                     ),
               maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
+              overflow: showEllipsis ? TextOverflow.ellipsis : null,
             ),
           ),
           if (onTap != null)
