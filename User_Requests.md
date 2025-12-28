@@ -1,7 +1,7 @@
 # Things To Fix
 
 ## Global
-- Create a setting in the settings screen to inject some test data. 1 of each type of med and different schedules. Allow for adding it , init it, and remove it. 
+- Create a setting in the settings screen to inject some test data. 1 of each type of med and different schedules. Allow for adding it , init it, and remove it.  [COMPLETED]
 
 ## Home Screen
 

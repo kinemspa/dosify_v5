@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
+import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -102,6 +103,60 @@ class SettingsPage extends ConsumerWidget {
             subtitle: const Text('View locked-in card concepts for launch'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/final-card-decisions'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.science_outlined),
+            title: const Text('Test Data'),
+            subtitle: const Text(
+              'Add or remove sample medications & schedules',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              if (!context.mounted) return;
+              await showModalBottomSheet<void>(
+                context: context,
+                builder: (context) {
+                  return SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.add_circle_outline),
+                          title: const Text('Add test data'),
+                          subtitle: const Text(
+                            'Creates 5 medications and 5 schedules',
+                          ),
+                          onTap: () async {
+                            Navigator.of(context).pop();
+                            await TestDataSeedService.seed();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Test data added')),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.delete_outline),
+                          title: const Text('Remove test data'),
+                          subtitle: const Text('Deletes the seeded items only'),
+                          onTap: () async {
+                            Navigator.of(context).pop();
+                            await TestDataSeedService.clear();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Test data removed'),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.bug_report),
