@@ -113,31 +113,40 @@ class CalendarMonthView extends StatelessWidget {
           ),
           // Calendar grid
           Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                childAspectRatio: 1.0, // Square cells
-              ),
-              itemCount: datesToDisplay.length,
-              itemBuilder: (context, index) {
-                final date = datesToDisplay[index];
-                final dayDoses = _getDosesForDay(date);
-                final isToday = _isToday(date);
-                final isCurrentMonth = _isCurrentMonth(date);
-                final isSelected =
-                    selectedDate != null &&
-                    date.year == selectedDate!.year &&
-                    date.month == selectedDate!.month &&
-                    date.day == selectedDate!.day;
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Always show a full 6-week grid without clipping.
+                // When the selected-day panel is visible, available height can be small;
+                // using a width-driven aspect ratio would clip the last row.
+                final cellHeight = constraints.maxHeight / 6;
 
-                return CalendarDayCell(
-                  date: date,
-                  doses: dayDoses,
-                  isCurrentMonth: isCurrentMonth,
-                  isToday: isToday,
-                  isSelected: isSelected,
-                  onTap: onDayTap != null ? () => onDayTap!(date) : null,
+                return GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisExtent: cellHeight,
+                  ),
+                  itemCount: datesToDisplay.length,
+                  itemBuilder: (context, index) {
+                    final date = datesToDisplay[index];
+                    final dayDoses = _getDosesForDay(date);
+                    final isToday = _isToday(date);
+                    final isCurrentMonth = _isCurrentMonth(date);
+                    final isSelected =
+                        selectedDate != null &&
+                        date.year == selectedDate!.year &&
+                        date.month == selectedDate!.month &&
+                        date.day == selectedDate!.day;
+
+                    return CalendarDayCell(
+                      date: date,
+                      doses: dayDoses,
+                      isCurrentMonth: isCurrentMonth,
+                      isToday: isToday,
+                      isSelected: isSelected,
+                      onTap: onDayTap != null ? () => onDayTap!(date) : null,
+                    );
+                  },
                 );
               },
             ),
