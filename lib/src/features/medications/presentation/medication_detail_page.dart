@@ -1052,13 +1052,20 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           context,
           'Name',
           med.name,
+          emphasized: true,
           onTap: () => _editName(context, med),
         ),
-        _buildDetailTile(context, 'Type', _formLabel(med.form)),
+        _buildDetailTile(
+          context,
+          'Type',
+          _formLabel(med.form),
+          emphasized: true,
+        ),
         _buildDetailTile(
           context,
           'Strength',
           '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
+          emphasized: true,
           onTap: () => _editStrength(context, med),
         ),
         _buildDetailTile(
@@ -1069,26 +1076,28 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           onTap: () => _editManufacturer(context, med),
         ),
 
-        const SizedBox(height: 8), // Section spacing (divider removed)
+        const SizedBox(height: kSpacingS), // Section spacing (divider removed)
         // ACTIVE VIAL (MDV only) - merged into this card since it's the tracked medicine for dosing
         if (isMdv) ...[
           // Section header for Active Vial
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: kSpacingL,
+              vertical: kSpacingS,
+            ),
             child: Row(
               children: [
                 Icon(
                   Icons.science_outlined,
-                  size: 14,
+                  size: kIconSizeSmall,
                   color: colorScheme.primary,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: kSpacingXS),
                 Text(
                   'Active Vial',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.primary,
-                  ),
+                  style: fieldLabelStyle(
+                    context,
+                  )?.copyWith(color: colorScheme.primary),
                 ),
               ],
             ),
@@ -1130,7 +1139,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           // Active vial storage conditions
           _buildActiveVialConditionsRow(context, med),
 
-          const SizedBox(height: 8), // Section spacing (divider removed)
+          const SizedBox(height: kSpacingS), // Section spacing (divider removed)
         ],
 
         // INVENTORY (for non-MDV or general inventory info)
@@ -1159,7 +1168,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             onTap: () => _editLowStockThreshold(context, med),
           ),
 
-          const SizedBox(height: 8), // Section spacing (divider removed)
+          const SizedBox(height: kSpacingS), // Section spacing (divider removed)
           // STORAGE (for non-MDV)
           _buildDetailTile(
             context,
@@ -1206,6 +1215,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     bool isPlaceholder = false,
     bool isWarning = false,
     bool isItalic = false,
+    bool emphasized = false,
+    int maxLines = 2,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -1215,8 +1226,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     )?.copyWith(fontSize: kFontSizeSmall, fontWeight: kFontWeightSemiBold);
 
     final valueBaseStyle = bodyTextStyle(context)?.copyWith(
-      fontWeight: kFontWeightSemiBold,
-      color: colorScheme.onSurface.withValues(alpha: kOpacityHigh),
+      fontWeight: emphasized ? kFontWeightSemiBold : kFontWeightNormal,
+      color: emphasized
+          ? colorScheme.onSurface.withValues(alpha: kOpacityHigh)
+          : colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
     );
 
     final placeholderStyle = mutedTextStyle(
@@ -1231,6 +1244,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         vertical: kSpacingS,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 90, child: Text(label, style: labelStyle)),
           Expanded(
@@ -1243,7 +1257,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   : valueBaseStyle?.copyWith(
                       fontStyle: isItalic ? FontStyle.italic : null,
                     ),
-              maxLines: 2,
+              maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
             ),
           ),

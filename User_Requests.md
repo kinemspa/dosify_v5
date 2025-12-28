@@ -33,7 +33,7 @@
 	- Inventory events timeline (refill/restock/vial opened markers)
 
 ### Medication Details Card
-- Can you not bring in a little flare and style to all the different text elements?  Still boring.
+- Can you not bring in a little flare and style to all the different text elements?  Still boring. [COMPLETED]
 - Remove the card border. This is still there.
 - Active vial needs helper text, thetracked medication. 
 - Description text in thius part needs to wrap and display all. not elipses.
