@@ -26,6 +26,8 @@ enum _StartFromMode { now, date }
 
 enum _EndMode { none, date }
 
+enum _MonthlyMissingDayMode { skip, lastDay }
+
 class AddScheduleWizardPage extends ScheduleWizardBase {
   const AddScheduleWizardPage({super.key, this.initial});
 
@@ -65,6 +67,9 @@ class _AddScheduleWizardPageState
   final _cycleN = TextEditingController(text: '2');
   DateTime _cycleAnchor = DateTime.now();
   final List<TimeOfDay> _times = [const TimeOfDay(hour: 9, minute: 0)];
+
+  _MonthlyMissingDayMode _monthlyMissingDayMode =
+      _MonthlyMissingDayMode.lastDay;
 
   // Schedule bounds
   _StartFromMode _startFromMode = _StartFromMode.now;
@@ -110,6 +115,13 @@ class _AddScheduleWizardPageState
       _daysOfMonth
         ..clear()
         ..addAll(s.daysOfMonth!);
+    }
+
+    // Monthly missing-day behavior
+    if (s.monthlyMissingDayBehavior == MonthlyMissingDayBehavior.lastDay) {
+      _monthlyMissingDayMode = _MonthlyMissingDayMode.lastDay;
+    } else {
+      _monthlyMissingDayMode = _MonthlyMissingDayMode.skip;
     }
 
     _active = s.active;
@@ -1180,8 +1192,32 @@ class _AddScheduleWizardPageState
               }),
             ),
             const SizedBox(height: kSpacingS),
+            LabelFieldRow(
+              label: "If day doesn't exist",
+              field: Field36(
+                child: DropdownButtonFormField<_MonthlyMissingDayMode>(
+                  value: _monthlyMissingDayMode,
+                  decoration: buildFieldDecoration(context),
+                  items: const [
+                    DropdownMenuItem(
+                      value: _MonthlyMissingDayMode.lastDay,
+                      child: Text('Use last day of month'),
+                    ),
+                    DropdownMenuItem(
+                      value: _MonthlyMissingDayMode.skip,
+                      child: Text('Skip that month'),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() {
+                    _monthlyMissingDayMode =
+                        v ?? _MonthlyMissingDayMode.lastDay;
+                  }),
+                ),
+              ),
+            ),
+            const SizedBox(height: kSpacingS),
             _helperBelowLeft(
-              'Months without selected days (e.g., 31st) will be skipped.',
+              'Example: selecting 31st in April can become Apr 30 (last day) instead of skipping.',
             ),
           ],
         );
@@ -1588,6 +1624,10 @@ class _AddScheduleWizardPageState
       inputModeCode: inputModeCode,
       startAt: _effectiveStartAt(),
       endAt: _effectiveEndAt(),
+      monthlyMissingDayBehaviorCode:
+          _monthlyMissingDayMode == _MonthlyMissingDayMode.lastDay
+          ? MonthlyMissingDayBehavior.lastDay.index
+          : MonthlyMissingDayBehavior.skip.index,
     );
 
     final box = Hive.box<Schedule>('schedules');

@@ -74,7 +74,7 @@
 		- Change name to type [COMPLETED]
 		- Days of the month:
 			- If I select the 31st day, how does this translate for 30 day or less months? [COMPLETED]
-			-  I dont like the answer to the above item, if a user wants a monthly, they need to dose every month, if the 31st doesnt occur then the user will miss a month. what is the options here, what do other task schedulers do?
+			-  I dont like the answer to the above item, if a user wants a monthly, they need to dose every month, if the 31st doesnt occur then the user will miss a month. what is the options here, what do other task schedulers do?  [COMPLETED]
 			- compact the grid, its too spacious. [COMPLETED]
 - Add MDV:
 	- Dose needs to only show 2 decimals.  [COMPLETED]

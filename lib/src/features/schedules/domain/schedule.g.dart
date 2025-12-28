@@ -45,6 +45,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       inputModeCode: fields[25] as int?,
       startAt: fields[27] as DateTime?,
       endAt: fields[28] as DateTime?,
+      monthlyMissingDayBehaviorCode: fields[29] as int?,
       createdAt: fields[8] as DateTime?,
     );
   }
@@ -52,7 +53,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
   @override
   void write(BinaryWriter writer, Schedule obj) {
     writer
-      ..writeByte(29)
+      ..writeByte(30)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -110,7 +111,9 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..writeByte(27)
       ..write(obj.startAt)
       ..writeByte(28)
-      ..write(obj.endAt);
+      ..write(obj.endAt)
+      ..writeByte(29)
+      ..write(obj.monthlyMissingDayBehaviorCode);
   }
 
   @override

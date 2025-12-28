@@ -35,6 +35,7 @@ class Schedule {
     this.inputModeCode,
     this.startAt,
     this.endAt,
+    this.monthlyMissingDayBehaviorCode,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -68,6 +69,13 @@ class Schedule {
   /// If set, occurrences after this moment are ignored.
   @HiveField(28)
   final DateTime? endAt;
+
+  /// Monthly schedules (days-of-month): what to do when a selected day does not
+  /// exist in a given month (e.g., 31st in April).
+  ///
+  /// Stored as an int code to avoid introducing a new adapter.
+  @HiveField(29)
+  final int? monthlyMissingDayBehaviorCode;
 
   // UTC storage (new)
   @HiveField(9)
@@ -126,6 +134,15 @@ class Schedule {
   bool get hasStartAt => startAt != null;
   bool get hasEndAt => endAt != null;
 
+  MonthlyMissingDayBehavior get monthlyMissingDayBehavior {
+    final code = monthlyMissingDayBehaviorCode;
+    if (code == null) return MonthlyMissingDayBehavior.skip;
+    if (code < 0 || code >= MonthlyMissingDayBehavior.values.length) {
+      return MonthlyMissingDayBehavior.skip;
+    }
+    return MonthlyMissingDayBehavior.values[code];
+  }
+
   // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
   DoseUnit? get doseUnitEnum =>
       doseUnitCode != null ? DoseUnit.values[doseUnitCode!] : null;
@@ -150,3 +167,11 @@ enum DoseUnit {
 }
 
 enum DoseInputMode { tablets, capsules, mass, volume, iuUnits, count }
+
+enum MonthlyMissingDayBehavior {
+  /// Skip the month if the selected day does not exist (legacy behavior).
+  skip,
+
+  /// Move the dose to the last day of the month.
+  lastDay,
+}

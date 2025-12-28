@@ -14,6 +14,28 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 /// This service computes all scheduled dose times for a given date range
 /// and matches them with existing dose logs to determine status.
 class DoseCalculationService {
+  static int _lastDayOfMonth(DateTime date) {
+    final last = DateTime(date.year, date.month + 1, 0);
+    return last.day;
+  }
+
+  static bool _isMonthlyDoseDay(Schedule schedule, DateTime date) {
+    final days = schedule.daysOfMonth;
+    if (days == null || days.isEmpty) return false;
+
+    if (days.contains(date.day)) return true;
+
+    if (schedule.monthlyMissingDayBehavior !=
+        MonthlyMissingDayBehavior.lastDay) {
+      return false;
+    }
+
+    final lastDay = _lastDayOfMonth(date);
+    if (date.day != lastDay) return false;
+
+    return days.any((d) => d > lastDay);
+  }
+
   /// Calculates all dose times for active schedules in a date range
   ///
   /// Returns a list of [CalculatedDose] objects sorted by scheduled time.
@@ -222,12 +244,11 @@ class DoseCalculationService {
     DateTime endDate,
   ) {
     final doses = <CalculatedDose>[];
-    final daysOfMonth = schedule.daysOfMonth ?? const <int>[];
 
     var currentDate = DateTime(startDate.year, startDate.month, startDate.day);
     while (currentDate.isBefore(endDate) ||
         currentDate.isAtSameMomentAs(endDate)) {
-      if (daysOfMonth.contains(currentDate.day)) {
+      if (_isMonthlyDoseDay(schedule, currentDate)) {
         for (final minutesOfDay in times) {
           final hour = minutesOfDay ~/ 60;
           final minute = minutesOfDay % 60;

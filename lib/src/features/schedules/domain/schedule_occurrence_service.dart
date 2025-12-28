@@ -2,6 +2,30 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Service for calculating schedule occurrences
 class ScheduleOccurrenceService {
+  static int _lastDayOfMonth(DateTime date) {
+    final last = DateTime(date.year, date.month + 1, 0);
+    return last.day;
+  }
+
+  static bool _isMonthlyScheduledOnDay(Schedule schedule, DateTime date) {
+    final days = schedule.daysOfMonth;
+    if (days == null || days.isEmpty) return false;
+
+    if (days.contains(date.day)) return true;
+
+    if (schedule.monthlyMissingDayBehavior !=
+        MonthlyMissingDayBehavior.lastDay) {
+      return false;
+    }
+
+    final lastDay = _lastDayOfMonth(date);
+    if (date.day != lastDay) return false;
+
+    // If any selected day exceeds this month length (e.g., 31 in a 30-day month),
+    // schedule it on the last day.
+    return days.any((d) => d > lastDay);
+  }
+
   static bool _isWithinBounds(Schedule schedule, DateTime dt) {
     final startAt = schedule.startAt;
     if (startAt != null && dt.isBefore(startAt)) return false;
@@ -59,7 +83,7 @@ class ScheduleOccurrenceService {
   ) {
     // Check monthly schedule (days of month)
     if (schedule.hasDaysOfMonth) {
-      return schedule.daysOfMonth!.contains(date.day);
+      return _isMonthlyScheduledOnDay(schedule, date);
     }
 
     // Check cyclic schedule (every N days)
