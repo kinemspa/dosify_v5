@@ -94,7 +94,7 @@
 
 ==============
 # Schedule Details Screen
-- Needs a full rework to align with the med details screen.
+- Needs a full rework to align with the med details screen. [COMPLETED]
 
 
 ==============

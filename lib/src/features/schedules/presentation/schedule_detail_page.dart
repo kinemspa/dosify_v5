@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
@@ -137,11 +138,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   // Helper methods for dose action UI
-  Color _getActionColor(DoseAction action) {
+  Color _getActionColor(BuildContext context, DoseAction action) {
+    final cs = Theme.of(context).colorScheme;
     return switch (action) {
-      DoseAction.taken => Colors.green,
-      DoseAction.snoozed => Colors.orange,
-      DoseAction.skipped => Colors.red,
+      DoseAction.taken => cs.primary,
+      DoseAction.snoozed => cs.tertiary,
+      DoseAction.skipped => cs.error,
     };
   }
 
@@ -210,547 +212,41 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     Schedule s,
     DateTime? nextDose,
   ) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Compact header
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(
-                  Icons.notifications_active,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      s.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      _getHeaderDoseInfo(s),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.75),
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: s.active
-                      ? Colors.green.withValues(alpha: 0.25)
-                      : Colors.grey.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: s.active ? Colors.greenAccent : Colors.white54,
-                  ),
-                ),
-                child: Text(
-                  s.active ? 'Active' : 'Paused',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
+    final nextDoseText = nextDose == null
+        ? 'None'
+        : '${DateFormat('EEE, MMM d').format(nextDose)} • ${TimeOfDay.fromDateTime(nextDose).format(context)}';
 
-          // Next dose with action buttons
-          if (nextDose != null)
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  // Status badge if dose is already recorded
-                  () {
-                    final existingLog = _getExistingLog(nextDose);
-                    if (existingLog == null) return const SizedBox.shrink();
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getActionColor(existingLog.action),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _getActionIcon(existingLog.action),
-                              size: 14,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${_getActionLabel(existingLog.action)} at ${TimeOfDay.fromDateTime(existingLog.actionTime).format(context)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }(),
-
-                  Row(
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            DateFormat('EEE').format(nextDose).toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          Text(
-                            DateFormat('d').format(nextDose),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              height: 1,
-                            ),
-                          ),
-                          Text(
-                            DateFormat('MMM').format(nextDose).toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 8,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 1,
-                        height: 32,
-                        color: Colors.white.withValues(alpha: 0.2),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                // Show syringe icon for injections
-                                () {
-                                  if (s.medicationId != null) {
-                                    try {
-                                      final medicationBox = Hive.box<dynamic>(
-                                        'medications',
-                                      );
-                                      final medication = medicationBox.get(
-                                        s.medicationId,
-                                      );
-                                      if (medication != null) {
-                                        final form =
-                                            medication.form
-                                                ?.toString()
-                                                .split('.')
-                                                .last ??
-                                            '';
-                                        final isInjection =
-                                            form == 'injection' ||
-                                            form == 'multiDoseVial' ||
-                                            form == 'singleDoseVial';
-                                        if (isInjection) {
-                                          return Padding(
-                                            padding: const EdgeInsets.only(
-                                              right: 4,
-                                            ),
-                                            child: Icon(
-                                              Icons.medication,
-                                              color: Colors.white.withValues(
-                                                alpha: 0.7,
-                                              ),
-                                              size: 12,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    } catch (e) {
-                                      // Ignore
-                                    }
-                                  }
-                                  return const SizedBox.shrink();
-                                }(),
-                                Text(
-                                  'Next Dose',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 1),
-                            Text(
-                              TimeOfDay.fromDateTime(nextDose).format(context),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Comprehensive dosing instructions
-                          () {
-                            if (s.medicationId != null) {
-                              try {
-                                final medicationBox = Hive.box<dynamic>(
-                                  'medications',
-                                );
-                                final medication = medicationBox.get(
-                                  s.medicationId,
-                                );
-
-                                if (medication != null) {
-                                  final strengthValue =
-                                      medication.strengthValue as double?;
-                                  final strengthUnit =
-                                      medication.strengthUnit
-                                          ?.toString()
-                                          .split('.')
-                                          .last ??
-                                      '';
-                                  final form =
-                                      medication.form
-                                          ?.toString()
-                                          .split('.')
-                                          .last ??
-                                      '';
-                                  final volumePerDose =
-                                      medication.volumePerDose as double?;
-                                  final volumeUnit =
-                                      medication.volumeUnit
-                                          ?.toString()
-                                          .split('.')
-                                          .last ??
-                                      'ml';
-                                  final isInjection =
-                                      form == 'injection' ||
-                                      form == 'multiDoseVial' ||
-                                      form == 'singleDoseVial';
-
-                                  if (strengthValue != null &&
-                                      strengthValue > 0) {
-                                    final totalAmount =
-                                        s.doseValue * strengthValue;
-
-                                    // For injections: show ALL instructions
-                                    if (isInjection && volumePerDose != null) {
-                                      final syringeUnits = (volumePerDose * 100)
-                                          .round();
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          // Dose count
-                                          Text(
-                                            '${_formatNumber(s.doseValue)} ${s.doseUnit}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          // Total medication amount
-                                          Text(
-                                            '${_formatNumber(totalAmount)} $strengthUnit',
-                                            style: TextStyle(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.9,
-                                              ),
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          // Volume in mL
-                                          Text(
-                                            '${_formatNumber(volumePerDose)} $volumeUnit',
-                                            style: TextStyle(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.8,
-                                              ),
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                          // Syringe units
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.medication,
-                                                size: 10,
-                                                color: Colors.greenAccent,
-                                              ),
-                                              const SizedBox(width: 2),
-                                              Text(
-                                                '$syringeUnits Units',
-                                                style: TextStyle(
-                                                  color: Colors.greenAccent,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    }
-
-                                    // For tablets/capsules: show total dose
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          '${_formatNumber(s.doseValue)} ${s.doseUnit}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${_formatNumber(totalAmount)} $strengthUnit total',
-                                          style: TextStyle(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.9,
-                                            ),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }
-                                }
-                              } catch (e) {
-                                // Ignore errors
-                              }
-                            }
-
-                            // Fallback: just dose count
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${_formatNumber(s.doseValue)} ${s.doseUnit}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  _getTimeUntil(nextDose),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                    fontSize: 9,
-                                  ),
-                                ),
-                              ],
-                            );
-                          }(),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Action buttons
-                  () {
-                    final existingLog = _getExistingLog(nextDose);
-                    final isTaken = existingLog?.action == DoseAction.taken;
-
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              _showRecordDoseDialog(
-                                schedule: s,
-                                scheduledTime: nextDose,
-                                action: DoseAction.taken,
-                                existingLog: existingLog,
-                              );
-                            },
-                            icon: Icon(
-                              existingLog != null ? Icons.edit : Icons.check,
-                              size: 14,
-                            ),
-                            label: Text(
-                              existingLog != null ? 'Edit' : 'Take',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                color: Colors.white,
-                                width: 1.5,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                            ),
-                          ),
-                        ),
-                        // Only show Snooze and Skip buttons if dose hasn't been taken
-                        if (!isTaken) ...[
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                _showRecordDoseDialog(
-                                  schedule: s,
-                                  scheduledTime: nextDose,
-                                  action: DoseAction.snoozed,
-                                  existingLog: existingLog,
-                                );
-                              },
-                              icon: const Icon(Icons.snooze, size: 14),
-                              label: const Text(
-                                'Snooze',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white70,
-                                side: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          OutlinedButton(
-                            onPressed: () {
-                              _showRecordDoseDialog(
-                                schedule: s,
-                                scheduledTime: nextDose,
-                                action: DoseAction.skipped,
-                                existingLog: existingLog,
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white70,
-                              side: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.5),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                            ),
-                            child: const Icon(Icons.close, size: 14),
-                          ),
-                        ],
-                      ],
-                    );
-                  }(),
-                ],
-              ),
-            ),
-          const SizedBox(height: 4),
-
-          // Frequency pills
-          Row(
-            children: [
-              _buildSmallChip(
-                context,
-                icon: Icons.repeat,
-                label: _frequencyText(s),
-              ),
-              const SizedBox(width: 6),
-              _buildSmallChip(
-                context,
-                icon: Icons.schedule,
-                label: _timesText(context, s),
-              ),
-            ],
-          ),
-        ],
+    return DetailStatsBanner(
+      title: s.name,
+      row1Left: DetailStatItem(
+        icon: Icons.medication_outlined,
+        label: 'Dose',
+        value: _getDoseDisplay(s),
       ),
-    );
-  }
-
-  Widget _buildSmallChip(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
+      row1Right: DetailStatItem(
+        icon: s.active ? Icons.play_circle_outline : Icons.pause_circle_outline,
+        label: 'Status',
+        value: s.active ? 'Active' : 'Paused',
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white70, size: 12),
-          const SizedBox(width: 3),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+      row2Left: DetailStatItem(
+        icon: Icons.repeat,
+        label: 'Frequency',
+        value: _frequencyText(s),
+      ),
+      row2Right: DetailStatItem(
+        icon: Icons.access_time,
+        label: 'Times',
+        value: _timesText(context, s),
+      ),
+      row3Left: DetailStatItem(
+        icon: Icons.event,
+        label: 'Next dose',
+        value: nextDoseText,
+      ),
+      row3Right: DetailStatItem(
+        icon: Icons.timer_outlined,
+        label: 'In',
+        value: nextDose == null ? '—' : _getTimeUntil(nextDose),
       ),
     );
   }
@@ -774,12 +270,14 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime? nextDose,
   ) {
     return [
+      if (nextDose != null) _buildNextDoseSection(context, s, nextDose),
+
       // Unified dose timeline (past, present, future)
       _buildDoseTimeline(context, s),
 
       // Schedule Details Card
       Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: kSpacingS),
         child: SectionFormCard(
           neutral: true,
           title: 'Schedule Details',
@@ -809,7 +307,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
       // Dose Calendar Section
       Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: kSpacingS),
         child: SectionFormCard(
           neutral: true,
           title: 'Dose Calendar',
@@ -828,6 +326,129 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     ];
   }
 
+  Widget _buildNextDoseSection(
+    BuildContext context,
+    Schedule s,
+    DateTime nextDose,
+  ) {
+    final existingLog = _getExistingLog(nextDose);
+    final isTaken = existingLog?.action == DoseAction.taken;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: kSpacingS),
+      child: SectionFormCard(
+        neutral: true,
+        title: 'Next Dose',
+        children: [
+          buildDetailInfoRow(
+            context,
+            label: 'When',
+            value:
+                '${DateFormat('EEE, MMM d').format(nextDose)} • ${TimeOfDay.fromDateTime(nextDose).format(context)}',
+            maxLines: 2,
+          ),
+          buildDetailInfoRow(
+            context,
+            label: 'Time until',
+            value: _getTimeUntil(nextDose),
+          ),
+          if (existingLog != null)
+            buildDetailInfoRow(
+              context,
+              label: 'Recorded',
+              value:
+                  '${_getActionLabel(existingLog.action)} at ${TimeOfDay.fromDateTime(existingLog.actionTime).format(context)}',
+              highlighted: true,
+            ),
+          const SizedBox(height: kSpacingS),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    _showRecordDoseDialog(
+                      schedule: s,
+                      scheduledTime: nextDose,
+                      action: DoseAction.taken,
+                      existingLog: existingLog,
+                    );
+                  },
+                  icon: Icon(
+                    existingLog != null ? Icons.edit : Icons.check,
+                    size: kIconSizeSmall,
+                  ),
+                  label: Text(existingLog != null ? 'Edit' : 'Take'),
+                ),
+              ),
+              if (!isTaken) ...[
+                const SizedBox(width: kSpacingS),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      _showRecordDoseDialog(
+                        schedule: s,
+                        scheduledTime: nextDose,
+                        action: DoseAction.snoozed,
+                        existingLog: existingLog,
+                      );
+                    },
+                    icon: Icon(Icons.snooze, size: kIconSizeSmall),
+                    label: const Text('Snooze'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: cs.onSurface.withValues(
+                        alpha: kOpacityMedium,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: kSpacingS),
+                OutlinedButton(
+                  onPressed: () {
+                    _showRecordDoseDialog(
+                      schedule: s,
+                      scheduledTime: nextDose,
+                      action: DoseAction.skipped,
+                      existingLog: existingLog,
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: cs.onSurface.withValues(
+                      alpha: kOpacityMedium,
+                    ),
+                  ),
+                  child: Icon(Icons.close, size: kIconSizeSmall),
+                ),
+              ],
+            ],
+          ),
+          if (existingLog != null) ...[
+            const SizedBox(height: kSpacingS),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getActionIcon(existingLog.action),
+                  size: kIconSizeSmall,
+                  color: _getActionColor(context, existingLog.action),
+                ),
+                const SizedBox(width: kSpacingXS),
+                Text(
+                  _getActionLabel(existingLog.action),
+                  style: helperTextStyle(context)?.copyWith(
+                    color: _getActionColor(context, existingLog.action),
+                    fontWeight: kFontWeightSemiBold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   /// Unified dose timeline showing past (with logs), today, and future doses
   Widget _buildDoseTimeline(BuildContext context, Schedule s) {
     final now = DateTime.now();
@@ -837,7 +458,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final days = List.generate(7, (i) => today.add(Duration(days: i - 3)));
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: kSpacingS),
       child: SectionFormCard(
         neutral: true,
         title: 'Dose Timeline',
@@ -961,7 +582,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: hasLog
-              ? _getActionColor(existingLog.action).withValues(alpha: 0.1)
+              ? _getActionColor(
+                  context,
+                  existingLog.action,
+                ).withValues(alpha: 0.1)
               : (isToday
                     ? Theme.of(
                         context,
@@ -971,7 +595,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           borderRadius: BorderRadius.circular(8),
           border: hasLog
               ? Border.all(
-                  color: _getActionColor(existingLog.action),
+                  color: _getActionColor(context, existingLog.action),
                   width: 1.5,
                 )
               : (isToday
@@ -994,7 +618,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   hasLog ? _getActionIcon(existingLog.action) : Icons.schedule,
                   size: 18,
                   color: hasLog
-                      ? _getActionColor(existingLog.action)
+                      ? _getActionColor(context, existingLog.action)
                       : (isToday
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.onSurfaceVariant),
@@ -1029,7 +653,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getActionColor(existingLog.action),
+                      color: _getActionColor(context, existingLog.action),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -1352,50 +976,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return value == value.roundToDouble()
         ? value.toInt().toString()
         : value.toStringAsFixed(2);
-  }
-
-  /// Get header dose info: "100 mg of Panadol" or "2 tablets — 100 mg of Panadol"
-  String _getHeaderDoseInfo(Schedule schedule) {
-    if (schedule.medicationId != null) {
-      try {
-        final medicationBox = Hive.box<dynamic>('medications');
-        final medication = medicationBox.get(schedule.medicationId);
-
-        if (medication != null) {
-          final strengthValue = medication.strengthValue as double?;
-          final strengthUnit =
-              medication.strengthUnit?.toString().split('.').last ?? '';
-          final form = medication.form?.toString().split('.').last ?? '';
-          final perMlValue = medication.perMlValue as double?;
-          final volumePerDose = medication.volumePerDose as double?;
-          final volumeUnit =
-              medication.volumeUnit?.toString().split('.').last ?? 'ml';
-
-          if (strengthValue != null && strengthValue > 0) {
-            final totalAmount = schedule.doseValue * strengthValue;
-            final isInjection =
-                form == 'injection' ||
-                form == 'multiDoseVial' ||
-                form == 'singleDoseVial';
-
-            // For injections, show mg/mcg + mL + syringe units
-            if (isInjection && perMlValue != null && volumePerDose != null) {
-              // Calculate syringe units (assuming 100 units = 1mL)
-              final syringeUnits = (volumePerDose * 100).round();
-              return '${_formatNumber(totalAmount)} $strengthUnit (${_formatNumber(volumePerDose)} $volumeUnit / $syringeUnits U) — ${schedule.medicationName}';
-            }
-
-            // For regular medications, show total dose
-            return '${_formatNumber(totalAmount)} $strengthUnit of ${schedule.medicationName}';
-          }
-        }
-      } catch (e) {
-        // Box might not be open, just use fallback
-      }
-    }
-
-    // Fallback: just show medication name
-    return schedule.medicationName;
   }
 
   String _frequencyText(Schedule schedule) {
