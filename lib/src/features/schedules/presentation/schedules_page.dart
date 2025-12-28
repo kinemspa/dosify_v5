@@ -147,9 +147,10 @@ class _SchedulesPageState extends State<SchedulesPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/schedules/add'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Schedule'),
       ),
     );
   }

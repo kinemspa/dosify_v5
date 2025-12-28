@@ -163,9 +163,10 @@ class _SuppliesPageState extends State<SuppliesPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/supplies/add'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Supply'),
       ),
     );
   }
@@ -768,7 +769,10 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
         actions: [
           TextButton(
             onPressed: _save,
-            child: Text('Save', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+            child: Text(
+              'Save',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+            ),
           ),
         ],
       ),

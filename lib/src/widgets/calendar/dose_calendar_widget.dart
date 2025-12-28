@@ -606,13 +606,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               onViewChanged: _onViewChanged,
               showViewToggle: showViewToggle,
             ),
-          // Calendar view (Day view needs Expanded, Month/Week use intrinsic height)
+          // Calendar view
           if (_isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
           else if (_currentView == CalendarView.day)
             Expanded(child: _buildCurrentView())
           else
-            _buildCurrentView(), // Month/Week views size themselves
+            Flexible(fit: FlexFit.loose, child: _buildCurrentView()),
           // Selected date schedules (if date selected, only for week/month views)
           if (_selectedDate != null &&
               _currentView != CalendarView.day &&
@@ -686,6 +686,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final listBottomPadding =
+        (widget.variant == CalendarVariant.compact
+            ? kSpacingL
+            : kPagePadding.bottom) +
+        safeBottom;
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -701,7 +708,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         children: [
           // Header with date and close button
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+              horizontal: kSpacingL,
+              vertical: kSpacingM,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -724,7 +734,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           widget.variant == CalendarVariant.compact
               ? (dayDoses.isEmpty
                     ? Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(kSpacingL),
                         child: Center(
                           child: Text(
                             'No doses scheduled',
@@ -739,7 +749,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                     : ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.only(bottom: 16),
+                        padding: EdgeInsets.only(bottom: listBottomPadding),
                         itemCount: dayDoses.length,
                         itemBuilder: (context, index) {
                           final dose = dayDoses[index];
@@ -759,7 +769,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 80),
+                          padding: EdgeInsets.only(bottom: listBottomPadding),
                           itemCount: dayDoses.length,
                           itemBuilder: (context, index) {
                             final dose = dayDoses[index];

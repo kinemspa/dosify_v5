@@ -1,3 +1,4 @@
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:flutter/material.dart';
@@ -51,12 +52,19 @@ class CalendarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Calendar', forceBackButton: true),
-      body: DoseCalendarWidget(
-        variant: CalendarVariant.full,
-        startDate: initialDate,
-        scheduleId: scheduleId,
-        medicationId: medicationId,
-        // Use default bottom sheet handler (removed onDoseTap override)
+      body: Padding(
+        padding: kPagePadding,
+        child: Container(
+          decoration: buildStandardCardDecoration(context: context),
+          clipBehavior: Clip.antiAlias,
+          child: DoseCalendarWidget(
+            variant: CalendarVariant.full,
+            startDate: initialDate,
+            scheduleId: scheduleId,
+            medicationId: medicationId,
+            // Use default bottom sheet handler (removed onDoseTap override)
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToAddSchedule(context),

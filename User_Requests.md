@@ -71,6 +71,7 @@
 		- Change name to type [COMPLETED]
 		- Days of the month:
 			- If I select the 31st day, how does this translate for 30 day or less months? [COMPLETED]
+			-  I dont like the answer to the above item, if a user wants a monthly, they need to dose every month, if the 31st doesnt occur then the user will miss a month. what is the options here, what do other task schedulers do?
 			- compact the grid, its too spacious. [COMPLETED]
 - Add MDV:
 	- Dose needs to only show 2 decimals.  [COMPLETED]
@@ -96,9 +97,9 @@
 ==============
 # Calendar
 
-- Style this to look similar to the calendar widget that exists in the medication details screen. 
-- Bottom of calendar is cropped byt the doses area. 
-- FAB Button, It has text for the instruction, piut this on all the FABS. 
+- Style this to look similar to the calendar widget that exists in the medication details screen.  [COMPLETED]
+- Bottom of calendar is cropped byt the doses area.  [COMPLETED]
+- FAB Button, It has text for the instruction, piut this on all the FABS.  [COMPLETED]
 
 
 

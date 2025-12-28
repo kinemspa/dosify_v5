@@ -251,9 +251,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/medications/select-type'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Medication'),
       ),
     );
   }
