@@ -786,6 +786,25 @@ Widget buildHelperText(
   );
 }
 
+/// Helper/support text used under section headers inside cards.
+///
+/// Keep this separate from [buildHelperText], which is reserved for helper text
+/// under form fields.
+Widget buildSectionHelperText(BuildContext context, String? text) {
+  if (text == null || text.isEmpty) return const SizedBox.shrink();
+  final cs = Theme.of(context).colorScheme;
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(kSpacingL, 0, kSpacingL, kSpacingS),
+    child: Text(
+      text,
+      style: helperTextStyle(
+        context,
+        color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+      ),
+    ),
+  );
+}
+
 /// Builds a standardized chip for storage conditions
 Widget buildStorageConditionChip(
   BuildContext context, {

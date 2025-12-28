@@ -35,7 +35,7 @@
 ### Medication Details Card
 - Can you not bring in a little flare and style to all the different text elements?  Still boring. [COMPLETED]
 - Remove the card border. This is still there. [COMPLETED]
-- Active vial needs helper text, thetracked medication. 
+- Active vial needs helper text, thetracked medication. [COMPLETED]
 - Description text in thius part needs to wrap and display all. not elipses.
 
 ==============

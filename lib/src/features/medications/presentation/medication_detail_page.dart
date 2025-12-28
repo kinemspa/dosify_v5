@@ -1108,6 +1108,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               ],
             ),
           ),
+          buildSectionHelperText(
+            context,
+            'This is the tracked vial used for dosing and inventory.',
+          ),
           // Volume remaining
           if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
             _buildDetailTile(
