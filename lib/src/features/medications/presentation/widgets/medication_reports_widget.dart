@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
@@ -27,6 +28,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isExpanded = true; // Collapsible state
+
+  static const int _historyPageStep = 25;
+  int _historyMaxItems = _historyPageStep;
+  String? _expandedHistoryLogId;
 
   @override
   void initState() {
@@ -150,14 +155,15 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final cs = Theme.of(context).colorScheme;
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
 
-    // Get dose logs for this medication (limit to 50 for performance)
+    // Get dose logs for this medication
     final logs =
         doseLogBox.values
             .where((log) => log.medicationId == widget.medication.id)
             .toList()
           ..sort((a, b) => b.actionTime.compareTo(a.actionTime));
 
-    final displayLogs = logs.take(50).toList();
+    final displayLogs = logs.take(_historyMaxItems).toList();
+    final hasMore = displayLogs.length < logs.length;
 
     if (displayLogs.isEmpty) {
       return Center(
@@ -185,12 +191,33 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     return ListView.separated(
       padding: const EdgeInsets.all(kSpacingS),
-      itemCount: displayLogs.length,
+      itemCount: displayLogs.length + (hasMore ? 1 : 0),
       separatorBuilder: (context, index) => Divider(
         height: 1,
         color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
       ),
       itemBuilder: (context, index) {
+        if (hasMore && index == displayLogs.length) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: kSpacingS),
+            child: Center(
+              child: TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _historyMaxItems += _historyPageStep;
+                  });
+                },
+                icon: const Icon(Icons.expand_more, size: kIconSizeSmall),
+                label: Text(
+                  'Load more',
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                ),
+              ),
+            ),
+          );
+        }
         final log = displayLogs[index];
         return _buildDoseLogItem(context, log);
       },
@@ -201,6 +228,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
+
+    final isExpanded = _expandedHistoryLogId == log.id;
 
     final IconData icon;
     final Color iconColor;
@@ -222,91 +251,364 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
-      child: Row(
-        children: [
-          Container(
-            width: kStepperButtonSize,
-            height: kStepperButtonSize,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: kOpacitySubtle),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: kIconSizeSmall, color: iconColor),
-          ),
-          const SizedBox(width: kSpacingS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _expandedHistoryLogId = isExpanded ? null : log.id;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+        child: Column(
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      _formatAmount(displayValue),
-                      style: bodyTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightBold),
-                    ),
-                    const SizedBox(width: kSpacingXS),
-                    Text(displayUnit, style: helperTextStyle(context)),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: kSpacingXS,
-                        vertical: kSpacingXS / 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: iconColor.withValues(alpha: kOpacitySubtle),
-                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
-                      ),
-                      child: Text(
-                        log.action.name,
-                        style: helperTextStyle(context, color: iconColor)
-                            ?.copyWith(
-                              fontSize: kFontSizeHint,
-                              fontWeight: kFontWeightBold,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: kSpacingXS),
-                Row(
-                  children: [
-                    Text(
-                      dateFormat.format(log.actionTime),
-                      style: helperTextStyle(
-                        context,
-                      )?.copyWith(fontSize: kFontSizeSmall),
-                    ),
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      timeFormat.format(log.actionTime),
-                      style: helperTextStyle(
-                        context,
-                      )?.copyWith(fontSize: kFontSizeSmall),
-                    ),
-                  ],
-                ),
-                if (log.notes != null && log.notes!.isNotEmpty) ...[
-                  const SizedBox(height: kSpacingXS),
-                  Text(
-                    log.notes!,
-                    style: helperTextStyle(context)?.copyWith(
-                      fontStyle: FontStyle.italic,
-                      fontSize: kFontSizeSmall,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                Container(
+                  width: kStepperButtonSize,
+                  height: kStepperButtonSize,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: kOpacitySubtle),
+                    shape: BoxShape.circle,
                   ),
-                ],
+                  child: Icon(icon, size: kIconSizeSmall, color: iconColor),
+                ),
+                const SizedBox(width: kSpacingS),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            _formatAmount(displayValue),
+                            style: bodyTextStyle(
+                              context,
+                            )?.copyWith(fontWeight: kFontWeightBold),
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Text(displayUnit, style: helperTextStyle(context)),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: kSpacingXS,
+                              vertical: kSpacingXS / 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: iconColor.withValues(
+                                alpha: kOpacitySubtle,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                kBorderRadiusChip,
+                              ),
+                            ),
+                            child: Text(
+                              log.action.name,
+                              style: helperTextStyle(context, color: iconColor)
+                                  ?.copyWith(
+                                    fontSize: kFontSizeHint,
+                                    fontWeight: kFontWeightBold,
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: kIconSizeMedium,
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumLow,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: kSpacingXS),
+                      Row(
+                        children: [
+                          Text(
+                            dateFormat.format(log.actionTime),
+                            style: helperTextStyle(
+                              context,
+                            )?.copyWith(fontSize: kFontSizeSmall),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Text(
+                            timeFormat.format(log.actionTime),
+                            style: helperTextStyle(
+                              context,
+                            )?.copyWith(fontSize: kFontSizeSmall),
+                          ),
+                        ],
+                      ),
+                      if (!isExpanded &&
+                          log.notes != null &&
+                          log.notes!.isNotEmpty) ...[
+                        const SizedBox(height: kSpacingXS),
+                        Text(
+                          log.notes!,
+                          style: helperTextStyle(context)?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            fontSize: kFontSizeSmall,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
+            AnimatedCrossFade(
+              duration: kAnimationFast,
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  kStepperButtonSize + kSpacingS,
+                  kSpacingS,
+                  0,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      log.scheduleName,
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
+                      style: helperTextStyle(context),
+                    ),
+                    Text(
+                      'Recorded: ${dateFormat.format(log.actionTime)} • ${timeFormat.format(log.actionTime)}',
+                      style: helperTextStyle(context),
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      log.action == DoseAction.taken
+                          ? (log.wasOnTime
+                                ? 'On time'
+                                : 'Offset: ${log.minutesOffset} min')
+                          : 'Action: ${log.action.name}',
+                      style: helperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumHigh,
+                        ),
+                      ),
+                    ),
+                    if (log.notes != null && log.notes!.isNotEmpty) ...[
+                      const SizedBox(height: kSpacingS),
+                      Text(
+                        log.notes!,
+                        style: helperTextStyle(
+                          context,
+                        )?.copyWith(fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                    const SizedBox(height: kSpacingS),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => _showEditDoseLogSheet(context, log),
+                        icon: Icon(
+                          Icons.edit_outlined,
+                          size: kIconSizeSmall,
+                          color: cs.primary,
+                        ),
+                        label: Text(
+                          'Edit',
+                          style: helperTextStyle(
+                            context,
+                            color: cs.primary,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _showEditDoseLogSheet(BuildContext context, DoseLog log) {
+    final cs = Theme.of(context).colorScheme;
+    final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+
+    final notesController = TextEditingController(text: log.notes ?? '');
+    final actualDoseController = TextEditingController(
+      text: _formatAmount(log.actualDoseValue ?? log.doseValue),
+    );
+
+    DoseAction selectedAction = log.action;
+
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            Future<void> save() async {
+              final rawActual = actualDoseController.text.trim();
+              final parsedActual = double.tryParse(rawActual);
+              if (selectedAction == DoseAction.taken && parsedActual == null) {
+                ScaffoldMessenger.of(sheetContext).showSnackBar(
+                  const SnackBar(content: Text('Enter a valid dose amount')),
+                );
+                return;
+              }
+
+              final unit = log.actualDoseUnit ?? log.doseUnit;
+
+              final updated = DoseLog(
+                id: log.id,
+                scheduleId: log.scheduleId,
+                scheduleName: log.scheduleName,
+                medicationId: log.medicationId,
+                medicationName: log.medicationName,
+                scheduledTime: log.scheduledTime,
+                actionTime: log.actionTime,
+                doseValue: log.doseValue,
+                doseUnit: log.doseUnit,
+                action: selectedAction,
+                actualDoseValue: selectedAction == DoseAction.taken
+                    ? (parsedActual == log.doseValue ? null : parsedActual)
+                    : null,
+                actualDoseUnit: selectedAction == DoseAction.taken
+                    ? unit
+                    : null,
+                notes: notesController.text.trim().isEmpty
+                    ? null
+                    : notesController.text.trim(),
+              );
+
+              await repo.upsert(updated);
+
+              if (sheetContext.mounted) {
+                Navigator.pop(sheetContext);
+                ScaffoldMessenger.of(
+                  sheetContext,
+                ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: kSpacingL,
+                right: kSpacingL,
+                top: kSpacingM,
+                bottom:
+                    MediaQuery.of(sheetContext).viewInsets.bottom + kSpacingL,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Edit dose',
+                          style: cardTitleStyle(context)?.copyWith(
+                            color: cs.primary,
+                            fontWeight: kFontWeightBold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(sheetContext),
+                        icon: Icon(Icons.close, color: cs.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  DropdownButtonFormField<DoseAction>(
+                    value: selectedAction,
+                    decoration: InputDecoration(
+                      labelText: 'Action',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          kBorderRadiusMedium,
+                        ),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: DoseAction.taken,
+                        child: Text('Taken'),
+                      ),
+                      DropdownMenuItem(
+                        value: DoseAction.skipped,
+                        child: Text('Skipped'),
+                      ),
+                      DropdownMenuItem(
+                        value: DoseAction.snoozed,
+                        child: Text('Snoozed'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setSheetState(() {
+                        selectedAction = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  if (selectedAction == DoseAction.taken) ...[
+                    TextField(
+                      controller: actualDoseController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText:
+                            'Actual dose (${log.actualDoseUnit ?? log.doseUnit})',
+                        hintText: _formatAmount(log.doseValue),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: kSpacingM),
+                  ],
+                  TextField(
+                    controller: notesController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Notes (optional)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          kBorderRadiusMedium,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  FilledButton(onPressed: save, child: const Text('Save')),
+                  const SizedBox(height: kSpacingS),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(() {
+      notesController.dispose();
+      actualDoseController.dispose();
+    });
   }
 
   Widget _buildAdherenceTab(BuildContext context) {
