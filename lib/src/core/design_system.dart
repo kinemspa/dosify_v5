@@ -397,15 +397,18 @@ BoxDecoration buildInsetSectionDecoration({
   required BuildContext context,
   double borderRadius = kBorderRadiusMedium,
   double backgroundOpacity = 1.0,
+  bool showBorder = true,
 }) {
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
     borderRadius: BorderRadius.circular(borderRadius),
     color: cs.surface.withValues(alpha: backgroundOpacity),
-    border: Border.all(
-      color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
-      width: kBorderWidthThin,
-    ),
+    border: showBorder
+        ? Border.all(
+            color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+            width: kBorderWidthThin,
+          )
+        : null,
   );
 }
 

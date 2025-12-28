@@ -24,7 +24,7 @@
 - History: 
     - Paginate it
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page.
-- Additional reports
+- Add reports
 	- Doses taken vs missed (stacked bar per day/week)
 	- Time-of-day consistency (histogram of taken times)
 	- Streaks / consistency score (sparkline)
@@ -34,7 +34,7 @@
 
 ### Medication Details Card
 - Can you not bring in a little flare and style to all the different text elements?  Still boring. [COMPLETED]
-- Remove the card border. This is still there.
+- Remove the card border. This is still there. [COMPLETED]
 - Active vial needs helper text, thetracked medication. 
 - Description text in thius part needs to wrap and display all. not elipses.
 

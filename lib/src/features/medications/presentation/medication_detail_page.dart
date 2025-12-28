@@ -909,7 +909,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 children: [
                   if (hasSchedules) ...[
                     Container(
-                      decoration: buildInsetSectionDecoration(context: context),
+                      decoration: buildInsetSectionDecoration(
+                        context: context,
+                        showBorder: false,
+                      ),
                       padding: kInsetSectionPadding,
                       child: _buildScheduleSection(context, med, nextDose),
                     ),
@@ -917,7 +920,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   ],
 
                   Container(
-                    decoration: buildInsetSectionDecoration(context: context),
+                    decoration: buildInsetSectionDecoration(
+                      context: context,
+                      showBorder: false,
+                    ),
                     padding: kInsetSectionPadding,
                     child: _buildMergedDetailsSection(context, med),
                   ),
@@ -1139,7 +1145,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           // Active vial storage conditions
           _buildActiveVialConditionsRow(context, med),
 
-          const SizedBox(height: kSpacingS), // Section spacing (divider removed)
+          const SizedBox(
+            height: kSpacingS,
+          ), // Section spacing (divider removed)
         ],
 
         // INVENTORY (for non-MDV or general inventory info)
@@ -1168,7 +1176,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             onTap: () => _editLowStockThreshold(context, med),
           ),
 
-          const SizedBox(height: kSpacingS), // Section spacing (divider removed)
+          const SizedBox(
+            height: kSpacingS,
+          ), // Section spacing (divider removed)
           // STORAGE (for non-MDV)
           _buildDetailTile(
             context,
