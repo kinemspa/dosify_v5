@@ -615,6 +615,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final cs = Theme.of(context).colorScheme;
     final adherenceData = _calculateAdherenceData();
     final avgPct = _getAveragePercentage(adherenceData);
+    final takenMissed = _calculateTakenMissedData();
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -673,6 +674,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ),
           ),
           const SizedBox(height: kSpacingS),
+
+          Text(
+            'Taken vs missed',
+            style: helperTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightSemiBold,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+
+          SizedBox(
+            height: kTakenMissedChartHeight,
+            child: CustomPaint(
+              painter: _TakenMissedStackedBarPainter(
+                data: takenMissed,
+                takenColor: cs.primary,
+                missedColor: cs.error,
+                emptyColor: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacitySubtleLow,
+                ),
+              ),
+              child: Container(),
+            ),
+          ),
 
           // Day labels
           Row(
@@ -833,6 +858,52 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return adherenceData;
   }
 
+  List<_TakenMissedDay> _calculateTakenMissedData() {
+    final now = DateTime.now();
+    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final scheduleBox = Hive.box<Schedule>('schedules');
+
+    final schedules = scheduleBox.values
+        .where((s) => s.medicationId == widget.medication.id && s.active)
+        .toList();
+
+    if (schedules.isEmpty) {
+      return List.generate(7, (_) => const _TakenMissedDay(expected: 0, taken: 0));
+    }
+
+    final days = <_TakenMissedDay>[];
+
+    for (int i = 6; i >= 0; i--) {
+      final day = DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: i));
+      final dayEnd = day.add(const Duration(days: 1));
+
+      int expectedDoses = 0;
+      for (final schedule in schedules) {
+        if (!schedule.daysOfWeek.contains(day.weekday)) continue;
+        final timesPerDay = schedule.timesOfDay?.length ?? 1;
+        expectedDoses += timesPerDay;
+      }
+
+      final dayLogs = doseLogBox.values.where(
+        (log) =>
+            log.medicationId == widget.medication.id &&
+            log.scheduledTime.isAfter(day.subtract(const Duration(seconds: 1))) &&
+            log.scheduledTime.isBefore(dayEnd),
+      );
+
+      final taken = dayLogs.where((l) => l.action == DoseAction.taken).length;
+      days.add(
+        _TakenMissedDay(
+          expected: expectedDoses,
+          taken: expectedDoses == 0 ? 0 : taken.clamp(0, expectedDoses),
+        ),
+      );
+    }
+
+    return days;
+  }
+
   String _formatAmount(double value) {
     if (value == value.toInt()) return value.toInt().toString();
     return value
@@ -952,5 +1023,105 @@ class _AdherenceLinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _AdherenceLinePainter oldDelegate) {
     return oldDelegate.data != data || oldDelegate.color != color;
+  }
+}
+
+class _TakenMissedDay {
+  const _TakenMissedDay({required this.expected, required this.taken});
+
+  final int expected;
+  final int taken;
+
+  int get missed => (expected - taken).clamp(0, expected);
+}
+
+class _TakenMissedStackedBarPainter extends CustomPainter {
+  _TakenMissedStackedBarPainter({
+    required this.data,
+    required this.takenColor,
+    required this.missedColor,
+    required this.emptyColor,
+  });
+
+  final List<_TakenMissedDay> data;
+  final Color takenColor;
+  final Color missedColor;
+  final Color emptyColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final spacing = kTakenMissedChartBarSpacing;
+    final totalBars = data.length;
+    final barWidth =
+        (size.width - (spacing * (totalBars - 1))) / totalBars.toDouble();
+    final radius = Radius.circular(kTakenMissedChartBarRadius);
+
+    final takenPaint = Paint()..color = takenColor.withValues(alpha: kOpacityEmphasis);
+    final missedPaint = Paint()
+      ..color = missedColor.withValues(alpha: kOpacityMediumHigh);
+    final emptyPaint = Paint()..color = emptyColor;
+
+    for (int i = 0; i < totalBars; i++) {
+      final d = data[i];
+      final x = i * (barWidth + spacing);
+
+      final rect = Rect.fromLTWH(x, 0, barWidth, size.height);
+      final background = RRect.fromRectAndRadius(rect, radius);
+      canvas.drawRRect(background, emptyPaint);
+
+      if (d.expected <= 0) continue;
+
+      final takenFrac = d.taken / d.expected;
+      final missedFrac = d.missed / d.expected;
+
+      final missedHeight = size.height * missedFrac;
+      final takenHeight = size.height * takenFrac;
+
+      // Missed segment (bottom)
+      if (missedHeight > 0) {
+        final missedRect = Rect.fromLTWH(
+          x,
+          size.height - missedHeight,
+          barWidth,
+          missedHeight,
+        );
+        final missedRRect = RRect.fromRectAndCorners(
+          missedRect,
+          bottomLeft: radius,
+          bottomRight: radius,
+          topLeft: Radius.zero,
+          topRight: Radius.zero,
+        );
+        canvas.drawRRect(missedRRect, missedPaint);
+      }
+
+      // Taken segment (top)
+      if (takenHeight > 0) {
+        final takenRect = Rect.fromLTWH(
+          x,
+          size.height - missedHeight - takenHeight,
+          barWidth,
+          takenHeight,
+        );
+        final takenRRect = RRect.fromRectAndCorners(
+          takenRect,
+          topLeft: radius,
+          topRight: radius,
+          bottomLeft: Radius.zero,
+          bottomRight: Radius.zero,
+        );
+        canvas.drawRRect(takenRRect, takenPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TakenMissedStackedBarPainter oldDelegate) {
+    return oldDelegate.data != data ||
+        oldDelegate.takenColor != takenColor ||
+        oldDelegate.missedColor != missedColor ||
+        oldDelegate.emptyColor != emptyColor;
   }
 }

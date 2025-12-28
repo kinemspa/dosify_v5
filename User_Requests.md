@@ -25,7 +25,7 @@
 	- Paginate it [COMPLETED]
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
 - Add reports
-	- Doses taken vs missed (stacked bar per day/week)
+	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
 	- Time-of-day consistency (histogram of taken times)
 	- Streaks / consistency score (sparkline)
 	- Action breakdown (taken / skipped / snoozed)

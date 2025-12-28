@@ -79,6 +79,11 @@ const double kAdherenceChartPointInnerRadius = 2;
 const double kAdherenceChartValueScale = 0.8;
 const double kAdherenceChartVerticalPaddingFraction = 0.1;
 
+/// Taken vs missed chart (reports)
+const double kTakenMissedChartHeight = 44;
+const double kTakenMissedChartBarSpacing = kSpacingS;
+const double kTakenMissedChartBarRadius = 4;
+
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
 const double kDualStockDonutInnerScale = 0.73;
