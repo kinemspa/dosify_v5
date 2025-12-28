@@ -33,6 +33,8 @@ class Schedule {
     this.doseIU,
     this.displayUnitCode,
     this.inputModeCode,
+    this.startAt,
+    this.endAt,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -54,6 +56,18 @@ class Schedule {
   final bool active;
   @HiveField(8)
   final DateTime createdAt;
+
+  /// Optional schedule start boundary.
+  ///
+  /// If set, occurrences before this moment are ignored.
+  @HiveField(27)
+  final DateTime? startAt;
+
+  /// Optional schedule end boundary.
+  ///
+  /// If set, occurrences after this moment are ignored.
+  @HiveField(28)
+  final DateTime? endAt;
 
   // UTC storage (new)
   @HiveField(9)
@@ -108,6 +122,9 @@ class Schedule {
   bool get hasMultipleTimes => timesOfDay != null && timesOfDay!.isNotEmpty;
   bool get hasCycle => cycleEveryNDays != null && cycleEveryNDays! > 0;
   bool get hasDaysOfMonth => daysOfMonth != null && daysOfMonth!.isNotEmpty;
+
+  bool get hasStartAt => startAt != null;
+  bool get hasEndAt => endAt != null;
 
   // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
   DoseUnit? get doseUnitEnum =>

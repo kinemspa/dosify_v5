@@ -22,6 +22,10 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 enum ScheduleMode { everyDay, daysOfWeek, daysOnOff, daysOfMonth }
 
+enum _StartFromMode { now, date }
+
+enum _EndMode { none, date }
+
 class AddScheduleWizardPage extends ScheduleWizardBase {
   const AddScheduleWizardPage({super.key, this.initial});
 
@@ -61,6 +65,12 @@ class _AddScheduleWizardPageState
   final _cycleN = TextEditingController(text: '2');
   DateTime _cycleAnchor = DateTime.now();
   final List<TimeOfDay> _times = [const TimeOfDay(hour: 9, minute: 0)];
+
+  // Schedule bounds
+  _StartFromMode _startFromMode = _StartFromMode.now;
+  DateTime _startFromDate = DateTime.now();
+  _EndMode _endMode = _EndMode.none;
+  DateTime _endDate = DateTime.now();
 
   // Step 3: Review
   bool _active = true;
@@ -114,6 +124,16 @@ class _AddScheduleWizardPageState
 
     _name.text = s.name;
     _nameAuto = false;
+
+    if (s.startAt != null) {
+      _startFromMode = _StartFromMode.date;
+      _startFromDate = s.startAt!;
+    }
+
+    if (s.endAt != null) {
+      _endMode = _EndMode.date;
+      _endDate = s.endAt!;
+    }
 
     _mode = _useCycle
         ? ScheduleMode.daysOnOff
@@ -662,6 +682,173 @@ class _AddScheduleWizardPageState
   Widget _buildSchedulePatternStep() {
     return Column(
       children: [
+        _buildSection(context, 'Schedule Dates', [
+          LabelFieldRow(
+            label: 'Start',
+            field: Row(
+              children: [
+                Expanded(
+                  child: Field36(
+                    child: DropdownButtonFormField<_StartFromMode>(
+                      value: _startFromMode,
+                      decoration: buildFieldDecoration(context),
+                      items: const [
+                        DropdownMenuItem(
+                          value: _StartFromMode.now,
+                          child: Text('Now'),
+                        ),
+                        DropdownMenuItem(
+                          value: _StartFromMode.date,
+                          child: Text('Selected date'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() {
+                        _startFromMode = v ?? _StartFromMode.now;
+                      }),
+                    ),
+                  ),
+                ),
+                if (_startFromMode == _StartFromMode.date) ...[
+                  const SizedBox(width: kSpacingS),
+                  DateButton36(
+                    label: MaterialLocalizations.of(
+                      context,
+                    ).formatCompactDate(_startFromDate),
+                    selected: true,
+                    onPressed: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime(
+                          _startFromDate.year,
+                          _startFromDate.month,
+                          _startFromDate.day,
+                        ),
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 365),
+                        ),
+                        lastDate: DateTime.now().add(
+                          const Duration(days: 365 * 5),
+                        ),
+                      );
+                      if (picked == null) return;
+                      setState(() {
+                        _startFromDate = DateTime(
+                          picked.year,
+                          picked.month,
+                          picked.day,
+                          _startFromDate.hour,
+                          _startFromDate.minute,
+                        );
+
+                        if (_endMode == _EndMode.date) {
+                          final startDay = DateTime(
+                            picked.year,
+                            picked.month,
+                            picked.day,
+                          );
+                          final endDay = DateTime(
+                            _endDate.year,
+                            _endDate.month,
+                            _endDate.day,
+                          );
+                          if (endDay.isBefore(startDay)) {
+                            _endDate = picked;
+                          }
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft(
+            "Default is now so you won't get past doses. Use a date to start later.",
+          ),
+          const SizedBox(height: kSpacingS),
+          LabelFieldRow(
+            label: 'End',
+            field: Row(
+              children: [
+                Expanded(
+                  child: Field36(
+                    child: DropdownButtonFormField<_EndMode>(
+                      value: _endMode,
+                      decoration: buildFieldDecoration(context),
+                      items: const [
+                        DropdownMenuItem(
+                          value: _EndMode.none,
+                          child: Text('No end'),
+                        ),
+                        DropdownMenuItem(
+                          value: _EndMode.date,
+                          child: Text('End date'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() {
+                        _endMode = v ?? _EndMode.none;
+                        if (_endMode == _EndMode.none) return;
+
+                        final startDay = _effectiveStartAt();
+                        final endDay = DateTime(
+                          _endDate.year,
+                          _endDate.month,
+                          _endDate.day,
+                        );
+                        if (endDay.isBefore(
+                          DateTime(startDay.year, startDay.month, startDay.day),
+                        )) {
+                          _endDate = startDay;
+                        }
+                      }),
+                    ),
+                  ),
+                ),
+                if (_endMode == _EndMode.date) ...[
+                  const SizedBox(width: kSpacingS),
+                  DateButton36(
+                    label: MaterialLocalizations.of(
+                      context,
+                    ).formatCompactDate(_endDate),
+                    selected: true,
+                    onPressed: () async {
+                      final startAt = _effectiveStartAt();
+                      final first = DateTime(
+                        startAt.year,
+                        startAt.month,
+                        startAt.day,
+                      );
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate:
+                            DateTime(
+                              _endDate.year,
+                              _endDate.month,
+                              _endDate.day,
+                            ).isBefore(first)
+                            ? first
+                            : DateTime(
+                                _endDate.year,
+                                _endDate.month,
+                                _endDate.day,
+                              ),
+                        firstDate: first,
+                        lastDate: DateTime.now().add(
+                          const Duration(days: 365 * 5),
+                        ),
+                      );
+                      if (picked == null) return;
+                      setState(() => _endDate = picked);
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+          _helperBelowLeft('Optional end date for this schedule.'),
+        ]),
         _buildSection(context, 'Schedule Pattern', [
           LabelFieldRow(
             label: 'Type',
@@ -708,6 +895,33 @@ class _AddScheduleWizardPageState
           _helperBelowLeft('Tap a time to edit it.'),
         ]),
       ],
+    );
+  }
+
+  DateTime _effectiveStartAt() {
+    final now = DateTime.now();
+    if (_startFromMode == _StartFromMode.now) return now;
+
+    final selectedDay = DateTime(
+      _startFromDate.year,
+      _startFromDate.month,
+      _startFromDate.day,
+    );
+    final today = DateTime(now.year, now.month, now.day);
+    if (selectedDay.isAtSameMomentAs(today)) return now;
+    return selectedDay;
+  }
+
+  DateTime? _effectiveEndAt() {
+    if (_endMode != _EndMode.date) return null;
+    return DateTime(
+      _endDate.year,
+      _endDate.month,
+      _endDate.day,
+      23,
+      59,
+      59,
+      999,
     );
   }
 
@@ -1372,6 +1586,8 @@ class _AddScheduleWizardPageState
       doseIU: doseIU,
       displayUnitCode: displayUnitCode,
       inputModeCode: inputModeCode,
+      startAt: _effectiveStartAt(),
+      endAt: _effectiveEndAt(),
     );
 
     final box = Hive.box<Schedule>('schedules');

@@ -106,6 +106,8 @@ class DoseCalculationService {
     if (schedule.hasCycle) {
       // Cycle-based schedule
       doses.addAll(_calculateCycleDoses(schedule, times, startDate, endDate));
+    } else if (schedule.hasDaysOfMonth) {
+      doses.addAll(_calculateMonthlyDoses(schedule, times, startDate, endDate));
     } else {
       // Weekly pattern schedule
       doses.addAll(_calculateWeeklyDoses(schedule, times, startDate, endDate));
@@ -143,7 +145,7 @@ class DoseCalculationService {
             minute,
           );
 
-          if (_isInRange(doseTime, startDate, endDate)) {
+          if (_isInRange(schedule, doseTime, startDate, endDate)) {
             doses.add(
               CalculatedDose(
                 scheduleId: schedule.id,
@@ -192,7 +194,52 @@ class DoseCalculationService {
             minute,
           );
 
-          if (_isInRange(doseTime, startDate, endDate)) {
+          if (_isInRange(schedule, doseTime, startDate, endDate)) {
+            doses.add(
+              CalculatedDose(
+                scheduleId: schedule.id,
+                scheduleName: schedule.name,
+                medicationName: schedule.medicationName,
+                scheduledTime: doseTime,
+                doseValue: schedule.doseValue,
+                doseUnit: schedule.doseUnit,
+              ),
+            );
+          }
+        }
+      }
+
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    return doses;
+  }
+
+  static List<CalculatedDose> _calculateMonthlyDoses(
+    Schedule schedule,
+    List<int> times,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    final doses = <CalculatedDose>[];
+    final daysOfMonth = schedule.daysOfMonth ?? const <int>[];
+
+    var currentDate = DateTime(startDate.year, startDate.month, startDate.day);
+    while (currentDate.isBefore(endDate) ||
+        currentDate.isAtSameMomentAs(endDate)) {
+      if (daysOfMonth.contains(currentDate.day)) {
+        for (final minutesOfDay in times) {
+          final hour = minutesOfDay ~/ 60;
+          final minute = minutesOfDay % 60;
+          final doseTime = DateTime(
+            currentDate.year,
+            currentDate.month,
+            currentDate.day,
+            hour,
+            minute,
+          );
+
+          if (_isInRange(schedule, doseTime, startDate, endDate)) {
             doses.add(
               CalculatedDose(
                 scheduleId: schedule.id,
@@ -214,9 +261,22 @@ class DoseCalculationService {
   }
 
   /// Checks if a time is within the date range
-  static bool _isInRange(DateTime time, DateTime start, DateTime end) {
-    return (time.isAfter(start) || time.isAtSameMomentAs(start)) &&
+  static bool _isInRange(
+    Schedule schedule,
+    DateTime time,
+    DateTime start,
+    DateTime end,
+  ) {
+    final inWindow =
+        (time.isAfter(start) || time.isAtSameMomentAs(start)) &&
         (time.isBefore(end) || time.isAtSameMomentAs(end));
+    if (!inWindow) return false;
+
+    final startAt = schedule.startAt;
+    if (startAt != null && time.isBefore(startAt)) return false;
+    final endAt = schedule.endAt;
+    if (endAt != null && time.isAfter(endAt)) return false;
+    return true;
   }
 
   /// Finds a dose log that matches the calculated dose

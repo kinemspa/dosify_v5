@@ -60,8 +60,8 @@
 
 ==============
 # Add Schedule
-- Adding a schedule seems to be adding events in the past. SHould not do this. Maybe have a start from setting, Now, or selected date. 
-- Needs an end date picker too. 
+- Adding a schedule seems to be adding events in the past. SHould not do this. Maybe have a start from setting, Now, or selected date.  [COMPLETED]
+- Needs an end date picker too.  [COMPLETED]
 - Alot of black text on this screen. [COMPLETED]
 - Add Tablet:
 	- Configure Dose:

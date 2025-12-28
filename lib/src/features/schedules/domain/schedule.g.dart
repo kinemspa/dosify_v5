@@ -43,6 +43,8 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       doseIU: fields[23] as int?,
       displayUnitCode: fields[24] as int?,
       inputModeCode: fields[25] as int?,
+      startAt: fields[27] as DateTime?,
+      endAt: fields[28] as DateTime?,
       createdAt: fields[8] as DateTime?,
     );
   }
@@ -50,7 +52,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
   @override
   void write(BinaryWriter writer, Schedule obj) {
     writer
-      ..writeByte(27)
+      ..writeByte(29)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -104,7 +106,11 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..writeByte(24)
       ..write(obj.displayUnitCode)
       ..writeByte(25)
-      ..write(obj.inputModeCode);
+      ..write(obj.inputModeCode)
+      ..writeByte(27)
+      ..write(obj.startAt)
+      ..writeByte(28)
+      ..write(obj.endAt);
   }
 
   @override

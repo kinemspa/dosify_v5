@@ -9,6 +9,14 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 /// Schedules notifications for registered [Schedule] entries and exposes helpers
 /// for deterministic stable slot ID generation used across the app.
 class ScheduleScheduler {
+  static bool _withinBounds(Schedule s, DateTime dt) {
+    final startAt = s.startAt;
+    if (startAt != null && dt.isBefore(startAt)) return false;
+    final endAt = s.endAt;
+    if (endAt != null && dt.isAfter(endAt)) return false;
+    return true;
+  }
+
   /// Maximum alarms we'll use across ALL schedules to stay well under Android's 500 limit.
   static const int _maxGlobalAlarms = 400;
 
@@ -129,6 +137,8 @@ class ScheduleScheduler {
             minutes ~/ 60,
             minutes % 60,
           );
+          if (!dt.isAfter(now)) continue;
+          if (!_withinBounds(s, dt)) continue;
           final id = slotIdFor(
             s.id,
             weekday: dt.weekday,
@@ -170,7 +180,7 @@ class ScheduleScheduler {
               mUtc % 60,
             );
             final dtLocal = dtUtc.toLocal();
-            if (dtLocal.isAfter(now)) {
+            if (dtLocal.isAfter(now) && _withinBounds(s, dtLocal)) {
               final id = slotIdFor(
                 s.id,
                 weekday: date.weekday,
@@ -196,7 +206,7 @@ class ScheduleScheduler {
               mLocal ~/ 60,
               mLocal % 60,
             );
-            if (dt.isAfter(now)) {
+            if (dt.isAfter(now) && _withinBounds(s, dt)) {
               final id = slotIdFor(
                 s.id,
                 weekday: date.weekday,
