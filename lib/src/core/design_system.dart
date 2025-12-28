@@ -89,6 +89,11 @@ const double kTimeOfDayHistogramHeight = 36;
 const double kTimeOfDayHistogramBarSpacing = 2;
 const double kTimeOfDayHistogramBarRadius = 3;
 
+/// Streaks / consistency sparkline (reports)
+const double kConsistencySparklineHeight = 24;
+const double kConsistencySparklineStrokeWidth = 2.0;
+const double kConsistencySparklineVerticalPaddingFraction = 0.2;
+
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
 const double kDualStockDonutInnerScale = 0.73;

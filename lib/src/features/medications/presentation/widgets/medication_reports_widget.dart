@@ -617,6 +617,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final avgPct = _getAveragePercentage(adherenceData);
     final takenMissed = _calculateTakenMissedData();
     final timeOfDayHistogram = _calculateTakenTimeOfDayHistogram();
+    final consistencySparkline = _calculateConsistencySparklineData(days: 14);
+    final streakStats = _calculateStreakStats(consistencySparkline);
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -755,28 +757,38 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             children: [
               Text(
                 '12a',
-                style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                    ?.copyWith(fontSize: kFontSizeHint),
+                style: helperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant,
+                )?.copyWith(fontSize: kFontSizeHint),
               ),
               Text(
                 '6a',
-                style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                    ?.copyWith(fontSize: kFontSizeHint),
+                style: helperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant,
+                )?.copyWith(fontSize: kFontSizeHint),
               ),
               Text(
                 '12p',
-                style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                    ?.copyWith(fontSize: kFontSizeHint),
+                style: helperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant,
+                )?.copyWith(fontSize: kFontSizeHint),
               ),
               Text(
                 '6p',
-                style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                    ?.copyWith(fontSize: kFontSizeHint),
+                style: helperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant,
+                )?.copyWith(fontSize: kFontSizeHint),
               ),
               Text(
                 '12a',
-                style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                    ?.copyWith(fontSize: kFontSizeHint),
+                style: helperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant,
+                )?.copyWith(fontSize: kFontSizeHint),
               ),
             ],
           ),
@@ -784,6 +796,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
           // Summary stats row
           _buildSummaryStats(context, adherenceData),
+          const SizedBox(height: kSpacingM),
+
+          Text(
+            'Streaks',
+            style: helperTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightSemiBold,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+
+          SizedBox(
+            height: kConsistencySparklineHeight,
+            child: CustomPaint(
+              painter: _ConsistencySparklinePainter(
+                data: consistencySparkline,
+                color: cs.primary,
+              ),
+              child: Container(),
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+
+          _buildStreakStats(context, streakStats),
         ],
       ),
     );
@@ -815,6 +851,32 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             label: 'Perfect',
             value: '$perfectDays days',
             color: cs.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStreakStats(BuildContext context, _StreakStats stats) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatChip(
+            context,
+            label: 'Current',
+            value: '${stats.currentStreakDays} days',
+            color: cs.primary,
+          ),
+        ),
+        const SizedBox(width: kSpacingS),
+        Expanded(
+          child: _buildStatChip(
+            context,
+            label: 'Consistency',
+            value: '${stats.consistencyPct}%',
+            color: _getAdherenceColor(cs, stats.consistencyPct),
           ),
         ),
       ],
@@ -915,6 +977,91 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return adherenceData;
   }
 
+  List<double> _calculateConsistencySparklineData({required int days}) {
+    final now = DateTime.now();
+    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final scheduleBox = Hive.box<Schedule>('schedules');
+
+    final schedules = scheduleBox.values
+        .where((s) => s.medicationId == widget.medication.id && s.active)
+        .toList();
+
+    if (schedules.isEmpty) return List.filled(days, -1.0);
+
+    final data = <double>[];
+
+    for (int i = days - 1; i >= 0; i--) {
+      final day = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: i));
+      final dayEnd = day.add(const Duration(days: 1));
+
+      int expectedDoses = 0;
+      for (final schedule in schedules) {
+        if (!schedule.daysOfWeek.contains(day.weekday)) continue;
+        final timesPerDay = schedule.timesOfDay?.length ?? 1;
+        expectedDoses += timesPerDay;
+      }
+
+      final dayLogs = doseLogBox.values.where(
+        (log) =>
+            log.medicationId == widget.medication.id &&
+            log.scheduledTime.isAfter(
+              day.subtract(const Duration(seconds: 1)),
+            ) &&
+            log.scheduledTime.isBefore(dayEnd),
+      );
+
+      final taken = dayLogs.where((l) => l.action == DoseAction.taken).length;
+
+      if (expectedDoses == 0) {
+        data.add(-1.0);
+      } else {
+        data.add((taken / expectedDoses).clamp(0.0, 1.0));
+      }
+    }
+
+    return data;
+  }
+
+  _StreakStats _calculateStreakStats(List<double> data) {
+    final valid = data.where((v) => v >= 0).toList();
+    final consistency = valid.isEmpty
+        ? 0
+        : ((valid.reduce((a, b) => a + b) / valid.length) * 100).toInt();
+
+    int current = 0;
+    for (int i = data.length - 1; i >= 0; i--) {
+      final v = data[i];
+      if (v < 0) continue;
+      if (v >= 0.999) {
+        current++;
+      } else {
+        break;
+      }
+    }
+
+    int best = 0;
+    int run = 0;
+    for (final v in data) {
+      if (v < 0) continue;
+      if (v >= 0.999) {
+        run++;
+        if (run > best) best = run;
+      } else {
+        run = 0;
+      }
+    }
+
+    return _StreakStats(
+      currentStreakDays: current,
+      bestStreakDays: best,
+      consistencyPct: consistency,
+    );
+  }
+
   List<_TakenMissedDay> _calculateTakenMissedData() {
     final now = DateTime.now();
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
@@ -1000,6 +1147,18 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         .replaceAll(RegExp(r'0+$'), '')
         .replaceAll(RegExp(r'\.$'), '');
   }
+}
+
+class _StreakStats {
+  const _StreakStats({
+    required this.currentStreakDays,
+    required this.bestStreakDays,
+    required this.consistencyPct,
+  });
+
+  final int currentStreakDays;
+  final int bestStreakDays;
+  final int consistencyPct;
 }
 
 class _AdherenceLinePainter extends CustomPainter {
@@ -1234,14 +1393,14 @@ class _TimeOfDayHistogramPainter extends CustomPainter {
     if (bars <= 1) return;
 
     final spacing = kTimeOfDayHistogramBarSpacing;
-    final barWidth =
-        (size.width - (spacing * (bars - 1))) / bars.toDouble();
+    final barWidth = (size.width - (spacing * (bars - 1))) / bars.toDouble();
     final radius = Radius.circular(kTimeOfDayHistogramBarRadius);
 
     final maxCount = counts.fold<int>(0, (m, v) => v > m ? v : m);
 
     final emptyPaint = Paint()..color = emptyColor;
-    final barPaint = Paint()..color = barColor.withValues(alpha: kOpacityEmphasis);
+    final barPaint = Paint()
+      ..color = barColor.withValues(alpha: kOpacityEmphasis);
 
     for (int i = 0; i < bars; i++) {
       final x = i * (barWidth + spacing);
@@ -1263,5 +1422,59 @@ class _TimeOfDayHistogramPainter extends CustomPainter {
     return oldDelegate.counts != counts ||
         oldDelegate.barColor != barColor ||
         oldDelegate.emptyColor != emptyColor;
+  }
+}
+
+class _ConsistencySparklinePainter extends CustomPainter {
+  _ConsistencySparklinePainter({required this.data, required this.color});
+
+  final List<double> data;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = kConsistencySparklineStrokeWidth
+      ..strokeCap = StrokeCap.round
+      ..color = color.withValues(alpha: kOpacityEmphasis);
+
+    final width = size.width;
+    final height = size.height;
+    if (data.length == 1) return;
+
+    final spacing = width / (data.length - 1);
+    final path = Path();
+    bool hasStarted = false;
+
+    for (int i = 0; i < data.length; i++) {
+      final v = data[i];
+      if (v < 0) continue;
+
+      final x = i * spacing;
+      final y =
+          height -
+          (v *
+              height *
+              (1 - (2 * kConsistencySparklineVerticalPaddingFraction))) -
+          (height * kConsistencySparklineVerticalPaddingFraction);
+
+      if (!hasStarted) {
+        path.moveTo(x, y);
+        hasStarted = true;
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    if (!hasStarted) return;
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConsistencySparklinePainter oldDelegate) {
+    return oldDelegate.data != data || oldDelegate.color != color;
   }
 }

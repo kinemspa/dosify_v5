@@ -1,7 +1,6 @@
 # Things To Fix
 
 ## Global
-- Create a setting in the settings screen to inject some test data. 1 of each type of med and different schedules. Allow for adding it , init it, and remove it.  [COMPLETED]
 
 ## Home Screen
 
@@ -27,7 +26,7 @@
 - Add reports
 	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
 	- Time-of-day consistency (histogram of taken times) [COMPLETED]
-	- Streaks / consistency score (sparkline)
+	- Streaks / consistency score (sparkline) [COMPLETED]
 	- Action breakdown (taken / skipped / snoozed)
 	- Dose amount trend (actual dose over time)
 	- Inventory events timeline (refill/restock/vial opened markers)
