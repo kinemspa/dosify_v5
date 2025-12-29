@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
@@ -35,6 +36,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   int _historyMaxItems = _historyPageStep;
   String? _expandedHistoryLogId;
   bool _historyHorizontalView = false;
+
+  static const int _inventoryEventsMaxItems = 10;
 
   @override
   void initState() {
@@ -857,6 +860,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final streakStats = _calculateStreakStats(consistencySparkline);
     final actionBreakdown = _calculateActionBreakdown(days: 30);
     final doseTrend = _calculateDoseTrendData(days: 30, maxPoints: 14);
+    final inventoryEvents = _calculateInventoryEvents(
+      days: 30,
+      maxItems: _inventoryEventsMaxItems,
+    );
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -1206,8 +1213,161 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ],
           ),
         ],
+
+        const SizedBox(height: kSpacingM),
+
+        Row(
+          children: [
+            Text(
+              'Inventory events',
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Text(
+              '30d',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+          ],
+        ),
+        const SizedBox(height: kSpacingS),
+
+        if (inventoryEvents.isEmpty)
+          Text('No inventory events yet', style: helperTextStyle(context))
+        else ...[
+          for (int i = 0; i < inventoryEvents.length; i++) ...[
+            _buildInventoryEventRow(context, inventoryEvents[i]),
+            if (i != inventoryEvents.length - 1)
+              Divider(
+                height: kSpacingM,
+                color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
+              ),
+          ],
+        ],
       ],
     );
+  }
+
+  List<InventoryLog> _calculateInventoryEvents({
+    required int days,
+    required int maxItems,
+  }) {
+    final now = DateTime.now();
+    final cutoff = now.subtract(Duration(days: days));
+    final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
+
+    final logs =
+        inventoryLogBox.values
+            .where((l) => l.medicationId == widget.medication.id)
+            .where((l) => l.timestamp.isAfter(cutoff))
+            .toList()
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    if (logs.length <= maxItems) return logs;
+    return logs.take(maxItems).toList();
+  }
+
+  Widget _buildInventoryEventRow(BuildContext context, InventoryLog log) {
+    final cs = Theme.of(context).colorScheme;
+
+    final icon = _getInventoryEventIcon(log.changeType);
+    final color = _getInventoryEventColor(cs, log.changeType);
+
+    final timeLabel = DateFormat('MMM d • h:mm a').format(log.timestamp);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: kStepperButtonSize,
+            height: kStepperButtonSize,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: kOpacitySubtle),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: kIconSizeSmall, color: color),
+          ),
+          const SizedBox(width: kSpacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  log.description,
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  timeLabel,
+                  style: helperTextStyle(
+                    context,
+                    color: cs.onSurfaceVariant,
+                  )?.copyWith(fontSize: kFontSizeSmall),
+                ),
+                if (log.notes != null && log.notes!.trim().isNotEmpty) ...[
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    log.notes!.trim(),
+                    style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                        ?.copyWith(
+                          fontSize: kFontSizeSmall,
+                          fontStyle: FontStyle.italic,
+                        ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getInventoryEventIcon(InventoryChangeType type) {
+    switch (type) {
+      case InventoryChangeType.refillAdd:
+      case InventoryChangeType.refillToMax:
+        return Icons.add_circle_outline;
+      case InventoryChangeType.doseDeducted:
+      case InventoryChangeType.adHocDose:
+        return Icons.remove_circle_outline;
+      case InventoryChangeType.manualAdjustment:
+        return Icons.tune;
+      case InventoryChangeType.vialOpened:
+        return Icons.vaccines_outlined;
+      case InventoryChangeType.vialRestocked:
+        return Icons.inventory_2_outlined;
+      case InventoryChangeType.expired:
+        return Icons.warning_amber_rounded;
+    }
+  }
+
+  Color _getInventoryEventColor(ColorScheme cs, InventoryChangeType type) {
+    switch (type) {
+      case InventoryChangeType.refillAdd:
+      case InventoryChangeType.refillToMax:
+      case InventoryChangeType.vialRestocked:
+        return cs.primary;
+      case InventoryChangeType.doseDeducted:
+      case InventoryChangeType.adHocDose:
+      case InventoryChangeType.expired:
+        return cs.error;
+      case InventoryChangeType.vialOpened:
+        return cs.secondary;
+      case InventoryChangeType.manualAdjustment:
+        return cs.tertiary;
+    }
   }
 
   Widget _buildSummaryStats(BuildContext context, List<double> data) {
