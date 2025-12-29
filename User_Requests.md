@@ -38,7 +38,7 @@
 	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
 	- Time-of-day consistency (histogram of taken times) [COMPLETED]
 	- Streaks / consistency score (sparkline) [COMPLETED]
-	- Action breakdown (taken / skipped / snoozed)
+	- Action breakdown (taken / skipped / snoozed) [COMPLETED]
 	- Dose amount trend (actual dose over time)
 	- Inventory events timeline (refill/restock/vial opened markers)
 

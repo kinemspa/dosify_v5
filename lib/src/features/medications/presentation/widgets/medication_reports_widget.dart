@@ -847,6 +847,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final timeOfDayHistogram = _calculateTakenTimeOfDayHistogram();
     final consistencySparkline = _calculateConsistencySparklineData(days: 14);
     final streakStats = _calculateStreakStats(consistencySparkline);
+    final actionBreakdown = _calculateActionBreakdown(days: 30);
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -1048,6 +1049,61 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           const SizedBox(height: kSpacingS),
 
           _buildStreakStats(context, streakStats),
+          const SizedBox(height: kSpacingM),
+
+          Row(
+            children: [
+              Text(
+                'Actions',
+                style: helperTextStyle(context)?.copyWith(
+                  fontWeight: kFontWeightSemiBold,
+                  color: cs.onSurfaceVariant.withValues(
+                    alpha: kOpacityMediumHigh,
+                  ),
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Text(
+                '30d',
+                style: helperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant,
+                )?.copyWith(fontSize: kFontSizeHint),
+              ),
+            ],
+          ),
+          const SizedBox(height: kSpacingS),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatChip(
+                  context,
+                  label: 'Taken',
+                  value: '${actionBreakdown.taken}',
+                  color: cs.primary,
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Expanded(
+                child: _buildStatChip(
+                  context,
+                  label: 'Skipped',
+                  value: '${actionBreakdown.skipped}',
+                  color: cs.tertiary,
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Expanded(
+                child: _buildStatChip(
+                  context,
+                  label: 'Snoozed',
+                  value: '${actionBreakdown.snoozed}',
+                  color: cs.secondary,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1368,6 +1424,38 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return counts;
   }
 
+  _ActionBreakdown _calculateActionBreakdown({required int days}) {
+    final now = DateTime.now();
+    final cutoff = now.subtract(Duration(days: days));
+    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+
+    int taken = 0;
+    int skipped = 0;
+    int snoozed = 0;
+
+    final logs = doseLogBox.values.where(
+      (log) =>
+          log.medicationId == widget.medication.id &&
+          log.actionTime.isAfter(cutoff),
+    );
+
+    for (final log in logs) {
+      switch (log.action) {
+        case DoseAction.taken:
+          taken++;
+          break;
+        case DoseAction.skipped:
+          skipped++;
+          break;
+        case DoseAction.snoozed:
+          snoozed++;
+          break;
+      }
+    }
+
+    return _ActionBreakdown(taken: taken, skipped: skipped, snoozed: snoozed);
+  }
+
   String _formatAmount(double value) {
     if (value == value.toInt()) return value.toInt().toString();
     return value
@@ -1387,6 +1475,18 @@ class _StreakStats {
   final int currentStreakDays;
   final int bestStreakDays;
   final int consistencyPct;
+}
+
+class _ActionBreakdown {
+  const _ActionBreakdown({
+    required this.taken,
+    required this.skipped,
+    required this.snoozed,
+  });
+
+  final int taken;
+  final int skipped;
+  final int snoozed;
 }
 
 class _AdherenceLinePainter extends CustomPainter {
