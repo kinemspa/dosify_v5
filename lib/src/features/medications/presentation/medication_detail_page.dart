@@ -58,6 +58,7 @@ class MedicationDetailPage extends ConsumerStatefulWidget {
 class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
   bool _isDetailsExpanded = true; // Collapsible state for details card
+  bool _isScheduleExpanded = true; // Collapsible state for schedule card
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -460,15 +461,23 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     ),
                   ),
 
-                  // Unified Details Card
+                  // Schedule Card (Scheduled Doses + Schedules)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100),
-                      child: _buildUnifiedDetailsCard(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+                      child: _buildScheduleCard(
                         context,
                         updatedMed,
                         _nextDoseForMedication(updatedMed.id),
                       ),
+                    ),
+                  ),
+
+                  // Unified Details Card
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100),
+                      child: _buildUnifiedDetailsCard(context, updatedMed),
                     ),
                   ),
                 ],
@@ -839,19 +848,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  Widget _buildUnifiedDetailsCard(
-    BuildContext context,
-    Medication med,
-    ScheduledDose? nextDose,
-  ) {
+  Widget _buildUnifiedDetailsCard(BuildContext context, Medication med) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    // Check for schedules
-    final scheduleBox = Hive.box<Schedule>('schedules');
-    final hasSchedules = scheduleBox.values.any(
-      (s) => s.medicationId == med.id && s.active,
-    );
 
     return GlassCardSurface(
       useGradient: false,
@@ -911,18 +910,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (hasSchedules) ...[
-                    Container(
-                      decoration: buildInsetSectionDecoration(
-                        context: context,
-                        showBorder: false,
-                      ),
-                      padding: kInsetSectionPadding,
-                      child: _buildScheduleSection(context, med, nextDose),
-                    ),
-                    const SizedBox(height: kSpacingM),
-                  ],
-
                   Container(
                     decoration: buildInsetSectionDecoration(
                       context: context,
@@ -952,6 +939,121 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScheduleCard(
+    BuildContext context,
+    Medication med,
+    ScheduledDose? nextDose,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final scheduleBox = Hive.box<Schedule>('schedules');
+    final hasSchedules = scheduleBox.values.any(
+      (s) => s.medicationId == med.id && s.active,
+    );
+
+    if (!hasSchedules) {
+      return GlassCardSurface(
+        useGradient: false,
+        showBorder: false,
+        padding: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(kCardPadding),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: kIconSizeMedium,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: kSpacingS),
+              Text(
+                'Schedule',
+                style: cardTitleStyle(
+                  context,
+                )?.copyWith(color: colorScheme.primary),
+              ),
+              const Spacer(),
+              Text(
+                'No schedules',
+                style: helperTextStyle(
+                  context,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return GlassCardSurface(
+      useGradient: false,
+      showBorder: false,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () =>
+                setState(() => _isScheduleExpanded = !_isScheduleExpanded),
+            child: Padding(
+              padding: const EdgeInsets.all(kCardPadding),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_month_rounded,
+                    size: kIconSizeMedium,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  Text(
+                    'Schedule',
+                    style: cardTitleStyle(
+                      context,
+                    )?.copyWith(color: colorScheme.primary),
+                  ),
+                  const Spacer(),
+                  AnimatedRotation(
+                    turns: _isScheduleExpanded ? 0 : -0.25,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: kIconSizeLarge,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _isScheduleExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                kCardPadding,
+                0,
+                kCardPadding,
+                kCardPadding,
+              ),
+              child: Container(
+                decoration: buildInsetSectionDecoration(
+                  context: context,
+                  showBorder: false,
+                ),
+                padding: kInsetSectionPadding,
+                child: _buildScheduleSection(context, med, nextDose),
               ),
             ),
           ),
