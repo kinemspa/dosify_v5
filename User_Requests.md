@@ -29,6 +29,9 @@
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too. 
 
 ### Reports Card
+- Not seeing the other report types. How to view them.
+- Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled. 
+- History and Adherance headings are way too big. 
 - History: 
 	- Paginate it [COMPLETED]
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
@@ -39,7 +42,7 @@
 	- Time-of-day consistency (histogram of taken times) [COMPLETED]
 	- Streaks / consistency score (sparkline) [COMPLETED]
 	- Action breakdown (taken / skipped / snoozed) [COMPLETED]
-	- Dose amount trend (actual dose over time)
+	- Dose amount trend (actual dose over time) [COMPLETED]
 	- Inventory events timeline (refill/restock/vial opened markers)
 
 ### Medication Details Card
@@ -125,6 +128,7 @@
 - The Days on the calnedar are no longer showing if they have a scheduled dose. Can we implement a tiny little number? We had some colour codeing for all the dose status, coming, skipped, missed and snoozed. 
 - Style the month view a little nicer, its actually looking really good. 
 - It might be good to have a little up next display up the top for the next dose. (These kinds of widgets will be used on the home page aswell.)
+
 
 
 ==============

@@ -72,6 +72,7 @@ const double kNextDoseDateCircleSizeLarge = 54;
 const double kMedicationReportsTabHeight = 280;
 
 /// Adherence chart (reports)
+const double kAdherenceChartHeight = 96;
 const double kAdherenceChartLineStrokeWidth = 2.5;
 const double kAdherenceChartGridStrokeWidth = 0.5;
 const double kAdherenceChartPointOuterRadius = 4;
@@ -93,6 +94,12 @@ const double kTimeOfDayHistogramBarRadius = 3;
 const double kConsistencySparklineHeight = 24;
 const double kConsistencySparklineStrokeWidth = 2.0;
 const double kConsistencySparklineVerticalPaddingFraction = 0.2;
+
+/// Dose amount trend (reports)
+const double kDoseTrendChartHeight = 36;
+const double kDoseTrendChartStrokeWidth = 2.0;
+const double kDoseTrendChartPointRadius = 2.5;
+const double kDoseTrendChartVerticalPaddingFraction = 0.2;
 
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
