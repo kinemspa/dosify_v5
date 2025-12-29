@@ -30,7 +30,7 @@
 
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
-- I want each report to be its own little page in the Reports card. Or provide some way to switch them on or off. 
+- I want each report to be its own little page in the Reports card. Or provide some way to switch them on or off.  [COMPLETED]
 - Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled.  [COMPLETED]
 - History and Adherance headings are way too big.  [COMPLETED]
 - History: 
@@ -45,7 +45,7 @@
 	- Action breakdown (taken / skipped / snoozed) [COMPLETED]
 	- Dose amount trend (actual dose over time) [COMPLETED]
 	- Inventory events timeline (refill/restock/vial opened markers) [COMPLETED]
-	- Dose Strenght History over time in a bar chart graph. 
+	- Dose Strenght History over time in a bar chart graph. [COMPLETED]
 
 ### Medication Details Card
 - Can you not bring in a little flare and style to all the different text elements?  Still boring. [COMPLETED]
@@ -167,6 +167,11 @@
 ==============
 # Analytics
 - This will have the same widgets as the medicaiont details screen but it will allow for viewing data from all meds and schedules. It will also allow for exporting of data. 
+
+
+==============
+# Inventory
+- A new screen that provides a high level of all stock. 
 
 
 

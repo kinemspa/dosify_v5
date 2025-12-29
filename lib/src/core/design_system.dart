@@ -101,6 +101,11 @@ const double kDoseTrendChartStrokeWidth = 2.0;
 const double kDoseTrendChartPointRadius = 2.5;
 const double kDoseTrendChartVerticalPaddingFraction = 0.2;
 
+/// Dose strength history (reports)
+const double kDoseStrengthChartHeight = 44;
+const double kDoseStrengthChartBarSpacing = 2;
+const double kDoseStrengthChartBarRadius = 3;
+
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
 const double kDualStockDonutInnerScale = 0.73;
