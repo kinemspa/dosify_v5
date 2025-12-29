@@ -30,7 +30,7 @@
 
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
-- Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled. 
+- Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled.  [COMPLETED]
 - History and Adherance headings are way too big. 
 - History: 
 	- Paginate it [COMPLETED]
@@ -105,6 +105,7 @@
 	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. 
 	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both.  
 	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? 
+	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered.
 
 
 

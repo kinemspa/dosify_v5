@@ -289,6 +289,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
+    final isAdHoc = log.scheduleId == 'ad_hoc';
 
     return InkWell(
       onTap: () {
@@ -421,10 +422,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       )?.copyWith(fontWeight: kFontWeightSemiBold),
                     ),
                     const SizedBox(height: kSpacingXS),
-                    Text(
-                      'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
-                      style: helperTextStyle(context),
-                    ),
+                    if (!isAdHoc)
+                      Text(
+                        'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
+                        style: helperTextStyle(context),
+                      ),
                     Text(
                       'Recorded: ${dateFormat.format(log.actionTime)} • ${timeFormat.format(log.actionTime)}',
                       style: helperTextStyle(context),
@@ -432,9 +434,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     const SizedBox(height: kSpacingXS),
                     Text(
                       log.action == DoseAction.taken
-                          ? (log.wasOnTime
-                                ? 'On time'
-                                : 'Offset: ${log.minutesOffset} min')
+                          ? (isAdHoc
+                                ? 'Unscheduled'
+                                : (log.wasOnTime
+                                      ? 'On time'
+                                      : 'Offset: ${log.minutesOffset} min'))
                           : 'Action: ${log.action.name}',
                       style: helperTextStyle(
                         context,
@@ -508,6 +512,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
+    final isAdHoc = log.scheduleId == 'ad_hoc';
 
     final dayNumber = DateFormat('d').format(log.actionTime);
     final monthName = DateFormat('MMM').format(log.actionTime);
@@ -672,10 +677,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       )?.copyWith(fontWeight: kFontWeightSemiBold),
                     ),
                     const SizedBox(height: kSpacingXS),
-                    Text(
-                      'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
-                      style: helperTextStyle(context),
-                    ),
+                    if (!isAdHoc)
+                      Text(
+                        'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
+                        style: helperTextStyle(context),
+                      ),
                     Text(
                       'Recorded: ${dateFormat.format(log.actionTime)} • ${timeFormat.format(log.actionTime)}',
                       style: helperTextStyle(context),
@@ -683,9 +689,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     const SizedBox(height: kSpacingXS),
                     Text(
                       log.action == DoseAction.taken
-                          ? (log.wasOnTime
-                                ? 'On time'
-                                : 'Offset: ${log.minutesOffset} min')
+                          ? (isAdHoc
+                                ? 'Unscheduled'
+                                : (log.wasOnTime
+                                      ? 'On time'
+                                      : 'Offset: ${log.minutesOffset} min'))
                           : 'Action: ${log.action.name}',
                       style: helperTextStyle(
                         context,
