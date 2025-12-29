@@ -118,7 +118,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     alpha: kOpacityTransparent,
                   ),
                   labelStyle: helperTextStyle(context)?.copyWith(
-                    fontSize: kFontSizeMedium,
+                    fontSize: kFontSizeSmall,
                     fontWeight: kFontWeightSemiBold,
                   ),
                   tabs: const [

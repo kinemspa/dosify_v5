@@ -31,7 +31,7 @@
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
 - Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled.  [COMPLETED]
-- History and Adherance headings are way too big. 
+- History and Adherance headings are way too big.  [COMPLETED]
 - History: 
 	- Paginate it [COMPLETED]
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
