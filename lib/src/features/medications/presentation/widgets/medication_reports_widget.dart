@@ -892,6 +892,14 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ),
           ],
         ),
+        const SizedBox(height: kSpacingXS),
+        Text(
+          'Scroll for more reports',
+          style: helperTextStyle(
+            context,
+            color: cs.onSurfaceVariant,
+          )?.copyWith(fontSize: kFontSizeHint),
+        ),
         const SizedBox(height: kSpacingL),
 
         // Adherence graph

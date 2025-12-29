@@ -29,7 +29,7 @@
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too. 
 
 ### Reports Card
-- Not seeing the other report types. How to view them.
+- Not seeing the other report types. How to view them. [COMPLETED]
 - Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled. 
 - History and Adherance headings are way too big. 
 - History: 
@@ -78,6 +78,7 @@
 - Adding a schedule seems to be adding events in the past. SHould not do this. Maybe have a start from setting, Now, or selected date.  [COMPLETED]
 - Needs an end date picker too.  [COMPLETED]
 - Alot of black text on this screen. [COMPLETED]
+- Increment field/buttons is not correct its not using the correct styling. 
 - Add Tablet:
 	- Configure Dose:
 		- the unit type to use should be a dropdown and incremental like the add med wizard objects.  [COMPLETED]
@@ -93,6 +94,18 @@
 			- compact the grid, its too spacious. [COMPLETED]
 - Add MDV:
 	- Dose needs to only show 2 decimals.  [COMPLETED]
+	- Default to 1mL syringe. Or to the saved reconstitution settings if exists.
+	- Needs helper text, input strenght of dose, or select volume or Units of the syringe size. It will do all the calculaiotns for you based on input.
+	- Formula is shwing incorrect.
+		- I have a MDV of BCP-157 which is 16mg at 5mL. I have toggled strenght, and incremented by 1, which puts a 1 there, which is 1mg, it then trhows an error of Dose Exceeds vial Sytrenght of 10mcg. 
+		- If using strenght, we need to be able to change the unit of strenght from mcg, mg and the value. 
+		- Changing to volume, I incremented in 1 to . Whcih trhows an error. I suppose this is correct, but I dont know what I am incremewnting in. There is no mL display. 
+		- Changing to Units, I then increment and 2 syring graphics display. 
+	- Syringe Graphic should always be showing. 
+	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. 
+	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both.  
+	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? 
+
 
 
 - Once the med is selected, we need to restyle all of this. It looks disgusting. Look at the edit dialgos on the medicaiont details screens that are used to edit an existing medication.  [COMPLETED]
@@ -130,9 +143,17 @@
 - It might be good to have a little up next display up the top for the next dose. (These kinds of widgets will be used on the home page aswell.)
 
 
+==============
+# Take Dose Screen
+- Take Dose:
+	- The Bottom page popup needs to be styled to match the dialogs and the rest of the app. 
+
+- Edit Historical Dose:
+	- Need to be able to edit the time taken. 
+
 
 ==============
-# Reconstitutio  Calculator
+# Reconstitution  Calculator
 
 ## Add Med Wizard - Recon Calc
 
