@@ -137,7 +137,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           box.listenable(),
           Hive.box<Schedule>('schedules').listenable(),
           Hive.box<DoseLog>('dose_logs').listenable(),
-          _scrollController,
         ]),
         builder: (context, _) {
           final updatedMed = box.get(med.id) ?? med;
@@ -151,13 +150,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             (s) => s.medicationId == updatedMed.id && s.active,
           );
           final headerHeight = _measuredExpandedHeaderHeight;
-
-          // Calculate scroll progress for title opacity
-          final offset = _scrollController.hasClients
-              ? _scrollController.offset
-              : 0.0;
-          final maxOffset = headerHeight - _kDetailHeaderCollapsedHeight;
-          final scrollProgress = (offset / maxOffset).clamp(0.0, 1.0);
 
           return Stack(
             children: [
@@ -364,6 +356,28 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 ),
                               ),
                             ),
+                            // Keep the same title-fade behavior without rebuilding the whole page on scroll.
+                            Positioned(
+                              top: top,
+                              left: 0,
+                              right: 0,
+                              height: _kDetailHeaderCollapsedHeight,
+                              child: IgnorePointer(
+                                child: Opacity(
+                                  opacity: (1.0 - t * 3).clamp(0.0, 1.0),
+                                  child: Center(
+                                    child: Text(
+                                      'Medication Details',
+                                      style: TextStyle(
+                                        color: onPrimary,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         );
                       },
@@ -372,17 +386,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => context.pop(),
                     ),
-                    title: Opacity(
-                      opacity: (1.0 - scrollProgress * 3).clamp(0.0, 1.0),
-                      child: Text(
-                        'Medication Details',
-                        style: TextStyle(
-                          color: onPrimary,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    title: const SizedBox.shrink(),
                     centerTitle: true,
                     actions: [
                       // Menu button

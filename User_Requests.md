@@ -23,13 +23,15 @@
 ==============
 
 ## Medication Details Screen
-- There must be some animation issues on this scren as it seems to lag a little. 
+- There must be some animation issues on this scren as it seems to lag a little.  [COMPLETED]
 - Remove the Scheduled Doses from the Medicaiont Details Card, and make itys own card.
 - We should have the following cards. Reports, Schedule, Details. You can rename these to bettere terms if they seem fit. 
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too. 
+- When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius. 
 
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
+- Still not seeing the addititional reports that were added. No way to view them. 
 - I want each report to be its own little page in the Reports card. Or provide some way to switch them on or off.  [COMPLETED]
 - Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled.  [COMPLETED]
 - History and Adherance headings are way too big.  [COMPLETED]
@@ -172,6 +174,15 @@
 ==============
 # Inventory
 - A new screen that provides a high level of all stock. 
+
+
+
+
+
+================================
+# Notifications
+- Seems to be a lot of notifications loading on startup. Is this goign to be a performance hit or an issue?
+
 
 
 
