@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
@@ -291,10 +292,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime? nextDose,
   ) {
     return [
-      if (nextDose != null) _buildNextDoseSection(context, s, nextDose),
-
-      // Unified dose timeline (past, present, future)
-      _buildDoseTimeline(context, s),
+      _buildNextDoseCard(context, s),
 
       // Schedule Details Card
       Padding(
@@ -350,6 +348,20 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         ),
       ),
     ];
+  }
+
+  Widget _buildNextDoseCard(BuildContext context, Schedule s) {
+    final medId = s.medicationId;
+    if (medId == null) return const SizedBox.shrink();
+
+    final medBox = Hive.box<Medication>('medications');
+    final med = medBox.get(medId);
+    if (med == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: kSpacingS),
+      child: EnhancedScheduleCard(schedule: s, medication: med),
+    );
   }
 
   Widget _buildStatusToggle(BuildContext context, Schedule s) {
@@ -446,6 +458,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     }
   }
 
+  // ignore: unused_element
   Widget _buildNextDoseSection(
     BuildContext context,
     Schedule s,
@@ -570,6 +583,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   /// Unified dose timeline showing past (with logs), today, and future doses
+  // ignore: unused_element
   Widget _buildDoseTimeline(BuildContext context, Schedule s) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

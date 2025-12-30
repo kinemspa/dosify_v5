@@ -139,7 +139,7 @@
 - Needs the Med Name at the top as part of the Shedule Name [COMPLETED]
 - Dose needs to show all the calulations. The Unit amount, the strenght and the volume if a liquid. Remove all trailing 0s. Remove plurality on single.  [COMPLETED]
 - Status needs to be a toggle button.  [COMPLETED]
-- Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense. 
+- Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense.  [COMPLETED]
 
 
 
