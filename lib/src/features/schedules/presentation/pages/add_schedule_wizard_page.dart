@@ -83,6 +83,26 @@ class _AddScheduleWizardPageState
   bool _nameAuto = true;
   bool _isApplyingAutoName = false;
 
+  int _readPositiveInt(
+    TextEditingController controller, {
+    required int fallback,
+  }) {
+    final parsed = int.tryParse(controller.text.trim());
+    if (parsed == null || parsed < 1) return fallback;
+    return parsed;
+  }
+
+  void _incIntController(TextEditingController controller) {
+    final current = _readPositiveInt(controller, fallback: 1);
+    setState(() => controller.text = '${current + 1}');
+  }
+
+  void _decIntController(TextEditingController controller) {
+    final current = _readPositiveInt(controller, fallback: 1);
+    if (current <= 1) return;
+    setState(() => controller.text = '${current - 1}');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1110,6 +1130,8 @@ class _AddScheduleWizardPageState
         );
 
       case ScheduleMode.daysOnOff:
+        final daysOnValue = _readPositiveInt(_daysOn, fallback: 5);
+        final daysOffValue = _readPositiveInt(_daysOff, fallback: 2);
         return Column(
           children: [
             const SizedBox(height: 12),
@@ -1118,19 +1140,12 @@ class _AddScheduleWizardPageState
                 Expanded(
                   child: LabelFieldRow(
                     label: 'Days On',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _daysOn,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        textAlign: TextAlign.center,
-                        style: bodyTextStyle(context),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                        ),
-                      ),
+                    field: StepperRow36(
+                      controller: _daysOn,
+                      onDec: () => _decIntController(_daysOn),
+                      onInc: () => _incIntController(_daysOn),
+                      decoration: buildFieldDecoration(context),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
                   ),
                 ),
@@ -1138,19 +1153,12 @@ class _AddScheduleWizardPageState
                 Expanded(
                   child: LabelFieldRow(
                     label: 'Days Off',
-                    field: Field36(
-                      child: TextFormField(
-                        controller: _daysOff,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        textAlign: TextAlign.center,
-                        style: bodyTextStyle(context),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                        ),
-                      ),
+                    field: StepperRow36(
+                      controller: _daysOff,
+                      onDec: () => _decIntController(_daysOff),
+                      onInc: () => _incIntController(_daysOff),
+                      decoration: buildFieldDecoration(context),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
                   ),
                 ),
@@ -1158,7 +1166,7 @@ class _AddScheduleWizardPageState
             ),
             const SizedBox(height: 8),
             Text(
-              'Take medication for ${_daysOn.text} days, then pause for ${_daysOff.text} days',
+              'Take medication for $daysOnValue days, then pause for $daysOffValue days',
               style: helperTextStyle(context),
             ),
           ],

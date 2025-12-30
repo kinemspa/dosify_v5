@@ -86,7 +86,7 @@
 - Adding a schedule seems to be adding events in the past. SHould not do this. Maybe have a start from setting, Now, or selected date.  [COMPLETED]
 - Needs an end date picker too.  [COMPLETED]
 - Alot of black text on this screen. [COMPLETED]
-- Increment field/buttons is not correct its not using the correct styling. 
+- Increment field/buttons is not correct its not using the correct styling. [COMPLETED]
 - Add Tablet:
 	- Configure Dose:
 		- the unit type to use should be a dropdown and incremental like the add med wizard objects.  [COMPLETED]
