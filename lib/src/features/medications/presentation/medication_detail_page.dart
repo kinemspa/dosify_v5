@@ -1102,7 +1102,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: kSpacingS),
-              Text('Scheduled Doses', style: sectionTitleStyle(context)),
+              Text('Doses', style: sectionTitleStyle(context)),
             ],
           ),
           const SizedBox(height: kSpacingM),

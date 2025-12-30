@@ -50,7 +50,7 @@
 	- Dose Strenght History over time in a bar chart graph. [COMPLETED]
 
 ### Schedule
-- Change Scheduled Doses heading to Doses
+- Change Scheduled Doses heading to Doses [COMPLETED]
 
 ### Medication Details Card
 - Can you not bring in a little flare and style to all the different text elements?  Still boring. [COMPLETED]
