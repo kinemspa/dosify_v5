@@ -27,6 +27,7 @@
 - We should have the following cards. Reports, Schedule, Details. You can rename these to bettere terms if they seem fit.  [COMPLETED]
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED]
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
+- Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. 
 
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
@@ -105,7 +106,7 @@
 			- compact the grid, its too spacious. [COMPLETED]
 - Add MDV:
 	- Dose needs to only show 2 decimals.  [COMPLETED]
-	- Default to 1mL syringe. Or to the saved reconstitution settings if exists.
+	- Default to 1mL syringe. Or to the saved reconstitution settings if exists. [COMPLETED]
 	- Needs helper text, input strenght of dose, or select volume or Units of the syringe size. It will do all the calculaiotns for you based on input.
 	- Formula is shwing incorrect.
 		- I have a MDV of BCP-157 which is 16mg at 5mL. I have toggled strenght, and incremented by 1, which puts a 1 there, which is 1mg, it then trhows an error of Dose Exceeds vial Sytrenght of 10mcg. 

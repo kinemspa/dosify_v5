@@ -1049,13 +1049,20 @@ class _AddScheduleWizardPageState
       return _selectedSyringeType;
     }
 
-    final volumeMl = med.containerVolumeMl ?? 1.0;
-    if (volumeMl <= 0.3) return SyringeType.ml_0_3;
-    if (volumeMl <= 0.5) return SyringeType.ml_0_5;
-    if (volumeMl <= 1.0) return SyringeType.ml_1_0;
-    if (volumeMl <= 3.0) return SyringeType.ml_3_0;
-    if (volumeMl <= 5.0) return SyringeType.ml_5_0;
-    return SyringeType.ml_10_0;
+    // Default behavior:
+    // - Prefer a saved, user-appropriate dosing volume (from reconstitution)
+    // - Otherwise default to a 1mL syringe
+    final doseVolumeMl = med.volumePerDose;
+    if (doseVolumeMl != null && doseVolumeMl > 0) {
+      if (doseVolumeMl <= 0.3) return SyringeType.ml_0_3;
+      if (doseVolumeMl <= 0.5) return SyringeType.ml_0_5;
+      if (doseVolumeMl <= 1.0) return SyringeType.ml_1_0;
+      if (doseVolumeMl <= 3.0) return SyringeType.ml_3_0;
+      if (doseVolumeMl <= 5.0) return SyringeType.ml_5_0;
+      return SyringeType.ml_10_0;
+    }
+
+    return SyringeType.ml_1_0;
   }
 
   double? _getInitialStrengthMcg() {
