@@ -14,8 +14,7 @@
 - Move the stoargae icons up. We need to make room for next dose buttons. [COMPLETED]
 - Multi Dose VIals have storager icons for both active and sealed vials. Can we represent both on the large cards? [COMPLETED]
 - Need an active schedules line or object. [COMPLETED]
-
-
+- Issues with icons, some are im front of text, some follow. can we unify icon placement.
 
 ### Compact Cards
 
@@ -43,7 +42,7 @@
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
 	- Can we do a  viea change button on this? Make the dose appear horizontal. The day componant is the most important. So we need that sorted and viewable in that state. [COMPLETED]
 	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. [COMPLETED]
-	- Need to include Refills in the history. 
+	- Need to include Refills in the history.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed. 
 - Add reports
 	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]

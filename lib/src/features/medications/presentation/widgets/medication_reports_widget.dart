@@ -16,6 +16,20 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 
+class _HistoryItem {
+  const _HistoryItem._({required this.time, this.doseLog, this.inventoryLog});
+
+  factory _HistoryItem.dose(DoseLog log) =>
+      _HistoryItem._(time: log.actionTime, doseLog: log);
+
+  factory _HistoryItem.inventory(InventoryLog log) =>
+      _HistoryItem._(time: log.timestamp, inventoryLog: log);
+
+  final DateTime time;
+  final DoseLog? doseLog;
+  final InventoryLog? inventoryLog;
+}
+
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
 /// Replaces DoseHistoryWidget with expanded functionality
 class MedicationReportsWidget extends StatefulWidget {
@@ -156,18 +170,34 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   Widget _buildHistoryTab(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
 
-    // Get dose logs for this medication
-    final logs =
-        doseLogBox.values
-            .where((log) => log.medicationId == widget.medication.id)
-            .toList()
-          ..sort((a, b) => b.actionTime.compareTo(a.actionTime));
+    // Dose logs for this medication
+    final doseLogs = doseLogBox.values
+        .where((log) => log.medicationId == widget.medication.id)
+        .toList(growable: false);
 
-    final displayLogs = logs.take(_historyMaxItems).toList();
-    final hasMore = displayLogs.length < logs.length;
+    // Refill events for this medication
+    final refillLogs = inventoryLogBox.values
+        .where((l) => l.medicationId == widget.medication.id)
+        .where(
+          (l) =>
+              l.changeType == InventoryChangeType.refillAdd ||
+              l.changeType == InventoryChangeType.refillToMax,
+        )
+        .toList(growable: false);
 
-    if (displayLogs.isEmpty) {
+    final allItems = <_HistoryItem>[
+      for (final log in doseLogs) _HistoryItem.dose(log),
+      for (final log in refillLogs) _HistoryItem.inventory(log),
+    ]..sort((a, b) => b.time.compareTo(a.time));
+
+    final displayItems = allItems
+        .take(_historyMaxItems)
+        .toList(growable: false);
+    final hasMore = displayItems.length < allItems.length;
+
+    if (displayItems.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -178,10 +208,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
             ),
             const SizedBox(height: kSpacingM),
-            Text('No dose history', style: helperTextStyle(context)),
+            Text('No history yet', style: helperTextStyle(context)),
             const SizedBox(height: kSpacingXS),
             Text(
-              'Recorded doses will appear here',
+              'Recorded doses and refills will appear here',
               style: helperTextStyle(
                 context,
               )?.copyWith(fontSize: kFontSizeSmall),
@@ -222,13 +252,13 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         Expanded(
           child: ListView.separated(
             padding: const EdgeInsets.all(kSpacingS),
-            itemCount: displayLogs.length + (hasMore ? 1 : 0),
+            itemCount: displayItems.length + (hasMore ? 1 : 0),
             separatorBuilder: (context, index) => Divider(
               height: 1,
               color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
             ),
             itemBuilder: (context, index) {
-              if (hasMore && index == displayLogs.length) {
+              if (hasMore && index == displayItems.length) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: kSpacingS),
                   child: Center(
@@ -249,8 +279,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   ),
                 );
               }
-              final log = displayLogs[index];
-              return _buildDoseLogItem(context, log);
+
+              final item = displayItems[index];
+              if (item.doseLog != null) {
+                return _buildDoseLogItem(context, item.doseLog!);
+              }
+              return _buildInventoryEventRow(context, item.inventoryLog!);
             },
           ),
         ),
