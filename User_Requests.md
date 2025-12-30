@@ -107,7 +107,7 @@
 - Add MDV:
 	- Dose needs to only show 2 decimals.  [COMPLETED]
 	- Default to 1mL syringe. Or to the saved reconstitution settings if exists. [COMPLETED]
-	- Needs helper text, input strenght of dose, or select volume or Units of the syringe size. It will do all the calculaiotns for you based on input.
+	- Needs helper text, input strenght of dose, or select volume or Units of the syringe size. It will do all the calculaiotns for you based on input. [COMPLETED]
 	- Formula is shwing incorrect.
 		- I have a MDV of BCP-157 which is 16mg at 5mL. I have toggled strenght, and incremented by 1, which puts a 1 there, which is 1mg, it then trhows an error of Dose Exceeds vial Sytrenght of 10mcg. 
 		- If using strenght, we need to be able to change the unit of strenght from mcg, mg and the value. 

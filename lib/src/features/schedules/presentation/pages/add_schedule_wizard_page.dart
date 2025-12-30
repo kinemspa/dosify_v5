@@ -703,7 +703,9 @@ class _AddScheduleWizardPageState
         ),
         const SizedBox(height: kSpacingS),
         _helperBelowLeft(
-          'Set the per-dose amount. You can fine-tune later if needed.',
+          _selectedMed!.form == MedicationForm.multiDoseVial
+              ? 'Enter the dose by strength, volume (mL), or syringe units. The app will calculate the other values automatically based on the vial concentration and syringe size.'
+              : 'Set the per-dose amount. You can fine-tune later if needed.',
         ),
       ],
     );
