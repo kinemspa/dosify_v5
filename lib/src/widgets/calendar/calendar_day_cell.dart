@@ -30,6 +30,9 @@ class CalendarDayCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final doseCount = doses.length;
+    final doseCountText = doseCount > 9 ? '9+' : '$doseCount';
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -47,24 +50,67 @@ class CalendarDayCell extends StatelessWidget {
             // Date number
             Padding(
               padding: const EdgeInsets.all(4),
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: isToday
-                    ? BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                      )
-                    : null,
-                child: Center(
-                  child: Text(
-                    '${date.day}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: _getTextColor(colorScheme),
-                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: isToday
+                        ? BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          )
+                        : null,
+                    child: Center(
+                      child: Text(
+                        '${date.day}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: _getTextColor(colorScheme),
+                          fontWeight: isToday
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  if (doseCount > 0)
+                    Positioned(
+                      right: -kSpacingXS,
+                      bottom: -kSpacingXS,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: kSpacingXS,
+                          vertical: kSpacingXS / 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withValues(
+                            alpha: kOpacityMinimal,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusSmall,
+                          ),
+                          border: Border.all(
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: kOpacityMediumLow,
+                            ),
+                            width: kBorderWidthThin,
+                          ),
+                        ),
+                        child: Text(
+                          doseCountText,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: isCurrentMonth
+                                ? colorScheme.primary
+                                : colorScheme.primary.withValues(
+                                    alpha: kOpacityMedium,
+                                  ),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
 
