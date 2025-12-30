@@ -31,6 +31,20 @@ class ScheduleDetailPage extends StatefulWidget {
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   late final DoseLogRepository _doseLogRepo;
 
+  String _mergedTitle(Schedule s) {
+    final med = s.medicationName.trim();
+    final name = s.name.trim();
+
+    if (med.isEmpty) return name;
+    if (name.isEmpty) return med;
+
+    final nameLower = name.toLowerCase();
+    final medLower = med.toLowerCase();
+    if (nameLower.startsWith(medLower)) return name;
+
+    return '$med - $name';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -195,12 +209,18 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       builder: (context, Box<Schedule> box, _) {
         final s = box.get(widget.scheduleId) ?? schedule;
         final nextDose = _nextOccurrence(s);
+        final mergedTitle = _mergedTitle(s);
 
         return DetailPageScaffold(
-          title: s.name,
+          title: mergedTitle,
           onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
           onDelete: () => _confirmDelete(context, s),
-          statsBannerContent: _buildScheduleHeader(context, s, nextDose),
+          statsBannerContent: _buildScheduleHeader(
+            context,
+            s,
+            nextDose,
+            title: mergedTitle,
+          ),
           sections: _buildSections(context, s, nextDose),
         );
       },
@@ -210,14 +230,15 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   Widget _buildScheduleHeader(
     BuildContext context,
     Schedule s,
-    DateTime? nextDose,
-  ) {
+    DateTime? nextDose, {
+    required String title,
+  }) {
     final nextDoseText = nextDose == null
         ? 'None'
         : '${DateFormat('EEE, MMM d').format(nextDose)} • ${TimeOfDay.fromDateTime(nextDose).format(context)}';
 
     return DetailStatsBanner(
-      title: s.name,
+      title: title,
       row1Left: DetailStatItem(
         icon: Icons.medication_outlined,
         label: 'Dose',
