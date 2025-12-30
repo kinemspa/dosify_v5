@@ -879,7 +879,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     }
 
     return ListView(
-      padding: const EdgeInsets.all(kSpacingL),
+      padding: const EdgeInsets.all(kSpacingM),
       children: [
         switch (section) {
           _AdherenceReportSection.adherence => _buildAdherenceLineSection(
@@ -932,7 +932,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ),
           ],
         ),
-        const SizedBox(height: kSpacingL),
+        const SizedBox(height: kSpacingM),
         SizedBox(
           height: kAdherenceChartHeight,
           child: CustomPaint(
@@ -961,7 +961,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
           ),
         ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         SizedBox(
           height: kTakenMissedChartHeight,
           child: CustomPaint(
@@ -976,7 +976,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             child: Container(),
           ),
         ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(7, (i) {
@@ -1018,7 +1018,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
           ),
         ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         SizedBox(
           height: kTimeOfDayHistogramHeight,
           child: CustomPaint(
@@ -1114,7 +1114,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
           ),
         ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         SizedBox(
           height: kConsistencySparklineHeight,
           child: CustomPaint(
@@ -1391,7 +1391,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 _buildInventoryEventRow(context, inventoryEvents[i]),
                 if (i != inventoryEvents.length - 1)
                   Divider(
-                    height: kSpacingM,
+                    height: kSpacingS,
                     color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
                   ),
               ],
