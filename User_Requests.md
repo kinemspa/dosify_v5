@@ -30,8 +30,8 @@
 
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
-- weWe have a history and an adherance page in this card. then you have placed the other graphs under the adherance tab. i want all individual tabs here under the Reports card, not sub tabs of another tab.
-- Dont ever use light grey for the inactive chips, never use this colour anywhere.
+- weWe have a history and an adherance page in this card. then you have placed the other graphs under the adherance tab. i want all individual tabs here under the Reports card, not sub tabs of another tab. [COMPLETED]
+- Dont ever use light grey for the inactive chips, never use this colour anywhere. [COMPLETED]
 - I want each report to be its own little page in the Reports card. Or provide some way to switch them on or off.  [COMPLETED]
 - Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled.  [COMPLETED]
 - History and Adherance headings are way too big.  [COMPLETED]

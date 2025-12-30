@@ -15,7 +15,6 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
 /// Replaces DoseHistoryWidget with expanded functionality
@@ -39,18 +38,13 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   String? _expandedHistoryLogId;
   bool _historyHorizontalView = false;
 
-  _AdherenceReportSection _selectedAdherenceSection =
-      _AdherenceReportSection.adherence;
-
   static const int _inventoryEventsMaxItems = 10;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-    ); // History + Adherence
+    final tabCount = 1 + _AdherenceReportSection.values.length;
+    _tabController = TabController(length: tabCount, vsync: this);
   }
 
   @override
@@ -119,6 +113,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 // Tab bar
                 TabBar(
                   controller: _tabController,
+                  isScrollable: true,
                   labelColor: cs.primary,
                   unselectedLabelColor: cs.onSurfaceVariant,
                   indicatorColor: cs.primary,
@@ -129,18 +124,13 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     fontSize: kFontSizeSmall,
                     fontWeight: kFontWeightSemiBold,
                   ),
-                  tabs: const [
-                    Tab(
+                  tabs: [
+                    const Tab(
                       text: 'History',
                       icon: Icon(Icons.history, size: kIconSizeMedium),
                     ),
-                    Tab(
-                      text: 'Adherence',
-                      icon: Icon(
-                        Icons.analytics_outlined,
-                        size: kIconSizeMedium,
-                      ),
-                    ),
+                    for (final section in _AdherenceReportSection.values)
+                      Tab(text: section.label),
                   ],
                 ),
                 // Tab content
@@ -150,7 +140,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     controller: _tabController,
                     children: [
                       _buildHistoryTab(context),
-                      _buildAdherenceTab(context),
+                      for (final section in _AdherenceReportSection.values)
+                        _buildReportTab(context, section),
                     ],
                   ),
                 ),
@@ -855,21 +846,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     );
   }
 
-  Widget _buildAdherenceTab(BuildContext context) {
+  Widget _buildReportTab(
+    BuildContext context,
+    _AdherenceReportSection section,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final adherenceData = _calculateAdherenceData();
-    final avgPct = _getAveragePercentage(adherenceData);
-    final takenMissed = _calculateTakenMissedData();
-    final timeOfDayHistogram = _calculateTakenTimeOfDayHistogram();
-    final consistencySparkline = _calculateConsistencySparklineData(days: 14);
-    final streakStats = _calculateStreakStats(consistencySparkline);
-    final actionBreakdown = _calculateActionBreakdown(days: 30);
-    final doseTrend = _calculateDoseTrendData(days: 30, maxPoints: 14);
-    final doseStrengthHistory = _calculateDoseStrengthHistoryData(days: 30);
-    final inventoryEvents = _calculateInventoryEvents(
-      days: 30,
-      maxItems: _inventoryEventsMaxItems,
-    );
 
     // No schedules = show message
     if (adherenceData.every((v) => v < 0)) {
@@ -896,229 +878,373 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       );
     }
 
-    final sections = _AdherenceReportSection.values;
-
     return ListView(
       padding: const EdgeInsets.all(kSpacingL),
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (final section in sections) ...[
-                PrimaryChoiceChip(
-                  label: Text(section.label),
-                  selected: _selectedAdherenceSection == section,
-                  onSelected: (selected) {
-                    if (!selected) return;
-                    setState(() => _selectedAdherenceSection = section);
-                  },
-                ),
-                const SizedBox(width: kSpacingS),
-              ],
-            ],
+        switch (section) {
+          _AdherenceReportSection.adherence => _buildAdherenceLineSection(
+            context,
+            adherenceData,
           ),
+          _AdherenceReportSection.takenMissed => _buildTakenMissedSection(
+            context,
+          ),
+          _AdherenceReportSection.timeOfDay => _buildTimeOfDaySection(context),
+          _AdherenceReportSection.summary => _buildSummarySection(
+            context,
+            adherenceData,
+          ),
+          _AdherenceReportSection.streaks => _buildStreaksSection(context),
+          _AdherenceReportSection.actions => _buildActionsSection(context),
+          _AdherenceReportSection.doseAmount => _buildDoseAmountSection(
+            context,
+          ),
+          _AdherenceReportSection.doseStrength => _buildDoseStrengthSection(
+            context,
+          ),
+          _AdherenceReportSection.inventoryEvents =>
+            _buildInventoryEventsSection(context),
+        },
+      ],
+    );
+  }
+
+  Widget _buildAdherenceLineSection(
+    BuildContext context,
+    List<double> adherenceData,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final avgPct = _getAveragePercentage(adherenceData);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Last 7 Days', style: helperTextStyle(context)),
+            const Spacer(),
+            Text(
+              '${avgPct}% avg',
+              style: bodyTextStyle(context)?.copyWith(
+                color: _getAdherenceColor(cs, avgPct),
+                fontWeight: kFontWeightSemiBold,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: kSpacingL),
+        SizedBox(
+          height: kAdherenceChartHeight,
+          child: CustomPaint(
+            painter: _AdherenceLinePainter(
+              data: adherenceData,
+              color: cs.primary,
+            ),
+            child: Container(),
+          ),
+        ),
+      ],
+    );
+  }
 
-        if (_selectedAdherenceSection == _AdherenceReportSection.adherence) ...[
-          Row(
-            children: [
-              Text('Last 7 Days', style: helperTextStyle(context)),
-              const Spacer(),
-              Text(
-                '${avgPct}% avg',
-                style: bodyTextStyle(context)?.copyWith(
-                  color: _getAdherenceColor(cs, avgPct),
-                  fontWeight: kFontWeightSemiBold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: kSpacingL),
-          SizedBox(
-            height: kAdherenceChartHeight,
-            child: CustomPaint(
-              painter: _AdherenceLinePainter(
-                data: adherenceData,
-                color: cs.primary,
-              ),
-              child: Container(),
-            ),
-          ),
-        ],
+  Widget _buildTakenMissedSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final takenMissed = _calculateTakenMissedData();
 
-        if (_selectedAdherenceSection ==
-            _AdherenceReportSection.takenMissed) ...[
-          Text(
-            'Taken vs missed',
-            style: helperTextStyle(context)?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Taken vs missed',
+          style: helperTextStyle(context)?.copyWith(
+            fontWeight: kFontWeightSemiBold,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+        ),
+        const SizedBox(height: kSpacingS),
+        SizedBox(
+          height: kTakenMissedChartHeight,
+          child: CustomPaint(
+            painter: _TakenMissedStackedBarPainter(
+              data: takenMissed,
+              takenColor: cs.primary,
+              missedColor: cs.error,
+              emptyColor: cs.onSurfaceVariant.withValues(
+                alpha: kOpacitySubtleLow,
+              ),
             ),
+            child: Container(),
           ),
-          const SizedBox(height: kSpacingS),
-          SizedBox(
-            height: kTakenMissedChartHeight,
-            child: CustomPaint(
-              painter: _TakenMissedStackedBarPainter(
-                data: takenMissed,
-                takenColor: cs.primary,
-                missedColor: cs.error,
-                emptyColor: cs.onSurfaceVariant.withValues(
-                  alpha: kOpacitySubtleLow,
-                ),
-              ),
-              child: Container(),
-            ),
-          ),
-          const SizedBox(height: kSpacingS),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (i) {
-              final day = DateTime.now().subtract(Duration(days: 6 - i));
-              final dayName = [
-                'M',
-                'T',
-                'W',
-                'T',
-                'F',
-                'S',
-                'S',
-              ][day.weekday - 1];
-              return Text(
-                dayName,
-                style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                    ?.copyWith(
-                      fontSize: kFontSizeHint,
-                      fontWeight: kFontWeightMedium,
-                    ),
-              );
-            }),
-          ),
-        ],
-
-        if (_selectedAdherenceSection == _AdherenceReportSection.timeOfDay) ...[
-          Text(
-            'Time of day',
-            style: helperTextStyle(context)?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-            ),
-          ),
-          const SizedBox(height: kSpacingS),
-          SizedBox(
-            height: kTimeOfDayHistogramHeight,
-            child: CustomPaint(
-              painter: _TimeOfDayHistogramPainter(
-                counts: timeOfDayHistogram,
-                barColor: cs.secondary,
-                emptyColor: cs.onSurfaceVariant.withValues(
-                  alpha: kOpacitySubtleLow,
-                ),
-              ),
-              child: Container(),
-            ),
-          ),
-          const SizedBox(height: kSpacingXS),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '12a',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-              Text(
-                '6a',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-              Text(
-                '12p',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-              Text(
-                '6p',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-              Text(
-                '12a',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-            ],
-          ),
-        ],
-
-        if (_selectedAdherenceSection == _AdherenceReportSection.summary) ...[
-          Text(
-            'Summary',
-            style: helperTextStyle(context)?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-            ),
-          ),
-          const SizedBox(height: kSpacingS),
-          _buildSummaryStats(context, adherenceData),
-        ],
-
-        if (_selectedAdherenceSection == _AdherenceReportSection.streaks) ...[
-          Text(
-            'Streaks',
-            style: helperTextStyle(context)?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-            ),
-          ),
-          const SizedBox(height: kSpacingS),
-          SizedBox(
-            height: kConsistencySparklineHeight,
-            child: CustomPaint(
-              painter: _ConsistencySparklinePainter(
-                data: consistencySparkline,
-                color: cs.primary,
-              ),
-              child: Container(),
-            ),
-          ),
-          const SizedBox(height: kSpacingS),
-          _buildStreakStats(context, streakStats),
-        ],
-
-        if (_selectedAdherenceSection == _AdherenceReportSection.actions) ...[
-          Row(
-            children: [
-              Text(
-                'Actions',
-                style: helperTextStyle(context)?.copyWith(
-                  fontWeight: kFontWeightSemiBold,
-                  color: cs.onSurfaceVariant.withValues(
-                    alpha: kOpacityMediumHigh,
+        ),
+        const SizedBox(height: kSpacingS),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(7, (i) {
+            final day = DateTime.now().subtract(Duration(days: 6 - i));
+            final dayName = [
+              'M',
+              'T',
+              'W',
+              'T',
+              'F',
+              'S',
+              'S',
+            ][day.weekday - 1];
+            return Text(
+              dayName,
+              style: helperTextStyle(context, color: cs.onSurfaceVariant)
+                  ?.copyWith(
+                    fontSize: kFontSizeHint,
+                    fontWeight: kFontWeightMedium,
                   ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeOfDaySection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final timeOfDayHistogram = _calculateTakenTimeOfDayHistogram();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Time of day',
+          style: helperTextStyle(context)?.copyWith(
+            fontWeight: kFontWeightSemiBold,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+        ),
+        const SizedBox(height: kSpacingS),
+        SizedBox(
+          height: kTimeOfDayHistogramHeight,
+          child: CustomPaint(
+            painter: _TimeOfDayHistogramPainter(
+              counts: timeOfDayHistogram,
+              barColor: cs.secondary,
+              emptyColor: cs.onSurfaceVariant.withValues(
+                alpha: kOpacitySubtleLow,
+              ),
+            ),
+            child: Container(),
+          ),
+        ),
+        const SizedBox(height: kSpacingXS),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '12a',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+            Text(
+              '6a',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+            Text(
+              '12p',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+            Text(
+              '6p',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+            Text(
+              '12a',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummarySection(
+    BuildContext context,
+    List<double> adherenceData,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Summary',
+          style: helperTextStyle(context)?.copyWith(
+            fontWeight: kFontWeightSemiBold,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+        ),
+        const SizedBox(height: kSpacingS),
+        _buildSummaryStats(context, adherenceData),
+      ],
+    );
+  }
+
+  Widget _buildStreaksSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final consistencySparkline = _calculateConsistencySparklineData(days: 14);
+    final streakStats = _calculateStreakStats(consistencySparkline);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Streaks',
+          style: helperTextStyle(context)?.copyWith(
+            fontWeight: kFontWeightSemiBold,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+        ),
+        const SizedBox(height: kSpacingS),
+        SizedBox(
+          height: kConsistencySparklineHeight,
+          child: CustomPaint(
+            painter: _ConsistencySparklinePainter(
+              data: consistencySparkline,
+              color: cs.primary,
+            ),
+            child: Container(),
+          ),
+        ),
+        const SizedBox(height: kSpacingS),
+        _buildStreakStats(context, streakStats),
+      ],
+    );
+  }
+
+  Widget _buildActionsSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final actionBreakdown = _calculateActionBreakdown(days: 30);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Actions',
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
                 ),
               ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Text(
+              '30d',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+          ],
+        ),
+        const SizedBox(height: kSpacingS),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatChip(
+                context,
+                label: 'Taken',
+                value: '${actionBreakdown.taken}',
+                color: cs.primary,
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: _buildStatChip(
+                context,
+                label: 'Skipped',
+                value: '${actionBreakdown.skipped}',
+                color: cs.tertiary,
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: _buildStatChip(
+                context,
+                label: 'Snoozed',
+                value: '${actionBreakdown.snoozed}',
+                color: cs.secondary,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDoseAmountSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final doseTrend = _calculateDoseTrendData(days: 30, maxPoints: 14);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Dose amount',
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Text(
+              '30d',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+            if (doseTrend.unit != null) ...[
               const SizedBox(width: kSpacingS),
               Text(
-                '30d',
+                doseTrend.unit!,
                 style: helperTextStyle(
                   context,
                   color: cs.onSurfaceVariant,
                 )?.copyWith(fontSize: kFontSizeHint),
               ),
             ],
+          ],
+        ),
+        const SizedBox(height: kSpacingS),
+        if (doseTrend.values.isEmpty)
+          Text('No taken dose data yet', style: helperTextStyle(context))
+        else ...[
+          SizedBox(
+            height: kDoseTrendChartHeight,
+            child: CustomPaint(
+              painter: _DoseTrendPainter(
+                values: doseTrend.values,
+                color: cs.primary,
+              ),
+              child: Container(),
+            ),
           ),
           const SizedBox(height: kSpacingS),
           Row(
@@ -1126,17 +1252,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               Expanded(
                 child: _buildStatChip(
                   context,
-                  label: 'Taken',
-                  value: '${actionBreakdown.taken}',
-                  color: cs.primary,
-                ),
-              ),
-              const SizedBox(width: kSpacingS),
-              Expanded(
-                child: _buildStatChip(
-                  context,
-                  label: 'Skipped',
-                  value: '${actionBreakdown.skipped}',
+                  label: 'Min',
+                  value: doseTrend.unit == null
+                      ? _formatAmount(doseTrend.min)
+                      : '${_formatAmount(doseTrend.min)} ${doseTrend.unit}',
                   color: cs.tertiary,
                 ),
               ),
@@ -1144,194 +1263,140 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               Expanded(
                 child: _buildStatChip(
                   context,
-                  label: 'Snoozed',
-                  value: '${actionBreakdown.snoozed}',
+                  label: 'Avg',
+                  value: doseTrend.unit == null
+                      ? _formatAmount(doseTrend.avg)
+                      : '${_formatAmount(doseTrend.avg)} ${doseTrend.unit}',
+                  color: cs.primary,
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Expanded(
+                child: _buildStatChip(
+                  context,
+                  label: 'Max',
+                  value: doseTrend.unit == null
+                      ? _formatAmount(doseTrend.max)
+                      : '${_formatAmount(doseTrend.max)} ${doseTrend.unit}',
                   color: cs.secondary,
                 ),
               ),
             ],
           ),
         ],
+      ],
+    );
+  }
 
-        if (_selectedAdherenceSection ==
-            _AdherenceReportSection.doseAmount) ...[
-          Row(
-            children: [
-              Text(
-                'Dose amount',
-                style: helperTextStyle(context)?.copyWith(
-                  fontWeight: kFontWeightSemiBold,
-                  color: cs.onSurfaceVariant.withValues(
-                    alpha: kOpacityMediumHigh,
-                  ),
-                ),
-              ),
-              const SizedBox(width: kSpacingS),
-              Text(
-                '30d',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-              if (doseTrend.unit != null) ...[
-                const SizedBox(width: kSpacingS),
-                Text(
-                  doseTrend.unit!,
-                  style: helperTextStyle(
-                    context,
-                    color: cs.onSurfaceVariant,
-                  )?.copyWith(fontSize: kFontSizeHint),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: kSpacingS),
-          if (doseTrend.values.isEmpty)
-            Text('No taken dose data yet', style: helperTextStyle(context))
-          else ...[
-            SizedBox(
-              height: kDoseTrendChartHeight,
-              child: CustomPaint(
-                painter: _DoseTrendPainter(
-                  values: doseTrend.values,
-                  color: cs.primary,
-                ),
-                child: Container(),
-              ),
-            ),
-            const SizedBox(height: kSpacingS),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatChip(
-                    context,
-                    label: 'Min',
-                    value: doseTrend.unit == null
-                        ? _formatAmount(doseTrend.min)
-                        : '${_formatAmount(doseTrend.min)} ${doseTrend.unit}',
-                    color: cs.tertiary,
-                  ),
-                ),
-                const SizedBox(width: kSpacingS),
-                Expanded(
-                  child: _buildStatChip(
-                    context,
-                    label: 'Avg',
-                    value: doseTrend.unit == null
-                        ? _formatAmount(doseTrend.avg)
-                        : '${_formatAmount(doseTrend.avg)} ${doseTrend.unit}',
-                    color: cs.primary,
-                  ),
-                ),
-                const SizedBox(width: kSpacingS),
-                Expanded(
-                  child: _buildStatChip(
-                    context,
-                    label: 'Max',
-                    value: doseTrend.unit == null
-                        ? _formatAmount(doseTrend.max)
-                        : '${_formatAmount(doseTrend.max)} ${doseTrend.unit}',
-                    color: cs.secondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
+  Widget _buildDoseStrengthSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final doseStrengthHistory = _calculateDoseStrengthHistoryData(days: 30);
 
-        if (_selectedAdherenceSection ==
-            _AdherenceReportSection.doseStrength) ...[
-          Row(
-            children: [
-              Text(
-                'Dose strength',
-                style: helperTextStyle(context)?.copyWith(
-                  fontWeight: kFontWeightSemiBold,
-                  color: cs.onSurfaceVariant.withValues(
-                    alpha: kOpacityMediumHigh,
-                  ),
-                ),
-              ),
-              const SizedBox(width: kSpacingS),
-              Text(
-                '30d',
-                style: helperTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
-              ),
-              if (doseStrengthHistory.unit != null) ...[
-                const SizedBox(width: kSpacingS),
-                Text(
-                  doseStrengthHistory.unit!,
-                  style: helperTextStyle(
-                    context,
-                    color: cs.onSurfaceVariant,
-                  )?.copyWith(fontSize: kFontSizeHint),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: kSpacingS),
-          if (!doseStrengthHistory.hasData)
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
             Text(
-              'No taken dose strength data yet',
-              style: helperTextStyle(context),
-            )
-          else
-            SizedBox(
-              height: kDoseStrengthChartHeight,
-              child: CustomPaint(
-                painter: _DoseStrengthBarChartPainter(
-                  values: doseStrengthHistory.values,
-                  barColor: cs.primary,
-                  emptyColor: cs.onSurfaceVariant.withValues(
-                    alpha: kOpacitySubtleLow,
-                  ),
+              'Dose strength',
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
                 ),
-                child: Container(),
               ),
             ),
-        ],
-
-        if (_selectedAdherenceSection ==
-            _AdherenceReportSection.inventoryEvents) ...[
-          Row(
-            children: [
-              Text(
-                'Inventory events',
-                style: helperTextStyle(context)?.copyWith(
-                  fontWeight: kFontWeightSemiBold,
-                  color: cs.onSurfaceVariant.withValues(
-                    alpha: kOpacityMediumHigh,
-                  ),
-                ),
-              ),
+            const SizedBox(width: kSpacingS),
+            Text(
+              '30d',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+            if (doseStrengthHistory.unit != null) ...[
               const SizedBox(width: kSpacingS),
               Text(
-                '30d',
+                doseStrengthHistory.unit!,
                 style: helperTextStyle(
                   context,
                   color: cs.onSurfaceVariant,
                 )?.copyWith(fontSize: kFontSizeHint),
               ),
             ],
-          ),
-          const SizedBox(height: kSpacingS),
-          if (inventoryEvents.isEmpty)
-            Text('No inventory events yet', style: helperTextStyle(context))
-          else ...[
-            for (int i = 0; i < inventoryEvents.length; i++) ...[
-              _buildInventoryEventRow(context, inventoryEvents[i]),
-              if (i != inventoryEvents.length - 1)
-                Divider(
-                  height: kSpacingM,
-                  color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
-                ),
-            ],
           ],
-        ],
+        ),
+        const SizedBox(height: kSpacingS),
+        if (!doseStrengthHistory.hasData)
+          Text(
+            'No taken dose strength data yet',
+            style: helperTextStyle(context),
+          )
+        else
+          SizedBox(
+            height: kDoseStrengthChartHeight,
+            child: CustomPaint(
+              painter: _DoseStrengthBarChartPainter(
+                values: doseStrengthHistory.values,
+                barColor: cs.primary,
+                emptyColor: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacitySubtleLow,
+                ),
+              ),
+              child: Container(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildInventoryEventsSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final inventoryEvents = _calculateInventoryEvents(
+      days: 30,
+      maxItems: _inventoryEventsMaxItems,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Inventory events',
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Text(
+              '30d',
+              style: helperTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontSize: kFontSizeHint),
+            ),
+          ],
+        ),
+        const SizedBox(height: kSpacingS),
+        if (inventoryEvents.isEmpty)
+          Text('No inventory events yet', style: helperTextStyle(context))
+        else
+          Column(
+            children: [
+              for (int i = 0; i < inventoryEvents.length; i++) ...[
+                _buildInventoryEventRow(context, inventoryEvents[i]),
+                if (i != inventoryEvents.length - 1)
+                  Divider(
+                    height: kSpacingM,
+                    color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
+                  ),
+              ],
+            ],
+          ),
       ],
     );
   }
