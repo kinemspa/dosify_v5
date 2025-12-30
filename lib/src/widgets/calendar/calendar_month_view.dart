@@ -1,5 +1,6 @@
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_day_cell.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
 /// A month view showing a calendar grid with doses.
@@ -190,12 +191,12 @@ class _DayHeaders extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      height: 36,
+      height: kStandardFieldHeight,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outline.withAlpha((0.2 * 255).round()),
+            color: colorScheme.outline.withValues(alpha: kOpacityMinimal),
           ),
         ),
       ),
@@ -210,20 +211,22 @@ class _DayHeaders extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: isToday
-                    ? colorScheme.primary.withValues(alpha: 0.15)
+                    ? colorScheme.primary.withValues(alpha: kOpacitySubtle)
                     : isSelected
-                    ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+                    ? colorScheme.primary.withValues(alpha: kOpacityFaint)
                     : null,
               ),
               child: Center(
                 child: Text(
                   dayName,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  style: helperTextStyle(context)?.copyWith(
                     color: isToday
                         ? colorScheme.primary
                         : isSelected
                         ? colorScheme.onSurface
-                        : colorScheme.onSurface.withAlpha((0.6 * 255).round()),
+                        : colorScheme.onSurface.withValues(
+                            alpha: kOpacityMedium,
+                          ),
                     fontWeight: isToday || isSelected
                         ? FontWeight.w700
                         : FontWeight.w500,

@@ -127,8 +127,18 @@ const double kCalendarHourHeight = 60; // Height of hour row in day view
 const double kCalendarDoseBlockHeight = 60; // Default dose block height
 const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
+const double kCalendarDoseIndicatorSpacing = 2;
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
+
+/// Month-view day cell styling
+const double kCalendarDayNumberSize = 24;
+const EdgeInsets kCalendarDayNumberPadding = EdgeInsets.all(kSpacingXS);
+const EdgeInsets kCalendarDayDoseIndicatorPadding = EdgeInsets.all(
+  kSpacingXS / 2,
+);
+const double kCalendarDayCellBorderRadius = kBorderRadiusSmall;
+const double kCalendarDayOverflowTextOpacity = kOpacityMedium;
 
 /// In the full-screen calendar, allocate a fixed portion of the available
 /// height to the selected-day list panel so the calendar grid remains stable
@@ -772,6 +782,27 @@ TextStyle? mutedTextStyle(BuildContext context) {
       context,
     ).colorScheme.onSurface.withValues(alpha: kDisabledOpacity),
   );
+}
+
+/// Calendar month-view day number style
+TextStyle? calendarDayNumberTextStyle(BuildContext context) {
+  return Theme.of(
+    context,
+  ).textTheme.bodySmall?.copyWith(fontWeight: kFontWeightSemiBold);
+}
+
+/// Calendar month-view day count badge style
+TextStyle? calendarDayCountBadgeTextStyle(BuildContext context) {
+  return Theme.of(
+    context,
+  ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightBold);
+}
+
+/// Calendar month-view overflow text style ("+N")
+TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
+  return Theme.of(
+    context,
+  ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightSemiBold);
 }
 
 /// Error text style
