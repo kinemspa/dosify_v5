@@ -904,23 +904,19 @@ class _MedLargeCard extends StatelessWidget {
     );
   }
 
-  List<IconData> _storageConditionIcons() {
+  List<IconData> _storageConditionIconsFor({
+    required bool requiresFreezer,
+    required bool requiresRefrigeration,
+    required bool lightSensitive,
+  }) {
     final icons = <IconData>[];
-    final isDark = m.activeVialLightSensitive || m.backupVialsLightSensitive;
-    final isFrozen =
-        m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer;
-    final isRefrigerated =
-        m.requiresRefrigeration == true ||
-        m.activeVialRequiresRefrigeration ||
-        m.backupVialsRequiresRefrigeration;
-
-    if (isFrozen) {
+    if (requiresFreezer) {
       icons.add(Icons.severe_cold);
     }
-    if (isRefrigerated) {
+    if (requiresRefrigeration) {
       icons.add(Icons.ac_unit);
     }
-    if (isDark) {
+    if (lightSensitive) {
       icons.add(Icons.dark_mode);
     }
     if (icons.isEmpty) {
@@ -929,6 +925,34 @@ class _MedLargeCard extends StatelessWidget {
 
     // Cap at 3 icons to allow for more info.
     return icons.take(3).toList();
+  }
+
+  List<IconData> _combinedStorageConditionIcons() {
+    return _storageConditionIconsFor(
+      requiresFreezer:
+          m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer,
+      requiresRefrigeration:
+          m.requiresRefrigeration == true ||
+          m.activeVialRequiresRefrigeration ||
+          m.backupVialsRequiresRefrigeration,
+      lightSensitive: m.activeVialLightSensitive || m.backupVialsLightSensitive,
+    );
+  }
+
+  List<IconData> _activeVialStorageConditionIcons() {
+    return _storageConditionIconsFor(
+      requiresFreezer: m.activeVialRequiresFreezer,
+      requiresRefrigeration: m.activeVialRequiresRefrigeration,
+      lightSensitive: m.activeVialLightSensitive,
+    );
+  }
+
+  List<IconData> _sealedVialsStorageConditionIcons() {
+    return _storageConditionIconsFor(
+      requiresFreezer: m.backupVialsRequiresFreezer,
+      requiresRefrigeration: m.backupVialsRequiresRefrigeration,
+      lightSensitive: m.backupVialsLightSensitive,
+    );
   }
 
   Widget _buildLeading(BuildContext context) {
@@ -940,7 +964,9 @@ class _MedLargeCard extends StatelessWidget {
         : fallbackStorage;
     final strengthQuantityLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
-    final storageIcons = _storageConditionIcons();
+    final activeIcons = _activeVialStorageConditionIcons();
+    final sealedIcons = _sealedVialsStorageConditionIcons();
+    final combinedIcons = _combinedStorageConditionIcons();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -982,14 +1008,57 @@ class _MedLargeCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: kSpacingXS),
-        Wrap(
-          spacing: kSpacingXS,
-          runSpacing: kSpacingXS,
-          children: [
-            for (final icon in storageIcons)
-              Icon(icon, size: kIconSizeSmall, color: cs.primary),
-          ],
-        ),
+        if (m.form == MedicationForm.multiDoseVial) ...[
+          Row(
+            children: [
+              Text(
+                'Active',
+                style: helperTextStyle(context)?.copyWith(
+                  fontSize: kFontSizeHint,
+                  fontWeight: kFontWeightSemiBold,
+                ),
+              ),
+              const SizedBox(width: kSpacingXS),
+              Wrap(
+                spacing: kSpacingXS,
+                runSpacing: kSpacingXS,
+                children: [
+                  for (final icon in activeIcons)
+                    Icon(icon, size: kIconSizeSmall, color: cs.primary),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: kSpacingXS),
+          Row(
+            children: [
+              Text(
+                'Sealed',
+                style: helperTextStyle(context)?.copyWith(
+                  fontSize: kFontSizeHint,
+                  fontWeight: kFontWeightSemiBold,
+                ),
+              ),
+              const SizedBox(width: kSpacingXS),
+              Wrap(
+                spacing: kSpacingXS,
+                runSpacing: kSpacingXS,
+                children: [
+                  for (final icon in sealedIcons)
+                    Icon(icon, size: kIconSizeSmall, color: cs.primary),
+                ],
+              ),
+            ],
+          ),
+        ] else
+          Wrap(
+            spacing: kSpacingXS,
+            runSpacing: kSpacingXS,
+            children: [
+              for (final icon in combinedIcons)
+                Icon(icon, size: kIconSizeSmall, color: cs.primary),
+            ],
+          ),
         if (storageLabel?.isNotEmpty ?? false) ...[
           const SizedBox(height: kSpacingXS),
           Row(
