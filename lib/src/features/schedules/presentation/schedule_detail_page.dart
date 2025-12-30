@@ -308,6 +308,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               label: 'Dose',
               value: _getDoseDisplay(s),
             ),
+            buildDetailInfoWidgetRow(
+              context,
+              label: 'Status',
+              child: _buildStatusToggle(context, s),
+            ),
             // Week 5: Show reconstitution badge if applicable
             if (s.medicationId != null) _buildReconstitutionBadge(s),
             buildDetailInfoRow(
@@ -345,6 +350,100 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         ),
       ),
     ];
+  }
+
+  Widget _buildStatusToggle(BuildContext context, Schedule s) {
+    return Wrap(
+      spacing: kSpacingS,
+      runSpacing: kSpacingXS,
+      children: [
+        PrimaryChoiceChip(
+          label: const Text('Active'),
+          selected: s.active,
+          onSelected: (selected) async {
+            if (!selected) return;
+            await _setScheduleActive(context, s, true);
+          },
+        ),
+        PrimaryChoiceChip(
+          label: const Text('Paused'),
+          selected: !s.active,
+          onSelected: (selected) async {
+            if (!selected) return;
+            await _setScheduleActive(context, s, false);
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _setScheduleActive(
+    BuildContext context,
+    Schedule s,
+    bool active,
+  ) async {
+    if (s.active == active) return;
+
+    try {
+      final scheduleBox = Hive.box<Schedule>('schedules');
+      final updated = Schedule(
+        id: s.id,
+        name: s.name,
+        medicationName: s.medicationName,
+        doseValue: s.doseValue,
+        doseUnit: s.doseUnit,
+        minutesOfDay: s.minutesOfDay,
+        daysOfWeek: s.daysOfWeek,
+        minutesOfDayUtc: s.minutesOfDayUtc,
+        daysOfWeekUtc: s.daysOfWeekUtc,
+        medicationId: s.medicationId,
+        active: active,
+        timesOfDay: s.timesOfDay,
+        timesOfDayUtc: s.timesOfDayUtc,
+        cycleEveryNDays: s.cycleEveryNDays,
+        cycleAnchorDate: s.cycleAnchorDate,
+        daysOfMonth: s.daysOfMonth,
+        doseUnitCode: s.doseUnitCode,
+        doseMassMcg: s.doseMassMcg,
+        doseVolumeMicroliter: s.doseVolumeMicroliter,
+        doseTabletQuarters: s.doseTabletQuarters,
+        doseCapsules: s.doseCapsules,
+        doseSyringes: s.doseSyringes,
+        doseVials: s.doseVials,
+        doseIU: s.doseIU,
+        displayUnitCode: s.displayUnitCode,
+        inputModeCode: s.inputModeCode,
+        startAt: s.startAt,
+        endAt: s.endAt,
+        monthlyMissingDayBehaviorCode: s.monthlyMissingDayBehaviorCode,
+        createdAt: s.createdAt,
+      );
+
+      await ScheduleScheduler.cancelFor(s.id);
+      await scheduleBox.put(s.id, updated);
+
+      if (updated.active) {
+        await ScheduleScheduler.scheduleFor(updated);
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            updated.active ? 'Schedule resumed' : 'Schedule paused',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update schedule status: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Widget _buildNextDoseSection(

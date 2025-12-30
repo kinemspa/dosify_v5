@@ -365,3 +365,28 @@ Widget buildDetailInfoRow(
 
   return row;
 }
+
+/// Centralized info row widget used in detail page sections, with a custom
+/// value widget.
+Widget buildDetailInfoWidgetRow(
+  BuildContext context, {
+  required String label,
+  required Widget child,
+}) {
+  if (label.isEmpty) return const SizedBox.shrink();
+
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 140,
+          child: Text(label, style: fieldLabelStyle(context)),
+        ),
+        const SizedBox(width: kPageHorizontalPadding),
+        Expanded(child: child),
+      ],
+    ),
+  );
+}
