@@ -1056,14 +1056,6 @@ class _MedLargeCard extends StatelessWidget {
         if (m.form == MedicationForm.multiDoseVial) ...[
           Row(
             children: [
-              Text(
-                'Active',
-                style: helperTextStyle(context)?.copyWith(
-                  fontSize: kFontSizeHint,
-                  fontWeight: kFontWeightSemiBold,
-                ),
-              ),
-              const SizedBox(width: kSpacingXS),
               Wrap(
                 spacing: kSpacingXS,
                 runSpacing: kSpacingXS,
@@ -1072,19 +1064,19 @@ class _MedLargeCard extends StatelessWidget {
                     Icon(icon, size: kIconSizeSmall, color: cs.primary),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: kSpacingXS),
-          Row(
-            children: [
+              const SizedBox(width: kSpacingXS),
               Text(
-                'Sealed',
+                'Active',
                 style: helperTextStyle(context)?.copyWith(
                   fontSize: kFontSizeHint,
                   fontWeight: kFontWeightSemiBold,
                 ),
               ),
-              const SizedBox(width: kSpacingXS),
+            ],
+          ),
+          const SizedBox(height: kSpacingXS),
+          Row(
+            children: [
               Wrap(
                 spacing: kSpacingXS,
                 runSpacing: kSpacingXS,
@@ -1092,6 +1084,14 @@ class _MedLargeCard extends StatelessWidget {
                   for (final icon in sealedIcons)
                     Icon(icon, size: kIconSizeSmall, color: cs.primary),
                 ],
+              ),
+              const SizedBox(width: kSpacingXS),
+              Text(
+                'Sealed',
+                style: helperTextStyle(context)?.copyWith(
+                  fontSize: kFontSizeHint,
+                  fontWeight: kFontWeightSemiBold,
+                ),
               ),
             ],
           ),

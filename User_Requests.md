@@ -14,7 +14,7 @@
 - Move the stoargae icons up. We need to make room for next dose buttons. [COMPLETED]
 - Multi Dose VIals have storager icons for both active and sealed vials. Can we represent both on the large cards? [COMPLETED]
 - Need an active schedules line or object. [COMPLETED]
-- Issues with icons, some are im front of text, some follow. can we unify icon placement.
+- Issues with icons, some are im front of text, some follow. can we unify icon placement. [COMPLETED]
 
 ### Compact Cards
 
