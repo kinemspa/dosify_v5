@@ -26,7 +26,7 @@
 - There must be some animation issues on this scren as it seems to lag a little.  [COMPLETED]
 - Remove the Scheduled Doses from the Medicaiont Details Card, and make itys own card. [COMPLETED]
 - We should have the following cards. Reports, Schedule, Details. You can rename these to bettere terms if they seem fit.  [COMPLETED]
-- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too. 
+- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED]
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius. 
 
 ### Reports Card

@@ -175,39 +175,38 @@ class MedicationHeaderWidget extends ConsumerWidget {
             ),
           ],
         ),
-        SizedBox(
-          height: kStandardButtonHeight,
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: kStandardButtonHeight),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Slot 1 (reserved)
-              const Expanded(child: SizedBox.shrink()),
-              const SizedBox(width: kButtonSpacing),
-              // Slot 2 (reserved)
-              const Expanded(child: SizedBox.shrink()),
-              const SizedBox(width: kButtonSpacing),
-              // Slot 3 (Adhoc)
-              Expanded(
-                child: onAdHocDose == null
-                    ? const SizedBox.shrink()
-                    : OutlinedButton.icon(
-                        onPressed: onAdHocDose,
-                        style: headerActionButtonStyle,
-                        icon: Icon(
-                          Icons.medication_rounded,
-                          size: kIconSizeSmall,
-                          color: onPrimary,
-                        ),
-                        label: const Text('Adhoc'),
-                      ),
-              ),
-              const SizedBox(width: kButtonSpacing),
-              // Slot 4 (Refill)
-              Expanded(
+              if (onAdHocDose != null) ...[
+                Flexible(
+                  child: OutlinedButton.icon(
+                    onPressed: onAdHocDose,
+                    style: headerActionButtonStyle,
+                    icon: Icon(
+                      Icons.medication_rounded,
+                      size: kIconSizeSmall,
+                      color: onPrimary,
+                    ),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Adhoc', maxLines: 1),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: kButtonSpacing),
+              ],
+              Flexible(
                 child: OutlinedButton.icon(
                   onPressed: onRefill,
                   style: headerActionButtonStyle,
                   icon: Icon(Icons.add, size: kIconSizeSmall, color: onPrimary),
-                  label: const Text('Refill'),
+                  label: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Refill', maxLines: 1),
+                  ),
                 ),
               ),
             ],
