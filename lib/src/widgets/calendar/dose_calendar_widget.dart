@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_week_view.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -753,7 +754,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                         itemCount: dayDoses.length,
                         itemBuilder: (context, index) {
                           final dose = dayDoses[index];
-                          return _buildDoseListTile(dose);
+                          return DoseSummaryRow(
+                            dose: dose,
+                            showMedicationName: true,
+                            onTap: () => _onDoseTapInternal(dose),
+                          );
                         },
                       ))
               : Expanded(
@@ -773,7 +778,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           itemCount: dayDoses.length,
                           itemBuilder: (context, index) {
                             final dose = dayDoses[index];
-                            return _buildDoseListTile(dose);
+                            return DoseSummaryRow(
+                              dose: dose,
+                              showMedicationName: true,
+                              onTap: () => _onDoseTapInternal(dose),
+                            );
                           },
                         ),
                 ),
@@ -803,50 +812,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     } else {
       return '$dayName, $formattedDate';
     }
-  }
-
-  Widget _buildDoseListTile(CalculatedDose dose) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    Color statusColor;
-    IconData statusIcon;
-
-    switch (dose.status) {
-      case DoseStatus.taken:
-        statusColor = colorScheme.primary;
-        statusIcon = Icons.check_circle;
-        break;
-      case DoseStatus.skipped:
-        statusColor = colorScheme.error;
-        statusIcon = Icons.cancel;
-        break;
-      case DoseStatus.snoozed:
-        statusColor = colorScheme.tertiary;
-        statusIcon = Icons.snooze;
-        break;
-      case DoseStatus.overdue:
-        statusColor = colorScheme.error;
-        statusIcon = Icons.warning;
-        break;
-      case DoseStatus.pending:
-        statusColor = colorScheme.onSurface.withValues(alpha: kOpacityMedium);
-        statusIcon = Icons.schedule;
-        break;
-    }
-
-    return ListTile(
-      leading: Icon(statusIcon, color: statusColor),
-      title: Text(dose.scheduleName),
-      subtitle: Text('${dose.medicationName} • ${dose.doseDescription}'),
-      trailing: Text(
-        dose.timeFormatted,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      onTap: () => _onDoseTapInternal(dose),
-    );
   }
 }
 

@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -374,121 +375,7 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   Widget _buildDoseCardContent(CalculatedDose dose, int index, int total) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
-    final isTaken = dose.status == DoseStatus.taken;
-    final isOverdue = dose.status == DoseStatus.overdue;
-    final isSkipped = dose.status == DoseStatus.skipped;
-    final isSnoozed = dose.status == DoseStatus.snoozed;
-
-    // Status Configuration
-    Color statusColor;
-    IconData statusIcon;
-    String statusText;
-
-    final timeStr = DateFormat('h:mm a').format(dose.scheduledTime);
-
-    if (isTaken) {
-      statusColor = Colors.green;
-      statusIcon = Icons.check_rounded;
-      // Use actionTime from DoseLog for when it was taken
-      final actionTime = dose.existingLog?.actionTime;
-      statusText = actionTime != null
-          ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
-          : 'Taken';
-    } else if (isSkipped) {
-      statusColor = Colors.grey;
-      statusIcon = Icons.block_rounded;
-      statusText = 'Skipped';
-    } else if (isSnoozed) {
-      statusColor = Colors.orange;
-      statusIcon = Icons.snooze_rounded;
-      statusText = 'Snoozed';
-    } else if (isOverdue) {
-      statusColor = Colors.red;
-      statusIcon = Icons.warning_rounded;
-      statusText = 'Missed at $timeStr';
-    } else {
-      statusColor = colorScheme.primary;
-      statusIcon = Icons.notifications_rounded;
-      statusText = 'Take at $timeStr';
-    }
-
-    // Dose info: "1 tablet"
-    final doseInfo = '${_formatNumber(dose.doseValue)} ${dose.doseUnit}';
-    final dateStr = DateFormat('E, MMM d').format(dose.scheduledTime);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showDoseActionSheet(dose),
-        child: Row(
-          children: [
-            // Circle Status Icon
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: kOpacityMinimal),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                statusIcon,
-                size: kIconSizeMedium,
-                color: statusColor,
-              ),
-            ),
-            const SizedBox(width: kSpacingM),
-
-            // Schedule Name, Dose, Date, Status (status in status color)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Line 1: Schedule Name (primary color, bold)
-                  Text(
-                    dose.scheduleName,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: kFontWeightSemiBold,
-                      color: colorScheme.primary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  // Line 2: Dose value
-                  Text(
-                    doseInfo,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  // Line 3: Date • Status (status in status color)
-                  Row(
-                    children: [
-                      Text(
-                        '$dateStr • ',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      Text(
-                        statusText,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: statusColor,
-                          fontWeight: kFontWeightMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return DoseSummaryRow(dose: dose, onTap: () => _showDoseActionSheet(dose));
   }
 
   Widget _buildEmptyState(BuildContext context) {

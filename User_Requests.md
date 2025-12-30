@@ -149,7 +149,7 @@
 - Style this to look similar to the calendar widget that exists in the medication details screen.  [COMPLETED]
 - Bottom of calendar is cropped byt the doses area.  [COMPLETED]
 - FAB Button, It has text for the instruction, piut this on all the FABS.  [COMPLETED]
-- The bottom part which shows all the doses, use the same widget as the Med details screen. 
+- The bottom part which shows all the doses, use the same widget as the Med details screen.  [COMPLETED]
 - Make the calendar section a set size, so it fits the month view, week view and day view. 
 - The Days on the calnedar are no longer showing if they have a scheduled dose. Can we implement a tiny little number? We had some colour codeing for all the dose status, coming, skipped, missed and snoozed. 
 - Style the month view a little nicer, its actually looking really good. 
