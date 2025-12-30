@@ -1,7 +1,7 @@
 # Things To Fix
 
 ## Global
-- How does changign the text size in the Android Phone settings impact the app layout and text styling?
+- How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED]
 
 ## Home Screen
 
@@ -13,6 +13,7 @@
 ### Large Cards
 - Move the stoargae icons up. We need to make room for next dose buttons. [COMPLETED]
 - Multi Dose VIals have storager icons for both active and sealed vials. Can we represent both on the large cards? [COMPLETED]
+- Need an active schedules line or object.
 
 
 

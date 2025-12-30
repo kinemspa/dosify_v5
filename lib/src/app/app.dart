@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/router.dart';
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 
 class DosifiApp extends ConsumerWidget {
   const DosifiApp({super.key});
@@ -355,17 +356,28 @@ class DosifiApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final clampedTextScaler = mq.textScaler.clamp(
+          minScaleFactor: kTextScaleFactorMin,
+          maxScaleFactor: kTextScaleFactorMax,
+        );
+
+        final clampedMq = mq.copyWith(textScaler: clampedTextScaler);
+
         // Wrap with GestureDetector to dismiss keyboard on tap outside fields
-        return GestureDetector(
-          onTap: () {
-            // Unfocus any active input field
-            final currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus &&
-                currentFocus.focusedChild != null) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            }
-          },
-          child: child,
+        return MediaQuery(
+          data: clampedMq,
+          child: GestureDetector(
+            onTap: () {
+              // Unfocus any active input field
+              final currentFocus = FocusScope.of(context);
+              if (!currentFocus.hasPrimaryFocus &&
+                  currentFocus.focusedChild != null) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
+            },
+            child: child,
+          ),
         );
       },
     );

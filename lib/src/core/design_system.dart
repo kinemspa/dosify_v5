@@ -466,6 +466,12 @@ Color kTextError(BuildContext c) => Theme.of(c).colorScheme.error;
 // TYPOGRAPHY CONSTANTS
 // ============================================================================
 
+/// Text scaling guardrails
+///
+/// These clamp extreme system font scaling so core layouts don't break.
+const double kTextScaleFactorMin = 1.0;
+const double kTextScaleFactorMax = 1.15;
+
 /// Font sizes
 const double kFontSizeSmall = 11;
 const double kFontSizeMedium = 13;
