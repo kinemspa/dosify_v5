@@ -580,22 +580,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final showHeader = widget.variant != CalendarVariant.mini;
     final showViewToggle = widget.variant == CalendarVariant.full;
 
-    return Container(
-      height: widget.height,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: widget.variant == CalendarVariant.full
-            ? null
-            : BorderRadius.circular(kBorderRadiusMedium),
-        border: widget.variant != CalendarVariant.full
-            ? Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.outline.withValues(alpha: 0.2),
-              )
-            : null,
-      ),
-      child: Column(
+    Widget buildBody({double? panelHeight}) {
+      return Column(
         children: [
           if (showHeader)
             CalendarHeader(
@@ -610,6 +596,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           // Calendar view
           if (_isLoading)
             const Expanded(child: Center(child: CircularProgressIndicator()))
+          else if (widget.variant == CalendarVariant.full)
+            Expanded(child: _buildCurrentView())
           else if (_currentView == CalendarView.day)
             Expanded(child: _buildCurrentView())
           else
@@ -618,11 +606,46 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           if (_selectedDate != null &&
               _currentView != CalendarView.day &&
               widget.showSelectedDayPanel)
-            widget.variant == CalendarVariant.compact
-                ? _buildSelectedDayPanel()
-                : Expanded(child: _buildSelectedDayPanel()),
+            if (widget.variant == CalendarVariant.compact)
+              _buildSelectedDayPanel()
+            else if (widget.variant == CalendarVariant.full &&
+                panelHeight != null)
+              SizedBox(height: panelHeight, child: _buildSelectedDayPanel())
+            else
+              Expanded(child: _buildSelectedDayPanel()),
         ],
-      ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final boundedHeight = constraints.hasBoundedHeight
+            ? constraints.maxHeight
+            : null;
+        final effectiveHeight = widget.height ?? boundedHeight;
+        final panelHeight =
+            (widget.variant == CalendarVariant.full && effectiveHeight != null)
+            ? effectiveHeight * kCalendarSelectedDayPanelHeightRatio
+            : null;
+
+        return Container(
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: widget.variant == CalendarVariant.full
+                ? null
+                : BorderRadius.circular(kBorderRadiusMedium),
+            border: widget.variant != CalendarVariant.full
+                ? Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
+                  )
+                : null,
+          ),
+          child: buildBody(panelHeight: panelHeight),
+        );
+      },
     );
   }
 

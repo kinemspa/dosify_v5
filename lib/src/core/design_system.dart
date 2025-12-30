@@ -130,6 +130,11 @@ const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
 
+/// In the full-screen calendar, allocate a fixed portion of the available
+/// height to the selected-day list panel so the calendar grid remains stable
+/// across Day/Week/Month views.
+const double kCalendarSelectedDayPanelHeightRatio = 0.42;
+
 // ============================================================================
 // SPACING CONSTANTS
 // ============================================================================
