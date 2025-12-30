@@ -894,13 +894,41 @@ class _MedLargeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final footer = _buildFooter(context);
     return LargeCard(
       onTap: () => context.push('/medications/${m.id}'),
       dense: true,
       leading: _buildLeading(context),
       trailing: _buildTrailing(context),
-      footer: _buildFooter(context),
+      footer: footer,
     );
+  }
+
+  List<IconData> _storageConditionIcons() {
+    final icons = <IconData>[];
+    final isDark = m.activeVialLightSensitive || m.backupVialsLightSensitive;
+    final isFrozen =
+        m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer;
+    final isRefrigerated =
+        m.requiresRefrigeration == true ||
+        m.activeVialRequiresRefrigeration ||
+        m.backupVialsRequiresRefrigeration;
+
+    if (isFrozen) {
+      icons.add(Icons.severe_cold);
+    }
+    if (isRefrigerated) {
+      icons.add(Icons.ac_unit);
+    }
+    if (isDark) {
+      icons.add(Icons.dark_mode);
+    }
+    if (icons.isEmpty) {
+      icons.add(Icons.thermostat);
+    }
+
+    // Cap at 3 icons to allow for more info.
+    return icons.take(3).toList();
   }
 
   Widget _buildLeading(BuildContext context) {
@@ -912,6 +940,7 @@ class _MedLargeCard extends StatelessWidget {
         : fallbackStorage;
     final strengthQuantityLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
+    final storageIcons = _storageConditionIcons();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -951,6 +980,15 @@ class _MedLargeCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        const SizedBox(height: kSpacingXS),
+        Wrap(
+          spacing: kSpacingXS,
+          runSpacing: kSpacingXS,
+          children: [
+            for (final icon in storageIcons)
+              Icon(icon, size: kIconSizeSmall, color: cs.primary),
+          ],
         ),
         if (storageLabel?.isNotEmpty ?? false) ...[
           const SizedBox(height: kSpacingXS),
@@ -1057,60 +1095,21 @@ class _MedLargeCard extends StatelessWidget {
     return DateFormat('dd MMM').format(expiry);
   }
 
-  Widget _buildFooter(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final icons = <IconData>[];
-    final isDark = m.activeVialLightSensitive || m.backupVialsLightSensitive;
-    final isFrozen =
-        m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer;
-    final isRefrigerated =
-        m.requiresRefrigeration == true ||
-        m.activeVialRequiresRefrigeration ||
-        m.backupVialsRequiresRefrigeration;
-
-    if (isFrozen) {
-      icons.add(Icons.severe_cold);
-    }
-    if (isRefrigerated) {
-      icons.add(Icons.ac_unit);
-    }
-    if (isDark) {
-      icons.add(Icons.dark_mode);
-    }
-    if (icons.isEmpty) {
-      icons.add(Icons.thermostat);
-    }
-
-    // Cap at 3 icons to allow for more info
-    final visibleIcons = icons.take(3).toList();
-
-    return Row(
-      children: [
-        ...visibleIcons.map(
-          (icon) => Padding(
-            padding: const EdgeInsets.only(right: kSpacingXS),
-            child: Icon(
-              icon,
-              size: kIconSizeSmall,
-              color: theme.colorScheme.primary,
-            ),
+  Widget? _buildFooter(BuildContext context) {
+    if (m.expiry == null) return null;
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Text(
+        'Exp ${_formatExpiryLabel(m.expiry!)}',
+        style: helperTextStyle(context)?.copyWith(
+          fontSize: 9,
+          color: expiryStatusColor(
+            context,
+            createdAt: m.createdAt,
+            expiry: m.expiry!,
           ),
         ),
-        const Spacer(),
-        if (m.expiry != null)
-          Text(
-            'Exp ${_formatExpiryLabel(m.expiry!)}',
-            style: helperTextStyle(context)?.copyWith(
-              fontSize: 9,
-              color: expiryStatusColor(
-                context,
-                createdAt: m.createdAt,
-                expiry: m.expiry!,
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 }
