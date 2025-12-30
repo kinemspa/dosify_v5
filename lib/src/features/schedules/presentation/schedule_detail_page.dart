@@ -658,7 +658,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         ),
                       ),
                       Text(
-                        '${_formatNumber(s.doseValue)} ${s.doseUnit}',
+                        _getDoseDisplay(s),
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -854,9 +854,85 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   String _getDoseDisplay(Schedule s) {
-    // TODO: Get medication from database to show strength
-    // For now just show the dose
-    return '${_formatNumber(s.doseValue)} ${s.doseUnit}';
+    String trimZerosNumber(double value, {int decimals = 3}) {
+      final fixed = value.toStringAsFixed(decimals);
+      return fixed
+          .replaceAll(RegExp(r'0+$'), '')
+          .replaceAll(RegExp(r'\.$'), '');
+    }
+
+    String formatMass(int mcg) {
+      if (mcg == 0) return '0 mcg';
+      if (mcg.abs() >= 1000000) {
+        final g = mcg / 1000000.0;
+        return '${trimZerosNumber(g, decimals: 3)} g';
+      }
+      if (mcg.abs() >= 1000) {
+        final mg = mcg / 1000.0;
+        return '${trimZerosNumber(mg, decimals: 3)} mg';
+      }
+      return '$mcg mcg';
+    }
+
+    String formatVolume(int microliter) {
+      final ml = microliter / 1000.0;
+      return '${trimZerosNumber(ml, decimals: 3)} mL';
+    }
+
+    String formatCount(double count, String singular) {
+      final label = (count == 1) ? singular : '${singular}s';
+      return '${trimZerosNumber(count, decimals: 3)} $label';
+    }
+
+    String? countPart;
+    if (s.doseTabletQuarters != null) {
+      final q = s.doseTabletQuarters!;
+      final count = q / 4.0;
+      String amount;
+      if (q == 1) {
+        amount = '1/4';
+      } else if (q == 2) {
+        amount = '1/2';
+      } else if (q == 3) {
+        amount = '3/4';
+      } else if (q % 4 == 0) {
+        amount = (q ~/ 4).toString();
+      } else {
+        amount = trimZerosNumber(count, decimals: 3);
+      }
+
+      final label = (count == 1) ? 'tablet' : 'tablets';
+      countPart = '$amount $label';
+    } else if (s.doseCapsules != null) {
+      final count = s.doseCapsules!.toDouble();
+      countPart = formatCount(count, 'capsule');
+    } else if (s.doseSyringes != null) {
+      final count = s.doseSyringes!.toDouble();
+      countPart = formatCount(count, 'syringe');
+    } else if (s.doseVials != null) {
+      final count = s.doseVials!.toDouble();
+      countPart = formatCount(count, 'vial');
+    }
+
+    final parts = <String>[];
+    if (countPart != null && countPart.isNotEmpty) {
+      parts.add(countPart);
+    }
+
+    if (s.doseMassMcg != null) {
+      parts.add(formatMass(s.doseMassMcg!));
+    }
+
+    if (s.doseVolumeMicroliter != null) {
+      parts.add(formatVolume(s.doseVolumeMicroliter!));
+    }
+
+    if (parts.isNotEmpty) {
+      return parts.join(' • ');
+    }
+
+    // Fallback (legacy)
+    return '${_formatNumber(s.doseValue)} ${s.doseUnit}'.trim();
   }
 
   /// Week 5: Build reconstitution badge if medication has reconstitution data
@@ -994,9 +1070,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   String _formatNumber(double value) {
-    return value == value.roundToDouble()
-        ? value.toInt().toString()
-        : value.toStringAsFixed(2);
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value
+        .toStringAsFixed(3)
+        .replaceAll(RegExp(r'0+$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
   }
 
   String _frequencyText(Schedule schedule) {
