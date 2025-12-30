@@ -7,12 +7,14 @@ class NextDoseDateBadge extends StatelessWidget {
     required this.nextDose,
     required this.isActive,
     required this.dense,
+    this.showNextLabel = false,
     super.key,
   });
 
   final DateTime? nextDose;
   final bool isActive;
   final bool dense;
+  final bool showNextLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,8 @@ class NextDoseDateBadge extends StatelessWidget {
         ? cs.primary.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
 
+    final shouldShowNext = showNextLabel && isEnabled;
+
     final dayText = hasNext ? DateFormat('d').format(nextDose!) : '—';
     final monthText = hasNext
         ? DateFormat('MMM').format(nextDose!).toUpperCase()
@@ -45,7 +49,7 @@ class NextDoseDateBadge extends StatelessWidget {
         ? TimeOfDay.fromDateTime(nextDose!).format(context)
         : 'No upcoming';
 
-    final circle = Container(
+    final circleCore = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -82,6 +86,38 @@ class NextDoseDateBadge extends StatelessWidget {
         ),
       ),
     );
+
+    final circle = shouldShowNext
+        ? Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              circleCore,
+              Positioned(
+                top: -kSpacingXS,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: kSpacingXS,
+                    vertical: kHelperTextTopPadding,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: kOpacityEmphasis),
+                    borderRadius: BorderRadius.circular(kBorderRadiusFull),
+                  ),
+                  child: Text(
+                    'Next',
+                    style: TextStyle(
+                      fontSize: kFontSizeSmall,
+                      fontWeight: kFontWeightExtraBold,
+                      height: 1,
+                      color: cs.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+        : circleCore;
 
     if (dense) return circle;
 

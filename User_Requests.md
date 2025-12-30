@@ -31,6 +31,7 @@
 ### Reports Card
 - Not seeing the other report types. How to view them. [COMPLETED]
 - weWe have a history and an adherance page in this card. then you have placed the other graphs under the adherance tab. i want all individual tabs here under the Reports card, not sub tabs of another tab. [COMPLETED]
+
 - The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED]
 - Dont ever use light grey for the inactive chips, never use this colour anywhere. [COMPLETED]
 - I want each report to be its own little page in the Reports card. Or provide some way to switch them on or off.  [COMPLETED]
@@ -41,6 +42,8 @@
 	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
 	- Can we do a  viea change button on this? Make the dose appear horizontal. The day componant is the most important. So we need that sorted and viewable in that state. [COMPLETED]
 	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. [COMPLETED]
+	- Need to include Refills in the history. 
+	- Need to include all actions taken on doses. SKipped, missed. Status changed. 
 - Add reports
 	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
 	- Time-of-day consistency (histogram of taken times) [COMPLETED]
@@ -79,7 +82,7 @@
 - Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
 - COmpact Cards date circle has made the compact card just as big as the large card. Need to fix this. The Large card purpose is to show mroe infoarmation. COmpact shows less. list shows the least.  [COMPLETED]
 - On the cards, Schedule Name needs to Merge the Med Name into it. If the Schedule is named "1 Tablet" it should show "Panadol - 1 Tablet" [COMPLETED]
-- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think. 
+- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think.  [COMPLETED]
 
 ==============
 # Add Schedule
@@ -155,10 +158,10 @@
 ==============
 # Take Dose Screen
 - Take Dose:
-	- The Bottom page popup needs to be styled to match the dialogs and the rest of the app. 
+	- Take dose screen to be styled into the same as the ad hoc dialog. Ad hoc dialog is very nice and stylish. I want all Take doses to look like this and display like that. 
 
 - Edit Historical Dose:
-	- Need to be able to edit the time taken. 
+	- Take dose screen to be styled into the same as the ad hoc dialog.
 
 
 ==============
