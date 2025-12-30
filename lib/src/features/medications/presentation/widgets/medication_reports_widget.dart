@@ -10,6 +10,8 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/data/dose_calculation_service.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -17,7 +19,13 @@ import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 
 class _HistoryItem {
-  const _HistoryItem._({required this.time, this.doseLog, this.inventoryLog});
+  const _HistoryItem._({
+    required this.time,
+    this.doseLog,
+    this.inventoryLog,
+    this.statusChange,
+    this.missedDose,
+  });
 
   factory _HistoryItem.dose(DoseLog log) =>
       _HistoryItem._(time: log.actionTime, doseLog: log);
@@ -25,9 +33,17 @@ class _HistoryItem {
   factory _HistoryItem.inventory(InventoryLog log) =>
       _HistoryItem._(time: log.timestamp, inventoryLog: log);
 
+  factory _HistoryItem.statusChange(DoseStatusChangeLog log) =>
+      _HistoryItem._(time: log.changeTime, statusChange: log);
+
+  factory _HistoryItem.missed(CalculatedDose dose) =>
+      _HistoryItem._(time: dose.scheduledTime, missedDose: dose);
+
   final DateTime time;
   final DoseLog? doseLog;
   final InventoryLog? inventoryLog;
+  final DoseStatusChangeLog? statusChange;
+  final CalculatedDose? missedDose;
 }
 
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
@@ -53,6 +69,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   bool _historyHorizontalView = false;
 
   static const int _inventoryEventsMaxItems = 10;
+  static const int _historyMissedLookbackDays = 14;
 
   @override
   void initState() {
@@ -171,6 +188,19 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final cs = Theme.of(context).colorScheme;
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
+    final statusChangeBox = Hive.box<DoseStatusChangeLog>(
+      'dose_status_change_logs',
+    );
+
+    final now = DateTime.now();
+    final missedStart = now.subtract(
+      const Duration(days: _historyMissedLookbackDays),
+    );
+    final missedFuture = DoseCalculationService.calculateDoses(
+      startDate: missedStart,
+      endDate: now,
+      medicationId: widget.medication.id,
+    );
 
     // Dose logs for this medication
     final doseLogs = doseLogBox.values
@@ -187,108 +217,248 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         )
         .toList(growable: false);
 
-    final allItems = <_HistoryItem>[
-      for (final log in doseLogs) _HistoryItem.dose(log),
-      for (final log in refillLogs) _HistoryItem.inventory(log),
-    ]..sort((a, b) => b.time.compareTo(a.time));
-
-    final displayItems = allItems
-        .take(_historyMaxItems)
+    // Status change events for this medication
+    final statusChanges = statusChangeBox.values
+        .where((l) => l.medicationId == widget.medication.id)
         .toList(growable: false);
-    final hasMore = displayItems.length < allItems.length;
 
-    if (displayItems.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    return FutureBuilder<List<CalculatedDose>>(
+      future: missedFuture,
+      builder: (context, snapshot) {
+        final missedDoses = (snapshot.data ?? const <CalculatedDose>[])
+            .where(
+              (d) => d.status == DoseStatus.overdue && d.existingLog == null,
+            )
+            .toList(growable: false);
+
+        final allItems = <_HistoryItem>[
+          for (final log in doseLogs) _HistoryItem.dose(log),
+          for (final log in refillLogs) _HistoryItem.inventory(log),
+          for (final log in statusChanges) _HistoryItem.statusChange(log),
+          for (final dose in missedDoses) _HistoryItem.missed(dose),
+        ]..sort((a, b) => b.time.compareTo(a.time));
+
+        final displayItems = allItems
+            .take(_historyMaxItems)
+            .toList(growable: false);
+        final hasMore = displayItems.length < allItems.length;
+
+        if (displayItems.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.history_outlined,
+                  size: kEmptyStateIconSize,
+                  color: cs.onSurfaceVariant.withValues(
+                    alpha: kOpacityMediumLow,
+                  ),
+                ),
+                const SizedBox(height: kSpacingM),
+                Text('No history yet', style: helperTextStyle(context)),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  'Recorded doses and refills will appear here',
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontSize: kFontSizeSmall),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
           children: [
-            Icon(
-              Icons.history_outlined,
-              size: kEmptyStateIconSize,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
-            ),
-            const SizedBox(height: kSpacingM),
-            Text('No history yet', style: helperTextStyle(context)),
-            const SizedBox(height: kSpacingXS),
-            Text(
-              'Recorded doses and refills will appear here',
-              style: helperTextStyle(
-                context,
-              )?.copyWith(fontSize: kFontSizeSmall),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            kSpacingS,
-            kSpacingXS,
-            kSpacingS,
-            kSpacingXS,
-          ),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              tooltip: 'Change view',
-              onPressed: () {
-                setState(() {
-                  _historyHorizontalView = !_historyHorizontalView;
-                });
-              },
-              icon: Icon(
-                _historyHorizontalView
-                    ? Icons.view_day_outlined
-                    : Icons.view_agenda_outlined,
-                size: kIconSizeMedium,
-                color: cs.onSurfaceVariant,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                kSpacingS,
+                kSpacingXS,
+                kSpacingS,
+                kSpacingXS,
+              ),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  tooltip: 'Change view',
+                  onPressed: () {
+                    setState(() {
+                      _historyHorizontalView = !_historyHorizontalView;
+                    });
+                  },
+                  icon: Icon(
+                    _historyHorizontalView
+                        ? Icons.view_day_outlined
+                        : Icons.view_agenda_outlined,
+                    size: kIconSizeMedium,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.all(kSpacingS),
-            itemCount: displayItems.length + (hasMore ? 1 : 0),
-            separatorBuilder: (context, index) => Divider(
-              height: 1,
-              color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
-            ),
-            itemBuilder: (context, index) {
-              if (hasMore && index == displayItems.length) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: kSpacingS),
-                  child: Center(
-                    child: TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _historyMaxItems += _historyPageStep;
-                        });
-                      },
-                      icon: const Icon(Icons.expand_more, size: kIconSizeSmall),
-                      label: Text(
-                        'Load more',
-                        style: helperTextStyle(
-                          context,
-                        )?.copyWith(fontWeight: kFontWeightSemiBold),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(kSpacingS),
+                itemCount: displayItems.length + (hasMore ? 1 : 0),
+                separatorBuilder: (context, index) => Divider(
+                  height: 1,
+                  color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
+                ),
+                itemBuilder: (context, index) {
+                  if (hasMore && index == displayItems.length) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: kSpacingS),
+                      child: Center(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _historyMaxItems += _historyPageStep;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.expand_more,
+                            size: kIconSizeSmall,
+                          ),
+                          label: Text(
+                            'Load more',
+                            style: helperTextStyle(
+                              context,
+                            )?.copyWith(fontWeight: kFontWeightSemiBold),
+                          ),
+                        ),
                       ),
+                    );
+                  }
+
+                  final item = displayItems[index];
+                  if (item.doseLog != null) {
+                    return _buildDoseLogItem(context, item.doseLog!);
+                  }
+                  if (item.inventoryLog != null) {
+                    return _buildInventoryEventRow(context, item.inventoryLog!);
+                  }
+                  if (item.statusChange != null) {
+                    return _buildDoseStatusChangeRow(
+                      context,
+                      item.statusChange!,
+                    );
+                  }
+                  return _buildMissedDoseRow(context, item.missedDose!);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDoseStatusChangeRow(
+    BuildContext context,
+    DoseStatusChangeLog log,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final timeFormat = DateFormat('h:mm a');
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.swap_horiz,
+            size: kIconSizeMedium,
+            color: cs.onSurfaceVariant,
+          ),
+          const SizedBox(width: kSpacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Status changed',
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  '${log.fromStatus} → ${log.toStatus}',
+                  style: helperTextStyle(
+                    context,
+                    color: cs.onSurfaceVariant.withValues(
+                      alpha: kOpacityMediumHigh,
                     ),
                   ),
-                );
-              }
-
-              final item = displayItems[index];
-              if (item.doseLog != null) {
-                return _buildDoseLogItem(context, item.doseLog!);
-              }
-              return _buildInventoryEventRow(context, item.inventoryLog!);
-            },
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  '${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontSize: kFontSizeSmall),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+          Text(
+            timeFormat.format(log.changeTime),
+            style: helperTextStyle(context)?.copyWith(
+              fontSize: kFontSizeSmall,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMissedDoseRow(BuildContext context, CalculatedDose dose) {
+    final cs = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final timeFormat = DateFormat('h:mm a');
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline, size: kIconSizeMedium, color: cs.error),
+          const SizedBox(width: kSpacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Missed dose',
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  '${dose.scheduleName} • ${dose.doseValue} ${dose.doseUnit}',
+                  style: helperTextStyle(
+                    context,
+                    color: cs.onSurfaceVariant.withValues(
+                      alpha: kOpacityMediumHigh,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  '${dateFormat.format(dose.scheduledTime)} • ${timeFormat.format(dose.scheduledTime)}',
+                  style: helperTextStyle(
+                    context,
+                  )?.copyWith(fontSize: kFontSizeSmall),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

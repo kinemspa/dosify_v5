@@ -7,6 +7,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
@@ -39,6 +40,12 @@ class HiveBootstrap {
       Hive.registerAdapter(DoseActionAdapter());
     await _openBoxWithRetry<DoseLog>('dose_logs');
 
+    // Dose status change logs (audit trail for status edits/reverts)
+    if (!Hive.isAdapterRegistered(45)) {
+      Hive.registerAdapter(DoseStatusChangeLogAdapter());
+    }
+    await _openBoxWithRetry<DoseStatusChangeLog>('dose_status_change_logs');
+
     // Supplies
     if (!Hive.isAdapterRegistered(50)) Hive.registerAdapter(SupplyAdapter());
     if (!Hive.isAdapterRegistered(52))
@@ -69,17 +76,19 @@ class HiveBootstrap {
       // Increased timeout to 15 seconds - slow devices need more time
       return await Hive.openBox<T>(name).timeout(const Duration(seconds: 15));
     } catch (e) {
-      print(
-        'HiveBootstrap: Failed to open box "$name" (Error: $e).',
-      );
-      
+      print('HiveBootstrap: Failed to open box "$name" (Error: $e).');
+
       // Only delete and recreate on actual corruption errors (HiveError)
       // Do NOT delete on timeouts or other transient errors - that causes data loss!
       if (e is HiveError) {
-        print('HiveBootstrap: Detected HiveError (corruption). Attempting recovery by deleting box...');
+        print(
+          'HiveBootstrap: Detected HiveError (corruption). Attempting recovery by deleting box...',
+        );
         try {
           await Hive.deleteBoxFromDisk(name);
-          print('HiveBootstrap: Deleted corrupted box "$name". Retrying open...');
+          print(
+            'HiveBootstrap: Deleted corrupted box "$name". Retrying open...',
+          );
           return await Hive.openBox<T>(name);
         } catch (e2) {
           print(
@@ -107,8 +116,7 @@ class HiveBootstrap {
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(StockUnitAdapter());
     if (!Hive.isAdapterRegistered(3))
       Hive.registerAdapter(MedicationFormAdapter());
-    if (!Hive.isAdapterRegistered(4))
-      Hive.registerAdapter(VolumeUnitAdapter());
+    if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(VolumeUnitAdapter());
     if (!Hive.isAdapterRegistered(10))
       Hive.registerAdapter(MedicationAdapter());
   }

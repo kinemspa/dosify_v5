@@ -5,6 +5,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 
 /// Bottom sheet showing dose details and actions (Take, Snooze, Skip)
 class DoseActionSheet extends StatefulWidget {
@@ -110,6 +111,32 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   Future<void> _saveChanges() async {
     // If status changed, call appropriate callback
     if (_selectedStatus != widget.dose.status) {
+      // Persist an audit event when editing an existing logged dose.
+      // This keeps a record of "status changed" even if the change reverts
+      // back to pending/overdue (which deletes the original log).
+      if (widget.dose.existingLog != null) {
+        final auditBox = Hive.box<DoseStatusChangeLog>(
+          'dose_status_change_logs',
+        );
+        final now = DateTime.now();
+        final id = now.microsecondsSinceEpoch.toString();
+        auditBox.put(
+          id,
+          DoseStatusChangeLog(
+            id: id,
+            scheduleId: widget.dose.scheduleId,
+            scheduleName: widget.dose.scheduleName,
+            medicationId: widget.dose.existingLog!.medicationId,
+            medicationName: widget.dose.existingLog!.medicationName,
+            scheduledTime: widget.dose.scheduledTime,
+            changeTime: now,
+            fromStatus: widget.dose.status.name,
+            toStatus: _selectedStatus.name,
+            notes: _notesController.text.isEmpty ? null : _notesController.text,
+          ),
+        );
+      }
+
       final notes = _notesController.text.isEmpty
           ? null
           : _notesController.text;
