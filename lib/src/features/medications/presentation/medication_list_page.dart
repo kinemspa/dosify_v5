@@ -4,6 +4,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
@@ -174,6 +175,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   @override
   Widget build(BuildContext context) {
     final box = Hive.box<Medication>('medications');
+    final schedulesBox = Hive.box<Schedule>('schedules');
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Medications', forceBackButton: true),
@@ -238,16 +240,23 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               );
             }
           }
-          return Stack(
-            children: [
-              _buildMedList(context, items),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _buildToolbar(context),
-              ),
-            ],
+
+          return ValueListenableBuilder(
+            valueListenable: schedulesBox.listenable(),
+            builder: (context, Box<Schedule> sb, __) {
+              final schedules = sb.values.toList(growable: false);
+              return Stack(
+                children: [
+                  _buildMedList(context, items, schedules),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: _buildToolbar(context),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
@@ -258,6 +267,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       ),
     );
   }
+
+  IconData _getViewIcon(_MedView v) => switch (v) {
+    _MedView.list => Icons.view_list,
+    _MedView.compact => Icons.view_comfy_alt,
+    _MedView.large => Icons.view_comfortable,
+  };
 
   Widget _buildToolbar(BuildContext context) {
     return Padding(
@@ -573,17 +588,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     return items;
   }
 
-  IconData _getViewIcon(_MedView view) {
-    switch (view) {
-      case _MedView.list:
-        return Icons.view_list;
-      case _MedView.compact:
-        return Icons.view_comfy_alt;
-      case _MedView.large:
-        return Icons.view_comfortable;
-    }
-  }
-
   Future<void> _cycleView() async {
     final order = [_MedView.large, _MedView.compact, _MedView.list];
     final idx = order.indexOf(_view);
@@ -694,7 +698,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
-  Widget _buildMedList(BuildContext context, List<Medication> items) {
+  Widget _buildMedList(
+    BuildContext context,
+    List<Medication> items,
+    List<Schedule> schedules,
+  ) {
     switch (_view) {
       case _MedView.list:
         return ListView.separated(
@@ -722,7 +730,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
-          itemBuilder: (context, i) => _MedLargeCard(m: items[i]),
+          itemBuilder: (context, i) =>
+              _MedLargeCard(m: items[i], schedules: schedules),
         );
     }
   }
@@ -888,9 +897,14 @@ class _MedCard extends StatelessWidget {
 }
 
 class _MedLargeCard extends StatelessWidget {
-  const _MedLargeCard({required this.m});
+  const _MedLargeCard({required this.m, this.schedules = const []});
 
   final Medication m;
+  final List<Schedule> schedules;
+
+  int _activeScheduleCount() {
+    return schedules.where((s) => s.medicationId == m.id && s.active).length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -962,6 +976,7 @@ class _MedLargeCard extends StatelessWidget {
     final storageLabel = (primaryStorage?.isNotEmpty ?? false)
         ? primaryStorage
         : fallbackStorage;
+    final activeScheduleCount = _activeScheduleCount();
     final strengthQuantityLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
     final activeIcons = _activeVialStorageConditionIcons();
@@ -1008,6 +1023,36 @@ class _MedLargeCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: kSpacingXS),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.calendar_month_rounded,
+              size: kIconSizeSmall,
+              color: activeScheduleCount > 0
+                  ? cs.primary
+                  : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+            ),
+            const SizedBox(width: kSpacingXS),
+            Expanded(
+              child: Text(
+                activeScheduleCount == 1
+                    ? '1 active schedule'
+                    : '$activeScheduleCount active schedules',
+                style: helperTextStyle(
+                  context,
+                  color: activeScheduleCount > 0
+                      ? cs.primary
+                      : cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumLow,
+                        ),
+                )?.copyWith(fontSize: kFontSizeSmall),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         if (m.form == MedicationForm.multiDoseVial) ...[
           Row(
             children: [
