@@ -40,6 +40,8 @@ class GlassCardSurface extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: borderRadius),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(onTap: onTap, borderRadius: borderRadius, child: card),
     );
   }
