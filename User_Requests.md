@@ -153,7 +153,7 @@
 - Make the calendar section a set size, so it fits the month view, week view and day view.  [COMPLETED]
 - The Days on the calnedar are no longer showing if they have a scheduled dose. Can we implement a tiny little number? We had some colour codeing for all the dose status, coming, skipped, missed and snoozed.  [COMPLETED]
 - Style the month view a little nicer, its actually looking really good.  [COMPLETED]
-- It might be good to have a little up next display up the top for the next dose. (These kinds of widgets will be used on the home page aswell.)
+- It might be good to have a little up next display up the top for the next dose. (These kinds of widgets will be used on the home page aswell.)  [COMPLETED]
 
 
 ==============

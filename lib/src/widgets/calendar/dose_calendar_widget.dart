@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_week_view.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
+import 'package:dosifi_v5/src/widgets/up_next_dose_card.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -580,6 +581,23 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final showHeader = widget.variant != CalendarVariant.mini;
     final showViewToggle = widget.variant == CalendarVariant.full;
 
+    CalculatedDose? nextDose;
+    if (_doses.isNotEmpty) {
+      final attention = _doses
+          .where((d) => d.status.requiresAttention)
+          .toList();
+      attention.sort((a, b) => b.scheduledTime.compareTo(a.scheduledTime));
+      if (attention.isNotEmpty) {
+        nextDose = attention.first;
+      } else {
+        final pending = _doses
+            .where((d) => d.status == DoseStatus.pending)
+            .toList();
+        pending.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+        if (pending.isNotEmpty) nextDose = pending.first;
+      }
+    }
+
     Widget buildBody({double? panelHeight}) {
       return Column(
         children: [
@@ -592,6 +610,20 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               onToday: _onTodayPressed,
               onViewChanged: _onViewChanged,
               showViewToggle: showViewToggle,
+            ),
+          if (widget.variant == CalendarVariant.full)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                kSpacingL,
+                kSpacingS,
+                kSpacingL,
+                kSpacingS,
+              ),
+              child: UpNextDoseCard(
+                dose: nextDose,
+                onDoseTap: _onDoseTapInternal,
+                showMedicationName: true,
+              ),
             ),
           // Calendar view
           if (_isLoading)
