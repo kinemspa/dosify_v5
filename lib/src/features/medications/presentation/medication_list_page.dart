@@ -1053,6 +1053,7 @@ class _MedLargeCard extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: kSpacingS),
         if (m.form == MedicationForm.multiDoseVial) ...[
           Row(
             children: [

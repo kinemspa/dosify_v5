@@ -11,7 +11,7 @@
 ## Medication Screen
 
 ### Large Cards
-- Need some space between the Storage info and the schedules row. 
+- Need some space between the Storage info and the schedules row.  [COMPLETED]
 - Can we place all the storage objects in their own little space? MDV Have Active and Sealed with Storage Conditionas and Storage Locations. 
 - MDV has Expiry for Active and Sealed, Maybe the expiry needs to sit within the storage details. 
 
@@ -22,26 +22,19 @@
 ==============
 
 ## Medication Details Screen
-- There must be some animation issues on this scren as it seems to lag a little.  [COMPLETED]
-- We should have the following cards. Reports, Schedule, Details. You can rename these to bettere terms if they seem fit.  [COMPLETED]
-- I am conflicted on the Schedule Card. It looks redundant having Schedules, 
-- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED]
-- When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
+- I am conflicted on the Schedule Card. It looks redundant having Schedules then Doses and Schedules within this card with the same prominant heading.  Do we split them into seperate cards or try to organise it a different way?
+- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED] - Not completed, there is issues with the fullly documented details nudging the refill and ad hoc down belowe the app header gradient bottom edge. The app header edge needs to adjust to fit all App header items. 
+- Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. 
+- When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED] This is not complete. There are light grey corners still  appearing on clicking. 
 - Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. 
 
 ### Reports Card
-- Not seeing the other report types. How to view them. [COMPLETED]
-- weWe have a history and an adherance page in this card. then you have placed the other graphs under the adherance tab. i want all individual tabs here under the Reports card, not sub tabs of another tab. [COMPLETED]
 
-- The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED]
-- Dont ever use light grey for the inactive chips, never use this colour anywhere. [COMPLETED]
-- I want each report to be its own little page in the Reports card. Or provide some way to switch them on or off.  [COMPLETED]
-- Ad Hoc Doses are reporting with a Scheduled DATE AND TIME. They are never shceduled.  [COMPLETED]
-- History and Adherance headings are way too big.  [COMPLETED]
+- The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED] Not good enough. This page menu display view is taking up way to much vertical real estate. I can post an image when you get to this one. 
 - History: 
-	- Paginate it [COMPLETED]
-	- Allow for expansion of historical dose entry, allows edit. Maybe it pops the bottom page. [COMPLETED]
-	- Can we do a  viea change button on this? Make the dose appear horizontal. The day componant is the most important. So we need that sorted and viewable in that state. [COMPLETED]
+	- Remove the view change. 
+	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that. 
+	- Missed Doses should be editable. 
 	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. [COMPLETED]
 	- Need to include Refills in the history.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
