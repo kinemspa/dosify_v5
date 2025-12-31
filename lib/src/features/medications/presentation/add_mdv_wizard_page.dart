@@ -1,11 +1,13 @@
 // Flutter imports:
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +29,9 @@ class AddMdvWizardPage extends ConsumerStatefulWidget {
 class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   int _currentStep = 0;
   final _scrollController = ScrollController();
+
+  final SavedReconstitutionRepository _savedReconRepo =
+      SavedReconstitutionRepository();
 
   // Step 1: Basic Info
   final _nameCtrl = TextEditingController();
@@ -97,6 +102,59 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         });
       }
     }
+  }
+
+  Unit _unitFromName(String name) {
+    for (final unit in Unit.values) {
+      if (unit.name == name) return unit;
+    }
+    return Unit.mg;
+  }
+
+  Future<void> _useSavedReconstitution() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final height = MediaQuery.of(context).size.height;
+        return SizedBox(
+          height: height * 0.8,
+          child: SavedReconstitutionSheet(
+            repo: _savedReconRepo,
+            onSelect: (item) {
+              final result = ReconstitutionResult(
+                perMlConcentration: item.perMlConcentration,
+                solventVolumeMl: item.solventVolumeMl,
+                recommendedUnits: item.recommendedUnits,
+                syringeSizeMl: item.syringeSizeMl,
+                diluentName: item.diluentName,
+                recommendedDose: item.recommendedDose,
+                doseUnit: item.doseUnit,
+                maxVialSizeMl: item.maxVialSizeMl,
+              );
+
+              setState(() {
+                _strengthValueCtrl.text =
+                    item.strengthValue == item.strengthValue.roundToDouble()
+                    ? item.strengthValue.toInt().toString()
+                    : item.strengthValue.toStringAsFixed(2);
+                _strengthUnit = _unitFromName(item.strengthUnit);
+
+                _reconResult = result;
+                _vialVolumeCtrl.text = result.solventVolumeMl.toStringAsFixed(
+                  2,
+                );
+                _perMlCtrl.text = result.perMlConcentration.toString();
+                _activeVialVolumeMlCtrl.text = result.solventVolumeMl
+                    .toStringAsFixed(2);
+              });
+
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      },
+    );
   }
 
   void _loadInitialData() {
@@ -697,6 +755,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               });
             }
           },
+          onUseSaved: _useSavedReconstitution,
           result: _reconResult,
         ),
         const SizedBox(height: 16),
@@ -1700,9 +1759,11 @@ class _ReconstitutionInfoCard extends StatelessWidget {
     required this.onCalculate,
     required this.medicationName,
     this.result,
+    this.onUseSaved,
   });
 
   final VoidCallback onCalculate;
+  final VoidCallback? onUseSaved;
   final String medicationName;
   final ReconstitutionResult? result;
 
@@ -1820,6 +1881,21 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               ),
             ),
           ),
+          if (onUseSaved != null) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onUseSaved,
+                icon: const Icon(Icons.bookmarks),
+                label: const Text('Use Saved'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -1,7 +1,7 @@
 # Things To Fix
 
 ## Global
-- How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED]
+- How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED] - How do I test this?
 
 ## Home Screen
 
@@ -11,10 +11,9 @@
 ## Medication Screen
 
 ### Large Cards
-- Move the stoargae icons up. We need to make room for next dose buttons. [COMPLETED]
-- Multi Dose VIals have storager icons for both active and sealed vials. Can we represent both on the large cards? [COMPLETED]
-- Need an active schedules line or object. [COMPLETED]
-- Issues with icons, some are im front of text, some follow. can we unify icon placement. [COMPLETED]
+- Need some space between the Storage info and the schedules row. 
+- Can we place all the storage objects in their own little space? MDV Have Active and Sealed with Storage Conditionas and Storage Locations. 
+- MDV has Expiry for Active and Sealed, Maybe the expiry needs to sit within the storage details. 
 
 ### Compact Cards
 
@@ -25,6 +24,7 @@
 ## Medication Details Screen
 - There must be some animation issues on this scren as it seems to lag a little.  [COMPLETED]
 - We should have the following cards. Reports, Schedule, Details. You can rename these to bettere terms if they seem fit.  [COMPLETED]
+- I am conflicted on the Schedule Card. It looks redundant having Schedules, 
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED]
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
 - Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. 
@@ -164,7 +164,10 @@
 - Edit Historical Dose:
 	- Take dose screen to be styled into the same as the ad hoc dialog.  [COMPLETED]
 
-
+- Ad-Hoc Dose
+	- MDV Slider for Units is not allowing saving the state. 
+	- MDV Units, remove trailing 0. Increment in whole numbers. 
+	- MDV Slider, should be able to click on spot on the slider to jump slider.
 ==============
 # Reconstitution  Calculator
 
@@ -172,7 +175,8 @@
 
 ## Stand Alone - Recon Calc
 - This is a stand alone version of the recon calculator used in the Add Med MDV wizard. I want it to be exactly the same as that one in an operations perspective. The only difference is that you will have the ability to enter a manual medicaiont name and medicaiont strenght. [COMPLETED]
-- The standalone one will allow for the saving of reconstitution calculations. Which can be opened up and viewe and editied, and or sourced in the add med wizard. 
+- The standalone one will allow for the saving of reconstitution calculations. Which can be opened up and viewe and editied, and or sourced in the add med wizard. [COMPLETED]
+- This should be the one accessible from the hamburger menu. [COMPLETED]
 
 ==============
 # Analytics

@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/core/hive/hive_migration_manager.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -66,6 +67,14 @@ class HiveBootstrap {
     if (!Hive.isAdapterRegistered(44))
       Hive.registerAdapter(InventoryChangeTypeAdapter());
     await _openBoxWithRetry<InventoryLog>('inventory_logs');
+
+    // Saved reconstitution calculations
+    if (!Hive.isAdapterRegistered(60)) {
+      Hive.registerAdapter(SavedReconstitutionCalculationAdapter());
+    }
+    await _openBoxWithRetry<SavedReconstitutionCalculation>(
+      'saved_reconstitutions',
+    );
 
     print('HiveBootstrap: Initialization complete');
   }
