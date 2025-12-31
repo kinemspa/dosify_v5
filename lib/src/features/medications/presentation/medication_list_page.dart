@@ -1002,11 +1002,33 @@ class _MedLargeCard extends StatelessWidget {
     );
   }
 
+  Widget _buildExpiryRow(
+    BuildContext context, {
+    required DateTime createdAt,
+    required DateTime expiry,
+  }) {
+    return Text(
+      'Exp ${_formatExpiryLabel(expiry)}',
+      style: helperTextStyle(context)?.copyWith(
+        fontSize: kFontSizeSmall,
+        color: expiryStatusColor(
+          context,
+          createdAt: createdAt,
+          expiry: expiry,
+        ),
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   Widget _buildMdvStorageBlock(
     BuildContext context, {
     required String label,
     required List<IconData> icons,
     required String? location,
+    required DateTime? createdAt,
+    required DateTime? expiry,
   }) {
     final cs = Theme.of(context).colorScheme;
     return Column(
@@ -1040,6 +1062,14 @@ class _MedLargeCard extends StatelessWidget {
           const SizedBox(height: kSpacingXS),
           _buildStorageLocationRow(context, location),
         ],
+        if (createdAt != null && expiry != null) ...[
+          const SizedBox(height: kSpacingXS),
+          _buildExpiryRow(
+            context,
+            createdAt: createdAt,
+            expiry: expiry,
+          ),
+        ],
       ],
     );
   }
@@ -1050,6 +1080,12 @@ class _MedLargeCard extends StatelessWidget {
     required List<IconData> sealedIcons,
     required List<IconData> combinedIcons,
   }) {
+    final activeCreatedAt = m.reconstitutedAt ?? m.createdAt;
+    final activeExpiry = m.reconstitutedVialExpiry;
+
+    final sealedCreatedAt = m.createdAt;
+    final sealedExpiry = m.backupVialsExpiry ?? m.expiry;
+
     final location = _pickLocation(
       m.storageLocation,
       m.activeVialStorageLocation,
@@ -1072,6 +1108,8 @@ class _MedLargeCard extends StatelessWidget {
                 label: 'Active',
                 icons: activeIcons,
                 location: activeLocation,
+                createdAt: activeCreatedAt,
+                expiry: activeExpiry,
               ),
               const SizedBox(height: kSpacingS),
               _buildMdvStorageBlock(
@@ -1079,6 +1117,8 @@ class _MedLargeCard extends StatelessWidget {
                 label: 'Sealed',
                 icons: sealedIcons,
                 location: sealedLocation,
+                createdAt: sealedCreatedAt,
+                expiry: sealedExpiry,
               ),
             ],
           )
@@ -1090,7 +1130,11 @@ class _MedLargeCard extends StatelessWidget {
                 runSpacing: kSpacingXS,
                 children: [
                   for (final icon in combinedIcons)
-                    Icon(icon, size: kIconSizeSmall),
+                    Icon(
+                      icon,
+                      size: kIconSizeSmall,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                 ],
               ),
               if (location != null) ...[
@@ -1279,6 +1323,7 @@ class _MedLargeCard extends StatelessWidget {
   }
 
   Widget? _buildFooter(BuildContext context) {
+    if (m.form == MedicationForm.multiDoseVial) return null;
     if (m.expiry == null) return null;
     return Align(
       alignment: Alignment.centerRight,

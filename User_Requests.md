@@ -13,7 +13,7 @@
 ### Large Cards
 - Need some space between the Storage info and the schedules row.  [COMPLETED]
 - Can we place all the storage objects in their own little space? MDV Have Active and Sealed with Storage Conditionas and Storage Locations.  [COMPLETED]
-- MDV has Expiry for Active and Sealed, Maybe the expiry needs to sit within the storage details. 
+- MDV has Expiry for Active and Sealed, Maybe the expiry needs to sit within the storage details.  [COMPLETED]
 
 ### Compact Cards
 
