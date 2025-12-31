@@ -979,87 +979,65 @@ class _MedLargeCard extends StatelessWidget {
     return _cleanText(primary) ?? _cleanText(fallback);
   }
 
-  Widget _buildStorageLocationRow(BuildContext context, String location) {
-    final cs = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.location_on_outlined,
-          size: kIconSizeSmall,
-          color: cs.primary,
-        ),
-        const SizedBox(width: kSpacingXS),
-        Expanded(
-          child: Text(
-            location,
-            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildExpiryRow(
+  Widget _buildCompactStorageLine(
     BuildContext context, {
-    required DateTime createdAt,
-    required DateTime expiry,
-  }) {
-    return Text(
-      'Exp ${_formatExpiryLabel(expiry)}',
-      style: helperTextStyle(context)?.copyWith(
-        fontSize: kFontSizeSmall,
-        color: expiryStatusColor(context, createdAt: createdAt, expiry: expiry),
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildMdvStorageBlock(
-    BuildContext context, {
-    required String label,
     required List<IconData> icons,
+    required String label,
     required String? location,
     required DateTime? createdAt,
     required DateTime? expiry,
   }) {
     final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final baseStyle = helperTextStyle(
+      context,
+    )?.copyWith(fontSize: kFontSizeHint);
+    final spans = <TextSpan>[];
+
+    spans.add(
+      TextSpan(
+        text: label,
+        style: const TextStyle(fontWeight: kFontWeightSemiBold),
+      ),
+    );
+
+    if (location != null) {
+      spans.add(TextSpan(text: ' · $location'));
+    }
+
+    if (createdAt != null && expiry != null) {
+      spans.add(const TextSpan(text: ' · '));
+      spans.add(
+        TextSpan(
+          text: 'Exp ${_formatExpiryLabel(expiry)}',
+          style: TextStyle(
+            color: expiryStatusColor(
+              context,
+              createdAt: createdAt,
+              expiry: expiry,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
       children: [
-        Row(
+        Wrap(
+          spacing: kSpacingXS,
+          runSpacing: kSpacingXS,
           children: [
-            Wrap(
-              spacing: kSpacingXS,
-              runSpacing: kSpacingXS,
-              children: [
-                for (final icon in icons)
-                  Icon(icon, size: kIconSizeSmall, color: cs.primary),
-              ],
-            ),
-            const SizedBox(width: kSpacingXS),
-            Expanded(
-              child: Text(
-                label,
-                style: helperTextStyle(context)?.copyWith(
-                  fontSize: kFontSizeHint,
-                  fontWeight: kFontWeightSemiBold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (createdAt != null && expiry != null)
-              _buildExpiryRow(context, createdAt: createdAt, expiry: expiry),
+            for (final icon in icons)
+              Icon(icon, size: kIconSizeSmall, color: cs.primary),
           ],
         ),
-        if (location != null) ...[
-          const SizedBox(height: kSpacingXS),
-          _buildStorageLocationRow(context, location),
-        ],
+        const SizedBox(width: kSpacingXS),
+        Expanded(
+          child: RichText(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(style: baseStyle, children: spans),
+          ),
+        ),
       ],
     );
   }
@@ -1093,7 +1071,7 @@ class _MedLargeCard extends StatelessWidget {
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMdvStorageBlock(
+              _buildCompactStorageLine(
                 context,
                 label: 'Active',
                 icons: activeIcons,
@@ -1102,7 +1080,7 @@ class _MedLargeCard extends StatelessWidget {
                 expiry: activeExpiry,
               ),
               const SizedBox(height: kSpacingXS),
-              _buildMdvStorageBlock(
+              _buildCompactStorageLine(
                 context,
                 label: 'Sealed',
                 icons: sealedIcons,
@@ -1112,26 +1090,13 @@ class _MedLargeCard extends StatelessWidget {
               ),
             ],
           )
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                spacing: kSpacingXS,
-                runSpacing: kSpacingXS,
-                children: [
-                  for (final icon in combinedIcons)
-                    Icon(
-                      icon,
-                      size: kIconSizeSmall,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                ],
-              ),
-              if (location != null) ...[
-                const SizedBox(height: kSpacingXS),
-                _buildStorageLocationRow(context, location),
-              ],
-            ],
+        : _buildCompactStorageLine(
+            context,
+            label: 'Storage',
+            icons: combinedIcons,
+            location: location,
+            createdAt: null,
+            expiry: null,
           );
 
     // Intentionally borderless/compact: keep storage details inline without an inset card.
@@ -1217,7 +1182,7 @@ class _MedLargeCard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         _buildStorageInsetSection(
           context,
           activeIcons: activeIcons,
