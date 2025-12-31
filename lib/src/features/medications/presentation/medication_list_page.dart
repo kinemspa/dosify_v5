@@ -1198,10 +1198,9 @@ class _MedLargeCard extends StatelessWidget {
   Widget _buildLeading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final activeScheduleCount = _activeScheduleCount();
+    final isMdv = m.form == MedicationForm.multiDoseVial;
     final strengthQuantityLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
-    final activeIcons = _activeVialStorageConditionIcons();
-    final sealedIcons = _sealedVialsStorageConditionIcons();
     final combinedIcons = _combinedStorageConditionIcons();
 
     return Column(
@@ -1274,13 +1273,15 @@ class _MedLargeCard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: kSpacingXS),
-        _buildStorageInsetSection(
-          context,
-          activeIcons: activeIcons,
-          sealedIcons: sealedIcons,
-          combinedIcons: combinedIcons,
-        ),
+        if (!isMdv) ...[
+          const SizedBox(height: kSpacingXS),
+          _buildStorageInsetSection(
+            context,
+            activeIcons: const <IconData>[],
+            sealedIcons: const <IconData>[],
+            combinedIcons: combinedIcons,
+          ),
+        ],
       ],
     );
   }
@@ -1336,7 +1337,14 @@ class _MedLargeCard extends StatelessWidget {
   }
 
   Widget? _buildFooter(BuildContext context) {
-    if (m.form == MedicationForm.multiDoseVial) return null;
+    if (m.form == MedicationForm.multiDoseVial) {
+      return _buildStorageInsetSection(
+        context,
+        activeIcons: _activeVialStorageConditionIcons(),
+        sealedIcons: _sealedVialsStorageConditionIcons(),
+        combinedIcons: _combinedStorageConditionIcons(),
+      );
+    }
     if (m.expiry == null) return null;
     return Align(
       alignment: Alignment.centerRight,
