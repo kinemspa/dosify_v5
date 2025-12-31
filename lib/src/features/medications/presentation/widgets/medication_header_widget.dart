@@ -75,6 +75,12 @@ class MedicationHeaderWidget extends ConsumerWidget {
         ? CrossAxisAlignment.start
         : crossAxisAlignment;
 
+    final description = medication.description?.trim() ?? '';
+    final descriptionTruncated =
+        description.length <= kMedicationHeaderDescriptionMaxChars
+        ? description
+        : '${description.substring(0, kMedicationHeaderDescriptionMaxChars)}…';
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -91,12 +97,11 @@ class MedicationHeaderWidget extends ConsumerWidget {
                   const SizedBox(height: 68),
 
                   // Description & Notes
-                  if (medication.description != null &&
-                      medication.description!.isNotEmpty)
+                  if (descriptionTruncated.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
-                        medication.description!,
+                        descriptionTruncated,
                         style: TextStyle(
                           color: onPrimary.withValues(alpha: 0.9),
                           fontSize: 10,

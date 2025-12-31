@@ -24,7 +24,7 @@
 ## Medication Details Screen
 - I am conflicted on the Schedule Card. It looks redundant having Schedules then Doses and Schedules within this card with the same prominant heading.  Do we split them into seperate cards or try to organise it a different way? [COMPLETED]
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED] - Not completed, there is issues with the fullly documented details nudging the refill and ad hoc down belowe the app header gradient bottom edge. The app header edge needs to adjust to fit all App header items. 
-- Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. 
+- Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. [COMPLETED]
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED] This is not complete. There are light grey corners still  appearing on clicking. 
 - Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. 
 - For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too?

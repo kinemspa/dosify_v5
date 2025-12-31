@@ -122,6 +122,9 @@ const double kMedicationDetailDonutSize = 112;
 const double kMedicationDetailDonutStrokeWidth = 14.0;
 const double kMedicationDetailDonutInnerStrokeWidth = 7.0;
 
+/// Medication header text limits
+const int kMedicationHeaderDescriptionMaxChars = 90;
+
 /// Calendar component sizing
 const double kCalendarDayHeight =
     60; // Height of day cell in month view (reduced from 80)
