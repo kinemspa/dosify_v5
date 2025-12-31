@@ -1093,39 +1093,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (schedules.isNotEmpty) ...[
-          // Scheduled Doses Section Heading with Icon
-          Row(
-            children: [
-              Icon(
-                Icons.medication_rounded,
-                size: kIconSizeMedium,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: kSpacingS),
-              Text('Doses', style: sectionTitleStyle(context)),
-            ],
-          ),
-          const SizedBox(height: kSpacingM),
-          // Show doses for active schedules only
+          // Show doses for active schedules only.
+          // Keep headings minimal: the card title already conveys "Schedule".
           NextDoseCard(
             medication: med,
             schedules: schedules.where((s) => s.active).toList(),
-          ),
-          const SizedBox(height: kSpacingL),
-        ],
-
-        // Schedules Section - show ALL schedules (including paused)
-        if (schedules.isNotEmpty) ...[
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_month_rounded,
-                size: kIconSizeMedium,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: kSpacingS),
-              Text('Schedules', style: sectionTitleStyle(context)),
-            ],
           ),
           const SizedBox(height: kSpacingM),
           // Show ALL schedules including paused ones
@@ -1133,7 +1105,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             (schedule) =>
                 EnhancedScheduleCard(schedule: schedule, medication: med),
           ),
-          const SizedBox(height: kSpacingL),
           // Adherence now moved to MedicationReportsWidget tabs
         ],
       ],

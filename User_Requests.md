@@ -22,7 +22,7 @@
 ==============
 
 ## Medication Details Screen
-- I am conflicted on the Schedule Card. It looks redundant having Schedules then Doses and Schedules within this card with the same prominant heading.  Do we split them into seperate cards or try to organise it a different way?
+- I am conflicted on the Schedule Card. It looks redundant having Schedules then Doses and Schedules within this card with the same prominant heading.  Do we split them into seperate cards or try to organise it a different way? [COMPLETED]
 - App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED] - Not completed, there is issues with the fullly documented details nudging the refill and ad hoc down belowe the app header gradient bottom edge. The app header edge needs to adjust to fit all App header items. 
 - Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. 
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED] This is not complete. There are light grey corners still  appearing on clicking. 
@@ -54,8 +54,10 @@
 ## Add Medication
 
 ### Choose Medicaiotn Type Screen
+- The menu card items have lost there shadow
 
 ### Choose Injection Type Screen
+- The menu card items have lost there shadow
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
