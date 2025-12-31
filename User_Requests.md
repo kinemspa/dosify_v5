@@ -12,7 +12,7 @@
 
 ### Large Cards
 - Need some space between the Storage info and the schedules row.  [COMPLETED]
-- Can we place all the storage objects in their own little space? MDV Have Active and Sealed with Storage Conditionas and Storage Locations. 
+- Can we place all the storage objects in their own little space? MDV Have Active and Sealed with Storage Conditionas and Storage Locations.  [COMPLETED]
 - MDV has Expiry for Active and Sealed, Maybe the expiry needs to sit within the storage details. 
 
 ### Compact Cards
@@ -27,6 +27,8 @@
 - Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. 
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED] This is not complete. There are light grey corners still  appearing on clicking. 
 - Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. 
+- For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too?
+- For MDV - Active Vial Details section not showing Expiry. 
 
 ### Reports Card
 
@@ -35,26 +37,18 @@
 	- Remove the view change. 
 	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that. 
 	- Missed Doses should be editable. 
-	- The expansion of the hisotrical dose is awesome, but you have created some new bottom pop up page for changing it. Use the existing one that pops on taking doses. This is to be the universal dose widget for editing doses. [COMPLETED]
-	- Need to include Refills in the history.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
-- Add reports
-	- Doses taken vs missed (stacked bar per day/week) [COMPLETED]
-	- Time-of-day consistency (histogram of taken times) [COMPLETED]
-	- Streaks / consistency score (sparkline) [COMPLETED]
-	- Action breakdown (taken / skipped / snoozed) [COMPLETED]
-	- Dose amount trend (actual dose over time) [COMPLETED]
-	- Inventory events timeline (refill/restock/vial opened markers) [COMPLETED]
-	- Dose Strenght History over time in a bar chart graph. [COMPLETED]
+	- Need to include other events like, doses recorded on empty stock, or stock deleted.
 
 ### Schedule
 - Change Scheduled Doses heading to Doses [COMPLETED]
+- Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. 
 
 ### Medication Details Card
-- Can you not bring in a little flare and style to all the different text elements?  Still boring. [COMPLETED]
-- Remove the card border. This is still there. [COMPLETED]
 - Active vial needs helper text, thetracked medication. [COMPLETED]
 - Description text in thius part needs to wrap and display all. not elipses. [COMPLETED]
+- The Sub Headings under each Card need to be smaller or maybe not primary colour. For EQ. Sleaed Vials is a bigger font than the Active vial, and also the same size as Medicaiont Details. 
+
 
 ==============
 ## Add Medication
@@ -76,7 +70,9 @@
 - Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
 - COmpact Cards date circle has made the compact card just as big as the large card. Need to fix this. The Large card purpose is to show mroe infoarmation. COmpact shows less. list shows the least.  [COMPLETED]
 - On the cards, Schedule Name needs to Merge the Med Name into it. If the Schedule is named "1 Tablet" it should show "Panadol - 1 Tablet" [COMPLETED]
+- Change for the Card Name and Medicine. The Medicine name to be the heading of the card. The Schedule Name to be the 2nd most prominent text on the card, place underneath the med name. 
 - For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think.  [COMPLETED]
+- Can we reduce the Next size a bit and move it to be slioght left of centre, as its cropping the date. 
 
 ==============
 # Add Schedule

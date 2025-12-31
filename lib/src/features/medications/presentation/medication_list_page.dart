@@ -969,13 +969,150 @@ class _MedLargeCard extends StatelessWidget {
     );
   }
 
+  String? _cleanText(String? value) {
+    final v = value?.trim();
+    if (v == null || v.isEmpty) return null;
+    return v;
+  }
+
+  String? _pickLocation(String? primary, String? fallback) {
+    return _cleanText(primary) ?? _cleanText(fallback);
+  }
+
+  Widget _buildStorageLocationRow(BuildContext context, String location) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.location_on_outlined,
+          size: kIconSizeSmall,
+          color: cs.primary,
+        ),
+        const SizedBox(width: kSpacingXS),
+        Expanded(
+          child: Text(
+            location,
+            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMdvStorageBlock(
+    BuildContext context, {
+    required String label,
+    required List<IconData> icons,
+    required String? location,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Wrap(
+              spacing: kSpacingXS,
+              runSpacing: kSpacingXS,
+              children: [
+                for (final icon in icons)
+                  Icon(icon, size: kIconSizeSmall, color: cs.primary),
+              ],
+            ),
+            const SizedBox(width: kSpacingXS),
+            Expanded(
+              child: Text(
+                label,
+                style: helperTextStyle(context)?.copyWith(
+                  fontSize: kFontSizeHint,
+                  fontWeight: kFontWeightSemiBold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        if (location != null) ...[
+          const SizedBox(height: kSpacingXS),
+          _buildStorageLocationRow(context, location),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStorageInsetSection(
+    BuildContext context, {
+    required List<IconData> activeIcons,
+    required List<IconData> sealedIcons,
+    required List<IconData> combinedIcons,
+  }) {
+    final location = _pickLocation(
+      m.storageLocation,
+      m.activeVialStorageLocation,
+    );
+    final activeLocation = _pickLocation(
+      m.activeVialStorageLocation,
+      m.storageLocation,
+    );
+    final sealedLocation = _pickLocation(
+      m.backupVialsStorageLocation,
+      m.storageLocation,
+    );
+
+    final body = m.form == MedicationForm.multiDoseVial
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildMdvStorageBlock(
+                context,
+                label: 'Active',
+                icons: activeIcons,
+                location: activeLocation,
+              ),
+              const SizedBox(height: kSpacingS),
+              _buildMdvStorageBlock(
+                context,
+                label: 'Sealed',
+                icons: sealedIcons,
+                location: sealedLocation,
+              ),
+            ],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: kSpacingXS,
+                runSpacing: kSpacingXS,
+                children: [
+                  for (final icon in combinedIcons)
+                    Icon(icon, size: kIconSizeSmall),
+                ],
+              ),
+              if (location != null) ...[
+                const SizedBox(height: kSpacingXS),
+                _buildStorageLocationRow(context, location),
+              ],
+            ],
+          );
+
+    return Container(
+      width: double.infinity,
+      padding: kInsetSectionPadding,
+      decoration: buildInsetSectionDecoration(
+        context: context,
+        backgroundOpacity: 0.9,
+      ),
+      child: body,
+    );
+  }
+
   Widget _buildLeading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final primaryStorage = m.storageLocation;
-    final fallbackStorage = m.activeVialStorageLocation;
-    final storageLabel = (primaryStorage?.isNotEmpty ?? false)
-        ? primaryStorage
-        : fallbackStorage;
     final activeScheduleCount = _activeScheduleCount();
     final strengthQuantityLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
@@ -1054,81 +1191,12 @@ class _MedLargeCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: kSpacingS),
-        if (m.form == MedicationForm.multiDoseVial) ...[
-          Row(
-            children: [
-              Wrap(
-                spacing: kSpacingXS,
-                runSpacing: kSpacingXS,
-                children: [
-                  for (final icon in activeIcons)
-                    Icon(icon, size: kIconSizeSmall, color: cs.primary),
-                ],
-              ),
-              const SizedBox(width: kSpacingXS),
-              Text(
-                'Active',
-                style: helperTextStyle(context)?.copyWith(
-                  fontSize: kFontSizeHint,
-                  fontWeight: kFontWeightSemiBold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: kSpacingXS),
-          Row(
-            children: [
-              Wrap(
-                spacing: kSpacingXS,
-                runSpacing: kSpacingXS,
-                children: [
-                  for (final icon in sealedIcons)
-                    Icon(icon, size: kIconSizeSmall, color: cs.primary),
-                ],
-              ),
-              const SizedBox(width: kSpacingXS),
-              Text(
-                'Sealed',
-                style: helperTextStyle(context)?.copyWith(
-                  fontSize: kFontSizeHint,
-                  fontWeight: kFontWeightSemiBold,
-                ),
-              ),
-            ],
-          ),
-        ] else
-          Wrap(
-            spacing: kSpacingXS,
-            runSpacing: kSpacingXS,
-            children: [
-              for (final icon in combinedIcons)
-                Icon(icon, size: kIconSizeSmall, color: cs.primary),
-            ],
-          ),
-        if (storageLabel?.isNotEmpty ?? false) ...[
-          const SizedBox(height: kSpacingXS),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                size: kIconSizeSmall,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: kSpacingXS),
-              Expanded(
-                child: Text(
-                  storageLabel!,
-                  style: helperTextStyle(
-                    context,
-                  )?.copyWith(fontSize: kFontSizeSmall),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ],
+        _buildStorageInsetSection(
+          context,
+          activeIcons: activeIcons,
+          sealedIcons: sealedIcons,
+          combinedIcons: combinedIcons,
+        ),
       ],
     );
   }
