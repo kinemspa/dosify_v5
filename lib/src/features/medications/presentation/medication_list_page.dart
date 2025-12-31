@@ -988,24 +988,61 @@ class _MedLargeCard extends StatelessWidget {
         : DateFormat('MM/dd', locale).format(expiry);
   }
 
-  String _buildMdvSecondaryLine() {
-    // Active vial total volume
-    final containerMl = m.containerVolumeMl;
+  TextSpan _mdvRemainingMlSpan(BuildContext context) {
+    final theme = Theme.of(context);
+    final colored = _MedicationStockStatusText.colorFor(context, m);
+    final resolvedBaseStyle = helperTextStyle(context)?.copyWith(
+      fontSize: kFontSizeXSmall,
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+    );
 
-    // Backup/unopened vials: use stockValue when the stockUnit is multi-dose vials
+    final totalMl = (m.containerVolumeMl ?? 0).toDouble();
+    final currentRaw = (m.activeVialVolume ?? totalMl).toDouble();
+    final currentMl = totalMl > 0 ? currentRaw.clamp(0.0, totalMl) : 0.0;
+
+    if (totalMl <= 0) {
+      return TextSpan(style: resolvedBaseStyle, text: '');
+    }
+
+    return TextSpan(
+      style: resolvedBaseStyle,
+      children: [
+        TextSpan(
+          text: fmt2(currentMl),
+          style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+        ),
+        TextSpan(text: '/${fmt2(totalMl)} mL'),
+      ],
+    );
+  }
+
+  TextSpan _mdvRemainingVialsSpan(BuildContext context) {
+    final theme = Theme.of(context);
+    final colored = _MedicationStockStatusText.colorFor(context, m);
+    final resolvedBaseStyle = helperTextStyle(context)?.copyWith(
+      fontSize: kFontSizeXSmall,
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+    );
+
     final hasMdvUnit = m.stockUnit == StockUnit.multiDoseVials;
-    final backupCount = hasMdvUnit ? m.stockValue.floor() : null;
-
-    if (backupCount != null && backupCount > 0) {
-      final label = backupCount == 1 ? 'sealed vial' : 'sealed vials';
-      return '$backupCount $label';
+    final count = hasMdvUnit ? m.stockValue.floor() : null;
+    if (count == null || count <= 0) {
+      return TextSpan(style: resolvedBaseStyle, text: '');
     }
 
-    if (containerMl != null) {
-      return '${fmt2(containerMl)} mL vial';
-    }
-
-    return '';
+    final label = count == 1 ? 'vial' : 'vials';
+    return TextSpan(
+      style: resolvedBaseStyle,
+      children: [
+        TextSpan(
+          text: '$count',
+          style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+        ),
+        TextSpan(text: ' $label'),
+      ],
+    );
   }
 
   Widget _buildCompactStorageLine(
@@ -1015,11 +1052,12 @@ class _MedLargeCard extends StatelessWidget {
     required String? location,
     required DateTime? createdAt,
     required DateTime? expiry,
+    Widget? trailing,
   }) {
     final cs = Theme.of(context).colorScheme;
     final baseStyle = helperTextStyle(
       context,
-    )?.copyWith(fontSize: kFontSizeHint);
+    )?.copyWith(fontSize: kFontSizeXSmall);
     final spans = <TextSpan>[];
 
     final createdAtValue = createdAt;
@@ -1048,31 +1086,38 @@ class _MedLargeCard extends StatelessWidget {
 
     return Row(
       children: [
-        Wrap(
-          spacing: kSpacingXS,
-          runSpacing: kSpacingXS,
-          children: [
-            for (final icon in icons)
-              Icon(icon, size: kIconSizeSmall, color: cs.primary),
-          ],
-        ),
-        if (expiryText != null) ...[
-          const SizedBox(width: kSpacingXS),
-          Text(
-            expiryText,
-            style: baseStyle?.copyWith(color: expiryColor),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-        const SizedBox(width: kSpacingXS),
         Expanded(
-          child: RichText(
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            text: TextSpan(style: baseStyle, children: spans),
+          child: Row(
+            children: [
+              Wrap(
+                spacing: kSpacingXS,
+                runSpacing: kSpacingXS,
+                children: [
+                  for (final icon in icons)
+                    Icon(icon, size: kIconSizeSmall, color: cs.primary),
+                ],
+              ),
+              if (expiryText != null) ...[
+                const SizedBox(width: kSpacingXS),
+                Text(
+                  expiryText,
+                  style: baseStyle?.copyWith(color: expiryColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(width: kSpacingXS),
+              Expanded(
+                child: RichText(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(style: baseStyle, children: spans),
+                ),
+              ),
+            ],
           ),
         ),
+        if (trailing != null) ...[const SizedBox(width: kSpacingS), trailing],
       ],
     );
   }
@@ -1113,6 +1158,12 @@ class _MedLargeCard extends StatelessWidget {
                 location: activeLocation,
                 createdAt: activeCreatedAt,
                 expiry: activeExpiry,
+                trailing: RichText(
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: _mdvRemainingMlSpan(context),
+                ),
               ),
               const SizedBox(height: kSpacingXS),
               _buildCompactStorageLine(
@@ -1122,6 +1173,12 @@ class _MedLargeCard extends StatelessWidget {
                 location: sealedLocation,
                 createdAt: sealedCreatedAt,
                 expiry: sealedExpiry,
+                trailing: RichText(
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: _mdvRemainingVialsSpan(context),
+                ),
               ),
             ],
           )
@@ -1231,6 +1288,7 @@ class _MedLargeCard extends StatelessWidget {
   Widget _buildTrailing(BuildContext context) {
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
     final pctRounded = stockInfo.percentage.clamp(0, 100).round();
+    final isMdv = m.form == MedicationForm.multiDoseVial;
     final baseStyle = helperTextStyle(
       context,
     )?.copyWith(fontSize: kFontSizeXSmall);
@@ -1255,32 +1313,20 @@ class _MedLargeCard extends StatelessWidget {
             textColor: stockColor,
           ),
         ),
-        const SizedBox(height: kSpacingXS),
-        Align(
-          alignment: Alignment.centerRight,
-          child: RichText(
-            textAlign: TextAlign.right,
-            text: _MedicationStockStatusText.textSpanFor(
-              context,
-              m,
-              baseStyle: baseStyle,
-            ),
-          ),
-        ),
-        if (m.form == MedicationForm.multiDoseVial)
-          Padding(
-            padding: const EdgeInsets.only(top: kSpacingXS),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                _buildMdvSecondaryLine(),
-                style: baseStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
+        if (!isMdv) ...[
+          const SizedBox(height: kSpacingXS),
+          Align(
+            alignment: Alignment.centerRight,
+            child: RichText(
+              textAlign: TextAlign.right,
+              text: _MedicationStockStatusText.textSpanFor(
+                context,
+                m,
+                baseStyle: baseStyle,
               ),
             ),
           ),
+        ],
       ],
     );
   }
