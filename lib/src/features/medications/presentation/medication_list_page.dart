@@ -1011,11 +1011,7 @@ class _MedLargeCard extends StatelessWidget {
       'Exp ${_formatExpiryLabel(expiry)}',
       style: helperTextStyle(context)?.copyWith(
         fontSize: kFontSizeSmall,
-        color: expiryStatusColor(
-          context,
-          createdAt: createdAt,
-          expiry: expiry,
-        ),
+        color: expiryStatusColor(context, createdAt: createdAt, expiry: expiry),
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
@@ -1056,19 +1052,13 @@ class _MedLargeCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            if (createdAt != null && expiry != null)
+              _buildExpiryRow(context, createdAt: createdAt, expiry: expiry),
           ],
         ),
         if (location != null) ...[
           const SizedBox(height: kSpacingXS),
           _buildStorageLocationRow(context, location),
-        ],
-        if (createdAt != null && expiry != null) ...[
-          const SizedBox(height: kSpacingXS),
-          _buildExpiryRow(
-            context,
-            createdAt: createdAt,
-            expiry: expiry,
-          ),
         ],
       ],
     );
@@ -1111,7 +1101,7 @@ class _MedLargeCard extends StatelessWidget {
                 createdAt: activeCreatedAt,
                 expiry: activeExpiry,
               ),
-              const SizedBox(height: kSpacingS),
+              const SizedBox(height: kSpacingXS),
               _buildMdvStorageBlock(
                 context,
                 label: 'Sealed',
@@ -1144,15 +1134,8 @@ class _MedLargeCard extends StatelessWidget {
             ],
           );
 
-    return Container(
-      width: double.infinity,
-      padding: kInsetSectionPadding,
-      decoration: buildInsetSectionDecoration(
-        context: context,
-        backgroundOpacity: 0.9,
-      ),
-      child: body,
-    );
+    // Intentionally borderless/compact: keep storage details inline without an inset card.
+    return body;
   }
 
   Widget _buildLeading(BuildContext context) {
