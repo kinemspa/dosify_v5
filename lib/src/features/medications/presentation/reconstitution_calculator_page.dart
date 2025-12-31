@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -75,54 +75,6 @@ class _ReconstitutionCalculatorPageState
     // Results handled by calculator widget
   }
 
-  InputDecoration _fieldDecoration(BuildContext context, {String? hint}) {
-    final cs = Theme.of(context).colorScheme;
-    return InputDecoration(
-      hintText: hint,
-      floatingLabelBehavior: FloatingLabelBehavior.never,
-      isDense: false,
-      isCollapsed: false,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      constraints: const BoxConstraints(minHeight: kFieldHeight),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withValues(alpha: 0.5),
-          width: 0.75,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
-      ),
-    );
-  }
-
-  InputDecoration _dropdownDecoration(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InputDecoration(
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      filled: true,
-      fillColor: cs.surfaceContainerLowest,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: cs.outlineVariant.withValues(alpha: 0.5),
-          width: 0.75,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 1.5),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final strengthValue = double.tryParse(_strengthCtrl.text) ?? 0;
@@ -130,104 +82,100 @@ class _ReconstitutionCalculatorPageState
     return Scaffold(
       appBar: const GradientAppBar(title: 'Reconstitution Calculator'),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(kSpacingL),
         children: [
-          // Medication name input (optional)
-          LabelFieldRow(
-            label: 'Medication',
-            field: Field36(
-              child: TextField(
-                controller: _medNameCtrl,
-                decoration: _fieldDecoration(context, hint: 'Optional'),
-                onChanged: (_) => setState(() {}),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
+          SectionFormCard(
+            title: 'Medication (Optional)',
+            neutral: true,
+            children: [
+              LabelFieldRow(
+                label: 'Name',
+                field: Field36(
+                  child: TextField(
+                    controller: _medNameCtrl,
+                    decoration: buildCompactFieldDecoration(
+                      context: context,
+                      hint: 'Optional',
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    textAlign: TextAlign.center,
+                    style: bodyTextStyle(context),
+                  ),
+                ),
               ),
-            ),
+              buildHelperText(
+                context,
+                'Enter the medication name (optional, for context)',
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 128, bottom: 12, top: 2),
-            child: Text(
-              'Enter the medication name (optional, for context)',
-              style: kMutedLabelStyle(context),
-            ),
-          ),
-          // Unit dropdown
-          LabelFieldRow(
-            label: 'Strength Unit',
-            field: SmallDropdown36<String>(
-              value: _selectedUnit,
-              width: kSmallControlWidth,
-              items: const [
-                DropdownMenuItem(
-                  value: 'mcg',
-                  child: Center(child: Text('mcg')),
+          sectionSpacing,
+          SectionFormCard(
+            title: 'Vial Strength',
+            neutral: true,
+            children: [
+              LabelFieldRow(
+                label: 'Unit',
+                field: SmallDropdown36<String>(
+                  value: _selectedUnit,
+                  width: kSmallControlWidth,
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'mcg',
+                      child: Center(child: Text('mcg')),
+                    ),
+                    DropdownMenuItem(
+                      value: 'mg',
+                      child: Center(child: Text('mg')),
+                    ),
+                    DropdownMenuItem(
+                      value: 'g',
+                      child: Center(child: Text('g')),
+                    ),
+                    DropdownMenuItem(
+                      value: 'units',
+                      child: Center(child: Text('units')),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _selectedUnit = v ?? 'mg'),
                 ),
-                DropdownMenuItem(
-                  value: 'mg',
-                  child: Center(child: Text('mg')),
+              ),
+              buildHelperText(context, 'Select the unit for vial strength'),
+              LabelFieldRow(
+                label: 'Strength',
+                field: StepperRow36(
+                  controller: _strengthCtrl,
+                  onDec: () {
+                    final v = double.tryParse(_strengthCtrl.text) ?? 0;
+                    final nv = (v - 1).clamp(0, 10000);
+                    setState(() {
+                      _strengthCtrl.text = nv == nv.roundToDouble()
+                          ? nv.toInt().toString()
+                          : nv.toStringAsFixed(2);
+                    });
+                  },
+                  onInc: () {
+                    final v = double.tryParse(_strengthCtrl.text) ?? 0;
+                    final nv = (v + 1).clamp(0, 10000);
+                    setState(() {
+                      _strengthCtrl.text = nv == nv.roundToDouble()
+                          ? nv.toInt().toString()
+                          : nv.toStringAsFixed(2);
+                    });
+                  },
+                  decoration: buildCompactFieldDecoration(
+                    context: context,
+                    hint: '0',
+                  ),
                 ),
-                DropdownMenuItem(
-                  value: 'g',
-                  child: Center(child: Text('g')),
-                ),
-                DropdownMenuItem(
-                  value: 'units',
-                  child: Center(child: Text('units')),
-                ),
-              ],
-              onChanged: (v) => setState(() => _selectedUnit = v ?? 'mg'),
-              decoration: _dropdownDecoration(context),
-            ),
+              ),
+              buildHelperText(
+                context,
+                'Total drug amount in the vial (before reconstitution)',
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 128, bottom: 12, top: 2),
-            child: Text(
-              'Select the unit for vial strength',
-              style: kMutedLabelStyle(context),
-            ),
-          ),
-          // Strength input row
-          LabelFieldRow(
-            label: 'Vial Strength',
-            field: StepperRow36(
-              controller: _strengthCtrl,
-              onDec: () {
-                final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                final nv = (v - 1).clamp(0, 10000);
-                setState(() {
-                  _strengthCtrl.text = nv == nv.roundToDouble()
-                      ? nv.toInt().toString()
-                      : nv.toStringAsFixed(2);
-                });
-              },
-              onInc: () {
-                final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                final nv = (v + 1).clamp(0, 10000);
-                setState(() {
-                  _strengthCtrl.text = nv == nv.roundToDouble()
-                      ? nv.toInt().toString()
-                      : nv.toStringAsFixed(2);
-                });
-              },
-              decoration: _fieldDecoration(context, hint: widget.unitLabel),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 128, bottom: 16, top: 2),
-            child: Text(
-              'Total drug amount in the vial (before reconstitution)',
-              style: kMutedLabelStyle(context),
-            ),
-          ),
-          // Divider
-          Divider(
-            color: Theme.of(
-              context,
-            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 12),
-          // Embedded calculator widget
+          sectionSpacing,
           if (strengthValue > 0)
             ReconstitutionCalculatorWidget(
               initialStrengthValue: strengthValue,
@@ -239,17 +187,20 @@ class _ReconstitutionCalculatorPageState
               initialDoseUnit: widget.initialDoseUnit,
               initialSyringeSize: widget.initialSyringeSize,
               initialVialSize: widget.initialVialSize,
-              showSummary: false,
+              showSummary: true,
               onCalculate: _onCalculation,
             )
           else
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Please enter the vial strength above to use the calculator',
-                style: kMutedLabelStyle(context),
-                textAlign: TextAlign.center,
-              ),
+            SectionFormCard(
+              title: 'Calculator',
+              neutral: true,
+              children: [
+                Text(
+                  'Enter the vial strength above to use the calculator',
+                  style: helperTextStyle(context),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
         ],
       ),
