@@ -505,6 +505,7 @@ const double kTextScaleFactorMin = 1.0;
 const double kTextScaleFactorMax = 1.15;
 
 /// Font sizes
+const double kFontSizeXSmall = 9;
 const double kFontSizeSmall = 11;
 const double kFontSizeMedium = 13;
 const double kFontSizeLarge = 15;

@@ -1231,7 +1231,9 @@ class _MedLargeCard extends StatelessWidget {
   Widget _buildTrailing(BuildContext context) {
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
     final pctRounded = stockInfo.percentage.clamp(0, 100).round();
-    final baseStyle = helperTextStyle(context)?.copyWith(fontSize: 9);
+    final baseStyle = helperTextStyle(
+      context,
+    )?.copyWith(fontSize: kFontSizeXSmall);
     final stockColor = stockStatusColorFromPercentage(
       context,
       percentage: stockInfo.percentage,
@@ -1272,7 +1274,7 @@ class _MedLargeCard extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: Text(
                 _buildMdvSecondaryLine(),
-                style: helperTextStyle(context)?.copyWith(fontSize: 9),
+                style: baseStyle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.right,
@@ -1295,7 +1297,7 @@ class _MedLargeCard extends StatelessWidget {
       child: Text(
         'Exp ${_formatExpiryLabel(m.expiry!)}',
         style: helperTextStyle(context)?.copyWith(
-          fontSize: 9,
+          fontSize: kFontSizeXSmall,
           color: expiryStatusColor(
             context,
             createdAt: m.createdAt,
