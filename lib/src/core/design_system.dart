@@ -131,6 +131,21 @@ const double kCalendarDoseIndicatorSpacing = 2;
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
 
+/// Bottom sheet sizing
+const double kBottomSheetHandleWidth = 40;
+const double kBottomSheetHandleHeight = 4;
+const double kBottomSheetHandleRadius = 2;
+const EdgeInsets kBottomSheetHeaderPadding = EdgeInsets.fromLTRB(
+  kSpacingL,
+  kSpacingS,
+  kSpacingL,
+  kSpacingL,
+);
+const EdgeInsets kBottomSheetContentPadding = EdgeInsets.all(kSpacingL);
+const EdgeInsets kBottomSheetHandleMargin = EdgeInsets.symmetric(
+  vertical: kSpacingL,
+);
+
 /// Month-view day cell styling
 const double kCalendarDayNumberSize = 24;
 const EdgeInsets kCalendarDayNumberPadding = EdgeInsets.all(kSpacingXS);

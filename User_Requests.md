@@ -159,10 +159,10 @@
 ==============
 # Take Dose Screen
 - Take Dose:
-	- Take dose screen to be styled into the same as the ad hoc dialog. Ad hoc dialog is very nice and stylish. I want all Take doses to look like this and display like that. 
+	- Take dose screen to be styled into the same as the ad hoc dialog. Ad hoc dialog is very nice and stylish. I want all Take doses to look like this and display like that.  [COMPLETED]
 
 - Edit Historical Dose:
-	- Take dose screen to be styled into the same as the ad hoc dialog.
+	- Take dose screen to be styled into the same as the ad hoc dialog.  [COMPLETED]
 
 
 ==============

@@ -6,6 +6,8 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
+import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Bottom sheet showing dose details and actions (Take, Snooze, Skip)
 class DoseActionSheet extends StatefulWidget {
@@ -35,7 +37,9 @@ class DoseActionSheet extends StatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DoseActionSheet(
         dose: dose,
         onMarkTaken: onMarkTaken,
@@ -184,35 +188,29 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             children: [
               // Handle bar
               Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: kBottomSheetHandleWidth,
+                height: kBottomSheetHandleHeight,
+                margin: kBottomSheetHandleMargin,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
+                  color: colorScheme.onSurfaceVariant.withValues(
+                    alpha: kOpacityLow,
+                  ),
+                  borderRadius: BorderRadius.circular(kBottomSheetHandleRadius),
                 ),
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: kBottomSheetHeaderPadding,
                 child: Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text('Take dose', style: sectionTitleStyle(context)),
                           Text(
-                            widget.dose.scheduleName,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.dose.doseDescription,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+                            'Confirm status, add notes, and save.',
+                            style: helperTextStyle(context),
                           ),
                         ],
                       ),
@@ -229,71 +227,76 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: kBottomSheetContentPadding,
                   children: [
-                    _buildInfoRow(
-                      context,
-                      'Time',
-                      widget.dose.timeFormatted,
-                      Icons.access_time,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildInfoRow(
-                      context,
-                      'Date',
-                      MaterialLocalizations.of(
-                        context,
-                      ).formatMediumDate(widget.dose.scheduledTime),
-                      Icons.calendar_today,
-                    ),
-                    const SizedBox(height: 12),
-                    // Compact status section
-                    _buildStatusSection(context, widget.dose, colorScheme),
-                    const SizedBox(height: 16),
-                    // Action buttons - always visible with state-based styling
-                    _buildActionButtons(context, widget.dose, colorScheme),
-                    const SizedBox(height: 16),
-                    // Notes field (always visible)
-                    TextField(
-                      controller: _notesController,
-                      decoration: InputDecoration(
-                        labelText: 'Notes (optional)',
-                        hintText: 'Add any notes about this dose...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    SectionFormCard(
+                      neutral: true,
+                      title: 'Dose',
+                      children: [
+                        DoseSummaryRow(
+                          dose: widget.dose,
+                          showMedicationName: true,
+                          onTap: () {},
                         ),
-                        prefixIcon: const Icon(Icons.note_outlined),
-                      ),
-                      maxLines: 3,
-                      textCapitalization: TextCapitalization.sentences,
+                      ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: kSpacingM),
+                    SectionFormCard(
+                      neutral: true,
+                      title: 'Status',
+                      children: [
+                        _buildStatusChips(),
+                        const SizedBox(height: kSpacingXS),
+                        _buildStatusHint(context),
+                      ],
+                    ),
+                    const SizedBox(height: kSpacingM),
+                    SectionFormCard(
+                      neutral: true,
+                      title: 'Notes',
+                      children: [
+                        TextField(
+                          controller: _notesController,
+                          style: bodyTextStyle(context),
+                          decoration: buildFieldDecoration(
+                            context,
+                            hint: 'Add any notes about this dose…',
+                          ),
+                          maxLines: 3,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: kSpacingM),
                     // Save & Close buttons
                     Row(
                       children: [
                         // Close without saving
                         Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: SizedBox(
+                            height: kLargeButtonHeight,
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Close'),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: kSpacingM),
                         // Save & Close
                         Expanded(
                           flex: 2,
-                          child: FilledButton.icon(
-                            onPressed: () async {
-                              await _saveChanges();
-                              if (context.mounted) Navigator.pop(context);
-                            },
-                            icon: const Icon(Icons.save, size: 18),
-                            label: const Text('Save & Close'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: SizedBox(
+                            height: kLargeButtonHeight,
+                            child: FilledButton.icon(
+                              onPressed: () async {
+                                await _saveChanges();
+                                if (context.mounted) Navigator.pop(context);
+                              },
+                              icon: const Icon(
+                                Icons.save,
+                                size: kIconSizeSmall,
+                              ),
+                              label: const Text('Save & Close'),
                             ),
                           ),
                         ),
@@ -309,264 +312,76 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     );
   }
 
-  Widget _buildStatusSection(
-    BuildContext context,
-    CalculatedDose dose,
-    ColorScheme colorScheme,
-  ) {
-    // Use local state if changed, otherwise show original status
-    final displayStatus = _selectedStatus;
-    final statusColor = _getStatusColor(displayStatus, colorScheme);
-    final statusIcon = _getStatusIcon(displayStatus);
-    final statusText = _getStatusText(displayStatus);
-
-    return Row(
+  Widget _buildStatusChips() {
+    return Wrap(
+      spacing: kSpacingS,
+      runSpacing: kSpacingXS,
       children: [
-        Icon(statusIcon, size: 20, color: statusColor),
-        const SizedBox(width: 8),
-        Text(
-          statusText,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: statusColor,
-            fontWeight: FontWeight.w600,
-          ),
+        PrimaryChoiceChip(
+          label: const Text('Scheduled'),
+          selected:
+              _selectedStatus == DoseStatus.pending ||
+              _selectedStatus == DoseStatus.overdue,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.pending;
+              _hasChanged = true;
+            });
+          },
         ),
-        if (_hasChanged) ...[
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              'Changed',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.onPrimaryContainer,
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildActionButtons(
-    BuildContext context,
-    CalculatedDose dose,
-    ColorScheme colorScheme,
-  ) {
-    // Use local state for selection
-    final status = _selectedStatus;
-
-    // Highlight based on current local status
-    final takePrimary = status == DoseStatus.taken;
-    final snoozePrimary = status == DoseStatus.snoozed;
-    final skipPrimary = status == DoseStatus.skipped;
-
-    return Row(
-      children: [
-        // Take button - toggles between taken and pending
-        Expanded(
-          child: takePrimary
-              ? FilledButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedStatus = widget.dose.status == DoseStatus.taken
-                          ? DoseStatus.pending
-                          : widget.dose.status;
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: const Icon(Icons.check_circle, size: 18),
-                  label: const Text('Taken'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                )
-              : OutlinedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedStatus = DoseStatus.taken;
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: const Icon(Icons.check_circle_outline, size: 18),
-                  label: const Text('Take'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
+        PrimaryChoiceChip(
+          label: const Text('Taken'),
+          selected: _selectedStatus == DoseStatus.taken,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.taken;
+              _hasChanged = true;
+            });
+          },
         ),
-        const SizedBox(width: 8),
-        // Snooze button - toggles between snoozed and pending
-        Expanded(
-          child: snoozePrimary
-              ? FilledButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedStatus = widget.dose.status == DoseStatus.snoozed
-                          ? DoseStatus.pending
-                          : widget.dose.status;
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: const Icon(Icons.snooze, size: 18),
-                  label: const Text('Snoozed'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    backgroundColor: Colors.amber,
-                    foregroundColor: Colors.black87,
-                  ),
-                )
-              : OutlinedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedStatus = DoseStatus.snoozed;
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: const Icon(Icons.snooze_outlined, size: 18),
-                  label: const Text('Snooze'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
+        PrimaryChoiceChip(
+          label: const Text('Snoozed'),
+          selected: _selectedStatus == DoseStatus.snoozed,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.snoozed;
+              _hasChanged = true;
+            });
+          },
         ),
-        const SizedBox(width: 8),
-        // Skip button - toggles between skipped and pending
-        Expanded(
-          child: skipPrimary
-              ? FilledButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedStatus = widget.dose.status == DoseStatus.skipped
-                          ? DoseStatus.pending
-                          : widget.dose.status;
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: const Icon(Icons.cancel, size: 18),
-                  label: const Text('Skipped'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    backgroundColor: Colors.grey,
-                    foregroundColor: Colors.white,
-                  ),
-                )
-              : OutlinedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedStatus = DoseStatus.skipped;
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: const Icon(Icons.cancel_outlined, size: 18),
-                  label: const Text('Skip'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
+        PrimaryChoiceChip(
+          label: const Text('Skipped'),
+          selected: _selectedStatus == DoseStatus.skipped,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.skipped;
+              _hasChanged = true;
+            });
+          },
         ),
       ],
     );
   }
 
-  Color _getStatusColor(DoseStatus status, ColorScheme colorScheme) {
-    switch (status) {
-      case DoseStatus.taken:
-        return colorScheme.primary; // Blue/Primary
-      case DoseStatus.skipped:
-        return Colors.grey; // Grey for canceled/skipped
-      case DoseStatus.snoozed:
-        return Colors.orange; // Orange for snoozed
-      case DoseStatus.overdue:
-        return colorScheme.error; // Red for missed/overdue
-      case DoseStatus.pending:
-        return colorScheme.onSurface.withValues(
-          alpha: 0.6,
-        ); // Muted for pending
-    }
-  }
-
-  String _getStatusText(DoseStatus status) {
-    switch (status) {
-      case DoseStatus.taken:
-        return 'Taken';
-      case DoseStatus.skipped:
-        return 'Skipped';
-      case DoseStatus.snoozed:
-        return 'Snoozed';
-      case DoseStatus.overdue:
-        return 'Overdue';
-      case DoseStatus.pending:
-        return 'Pending';
-    }
-  }
-
-  Widget _buildInfoRow(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+  Widget _buildStatusHint(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 20, color: colorScheme.primary),
-        const SizedBox(width: 12),
+        Icon(
+          _hasChanged ? Icons.info_outline_rounded : Icons.schedule_rounded,
+          size: kIconSizeSmall,
+          color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+        ),
+        const SizedBox(width: kSpacingS),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(value, style: theme.textTheme.bodyLarge),
-            ],
+          child: Text(
+            _hasChanged
+                ? 'Status changed — press Save & Close to apply.'
+                : 'Change status if you need to correct this dose.',
+            style: helperTextStyle(context),
           ),
         ),
       ],
     );
-  }
-
-  IconData _getStatusIcon(DoseStatus status) {
-    switch (status) {
-      case DoseStatus.taken:
-        return Icons.check_circle;
-      case DoseStatus.skipped:
-        return Icons.cancel;
-      case DoseStatus.snoozed:
-        return Icons.snooze;
-      case DoseStatus.overdue:
-        return Icons.warning;
-      case DoseStatus.pending:
-        return Icons.schedule;
-    }
   }
 }
