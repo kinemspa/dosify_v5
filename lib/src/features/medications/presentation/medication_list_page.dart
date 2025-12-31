@@ -988,6 +988,20 @@ class _MedLargeCard extends StatelessWidget {
         : DateFormat('MM/dd', locale).format(expiry);
   }
 
+  String? _buildMdvActiveStockLabel() {
+    final remainingMl = m.activeVialVolume;
+    final totalMl = m.containerVolumeMl;
+    if (remainingMl == null || totalMl == null) return null;
+    return '${fmt2(remainingMl)}/${fmt2(totalMl)} mL';
+  }
+
+  String? _buildMdvSealedStockLabel() {
+    final hasMdvUnit = m.stockUnit == StockUnit.multiDoseVials;
+    final backupCount = hasMdvUnit ? m.stockValue.floor() : null;
+    if (backupCount == null || backupCount <= 0) return null;
+    return '$backupCount vials';
+  }
+
   Widget _buildCompactStorageLine(
     BuildContext context, {
     required List<IconData> icons,
@@ -1083,25 +1097,55 @@ class _MedLargeCard extends StatelessWidget {
     );
 
     final body = m.form == MedicationForm.multiDoseVial
-        ? Column(
+        ? Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildCompactStorageLine(
-                context,
-                label: 'Active',
-                icons: activeIcons,
-                location: activeLocation,
-                createdAt: activeCreatedAt,
-                expiry: activeExpiry,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCompactStorageLine(
+                      context,
+                      label: 'Active',
+                      icons: activeIcons,
+                      location: activeLocation,
+                      createdAt: activeCreatedAt,
+                      expiry: activeExpiry,
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    _buildCompactStorageLine(
+                      context,
+                      label: 'Sealed',
+                      icons: sealedIcons,
+                      location: sealedLocation,
+                      createdAt: sealedCreatedAt,
+                      expiry: sealedExpiry,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: kSpacingXS),
-              _buildCompactStorageLine(
-                context,
-                label: 'Sealed',
-                icons: sealedIcons,
-                location: sealedLocation,
-                createdAt: sealedCreatedAt,
-                expiry: sealedExpiry,
+              const SizedBox(width: kSpacingS),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    _buildMdvActiveStockLabel() ?? '',
+                    style: helperTextStyle(
+                      context,
+                    )?.copyWith(fontSize: kFontSizeHint),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    _buildMdvSealedStockLabel() ?? '',
+                    style: helperTextStyle(
+                      context,
+                    )?.copyWith(fontSize: kFontSizeHint),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ],
           )
@@ -1217,6 +1261,8 @@ class _MedLargeCard extends StatelessWidget {
       percentage: stockInfo.percentage,
     );
 
+    final isMdv = m.form == MedicationForm.multiDoseVial;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -1227,58 +1273,27 @@ class _MedLargeCard extends StatelessWidget {
           child: StockDonutGauge(
             percentage: stockInfo.percentage,
             primaryLabel: '$pctRounded%',
+            size: kStockDonutGaugeSizeCompact,
             color: stockColor,
             textColor: stockColor,
           ),
         ),
-        const SizedBox(height: kSpacingXS),
-        Align(
-          alignment: Alignment.centerRight,
-          child: RichText(
-            textAlign: TextAlign.right,
-            text: _MedicationStockStatusText.textSpanFor(
-              context,
-              m,
-              baseStyle: baseStyle,
-            ),
-          ),
-        ),
-        if (m.form == MedicationForm.multiDoseVial)
-          Padding(
-            padding: const EdgeInsets.only(top: kSpacingXS),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                _buildMdvSecondaryLine(),
-                style: helperTextStyle(context)?.copyWith(fontSize: 9),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
+        if (!isMdv) ...[
+          const SizedBox(height: kSpacingXS),
+          Align(
+            alignment: Alignment.centerRight,
+            child: RichText(
+              textAlign: TextAlign.right,
+              text: _MedicationStockStatusText.textSpanFor(
+                context,
+                m,
+                baseStyle: baseStyle,
               ),
             ),
           ),
+        ],
       ],
     );
-  }
-
-  String _buildMdvSecondaryLine() {
-    // Active vial total volume
-    final containerMl = m.containerVolumeMl;
-
-    // Backup/unopened vials: use stockValue when the stockUnit is multi-dose vials
-    final hasMdvUnit = m.stockUnit == StockUnit.multiDoseVials;
-    final backupCount = hasMdvUnit ? m.stockValue.floor() : null;
-
-    if (backupCount != null && backupCount > 0) {
-      final label = backupCount == 1 ? 'sealed vial' : 'sealed vials';
-      return '$backupCount $label';
-    }
-
-    if (containerMl != null) {
-      return '${fmt2(containerMl)} mL vial';
-    }
-
-    return '';
   }
 
   String _formatExpiryLabel(DateTime expiry) {

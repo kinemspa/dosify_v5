@@ -108,6 +108,7 @@ const double kDoseStrengthChartBarRadius = 3;
 
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
+const double kStockDonutGaugeSizeCompact = 88;
 const double kDualStockDonutInnerScale = 0.73;
 const double kDualStockDonutInnerStrokeWidth = 6.0;
 
