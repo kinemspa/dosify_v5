@@ -121,7 +121,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    if (reconFluidName != null && reconFluidName!.isNotEmpty && containerVolumeMl != null) ...[
+                    if (reconFluidName != null &&
+                        reconFluidName!.isNotEmpty &&
+                        containerVolumeMl != null) ...[
                       TextSpan(
                         text: '\nwith ',
                         style: TextStyle(

@@ -56,13 +56,13 @@ class SectionFormCard extends StatelessWidget {
             backgroundColor ??
             (neutral
                 ? (isDark
-                    ? Color.alphaBlend(
-                        theme.colorScheme.onSurface.withValues(
-                          alpha: kOpacityFaint,
-                        ),
-                        theme.colorScheme.surface,
-                      )
-                    : theme.colorScheme.surfaceContainerLowest)
+                      ? Color.alphaBlend(
+                          theme.colorScheme.onSurface.withValues(
+                            alpha: kOpacityFaint,
+                          ),
+                          theme.colorScheme.surface,
+                        )
+                      : theme.colorScheme.surfaceContainerLowest)
                 : theme.colorScheme.primary.withValues(
                     alpha: isDark ? kOpacityFaint : 0.03,
                   )),
@@ -447,7 +447,7 @@ class _SyringePainter extends CustomPainter {
 }
 
 /// A [-] [ 120x36 Field36 TextField ] [+] row used for numeric steppers.
-/// 
+///
 /// Use [fixedFieldWidth] when using in dialogs (LayoutBuilder doesn't work with IntrinsicWidth).
 class StepperRow36 extends StatelessWidget {
   const StepperRow36({
@@ -469,6 +469,7 @@ class StepperRow36 extends StatelessWidget {
   final bool compact;
   final bool enabled;
   final List<TextInputFormatter>? inputFormatters;
+
   /// When set, bypasses LayoutBuilder (required for use in dialogs).
   final double? fixedFieldWidth;
 
@@ -478,7 +479,7 @@ class StepperRow36 extends StatelessWidget {
     if (fixedFieldWidth != null) {
       return _buildRow(context, fixedFieldWidth!);
     }
-    
+
     // Otherwise use LayoutBuilder for responsive sizing
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -497,7 +498,7 @@ class StepperRow36 extends StatelessWidget {
       },
     );
   }
-  
+
   Widget _buildRow(BuildContext context, double fieldWidth) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
