@@ -40,7 +40,7 @@ Future<void> main() async {
 
       // Kick off rescheduling in the background so startup isn't blocked
       // ignore: unawaited_futures
-      ScheduleScheduler.rescheduleAllActive().catchError((_) {});
+      ScheduleScheduler.rescheduleAllActiveIfStale().catchError((_) {});
     },
     MCPToolkitBinding.instance.handleZoneError,
   );

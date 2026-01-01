@@ -1,6 +1,7 @@
 // Package imports:
 import 'dart:async';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
@@ -9,6 +10,9 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 /// Schedules notifications for registered [Schedule] entries and exposes helpers
 /// for deterministic stable slot ID generation used across the app.
 class ScheduleScheduler {
+  static const String _lastStartupRescheduleMsKey =
+      'schedule_scheduler.last_startup_reschedule_ms';
+
   static bool _withinBounds(Schedule s, DateTime dt) {
     final startAt = s.startAt;
     if (startAt != null && dt.isBefore(startAt)) return false;
@@ -315,6 +319,34 @@ class ScheduleScheduler {
         await scheduleFor(s);
       }
     }
+  }
+
+  /// Startup-friendly reschedule that avoids doing heavy cancel/recreate work
+  /// every single launch.
+  static Future<void> rescheduleAllActiveIfStale({
+    Duration minInterval = const Duration(hours: 12),
+  }) async {
+    final schedulesBox = Hive.box<Schedule>('schedules');
+    final activeCount = schedulesBox.values.where((s) => s.active).length;
+    if (activeCount == 0) return;
+
+    // Avoid any work if notifications can't be shown anyway.
+    final enabled = await NotificationService.areNotificationsEnabled();
+    if (!enabled) return;
+
+    final permissionGranted = await NotificationService.isPermissionGranted();
+    if (!permissionGranted) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final lastMs = prefs.getInt(_lastStartupRescheduleMsKey) ?? 0;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+
+    if (lastMs > 0 && (nowMs - lastMs) < minInterval.inMilliseconds) {
+      return;
+    }
+
+    await rescheduleAllActive();
+    await prefs.setInt(_lastStartupRescheduleMsKey, nowMs);
   }
 
   /// Internal: stable hash 31-bit positive int (suitable for notification IDs)

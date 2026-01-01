@@ -122,6 +122,17 @@ class NotificationService {
     return result.isGranted;
   }
 
+  static Future<bool> isPermissionGranted() async {
+    try {
+      final status = await Permission.notification.status;
+      _log('Notification permission status (no prompt): $status');
+      return status.isGranted;
+    } catch (e) {
+      _log('Error checking notification permission status: $e');
+      return false;
+    }
+  }
+
   static Future<bool> canScheduleExactAlarms() async {
     try {
       final res = await _platform.invokeMethod<bool>('canScheduleExactAlarms');
