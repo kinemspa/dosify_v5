@@ -94,23 +94,26 @@ class NextDoseDateBadge extends StatelessWidget {
             children: [
               circleCore,
               Positioned(
-                top: -kSpacingXS,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: kSpacingXS,
-                    vertical: kHelperTextTopPadding,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: kOpacityEmphasis),
-                    borderRadius: BorderRadius.circular(kBorderRadiusFull),
-                  ),
-                  child: Text(
-                    'Next',
-                    style: TextStyle(
-                      fontSize: kFontSizeSmall,
-                      fontWeight: kFontWeightExtraBold,
-                      height: 1,
-                      color: cs.onPrimary,
+                top: -kSpacingS,
+                child: Transform.translate(
+                  offset: const Offset(-kSpacingXS, 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: kSpacingXS,
+                      vertical: kHelperTextTopPadding,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: kOpacityEmphasis),
+                      borderRadius: BorderRadius.circular(kBorderRadiusFull),
+                    ),
+                    child: Text(
+                      'Next',
+                      style: TextStyle(
+                        fontSize: kFontSizeXSmall,
+                        fontWeight: kFontWeightExtraBold,
+                        height: 1,
+                        color: cs.onPrimary,
+                      ),
                     ),
                   ),
                 ),
