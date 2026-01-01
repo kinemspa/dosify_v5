@@ -17,6 +17,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 
 class _HistoryItem {
   const _HistoryItem._({
@@ -88,9 +89,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: buildStandardCardDecoration(context: context),
-      clipBehavior: Clip.antiAlias,
+    return GlassCardSurface(
+      useGradient: false,
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -101,7 +102,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingL,
-                vertical: kSpacingM,
+                vertical: kSpacingS,
               ),
               child: Row(
                 children: [
@@ -145,6 +146,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 TabBar(
                   controller: _tabController,
                   isScrollable: true,
+                  labelPadding: const EdgeInsets.symmetric(
+                    horizontal: kSpacingM,
+                  ),
                   labelColor: cs.primary,
                   unselectedLabelColor: cs.onSurfaceVariant,
                   indicatorColor: cs.primary,
@@ -156,10 +160,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     fontWeight: kFontWeightSemiBold,
                   ),
                   tabs: [
-                    const Tab(
-                      text: 'History',
-                      icon: Icon(Icons.history, size: kIconSizeMedium),
-                    ),
+                    const Tab(text: 'History'),
                     for (final section in _AdherenceReportSection.values)
                       Tab(text: section.label),
                   ],
