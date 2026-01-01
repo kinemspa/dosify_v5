@@ -505,10 +505,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             // Summary content (collapses when keyboard is open)
             AnimatedCrossFade(
               duration: const Duration(milliseconds: 200),
-              crossFadeState:
-                  MediaQuery.of(context).viewInsets.bottom > 0
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
+              crossFadeState: MediaQuery.of(context).viewInsets.bottom > 0
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
               firstChild: Container(
                 constraints: const BoxConstraints(minHeight: 100),
                 padding: const EdgeInsets.all(12),
