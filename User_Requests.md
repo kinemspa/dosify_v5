@@ -35,7 +35,7 @@
 - Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. [COMPLETED]
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
 - Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. [COMPLETED]
-- For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too?
+- For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too? [COMPLETED]
 - For MDV - Active Vial Details section not showing Expiry. [COMPLETED]
 
 ### Reports Card
