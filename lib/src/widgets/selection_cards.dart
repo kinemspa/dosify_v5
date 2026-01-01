@@ -80,7 +80,6 @@ class SelectionOptionCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return GlassCardSurface(
-      useGradient: false,
       onTap: onTap,
       padding: const EdgeInsets.symmetric(
         horizontal: kCardPadding,
