@@ -9,7 +9,7 @@
 	- All the fields and cards are not so visibly distingt in Dark Mode theme, Is there a way to rectify this? Maybe give the fields a slightly lighter colour than the background dark colour? [COMPLETED]
 
 - UI and Real estate. 
-	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this?
+	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]
 
 ## Home Screen
 

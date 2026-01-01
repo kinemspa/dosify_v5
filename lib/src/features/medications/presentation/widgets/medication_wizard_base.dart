@@ -181,11 +181,19 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
                 context,
               ).colorScheme.onPrimary.withValues(alpha: 0.15),
             ),
-            // Summary content with fixed min height
-            Container(
-              constraints: const BoxConstraints(minHeight: 100),
-              padding: const EdgeInsets.all(12),
-              child: buildSummaryContent(),
+            // Summary content (collapses when keyboard is open)
+            AnimatedCrossFade(
+              duration: const Duration(milliseconds: 200),
+              crossFadeState:
+                  MediaQuery.of(context).viewInsets.bottom > 0
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+              firstChild: Container(
+                constraints: const BoxConstraints(minHeight: 100),
+                padding: const EdgeInsets.all(12),
+                child: buildSummaryContent(),
+              ),
+              secondChild: const SizedBox.shrink(),
             ),
           ],
         ),
