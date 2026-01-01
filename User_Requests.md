@@ -2,6 +2,14 @@
 
 ## Global
 - How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED] - How do I test this?
+- Dark Theme 
+	- The reconstitution calculator 
+		- was recently changed so now the text in the fields is not visible. 
+		- Has a lovely dark blue colour which looks amazing in the light theme but not so ce in the dark mode theme. 
+	- All the fields and cards are not so visibly distingt in Dark Mode theme, Is there a way to rectify this? Maybe give the fields a slightly lighter colour than the background dark colour?
+
+- UI and Real estate. 
+	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this?
 
 ## Home Screen
 
@@ -23,12 +31,12 @@
 
 ## Medication Details Screen
 - I am conflicted on the Schedule Card. It looks redundant having Schedules then Doses and Schedules within this card with the same prominant heading.  Do we split them into seperate cards or try to organise it a different way? [COMPLETED]
-- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED] - Not completed, there is issues with the fullly documented details nudging the refill and ad hoc down belowe the app header gradient bottom edge. The app header edge needs to adjust to fit all App header items. 
+- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED]
 - Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. [COMPLETED]
-- When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED] This is not complete. There are light grey corners still  appearing on clicking. 
-- Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. 
+- When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
+- Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. [COMPLETED]
 - For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too?
-- For MDV - Active Vial Details section not showing Expiry. 
+- For MDV - Active Vial Details section not showing Expiry. [COMPLETED]
 
 ### Reports Card
 
@@ -54,10 +62,10 @@
 ## Add Medication
 
 ### Choose Medicaiotn Type Screen
-- The menu card items have lost there shadow
+- The menu card items have lost there shadow [COMPLETED]
 
 ### Choose Injection Type Screen
-- The menu card items have lost there shadow
+- The menu card items have lost there shadow [COMPLETED]
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
@@ -156,9 +164,9 @@
 	- Take dose screen to be styled into the same as the ad hoc dialog.  [COMPLETED]
 
 - Ad-Hoc Dose
-	- MDV Slider for Units is not allowing saving the state. 
-	- MDV Units, remove trailing 0. Increment in whole numbers. 
-	- MDV Slider, should be able to click on spot on the slider to jump slider.
+	- MDV Slider for Units is not allowing saving the state. [COMPLETED]
+	- MDV Units, remove trailing 0. Increment in whole numbers. [COMPLETED]
+	- MDV Slider, should be able to click on spot on the slider to jump slider. [COMPLETED]
 ==============
 # Reconstitution  Calculator
 
