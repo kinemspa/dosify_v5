@@ -1202,6 +1202,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           // Diluent
           if (med.diluentName != null && med.diluentName!.isNotEmpty)
             _buildDetailTile(context, 'Diluent', med.diluentName!),
+          _buildDetailTile(
+            context,
+            'Expiry',
+            med.reconstitutedVialExpiry != null
+                ? _formatExpiry(med.reconstitutedVialExpiry!)
+                : 'Not set',
+            isPlaceholder: med.reconstitutedVialExpiry == null,
+            isWarning:
+                med.reconstitutedVialExpiry != null &&
+                _isExpiringSoon(med.reconstitutedVialExpiry!),
+          ),
           // Active vial batch & location
           _buildDetailTile(
             context,
