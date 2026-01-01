@@ -724,9 +724,11 @@ TextStyle? checkboxLabelStyle(BuildContext context) {
 /// Section title style
 TextStyle? sectionTitleStyle(BuildContext context) {
   return Theme.of(context).textTheme.titleMedium?.copyWith(
-    fontSize: kFontSizeLarge,
-    fontWeight: kFontWeightBold,
-    color: Theme.of(context).colorScheme.primary,
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightSemiBold,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
   );
 }
 
