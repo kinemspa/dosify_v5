@@ -55,7 +55,7 @@
 ### Medication Details Card
 - Active vial needs helper text, thetracked medication. [COMPLETED]
 - Description text in thius part needs to wrap and display all. not elipses. [COMPLETED]
-- The Sub Headings under each Card need to be smaller or maybe not primary colour. For EQ. Sleaed Vials is a bigger font than the Active vial, and also the same size as Medicaiont Details. 
+- The Sub Headings under each Card need to be smaller or maybe not primary colour. For EQ. Sleaed Vials is a bigger font than the Active vial, and also the same size as Medicaiont Details. [COMPLETED]
 
 
 ==============
