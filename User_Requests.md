@@ -4,7 +4,7 @@
 - How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED] - How do I test this?
 - Dark Theme 
 	- The reconstitution calculator 
-		- was recently changed so now the text in the fields is not visible. 
+		- was recently changed so now the text in the fields is not visible. [COMPLETED]
 		- Has a lovely dark blue colour which looks amazing in the light theme but not so ce in the dark mode theme. 
 	- All the fields and cards are not so visibly distingt in Dark Mode theme, Is there a way to rectify this? Maybe give the fields a slightly lighter colour than the background dark colour?
 

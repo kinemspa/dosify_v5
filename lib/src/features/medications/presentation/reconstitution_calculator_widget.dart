@@ -254,27 +254,37 @@ class _ReconstitutionCalculatorWidgetState
 
   InputDecoration _fieldDecoration(BuildContext context, {String? hint}) {
     final cs = Theme.of(context).colorScheme;
-    // Use white/light background for visibility on dark card
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Keep the field readable in both light+dark themes:
+    // - Light theme: use surface (typically light)
+    // - Dark theme: use a subtle onSurface tint so the field is slightly
+    //   lighter than the dark calculator background
+    final fill = isDark
+        ? cs.onSurface.withValues(alpha: kOpacitySubtleLow)
+        : cs.surface;
+
     return InputDecoration(
       hintText: hint,
+      hintStyle: hintTextStyle(context),
       floatingLabelBehavior: FloatingLabelBehavior.never,
       isDense: false,
       isCollapsed: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.95),
+      fillColor: fill,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: cs.outlineVariant.withValues(alpha: 0.5),
-          width: 0.75,
+          width: kOutlineWidth,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
       ),
     );
   }
