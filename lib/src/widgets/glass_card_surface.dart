@@ -25,24 +25,25 @@ class GlassCardSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(kBorderRadiusLarge);
 
-    final card = Container(
+    final content = Padding(padding: padding, child: child);
+
+    // Keep the decoration (including shadows) outside the clipped Material so
+    // we don't clip the card shadow, but still ensure Ink splashes from any
+    // nested InkWell are clipped to the rounded corners.
+    return Container(
       decoration: buildStandardCardDecoration(
         context: context,
         useGradient: useGradient,
         showBorder: showBorder,
       ),
-      child: Padding(padding: padding, child: child),
-    );
-
-    if (onTap == null) {
-      return card;
-    }
-
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(onTap: onTap, borderRadius: borderRadius, child: card),
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? content
+            : InkWell(onTap: onTap, borderRadius: borderRadius, child: content),
+      ),
     );
   }
 }
