@@ -102,7 +102,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingL,
-                vertical: kSpacingS,
+                vertical: kSpacingXS,
               ),
               child: Row(
                 children: [

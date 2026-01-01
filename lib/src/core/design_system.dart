@@ -69,7 +69,7 @@ const double kNextDoseDateCircleSizeCompact = 44;
 const double kNextDoseDateCircleSizeLarge = 54;
 
 /// Medication details reports card
-const double kMedicationReportsTabHeight = 200;
+const double kMedicationReportsTabHeight = 160;
 
 /// Adherence chart (reports)
 const double kAdherenceChartHeight = 96;
