@@ -272,35 +272,14 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
         return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                kSpacingS,
-                kSpacingXS,
-                kSpacingS,
-                kSpacingXS,
-              ),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  tooltip: 'Change view',
-                  onPressed: () {
-                    setState(() {
-                      _historyHorizontalView = !_historyHorizontalView;
-                    });
-                  },
-                  icon: Icon(
-                    _historyHorizontalView
-                        ? Icons.view_day_outlined
-                        : Icons.view_agenda_outlined,
-                    size: kIconSizeMedium,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.all(kSpacingS),
+                padding: const EdgeInsets.fromLTRB(
+                  kSpacingS,
+                  0,
+                  kSpacingS,
+                  kSpacingS,
+                ),
                 itemCount: displayItems.length + (hasMore ? 1 : 0),
                 separatorBuilder: (context, index) => Divider(
                   height: 1,
