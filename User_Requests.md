@@ -80,7 +80,7 @@
 - Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
 - COmpact Cards date circle has made the compact card just as big as the large card. Need to fix this. The Large card purpose is to show mroe infoarmation. COmpact shows less. list shows the least.  [COMPLETED]
 - On the cards, Schedule Name needs to Merge the Med Name into it. If the Schedule is named "1 Tablet" it should show "Panadol - 1 Tablet" [COMPLETED]
-- Change for the Card Name and Medicine. The Medicine name to be the heading of the card. The Schedule Name to be the 2nd most prominent text on the card, place underneath the med name. 
+- Change for the Card Name and Medicine. The Medicine name to be the heading of the card. The Schedule Name to be the 2nd most prominent text on the card, place underneath the med name. [COMPLETED]
 - For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think.  [COMPLETED]
 - Can we reduce the Next size a bit and move it to be slioght left of centre, as its cropping the date. 
 
