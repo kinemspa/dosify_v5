@@ -26,10 +26,6 @@ class GlassCardSurface extends StatelessWidget {
     final borderRadius = BorderRadius.circular(kBorderRadiusLarge);
 
     final content = Padding(padding: padding, child: child);
-
-    // Keep the decoration (including shadows) outside the clipped Material so
-    // we don't clip the card shadow, but still ensure Ink splashes from any
-    // nested InkWell are clipped to the rounded corners.
     return Container(
       decoration: buildStandardCardDecoration(
         context: context,
