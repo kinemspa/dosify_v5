@@ -312,7 +312,8 @@ class _ScheduleListRow extends StatelessWidget {
     final cadence = _ScheduleText.cadenceLabel(s);
     final timesPerDay = _ScheduleText.timesPerDayLabel(s);
     final detailLabel = '$cadence · $timesPerDay';
-    final mergedName = _ScheduleText.mergedName(s);
+    final medTitle = _ScheduleText.medTitle(s);
+    final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
 
     return Material(
       color: Colors.transparent,
@@ -332,7 +333,7 @@ class _ScheduleListRow extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      mergedName,
+                      medTitle,
                       style: cardTitleStyle(context)?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: cs.primary,
@@ -342,7 +343,7 @@ class _ScheduleListRow extends StatelessWidget {
                     ),
                     const SizedBox(height: kSpacingXS),
                     Text(
-                      detailLabel,
+                      scheduleSubtitle ?? detailLabel,
                       style: helperTextStyle(context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -401,7 +402,8 @@ class _ScheduleCard extends StatelessWidget {
     final next = ScheduleOccurrenceService.nextOccurrence(s);
     final cadence = _ScheduleText.cadenceLabel(s);
     final timesPerDay = _ScheduleText.timesPerDayLabel(s);
-    final mergedName = _ScheduleText.mergedName(s);
+    final medTitle = _ScheduleText.medTitle(s);
+    final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
 
     if (dense) {
       return GlassCardSurface(
@@ -417,7 +419,7 @@ class _ScheduleCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    mergedName,
+                    medTitle,
                     style: cardTitleStyle(
                       context,
                     )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
@@ -426,7 +428,7 @@ class _ScheduleCard extends StatelessWidget {
                   ),
                   const SizedBox(height: kSpacingXS),
                   Text(
-                    '$cadence · $timesPerDay',
+                    scheduleSubtitle ?? '$cadence · $timesPerDay',
                     style: helperTextStyle(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -453,13 +455,22 @@ class _ScheduleCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            mergedName,
+            medTitle,
             style: cardTitleStyle(
               context,
             )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          if (scheduleSubtitle != null) ...[
+            const SizedBox(height: kSpacingXS),
+            Text(
+              scheduleSubtitle,
+              style: bodyTextStyle(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
           const SizedBox(height: kSpacingS),
           Text(
             '$cadence · $timesPerDay',
@@ -490,18 +501,18 @@ class _ScheduleCard extends StatelessWidget {
 }
 
 class _ScheduleText {
-  static String mergedName(Schedule s) {
+  static String medTitle(Schedule s) {
     final med = s.medicationName.trim();
     final name = s.name.trim();
+    return med.isNotEmpty ? med : name;
+  }
 
-    if (med.isEmpty) return name;
-    if (name.isEmpty) return med;
-
-    final nameLower = name.toLowerCase();
-    final medLower = med.toLowerCase();
-    if (nameLower.startsWith(medLower)) return name;
-
-    return '$med - $name';
+  static String? scheduleSubtitle(Schedule s) {
+    final med = s.medicationName.trim();
+    final name = s.name.trim();
+    if (med.isEmpty) return null;
+    if (name.isEmpty) return null;
+    return name;
   }
 
   static String cadenceLabel(Schedule s) {
