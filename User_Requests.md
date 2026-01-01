@@ -50,7 +50,7 @@
 
 ### Schedule
 - Change Scheduled Doses heading to Doses [COMPLETED]
-- Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. 
+- Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. [COMPLETED]
 
 ### Medication Details Card
 - Active vial needs helper text, thetracked medication. [COMPLETED]
