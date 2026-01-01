@@ -69,7 +69,11 @@ class DoseSummaryRow extends StatelessWidget {
         : doseInfo;
 
     return Material(
-      type: MaterialType.transparency,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),

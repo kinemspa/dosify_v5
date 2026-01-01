@@ -375,7 +375,14 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   Widget _buildDoseCardContent(CalculatedDose dose, int index, int total) {
-    return DoseSummaryRow(dose: dose, onTap: () => _showDoseActionSheet(dose));
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: kSpacingXS),
+      decoration: buildInsetSectionDecoration(context: context),
+      child: DoseSummaryRow(
+        dose: dose,
+        onTap: () => _showDoseActionSheet(dose),
+      ),
+    );
   }
 
   Widget _buildEmptyState(BuildContext context) {
