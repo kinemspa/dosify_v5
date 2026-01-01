@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -84,10 +85,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
       final measuredHeight = renderObject.size.height;
       final topInset = MediaQuery.of(context).padding.top;
-      final baseChildMax = _kDetailHeaderExpandedHeight - topInset;
+      // Leave a small safety margin so content doesn't hug the gradient edge
+      // (helps on compact screens and near-limit text scaling).
+      final baseChildMax = _kDetailHeaderExpandedHeight - topInset - kSpacingS;
       final desired = measuredHeight <= baseChildMax
           ? _kDetailHeaderExpandedHeight
-          : (measuredHeight + topInset + kSpacingS);
+          : (measuredHeight + topInset + kSpacingM);
 
       if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0) {
         setState(() {
@@ -3165,6 +3168,22 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
         final theme = Theme.of(stateContext);
         final colorScheme = theme.colorScheme;
 
+        void setInputFromVolumeMl(double volumeMl) {
+          final clamped = volumeMl.clamp(0.0, maxVolume);
+          if (selectedUnit == 'mL') {
+            volumeController.text = fmt2(clamped);
+            return;
+          }
+          if (selectedUnit == 'units') {
+            volumeController.text = (clamped * 100).round().toString();
+            return;
+          }
+
+          // Strength input (mg/mcg)
+          final strength = concentration != null ? clamped * concentration : 0;
+          volumeController.text = fmt2(strength);
+        }
+
         // Get input value and convert to mL based on selected unit
         final inputValue = double.tryParse(volumeController.text) ?? 0;
         double volumeInMl;
@@ -3310,15 +3329,18 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                             selectedUnit == 'units',
                           ],
                           onPressed: (index) {
+                            final previousVolumeMl = clampedVolume.toDouble();
                             setState(() {
-                              if (index == 0)
+                              if (index == 0) {
                                 selectedUnit = 'mL';
-                              else if (index == 1)
+                              } else if (index == 1) {
                                 selectedUnit = strengthUnit.contains('mcg')
                                     ? 'mcg'
                                     : 'mg';
-                              else
+                              } else {
                                 selectedUnit = 'units';
+                              }
+                              setInputFromVolumeMl(previousVolumeMl);
                             });
                           },
                           borderRadius: BorderRadius.circular(8),
@@ -3365,17 +3387,56 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                           onDec: () {
                             final v =
                                 double.tryParse(volumeController.text) ?? 0;
-                            if (v > 0.01) {
-                              volumeController.text = (v - 0.1).toStringAsFixed(
-                                2,
+
+                            if (selectedUnit == 'units') {
+                              final maxUnits =
+                                  (syringeSize.clamp(0.0, maxVolume) * 100)
+                                      .round();
+                              final nv = (v - 1)
+                                  .clamp(0, maxUnits)
+                                  .round()
+                                  .toString();
+                              volumeController.text = nv;
+                              setState(() {});
+                              return;
+                            }
+
+                            if (selectedUnit == 'mL') {
+                              final maxMl = syringeSize.clamp(0.0, maxVolume);
+                              volumeController.text = fmt2(
+                                (v - 0.1).clamp(0.0, maxMl),
                               );
                               setState(() {});
+                              return;
                             }
+
+                            // Strength mode
+                            final maxStrength = concentration != null
+                                ? syringeSize.clamp(0.0, maxVolume) *
+                                      concentration
+                                : 0.0;
+                            volumeController.text = fmt2(
+                              (v - 0.1).clamp(0.0, maxStrength),
+                            );
+                            setState(() {});
                           },
                           onInc: () {
                             final v =
                                 double.tryParse(volumeController.text) ?? 0;
-                            // Limit to min of syringe size and remaining volume
+
+                            if (selectedUnit == 'units') {
+                              final maxUnits =
+                                  (syringeSize.clamp(0.0, maxVolume) * 100)
+                                      .round();
+                              final nv = (v + 1)
+                                  .clamp(0, maxUnits)
+                                  .round()
+                                  .toString();
+                              volumeController.text = nv;
+                              setState(() {});
+                              return;
+                            }
+
                             final maxInputValue = selectedUnit == 'mL'
                                 ? syringeSize.clamp(0.0, maxVolume)
                                 : (selectedUnit == 'mg' ||
@@ -3384,10 +3445,9 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                                 ? syringeSize.clamp(0.0, maxVolume) *
                                       concentration
                                 : syringeSize * 100;
+
                             if (v < maxInputValue) {
-                              volumeController.text = (v + 0.1).toStringAsFixed(
-                                2,
-                              );
+                              volumeController.text = fmt2(v + 0.1);
                               setState(() {});
                             }
                           },
@@ -3444,8 +3504,22 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                           maxConstraint: maxVolume * 100,
                           showValueLabel: false, // Remove double label
                           onChanged: (newValue) {
-                            volumeController.text = (newValue / 100)
-                                .toStringAsFixed(2);
+                            final newVolumeMl = (newValue / 100).clamp(
+                              0.0,
+                              maxVolume,
+                            );
+                            if (selectedUnit == 'units') {
+                              volumeController.text = newValue
+                                  .round()
+                                  .toString();
+                            } else if (selectedUnit == 'mL') {
+                              volumeController.text = fmt2(newVolumeMl);
+                            } else {
+                              final strength = concentration != null
+                                  ? newVolumeMl * concentration
+                                  : 0;
+                              volumeController.text = fmt2(strength);
+                            }
                             setState(() {});
                           },
                           onMaxConstraintHit: () {},
@@ -3480,7 +3554,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                           text:
                               ' on a ${_formatNumber(syringeSize)} mL syringe',
                         ),
-                        if (displayStrength != null) ...[
+                        if (concentration != null) ...[
                           const TextSpan(text: ' for a dose of '),
                           TextSpan(
                             text:
@@ -3570,6 +3644,18 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
             ),
             FilledButton(
               onPressed: () {
+                if (isMdv) {
+                  final amountMl = clampedVolume.toDouble();
+                  if (amountMl > 0) {
+                    Navigator.pop(dialogContext, {
+                      'amount': amountMl,
+                      'unit': 'mL',
+                      'notes': notesController.text.trim(),
+                    });
+                  }
+                  return;
+                }
+
                 final val = double.tryParse(volumeController.text);
                 if (val != null && val > 0) {
                   Navigator.pop(dialogContext, {
