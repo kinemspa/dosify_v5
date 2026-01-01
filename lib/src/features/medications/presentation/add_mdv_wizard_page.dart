@@ -1779,7 +1779,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kReconBackgroundDark,
+        color: reconBackgroundDarkColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),

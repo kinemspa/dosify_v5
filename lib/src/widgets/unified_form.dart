@@ -49,21 +49,36 @@ class SectionFormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color:
             backgroundColor ??
             (neutral
-                ? theme.colorScheme.surfaceContainerLowest
-                : theme.colorScheme.primary.withValues(alpha: 0.03)),
+                ? (isDark
+                    ? Color.alphaBlend(
+                        theme.colorScheme.onSurface.withValues(
+                          alpha: kOpacityFaint,
+                        ),
+                        theme.colorScheme.surface,
+                      )
+                    : theme.colorScheme.surfaceContainerLowest)
+                : theme.colorScheme.primary.withValues(
+                    alpha: isDark ? kOpacityFaint : 0.03,
+                  )),
         borderRadius: BorderRadius.circular(12),
         border: neutral
             ? Border.all(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-                width: 0.75,
+                color: theme.colorScheme.outlineVariant.withValues(
+                  alpha: isDark ? kOpacityMediumHigh : 0.5,
+                ),
+                width: kOutlineWidth,
               )
             : Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.06),
+                color: theme.colorScheme.primary.withValues(
+                  alpha: isDark ? kOpacitySubtleLow : 0.06,
+                ),
+                width: kOutlineWidth,
               ),
         boxShadow: neutral
             ? [

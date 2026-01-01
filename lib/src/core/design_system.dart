@@ -283,6 +283,36 @@ const Color kReconBackgroundActive = Color(
   0xFF1A1E37,
 ); // Slightly lighter for active state
 
+/// Theme-aware reconstitution calculator background.
+///
+/// In light theme, keeps the signature dark-blue look.
+/// In dark theme, blends toward the app surface so it feels less harsh and more
+/// consistent with the overall dark palette.
+Color reconBackgroundDarkColor(BuildContext context) {
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
+  if (theme.brightness == Brightness.dark) {
+    return Color.alphaBlend(
+      kReconBackgroundDark.withValues(alpha: 0.65),
+      cs.surface,
+    );
+  }
+  return kReconBackgroundDark;
+}
+
+/// Theme-aware active/raised background for reconstitution surfaces.
+Color reconBackgroundActiveColor(BuildContext context) {
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
+  if (theme.brightness == Brightness.dark) {
+    return Color.alphaBlend(
+      kReconBackgroundActive.withValues(alpha: 0.70),
+      cs.surface,
+    );
+  }
+  return kReconBackgroundActive;
+}
+
 /// Reconstitution divider styling
 const double kReconDividerHeight = 1.0;
 const double kReconDividerOpacity = 0.7;

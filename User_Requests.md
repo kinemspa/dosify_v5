@@ -5,8 +5,8 @@
 - Dark Theme 
 	- The reconstitution calculator 
 		- was recently changed so now the text in the fields is not visible. [COMPLETED]
-		- Has a lovely dark blue colour which looks amazing in the light theme but not so ce in the dark mode theme. 
-	- All the fields and cards are not so visibly distingt in Dark Mode theme, Is there a way to rectify this? Maybe give the fields a slightly lighter colour than the background dark colour?
+		- Has a lovely dark blue colour which looks amazing in the light theme but not so ce in the dark mode theme. [COMPLETED]
+	- All the fields and cards are not so visibly distingt in Dark Mode theme, Is there a way to rectify this? Maybe give the fields a slightly lighter colour than the background dark colour? [COMPLETED]
 
 - UI and Real estate. 
 	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this?
@@ -139,6 +139,7 @@
 - Dose needs to show all the calulations. The Unit amount, the strenght and the volume if a liquid. Remove all trailing 0s. Remove plurality on single.  [COMPLETED]
 - Status needs to be a toggle button.  [COMPLETED]
 - Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense.  [COMPLETED]
+- Need to consider the objects that sit in the app header. I need them not to be just text objects. I want some flavour. 
 
 
 
