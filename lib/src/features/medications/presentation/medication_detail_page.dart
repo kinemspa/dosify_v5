@@ -2053,24 +2053,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
         const SizedBox(height: 8),
 
-        // Restock button
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kSpacingL),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: OutlinedButton.icon(
-              onPressed: () => _showRestockSealedVialsDialog(context, med),
-              icon: const Icon(Icons.add, size: kIconSizeSmall),
-              label: const Text('Restock'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(0, kStandardButtonHeight),
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
         // Details
         _buildDetailTile(
           context,
@@ -2791,7 +2773,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   final controller = TextEditingController(text: '1');
   final currentVolume = med.activeVialVolume ?? 0;
   final vialSize = med.containerVolumeMl ?? 5.0;
-  final sealedVials = med.stockValue.toInt();
+  int sealedVials = med.stockValue.toInt();
 
   // Track options
   String selectedMode = 'replace'; // 'replace' or 'topUp'
@@ -2862,6 +2844,33 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               ),
               const SizedBox(height: 16),
 
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await _showRestockSealedVialsDialog(context, med);
+
+                    final updated = Hive.box<Medication>('medications').get(
+                      med.id,
+                    );
+
+                    setState(() {
+                      sealedVials = (updated?.stockValue ?? 0).toInt();
+                      if (sealedVials > 0) {
+                        useFromStock = true;
+                      }
+                    });
+                  },
+                  icon: const Icon(Icons.add, size: kIconSizeSmall),
+                  label: const Text('Restock'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, kStandardButtonHeight),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
               // Mode selection
               const Text(
                 'Action:',
@@ -2895,7 +2904,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                       )
                     : Text('Will deduct 1 vial (${sealedVials - 1} remaining)'),
                 value: useFromStock,
-                onChanged: (v) => setState(() => useFromStock = v ?? false),
+                onChanged: sealedVials == 0
+                    ? null
+                    : (v) => setState(() => useFromStock = v ?? false),
                 dense: true,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -3001,7 +3012,10 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
 }
 
 /// Dialog to add sealed vials to sealed vial stock
-void _showRestockSealedVialsDialog(BuildContext context, Medication med) async {
+Future<void> _showRestockSealedVialsDialog(
+  BuildContext context,
+  Medication med,
+) async {
   final controller = TextEditingController(text: '1');
   final currentStock = med.stockValue.toInt();
 
