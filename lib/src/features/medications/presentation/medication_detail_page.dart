@@ -2850,9 +2850,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                   onPressed: () async {
                     await _showRestockSealedVialsDialog(context, med);
 
-                    final updated = Hive.box<Medication>('medications').get(
-                      med.id,
-                    );
+                    final updated = Hive.box<Medication>(
+                      'medications',
+                    ).get(med.id);
 
                     setState(() {
                       sealedVials = (updated?.stockValue ?? 0).toInt();
