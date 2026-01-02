@@ -1071,19 +1071,44 @@ class _AddScheduleWizardPageState
       return null;
     }
 
-    final perMl = med.perMlValue ?? med.strengthValue;
     final volumeMl = med.containerVolumeMl ?? 1.0;
 
-    final mcgPerMl = switch (med.strengthUnit) {
-      Unit.mcgPerMl => perMl,
-      Unit.mgPerMl => perMl * 1000,
-      Unit.gPerMl => perMl * 1000000,
-      Unit.unitsPerMl => perMl,
-      _ => perMl,
-    };
+    // Preferred: derive concentration from the medication's stored strength + per-mL value.
+    // This matches how other parts of the app treat `perMlValue` when strengthUnit is not a
+    // per-mL unit.
+    double? concentrationMcgPerMl;
+    switch (med.strengthUnit) {
+      case Unit.mcgPerMl:
+        concentrationMcgPerMl = med.strengthValue;
+      case Unit.mgPerMl:
+        concentrationMcgPerMl = med.strengthValue * 1000;
+      case Unit.gPerMl:
+        concentrationMcgPerMl = med.strengthValue * 1000000;
+      case Unit.mcg:
+        concentrationMcgPerMl = med.perMlValue;
+      case Unit.mg:
+        concentrationMcgPerMl = med.perMlValue == null
+            ? null
+            : (med.perMlValue! * 1000);
+      case Unit.g:
+        concentrationMcgPerMl = med.perMlValue == null
+            ? null
+            : (med.perMlValue! * 1000000);
+      case Unit.units:
+      case Unit.unitsPerMl:
+        concentrationMcgPerMl = null;
+    }
 
-    // total mcg in vial = (mcg/mL) * (mL)
-    return mcgPerMl * volumeMl;
+    if (concentrationMcgPerMl != null) {
+      // total mcg in vial = (mcg/mL) * (mL)
+      return concentrationMcgPerMl * volumeMl;
+    }
+
+    // Fallback (IU-based MDV): treat stored values as units.
+    final perMlUnits = (med.strengthUnit == Unit.unitsPerMl)
+        ? med.strengthValue
+        : (med.perMlValue ?? med.strengthValue);
+    return perMlUnits * volumeMl;
   }
 
   double? _getTotalVialVolumeMicroliter() {
