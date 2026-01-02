@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
 
 /// Base class for medication wizard pages.
 /// Provides common wizard functionality: step indicator, navigation, validation.
@@ -204,41 +205,14 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
   Widget buildSummaryContent();
 
   Widget _buildNavigationBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (_currentStep > 0)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: previousStep,
-                child: const Text('Back'),
-              ),
-            ),
-          if (_currentStep > 0) const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: FilledButton(
-              onPressed: canProceed
-                  ? (_currentStep < widget.stepCount - 1
-                        ? nextStep
-                        : saveMedication)
-                  : null,
-              child: Text(
-                _currentStep < widget.stepCount - 1
-                    ? 'Continue'
-                    : 'Save Medication',
-              ),
-            ),
-          ),
-        ],
-      ),
+    return WizardNavigationBar(
+      currentStep: _currentStep,
+      stepCount: widget.stepCount,
+      canProceed: canProceed,
+      onBack: _currentStep > 0 ? previousStep : null,
+      onContinue: nextStep,
+      onSave: saveMedication,
+      saveLabel: 'Save Medication',
     );
   }
 }

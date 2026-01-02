@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
 
 /// Base class for schedule wizard pages.
 /// Provides common wizard functionality: step indicator, navigation, validation.
@@ -190,41 +191,14 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
   }
 
   Widget _buildNavigationBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (_currentStep > 0)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: previousStep,
-                child: const Text('Back'),
-              ),
-            ),
-          if (_currentStep > 0) const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: FilledButton(
-              onPressed: canProceed
-                  ? (_currentStep < widget.stepCount - 1
-                        ? nextStep
-                        : saveSchedule)
-                  : null,
-              child: Text(
-                _currentStep < widget.stepCount - 1
-                    ? 'Continue'
-                    : 'Save Schedule',
-              ),
-            ),
-          ),
-        ],
-      ),
+    return WizardNavigationBar(
+      currentStep: _currentStep,
+      stepCount: widget.stepCount,
+      canProceed: canProceed,
+      onBack: _currentStep > 0 ? previousStep : null,
+      onContinue: nextStep,
+      onSave: saveSchedule,
+      saveLabel: 'Save Schedule',
     );
   }
 }
