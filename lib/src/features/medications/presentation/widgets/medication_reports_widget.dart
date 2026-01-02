@@ -209,15 +209,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         .where((log) => log.medicationId == widget.medication.id)
         .toList(growable: false);
 
-    // Refill events for this medication
-    final refillLogs = inventoryLogBox.values
-        .where((l) => l.medicationId == widget.medication.id)
-        .where(
-          (l) =>
-              l.changeType == InventoryChangeType.refillAdd ||
-              l.changeType == InventoryChangeType.refillToMax,
-        )
-        .toList(growable: false);
+    // Inventory events for this medication (refills, deductions, adjustments, etc)
+    final inventoryLogs = inventoryLogBox.values
+      .where((l) => l.medicationId == widget.medication.id)
+      .toList(growable: false);
 
     // Status change events for this medication
     final statusChanges = statusChangeBox.values
@@ -235,7 +230,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
         final allItems = <_HistoryItem>[
           for (final log in doseLogs) _HistoryItem.dose(log),
-          for (final log in refillLogs) _HistoryItem.inventory(log),
+          for (final log in inventoryLogs) _HistoryItem.inventory(log),
           for (final log in statusChanges) _HistoryItem.statusChange(log),
           for (final dose in missedDoses) _HistoryItem.missed(dose),
         ]..sort((a, b) => b.time.compareTo(a.time));
@@ -261,7 +256,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 Text('No history yet', style: helperTextStyle(context)),
                 const SizedBox(height: kSpacingXS),
                 Text(
-                  'Recorded doses and refills will appear here',
+                  'Recorded doses and inventory events will appear here',
                   style: helperTextStyle(
                     context,
                   )?.copyWith(fontSize: kFontSizeSmall),
@@ -436,23 +431,23 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     ),
                   ),
                   const SizedBox(height: kSpacingXS),
-                    Row(
-                      children: [
-                        NextDoseDateBadge(
-                          nextDose: dose.scheduledTime,
-                          isActive: true,
-                          dense: true,
-                          showNextLabel: false,
-                        ),
-                        const SizedBox(width: kSpacingS),
-                        Text(
-                          timeFormat.format(dose.scheduledTime),
-                          style: helperTextStyle(
-                            context,
-                          )?.copyWith(fontSize: kFontSizeSmall),
-                        ),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      NextDoseDateBadge(
+                        nextDose: dose.scheduledTime,
+                        isActive: true,
+                        dense: true,
+                        showNextLabel: false,
+                      ),
+                      const SizedBox(width: kSpacingS),
+                      Text(
+                        timeFormat.format(dose.scheduledTime),
+                        style: helperTextStyle(
+                          context,
+                        )?.copyWith(fontSize: kFontSizeSmall),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -1696,6 +1691,13 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final icon = _getInventoryEventIcon(log.changeType);
     final color = _getInventoryEventColor(cs, log.changeType);
 
+    final isDoseDeduct =
+      log.changeType == InventoryChangeType.doseDeducted ||
+      log.changeType == InventoryChangeType.adHocDose;
+    final isEmptyStockDose = isDoseDeduct && log.previousStock <= 0;
+    final description =
+      isEmptyStockDose ? '${log.description} • empty stock' : log.description;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
       child: Row(
@@ -1716,7 +1718,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  log.description,
+                  description,
                   style: bodyTextStyle(
                     context,
                   )?.copyWith(fontWeight: kFontWeightSemiBold),
