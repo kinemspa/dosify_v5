@@ -190,14 +190,35 @@ class _AddScheduleWizardPageState
   @override
   String getStepLabel(int step) => widget.stepLabels[step];
 
+  bool _hasPositiveDoseFromResult(DoseCalculationResult result) {
+    final values = <double>[
+      (result.doseTabletQuarters ?? 0) / 4.0,
+      (result.doseCapsules ?? 0).toDouble(),
+      (result.doseSyringes ?? 0).toDouble(),
+      (result.doseVials ?? 0).toDouble(),
+      (result.doseMassMcg ?? 0).toDouble(),
+      (result.doseVolumeMicroliter ?? 0).toDouble(),
+      (result.syringeUnits ?? 0).toDouble(),
+    ];
+    return values.any((v) => v > 0.000001);
+  }
+
   @override
   bool get canProceed {
     switch (currentStep) {
       case 0:
-        return _selectedMed != null &&
-            _doseValue.text.isNotEmpty &&
-            _doseUnit.text.isNotEmpty &&
-            (double.tryParse(_doseValue.text) ?? 0) > 0;
+        if (_selectedMed == null) return false;
+
+        // Prefer typed dose result from DoseInputField (especially important for MDV).
+        final result = _doseResult;
+        if (result != null && result.success && !result.hasError) {
+          return _hasPositiveDoseFromResult(result);
+        }
+
+        // Backward-compatible fallback for legacy dose fields.
+        return _doseValue.text.trim().isNotEmpty &&
+            _doseUnit.text.trim().isNotEmpty &&
+            (double.tryParse(_doseValue.text.trim()) ?? 0) > 0;
       case 1:
         if (_times.isEmpty) return false;
         if (_mode == ScheduleMode.daysOfWeek && _days.isEmpty) return false;
@@ -571,11 +592,7 @@ class _AddScheduleWizardPageState
           if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
         case MedicationForm.multiDoseVial:
           final u = med.strengthUnit;
-          if (u == Unit.unitsPerMl) {
-            _doseUnit.text = 'IU';
-          } else {
-            _doseUnit.text = 'mg';
-          }
+          _doseUnit.text = u == Unit.unitsPerMl ? 'units' : 'mg';
           if (_doseValue.text.trim().isEmpty) {
             if (u == Unit.mcgPerMl) {
               _doseValue.text = fmt2(med.strengthValue);
@@ -588,7 +605,7 @@ class _AddScheduleWizardPageState
               _doseUnit.text = 'g';
             } else if (u == Unit.unitsPerMl) {
               _doseValue.text = fmt2(med.strengthValue);
-              _doseUnit.text = 'IU';
+              _doseUnit.text = 'units';
             } else {
               _doseValue.text = '1';
             }
@@ -600,6 +617,44 @@ class _AddScheduleWizardPageState
 
   void _syncLegacyDoseFieldsFromResult(DoseCalculationResult result) {
     if (!result.success) return;
+
+    // MDV needs explicit sync because DoseInputField doesn't use legacy controllers.
+    if (_selectedMed?.form == MedicationForm.multiDoseVial) {
+      if (result.syringeUnits != null) {
+        _doseValue.text = fmt2(result.syringeUnits!);
+        _doseUnit.text = 'units';
+        return;
+      }
+
+      if (result.doseVolumeMicroliter != null) {
+        _doseValue.text = fmt2(result.doseVolumeMicroliter! / 1000);
+        _doseUnit.text = 'ml';
+        return;
+      }
+
+      if (result.doseMassMcg != null) {
+        final raw = result.doseMassMcg!;
+        final strengthUnit = (_getStrengthUnit() ?? 'mg').toLowerCase();
+        if (strengthUnit == 'units') {
+          _doseValue.text = fmt2(raw);
+          _doseUnit.text = 'units';
+          return;
+        }
+        if (strengthUnit == 'mg') {
+          _doseValue.text = fmt2(raw / 1000);
+          _doseUnit.text = 'mg';
+          return;
+        }
+        if (strengthUnit == 'g') {
+          _doseValue.text = fmt2(raw / 1000000);
+          _doseUnit.text = 'g';
+          return;
+        }
+        _doseValue.text = fmt2(raw);
+        _doseUnit.text = 'mcg';
+        return;
+      }
+    }
 
     if (result.doseTabletQuarters != null) {
       final tabletCount = result.doseTabletQuarters! / 4;
