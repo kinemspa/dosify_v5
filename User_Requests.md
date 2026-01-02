@@ -25,9 +25,8 @@
 ## Medication Screen
 
 ### Large Cards
-- Need some space between the Storage info and the schedules row.  [COMPLETED]
-- Can we place all the storage objects in their own little space? MDV Have Active and Sealed with Storage Conditionas and Storage Locations.  [COMPLETED]
-- MDV has Expiry for Active and Sealed, Maybe the expiry needs to sit within the storage details.  [COMPLETED]
+- Tablets, Capsules, pre filled syringes and single use vials dont have the same expiry moved to the storage section. 
+- in the donut graph under the percentage text, can we have a tiny tiny text "of Active Vial remains" or "tablets remain", or "capsules remain". Extremely tiny text.  
 
 ### Compact Cards
 
@@ -115,10 +114,10 @@
 	- Needs helper text, input strenght of dose, or select volume or Units of the syringe size. It will do all the calculaiotns for you based on input. [COMPLETED]
 	- Formula is shwing incorrect.
 		- I have a MDV of BCP-157 which is 16mg at 5mL. I have toggled strenght, and incremented by 1, which puts a 1 there, which is 1mg, it then trhows an error of Dose Exceeds vial Sytrenght of 10mcg. [COMPLETED]
-		- If using strenght, we need to be able to change the unit of strenght from mcg, mg and the value. 
-		- Changing to volume, I incremented in 1 to . Whcih trhows an error. I suppose this is correct, but I dont know what I am incremewnting in. There is no mL display. 
-		- Changing to Units, I then increment and 2 syring graphics display. 
-	- Syringe Graphic should always be showing. 
+		- If using strenght, we need to be able to change the unit of strenght from mcg, mg and the value. [COMPLETED]
+		- Changing to volume, I incremented in 1 to . Whcih trhows an error. I suppose this is correct, but I dont know what I am incremewnting in. There is no mL display. [COMPLETED]
+		- Changing to Units, I then increment and 2 syring graphics display. [COMPLETED]
+	- Syringe Graphic should always be showing. [COMPLETED]
 	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. 
 	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both.  
 	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? 

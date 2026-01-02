@@ -86,6 +86,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
   late bool
   _isCountMode; // true = count mode, false = strength mode (tablets/capsules)
   late MdvInputMode _mdvMode; // MDV-specific: strength, volume, or units
+  late String _mdvStrengthUnit;
   DoseCalculationResult? _result;
 
   @override
@@ -96,6 +97,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     // Initialize mode and value based on medication form and initial data
     _isCountMode = _shouldDefaultToCountMode();
     _mdvMode = _shouldDefaultMdvMode();
+    _mdvStrengthUnit = widget.strengthUnit;
     _initializeValue();
 
     // Schedule calculation after build
@@ -213,7 +215,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   double _convertMcgToDisplayUnit(double mcg) {
-    switch (widget.strengthUnit) {
+    switch (_effectiveStrengthUnit()) {
       case 'mcg':
         return mcg;
       case 'mg':
@@ -226,7 +228,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   double _convertDisplayUnitToMcg(double value) {
-    switch (widget.strengthUnit) {
+    switch (_effectiveStrengthUnit()) {
       case 'mcg':
         return value;
       case 'mg':
@@ -236,6 +238,14 @@ class _DoseInputFieldState extends State<DoseInputField> {
       default:
         return value * 1000; // Default to mg
     }
+  }
+
+  String _effectiveStrengthUnit() {
+    if (widget.medicationForm == MedicationForm.multiDoseVial &&
+        _mdvMode == MdvInputMode.strength) {
+      return _mdvStrengthUnit;
+    }
+    return widget.strengthUnit;
   }
 
   void _calculate() {
@@ -422,9 +432,15 @@ class _DoseInputFieldState extends State<DoseInputField> {
       return customStep;
     }
 
-    // MDV uses its own 3-way mode; keep steppers simple here.
     if (widget.medicationForm == MedicationForm.multiDoseVial) {
-      return 1;
+      switch (_mdvMode) {
+        case MdvInputMode.volume:
+          return 0.01;
+        case MdvInputMode.units:
+          return 1;
+        case MdvInputMode.strength:
+          return 1;
+      }
     }
 
     // Count mode: tablets allow quarter-tablet steps; other unit-count forms are whole numbers.
@@ -571,6 +587,11 @@ class _DoseInputFieldState extends State<DoseInputField> {
         // MDV mode toggle (3-way: Strength | Volume | Units)
         if (widget.medicationForm == MedicationForm.multiDoseVial) ...[
           _buildMdvModeToggle(cs),
+          if (_mdvMode == MdvInputMode.strength &&
+              widget.strengthUnit != 'units') ...[
+            const SizedBox(height: kSpacingS),
+            _buildMdvStrengthUnitPicker(),
+          ],
           const SizedBox(height: kFieldGroupSpacing),
         ],
 
@@ -584,21 +605,10 @@ class _DoseInputFieldState extends State<DoseInputField> {
           const SizedBox(height: kCardInnerSpacing),
         ],
 
-        // MDV units mode: show syringe gauge as the primary input affordance
+        // MDV syringe gauge (always visible; drag to fine-tune)
         if (widget.medicationForm == MedicationForm.multiDoseVial &&
-            _mdvMode == MdvInputMode.units &&
             widget.syringeType != null) ...[
-          _buildMdvUnitsSyringeRow(cs),
-          const SizedBox(height: kCardInnerSpacing),
-        ],
-
-        // MDV syringe graphic (when result available)
-        if (widget.medicationForm == MedicationForm.multiDoseVial &&
-            _result != null &&
-            !_result!.hasError &&
-            _result!.syringeUnits != null &&
-            widget.syringeType != null) ...[
-          _buildSyringeGraphic(cs),
+          _buildMdvSyringeSection(cs),
           const SizedBox(height: kCardInnerSpacing),
         ],
 
@@ -759,6 +769,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   Widget _buildInputRow(ColorScheme cs) {
+    final unitLabel = _getInlineUnitLabel();
     return Row(
       children: [
         // Decrement button
@@ -778,12 +789,42 @@ class _DoseInputFieldState extends State<DoseInputField> {
             onChanged: (_) => _calculate(),
           ),
         ),
+        if (unitLabel != null) ...[
+          const SizedBox(width: kSpacingS),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 34),
+            child: Text(
+              unitLabel,
+              style: bodyTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(width: kStepperButtonSpacing),
 
         // Increment button
         _buildStepperButton(icon: Icons.add, onPressed: _increment, cs: cs),
       ],
     );
+  }
+
+  String? _getInlineUnitLabel() {
+    if (widget.medicationForm != MedicationForm.multiDoseVial) return null;
+    switch (_mdvMode) {
+      case MdvInputMode.volume:
+        return 'mL';
+      case MdvInputMode.units:
+        return 'U';
+      case MdvInputMode.strength:
+        final u = _effectiveStrengthUnit();
+        if (u == 'mcg') return 'mcg';
+        if (u == 'mg') return 'mg';
+        if (u == 'g') return 'g';
+        if (u == 'units') return 'units';
+        return u;
+    }
   }
 
   String _getInputHint() {
@@ -862,62 +903,82 @@ class _DoseInputFieldState extends State<DoseInputField> {
     );
   }
 
-  Widget _buildSyringeGraphic(ColorScheme cs) {
-    if (_result == null || widget.syringeType == null) {
-      return const SizedBox.shrink();
-    }
+  Widget _buildMdvStrengthUnitPicker() {
+    return LabelFieldRow(
+      label: 'Unit',
+      field: SmallDropdown36<String>(
+        value: _mdvStrengthUnit,
+        items: const [
+          DropdownMenuItem(value: 'mcg', child: Text('mcg')),
+          DropdownMenuItem(value: 'mg', child: Text('mg')),
+          DropdownMenuItem(value: 'g', child: Text('g')),
+        ],
+        onChanged: (value) {
+          if (value == null || value == _mdvStrengthUnit) return;
 
-    final totalUnits = widget.syringeType!.maxUnits;
-    final fillUnits = _result!.syringeUnits ?? 0;
+          final raw = double.tryParse(_controller.text.trim());
+          // Convert the existing value to the new unit so the dose stays consistent.
+          final mcg = raw == null ? null : _convertDisplayUnitToMcg(raw);
 
-    return WhiteSyringeGauge(
-      totalUnits: totalUnits,
-      fillUnits: fillUnits,
-      interactive: true, // Week 4: Interactive fine-tuning
-      onChanged: _onSyringeDragChanged,
-      showValueLabel: true, // Show value during drag
+          setState(() {
+            _mdvStrengthUnit = value;
+            if (mcg != null) {
+              _controller.text = fmt2(_convertMcgToDisplayUnit(mcg));
+            }
+          });
+
+          _calculate();
+        },
+      ),
     );
   }
 
-  Widget _buildMdvUnitsSyringeRow(ColorScheme cs) {
-    final totalUnits = widget.syringeType!.maxUnits;
+  Widget _buildMdvSyringeSection(ColorScheme cs) {
+    final totalUnits = widget.syringeType!.maxUnits.toDouble();
     final parsedUnits = double.tryParse(_controller.text.trim()) ?? 0;
-    final fillUnits = (_result?.syringeUnits ?? parsedUnits)
-        .clamp(0, totalUnits.toDouble())
-        .toDouble();
+    final fillUnits =
+        (_result?.syringeUnits ??
+                (_mdvMode == MdvInputMode.units ? parsedUnits : 0))
+            .clamp(0, totalUnits)
+            .toDouble();
+
+    final helper = _mdvMode == MdvInputMode.units
+        ? 'Drag the syringe or use +/- for fine adjustments (U = Units)'
+        : 'Syringe units preview (drag to fine-tune)';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Drag the syringe or use +/- for fine adjustments (U = Units)',
-          style: helperTextStyle(context),
-        ),
+        Text(helper, style: helperTextStyle(context)),
         const SizedBox(height: kSpacingS),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            _buildStepperButton(
-              icon: Icons.remove,
-              onPressed: () => _decrement(customStep: 1),
-              cs: cs,
-            ),
-            const SizedBox(width: kSpacingS),
+            if (_mdvMode == MdvInputMode.units) ...[
+              _buildStepperButton(
+                icon: Icons.remove,
+                onPressed: () => _decrement(customStep: 1),
+                cs: cs,
+              ),
+              const SizedBox(width: kSpacingS),
+            ],
             Expanded(
               child: WhiteSyringeGauge(
-                totalUnits: totalUnits.toDouble(),
+                totalUnits: totalUnits,
                 fillUnits: fillUnits,
                 interactive: true,
                 onChanged: _onSyringeDragChanged,
                 showValueLabel: true,
               ),
             ),
-            const SizedBox(width: kSpacingS),
-            _buildStepperButton(
-              icon: Icons.add,
-              onPressed: () => _increment(customStep: 1),
-              cs: cs,
-            ),
+            if (_mdvMode == MdvInputMode.units) ...[
+              const SizedBox(width: kSpacingS),
+              _buildStepperButton(
+                icon: Icons.add,
+                onPressed: () => _increment(customStep: 1),
+                cs: cs,
+              ),
+            ],
           ],
         ),
       ],
