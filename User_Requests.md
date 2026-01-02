@@ -44,7 +44,7 @@
 - History: 
 	- Remove the view change. 
 	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that. 
-	- Missed Doses should be editable. 
+	- Missed Doses should be editable.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
 	- Need to include other events like, doses recorded on empty stock, or stock deleted.
 

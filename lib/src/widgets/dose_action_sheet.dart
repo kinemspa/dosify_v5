@@ -13,9 +13,9 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 class DoseActionSheet extends StatefulWidget {
   final CalculatedDose dose;
   final void Function(String? notes) onMarkTaken;
-  final VoidCallback onSnooze;
-  final VoidCallback onSkip;
-  final VoidCallback onDelete;
+  final void Function(String? notes) onSnooze;
+  final void Function(String? notes) onSkip;
+  final void Function(String? notes) onDelete;
 
   const DoseActionSheet({
     super.key,
@@ -30,9 +30,9 @@ class DoseActionSheet extends StatefulWidget {
     BuildContext context, {
     required CalculatedDose dose,
     required void Function(String? notes) onMarkTaken,
-    required VoidCallback onSnooze,
-    required VoidCallback onSkip,
-    required VoidCallback onDelete,
+    required void Function(String? notes) onSnooze,
+    required void Function(String? notes) onSkip,
+    required void Function(String? notes) onDelete,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -150,15 +150,15 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           widget.onMarkTaken(notes);
           break;
         case DoseStatus.skipped:
-          widget.onSkip();
+          widget.onSkip(notes);
           break;
         case DoseStatus.snoozed:
-          widget.onSnooze();
+          widget.onSnooze(notes);
           break;
         case DoseStatus.pending:
         case DoseStatus.overdue:
           // Revert to original - delete existing log
-          widget.onDelete();
+          widget.onDelete(notes);
           break;
       }
     } else if (widget.dose.existingLog != null) {

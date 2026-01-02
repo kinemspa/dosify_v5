@@ -849,18 +849,17 @@ class _NextDoseCardState extends State<NextDoseCard>
           );
         }
 
-        if (mounted) {
-          setState(() {
-            _calculateDosesForWeek(_selectedDate);
-            _updateDayDoses();
-          });
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
-        }
+        if (!mounted) return;
+        setState(() {
+          _calculateDosesForWeek(_selectedDate);
+          _updateDayDoses();
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       },
-      onSnooze: () {},
-      onSkip: () async {
+      onSnooze: (_) {},
+      onSkip: (notes) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -873,30 +872,29 @@ class _NextDoseCardState extends State<NextDoseCard>
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.skipped,
+          notes: notes?.isEmpty ?? true ? null : notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
         await repo.upsert(log);
 
-        if (mounted) {
-          setState(() {
-            _calculateDosesForWeek(_selectedDate);
-            _updateDayDoses();
-          });
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
-        }
+        if (!mounted) return;
+        setState(() {
+          _calculateDosesForWeek(_selectedDate);
+          _updateDayDoses();
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
       },
-      onDelete: () async {
-        // When deleting/undoing a dose, restore the stock if it was taken
+      onDelete: (_) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final logBox = Hive.box<DoseLog>('dose_logs');
         final existingLog = logBox.get(logId);
 
+        // When deleting/undoing a dose, restore the stock if it was taken
         if (existingLog != null && existingLog.action == DoseAction.taken) {
-          // Restore stock when undoing a taken dose
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
@@ -911,15 +909,14 @@ class _NextDoseCardState extends State<NextDoseCard>
         final repo = DoseLogRepository(logBox);
         await repo.delete(logId);
 
-        if (mounted) {
-          setState(() {
-            _calculateDosesForWeek(_selectedDate);
-            _updateDayDoses();
-          });
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
-        }
+        if (!mounted) return;
+        setState(() {
+          _calculateDosesForWeek(_selectedDate);
+          _updateDayDoses();
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
       },
     );
   }

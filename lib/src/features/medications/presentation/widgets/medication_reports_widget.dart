@@ -400,44 +400,47 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.error_outline, size: kIconSizeMedium, color: cs.error),
-          const SizedBox(width: kSpacingS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Missed dose',
-                  style: helperTextStyle(
-                    context,
-                  )?.copyWith(fontWeight: kFontWeightSemiBold),
-                ),
-                const SizedBox(height: kSpacingXS),
-                Text(
-                  '${dose.scheduleName} • ${dose.doseValue} ${dose.doseUnit}',
-                  style: helperTextStyle(
-                    context,
-                    color: cs.onSurfaceVariant.withValues(
-                      alpha: kOpacityMediumHigh,
+    return InkWell(
+      onTap: () => _showUniversalDoseActionSheetForMissedDose(context, dose),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.error_outline, size: kIconSizeMedium, color: cs.error),
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Missed dose',
+                    style: helperTextStyle(
+                      context,
+                    )?.copyWith(fontWeight: kFontWeightSemiBold),
+                  ),
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    '${dose.scheduleName} • ${dose.doseValue} ${dose.doseUnit}',
+                    style: helperTextStyle(
+                      context,
+                      color: cs.onSurfaceVariant.withValues(
+                        alpha: kOpacityMediumHigh,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: kSpacingXS),
-                Text(
-                  '${dateFormat.format(dose.scheduledTime)} • ${timeFormat.format(dose.scheduledTime)}',
-                  style: helperTextStyle(
-                    context,
-                  )?.copyWith(fontSize: kFontSizeSmall),
-                ),
-              ],
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    '${dateFormat.format(dose.scheduledTime)} • ${timeFormat.format(dose.scheduledTime)}',
+                    style: helperTextStyle(
+                      context,
+                    )?.copyWith(fontSize: kFontSizeSmall),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -974,7 +977,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           showUpdatedSnackBar('Dose updated');
         });
       },
-      onSnooze: () {
+      onSnooze: (notes) {
+        final trimmed = notes?.trim();
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -986,7 +990,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           doseValue: log.doseValue,
           doseUnit: log.doseUnit,
           action: DoseAction.snoozed,
-          notes: log.notes,
+          notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
         repo.upsert(updated).then((_) {
@@ -995,7 +999,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           showUpdatedSnackBar('Dose updated');
         });
       },
-      onSkip: () {
+      onSkip: (notes) {
+        final trimmed = notes?.trim();
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -1007,7 +1012,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           doseValue: log.doseValue,
           doseUnit: log.doseUnit,
           action: DoseAction.skipped,
-          notes: log.notes,
+          notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
         repo.upsert(updated).then((_) {
@@ -1016,7 +1021,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           showUpdatedSnackBar('Dose updated');
         });
       },
-      onDelete: () {
+      onDelete: (_) {
         repo.delete(log.id).then((_) {
           if (!mounted) return;
           setState(() {
@@ -1026,6 +1031,69 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           });
           showUpdatedSnackBar('Dose log removed');
         });
+      },
+    );
+  }
+
+  Future<void> _showUniversalDoseActionSheetForMissedDose(
+    BuildContext context,
+    CalculatedDose dose,
+  ) {
+    final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+
+    void showUpdatedSnackBar(String message) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        this.context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
+
+    DoseLog buildLog(DoseAction action, String? notes) {
+      final now = DateTime.now();
+      final id = now.microsecondsSinceEpoch.toString();
+      final trimmed = notes?.trim();
+
+      return DoseLog(
+        id: id,
+        scheduleId: dose.scheduleId,
+        scheduleName: dose.scheduleName,
+        medicationId: widget.medication.id,
+        medicationName: widget.medication.name,
+        scheduledTime: dose.scheduledTime,
+        actionTime: now,
+        doseValue: dose.doseValue,
+        doseUnit: dose.doseUnit,
+        action: action,
+        notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
+      );
+    }
+
+    return DoseActionSheet.show(
+      context,
+      dose: dose,
+      onMarkTaken: (notes) {
+        repo.upsert(buildLog(DoseAction.taken, notes)).then((_) {
+          if (!mounted) return;
+          setState(() {});
+          showUpdatedSnackBar('Dose logged');
+        });
+      },
+      onSnooze: (notes) {
+        repo.upsert(buildLog(DoseAction.snoozed, notes)).then((_) {
+          if (!mounted) return;
+          setState(() {});
+          showUpdatedSnackBar('Dose logged');
+        });
+      },
+      onSkip: (notes) {
+        repo.upsert(buildLog(DoseAction.skipped, notes)).then((_) {
+          if (!mounted) return;
+          setState(() {});
+          showUpdatedSnackBar('Dose logged');
+        });
+      },
+      onDelete: (_) {
+        // Missed doses have no existing log to delete.
       },
     );
   }

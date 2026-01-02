@@ -248,9 +248,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       context,
       dose: dose,
       onMarkTaken: (notes) => _markDoseAsTaken(dose, notes),
-      onSnooze: () => _snoozeDose(dose),
-      onSkip: () => _skipDose(dose),
-      onDelete: () => _deleteDoseLog(dose),
+      onSnooze: (notes) => _snoozeDose(dose, notes),
+      onSkip: (notes) => _skipDose(dose, notes),
+      onDelete: (_) => _deleteDoseLog(dose),
     );
   }
 
@@ -321,7 +321,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     return hash;
   }
 
-  Future<void> _snoozeDose(CalculatedDose dose) async {
+  Future<void> _snoozeDose(CalculatedDose dose, String? notes) async {
     final logId =
         '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
     final medicationId = dose.existingLog?.medicationId ?? 'unknown';
@@ -335,6 +335,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       doseValue: dose.doseValue,
       doseUnit: dose.doseUnit,
       action: DoseAction.snoozed,
+      notes: notes?.isEmpty ?? true ? null : notes,
     );
 
     try {
@@ -359,7 +360,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
   }
 
-  Future<void> _skipDose(CalculatedDose dose) async {
+  Future<void> _skipDose(CalculatedDose dose, String? notes) async {
     final logId =
         '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
     final medicationId = dose.existingLog?.medicationId ?? 'unknown';
@@ -373,6 +374,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       doseValue: dose.doseValue,
       doseUnit: dose.doseUnit,
       action: DoseAction.skipped,
+      notes: notes?.isEmpty ?? true ? null : notes,
     );
 
     try {
