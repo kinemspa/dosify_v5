@@ -81,6 +81,7 @@ class SelectionOptionCard extends StatelessWidget {
 
     return GlassCardSurface(
       onTap: onTap,
+      useGradient: false,
       padding: const EdgeInsets.symmetric(
         horizontal: kCardPadding,
         vertical: kSpacingL,
