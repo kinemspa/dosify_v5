@@ -32,7 +32,7 @@ class WizardNavigationBar extends StatelessWidget {
 
     // While the keyboard is open, prefer a "Next" affordance to move focus
     // through the current step without forcing the user to dismiss the keyboard.
-    final showNextMode = keyboardOpen && !isLastStep && !canProceed;
+    final showNextMode = keyboardOpen && !isLastStep;
 
     final primaryLabel = isLastStep
         ? saveLabel
@@ -44,9 +44,15 @@ class WizardNavigationBar extends StatelessWidget {
     } else if (showNextMode) {
       primaryAction = () {
         final moved = FocusScope.of(context).nextFocus();
-        if (!moved) {
-          FocusScope.of(context).unfocus();
+        if (moved) return;
+
+        // No more fields in this step. Prefer proceeding if allowed.
+        if (canProceed) {
+          onContinue();
+          return;
         }
+
+        FocusScope.of(context).unfocus();
       };
     } else {
       primaryAction = canProceed ? onContinue : null;
