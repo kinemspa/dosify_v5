@@ -43,7 +43,7 @@
 - The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED] Not good enough. This page menu display view is taking up way to much vertical real estate. I can post an image when you get to this one. [COMPLETED]
 - History: 
 	- Remove the view change. 
-	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that. 
+	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that.  [COMPLETED]
 	- Missed Doses should be editable.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
 	- Need to include other events like, doses recorded on empty stock, or stock deleted.

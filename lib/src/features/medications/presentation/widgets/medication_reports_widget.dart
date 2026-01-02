@@ -18,6 +18,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
+import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
 class _HistoryItem {
   const _HistoryItem._({
@@ -339,7 +340,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     DoseStatusChangeLog log,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
 
     return Padding(
@@ -374,20 +374,27 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   ),
                 ),
                 const SizedBox(height: kSpacingXS),
-                Text(
-                  '${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
-                  style: helperTextStyle(
-                    context,
-                  )?.copyWith(fontSize: kFontSizeSmall),
+                Row(
+                  children: [
+                    NextDoseDateBadge(
+                      nextDose: log.changeTime,
+                      isActive: true,
+                      dense: true,
+                      showNextLabel: false,
+                    ),
+                    const SizedBox(width: kSpacingS),
+                    Text(
+                      timeFormat.format(log.changeTime),
+                      style: helperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumHigh,
+                        ),
+                      )?.copyWith(fontSize: kFontSizeSmall),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ),
-          Text(
-            timeFormat.format(log.changeTime),
-            style: helperTextStyle(context)?.copyWith(
-              fontSize: kFontSizeSmall,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
             ),
           ),
         ],
@@ -397,7 +404,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildMissedDoseRow(BuildContext context, CalculatedDose dose) {
     final cs = Theme.of(context).colorScheme;
-    final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
 
     return InkWell(
@@ -430,12 +436,23 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     ),
                   ),
                   const SizedBox(height: kSpacingXS),
-                  Text(
-                    '${dateFormat.format(dose.scheduledTime)} • ${timeFormat.format(dose.scheduledTime)}',
-                    style: helperTextStyle(
-                      context,
-                    )?.copyWith(fontSize: kFontSizeSmall),
-                  ),
+                    Row(
+                      children: [
+                        NextDoseDateBadge(
+                          nextDose: dose.scheduledTime,
+                          isActive: true,
+                          dense: true,
+                          showNextLabel: false,
+                        ),
+                        const SizedBox(width: kSpacingS),
+                        Text(
+                          timeFormat.format(dose.scheduledTime),
+                          style: helperTextStyle(
+                            context,
+                          )?.copyWith(fontSize: kFontSizeSmall),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -551,11 +568,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       const SizedBox(height: kSpacingXS),
                       Row(
                         children: [
-                          Text(
-                            dateFormat.format(log.actionTime),
-                            style: helperTextStyle(
-                              context,
-                            )?.copyWith(fontSize: kFontSizeSmall),
+                          NextDoseDateBadge(
+                            nextDose: log.actionTime,
+                            isActive: true,
+                            dense: true,
+                            showNextLabel: false,
                           ),
                           const SizedBox(width: kSpacingS),
                           Text(
@@ -1674,11 +1691,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildInventoryEventRow(BuildContext context, InventoryLog log) {
     final cs = Theme.of(context).colorScheme;
+    final timeFormat = DateFormat('h:mm a');
 
     final icon = _getInventoryEventIcon(log.changeType);
     final color = _getInventoryEventColor(cs, log.changeType);
-
-    final timeLabel = DateFormat('MMM d • h:mm a').format(log.timestamp);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
@@ -1706,12 +1722,23 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   )?.copyWith(fontWeight: kFontWeightSemiBold),
                 ),
                 const SizedBox(height: kSpacingXS),
-                Text(
-                  timeLabel,
-                  style: helperTextStyle(
-                    context,
-                    color: cs.onSurfaceVariant,
-                  )?.copyWith(fontSize: kFontSizeSmall),
+                Row(
+                  children: [
+                    NextDoseDateBadge(
+                      nextDose: log.timestamp,
+                      isActive: true,
+                      dense: true,
+                      showNextLabel: false,
+                    ),
+                    const SizedBox(width: kSpacingS),
+                    Text(
+                      timeFormat.format(log.timestamp),
+                      style: helperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant,
+                      )?.copyWith(fontSize: kFontSizeSmall),
+                    ),
+                  ],
                 ),
                 if (log.notes != null && log.notes!.trim().isNotEmpty) ...[
                   const SizedBox(height: kSpacingXS),
