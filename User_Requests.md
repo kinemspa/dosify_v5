@@ -10,7 +10,9 @@
 
 - UI and Real estate. 
 	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]
-	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED]
+	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED] This is not working. 
+
+- Cards on Details Screen. When minimized, would like to be able to hold and drag them to change order. 
 
 	
 
@@ -40,25 +42,34 @@
 - Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. [COMPLETED]
 - When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
 - Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. [COMPLETED]
-- For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too? [COMPLETED]
-- For MDV - Active Vial Details section not showing Expiry. [COMPLETED]
+- For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too? [COMPLETED] I dont like this. We need some sort of page to change between Avtive Vial Refill or Sealed Vials Stock Refill. Its not obvious enough. 
+- For MDV - Active Vial Details section not showing Expiry. [COMPLETED] Cant Edit it. 
+
+### App Header
+- Can we make the Storage details and expiry info the same as how we did it on the large cards? ON the same rows with the remaining on the right aligned. 
 
 ### Reports Card
 
 - The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED] Not good enough. This page menu display view is taking up way to much vertical real estate. I can post an image when you get to this one. [COMPLETED]
 - History: 
+	- Each line item needs to be extremely thin. Make the reports card a little taller to fit more items in the view area. 
 	- Remove the view change. 
 	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that.  [COMPLETED]
 	- Missed Doses should be editable.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
 	- Need to include other events like, doses recorded on empty stock, or stock deleted.  [COMPLETED]
+	- The little Date icon needs to be the leftist most item. Status of the object on the right. Details in the middle. 
 
 ### Schedule
 - Change Scheduled Doses heading to Doses [COMPLETED]
 - Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. [COMPLETED]
+- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. 
+- Can no longer scroll left and right on the dose cards to the next or previous days. 
+- Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same?
+- Actually I think if we do any editing of schedules from here it needs to jump to the actual schedules details screen for editing. 
 
 ### Medication Details Card
-- Active vial needs helper text, thetracked medication. [COMPLETED]
+- Active vial needs helper text, the tracked medication. [COMPLETED]
 - Description text in thius part needs to wrap and display all. not elipses. [COMPLETED]
 - The Sub Headings under each Card need to be smaller or maybe not primary colour. For EQ. Sleaed Vials is a bigger font than the Active vial, and also the same size as Medicaiont Details. [COMPLETED]
 
@@ -80,21 +91,18 @@
 
 ==============
 # Schedules List
-- Cards Need to be restyled exactly like the medication screen ones. Large, Compact and list. [COMPLETED]
-- This doesnt need to have the actual time and dose details. Its the saved object of a schedule of doses. Provide the best informaiotn you can for being concise and explicit. [COMPLETED]
-- Cards Large and Compact - Put a nice big Date cirecly on the right which shows the next dose date and time in little underneath.  [COMPLETED]
-- COmpact Cards date circle has made the compact card just as big as the large card. Need to fix this. The Large card purpose is to show mroe infoarmation. COmpact shows less. list shows the least.  [COMPLETED]
-- On the cards, Schedule Name needs to Merge the Med Name into it. If the Schedule is named "1 Tablet" it should show "Panadol - 1 Tablet" [COMPLETED]
-- Change for the Card Name and Medicine. The Medicine name to be the heading of the card. The Schedule Name to be the 2nd most prominent text on the card, place underneath the med name. [COMPLETED]
-- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think.  [COMPLETED]
-- Can we reduce the Next size a bit and move it to be slioght left of centre, as its cropping the date. [COMPLETED]
+- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think.  [COMPLETED] This still needs to be smaller. Also make the chip have less rounded border radius, also move it more left and down a smudge, its touching the top of the card containing it. 
+
 
 ==============
 # Add Schedule
-- Adding a schedule seems to be adding events in the past. SHould not do this. Maybe have a start from setting, Now, or selected date.  [COMPLETED]
-- Needs an end date picker too.  [COMPLETED]
-- Alot of black text on this screen. [COMPLETED]
-- Increment field/buttons is not correct its not using the correct styling. [COMPLETED]
+- Alot of black text on this screen. [COMPLETED] Still black text on the chips, and the summary. Why do we have 3 summaries on this screen. 
+- Helper Text., We need hel text above the type input selection. 
+	- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary. 
+	- Strength needs to be able to select the STrenght Unit. mcg, mg, g. 
+- The incremental field and buttons are wrong. Use the same styling as the add med screen. 
+
+- You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route?
 - Add Tablet:
 	- Configure Dose:
 		- the unit type to use should be a dropdown and incremental like the add med wizard objects.  [COMPLETED]
@@ -118,8 +126,8 @@
 		- Changing to volume, I incremented in 1 to . Whcih trhows an error. I suppose this is correct, but I dont know what I am incremewnting in. There is no mL display. [COMPLETED]
 		- Changing to Units, I then increment and 2 syring graphics display. [COMPLETED]
 	- Syringe Graphic should always be showing. [COMPLETED]
-	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. 
-	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both.  
+	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. [COMPLETED]
+	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both. [COMPLETED]
 	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? 
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
 
@@ -164,6 +172,7 @@
 ==============
 # Take Dose Screen
 - Take Dose:
+- Why is tyhere grey chips????????????
 	- Take dose screen to be styled into the same as the ad hoc dialog. Ad hoc dialog is very nice and stylish. I want all Take doses to look like this and display like that.  [COMPLETED]
 
 - Edit Historical Dose:

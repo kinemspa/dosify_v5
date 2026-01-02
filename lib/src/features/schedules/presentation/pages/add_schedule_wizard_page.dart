@@ -361,10 +361,10 @@ class _AddScheduleWizardPageState
           return '${fmt2(raw)} mcg';
         case Unit.mg:
         case Unit.mgPerMl:
-          return '${fmt2(raw / 1000)} mg';
+          return '${fmt3(raw / 1000)} mg';
         case Unit.g:
         case Unit.gPerMl:
-          return '${fmt2(raw / 1000000)} g';
+          return '${fmt3(raw / 1000000)} g';
         case Unit.units:
         case Unit.unitsPerMl:
           return '${fmt2(raw)} units';

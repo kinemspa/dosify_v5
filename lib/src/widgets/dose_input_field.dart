@@ -995,7 +995,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     // Format values
     String strengthStr;
     if (strengthMcg >= 1000) {
-      strengthStr = '${fmt2(strengthMcg / 1000)}mg';
+      strengthStr = '${fmt3(strengthMcg / 1000)}mg';
     } else {
       strengthStr = '${strengthMcg.toStringAsFixed(0)}mcg';
     }

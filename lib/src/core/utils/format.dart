@@ -9,3 +9,13 @@ String fmt2(num value) {
   }
   return s;
 }
+
+String fmt3(num value) {
+  // Format with up to 3 decimals. Remove only fractional trailing zeros, never integers.
+  var s = value.toStringAsFixed(3);
+  if (s.contains('.')) {
+    s = s.replaceAll(RegExp(r'0+$'), '');
+    if (s.endsWith('.')) s = s.substring(0, s.length - 1);
+  }
+  return s;
+}
