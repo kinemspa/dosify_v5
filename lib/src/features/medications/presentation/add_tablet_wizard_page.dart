@@ -316,7 +316,7 @@ class _AddTabletWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Ibuprofen',
+                    hint: 'e.g., Example medication',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),

@@ -62,13 +62,13 @@
 ## Add Medication
 
 ### Choose Medicaiotn Type Screen
-- The menu card items have lost there shadow [COMPLETED]
+- The menu card items have lost there shadow [COMPLETED] NOT COMPLETED - You added a gradient. I didnt ask for that. I want them to have a shadow like all the cards do in other screens. 
 
 ### Choose Injection Type Screen
-- The menu card items have lost there shadow [COMPLETED]
+- The menu card items have lost there shadow [COMPLETED] NOT COMPLETED - You added a gradient. I didnt ask for that. I want them to have a shadow like all the cards do in other screens. 
 
 ### Add Medicaiton Tablet
-- Is Ibuprofen allowed to be used as an example? Is there a legal issues here. 
+- Is Ibuprofen allowed to be used as an example? Is there a legal issues here.  [COMPLETED]
 
 ### Add Medicaiton - Multi Dose Vial
 
