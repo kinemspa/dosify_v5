@@ -43,6 +43,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
     final effectiveColor =
         widget.color ?? Theme.of(context).colorScheme.primary;
     final currentFill = _dragValue ?? widget.fillUnits;
+    final labelBackgroundColor = reconBackgroundActiveColor(context);
 
     return GestureDetector(
       onHorizontalDragStart: widget.interactive
@@ -120,6 +121,7 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
             totalUnits: widget.totalUnits,
             fillUnits: currentFill,
             color: effectiveColor,
+            labelBackgroundColor: labelBackgroundColor,
             interactive: widget.interactive,
             isActivelyDragging: _isActivelyDragging,
             showValueLabel: widget.showValueLabel,
@@ -135,6 +137,7 @@ class _WhiteSyringePainter extends CustomPainter {
     required this.totalUnits,
     required this.fillUnits,
     required this.color,
+    required this.labelBackgroundColor,
     this.interactive = false,
     this.isActivelyDragging = false,
     this.showValueLabel = false,
@@ -143,6 +146,7 @@ class _WhiteSyringePainter extends CustomPainter {
   final double totalUnits;
   final double fillUnits;
   final Color color;
+  final Color labelBackgroundColor;
   final bool interactive;
   final bool isActivelyDragging;
   final bool showValueLabel;
@@ -277,8 +281,8 @@ class _WhiteSyringePainter extends CustomPainter {
           centerPaint,
         );
 
-        // Draw numeric unit indicator on handle (interactive only)
-        if (interactive) {
+        // Draw numeric unit indicator on handle (interactive: only while dragging)
+        if (interactive && showValueLabel && isActivelyDragging) {
           final unitsText = fillUnits.round().toString();
           final unitPainter = TextPainter(
             text: TextSpan(
@@ -304,8 +308,7 @@ class _WhiteSyringePainter extends CustomPainter {
                   2 +
               3;
           final backgroundPaint = Paint()
-            ..color =
-                const Color(0xFF1A1E37) // kReconBackgroundActive
+            ..color = labelBackgroundColor
             ..style = PaintingStyle.fill;
           canvas.drawCircle(
             Offset(fillEndX, textY + unitPainter.height / 2),
@@ -318,7 +321,7 @@ class _WhiteSyringePainter extends CustomPainter {
       }
 
       // Draw value label for non-interactive gauges
-      if (showValueLabel && fillEndX > 0) {
+      if (showValueLabel && !interactive && fillEndX > 0) {
         final unitsText = '${fillUnits.round()} U';
         final unitPainter = TextPainter(
           text: TextSpan(
@@ -335,6 +338,22 @@ class _WhiteSyringePainter extends CustomPainter {
         // Position above the fill line
         final textX = fillEndX - unitPainter.width / 2;
         final textY = baselineY - 20 - unitPainter.height;
+
+        final backgroundRadius =
+            (unitPainter.width > unitPainter.height
+                    ? unitPainter.width
+                    : unitPainter.height) /
+                2 +
+            3;
+        final backgroundPaint = Paint()
+          ..color = labelBackgroundColor
+          ..style = PaintingStyle.fill;
+        canvas.drawCircle(
+          Offset(fillEndX, textY + unitPainter.height / 2),
+          backgroundRadius,
+          backgroundPaint,
+        );
+
         unitPainter.paint(canvas, Offset(textX, textY));
       }
     }

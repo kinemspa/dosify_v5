@@ -128,7 +128,7 @@
 	- Syringe Graphic should always be showing. [COMPLETED]
 	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. [COMPLETED]
 	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both. [COMPLETED]
-	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? 
+	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? [COMPLETED]
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
 
 
