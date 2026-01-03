@@ -27,7 +27,7 @@
 ## Medication Screen
 
 ### Large Cards
-- Tablets, Capsules, pre filled syringes and single use vials dont have the same expiry moved to the storage section. 
+- Tablets, Capsules, pre filled syringes and single use vials dont have the same expiry moved to the storage section. [COMPLETED]
 - in the donut graph under the percentage text, can we have a tiny tiny text "of Active Vial remains" or "tablets remain", or "capsules remain". Extremely tiny text.  
 
 ### Compact Cards

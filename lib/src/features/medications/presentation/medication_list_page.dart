@@ -1187,8 +1187,8 @@ class _MedLargeCard extends StatelessWidget {
             label: 'Storage',
             icons: combinedIcons,
             location: location,
-            createdAt: null,
-            expiry: null,
+            createdAt: m.createdAt,
+            expiry: m.expiry,
           );
 
     // Intentionally borderless/compact: keep storage details inline without an inset card.
@@ -1321,10 +1321,6 @@ class _MedLargeCard extends StatelessWidget {
     );
   }
 
-  String _formatExpiryLabel(DateTime expiry) {
-    return DateFormat('dd MMM').format(expiry);
-  }
-
   Widget? _buildFooter(BuildContext context) {
     final isMdv = m.form == MedicationForm.multiDoseVial;
 
@@ -1339,33 +1335,6 @@ class _MedLargeCard extends StatelessWidget {
       combinedIcons: _combinedStorageConditionIcons(),
     );
 
-    final expiry = m.expiry;
-    final expiryWidget = (!isMdv && expiry != null)
-        ? Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'Exp ${_formatExpiryLabel(expiry)}',
-              style: helperTextStyle(context)?.copyWith(
-                fontSize: kFontSizeXSmall,
-                color: expiryStatusColor(
-                  context,
-                  createdAt: m.createdAt,
-                  expiry: expiry,
-                ),
-              ),
-            ),
-          )
-        : null;
-
-    if (expiryWidget == null) return storageSection;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        storageSection,
-        const SizedBox(height: kSpacingXS),
-        expiryWidget,
-      ],
-    );
+    return storageSection;
   }
 }
