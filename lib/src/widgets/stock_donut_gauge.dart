@@ -11,6 +11,7 @@ class StockDonutGauge extends StatelessWidget {
     super.key,
     required this.percentage,
     required this.primaryLabel,
+    this.secondaryLabel,
     this.size,
     this.color,
     this.backgroundColor,
@@ -26,6 +27,9 @@ class StockDonutGauge extends StatelessWidget {
 
   /// Main label inside the donut (e.g. `12` or `450 mL`).
   final String primaryLabel;
+
+  /// Optional tiny subtitle under the main label (e.g. "tablets remain").
+  final String? secondaryLabel;
 
   /// Square size of the donut gauge.
   ///
@@ -62,6 +66,22 @@ class StockDonutGauge extends StatelessWidget {
       return stockStatusColorFromPercentage(context, percentage: clamped);
     }
 
+    final effectiveLabelColor = textColor ?? defaultLabelColor();
+    final subtitle = secondaryLabel?.trim();
+    final hasSubtitle = subtitle != null && subtitle.isNotEmpty;
+
+    final effectivePrimaryStyle =
+        labelStyle ??
+        Theme.of(context).textTheme.titleLarge?.copyWith(
+          fontWeight: kFontWeightExtraBold,
+          color: effectiveLabelColor,
+        );
+
+    final effectiveSecondaryStyle = helperTextStyle(
+      context,
+      color: effectiveLabelColor.withValues(alpha: kOpacityMediumLow),
+    )?.copyWith(fontSize: kFontSizeXXSmall, height: 1.0);
+
     return SizedBox(
       width: gaugeSize,
       height: gaugeSize,
@@ -97,17 +117,23 @@ class StockDonutGauge extends StatelessWidget {
               strokeWidth: strokeWidth,
             ),
           ),
-          // Center label (percentage) - color changes based on stock level
-          Text(
-            primaryLabel,
-            style:
-                labelStyle ??
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: kFontWeightExtraBold,
-                  // Text color changes based on stock level
-                  color: textColor ?? defaultLabelColor(),
+          // Center label (percentage) + optional tiny subtitle
+          if (!hasSubtitle)
+            Text(primaryLabel, style: effectivePrimaryStyle)
+          else
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(primaryLabel, style: effectivePrimaryStyle),
+                Text(
+                  subtitle,
+                  style: effectiveSecondaryStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -125,6 +151,7 @@ class DualStockDonutGauge extends StatelessWidget {
     required this.outerPercentage,
     required this.innerPercentage,
     required this.primaryLabel,
+    this.secondaryLabel,
     this.size,
     this.color,
     this.backgroundColor,
@@ -144,6 +171,9 @@ class DualStockDonutGauge extends StatelessWidget {
 
   /// Main label in the centre (typically the active vial percentage).
   final String primaryLabel;
+
+  /// Optional tiny subtitle under the main label.
+  final String? secondaryLabel;
 
   /// Square size of the donut gauge.
   ///
@@ -183,6 +213,22 @@ class DualStockDonutGauge extends StatelessWidget {
     Color defaultLabelColor() {
       return stockStatusColorFromPercentage(context, percentage: outerClamped);
     }
+
+    final effectiveLabelColor = textColor ?? defaultLabelColor();
+    final subtitle = secondaryLabel?.trim();
+    final hasSubtitle = subtitle != null && subtitle.isNotEmpty;
+
+    final effectivePrimaryStyle =
+        labelStyle ??
+        Theme.of(context).textTheme.titleLarge?.copyWith(
+          fontWeight: kFontWeightExtraBold,
+          color: effectiveLabelColor,
+        );
+
+    final effectiveSecondaryStyle = helperTextStyle(
+      context,
+      color: effectiveLabelColor.withValues(alpha: kOpacityMediumLow),
+    )?.copyWith(fontSize: kFontSizeXXSmall, height: 1.0);
 
     return SizedBox(
       width: gaugeSize,
@@ -233,16 +279,23 @@ class DualStockDonutGauge extends StatelessWidget {
               strokeWidth: innerStrokeWidth ?? kDualStockDonutInnerStrokeWidth,
             ),
           ),
-          // Centre label.
-          Text(
-            primaryLabel,
-            style:
-                labelStyle ??
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: kFontWeightExtraBold,
-                  color: textColor ?? defaultLabelColor(),
+          // Centre label + optional tiny subtitle.
+          if (!hasSubtitle)
+            Text(primaryLabel, style: effectivePrimaryStyle)
+          else
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(primaryLabel, style: effectivePrimaryStyle),
+                Text(
+                  subtitle,
+                  style: effectiveSecondaryStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-          ),
+              ],
+            ),
         ],
       ),
     );

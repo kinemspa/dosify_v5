@@ -538,6 +538,7 @@ const double kTextScaleFactorMin = 1.0;
 const double kTextScaleFactorMax = 1.15;
 
 /// Font sizes
+const double kFontSizeXXSmall = 8;
 const double kFontSizeXSmall = 9;
 const double kFontSizeSmall = 11;
 const double kFontSizeMedium = 13;
