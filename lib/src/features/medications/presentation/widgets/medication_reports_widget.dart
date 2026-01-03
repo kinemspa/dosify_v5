@@ -51,9 +51,14 @@ class _HistoryItem {
 /// Comprehensive reports widget with tabs for History, Adherence, and future analytics
 /// Replaces DoseHistoryWidget with expanded functionality
 class MedicationReportsWidget extends StatefulWidget {
-  const MedicationReportsWidget({required this.medication, super.key});
+  const MedicationReportsWidget({
+    required this.medication,
+    this.onExpandedChanged,
+    super.key,
+  });
 
   final Medication medication;
+  final ValueChanged<bool>? onExpandedChanged;
 
   @override
   State<MedicationReportsWidget> createState() =>
@@ -99,7 +104,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         children: [
           // Collapsible header
           InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            onTap: () {
+              setState(() => _isExpanded = !_isExpanded);
+              widget.onExpandedChanged?.call(_isExpanded);
+            },
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingL,

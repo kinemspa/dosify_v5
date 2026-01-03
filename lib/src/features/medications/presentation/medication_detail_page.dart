@@ -60,6 +60,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
   bool _isDetailsExpanded = true; // Collapsible state for details card
   bool _isScheduleExpanded = true; // Collapsible state for schedule card
+  bool _isReportsExpanded = true; // Collapsible state for reports card
+
+  late final List<String> _cardOrder;
+
+  static const String _kCardReports = 'reports';
+  static const String _kCardSchedule = 'schedule';
+  static const String _kCardDetails = 'details';
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -68,6 +75,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _cardOrder = <String>[_kCardReports, _kCardSchedule, _kCardDetails];
   }
 
   @override
@@ -456,31 +464,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       child: _buildReconstitutionCard(context, updatedMed),
                     ),
 
-                  // Medication Reports Widget (History + Adherence tabs)
+                  // Detail page cards (reorderable when minimized)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-                      child: MedicationReportsWidget(medication: updatedMed),
-                    ),
-                  ),
-
-                  // Schedule Card (Scheduled Doses + Schedules)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-                      child: _buildScheduleCard(
-                        context,
-                        updatedMed,
-                        _nextDoseForMedication(updatedMed.id),
+                      padding: const EdgeInsets.fromLTRB(
+                        kPageHorizontalPadding,
+                        kPageHorizontalPadding,
+                        kPageHorizontalPadding,
+                        100,
                       ),
-                    ),
-                  ),
-
-                  // Unified Details Card
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100),
-                      child: _buildUnifiedDetailsCard(context, updatedMed),
+                      child: _buildDetailCardsList(context, updatedMed),
                     ),
                   ),
                 ],
@@ -516,6 +509,55 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildDetailCardsList(BuildContext context, Medication med) {
+    final cards = <String, Widget>{
+      _kCardReports: MedicationReportsWidget(
+        medication: med,
+        onExpandedChanged: (expanded) {
+          if (!mounted) return;
+          setState(() => _isReportsExpanded = expanded);
+        },
+      ),
+      _kCardSchedule: _buildScheduleCard(
+        context,
+        med,
+        _nextDoseForMedication(med.id),
+      ),
+      _kCardDetails: _buildUnifiedDetailsCard(context, med),
+    };
+
+    final reorderEnabled =
+        !_isReportsExpanded && !_isScheduleExpanded && !_isDetailsExpanded;
+
+    final children = <Widget>[
+      for (final id in _cardOrder)
+        Padding(
+          key: ValueKey<String>('detail_card_$id'),
+          padding: EdgeInsets.only(
+            bottom: id == _cardOrder.last ? 0 : kSpacingM,
+          ),
+          child: cards[id]!,
+        ),
+    ];
+
+    if (!reorderEnabled) {
+      return Column(children: children);
+    }
+
+    return ReorderableListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      onReorder: (oldIndex, newIndex) {
+        setState(() {
+          if (newIndex > oldIndex) newIndex -= 1;
+          final id = _cardOrder.removeAt(oldIndex);
+          _cardOrder.insert(newIndex, id);
+        });
+      },
+      children: children,
     );
   }
 
