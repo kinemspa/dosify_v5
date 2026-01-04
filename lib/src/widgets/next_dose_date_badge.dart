@@ -102,7 +102,7 @@ class NextDoseDateBadge extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: kSpacingXS,
-                      vertical: kHelperTextTopPadding,
+                      vertical: 0,
                     ),
                     decoration: BoxDecoration(
                       color: cs.primary.withValues(alpha: kOpacityEmphasis),
@@ -111,7 +111,7 @@ class NextDoseDateBadge extends StatelessWidget {
                     child: Text(
                       'Next',
                       style: TextStyle(
-                        fontSize: kFontSizeXSmall,
+                        fontSize: kFontSizeXXSmall,
                         fontWeight: kFontWeightExtraBold,
                         height: 1,
                         color: cs.onPrimary,
@@ -138,7 +138,7 @@ class NextDoseDateBadge extends StatelessWidget {
             color: isEnabled
                 ? cs.primary.withValues(alpha: kOpacityFull)
                 : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
-          ),
+          )?.copyWith(fontSize: kFontSizeXSmall),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
