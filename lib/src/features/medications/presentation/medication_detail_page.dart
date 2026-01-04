@@ -62,12 +62,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   bool _isDetailsExpanded = true; // Collapsible state for details card
   bool _isScheduleExpanded = true; // Collapsible state for schedule card
   bool _isReportsExpanded = true; // Collapsible state for reports card
+  bool _isReconstitutionExpanded = true; // Collapsible state for reconstitution
 
   late final List<String> _cardOrder;
 
   static const String _kCardReports = 'reports';
   static const String _kCardSchedule = 'schedule';
   static const String _kCardDetails = 'details';
+  static const String _kCardReconstitution = 'reconstitution';
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -76,7 +78,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _cardOrder = <String>[_kCardReports, _kCardSchedule, _kCardDetails];
+    _cardOrder = <String>[
+      _kCardReconstitution,
+      _kCardReports,
+      _kCardSchedule,
+      _kCardDetails,
+    ];
   }
 
   @override
@@ -460,11 +467,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     ],
                   ),
                   // Reconstitution Card (if applicable)
-                  if (updatedMed.form == MedicationForm.multiDoseVial)
-                    SliverToBoxAdapter(
-                      child: _buildReconstitutionCard(context, updatedMed),
-                    ),
-
                   // Detail page cards (reorderable when minimized)
                   SliverToBoxAdapter(
                     child: Padding(
@@ -515,6 +517,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
   Widget _buildDetailCardsList(BuildContext context, Medication med) {
     final cards = <String, Widget>{
+      if (med.form == MedicationForm.multiDoseVial)
+        _kCardReconstitution: _buildReconstitutionCard(context, med),
       _kCardReports: MedicationReportsWidget(
         medication: med,
         onExpandedChanged: (expanded) {
@@ -530,10 +534,34 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       _kCardDetails: _buildUnifiedDetailsCard(context, med),
     };
 
-    final reorderEnabled =
-        !_isReportsExpanded || !_isScheduleExpanded || !_isDetailsExpanded;
+    final hasReconstitutionCard = cards.containsKey(_kCardReconstitution);
 
-    final orderedIds = List<String>.from(_cardOrder);
+    final reorderEnabled =
+        !_isReportsExpanded ||
+        !_isScheduleExpanded ||
+        !_isDetailsExpanded ||
+        (hasReconstitutionCard && !_isReconstitutionExpanded);
+
+    final orderedIds = _cardOrder.where(cards.containsKey).toList();
+    for (final id in cards.keys) {
+      if (!orderedIds.contains(id)) {
+        orderedIds.add(id);
+      }
+    }
+
+    if (!reorderEnabled) {
+      return Column(
+        children: [
+          for (final entry in orderedIds.asMap().entries)
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingM,
+              ),
+              child: cards[entry.value]!,
+            ),
+        ],
+      );
+    }
 
     final children = <Widget>[
       for (final entry in orderedIds.asMap().entries)
@@ -548,10 +576,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           ),
         ),
     ];
-
-    if (!reorderEnabled) {
-      return Column(children: children);
-    }
 
     return ReorderableListView(
       shrinkWrap: true,
@@ -2321,54 +2345,100 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       return const SizedBox.shrink();
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Stack(
-        children: [
-          ReconstitutionSummaryCard(
-            strengthValue: med.strengthValue,
-            strengthUnit: _unitLabel(med.strengthUnit),
-            medicationName: med.name,
-            containerVolumeMl: med.containerVolumeMl,
-            perMlValue: med.perMlValue,
-            volumePerDose: med.volumePerDose,
-            reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
-            syringeSizeMl: 3.0,
-            compact: true,
-          ),
-          Positioned(
-            top: 8,
-            right: 8,
-            child: IconButton(
-              icon: Icon(
-                Icons.edit_outlined,
-                size: 20,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              onPressed: () async {
-                final result = await showModalBottomSheet<ReconstitutionResult>(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => ReconstitutionCalculatorDialog(
-                    initialStrengthValue: med.strengthValue,
-                    unitLabel: _unitLabel(med.strengthUnit),
-                    initialDoseValue: med.volumePerDose,
-                    initialVialSize: med.containerVolumeMl,
-                  ),
-                );
+    final cs = Theme.of(context).colorScheme;
 
-                if (result != null && context.mounted) {
-                  final updatedMed = med.copyWith(
-                    containerVolumeMl: result.solventVolumeMl,
-                    perMlValue: result.perMlConcentration,
-                    volumePerDose: result.recommendedUnits / 100,
-                  );
-                  final box = await Hive.openBox<Medication>('medications');
-                  await box.put(updatedMed.id, updatedMed);
-                }
-              },
-              tooltip: 'Edit Reconstitution',
+    Future<void> onEdit() async {
+      final result = await showModalBottomSheet<ReconstitutionResult>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => ReconstitutionCalculatorDialog(
+          initialStrengthValue: med.strengthValue,
+          unitLabel: _unitLabel(med.strengthUnit),
+          initialDoseValue: med.volumePerDose,
+          initialVialSize: med.containerVolumeMl,
+        ),
+      );
+
+      if (result != null && context.mounted) {
+        final updatedMed = med.copyWith(
+          containerVolumeMl: result.solventVolumeMl,
+          perMlValue: result.perMlConcentration,
+          volumePerDose: result.recommendedUnits / 100,
+        );
+        final box = await Hive.openBox<Medication>('medications');
+        await box.put(updatedMed.id, updatedMed);
+      }
+    }
+
+    return GlassCardSurface(
+      useGradient: false,
+      showBorder: false,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(
+              () => _isReconstitutionExpanded = !_isReconstitutionExpanded,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(kCardPadding),
+              child: Row(
+                children: [
+                  Icon(Icons.science_outlined, size: 18, color: cs.primary),
+                  const SizedBox(width: kSpacingS),
+                  Text(
+                    'Reconstitution',
+                    style: cardTitleStyle(context)?.copyWith(color: cs.primary),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: onEdit,
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 20,
+                      color: cs.primary,
+                    ),
+                    tooltip: 'Edit Reconstitution',
+                  ),
+                  AnimatedRotation(
+                    turns: _isReconstitutionExpanded ? 0 : -0.25,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 22,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _isReconstitutionExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                kCardPadding,
+                0,
+                kCardPadding,
+                kCardPadding,
+              ),
+              child: ReconstitutionSummaryCard(
+                strengthValue: med.strengthValue,
+                strengthUnit: _unitLabel(med.strengthUnit),
+                medicationName: med.name,
+                containerVolumeMl: med.containerVolumeMl,
+                perMlValue: med.perMlValue,
+                volumePerDose: med.volumePerDose,
+                reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
+                syringeSizeMl: 3.0,
+                compact: true,
+              ),
             ),
           ),
         ],
