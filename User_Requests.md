@@ -49,7 +49,7 @@
 ### Reports Card
 - Minimizing this card is requireing 2 clicks. 
 - History: 
-	- Date Icon - make smaller.
+	- Date Icon - make smaller. [COMPLETED]
 	- AdHoc Doses should be editable. 
 	- Indicate entries that are editable.
 

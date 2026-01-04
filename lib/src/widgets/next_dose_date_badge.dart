@@ -76,7 +76,9 @@ class NextDoseDateBadge extends StatelessWidget {
               Text(
                 monthText,
                 style: TextStyle(
-                  fontSize: kNextDoseDateCircleMonthFontSize,
+                  fontSize: dense
+                      ? kFontSizeXSmall
+                      : kNextDoseDateCircleMonthFontSize,
                   fontWeight: kFontWeightSemiBold,
                   height: 1,
                   color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
