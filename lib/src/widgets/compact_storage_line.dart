@@ -77,9 +77,11 @@ class CompactStorageLine extends StatelessWidget {
     ];
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Wrap(
                 spacing: kSpacingXS,

@@ -26,7 +26,7 @@
 
 ### Large Cards
 - Tablets, Capsules, pre filled syringes and single use vials dont have the same expiry moved to the storage section. [COMPLETED]
-- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. 
+- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. [COMPLETED]
 - in the donut graph under the percentage text, can we have a tiny tiny text "of Active Vial remains" or "tablets remain", or "capsules remain". Extremely tiny text. [COMPLETED]
 
 
