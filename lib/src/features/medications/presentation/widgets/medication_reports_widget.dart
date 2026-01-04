@@ -72,8 +72,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   static const int _historyPageStep = 25;
   int _historyMaxItems = _historyPageStep;
-  String? _expandedHistoryLogId;
-  bool _historyHorizontalView = false;
 
   static const int _inventoryEventsMaxItems = 10;
   static const int _historyMissedLookbackDays = 14;
@@ -219,8 +217,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     // Inventory events for this medication (refills, deductions, adjustments, etc)
     final inventoryLogs = inventoryLogBox.values
-      .where((l) => l.medicationId == widget.medication.id)
-      .toList(growable: false);
+        .where((l) => l.medicationId == widget.medication.id)
+        .toList(growable: false);
 
     // Status change events for this medication
     final statusChanges = statusChangeBox.values
@@ -346,14 +344,15 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final timeFormat = DateFormat('h:mm a');
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.swap_horiz,
-            size: kIconSizeMedium,
-            color: cs.onSurfaceVariant,
+          NextDoseDateBadge(
+            nextDose: log.changeTime,
+            isActive: true,
+            dense: true,
+            showNextLabel: false,
           ),
           const SizedBox(width: kSpacingS),
           Expanded(
@@ -361,44 +360,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Status changed',
+                  '${log.fromStatus} → ${log.toStatus}',
                   style: helperTextStyle(
                     context,
+                    color: cs.onSurfaceVariant,
                   )?.copyWith(fontWeight: kFontWeightSemiBold),
                 ),
-                const SizedBox(height: kSpacingXS),
+                const SizedBox(height: kSpacingXS / 2),
                 Text(
-                  '${log.fromStatus} → ${log.toStatus}',
+                  timeFormat.format(log.changeTime),
                   style: helperTextStyle(
                     context,
                     color: cs.onSurfaceVariant.withValues(
                       alpha: kOpacityMediumHigh,
                     ),
-                  ),
-                ),
-                const SizedBox(height: kSpacingXS),
-                Row(
-                  children: [
-                    NextDoseDateBadge(
-                      nextDose: log.changeTime,
-                      isActive: true,
-                      dense: true,
-                      showNextLabel: false,
-                    ),
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      timeFormat.format(log.changeTime),
-                      style: helperTextStyle(
-                        context,
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMediumHigh,
-                        ),
-                      )?.copyWith(fontSize: kFontSizeSmall),
-                    ),
-                  ],
+                  )?.copyWith(fontSize: kFontSizeSmall),
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: kSpacingS),
+          Icon(
+            Icons.swap_horiz,
+            size: kIconSizeSmall,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
           ),
         ],
       ),
@@ -412,23 +397,21 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return InkWell(
       onTap: () => _showUniversalDoseActionSheetForMissedDose(context, dose),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.error_outline, size: kIconSizeMedium, color: cs.error),
+            NextDoseDateBadge(
+              nextDose: dose.scheduledTime,
+              isActive: true,
+              dense: true,
+              showNextLabel: false,
+            ),
             const SizedBox(width: kSpacingS),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Missed dose',
-                    style: helperTextStyle(
-                      context,
-                    )?.copyWith(fontWeight: kFontWeightSemiBold),
-                  ),
-                  const SizedBox(height: kSpacingXS),
                   Text(
                     '${dose.scheduleName} • ${dose.doseValue} ${dose.doseUnit}',
                     style: helperTextStyle(
@@ -438,25 +421,35 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       ),
                     ),
                   ),
-                  const SizedBox(height: kSpacingXS),
-                  Row(
-                    children: [
-                      NextDoseDateBadge(
-                        nextDose: dose.scheduledTime,
-                        isActive: true,
-                        dense: true,
-                        showNextLabel: false,
+                  const SizedBox(height: kSpacingXS / 2),
+                  Text(
+                    timeFormat.format(dose.scheduledTime),
+                    style: helperTextStyle(
+                      context,
+                      color: cs.onSurfaceVariant.withValues(
+                        alpha: kOpacityMediumHigh,
                       ),
-                      const SizedBox(width: kSpacingS),
-                      Text(
-                        timeFormat.format(dose.scheduledTime),
-                        style: helperTextStyle(
-                          context,
-                        )?.copyWith(fontSize: kFontSizeSmall),
-                      ),
-                    ],
+                    )?.copyWith(fontSize: kFontSizeSmall),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingXS,
+                vertical: kSpacingXS / 2,
+              ),
+              decoration: BoxDecoration(
+                color: cs.error.withValues(alpha: kOpacitySubtle),
+                borderRadius: BorderRadius.circular(kBorderRadiusChip),
+              ),
+              child: Text(
+                'Missed',
+                style: helperTextStyle(context, color: cs.error)?.copyWith(
+                  fontSize: kFontSizeHint,
+                  fontWeight: kFontWeightBold,
+                ),
               ),
             ),
           ],
@@ -466,478 +459,104 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   }
 
   Widget _buildDoseLogItem(BuildContext context, DoseLog log) {
-    if (_historyHorizontalView) {
-      return _buildDoseLogItemHorizontal(context, log);
-    }
-
     final cs = Theme.of(context).colorScheme;
-    final dateFormat = DateFormat('MMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
-
-    final isExpanded = _expandedHistoryLogId == log.id;
-
-    final IconData icon;
-    final Color iconColor;
-    switch (log.action) {
-      case DoseAction.taken:
-        icon = Icons.check_circle_outline;
-        iconColor = cs.primary;
-        break;
-      case DoseAction.skipped:
-        icon = Icons.cancel_outlined;
-        iconColor = cs.tertiary;
-        break;
-      case DoseAction.snoozed:
-        icon = Icons.snooze;
-        iconColor = cs.secondary;
-        break;
-    }
 
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
     final isAdHoc = log.scheduleId == 'ad_hoc';
 
+    final Color iconColor;
+    switch (log.action) {
+      case DoseAction.taken:
+        iconColor = cs.primary;
+        break;
+      case DoseAction.skipped:
+        iconColor = cs.tertiary;
+        break;
+      case DoseAction.snoozed:
+        iconColor = cs.secondary;
+        break;
+    }
+
+    final title = isAdHoc ? 'Unscheduled' : log.scheduleName;
+
     return InkWell(
-      onTap: () {
-        setState(() {
-          _expandedHistoryLogId = isExpanded ? null : log.id;
-        });
-      },
+      onTap: () => _showUniversalDoseActionSheetForLog(context, log),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
-        child: Column(
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: kStepperButtonSize,
-                  height: kStepperButtonSize,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: kOpacitySubtle),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, size: kIconSizeSmall, color: iconColor),
-                ),
-                const SizedBox(width: kSpacingS),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            _formatAmount(displayValue),
-                            style: bodyTextStyle(
-                              context,
-                            )?.copyWith(fontWeight: kFontWeightBold),
-                          ),
-                          const SizedBox(width: kSpacingXS),
-                          Text(displayUnit, style: helperTextStyle(context)),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: kSpacingXS,
-                              vertical: kSpacingXS / 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: iconColor.withValues(
-                                alpha: kOpacitySubtle,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                kBorderRadiusChip,
-                              ),
-                            ),
-                            child: Text(
-                              log.action.name,
-                              style: helperTextStyle(context, color: iconColor)
-                                  ?.copyWith(
-                                    fontSize: kFontSizeHint,
-                                    fontWeight: kFontWeightBold,
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(width: kSpacingXS),
-                          Icon(
-                            isExpanded
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                            size: kIconSizeMedium,
-                            color: cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMediumLow,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: kSpacingXS),
-                      Row(
-                        children: [
-                          NextDoseDateBadge(
-                            nextDose: log.actionTime,
-                            isActive: true,
-                            dense: true,
-                            showNextLabel: false,
-                          ),
-                          const SizedBox(width: kSpacingS),
-                          Text(
-                            timeFormat.format(log.actionTime),
-                            style: helperTextStyle(
-                              context,
-                            )?.copyWith(fontSize: kFontSizeSmall),
-                          ),
-                        ],
-                      ),
-                      if (!isExpanded &&
-                          log.notes != null &&
-                          log.notes!.isNotEmpty) ...[
-                        const SizedBox(height: kSpacingXS),
-                        Text(
-                          log.notes!,
-                          style: helperTextStyle(context)?.copyWith(
-                            fontStyle: FontStyle.italic,
-                            fontSize: kFontSizeSmall,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+            NextDoseDateBadge(
+              nextDose: log.actionTime,
+              isActive: true,
+              dense: true,
+              showNextLabel: false,
             ),
-            AnimatedCrossFade(
-              duration: kAnimationFast,
-              crossFadeState: isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              firstChild: const SizedBox.shrink(),
-              secondChild: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  kStepperButtonSize + kSpacingS,
-                  kSpacingS,
-                  0,
-                  0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      log.scheduleName,
-                      style: bodyTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightSemiBold),
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    if (!isAdHoc)
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
                       Text(
-                        'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
-                        style: helperTextStyle(context),
+                        _formatAmount(displayValue),
+                        style: bodyTextStyle(
+                          context,
+                        )?.copyWith(fontWeight: kFontWeightBold),
                       ),
-                    Text(
-                      'Recorded: ${dateFormat.format(log.actionTime)} • ${timeFormat.format(log.actionTime)}',
-                      style: helperTextStyle(context),
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      log.action == DoseAction.taken
-                          ? (isAdHoc
-                                ? 'Unscheduled'
-                                : (log.wasOnTime
-                                      ? 'On time'
-                                      : 'Offset: ${log.minutesOffset} min'))
-                          : 'Action: ${log.action.name}',
-                      style: helperTextStyle(
-                        context,
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMediumHigh,
-                        ),
-                      ),
-                    ),
-                    if (log.notes != null && log.notes!.isNotEmpty) ...[
-                      const SizedBox(height: kSpacingS),
+                      const SizedBox(width: kSpacingXS),
                       Text(
-                        log.notes!,
+                        displayUnit,
                         style: helperTextStyle(
                           context,
-                        )?.copyWith(fontStyle: FontStyle.italic),
+                          color: cs.onSurfaceVariant,
+                        )?.copyWith(fontSize: kFontSizeSmall),
+                      ),
+                      const SizedBox(width: kSpacingS),
+                      Text(
+                        timeFormat.format(log.actionTime),
+                        style: helperTextStyle(
+                          context,
+                          color: cs.onSurfaceVariant.withValues(
+                            alpha: kOpacityMediumHigh,
+                          ),
+                        )?.copyWith(fontSize: kFontSizeSmall),
                       ),
                     ],
-                    const SizedBox(height: kSpacingS),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () =>
-                            _showUniversalDoseActionSheetForLog(context, log),
-                        icon: Icon(
-                          Icons.edit_outlined,
-                          size: kIconSizeSmall,
-                          color: cs.primary,
-                        ),
-                        label: Text(
-                          'Edit',
-                          style: helperTextStyle(
-                            context,
-                            color: cs.primary,
-                          )?.copyWith(fontWeight: kFontWeightSemiBold),
-                        ),
+                  ),
+                  const SizedBox(height: kSpacingXS / 2),
+                  Text(
+                    title,
+                    style: helperTextStyle(
+                      context,
+                      color: cs.onSurfaceVariant.withValues(
+                        alpha: kOpacityMediumHigh,
                       ),
-                    ),
-                  ],
-                ),
+                    )?.copyWith(fontSize: kFontSizeSmall),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDoseLogItemHorizontal(BuildContext context, DoseLog log) {
-    final cs = Theme.of(context).colorScheme;
-    final dateFormat = DateFormat('MMM d, yyyy');
-    final timeFormat = DateFormat('h:mm a');
-
-    final isExpanded = _expandedHistoryLogId == log.id;
-
-    final IconData icon;
-    final Color iconColor;
-    switch (log.action) {
-      case DoseAction.taken:
-        icon = Icons.check_circle_outline;
-        iconColor = cs.primary;
-        break;
-      case DoseAction.skipped:
-        icon = Icons.cancel_outlined;
-        iconColor = cs.tertiary;
-        break;
-      case DoseAction.snoozed:
-        icon = Icons.snooze;
-        iconColor = cs.secondary;
-        break;
-    }
-
-    final displayValue = log.actualDoseValue ?? log.doseValue;
-    final displayUnit = log.actualDoseUnit ?? log.doseUnit;
-    final isAdHoc = log.scheduleId == 'ad_hoc';
-
-    final dayNumber = DateFormat('d').format(log.actionTime);
-    final monthName = DateFormat('MMM').format(log.actionTime);
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _expandedHistoryLogId = isExpanded ? null : log.id;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: kNextDoseDateCircleSizeCompact,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: kNextDoseDateCircleSizeCompact,
-                        height: kNextDoseDateCircleSizeCompact,
-                        decoration: BoxDecoration(
-                          color: iconColor.withValues(alpha: kOpacitySubtle),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          dayNumber,
-                          style: cardTitleStyle(context)?.copyWith(
-                            fontWeight: kFontWeightBold,
-                            color: iconColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: kSpacingXS),
-                      Text(
-                        monthName,
-                        style:
-                            helperTextStyle(
-                              context,
-                              color: cs.onSurfaceVariant,
-                            )?.copyWith(
-                              fontSize: kFontSizeHint,
-                              fontWeight: kFontWeightSemiBold,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: kSpacingS),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(icon, size: kIconSizeSmall, color: iconColor),
-                          const SizedBox(width: kSpacingXS),
-                          Text(
-                            _formatAmount(displayValue),
-                            style: bodyTextStyle(
-                              context,
-                            )?.copyWith(fontWeight: kFontWeightBold),
-                          ),
-                          const SizedBox(width: kSpacingXS),
-                          Text(displayUnit, style: helperTextStyle(context)),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: kSpacingXS,
-                              vertical: kSpacingXS / 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: iconColor.withValues(
-                                alpha: kOpacitySubtle,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                kBorderRadiusChip,
-                              ),
-                            ),
-                            child: Text(
-                              log.action.name,
-                              style: helperTextStyle(context, color: iconColor)
-                                  ?.copyWith(
-                                    fontSize: kFontSizeHint,
-                                    fontWeight: kFontWeightBold,
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(width: kSpacingXS),
-                          Icon(
-                            isExpanded
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                            size: kIconSizeMedium,
-                            color: cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMediumLow,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: kSpacingXS),
-                      Row(
-                        children: [
-                          Text(
-                            timeFormat.format(log.actionTime),
-                            style: helperTextStyle(
-                              context,
-                            )?.copyWith(fontSize: kFontSizeSmall),
-                          ),
-                          const SizedBox(width: kSpacingS),
-                          Text(
-                            dateFormat.format(log.actionTime),
-                            style: helperTextStyle(
-                              context,
-                            )?.copyWith(fontSize: kFontSizeSmall),
-                          ),
-                        ],
-                      ),
-                      if (!isExpanded &&
-                          log.notes != null &&
-                          log.notes!.isNotEmpty) ...[
-                        const SizedBox(height: kSpacingXS),
-                        Text(
-                          log.notes!,
-                          style: helperTextStyle(context)?.copyWith(
-                            fontStyle: FontStyle.italic,
-                            fontSize: kFontSizeSmall,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            AnimatedCrossFade(
-              duration: kAnimationFast,
-              crossFadeState: isExpanded
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
-              firstChild: const SizedBox.shrink(),
-              secondChild: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  kNextDoseDateCircleSizeCompact + kSpacingS,
-                  kSpacingS,
-                  0,
-                  0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      log.scheduleName,
-                      style: bodyTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightSemiBold),
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    if (!isAdHoc)
-                      Text(
-                        'Scheduled: ${dateFormat.format(log.scheduledTime)} • ${timeFormat.format(log.scheduledTime)}',
-                        style: helperTextStyle(context),
-                      ),
-                    Text(
-                      'Recorded: ${dateFormat.format(log.actionTime)} • ${timeFormat.format(log.actionTime)}',
-                      style: helperTextStyle(context),
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      log.action == DoseAction.taken
-                          ? (isAdHoc
-                                ? 'Unscheduled'
-                                : (log.wasOnTime
-                                      ? 'On time'
-                                      : 'Offset: ${log.minutesOffset} min'))
-                          : 'Action: ${log.action.name}',
-                      style: helperTextStyle(
-                        context,
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMediumHigh,
-                        ),
-                      ),
-                    ),
-                    if (log.notes != null && log.notes!.isNotEmpty) ...[
-                      const SizedBox(height: kSpacingS),
-                      Text(
-                        log.notes!,
-                        style: helperTextStyle(
-                          context,
-                        )?.copyWith(fontStyle: FontStyle.italic),
-                      ),
-                    ],
-                    const SizedBox(height: kSpacingS),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () =>
-                            _showUniversalDoseActionSheetForLog(context, log),
-                        icon: Icon(
-                          Icons.edit_outlined,
-                          size: kIconSizeSmall,
-                          color: cs.primary,
-                        ),
-                        label: Text(
-                          'Edit',
-                          style: helperTextStyle(
-                            context,
-                            color: cs.primary,
-                          )?.copyWith(fontWeight: kFontWeightSemiBold),
-                        ),
-                      ),
-                    ),
-                  ],
+            const SizedBox(width: kSpacingS),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingXS,
+                vertical: kSpacingXS / 2,
+              ),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: kOpacitySubtle),
+                borderRadius: BorderRadius.circular(kBorderRadiusChip),
+              ),
+              child: Text(
+                log.action.name,
+                style: helperTextStyle(context, color: iconColor)?.copyWith(
+                  fontSize: kFontSizeHint,
+                  fontWeight: kFontWeightBold,
                 ),
               ),
             ),
@@ -1044,11 +663,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       onDelete: (_) {
         repo.delete(log.id).then((_) {
           if (!mounted) return;
-          setState(() {
-            if (_expandedHistoryLogId == log.id) {
-              _expandedHistoryLogId = null;
-            }
-          });
+          setState(() {});
           showUpdatedSnackBar('Dose log removed');
         });
       },
@@ -1700,25 +1315,23 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final color = _getInventoryEventColor(cs, log.changeType);
 
     final isDoseDeduct =
-      log.changeType == InventoryChangeType.doseDeducted ||
-      log.changeType == InventoryChangeType.adHocDose;
+        log.changeType == InventoryChangeType.doseDeducted ||
+        log.changeType == InventoryChangeType.adHocDose;
     final isEmptyStockDose = isDoseDeduct && log.previousStock <= 0;
-    final description =
-      isEmptyStockDose ? '${log.description} • empty stock' : log.description;
+    final description = isEmptyStockDose
+        ? '${log.description} • empty stock'
+        : log.description;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: kStepperButtonSize,
-            height: kStepperButtonSize,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: kOpacitySubtle),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: kIconSizeSmall, color: color),
+          NextDoseDateBadge(
+            nextDose: log.timestamp,
+            isActive: true,
+            dense: true,
+            showNextLabel: false,
           ),
           const SizedBox(width: kSpacingS),
           Expanded(
@@ -1731,27 +1344,16 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     context,
                   )?.copyWith(fontWeight: kFontWeightSemiBold),
                 ),
-                const SizedBox(height: kSpacingXS),
-                Row(
-                  children: [
-                    NextDoseDateBadge(
-                      nextDose: log.timestamp,
-                      isActive: true,
-                      dense: true,
-                      showNextLabel: false,
-                    ),
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      timeFormat.format(log.timestamp),
-                      style: helperTextStyle(
-                        context,
-                        color: cs.onSurfaceVariant,
-                      )?.copyWith(fontSize: kFontSizeSmall),
-                    ),
-                  ],
+                const SizedBox(height: kSpacingXS / 2),
+                Text(
+                  timeFormat.format(log.timestamp),
+                  style: helperTextStyle(
+                    context,
+                    color: cs.onSurfaceVariant,
+                  )?.copyWith(fontSize: kFontSizeSmall),
                 ),
                 if (log.notes != null && log.notes!.trim().isNotEmpty) ...[
-                  const SizedBox(height: kSpacingXS),
+                  const SizedBox(height: kSpacingXS / 2),
                   Text(
                     log.notes!.trim(),
                     style: helperTextStyle(context, color: cs.onSurfaceVariant)
@@ -1759,10 +1361,22 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                           fontSize: kFontSizeSmall,
                           fontStyle: FontStyle.italic,
                         ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
             ),
+          ),
+          const SizedBox(width: kSpacingS),
+          Container(
+            width: kStepperButtonSize,
+            height: kStepperButtonSize,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: kOpacitySubtle),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: kIconSizeSmall, color: color),
           ),
         ],
       ),

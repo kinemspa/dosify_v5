@@ -4,9 +4,7 @@
 - How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED] - How do I test this?
 - Dark Theme 
 	- The reconstitution calculator 
-		- was recently changed so now the text in the fields is not visible. [COMPLETED]
-		- Has a lovely dark blue colour which looks amazing in the light theme but not so ce in the dark mode theme. [COMPLETED]
-	- All the fields and cards are not so visibly distingt in Dark Mode theme, Is there a way to rectify this? Maybe give the fields a slightly lighter colour than the background dark colour? [COMPLETED]
+		- Can we change the background blue colour to something a bit darker?
 
 - UI and Real estate. 
 	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]
@@ -52,13 +50,13 @@
 
 - The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED] Not good enough. This page menu display view is taking up way to much vertical real estate. I can post an image when you get to this one. [COMPLETED]
 - History: 
-	- Each line item needs to be extremely thin. Make the reports card a little taller to fit more items in the view area. 
-	- Remove the view change. 
+	- Each line item needs to be extremely thin. Make the reports card a little taller to fit more items in the view area. [COMPLETED]
+	- Remove the view change. [COMPLETED]
 	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that.  [COMPLETED]
 	- Missed Doses should be editable.  [COMPLETED]
 	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
 	- Need to include other events like, doses recorded on empty stock, or stock deleted.  [COMPLETED]
-	- The little Date icon needs to be the leftist most item. Status of the object on the right. Details in the middle. 
+	- The little Date icon needs to be the leftist most item. Status of the object on the right. Details in the middle. [COMPLETED]
 
 ### Schedule
 - Change Scheduled Doses heading to Doses [COMPLETED]
