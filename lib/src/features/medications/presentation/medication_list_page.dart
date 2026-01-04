@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
+import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -979,15 +980,6 @@ class _MedLargeCard extends StatelessWidget {
     return _cleanText(primary) ?? _cleanText(fallback);
   }
 
-  String _formatExpiryShort(BuildContext context, DateTime expiry) {
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final mdPattern = DateFormat.Md(locale).pattern ?? 'M/d';
-    final dayFirst = mdPattern.trimLeft().startsWith('d');
-    return dayFirst
-        ? DateFormat('dd/MM', locale).format(expiry)
-        : DateFormat('MM/dd', locale).format(expiry);
-  }
-
   TextSpan _mdvRemainingMlSpan(BuildContext context) {
     final theme = Theme.of(context);
     final colored = _MedicationStockStatusText.colorFor(context, m);
@@ -1054,71 +1046,13 @@ class _MedLargeCard extends StatelessWidget {
     required DateTime? expiry,
     Widget? trailing,
   }) {
-    final cs = Theme.of(context).colorScheme;
-    final baseStyle = helperTextStyle(
-      context,
-    )?.copyWith(fontSize: kFontSizeXSmall);
-    final spans = <TextSpan>[];
-
-    final createdAtValue = createdAt;
-    final expiryValue = expiry;
-    String? expiryText;
-    Color? expiryColor;
-    if (createdAtValue != null && expiryValue != null) {
-      expiryText = _formatExpiryShort(context, expiryValue);
-      expiryColor = expiryStatusColor(
-        context,
-        createdAt: createdAtValue,
-        expiry: expiryValue,
-      );
-    }
-
-    spans.add(
-      TextSpan(
-        text: label,
-        style: const TextStyle(fontWeight: kFontWeightSemiBold),
-      ),
-    );
-
-    if (location != null) {
-      spans.add(TextSpan(text: ' · $location'));
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          child: Row(
-            children: [
-              Wrap(
-                spacing: kSpacingXS,
-                runSpacing: kSpacingXS,
-                children: [
-                  for (final icon in icons)
-                    Icon(icon, size: kIconSizeSmall, color: cs.primary),
-                ],
-              ),
-              if (expiryText != null) ...[
-                const SizedBox(width: kSpacingXS),
-                Text(
-                  expiryText,
-                  style: baseStyle?.copyWith(color: expiryColor),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(width: kSpacingXS),
-              Expanded(
-                child: RichText(
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(style: baseStyle, children: spans),
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (trailing != null) ...[const SizedBox(width: kSpacingS), trailing],
-      ],
+    return CompactStorageLine(
+      icons: icons,
+      label: label,
+      location: location,
+      createdAt: createdAt,
+      expiry: expiry,
+      trailing: trailing,
     );
   }
 

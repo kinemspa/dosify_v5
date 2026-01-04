@@ -31,6 +31,7 @@ import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
+import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
@@ -714,10 +715,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 ),
                 const SizedBox(height: 8),
 
-                // Storage
-                if (storageLabel != null && storageLabel.isNotEmpty) ...[
+                // Storage + expiry (match Large Cards compact storage rows)
+                if (isMdv) ...[
+                  _buildHeaderMdvStorageSection(
+                    context,
+                    med,
+                    onPrimary: onPrimary,
+                  ),
+                  const SizedBox(height: 8),
+                ] else if (storageLabel != null && storageLabel.isNotEmpty) ...[
                   _HeaderInfoTile(
-                    icon: med.activeVialRequiresFreezer
+                    icon: med.requiresFreezer
                         ? Icons.severe_cold
                         : (med.requiresRefrigeration
                               ? Icons.ac_unit
@@ -725,7 +733,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     label: 'Storage',
                     value: storageLabel,
                     textColor: onPrimary,
-                    trailingIcon: med.activeVialLightSensitive
+                    trailingIcon: med.lightSensitive
                         ? Icons.dark_mode_outlined
                         : null,
                   ),
@@ -888,6 +896,170 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderMdvStorageSection(
+    BuildContext context,
+    Medication med, {
+    required Color onPrimary,
+  }) {
+    String? clean(String? value) {
+      final v = value?.trim();
+      if (v == null || v.isEmpty) return null;
+      return v;
+    }
+
+    String? pickLocation(String? primary, String? fallback) {
+      return clean(primary) ?? clean(fallback);
+    }
+
+    final activeCreatedAt = med.reconstitutedAt ?? med.createdAt;
+    final activeExpiry = med.reconstitutedVialExpiry;
+    final activeLocation = pickLocation(
+      med.activeVialStorageLocation,
+      med.storageLocation,
+    );
+
+    final sealedCreatedAt = med.createdAt;
+    final sealedExpiry = med.backupVialsExpiry ?? med.expiry;
+    final sealedLocation = pickLocation(
+      med.backupVialsStorageLocation,
+      med.storageLocation,
+    );
+
+    final hasAny =
+        activeLocation != null ||
+        sealedLocation != null ||
+        activeExpiry != null ||
+        sealedExpiry != null;
+    if (!hasAny) return const SizedBox.shrink();
+
+    final iconColor = onPrimary.withValues(alpha: kOpacityEmphasis);
+
+    final activeIcons = <IconData>[];
+    if (med.activeVialRequiresFreezer) activeIcons.add(Icons.severe_cold);
+    if (med.activeVialRequiresRefrigeration) activeIcons.add(Icons.ac_unit);
+    if (med.activeVialLightSensitive) {
+      activeIcons.add(Icons.dark_mode_outlined);
+    }
+
+    final sealedIcons = <IconData>[];
+    if (med.backupVialsRequiresFreezer) sealedIcons.add(Icons.severe_cold);
+    if (med.backupVialsRequiresRefrigeration) sealedIcons.add(Icons.ac_unit);
+    if (med.backupVialsLightSensitive) {
+      sealedIcons.add(Icons.dark_mode_outlined);
+    }
+
+    final activeTrailing = _headerMdvRemainingMl(context, med, onPrimary);
+    final sealedTrailing = _headerMdvRemainingVials(context, med, onPrimary);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CompactStorageLine(
+          icons: activeIcons,
+          label: 'Active',
+          location: activeLocation,
+          createdAt: activeCreatedAt,
+          expiry: activeExpiry,
+          trailing: activeTrailing,
+          iconColor: iconColor,
+          textColor: onPrimary,
+          onPrimaryBackground: true,
+        ),
+        const SizedBox(height: kSpacingXS),
+        CompactStorageLine(
+          icons: sealedIcons,
+          label: 'Sealed',
+          location: sealedLocation,
+          createdAt: sealedCreatedAt,
+          expiry: sealedExpiry,
+          trailing: sealedTrailing,
+          iconColor: iconColor,
+          textColor: onPrimary,
+          onPrimaryBackground: true,
+        ),
+      ],
+    );
+  }
+
+  Widget? _headerMdvRemainingMl(
+    BuildContext context,
+    Medication med,
+    Color onPrimary,
+  ) {
+    final totalMl = (med.containerVolumeMl ?? 0).toDouble();
+    final currentRaw = (med.activeVialVolume ?? totalMl).toDouble();
+    final currentMl = totalMl > 0 ? currentRaw.clamp(0.0, totalMl) : 0.0;
+    if (totalMl <= 0) return null;
+
+    final colored = statusColorOnPrimary(
+      context,
+      stockStatusColorFromRatio(context, currentMl / totalMl),
+    );
+    final baseStyle = helperTextStyle(
+      context,
+      color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+    )?.copyWith(fontSize: kFontSizeXSmall, fontWeight: FontWeight.w600);
+
+    return RichText(
+      textAlign: TextAlign.right,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        style: baseStyle,
+        children: [
+          TextSpan(
+            text: fmt2(currentMl),
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(text: '/${fmt2(totalMl)} mL'),
+        ],
+      ),
+    );
+  }
+
+  Widget? _headerMdvRemainingVials(
+    BuildContext context,
+    Medication med,
+    Color onPrimary,
+  ) {
+    if (med.stockUnit != StockUnit.multiDoseVials) return null;
+
+    final count = med.stockValue.floor();
+    if (count <= 0) return null;
+
+    final remainingRatio =
+        med.lowStockVialsThresholdCount != null &&
+            med.lowStockVialsThresholdCount! > 0
+        ? (count / med.lowStockVialsThresholdCount!.toDouble())
+        : 1.0;
+
+    final colored = statusColorOnPrimary(
+      context,
+      stockStatusColorFromRatio(context, remainingRatio),
+    );
+    final baseStyle = helperTextStyle(
+      context,
+      color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+    )?.copyWith(fontSize: kFontSizeXSmall, fontWeight: FontWeight.w600);
+
+    final label = count == 1 ? 'vial' : 'vials';
+    return RichText(
+      textAlign: TextAlign.right,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        style: baseStyle,
+        children: [
+          TextSpan(
+            text: '$count',
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(text: ' $label'),
         ],
       ),
     );

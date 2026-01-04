@@ -46,7 +46,7 @@
 - For MDV - Active Vial Details section not showing Expiry. [COMPLETED] Cant Edit it. 
 
 ### App Header
-- Can we make the Storage details and expiry info the same as how we did it on the large cards? ON the same rows with the remaining on the right aligned. 
+- Can we make the Storage details and expiry info the same as how we did it on the large cards? ON the same rows with the remaining on the right aligned. [COMPLETED]
 
 ### Reports Card
 
