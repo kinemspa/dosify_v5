@@ -64,6 +64,20 @@ const double kEmptyStateIconSize = 48;
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
 
+/// Detail-card collapsed header padding (Medication Details screen).
+///
+/// Matches the Reports card header height for consistent collapsed card sizing.
+const EdgeInsets kDetailCardCollapsedHeaderPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingL,
+  vertical: kSpacingXS,
+);
+
+/// Tight icon button sizing (avoids default 48px IconButton height).
+const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
+  width: kIconButtonSize,
+  height: kIconButtonSize,
+);
+
 /// Next-dose date badge sizing (Schedules list)
 const double kNextDoseDateCircleSizeCompact = 44;
 const double kNextDoseDateCircleSizeLarge = 54;

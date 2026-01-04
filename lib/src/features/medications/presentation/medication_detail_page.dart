@@ -1118,12 +1118,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             onTap: () =>
                 setState(() => _isDetailsExpanded = !_isDetailsExpanded),
             child: Padding(
-              padding: const EdgeInsets.all(kCardPadding),
+              padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    size: 18,
+                    size: kIconSizeMedium,
                     color: colorScheme.primary,
                   ),
                   const SizedBox(width: kSpacingS),
@@ -1139,7 +1139,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       Icons.keyboard_arrow_down,
-                      size: 22,
+                      size: kIconSizeLarge,
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -1219,7 +1219,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         showBorder: false,
         padding: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(kCardPadding),
+          padding: kDetailCardCollapsedHeaderPadding,
           child: Row(
             children: [
               Icon(
@@ -1259,7 +1259,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             onTap: () =>
                 setState(() => _isScheduleExpanded = !_isScheduleExpanded),
             child: Padding(
-              padding: const EdgeInsets.all(kCardPadding),
+              padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
                   Icon(
@@ -2390,10 +2390,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               () => _isReconstitutionExpanded = !_isReconstitutionExpanded,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(kCardPadding),
+              padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
-                  Icon(Icons.science_outlined, size: 18, color: cs.primary),
+                  Icon(
+                    Icons.science_outlined,
+                    size: kIconSizeMedium,
+                    color: cs.primary,
+                  ),
                   const SizedBox(width: kSpacingS),
                   Text(
                     'Reconstitution',
@@ -2402,9 +2406,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   const Spacer(),
                   IconButton(
                     onPressed: onEdit,
+                    constraints: kTightIconButtonConstraints,
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
                     icon: Icon(
                       Icons.edit_outlined,
-                      size: 20,
+                      size: kIconSizeMedium,
                       color: cs.primary,
                     ),
                     tooltip: 'Edit Reconstitution',
@@ -2414,7 +2421,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       Icons.keyboard_arrow_down,
-                      size: 22,
+                      size: kIconSizeLarge,
                       color: cs.onSurfaceVariant,
                     ),
                   ),
