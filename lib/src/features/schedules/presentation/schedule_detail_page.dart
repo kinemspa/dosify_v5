@@ -294,6 +294,25 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return [
       _buildNextDoseCard(context, s),
 
+      // Dose Calendar Section
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: SectionFormCard(
+          neutral: true,
+          title: 'Dose Calendar',
+          children: [
+            SizedBox(
+              height: 400,
+              child: DoseCalendarWidget(
+                variant: CalendarVariant.compact,
+                defaultView: CalendarView.week,
+                scheduleId: s.id,
+              ),
+            ),
+          ],
+        ),
+      ),
+
       // Schedule Details Card
       Padding(
         padding: const EdgeInsets.only(bottom: kSpacingS),
@@ -325,25 +344,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             ),
             // Week 5: Add Recalculate button for MDV schedules with reconstitution
             if (s.medicationId != null) _buildRecalculateButton(s),
-          ],
-        ),
-      ),
-
-      // Dose Calendar Section
-      Padding(
-        padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: SectionFormCard(
-          neutral: true,
-          title: 'Dose Calendar',
-          children: [
-            SizedBox(
-              height: 400,
-              child: DoseCalendarWidget(
-                variant: CalendarVariant.compact,
-                defaultView: CalendarView.week,
-                scheduleId: s.id,
-              ),
-            ),
           ],
         ),
       ),
