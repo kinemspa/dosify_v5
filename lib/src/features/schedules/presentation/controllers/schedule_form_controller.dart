@@ -42,13 +42,14 @@ class ScheduleFormState with _$ScheduleFormState {
   }) = _ScheduleFormState;
 }
 
-class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState, Schedule?> {
+class ScheduleFormController
+    extends AutoDisposeFamilyNotifier<ScheduleFormState, Schedule?> {
   @override
   ScheduleFormState build(Schedule? initial) {
     if (initial != null) {
       final times = initial.timesOfDay ?? [initial.minutesOfDay];
       final useCycle = initial.cycleEveryNDays != null;
-      
+
       // Parse cycle days if possible
       int dOn = 5;
       int dOff = 2;
@@ -61,21 +62,25 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
       final mode = useCycle
           ? ScheduleMode.daysOnOff
           : (initial.daysOfMonth != null && initial.daysOfMonth!.isNotEmpty
-              ? ScheduleMode.daysOfMonth
-              : (initial.daysOfWeek.length == 7
-                  ? ScheduleMode.everyDay
-                  : ScheduleMode.daysOfWeek));
+                ? ScheduleMode.daysOfMonth
+                : (initial.daysOfWeek.length == 7
+                      ? ScheduleMode.everyDay
+                      : ScheduleMode.daysOfWeek));
 
       return ScheduleFormState(
         mode: mode,
-        endDate: null, // TODO: Add endDate to Schedule model if needed, currently not in model?
-        noEnd: true, // Assuming no end date in model for now based on previous code
+        endDate:
+            null, // TODO: Add endDate to Schedule model if needed, currently not in model?
+        noEnd:
+            true, // Assuming no end date in model for now based on previous code
         name: initial.name,
         medicationName: initial.medicationName,
         medicationId: initial.medicationId,
         doseValue: initial.doseValue,
         doseUnit: initial.doseUnit,
-        times: times.map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60)).toList(),
+        times: times
+            .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
+            .toList(),
         days: initial.daysOfWeek.toSet(),
         daysOfMonth: initial.daysOfMonth?.toSet() ?? {},
         active: initial.active,
@@ -86,14 +91,14 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
         cycleAnchor: initial.cycleAnchorDate ?? DateTime.now(),
         nameAuto: false, // Existing schedule name considered manual
         startDate: DateTime.now(), // TODO: Add startDate to Schedule model?
-        // selectedMed: null, // We need to fetch this? Or pass it in? 
+        // selectedMed: null, // We need to fetch this? Or pass it in?
         // For now, we might not have the full Medication object unless we fetch it.
-        // The original code didn't load the medication object in initState, 
+        // The original code didn't load the medication object in initState,
         // it just set the name/id. But _selectedMed is needed for logic.
         // We might need to load it asynchronously.
       );
     }
-    
+
     return ScheduleFormState(
       mode: ScheduleMode.everyDay,
       cycleAnchor: DateTime.now(),
@@ -111,22 +116,14 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
         daysOfMonth: {},
       );
     } else if (mode == ScheduleMode.daysOfWeek) {
-      state = state.copyWith(
-        useCycle: false,
-        daysOfMonth: {},
-      );
+      state = state.copyWith(useCycle: false, daysOfMonth: {});
       if (state.days.isEmpty) {
         state = state.copyWith(days: {1, 2, 3, 4, 5});
       }
     } else if (mode == ScheduleMode.daysOnOff) {
-      state = state.copyWith(
-        useCycle: true,
-        daysOfMonth: {},
-      );
+      state = state.copyWith(useCycle: true, daysOfMonth: {});
     } else if (mode == ScheduleMode.daysOfMonth) {
-      state = state.copyWith(
-        useCycle: false,
-      );
+      state = state.copyWith(useCycle: false);
       if (state.daysOfMonth.isEmpty) {
         state = state.copyWith(daysOfMonth: {1});
       }
@@ -140,11 +137,11 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
       medicationName: med.name,
       showMedSelector: false,
     );
-    
+
     // Set defaults
     String newUnit = state.doseUnit;
     double newValue = state.doseValue;
-    
+
     switch (med.form) {
       case MedicationForm.tablet:
         newUnit = 'tablets';
@@ -166,28 +163,28 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
           newUnit = 'mg';
         }
         if (state.doseValue == 0) {
-           if (u == Unit.mcgPerMl) {
-              newValue = med.strengthValue;
-              newUnit = 'mcg';
-            } else if (u == Unit.mgPerMl) {
-              newValue = med.strengthValue;
-              newUnit = 'mg';
-            } else if (u == Unit.gPerMl) {
-              newValue = med.strengthValue;
-              newUnit = 'g';
-            } else if (u == Unit.unitsPerMl) {
-              newValue = med.strengthValue;
-              newUnit = 'IU';
-            } else {
-              newValue = 1;
-            }
+          if (u == Unit.mcgPerMl) {
+            newValue = med.strengthValue;
+            newUnit = 'mcg';
+          } else if (u == Unit.mgPerMl) {
+            newValue = med.strengthValue;
+            newUnit = 'mg';
+          } else if (u == Unit.gPerMl) {
+            newValue = med.strengthValue;
+            newUnit = 'g';
+          } else if (u == Unit.unitsPerMl) {
+            newValue = med.strengthValue;
+            newUnit = 'IU';
+          } else {
+            newValue = 1;
+          }
         }
     }
-    
+
     state = state.copyWith(doseUnit: newUnit, doseValue: newValue);
     _maybeAutoName();
   }
-  
+
   void updateDose(double value, String unit) {
     state = state.copyWith(doseValue: value, doseUnit: unit);
     _maybeAutoName();
@@ -206,9 +203,11 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
     final dose = state.doseValue;
     final unit = state.doseUnit;
     if (med.isEmpty || dose == 0 || unit.isEmpty) return;
-    
+
     // Simple formatting
-    final doseStr = dose == dose.roundToDouble() ? dose.toStringAsFixed(0) : dose.toStringAsFixed(2);
+    final doseStr = dose == dose.roundToDouble()
+        ? dose.toStringAsFixed(0)
+        : dose.toStringAsFixed(2);
     state = state.copyWith(name: '$med — $doseStr $unit');
   }
 
@@ -223,7 +222,7 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
       state = state.copyWith(times: newTimes);
     }
   }
-  
+
   void updateTime(int index, TimeOfDay time) {
     if (index >= 0 && index < state.times.length) {
       final newTimes = [...state.times];
@@ -241,7 +240,7 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
     }
     state = state.copyWith(days: newDays);
   }
-  
+
   void toggleDayOfMonth(int day) {
     final newDays = {...state.daysOfMonth};
     if (newDays.contains(day)) {
@@ -259,7 +258,7 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
   void setEndDate(DateTime? date) {
     state = state.copyWith(endDate: date, noEnd: date == null);
   }
-  
+
   void setNoEnd(bool value) {
     state = state.copyWith(noEnd: value, endDate: value ? null : state.endDate);
   }
@@ -271,15 +270,15 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
   void setDaysOff(int days) {
     state = state.copyWith(daysOff: days);
   }
-  
+
   void setSyringeType(SyringeType? type) {
     state = state.copyWith(selectedSyringeType: type);
   }
-  
+
   void toggleMedSelector() {
     state = state.copyWith(showMedSelector: !state.showMedSelector);
   }
-  
+
   void setActive(bool active) {
     state = state.copyWith(active: active);
   }
@@ -287,8 +286,12 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
   Future<void> save(Schedule? initialSchedule) async {
     state = state.copyWith(isSaving: true, error: null);
     try {
-      final id = initialSchedule?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
-      final minutesList = state.times.map((t) => t.hour * 60 + t.minute).toList();
+      final id =
+          initialSchedule?.id ??
+          DateTime.now().microsecondsSinceEpoch.toString();
+      final minutesList = state.times
+          .map((t) => t.hour * 60 + t.minute)
+          .toList();
 
       // Compute UTC fields
       final now = DateTime.now();
@@ -341,7 +344,7 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
       final med = state.selectedMed;
       final doseVal = state.doseValue;
       final unitStr = state.doseUnit.trim().toLowerCase();
-      
+
       if (med != null && doseVal > 0 && unitStr.isNotEmpty) {
         switch (med.form) {
           case MedicationForm.tablet:
@@ -380,7 +383,6 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
                 Unit.mgPerMl => med.strengthValue * 1000,
                 Unit.gPerMl => med.strengthValue * 1e6,
                 Unit.unitsPerMl => med.strengthValue,
-  
               };
               doseTabletQuarters = ((desiredMcg / perTabMcg) * 4).round();
               doseUnitCode = switch (unitStr) {
@@ -515,7 +517,11 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
         timesOfDayUtc: timesUtc,
         cycleEveryNDays: state.useCycle ? state.cycleN : null,
         cycleAnchorDate: state.useCycle
-            ? DateTime(state.cycleAnchor.year, state.cycleAnchor.month, state.cycleAnchor.day)
+            ? DateTime(
+                state.cycleAnchor.year,
+                state.cycleAnchor.month,
+                state.cycleAnchor.day,
+              )
             : null,
         daysOfMonth: state.daysOfMonth.isNotEmpty
             ? (state.daysOfMonth.toList()..sort())
@@ -533,16 +539,16 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
       );
 
       final box = Hive.box<Schedule>('schedules');
-      
+
       // Cancel existing notifications for this schedule id (handles edits)
       await ScheduleScheduler.cancelFor(id);
       await box.put(id, s);
-      
+
       // Schedule notifications if active
-      if (s.active) {
-         await ScheduleScheduler.scheduleFor(s);
+      if (s.isActive) {
+        await ScheduleScheduler.scheduleFor(s);
       }
-      
+
       state = state.copyWith(isSaving: false);
     } catch (e) {
       state = state.copyWith(isSaving: false, error: e.toString());
@@ -551,4 +557,9 @@ class ScheduleFormController extends AutoDisposeFamilyNotifier<ScheduleFormState
   }
 }
 
-final scheduleFormProvider = AutoDisposeNotifierProviderFamily<ScheduleFormController, ScheduleFormState, Schedule?>(ScheduleFormController.new);
+final scheduleFormProvider =
+    AutoDisposeNotifierProviderFamily<
+      ScheduleFormController,
+      ScheduleFormState,
+      Schedule?
+    >(ScheduleFormController.new);

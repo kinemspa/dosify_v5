@@ -154,15 +154,15 @@
 - DOse Calendar - Needs to use the same Dose calendar widget as the medicaiotn details screen. . [COMPLETED]
 - Move DOse Calnedar to top card. [COMPLETED]
 - Schedule Details needs to have edit options like medication details. [COMPLETED]
-- SO we should have Schedule Status of , Active, Paused, Disabled, Completed. 
+- SO we should have Schedule Status of , Active, Paused, Disabled, Completed. [COMPLETED]
 	- Active is of course active
 	- Paused, the ability to pause a schdule until a set date. 
 	- Disabled. Paused indefinately. 
 	- Completed, end of scheudle cycle has passed. 
 - App Header:
-	- Add the Date Icon for the next dose in the app header. 
-	- Add chips for the frequency type. 
-	- Include Pause button. 
+	- Add the Date Icon for the next dose in the app header. [COMPLETED]
+	- Add chips for the frequency type. [COMPLETED]
+	- Include Pause button. [COMPLETED]
 		Pause Button: Has an indefinate and an Pause end date option. Helper text explains the 2 options and how the schedule will behave. 
 
 ## Schedule Details Card

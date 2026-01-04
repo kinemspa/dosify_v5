@@ -15,12 +15,14 @@ import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
+import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class ScheduleDetailPage extends StatefulWidget {
@@ -253,6 +255,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             selected: true,
             onSelected: (_) {},
           ),
+          if (!s.isCompleted)
+            PrimaryChoiceChip(
+              label: Text(s.isActive ? 'Pause' : 'Resume'),
+              selected: false,
+              onSelected: (_) => _promptPauseFromHeader(context, s),
+            ),
         ],
       ),
       row1Left: DetailStatItem(
@@ -261,9 +269,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         value: _getDoseDisplay(s),
       ),
       row1Right: DetailStatItem(
-        icon: s.active ? Icons.play_circle_outline : Icons.pause_circle_outline,
+        icon: scheduleStatusIcon(s),
         label: 'Status',
-        value: s.active ? 'Active' : 'Paused',
+        value: scheduleStatusLabel(s),
       ),
       row2Left: DetailStatItem(
         icon: Icons.repeat,
@@ -297,7 +305,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           const SizedBox(height: kSpacingXS),
           NextDoseDateBadge(
             nextDose: nextDose,
-            isActive: s.active,
+            isActive: s.isActive,
             dense: true,
             showNextLabel: true,
           ),
@@ -309,6 +317,42 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         value: nextDose == null ? '—' : _getTimeUntil(nextDose),
       ),
     );
+  }
+
+  Future<void> _promptPauseFromHeader(BuildContext context, Schedule s) async {
+    final choice = await showSchedulePauseDialog(context, schedule: s);
+    if (choice == null) return;
+
+    switch (choice) {
+      case SchedulePauseDialogChoice.resume:
+        await _setScheduleStatus(context, s, active: true, pausedUntil: null);
+        return;
+      case SchedulePauseDialogChoice.pauseIndefinitely:
+        await _setScheduleStatus(context, s, active: false, pausedUntil: null);
+        return;
+      case SchedulePauseDialogChoice.pauseUntilDate:
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now().add(const Duration(days: 1)),
+          firstDate: DateTime.now(),
+          lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+        );
+        if (picked == null) return;
+        final endOfDay = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          23,
+          59,
+        );
+        await _setScheduleStatus(
+          context,
+          s,
+          active: false,
+          pausedUntil: endOfDay,
+        );
+        return;
+    }
   }
 
   String _getTimeUntil(DateTime dt) {
@@ -414,85 +458,116 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   Widget _buildStatusToggle(BuildContext context, Schedule s) {
-    return Wrap(
-      spacing: kSpacingS,
-      runSpacing: kSpacingXS,
+    if (s.isCompleted) {
+      return Wrap(
+        spacing: kSpacingS,
+        runSpacing: kSpacingXS,
+        children: [
+          PrimaryChoiceChip(
+            label: const Text('Completed'),
+            selected: true,
+            onSelected: (_) {},
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        PrimaryChoiceChip(
-          label: const Text('Active'),
-          selected: s.active,
-          onSelected: (selected) async {
-            if (!selected) return;
-            await _setScheduleActive(context, s, true);
-          },
+        Wrap(
+          spacing: kSpacingS,
+          runSpacing: kSpacingXS,
+          children: [
+            PrimaryChoiceChip(
+              label: const Text('Active'),
+              selected: s.isActive,
+              onSelected: (selected) async {
+                if (!selected) return;
+                await _setScheduleStatus(
+                  context,
+                  s,
+                  active: true,
+                  pausedUntil: null,
+                );
+              },
+            ),
+            PrimaryChoiceChip(
+              label: const Text('Paused'),
+              selected: s.isPaused,
+              onSelected: (selected) async {
+                if (!selected) return;
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now().add(const Duration(days: 1)),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+                );
+                if (picked == null) return;
+                final endOfDay = DateTime(
+                  picked.year,
+                  picked.month,
+                  picked.day,
+                  23,
+                  59,
+                );
+                await _setScheduleStatus(
+                  context,
+                  s,
+                  active: false,
+                  pausedUntil: endOfDay,
+                );
+              },
+            ),
+            PrimaryChoiceChip(
+              label: const Text('Disabled'),
+              selected: s.isDisabled,
+              onSelected: (selected) async {
+                if (!selected) return;
+                await _setScheduleStatus(
+                  context,
+                  s,
+                  active: false,
+                  pausedUntil: null,
+                );
+              },
+            ),
+          ],
         ),
-        PrimaryChoiceChip(
-          label: const Text('Paused'),
-          selected: !s.active,
-          onSelected: (selected) async {
-            if (!selected) return;
-            await _setScheduleActive(context, s, false);
-          },
-        ),
+        if (s.isPaused && s.pausedUntil != null) ...[
+          const SizedBox(height: kSpacingXS),
+          Text(
+            'Paused until ${DateFormat('d MMM y').format(s.pausedUntil!)}',
+            style: helperTextStyle(context),
+          ),
+        ],
       ],
     );
   }
 
-  Future<void> _setScheduleActive(
+  Future<void> _setScheduleStatus(
     BuildContext context,
-    Schedule s,
-    bool active,
-  ) async {
-    if (s.active == active) return;
+    Schedule s, {
+    required bool active,
+    required DateTime? pausedUntil,
+  }) async {
+    if (s.active == active && s.pausedUntil == pausedUntil) return;
 
     try {
       final scheduleBox = Hive.box<Schedule>('schedules');
-      final updated = Schedule(
-        id: s.id,
-        name: s.name,
-        medicationName: s.medicationName,
-        doseValue: s.doseValue,
-        doseUnit: s.doseUnit,
-        minutesOfDay: s.minutesOfDay,
-        daysOfWeek: s.daysOfWeek,
-        minutesOfDayUtc: s.minutesOfDayUtc,
-        daysOfWeekUtc: s.daysOfWeekUtc,
-        medicationId: s.medicationId,
-        active: active,
-        timesOfDay: s.timesOfDay,
-        timesOfDayUtc: s.timesOfDayUtc,
-        cycleEveryNDays: s.cycleEveryNDays,
-        cycleAnchorDate: s.cycleAnchorDate,
-        daysOfMonth: s.daysOfMonth,
-        doseUnitCode: s.doseUnitCode,
-        doseMassMcg: s.doseMassMcg,
-        doseVolumeMicroliter: s.doseVolumeMicroliter,
-        doseTabletQuarters: s.doseTabletQuarters,
-        doseCapsules: s.doseCapsules,
-        doseSyringes: s.doseSyringes,
-        doseVials: s.doseVials,
-        doseIU: s.doseIU,
-        displayUnitCode: s.displayUnitCode,
-        inputModeCode: s.inputModeCode,
-        startAt: s.startAt,
-        endAt: s.endAt,
-        monthlyMissingDayBehaviorCode: s.monthlyMissingDayBehaviorCode,
-        createdAt: s.createdAt,
-      );
+      final updated = s.copyWith(active: active, pausedUntil: pausedUntil);
 
       await ScheduleScheduler.cancelFor(s.id);
       await scheduleBox.put(s.id, updated);
 
-      if (updated.active) {
+      if (updated.isActive) {
         await ScheduleScheduler.scheduleFor(updated);
       }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            updated.active ? 'Schedule resumed' : 'Schedule paused',
-          ),
+          content: Text('Schedule set to ${scheduleStatusLabel(updated)}'),
           behavior: SnackBarBehavior.floating,
         ),
       );

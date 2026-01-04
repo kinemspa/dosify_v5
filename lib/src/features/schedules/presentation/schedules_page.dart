@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -45,7 +46,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
           // Filter
           items = switch (_filter) {
             _SchedFilter.all => items,
-            _SchedFilter.activeOnly => items.where((s) => s.active).toList(),
+            _SchedFilter.activeOnly => items.where((s) => s.isActive).toList(),
             _SchedFilter.linkedOnly =>
               items.where((s) => s.medicationId != null).toList(),
           };
@@ -360,7 +361,7 @@ class _ScheduleListRow extends StatelessWidget {
                     _ScheduleText.nextDayLabel(context, next),
                     style: helperTextStyle(
                       context,
-                      color: s.active && next != null
+                      color: s.isActive && next != null
                           ? cs.primary
                           : cs.onSurfaceVariant.withValues(
                               alpha: kOpacityMedium,
@@ -369,10 +370,10 @@ class _ScheduleListRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (!s.active) ...[
+                  if (!s.isActive) ...[
                     const SizedBox(height: kSpacingXS),
                     Text(
-                      'Paused',
+                      scheduleStatusLabel(s),
                       style: helperTextStyle(
                         context,
                         color: cs.onSurfaceVariant.withValues(
@@ -435,13 +436,20 @@ class _ScheduleCard extends StatelessWidget {
                   ),
                   if (!s.active) ...[
                     const SizedBox(height: kSpacingXS),
-                    Text('Paused', style: mutedTextStyle(context)),
+                    Text(
+                      scheduleStatusLabel(s),
+                      style: mutedTextStyle(context),
+                    ),
                   ],
                 ],
               ),
             ),
             const SizedBox(width: kSpacingS),
-            NextDoseDateBadge(nextDose: next, isActive: s.active, dense: true),
+            NextDoseDateBadge(
+              nextDose: next,
+              isActive: s.isActive,
+              dense: true,
+            ),
           ],
         ),
       );
@@ -478,9 +486,9 @@ class _ScheduleCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          if (!s.active) ...[
+          if (!s.isActive) ...[
             const SizedBox(height: kSpacingXS),
-            Text('Paused', style: mutedTextStyle(context)),
+            Text(scheduleStatusLabel(s), style: mutedTextStyle(context)),
           ],
         ],
       ),
@@ -490,7 +498,7 @@ class _ScheduleCard extends StatelessWidget {
         children: [
           NextDoseDateBadge(
             nextDose: next,
-            isActive: s.active,
+            isActive: s.isActive,
             dense: false,
             showNextLabel: true,
           ),

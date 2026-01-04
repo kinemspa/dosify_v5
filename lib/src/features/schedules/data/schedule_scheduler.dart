@@ -13,6 +13,18 @@ class ScheduleScheduler {
   static const String _lastStartupRescheduleMsKey =
       'schedule_scheduler.last_startup_reschedule_ms';
 
+  static Future<void> _disableCompletedSchedulesIfAny() async {
+    final box = Hive.box<Schedule>('schedules');
+    final completed = box.values
+        .where((s) => s.isCompleted && s.active)
+        .toList();
+    for (final s in completed) {
+      await cancelFor(s.id);
+      final updated = s.copyWith(active: false, pausedUntil: null);
+      await box.put(s.id, updated);
+    }
+  }
+
   static Future<void> _resumePausedSchedulesIfDue() async {
     final box = Hive.box<Schedule>('schedules');
     final now = DateTime.now();
@@ -88,7 +100,7 @@ class ScheduleScheduler {
   /// Calculates how many days to schedule for this schedule based on global budget.
   static Future<int> _calculateScheduleDays(Schedule s) async {
     final box = Hive.box<Schedule>('schedules');
-    final allActive = box.values.where((sch) => sch.active).toList();
+    final allActive = box.values.where((sch) => sch.isActive).toList();
 
     // Calculate total alarms needed if we schedule _minDaysPerSchedule for all
     var totalNeeded = 0;
@@ -129,7 +141,7 @@ class ScheduleScheduler {
 
   /// Schedules upcoming alarms for the given schedule (best-effort)
   static Future<void> scheduleFor(Schedule s) async {
-    if (!s.active) return;
+    if (!s.isActive) return;
     final title = s.name;
     final body = '${s.medicationName} • ${s.doseValue} ${s.doseUnit}';
 
@@ -332,7 +344,7 @@ class ScheduleScheduler {
   static Future<void> rescheduleAllActive() async {
     final box = Hive.box<Schedule>('schedules');
     for (final s in box.values) {
-      if (s.active) {
+      if (s.isActive) {
         await cancelFor(s.id, days: s.daysOfWeek);
         await scheduleFor(s);
       }
@@ -349,8 +361,12 @@ class ScheduleScheduler {
     // the correct state.
     await _resumePausedSchedulesIfDue();
 
+    // Disable completed schedules so they stop showing as 'active' and so we
+    // proactively cancel any previously scheduled notifications.
+    await _disableCompletedSchedulesIfAny();
+
     final schedulesBox = Hive.box<Schedule>('schedules');
-    final activeCount = schedulesBox.values.where((s) => s.active).length;
+    final activeCount = schedulesBox.values.where((s) => s.isActive).length;
     if (activeCount == 0) return;
 
     // Avoid any work if notifications can't be shown anyway.

@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
 /// Enhanced expandable schedule card for medication detail page
 /// Shows schedule summary by default, expands to show full details
@@ -96,7 +97,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (!widget.schedule.active) ...[
+                          if (!widget.schedule.isActive) ...[
                             const SizedBox(width: kSpacingXS),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -108,7 +109,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                                 borderRadius: BorderRadius.circular(kSpacingXS),
                               ),
                               child: Text(
-                                'Paused',
+                                scheduleStatusLabel(widget.schedule),
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
@@ -119,7 +120,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       ),
                     ),
                     // Next dose time OR frequency (secondary info)
-                    if (widget.schedule.active && nextDose != null)
+                    if (widget.schedule.isActive && nextDose != null)
                       Text(
                         _formatNextDoseShort(nextDose),
                         style: theme.textTheme.bodyMedium?.copyWith(

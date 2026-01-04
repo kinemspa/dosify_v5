@@ -176,8 +176,9 @@ class Schedule {
       daysOfWeekUtc: daysOfWeekUtc,
       medicationId: medicationId,
       active: active ?? this.active,
-      pausedUntil:
-          pausedUntil == _noChange ? this.pausedUntil : pausedUntil as DateTime?,
+      pausedUntil: pausedUntil == _noChange
+          ? this.pausedUntil
+          : pausedUntil as DateTime?,
       timesOfDay: timesOfDay,
       timesOfDayUtc: timesOfDayUtc,
       cycleEveryNDays: cycleEveryNDays,
@@ -242,9 +243,4 @@ enum MonthlyMissingDayBehavior {
   lastDay,
 }
 
-enum ScheduleStatus {
-  active,
-  paused,
-  disabled,
-  completed,
-}
+enum ScheduleStatus { active, paused, disabled, completed }
