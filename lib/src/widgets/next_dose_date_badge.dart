@@ -41,10 +41,12 @@ class NextDoseDateBadge extends StatelessWidget {
 
     final shouldShowNext = showNextLabel && isEnabled;
 
+    final isToday = hasNext && _isSameDay(nextDose!, DateTime.now());
+
     final dayText = hasNext ? DateFormat('d').format(nextDose!) : '—';
-    final monthText = hasNext
-        ? DateFormat('MMM').format(nextDose!).toUpperCase()
-        : '';
+    final monthText = isToday
+        ? ''
+        : (hasNext ? DateFormat('MMM').format(nextDose!).toUpperCase() : '');
     final timeText = hasNext
         ? TimeOfDay.fromDateTime(nextDose!).format(context)
         : 'No upcoming';
@@ -61,17 +63,20 @@ class NextDoseDateBadge extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              dayText,
-              style: TextStyle(
-                fontSize: dense
-                    ? kNextDoseDateCircleDayFontSizeCompact
-                    : kNextDoseDateCircleDayFontSizeLarge,
-                fontWeight: kFontWeightExtraBold,
-                height: 1,
-                color: primaryTextColor,
+            if (isToday)
+              Icon(Icons.today, size: dense ? 16 : 18, color: primaryTextColor)
+            else
+              Text(
+                dayText,
+                style: TextStyle(
+                  fontSize: dense
+                      ? kNextDoseDateCircleDayFontSizeCompact
+                      : kNextDoseDateCircleDayFontSizeLarge,
+                  fontWeight: kFontWeightExtraBold,
+                  height: 1,
+                  color: primaryTextColor,
+                ),
               ),
-            ),
             if (monthText.isNotEmpty)
               Text(
                 monthText,
@@ -145,5 +150,9 @@ class NextDoseDateBadge extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

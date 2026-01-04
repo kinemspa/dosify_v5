@@ -98,10 +98,10 @@
 	- Add a started date [COMPLETED]
 	- Add an End date or doesnt end. [COMPLETED]
 	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size.  [COMPLETED]
-	- If today, change date icon to today
+	- If today, change date icon to today [COMPLETED]
 - Compact Card:
 	- Next Dose date Icon to inculde the Next icon. Smaller. 
-	- If today, change date icon to today
+	- If today, change date icon to today [COMPLETED]
 
 
 
