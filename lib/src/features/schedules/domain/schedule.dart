@@ -17,6 +17,7 @@ class Schedule {
     this.daysOfWeekUtc,
     this.medicationId,
     this.active = true,
+    this.pausedUntil,
     this.timesOfDay,
     this.timesOfDayUtc,
     this.cycleEveryNDays,
@@ -55,6 +56,13 @@ class Schedule {
   final List<int> daysOfWeek; // 1=Mon..7=Sun (local, legacy)
   @HiveField(7)
   final bool active;
+
+  /// If set and [active] is false, the schedule is paused until this moment.
+  ///
+  /// When this moment is in the past, the schedule may be auto-resumed by the
+  /// scheduler on app startup.
+  @HiveField(30)
+  final DateTime? pausedUntil;
   @HiveField(8)
   final DateTime createdAt;
 
@@ -134,6 +142,64 @@ class Schedule {
   bool get hasStartAt => startAt != null;
   bool get hasEndAt => endAt != null;
 
+  ScheduleStatus get status {
+    final now = DateTime.now();
+    final end = endAt;
+    if (end != null && end.isBefore(now)) {
+      return ScheduleStatus.completed;
+    }
+    if (active) return ScheduleStatus.active;
+    final until = pausedUntil;
+    if (until != null && until.isAfter(now)) {
+      return ScheduleStatus.paused;
+    }
+    return ScheduleStatus.disabled;
+  }
+
+  bool get isActive => status == ScheduleStatus.active;
+  bool get isPaused => status == ScheduleStatus.paused;
+  bool get isDisabled => status == ScheduleStatus.disabled;
+  bool get isCompleted => status == ScheduleStatus.completed;
+
+  static const Object _noChange = Object();
+
+  Schedule copyWith({bool? active, Object? pausedUntil = _noChange}) {
+    return Schedule(
+      id: id,
+      name: name,
+      medicationName: medicationName,
+      doseValue: doseValue,
+      doseUnit: doseUnit,
+      minutesOfDay: minutesOfDay,
+      daysOfWeek: daysOfWeek,
+      minutesOfDayUtc: minutesOfDayUtc,
+      daysOfWeekUtc: daysOfWeekUtc,
+      medicationId: medicationId,
+      active: active ?? this.active,
+      pausedUntil:
+          pausedUntil == _noChange ? this.pausedUntil : pausedUntil as DateTime?,
+      timesOfDay: timesOfDay,
+      timesOfDayUtc: timesOfDayUtc,
+      cycleEveryNDays: cycleEveryNDays,
+      cycleAnchorDate: cycleAnchorDate,
+      daysOfMonth: daysOfMonth,
+      doseUnitCode: doseUnitCode,
+      doseMassMcg: doseMassMcg,
+      doseVolumeMicroliter: doseVolumeMicroliter,
+      doseTabletQuarters: doseTabletQuarters,
+      doseCapsules: doseCapsules,
+      doseSyringes: doseSyringes,
+      doseVials: doseVials,
+      doseIU: doseIU,
+      displayUnitCode: displayUnitCode,
+      inputModeCode: inputModeCode,
+      startAt: startAt,
+      endAt: endAt,
+      monthlyMissingDayBehaviorCode: monthlyMissingDayBehaviorCode,
+      createdAt: createdAt,
+    );
+  }
+
   MonthlyMissingDayBehavior get monthlyMissingDayBehavior {
     final code = monthlyMissingDayBehaviorCode;
     if (code == null) return MonthlyMissingDayBehavior.skip;
@@ -174,4 +240,11 @@ enum MonthlyMissingDayBehavior {
 
   /// Move the dose to the last day of the month.
   lastDay,
+}
+
+enum ScheduleStatus {
+  active,
+  paused,
+  disabled,
+  completed,
 }

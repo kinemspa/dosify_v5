@@ -13,6 +13,24 @@ class ScheduleScheduler {
   static const String _lastStartupRescheduleMsKey =
       'schedule_scheduler.last_startup_reschedule_ms';
 
+  static Future<void> _resumePausedSchedulesIfDue() async {
+    final box = Hive.box<Schedule>('schedules');
+    final now = DateTime.now();
+    final due = box.values
+        .where(
+          (s) =>
+              !s.active &&
+              s.pausedUntil != null &&
+              !s.pausedUntil!.isAfter(now),
+        )
+        .toList();
+
+    for (final s in due) {
+      final updated = s.copyWith(active: true, pausedUntil: null);
+      await box.put(s.id, updated);
+    }
+  }
+
   static bool _withinBounds(Schedule s, DateTime dt) {
     final startAt = s.startAt;
     if (startAt != null && dt.isBefore(startAt)) return false;
@@ -326,6 +344,11 @@ class ScheduleScheduler {
   static Future<void> rescheduleAllActiveIfStale({
     Duration minInterval = const Duration(hours: 12),
   }) async {
+    // First, ensure any schedules whose pause window has passed are resumed.
+    // This is done regardless of notification permission so the UI reflects
+    // the correct state.
+    await _resumePausedSchedulesIfDue();
+
     final schedulesBox = Hive.box<Schedule>('schedules');
     final activeCount = schedulesBox.values.where((s) => s.active).length;
     if (activeCount == 0) return;
