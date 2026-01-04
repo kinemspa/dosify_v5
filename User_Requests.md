@@ -3,14 +3,9 @@
 ## Global
 - Dark Theme 
 	- The reconstitution calculator 
-		- Can we change the background blue colour to something a bit darker? [COMPLETED]
-		- The reconstituted Card needs to be same baclground colour as calculator. [COMPLETED]
+		- Can we change the background blue colour to something not blue?
+	
 
-- UI and Real estate. 
-	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]
-	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED]
-
-- Cards on Details Screen. When minimized, would like to be able to hold and drag them to change order. [COMPLETED]
 
 	
 
@@ -36,68 +31,87 @@
 ==============
 
 # Medication Details Screen
-- Canw e have some help text somewhere to state minimize all the cards to arrange them? Maybe put the drag icon on minimized cards to inform user they are rearrangeable. 
+- Can we have some help text somewhere to state minimize all the cards to arrange them? Maybe put the drag icon on minimized cards to inform user they are rearrangeable. 
 - Re Arrange state is not saving on return to the screen. 
-- Dark Mode
-	- Can we make text in the app header Black.  [COMPLETED]
-- COllpased cards have different sizes. I like reports size hieght. Make all the same.  [COMPLETED] Reconstitution isnt the same size. 
-- Only reports card has  a border. Make sure all cards have the same border.  [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
-- For MDV - Cant Edit Active Vial expiry date.  [COMPLETED]
+	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
+	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
+- Minimized Cards, make them all the same size as the Reconsitution card in height. 
+- Reconstitution Card:
+	- Remove the dit button.
+	- Card within a card is not a good design concept. Make it one card. 
 
 ### App Header
 - Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED] No this is not done. The Sotrage Locaiton Text is above the value, the remaining text is on 2 lines. What do you not understand about make it the same as the Large Med Card?
 
 ### Reports Card
-- Minimizing this card is requireing 2 clicks. [COMPLETED]
 - History: 
 	- Date Icon - make smaller. [COMPLETED]
 	- AdHoc Doses should be editable. [COMPLETED]
+		- Editing an ad hoc dose, needs to include the ability to select the dose unit type. Same as a dose. 
 	- Indicate entries that are editable. [COMPLETED]
 	- Edit icon should always be to the left of all icons. This is not the case. 
 	- Adhoc doses are showing up as 2 entries. 
+	- Add if Recositution of a vial. 
+		- If a sealed vial was used or deducted
+		- If a new calculation was made, existing, saved, or direct mL entry. 
+	
 
 
 
 ### Schedule
-- Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. [COMPLETED]
-	- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. [COMPLETED]
-- Stack multiple doses on same day vertically. [COMPLETED]
-- Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same? [COMPLETED]
-- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. [COMPLETED]
-- Currently clicking the schedule collapses/expands the schedule. I want only the collapse row to do this. Clicking the schedule should prompt to edit it, which will prompt a page change dialog. Remove all the little edit icons. [COMPLETED]
+- Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps. 
+- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. I paused the schedule now the schedule shows No shcedules. 
+- Top Area of Schedule should expand or collapse schedule. Currenly it is editing scehdule. the only area to expand and collapse seems to be the little arrow. Make the enitre top orw where the arrow sits the expand and collaps.
+- Set Paused button is not the right terminology.
+- Take Dose Card:
+	- Dose Name is correct.
+	- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action.
+- Make sure this entire card is a widget. As it will be expanded for the schedules, calendar and home screen. 
 
 
 ### Medication Details Card
-- The Sub Headings under each Card need to be smaller or maybe not primary colour. For EQ. Sleaed Vials is a bigger font than the Active vial, and also the same size as Medicaiont Details. [COMPLETED]
-
+- Sealed VIals heading should still be in primary colour. 
+- Some text is out of horizontal alignment. For example Active VIal Location heading is higher up than the Value. 
 
 ==============
 ## Add Medication
 
+- Wizard still doesnt have Next button instead of continue button at the bottom when filling in fields. 
+
 ### Choose Medicaiotn Type Screen
-- The menu card items have lost there shadow [COMPLETED]
 
 ### Choose Injection Type Screen
-- The menu card items have lost there shadow [COMPLETED]
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here.  [COMPLETED]
+- Go through the entire app and find any exmaple text or helper text that contyains any actual real life medicaiotn names or company names. These are legal issues.
 
 ### Add Medicaiton - Multi Dose Vial
 
 
 ==============
 # Schedules List
-- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think. This still needs to be smaller. Also make the chip have less rounded border radius, also move it more left and down a smudge, its touching the top of the card containing it. [COMPLETED]
+- Large Cards:
+	- Make Next icon and text smaller.
+	- Make the Dose name in a bolder font
+	- Add a started date
+	- Add an End date or doesnt end.
+	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size. 
+	- If today, change date icon to today
+- Compact Card:
+	- Next Dose date Icon to inculde the Next icon. Smaller. 
+	- If today, change date icon to today
+
 
 
 ==============
 # Add Schedule
+- Adding a schedule is still entriing historical entries that become skipped. Fix this. 
 - Alot of black text on this screen. [COMPLETED] Still black text on the chips, and the summary. Why do we have 3 summaries on this screen. 
-- Helper Text., We need hel text above the type input selection. 
-	- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary. 
-	- Strength needs to be able to select the STrenght Unit. mcg, mg, g. 
+- Helper Text., We need hel text above the type input selection.  [COMPLETED]
+	- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
+	- Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
 - The incremental field and buttons are wrong. Use the same styling as the add med screen. 
 
 - You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route?

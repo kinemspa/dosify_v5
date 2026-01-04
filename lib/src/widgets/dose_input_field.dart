@@ -586,6 +586,8 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
         // MDV mode toggle (3-way: Strength | Volume | Units)
         if (widget.medicationForm == MedicationForm.multiDoseVial) ...[
+          _buildMdvModeHelperText(),
+          const SizedBox(height: kSpacingS),
           _buildMdvModeToggle(cs),
           if (_mdvMode == MdvInputMode.strength &&
               widget.strengthUnit != 'units') ...[
@@ -636,6 +638,17 @@ class _DoseInputFieldState extends State<DoseInputField> {
       _isCountMode
           ? 'Enter how many you take. Use shortcuts for common doses.'
           : "Enter strength instead and we'll calculate the equivalent dose.",
+      style: helperTextStyle(context),
+    );
+  }
+
+  Widget _buildMdvModeHelperText() {
+    if (widget.medicationForm != MedicationForm.multiDoseVial) {
+      return const SizedBox.shrink();
+    }
+
+    return Text(
+      "Select a dose input mode: Strength, Volume, or Units. We'll calculate the other values automatically.",
       style: helperTextStyle(context),
     );
   }
