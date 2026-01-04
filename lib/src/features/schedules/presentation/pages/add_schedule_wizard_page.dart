@@ -278,6 +278,7 @@ class _AddScheduleWizardPageState
 
   @override
   Widget buildSummaryContent() {
+    final med = _selectedMed;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -310,7 +311,16 @@ class _AddScheduleWizardPageState
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  if (_selectedMed != null && _doseValue.text.isNotEmpty)
+                  if (med != null)
+                    Text(
+                      _medStrengthOrConcentrationSummaryLabel(med),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  if (med != null && _doseValue.text.isNotEmpty)
                     Text(
                       'Dose: ${_doseMetricsSummaryLabel()}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -337,6 +347,33 @@ class _AddScheduleWizardPageState
         ],
       ],
     );
+  }
+
+  String _medStrengthOrConcentrationSummaryLabel(Medication med) {
+    final unit = MedicationDisplayHelpers.unitLabel(med.strengthUnit);
+
+    final isPerMl = switch (med.strengthUnit) {
+      Unit.mcgPerMl || Unit.mgPerMl || Unit.gPerMl || Unit.unitsPerMl => true,
+      _ => false,
+    };
+
+    final term = isPerMl ? 'Concentration' : 'Strength';
+    final value = fmt2(med.strengthValue);
+
+    if (isPerMl) {
+      return '$term: $value $unit';
+    }
+
+    final perUnit = switch (med.form) {
+      MedicationForm.tablet => 'tablet',
+      MedicationForm.capsule => 'capsule',
+      MedicationForm.prefilledSyringe => 'syringe',
+      MedicationForm.singleDoseVial => 'vial',
+      MedicationForm.multiDoseVial => null,
+    };
+
+    if (perUnit == null) return '$term: $value $unit';
+    return '$term: $value $unit per $perUnit';
   }
 
   String _doseSummaryLabel() {
@@ -370,79 +407,18 @@ class _AddScheduleWizardPageState
       return _doseSummaryLabel();
     }
 
-    String formatTabletCountFromQuarters(int quarters) {
-      if (quarters == 1) return '1/4';
-      if (quarters == 2) return '1/2';
-      if (quarters == 3) return '3/4';
-      final count = quarters / 4.0;
-      if (count % 1 == 0) return count.toInt().toString();
-      return fmt2(count);
-    }
-
-    String formatStrengthFromRawDouble(double raw) {
-      switch (med.strengthUnit) {
-        case Unit.mcg:
-        case Unit.mcgPerMl:
-          return '${fmt2(raw)} mcg';
-        case Unit.mg:
-        case Unit.mgPerMl:
-          return '${fmt3(raw / 1000)} mg';
-        case Unit.g:
-        case Unit.gPerMl:
-          return '${fmt3(raw / 1000000)} g';
-        case Unit.units:
-        case Unit.unitsPerMl:
-          return '${fmt2(raw)} units';
-      }
-    }
-
-    final metrics = <String>[];
-
-    switch (med.form) {
-      case MedicationForm.tablet:
-        if (r.doseTabletQuarters != null) {
-          final count = r.doseTabletQuarters! / 4.0;
-          final unit = (count - 1.0).abs() < 0.0001 || count < 1
-              ? 'tablet'
-              : 'tablets';
-          metrics.add(
-            '${formatTabletCountFromQuarters(r.doseTabletQuarters!)} $unit',
-          );
-        }
-      case MedicationForm.capsule:
-        if (r.doseCapsules != null) {
-          final n = r.doseCapsules!;
-          metrics.add('$n ${n == 1 ? 'capsule' : 'capsules'}');
-        }
-      case MedicationForm.prefilledSyringe:
-        if (r.doseSyringes != null) {
-          final n = r.doseSyringes!;
-          metrics.add('$n ${n == 1 ? 'syringe' : 'syringes'}');
-        }
-      case MedicationForm.singleDoseVial:
-        if (r.doseVials != null) {
-          final n = r.doseVials!;
-          metrics.add('$n ${n == 1 ? 'vial' : 'vials'}');
-        }
-      case MedicationForm.multiDoseVial:
-        break;
-    }
-
-    if (r.doseMassMcg != null) {
-      metrics.add(formatStrengthFromRawDouble(r.doseMassMcg!));
-    }
-
-    if (r.doseVolumeMicroliter != null) {
-      metrics.add('${fmt2(r.doseVolumeMicroliter! / 1000)} mL');
-    }
-
-    if (r.syringeUnits != null) {
-      final u = r.syringeUnits!;
-      metrics.add('${fmt2(u)} ${u == 1 ? 'unit' : 'units'}');
-    }
-
-    if (metrics.isEmpty) return _doseSummaryLabel();
-    return metrics.join(', ');
+    final summary = MedicationDisplayHelpers.doseMetricsSummary(
+      med,
+      doseTabletQuarters: r.doseTabletQuarters,
+      doseCapsules: r.doseCapsules,
+      doseSyringes: r.doseSyringes,
+      doseVials: r.doseVials,
+      doseMassMcg: r.doseMassMcg,
+      doseVolumeMicroliter: r.doseVolumeMicroliter,
+      syringeUnits: r.syringeUnits,
+    );
+    if (summary.isEmpty) return _doseSummaryLabel();
+    return summary;
   }
 
   String _getPatternSummary() {

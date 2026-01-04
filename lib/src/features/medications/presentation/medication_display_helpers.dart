@@ -27,6 +27,100 @@ class MedicationDisplayHelpers {
     }
   }
 
+  /// Formats dose metrics consistently across screens.
+  ///
+  /// Inputs:
+  /// - [med] provides the dosage form and preferred strength unit.
+  /// - Dose inputs are expected to be in the same units used by schedules:
+  ///   - [doseMassMcg] in micrograms
+  ///   - [doseVolumeMicroliter] in microliters
+  ///   - [syringeUnits] in device units (U)
+  ///
+  /// The returned string is intended for compact summaries (single line).
+  static String doseMetricsSummary(
+    Medication med, {
+    int? doseTabletQuarters,
+    int? doseCapsules,
+    int? doseSyringes,
+    int? doseVials,
+    double? doseMassMcg,
+    double? doseVolumeMicroliter,
+    double? syringeUnits,
+    String separator = ' • ',
+  }) {
+    String formatTabletCountFromQuarters(int quarters) {
+      if (quarters == 1) return '1/4';
+      if (quarters == 2) return '1/2';
+      if (quarters == 3) return '3/4';
+      final count = quarters / 4.0;
+      if (count % 1 == 0) return count.toInt().toString();
+      return fmt2(count);
+    }
+
+    String formatStrengthFromMcg(double mcg) {
+      switch (med.strengthUnit) {
+        case Unit.mcg:
+        case Unit.mcgPerMl:
+          return '${fmt2(mcg)} mcg';
+        case Unit.mg:
+        case Unit.mgPerMl:
+          return '${fmt3(mcg / 1000)} mg';
+        case Unit.g:
+        case Unit.gPerMl:
+          return '${fmt3(mcg / 1000000)} g';
+        case Unit.units:
+        case Unit.unitsPerMl:
+          return '${fmt2(mcg)} units';
+      }
+    }
+
+    final metrics = <String>[];
+
+    switch (med.form) {
+      case MedicationForm.tablet:
+        if (doseTabletQuarters != null) {
+          final quarters = doseTabletQuarters;
+          final count = quarters / 4.0;
+          final unit = (count - 1.0).abs() < 0.0001 || count < 1
+              ? 'tablet'
+              : 'tablets';
+          metrics.add('${formatTabletCountFromQuarters(quarters)} $unit');
+        }
+      case MedicationForm.capsule:
+        if (doseCapsules != null) {
+          final n = doseCapsules;
+          metrics.add('$n ${n == 1 ? 'capsule' : 'capsules'}');
+        }
+      case MedicationForm.prefilledSyringe:
+        if (doseSyringes != null) {
+          final n = doseSyringes;
+          metrics.add('$n ${n == 1 ? 'syringe' : 'syringes'}');
+        }
+      case MedicationForm.singleDoseVial:
+        if (doseVials != null) {
+          final n = doseVials;
+          metrics.add('$n ${n == 1 ? 'vial' : 'vials'}');
+        }
+      case MedicationForm.multiDoseVial:
+        break;
+    }
+
+    if (doseMassMcg != null) {
+      metrics.add(formatStrengthFromMcg(doseMassMcg));
+    }
+
+    if (doseVolumeMicroliter != null) {
+      metrics.add('${fmt2(doseVolumeMicroliter / 1000)} mL');
+    }
+
+    if (syringeUnits != null) {
+      metrics.add('${fmt2(syringeUnits)} U');
+    }
+
+    if (metrics.isEmpty) return '';
+    return metrics.join(separator);
+  }
+
   static String formLabel(MedicationForm form, {bool plural = false}) {
     if (plural) {
       switch (form) {

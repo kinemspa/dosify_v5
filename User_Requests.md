@@ -114,27 +114,27 @@
 			- Selected date calnedar button is causing an overflow.  [COMPLETED]
 			- Once changed to selected ate, the drop down is becominga calendar button. Calendar button needs to appear below the dropdown, alos make it the same sizing as the system design, same size as the date button on the add med screens.  [COMPLETED]
 	- End:
-			- Same as above.  [COMPLETED]
+		- Same as above.  [COMPLETED]
 	- Schedule Pattern:
-			- Drop Down Menu has sharp corners.  [COMPLETED]
+		- Drop Down Menu has sharp corners.  [COMPLETED]
 		- Days of the Week:
-				- Day selection chips. Reduce the size of them. Center align them. Reduce padding make more compact.  [COMPLETED]
-				- Dont use Grey backgrounds. Ever. Put this in your rules.  [COMPLETED]
-				- Dont use black font. Rules.  [COMPLETED]
+			- Day selection chips. Reduce the size of them. Center align them. Reduce padding make more compact.  [COMPLETED]
+			- Dont use Grey backgrounds. Ever. Put this in your rules.  [COMPLETED]
+			- Dont use black font. Rules.  [COMPLETED]
 		- Days on / Days Off
-				- Days on and Days off fields are on the same horizaontal row, causing a major overflow. Shoult be vertically stacked.  [COMPLETED]
+			- Days on and Days off fields are on the same horizaontal row, causing a major overflow. Shoult be vertically stacked.  [COMPLETED]
 		- Days of the Month
-				- Make the grid more compact like the days of the week.  [COMPLETED]
-				- Centre Align  [COMPLETED]
-				- No Grey backgorund  [COMPLETED]
-				- No black font.  [COMPLETED]
-				- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
-				- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
+			- Make the grid more compact like the days of the week.  [COMPLETED]
+			- Centre Align  [COMPLETED]
+			- No Grey backgorund  [COMPLETED]
+			- No black font.  [COMPLETED]
+			- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
+			- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
 - Step 3:
 	- These cards need to have the same heading styling as all other large cards.  [COMPLETED]
 	- Summary:
 		- Dose needs to show the following:
-			- Go and find out the correct terminology for dosing medications. What I care about is framing the correct terms for Say, if a dose is 1 tablet, the tablet is called what?, then we have the strenght of medicaiont in the tabletm what is that called? Same with a capsule, this is like the medicaiont carrier or form. Then if its a single dose vial, we would have the Dose in Volume, the Dose in Strenght, and the DOse in the delivery or admiinstration mechanism, which would be a syringe for this one. These values need to be displayed evetrywhere on the app where these things appear. As this app is to communicate very specifically the details here. If I am using a pre filled syringe, I want the Med Strenght, the Med Volume and the Amount of the measurement in teh administation tool/ method. So go find the correct terminology for this so we can write it in as a rule for you to adhere to across this app.
+			- Go and find out the correct terminology for dosing medications. What I care about is framing the correct terms for Say, if a dose is 1 tablet, the tablet is called what?, then we have the strenght of medicaiont in the tabletm what is that called? Same with a capsule, this is like the medicaiont carrier or form. Then if its a single dose vial, we would have the Dose in Volume, the Dose in Strenght, and the DOse in the delivery or admiinstration mechanism, which would be a syringe for this one. These values need to be displayed evetrywhere on the app where these things appear. As this app is to communicate very specifically the details here. If I am using a pre filled syringe, I want the Med Strenght, the Med Volume and the Amount of the measurement in teh administation tool/ method. So go find the correct terminology for this so we can write it in as a rule for you to adhere to across this app. [COMPLETED]
 	- Settings:
 		- The Active button switch, we dont use this switch type anywhere in teh app, why are you using it now? [COMPLETED]
 
