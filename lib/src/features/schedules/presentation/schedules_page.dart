@@ -407,6 +407,7 @@ class _ScheduleCard extends StatelessWidget {
     final medTitle = _ScheduleText.medTitle(s);
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
     final startedLabel = _ScheduleText.startedLabel(s);
+    final endLabel = _ScheduleText.endLabel(s);
 
     if (dense) {
       return GlassCardSurface(
@@ -497,6 +498,13 @@ class _ScheduleCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: kSpacingXS),
+          Text(
+            endLabel,
+            style: helperTextStyle(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (!s.isActive) ...[
             const SizedBox(height: kSpacingXS),
             Text(scheduleStatusLabel(s), style: mutedTextStyle(context)),
@@ -530,6 +538,12 @@ class _ScheduleText {
     final start = s.startAt;
     if (start == null) return 'Start: —';
     return 'Start: ${DateFormat('d MMM').format(start)}';
+  }
+
+  static String endLabel(Schedule s) {
+    final end = s.endAt;
+    if (end == null) return 'End: No end';
+    return 'End: ${DateFormat('d MMM').format(end)}';
   }
 
   static String? scheduleSubtitle(Schedule s) {
