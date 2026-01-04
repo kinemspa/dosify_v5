@@ -12,6 +12,7 @@ class WizardNavigationBar extends StatelessWidget {
     required this.saveLabel,
     this.continueLabel = 'Continue',
     this.nextLabel = 'Next',
+    this.nextPageLabel = 'Next Page',
     super.key,
   });
 
@@ -24,6 +25,7 @@ class WizardNavigationBar extends StatelessWidget {
   final String saveLabel;
   final String continueLabel;
   final String nextLabel;
+  final String nextPageLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,9 @@ class WizardNavigationBar extends StatelessWidget {
 
     final primaryLabel = isLastStep
         ? saveLabel
-        : (showNextMode ? nextLabel : continueLabel);
+        : (showNextMode
+              ? (canProceed ? nextPageLabel : nextLabel)
+              : continueLabel);
 
     final VoidCallback? primaryAction;
     if (isLastStep) {

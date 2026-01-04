@@ -7,10 +7,10 @@
 		- The reconstituted Card needs to be same baclground colour as calculator. [COMPLETED]
 
 - UI and Real estate. 
-	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED] NOT COMPLETED. STILL THE SAME
-	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED] NOT COMPLETED. STILL THE SAME
+	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]
+	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED]
 
-- Cards on Details Screen. When minimized, would like to be able to hold and drag them to change order. [COMPLETED] This is not working. Is this dependant on the reconstotution card collapsing? becasure that one isnt collapsable. 
+- Cards on Details Screen. When minimized, would like to be able to hold and drag them to change order. This is not working. Is this dependant on the reconstotution card collapsing? becasure that one isnt collapsable. 
 
 	
 
@@ -25,9 +25,8 @@
 ## Medication Screen
 
 ### Large Cards
-- Tablets, Capsules, pre filled syringes and single use vials dont have the same expiry moved to the storage section. [COMPLETED]
-- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. [COMPLETED]
-- in the donut graph under the percentage text, can we have a tiny tiny text "of Active Vial remains" or "tablets remain", or "capsules remain". Extremely tiny text. [COMPLETED]
+- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. 
+- Remove the text under the Donut Graph percentage. 
 
 
 ### Compact Cards
@@ -36,7 +35,7 @@
 
 ==============
 
-## Medication Details Screen
+# Medication Details Screen
 - Dark Mode
 	- Can we make text in the app header Black. 
 - COllpased cards have different sizes. I like reports size hieght. Make all the same. 
@@ -56,16 +55,15 @@
 
 
 ### Schedule
-- Change Scheduled Doses heading to Doses [COMPLETED]
 - Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. [COMPLETED]
 	- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. [COMPLETED]
-- Can no longer scroll left and right on the dose cards to the next or previous days. [COMPLETED]
+- Stack multiple doses on same day vertically. 
 - Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same? [COMPLETED]
-- Actually I think if we do any editing of schedules from here it needs to jump to the actual schedules details screen for editing. [COMPLETED]
+- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. 
+- Currently clicking the schedule collapses/expands the schedule. I want only the collapse row to do this. Clicking the schedule should prompt to edit it, which will prompt a page change dialog. Remove all the little edit icons. 
+
 
 ### Medication Details Card
-- Active vial needs helper text, the tracked medication. [COMPLETED]
-- Description text in thius part needs to wrap and display all. not elipses. [COMPLETED]
 - The Sub Headings under each Card need to be smaller or maybe not primary colour. For EQ. Sleaed Vials is a bigger font than the Active vial, and also the same size as Medicaiont Details. [COMPLETED]
 
 

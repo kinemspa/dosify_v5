@@ -86,6 +86,8 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
   }
 
   Widget _buildUnifiedHeader() {
+    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -126,63 +128,82 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
                 ],
               ),
             ),
-            // Step indicator
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Row(
+            AnimatedCrossFade(
+              duration: const Duration(milliseconds: 200),
+              crossFadeState: keyboardOpen
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: Column(
                 children: [
-                  for (int i = 0; i < widget.stepCount; i++) ...{
-                    _StepCircle(
-                      number: i + 1,
-                      isActive: i == _currentStep,
-                      isCompleted: i < _currentStep,
-                    ),
-                    if (i < widget.stepCount - 1)
-                      Expanded(
-                        child: Container(
-                          height: 1.5,
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(
-                            color: i < _currentStep
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onPrimary
-                                      .withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(1),
+                  // Step indicator
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Row(
+                      children: [
+                        for (int i = 0; i < widget.stepCount; i++) ...{
+                          _StepCircle(
+                            number: i + 1,
+                            isActive: i == _currentStep,
+                            isCompleted: i < _currentStep,
                           ),
-                        ),
+                          if (i < widget.stepCount - 1)
+                            Expanded(
+                              child: Container(
+                                height: 1.5,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: i < _currentStep
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onPrimary
+                                            .withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                            ),
+                        },
+                      ],
+                    ),
+                  ),
+                  // Current step label
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                      getStepLabel(_currentStep),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
                       ),
-                  },
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  // Divider
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                  ),
+                  // Summary content
+                  Container(
+                    constraints: const BoxConstraints(minHeight: 100),
+                    padding: const EdgeInsets.all(12),
+                    child: buildSummaryContent(),
+                  ),
                 ],
               ),
-            ),
-            // Current step label
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Text(
-                getStepLabel(_currentStep),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onPrimary.withValues(alpha: 0.85),
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
-                ),
-                textAlign: TextAlign.center,
+              secondChild: Divider(
+                height: 1,
+                thickness: 1,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimary.withValues(alpha: 0.15),
               ),
-            ),
-            // Divider
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: Theme.of(
-                context,
-              ).colorScheme.onPrimary.withValues(alpha: 0.15),
-            ),
-            // Summary content with fixed min height
-            Container(
-              constraints: const BoxConstraints(minHeight: 100),
-              padding: const EdgeInsets.all(12),
-              child: buildSummaryContent(),
             ),
           ],
         ),

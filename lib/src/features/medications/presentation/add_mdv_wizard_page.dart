@@ -10,6 +10,7 @@ import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter/services.dart';
@@ -408,6 +409,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   Widget _buildUnifiedHeader() {
+    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -450,70 +453,82 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                 ],
               ),
             ),
-            // Step indicator
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Row(
-                children: [
-                  for (int i = 0; i < 5; i++) ...[
-                    _StepCircle(
-                      number: i + 1,
-                      isActive: i == _currentStep,
-                      isCompleted: i < _currentStep,
-                    ),
-                    if (i < 4)
-                      Expanded(
-                        child: Container(
-                          height: 1.5,
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          decoration: BoxDecoration(
-                            color: i < _currentStep
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onPrimary
-                                      .withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(1),
-                          ),
-                        ),
-                      ),
-                  ],
-                ],
-              ),
-            ),
-            // Current step label
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Text(
-                _getStepLabel(_currentStep),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onPrimary.withValues(alpha: 0.85),
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            // Divider
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: Theme.of(
-                context,
-              ).colorScheme.onPrimary.withValues(alpha: 0.15),
-            ),
-            // Summary content (collapses when keyboard is open)
             AnimatedCrossFade(
               duration: const Duration(milliseconds: 200),
-              crossFadeState: MediaQuery.of(context).viewInsets.bottom > 0
+              crossFadeState: keyboardOpen
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
-              firstChild: Container(
-                constraints: const BoxConstraints(minHeight: 100),
-                padding: const EdgeInsets.all(12),
-                child: _buildSummaryContent(),
+              firstChild: Column(
+                children: [
+                  // Step indicator
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Row(
+                      children: [
+                        for (int i = 0; i < 5; i++) ...[
+                          _StepCircle(
+                            number: i + 1,
+                            isActive: i == _currentStep,
+                            isCompleted: i < _currentStep,
+                          ),
+                          if (i < 4)
+                            Expanded(
+                              child: Container(
+                                height: 1.5,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: i < _currentStep
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onPrimary
+                                            .withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Current step label
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                      _getStepLabel(_currentStep),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  // Divider
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                  ),
+                  // Summary content
+                  Container(
+                    constraints: const BoxConstraints(minHeight: 100),
+                    padding: const EdgeInsets.all(12),
+                    child: _buildSummaryContent(),
+                  ),
+                ],
               ),
-              secondChild: const SizedBox.shrink(),
+              secondChild: Divider(
+                height: 1,
+                thickness: 1,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimary.withValues(alpha: 0.15),
+              ),
             ),
           ],
         ),
@@ -1681,35 +1696,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   Widget _buildNavigationBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (_currentStep > 0)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _previousStep,
-                child: const Text('Back'),
-              ),
-            ),
-          if (_currentStep > 0) const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: FilledButton(
-              onPressed: _canProceed
-                  ? (_currentStep < 4 ? _nextStep : _saveMedication)
-                  : null,
-              child: Text(_currentStep < 4 ? 'Continue' : 'Save Medication'),
-            ),
-          ),
-        ],
-      ),
+    return WizardNavigationBar(
+      currentStep: _currentStep,
+      stepCount: 5,
+      canProceed: _canProceed,
+      onBack: _currentStep > 0 ? _previousStep : null,
+      onContinue: _nextStep,
+      onSave: _saveMedication,
+      saveLabel: 'Save Medication',
     );
   }
 }
