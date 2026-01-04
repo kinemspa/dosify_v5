@@ -1,16 +1,16 @@
 # Things To Fix
 
 ## Global
-- How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED] - How do I test this?
 - Dark Theme 
 	- The reconstitution calculator 
 		- Can we change the background blue colour to something a bit darker? [COMPLETED]
+		- The reconstituted Card needs to be same baclground colour as calculator. 
 
 - UI and Real estate. 
-	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]
-	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED]
+	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED] NOT COMPLETED. STILL THE SAME
+	- Regarding above item, there is a contionue button that exists at the bottom of the page that hugs the top of the On Screen Keyboard. This currently always states continue to jump to the next step in the wizard. Can we change it to it states "Next" to jump to the next field to enter. Once at the last field, it shows a Continue or Next Page option. That way the user doesnt need to scroll or hide the OSK to click to the next field.  Make sure all Step Wizards to this. Add Med, and add Schedule.  Make it a central design or widget for future use. [COMPLETED] NOT COMPLETED. STILL THE SAME
 
-- Cards on Details Screen. When minimized, would like to be able to hold and drag them to change order. [COMPLETED]
+- Cards on Details Screen. When minimized, would like to be able to hold and drag them to change order. [COMPLETED] This is not working. Is this dependant on the reconstotution card collapsing? becasure that one isnt collapsable. 
 
 	
 
@@ -26,7 +26,9 @@
 
 ### Large Cards
 - Tablets, Capsules, pre filled syringes and single use vials dont have the same expiry moved to the storage section. [COMPLETED]
+- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. 
 - in the donut graph under the percentage text, can we have a tiny tiny text "of Active Vial remains" or "tablets remain", or "capsules remain". Extremely tiny text. [COMPLETED]
+
 
 ### Compact Cards
 
@@ -35,28 +37,23 @@
 ==============
 
 ## Medication Details Screen
-- I am conflicted on the Schedule Card. It looks redundant having Schedules then Doses and Schedules within this card with the same prominant heading.  Do we split them into seperate cards or try to organise it a different way? [COMPLETED]
-- App header objects and text are cropping on a smaller Samsung S22+ screen. We need to make sure everything is responsive, I suppose we can do this pass later once the app is completed and check everything on all screen sizes. Adhoc and Refill button text needs to adapt the text size too.  [COMPLETED]
-- Prbably need to restrict the Description to x number of characters on the app header so it doesnt blow the app header size out. [COMPLETED]
-- When Expanding or Minimizing the cards, the animation highlight is a full square so the corneers slightly flash on press outside of the cards roudner border radius.  [COMPLETED]
-- Samsung S22+ and Pixel 5, there is an overflow on the bottom of app header, i think its the buttons are pushed out. the app header background gradient always should fit to the internal objects. [COMPLETED]
-- For MDV - we have a refill button and a restock button down below. Can we either merge the function or bring the restock button up to the app header too? [COMPLETED] I dont like this. We need some sort of page to change between Avtive Vial Refill or Sealed Vials Stock Refill. Its not obvious enough. 
-- For MDV - Active Vial Details section not showing Expiry. [COMPLETED] Cant Edit it. 
+- Dark Mode
+	- Can we make text in the app header Black. 
+- COllpased cards have different sizes. I like reports size hieght. Make all the same. 
+- Only reports card has  a border. Make sure all cards have the same border. 
+- For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page? 
+- For MDV - Cant Edit Active Vial expiry date.  
 
 ### App Header
-- Can we make the Storage details and expiry info the same as how we did it on the large cards? ON the same rows with the remaining on the right aligned. [COMPLETED]
+- Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen.
 
 ### Reports Card
-
-- The pages of all the rports looks shit and takes up too much real estate. Is there a more compact way to provide these pages? Maybe compact it all? [COMPLETED] Not good enough. This page menu display view is taking up way to much vertical real estate. I can post an image when you get to this one. [COMPLETED]
+- Minimizing this card is requireing 2 clicks. 
 - History: 
-	- Each line item needs to be extremely thin. Make the reports card a little taller to fit more items in the view area. [COMPLETED]
-	- Remove the view change. [COMPLETED]
-	- Date Icon like on the Schedule cards. Make it really small. The date needs to be the most visible as its sorted by that.  [COMPLETED]
-	- Missed Doses should be editable.  [COMPLETED]
-	- Need to include all actions taken on doses. SKipped, missed. Status changed.  [COMPLETED]
-	- Need to include other events like, doses recorded on empty stock, or stock deleted.  [COMPLETED]
-	- The little Date icon needs to be the leftist most item. Status of the object on the right. Details in the middle. [COMPLETED]
+	- Date Icon - make smaller.
+	- AdHoc Doses should be editable. 
+	- Indicate entries that are editable.
+
 
 ### Schedule
 - Change Scheduled Doses heading to Doses [COMPLETED]
