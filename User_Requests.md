@@ -50,7 +50,7 @@
 - Minimizing this card is requireing 2 clicks. 
 - History: 
 	- Date Icon - make smaller. [COMPLETED]
-	- AdHoc Doses should be editable. 
+	- AdHoc Doses should be editable. [COMPLETED]
 	- Indicate entries that are editable.
 
 
