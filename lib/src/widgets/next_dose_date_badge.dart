@@ -96,9 +96,9 @@ class NextDoseDateBadge extends StatelessWidget {
             children: [
               circleCore,
               Positioned(
-                top: -kSpacingS,
+                top: -kSpacingXS,
                 child: Transform.translate(
-                  offset: const Offset(-kSpacingXS, 0),
+                  offset: const Offset(-kSpacingS, kSpacingXS),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: kSpacingXS,
@@ -106,7 +106,7 @@ class NextDoseDateBadge extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: cs.primary.withValues(alpha: kOpacityEmphasis),
-                      borderRadius: BorderRadius.circular(kBorderRadiusFull),
+                      borderRadius: BorderRadius.circular(kBorderRadiusChip),
                     ),
                     child: Text(
                       'Next',

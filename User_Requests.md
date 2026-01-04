@@ -89,7 +89,7 @@
 
 ==============
 # Schedules List
-- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think. This still needs to be smaller. Also make the chip have less rounded border radius, also move it more left and down a smudge, its touching the top of the card containing it. 
+- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think. This still needs to be smaller. Also make the chip have less rounded border radius, also move it more left and down a smudge, its touching the top of the card containing it. [COMPLETED]
 
 
 ==============

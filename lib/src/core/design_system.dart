@@ -79,8 +79,8 @@ const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
 );
 
 /// Next-dose date badge sizing (Schedules list)
-const double kNextDoseDateCircleSizeCompact = 38;
-const double kNextDoseDateCircleSizeLarge = 54;
+const double kNextDoseDateCircleSizeCompact = 34;
+const double kNextDoseDateCircleSizeLarge = 48;
 
 /// Medication details reports card
 const double kMedicationReportsTabHeight = 160;
@@ -572,8 +572,8 @@ const double kFontSizeLarge = 15;
 const double kFontSizeXLarge = 17;
 
 /// Next-dose date badge typography (Schedules list)
-const double kNextDoseDateCircleDayFontSizeCompact = 16;
-const double kNextDoseDateCircleDayFontSizeLarge = 20;
+const double kNextDoseDateCircleDayFontSizeCompact = 15;
+const double kNextDoseDateCircleDayFontSizeLarge = 18;
 const double kNextDoseDateCircleMonthFontSize = kFontSizeSmall;
 
 /// Specific component font sizes

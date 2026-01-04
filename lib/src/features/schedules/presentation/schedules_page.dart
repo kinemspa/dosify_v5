@@ -434,7 +434,7 @@ class _ScheduleCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (!s.active) ...[
+                  if (!s.isActive) ...[
                     const SizedBox(height: kSpacingXS),
                     Text(
                       scheduleStatusLabel(s),
