@@ -53,11 +53,13 @@ class _HistoryItem {
 class MedicationReportsWidget extends StatefulWidget {
   const MedicationReportsWidget({
     required this.medication,
+    this.isExpanded = true,
     this.onExpandedChanged,
     super.key,
   });
 
   final Medication medication;
+  final bool isExpanded;
   final ValueChanged<bool>? onExpandedChanged;
 
   @override
@@ -68,7 +70,7 @@ class MedicationReportsWidget extends StatefulWidget {
 class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isExpanded = true; // Collapsible state
+  bool _isExpandedInternal = true; // Collapsible state (uncontrolled mode)
 
   static const int _historyPageStep = 25;
   int _historyMaxItems = _historyPageStep;
@@ -93,6 +95,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
+    final isExpanded = widget.onExpandedChanged != null
+        ? widget.isExpanded
+        : _isExpandedInternal;
+
     return GlassCardSurface(
       useGradient: false,
       padding: EdgeInsets.zero,
@@ -103,8 +109,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           // Collapsible header
           InkWell(
             onTap: () {
-              setState(() => _isExpanded = !_isExpanded);
-              widget.onExpandedChanged?.call(_isExpanded);
+              if (widget.onExpandedChanged != null) {
+                widget.onExpandedChanged?.call(!isExpanded);
+                return;
+              }
+
+              setState(() => _isExpandedInternal = !_isExpandedInternal);
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -127,7 +137,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   ),
                   const Spacer(),
                   AnimatedRotation(
-                    turns: _isExpanded ? 0 : -0.25,
+                    turns: isExpanded ? 0 : -0.25,
                     duration: kAnimationNormal,
                     child: Icon(
                       Icons.keyboard_arrow_down,
@@ -142,7 +152,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           // Collapsible content
           AnimatedCrossFade(
             duration: kAnimationNormal,
-            crossFadeState: _isExpanded
+            crossFadeState: isExpanded
                 ? CrossFadeState.showSecond
                 : CrossFadeState.showFirst,
             firstChild: const SizedBox.shrink(),

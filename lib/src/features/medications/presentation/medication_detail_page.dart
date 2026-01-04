@@ -529,6 +529,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         _kCardReconstitution: _buildReconstitutionCard(context, med),
       _kCardReports: MedicationReportsWidget(
         medication: med,
+        isExpanded: _isReportsExpanded,
         onExpandedChanged: (expanded) {
           if (!mounted) return;
           setState(() => _isReportsExpanded = expanded);
@@ -771,9 +772,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     label: 'Storage',
                     value: storageLabel,
                     textColor: onPrimary,
-                    trailingIcon: med.lightSensitive
-                        ? Icons.dark_mode
-                        : null,
+                    trailingIcon: med.lightSensitive ? Icons.dark_mode : null,
                   ),
                   const SizedBox(height: 8),
                 ],
