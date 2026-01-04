@@ -61,10 +61,8 @@ class _AddScheduleWizardPageState
   ScheduleMode _mode = ScheduleMode.everyDay;
   final Set<int> _days = {1, 2, 3, 4, 5, 6, 7};
   final Set<int> _daysOfMonth = {};
-  bool _useCycle = false;
   final _daysOn = TextEditingController(text: '5');
   final _daysOff = TextEditingController(text: '2');
-  final _cycleN = TextEditingController(text: '2');
   DateTime _cycleAnchor = DateTime.now();
   final List<TimeOfDay> _times = [const TimeOfDay(hour: 9, minute: 0)];
 
@@ -81,7 +79,6 @@ class _AddScheduleWizardPageState
   bool _active = true;
   final _name = TextEditingController();
   bool _nameAuto = true;
-  bool _isApplyingAutoName = false;
 
   int _readPositiveInt(
     TextEditingController controller, {
@@ -109,71 +106,6 @@ class _AddScheduleWizardPageState
     if (widget.initial != null) {
       _loadInitialData(widget.initial!);
     }
-    _name.addListener(() {
-      if (_isApplyingAutoName) return;
-      if (_nameAuto) _nameAuto = false;
-    });
-  }
-
-  void _loadInitialData(Schedule s) {
-    final medBox = Hive.box<Medication>('medications');
-    _selectedMed = medBox.get(s.medicationId);
-    _medicationId = s.medicationId;
-    _doseValue.text = fmt2(s.doseValue);
-    _doseUnit.text = s.doseUnit;
-
-    final times = s.timesOfDay ?? [s.minutesOfDay];
-    _times
-      ..clear()
-      ..addAll(times.map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60)));
-
-    _days
-      ..clear()
-      ..addAll(s.daysOfWeek);
-
-    if (s.daysOfMonth != null && s.daysOfMonth!.isNotEmpty) {
-      _daysOfMonth
-        ..clear()
-        ..addAll(s.daysOfMonth!);
-    }
-
-    // Monthly missing-day behavior
-    if (s.monthlyMissingDayBehavior == MonthlyMissingDayBehavior.lastDay) {
-      _monthlyMissingDayMode = _MonthlyMissingDayMode.lastDay;
-    } else {
-      _monthlyMissingDayMode = _MonthlyMissingDayMode.skip;
-    }
-
-    _active = s.active;
-    _useCycle = s.cycleEveryNDays != null;
-    if (_useCycle) {
-      _cycleN.text = s.cycleEveryNDays!.toString();
-      final n = s.cycleEveryNDays ?? 2;
-      _daysOn.text = '${n ~/ 2}';
-      _daysOff.text = '${n - (n ~/ 2)}';
-      _cycleAnchor = s.cycleAnchorDate ?? DateTime.now();
-    }
-
-    _name.text = s.name;
-    _nameAuto = false;
-
-    if (s.startAt != null) {
-      _startFromMode = _StartFromMode.date;
-      _startFromDate = s.startAt!;
-    }
-
-    if (s.endAt != null) {
-      _endMode = _EndMode.date;
-      _endDate = s.endAt!;
-    }
-
-    _mode = _useCycle
-        ? ScheduleMode.daysOnOff
-        : (_daysOfMonth.isNotEmpty
-              ? ScheduleMode.daysOfMonth
-              : (_days.length == 7
-                    ? ScheduleMode.everyDay
-                    : ScheduleMode.daysOfWeek));
   }
 
   @override
@@ -182,9 +114,102 @@ class _AddScheduleWizardPageState
     _doseUnit.dispose();
     _daysOn.dispose();
     _daysOff.dispose();
-    _cycleN.dispose();
     _name.dispose();
     super.dispose();
+  }
+
+  void _loadInitialData(Schedule s) {
+    _nameAuto = false;
+    _name.text = s.name;
+    _active = s.active;
+
+    _doseValue.text = s.doseValue.toString();
+    _doseUnit.text = s.doseUnit;
+    _medicationId = s.medicationId;
+
+    final meds = Hive.box<Medication>('medications').values;
+    Medication? match;
+    if (s.medicationId != null) {
+      for (final m in meds) {
+        if (m.id == s.medicationId) {
+          match = m;
+          break;
+        }
+      }
+    }
+    if (match == null) {
+      for (final m in meds) {
+        if (m.name == s.medicationName) {
+          match = m;
+          break;
+        }
+      }
+    }
+    _selectedMed = match;
+
+    final minutes = (s.timesOfDay ?? [s.minutesOfDay]).toList()..sort();
+    _times
+      ..clear()
+      ..addAll(minutes.map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60)));
+
+    if (s.hasDaysOfMonth) {
+      _mode = ScheduleMode.daysOfMonth;
+      _daysOfMonth
+        ..clear()
+        ..addAll(s.daysOfMonth!);
+    } else if (s.hasCycle) {
+      _mode = ScheduleMode.daysOnOff;
+      final n = s.cycleEveryNDays ?? 2;
+      final on = n ~/ 2;
+      final off = n - on;
+      _daysOn.text = '$on';
+      _daysOff.text = '$off';
+      _cycleAnchor = s.cycleAnchorDate ?? DateTime.now();
+    } else {
+      final days = s.daysOfWeek.toSet();
+      if (days.length == 7) {
+        _mode = ScheduleMode.everyDay;
+        _days
+          ..clear()
+          ..addAll({1, 2, 3, 4, 5, 6, 7});
+      } else {
+        _mode = ScheduleMode.daysOfWeek;
+        _days
+          ..clear()
+          ..addAll(days);
+      }
+    }
+
+    final startAt = s.startAt;
+    if (startAt == null) {
+      _startFromMode = _StartFromMode.now;
+      _startFromDate = DateTime.now();
+    } else {
+      final now = DateTime.now();
+      final startDay = DateTime(startAt.year, startAt.month, startAt.day);
+      final today = DateTime(now.year, now.month, now.day);
+      if (startDay.isAtSameMomentAs(today)) {
+        _startFromMode = _StartFromMode.now;
+        _startFromDate = now;
+      } else {
+        _startFromMode = _StartFromMode.date;
+        _startFromDate = startAt;
+      }
+    }
+
+    final endAt = s.endAt;
+    if (endAt == null) {
+      _endMode = _EndMode.none;
+      _endDate = DateTime.now();
+    } else {
+      _endMode = _EndMode.date;
+      _endDate = endAt;
+    }
+
+    _monthlyMissingDayMode =
+        s.monthlyMissingDayBehavior == MonthlyMissingDayBehavior.lastDay
+        ? _MonthlyMissingDayMode.lastDay
+        : _MonthlyMissingDayMode.skip;
   }
 
   @override
@@ -774,29 +799,28 @@ class _AddScheduleWizardPageState
         _buildSection(context, 'Schedule Dates', [
           LabelFieldRow(
             label: 'Start Date',
-            field: Row(
+            field: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SmallDropdown36<_StartFromMode>(
-                    value: _startFromMode,
-                    decoration: buildCompactFieldDecoration(context: context),
-                    items: const [
-                      DropdownMenuItem(
-                        value: _StartFromMode.now,
-                        child: Center(child: Text('Today')),
-                      ),
-                      DropdownMenuItem(
-                        value: _StartFromMode.date,
-                        child: Center(child: Text('Selected date')),
-                      ),
-                    ],
-                    onChanged: (v) => setState(() {
-                      _startFromMode = v ?? _StartFromMode.now;
-                    }),
-                  ),
+                SmallDropdown36<_StartFromMode>(
+                  value: _startFromMode,
+                  decoration: buildCompactFieldDecoration(context: context),
+                  items: const [
+                    DropdownMenuItem(
+                      value: _StartFromMode.now,
+                      child: Center(child: Text('Today')),
+                    ),
+                    DropdownMenuItem(
+                      value: _StartFromMode.date,
+                      child: Center(child: Text('Selected date')),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() {
+                    _startFromMode = v ?? _StartFromMode.now;
+                  }),
                 ),
                 if (_startFromMode == _StartFromMode.date) ...[
-                  const SizedBox(width: kSpacingS),
+                  const SizedBox(height: kSpacingS),
                   DateButton36(
                     label: MaterialLocalizations.of(
                       context,
@@ -856,42 +880,41 @@ class _AddScheduleWizardPageState
           const SizedBox(height: kSpacingS),
           LabelFieldRow(
             label: 'End',
-            field: Row(
+            field: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SmallDropdown36<_EndMode>(
-                    value: _endMode,
-                    decoration: buildCompactFieldDecoration(context: context),
-                    items: const [
-                      DropdownMenuItem(
-                        value: _EndMode.none,
-                        child: Center(child: Text('No end')),
-                      ),
-                      DropdownMenuItem(
-                        value: _EndMode.date,
-                        child: Center(child: Text('End date')),
-                      ),
-                    ],
-                    onChanged: (v) => setState(() {
-                      _endMode = v ?? _EndMode.none;
-                      if (_endMode == _EndMode.none) return;
+                SmallDropdown36<_EndMode>(
+                  value: _endMode,
+                  decoration: buildCompactFieldDecoration(context: context),
+                  items: const [
+                    DropdownMenuItem(
+                      value: _EndMode.none,
+                      child: Center(child: Text('No end')),
+                    ),
+                    DropdownMenuItem(
+                      value: _EndMode.date,
+                      child: Center(child: Text('End date')),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() {
+                    _endMode = v ?? _EndMode.none;
+                    if (_endMode == _EndMode.none) return;
 
-                      final startDay = _effectiveStartAt();
-                      final endDay = DateTime(
-                        _endDate.year,
-                        _endDate.month,
-                        _endDate.day,
-                      );
-                      if (endDay.isBefore(
-                        DateTime(startDay.year, startDay.month, startDay.day),
-                      )) {
-                        _endDate = startDay;
-                      }
-                    }),
-                  ),
+                    final startDay = _effectiveStartAt();
+                    final endDay = DateTime(
+                      _endDate.year,
+                      _endDate.month,
+                      _endDate.day,
+                    );
+                    if (endDay.isBefore(
+                      DateTime(startDay.year, startDay.month, startDay.day),
+                    )) {
+                      _endDate = startDay;
+                    }
+                  }),
                 ),
                 if (_endMode == _EndMode.date) ...[
-                  const SizedBox(width: kSpacingS),
+                  const SizedBox(height: kSpacingS),
                   DateButton36(
                     label: MaterialLocalizations.of(
                       context,
@@ -958,7 +981,6 @@ class _AddScheduleWizardPageState
                     _mode = value ?? ScheduleMode.everyDay;
                     _days.clear();
                     _daysOfMonth.clear();
-                    _useCycle = false;
 
                     if (_mode == ScheduleMode.everyDay) {
                       _days.addAll([1, 2, 3, 4, 5, 6, 7]);
@@ -1426,17 +1448,13 @@ class _AddScheduleWizardPageState
   void _maybeAutoName() {
     if (!_nameAuto) return;
     if (_selectedMed == null) {
-      _isApplyingAutoName = true;
       _name.text = '';
-      _isApplyingAutoName = false;
       return;
     }
 
     final dose = _autoNameDoseSegment();
 
-    _isApplyingAutoName = true;
     _name.text = dose;
-    _isApplyingAutoName = false;
   }
 
   String _autoNameDoseSegment() {
