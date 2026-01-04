@@ -1396,8 +1396,6 @@ class _AddScheduleWizardPageState
       children: [
         _buildSection(context, 'Schedule Name', [_buildNameField()]),
         const SizedBox(height: 16),
-        _buildSection(context, 'Summary', [_buildSummaryDisplay()]),
-        const SizedBox(height: 16),
         _buildSection(context, 'Settings', [_buildSettingsFields()]),
       ],
     );
@@ -1501,42 +1499,6 @@ class _AddScheduleWizardPageState
     if (value.isEmpty) return '';
     if (unit.isEmpty) return value;
     return '$value $unit';
-  }
-
-  Widget _buildSummaryDisplay() {
-    return Column(
-      children: [
-        _buildReviewRow('Medication', _selectedMed?.name ?? ''),
-        _buildReviewRow('Dose', _doseMetricsSummaryLabel()),
-        _buildReviewRow('Pattern', _getPatternSummary()),
-        if (_mode == ScheduleMode.daysOnOff)
-          _buildReviewRow(
-            'Cycle Start',
-            '${_cycleAnchor.year}-${_cycleAnchor.month}-${_cycleAnchor.day}',
-          ),
-      ],
-    );
-  }
-
-  Widget _buildReviewRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: kSpacingM),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: bodyTextStyle(
-                context,
-              )?.copyWith(fontWeight: kFontWeightSemiBold),
-            ),
-          ),
-          Expanded(child: Text(value, style: bodyTextStyle(context))),
-        ],
-      ),
-    );
   }
 
   Widget _buildSettingsFields() {

@@ -312,7 +312,9 @@ class PrimaryChoiceChip extends StatelessWidget {
     final theme = Theme.of(context);
     final selectedColor = theme.colorScheme.primary;
     final unselectedColor = theme.colorScheme.surfaceContainerHighest;
-    final labelColor = selected ? Colors.white : theme.colorScheme.onSurface;
+    final labelColor = selected
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onSurfaceVariant;
     return ChoiceChip(
       label: DefaultTextStyle(
         style:
