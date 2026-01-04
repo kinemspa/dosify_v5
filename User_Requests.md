@@ -41,7 +41,7 @@
 - COllpased cards have different sizes. I like reports size hieght. Make all the same.  [COMPLETED]
 - Only reports card has  a border. Make sure all cards have the same border.  [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
-- For MDV - Cant Edit Active Vial expiry date.  
+- For MDV - Cant Edit Active Vial expiry date.  [COMPLETED]
 
 ### App Header
 - Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen.

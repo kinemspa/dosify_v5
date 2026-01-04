@@ -1460,6 +1460,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             isWarning:
                 med.reconstitutedVialExpiry != null &&
                 _isExpiringSoon(med.reconstitutedVialExpiry!),
+            onTap: () => _editActiveVialExpiry(context, med),
           ),
           // Active vial batch & location
           _buildDetailTile(
@@ -4710,6 +4711,15 @@ void _editActiveVialLowStock(BuildContext context, Medication med) {
     },
     unit: 'mL',
   );
+}
+
+void _editActiveVialExpiry(BuildContext context, Medication med) {
+  _editDate(context, med, 'Active Vial Expiry', med.reconstitutedVialExpiry, (
+    val,
+  ) {
+    final box = Hive.box<Medication>('medications');
+    box.put(med.id, med.copyWith(reconstitutedVialExpiry: val));
+  });
 }
 
 void _editBackupVialBatch(BuildContext context, Medication med) {
