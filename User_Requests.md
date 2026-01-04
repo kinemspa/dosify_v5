@@ -26,7 +26,7 @@
 
 ### Large Cards
 - The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. 
-- Remove the text under the Donut Graph percentage. 
+	- Remove the text under the Donut Graph percentage. [COMPLETED]
 
 
 ### Compact Cards

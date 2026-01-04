@@ -1221,14 +1221,6 @@ class _MedLargeCard extends StatelessWidget {
       percentage: stockInfo.percentage,
     );
 
-    final donutSubtitle = switch (m.form) {
-      MedicationForm.multiDoseVial => 'of Active Vial remains',
-      MedicationForm.tablet => 'tablets remain',
-      MedicationForm.capsule => 'capsules remain',
-      MedicationForm.prefilledSyringe => 'syringes remain',
-      MedicationForm.singleDoseVial => 'vials remain',
-    };
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -1239,7 +1231,6 @@ class _MedLargeCard extends StatelessWidget {
           child: StockDonutGauge(
             percentage: stockInfo.percentage,
             primaryLabel: '$pctRounded%',
-            secondaryLabel: donutSubtitle,
             size: kStockDonutGaugeSizeCompact,
             strokeWidth: kStockDonutGaugeStrokeWidth,
             color: stockColor,
