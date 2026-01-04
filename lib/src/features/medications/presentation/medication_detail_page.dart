@@ -531,16 +531,21 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     };
 
     final reorderEnabled =
-        !_isReportsExpanded && !_isScheduleExpanded && !_isDetailsExpanded;
+        !_isReportsExpanded || !_isScheduleExpanded || !_isDetailsExpanded;
+
+    final orderedIds = List<String>.from(_cardOrder);
 
     final children = <Widget>[
-      for (final id in _cardOrder)
-        Padding(
-          key: ValueKey<String>('detail_card_$id'),
-          padding: EdgeInsets.only(
-            bottom: id == _cardOrder.last ? 0 : kSpacingM,
+      for (final entry in orderedIds.asMap().entries)
+        ReorderableDelayedDragStartListener(
+          key: ValueKey<String>('detail_card_${entry.value}'),
+          index: entry.key,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingM,
+            ),
+            child: cards[entry.value]!,
           ),
-          child: cards[id]!,
         ),
     ];
 
@@ -551,6 +556,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return ReorderableListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
       onReorder: (oldIndex, newIndex) {
         setState(() {
           if (newIndex > oldIndex) newIndex -= 1;
