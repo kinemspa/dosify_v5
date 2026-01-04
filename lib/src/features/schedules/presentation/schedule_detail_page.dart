@@ -18,7 +18,9 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_serv
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
+import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
+import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class ScheduleDetailPage extends StatefulWidget {
@@ -31,6 +33,12 @@ class ScheduleDetailPage extends StatefulWidget {
 
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   late final DoseLogRepository _doseLogRepo;
+
+  Future<void> _promptEditSchedule(Schedule s) async {
+    final confirmed = await showConfirmEditScheduleDialog(context);
+    if (!confirmed || !mounted) return;
+    context.push('/schedules/edit/${s.id}');
+  }
 
   String _mergedTitle(Schedule s) {
     final med = s.medicationName.trim();
@@ -234,12 +242,19 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime? nextDose, {
     required String title,
   }) {
-    final nextDoseText = nextDose == null
-        ? 'None'
-        : '${DateFormat('EEE, MMM d').format(nextDose)} • ${TimeOfDay.fromDateTime(nextDose).format(context)}';
-
     return DetailStatsBanner(
       title: title,
+      headerChips: Wrap(
+        spacing: kSpacingS,
+        runSpacing: kSpacingXS,
+        children: [
+          PrimaryChoiceChip(
+            label: Text(_scheduleTypeChipText(s)),
+            selected: true,
+            onSelected: (_) {},
+          ),
+        ],
+      ),
       row1Left: DetailStatItem(
         icon: Icons.medication_outlined,
         label: 'Dose',
@@ -252,18 +267,41 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       ),
       row2Left: DetailStatItem(
         icon: Icons.repeat,
-        label: 'Frequency',
-        value: _frequencyText(s),
+        label: 'Type',
+        value: _scheduleTypeText(s),
       ),
       row2Right: DetailStatItem(
         icon: Icons.access_time,
         label: 'Times',
         value: _timesText(context, s),
       ),
-      row3Left: DetailStatItem(
-        icon: Icons.event,
-        label: 'Next dose',
-        value: nextDoseText,
+      row3Left: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.event,
+                size: kIconSizeSmall,
+                color: Colors.white.withValues(alpha: kOpacityMedium),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Next dose',
+                style: helperTextStyle(context)?.copyWith(
+                  color: Colors.white.withValues(alpha: kOpacityMedium),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: kSpacingXS),
+          NextDoseDateBadge(
+            nextDose: nextDose,
+            isActive: s.active,
+            dense: true,
+            showNextLabel: true,
+          ),
+        ],
       ),
       row3Right: DetailStatItem(
         icon: Icons.timer_outlined,
@@ -324,6 +362,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               context,
               label: 'Dose',
               value: _getDoseDisplay(s),
+              onTap: () => _promptEditSchedule(s),
             ),
             buildDetailInfoWidgetRow(
               context,
@@ -334,13 +373,23 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             if (s.medicationId != null) _buildReconstitutionBadge(s),
             buildDetailInfoRow(
               context,
-              label: 'Frequency',
-              value: _frequencyText(s),
+              label: 'Type',
+              value: _scheduleTypeText(s),
+              onTap: () => _promptEditSchedule(s),
             ),
+            if (_scheduleTypeText(s) == 'Days of week' ||
+                _scheduleTypeText(s) == 'Days of month')
+              buildDetailInfoRow(
+                context,
+                label: 'Pattern',
+                value: _frequencyText(s),
+                onTap: () => _promptEditSchedule(s),
+              ),
             buildDetailInfoRow(
               context,
               label: 'Times',
               value: _timesText(context, s),
+              onTap: () => _promptEditSchedule(s),
             ),
             // Week 5: Add Recalculate button for MDV schedules with reconstitution
             if (s.medicationId != null) _buildRecalculateButton(s),
@@ -1195,12 +1244,40 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       final n = schedule.cycleEveryNDays!;
       return 'Every $n day${n == 1 ? '' : 's'}';
     }
+
+    final daysOfMonth = (schedule.daysOfMonth ?? <int>[]).toList()..sort();
+    if (daysOfMonth.isNotEmpty) {
+      return daysOfMonth.join(', ');
+    }
+
     final ds = schedule.daysOfWeek.toList()..sort();
     if (ds.length == 7) {
       return 'Every day';
     }
     const dlabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return ds.map((i) => dlabels[i - 1]).join(', ');
+  }
+
+  String _scheduleTypeText(Schedule schedule) {
+    if (schedule.daysOfMonth?.isNotEmpty == true) return 'Days of month';
+    if (schedule.hasCycle && schedule.cycleEveryNDays != null) {
+      final n = schedule.cycleEveryNDays!;
+      return 'Every $n day${n == 1 ? '' : 's'}';
+    }
+    final ds = schedule.daysOfWeek.toList();
+    if (ds.length == 7) return 'Daily';
+    return 'Days of week';
+  }
+
+  String _scheduleTypeChipText(Schedule schedule) {
+    if (schedule.daysOfMonth?.isNotEmpty == true) return 'Monthly';
+    if (schedule.hasCycle && schedule.cycleEveryNDays != null) {
+      final n = schedule.cycleEveryNDays!;
+      return '$n day${n == 1 ? '' : 's'}';
+    }
+    final ds = schedule.daysOfWeek.toList();
+    if (ds.length == 7) return 'Daily';
+    return 'Days of week';
   }
 
   String _timesText(BuildContext context, Schedule schedule) {

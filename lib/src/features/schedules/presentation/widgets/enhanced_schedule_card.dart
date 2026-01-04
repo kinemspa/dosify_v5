@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 
 /// Enhanced expandable schedule card for medication detail page
 /// Shows schedule summary by default, expands to show full details
@@ -35,32 +36,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   bool _isExpanded = false;
 
   Future<void> _promptEditSchedule() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        final cs = Theme.of(dialogContext).colorScheme;
-        return AlertDialog(
-          titleTextStyle: cardTitleStyle(
-            dialogContext,
-          )?.copyWith(color: cs.primary),
-          contentTextStyle: bodyTextStyle(dialogContext),
-          title: const Text('Edit schedule?'),
-          content: const Text('This will open the schedule editor.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Edit'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != true || !mounted) return;
+    final confirmed = await showConfirmEditScheduleDialog(context);
+    if (!confirmed || !mounted) return;
     context.push('/schedules/edit/${widget.schedule.id}');
   }
 
@@ -275,11 +252,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                               'Dose',
                               '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
                             ),
-                            _buildDetailRow(
-                              context,
-                              'Times',
-                              _getTimesText(),
-                            ),
+                            _buildDetailRow(context, 'Times', _getTimesText()),
                             _buildDetailRow(context, 'Days', _getDaysText()),
                             _buildDetailRow(
                               context,

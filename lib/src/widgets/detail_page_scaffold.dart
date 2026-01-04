@@ -187,6 +187,7 @@ class DetailStatsBanner extends StatelessWidget {
     required this.row2Right,
     required this.row3Left,
     required this.row3Right,
+    this.headerChips,
     super.key,
   });
 
@@ -197,6 +198,7 @@ class DetailStatsBanner extends StatelessWidget {
   final Widget row2Right;
   final Widget row3Left;
   final Widget row3Right;
+  final Widget? headerChips;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +219,10 @@ class DetailStatsBanner extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
+        if (headerChips != null) ...[
+          const SizedBox(height: kSpacingS),
+          headerChips!,
+        ],
         const SizedBox(height: kCardInnerSpacing),
 
         // Row 1

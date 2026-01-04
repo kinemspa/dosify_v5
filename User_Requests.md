@@ -25,7 +25,7 @@
 ## Medication Screen
 
 ### Large Cards
-- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. [COMPLETED]
+- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. [COMPLETED] They are still not on the same rows. FIX IT.
 	- Remove the text under the Donut Graph percentage. [COMPLETED]
 
 
@@ -36,15 +36,17 @@
 ==============
 
 # Medication Details Screen
+- Canw e have some help text somewhere to state minimize all the cards to arrange them? Maybe put the drag icon on minimized cards to inform user they are rearrangeable. 
+- Re Arrange state is not saving on return to the screen. 
 - Dark Mode
 	- Can we make text in the app header Black.  [COMPLETED]
-- COllpased cards have different sizes. I like reports size hieght. Make all the same.  [COMPLETED]
+- COllpased cards have different sizes. I like reports size hieght. Make all the same.  [COMPLETED] Reconstitution isnt the same size. 
 - Only reports card has  a border. Make sure all cards have the same border.  [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 - For MDV - Cant Edit Active Vial expiry date.  [COMPLETED]
 
 ### App Header
-- Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED]
+- Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED] No this is not done. The Sotrage Locaiton Text is above the value, the remaining text is on 2 lines. What do you not understand about make it the same as the Large Med Card?
 
 ### Reports Card
 - Minimizing this card is requireing 2 clicks. [COMPLETED]
@@ -52,6 +54,9 @@
 	- Date Icon - make smaller. [COMPLETED]
 	- AdHoc Doses should be editable. [COMPLETED]
 	- Indicate entries that are editable. [COMPLETED]
+	- Edit icon should always be to the left of all icons. This is not the case. 
+	- Adhoc doses are showing up as 2 entries. 
+
 
 
 ### Schedule
@@ -84,7 +89,7 @@
 
 ==============
 # Schedules List
-- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think.  [COMPLETED] This still needs to be smaller. Also make the chip have less rounded border radius, also move it more left and down a smudge, its touching the top of the card containing it. 
+- For the date icon on the cards, can we put a little "Next" somewhere? Maybe overlap it over the icon or something. I will let you recommend what you think. This still needs to be smaller. Also make the chip have less rounded border radius, also move it more left and down a smudge, its touching the top of the card containing it. 
 
 
 ==============
@@ -148,7 +153,7 @@
 - Need to consider the objects that sit in the app header. I need them not to be just text objects. I want some flavour. [COMPLETED]
 - DOse Calendar - Needs to use the same Dose calendar widget as the medicaiotn details screen. . [COMPLETED]
 - Move DOse Calnedar to top card. [COMPLETED]
-- Schedule Details needs to have edit options like medication details. 
+- Schedule Details needs to have edit options like medication details. [COMPLETED]
 - SO we should have Schedule Status of , Active, Paused, Disabled, Completed. 
 	- Active is of course active
 	- Paused, the ability to pause a schdule until a set date. 
@@ -161,7 +166,7 @@
 		Pause Button: Has an indefinate and an Pause end date option. Helper text explains the 2 options and how the schedule will behave. 
 
 ## Schedule Details Card
-- Frequency is the incorrect term. Needs the Schedule type. Which is Daily, X days, Days of the week, Cycle. The it can display, 
+- Frequency is the incorrect term. Needs the Schedule type. Which is Daily, X days, Days of the week, Cycle. The it can display,  [COMPLETED]
 
 	
 
