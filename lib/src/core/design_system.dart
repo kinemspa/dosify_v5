@@ -341,6 +341,18 @@ const double kReconErrorOpacity = 0.15;
 const Color kMedicationDetailGradientStart = Color(0xFF09A8BD);
 const Color kMedicationDetailGradientEnd = Color(0xFF18537D);
 
+/// Foreground color for the Medication Details header.
+///
+/// In dark mode, the header background is bright enough that black text/icons
+/// are preferred for legibility (per UX request).
+Color medicationDetailHeaderForegroundColor(BuildContext context) {
+  final theme = Theme.of(context);
+  if (theme.brightness == Brightness.dark) {
+    return Colors.black;
+  }
+  return theme.colorScheme.onPrimary;
+}
+
 /// Default expiry offset for newly added medications.
 ///
 /// Used when the user hasn't selected an expiry yet.

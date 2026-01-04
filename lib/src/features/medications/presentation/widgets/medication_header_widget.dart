@@ -21,6 +21,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
     this.onAdHocDose,
     this.hasSchedules = false,
     this.crossAxisAlignment = CrossAxisAlignment.stretch,
+    this.foregroundColor,
     super.key,
   });
 
@@ -29,17 +30,18 @@ class MedicationHeaderWidget extends ConsumerWidget {
   final VoidCallback? onAdHocDose;
   final bool hasSchedules;
   final CrossAxisAlignment crossAxisAlignment;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final onPrimary = theme.colorScheme.onPrimary;
+    final headerForeground = foregroundColor ?? theme.colorScheme.onPrimary;
 
     final headerActionButtonStyle = OutlinedButton.styleFrom(
-      foregroundColor: onPrimary,
+      foregroundColor: headerForeground,
       textStyle: buttonTextStyle(context),
       side: BorderSide(
-        color: onPrimary.withValues(alpha: kOpacityMediumLow),
+        color: headerForeground.withValues(alpha: kOpacityMediumLow),
         width: kBorderWidthThin,
       ),
       shape: RoundedRectangleBorder(
@@ -103,7 +105,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                       child: Text(
                         descriptionTruncated,
                         style: TextStyle(
-                          color: onPrimary.withValues(alpha: 0.9),
+                          color: headerForeground.withValues(alpha: 0.9),
                           fontSize: 10,
                           fontStyle: FontStyle.italic,
                         ),
@@ -118,7 +120,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                       child: Text(
                         medication.notes!,
                         style: TextStyle(
-                          color: onPrimary.withValues(alpha: 0.6),
+                          color: headerForeground.withValues(alpha: 0.6),
                           fontStyle: FontStyle.italic,
                           fontSize: 9,
                         ),
@@ -135,7 +137,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                     label: strengthPerLabel,
                     value:
                         '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
-                    textColor: onPrimary,
+                    textColor: headerForeground,
                     valueSize: 11,
                   ),
                   const SizedBox(height: kSpacingS),
@@ -146,7 +148,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                       icon: Icons.location_on_outlined,
                       label: 'Storage Location',
                       value: storageLabel,
-                      textColor: onPrimary,
+                      textColor: headerForeground,
                       valueSize: 11,
                       trailingIcons: [
                         if (medication.activeVialRequiresFreezer ||
@@ -172,7 +174,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
               flex: 4,
               child: _StockInfoCard(
                 medication: medication,
-                onPrimary: onPrimary,
+                onPrimary: headerForeground,
                 stockRatio: stockRatio,
                 daysRemaining: daysRemaining,
                 stockoutDate: stockoutDate,
@@ -193,7 +195,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                     icon: Icon(
                       Icons.medication_rounded,
                       size: kIconSizeSmall,
-                      color: onPrimary,
+                      color: headerForeground,
                     ),
                     label: const FittedBox(
                       fit: BoxFit.scaleDown,
@@ -207,7 +209,11 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 child: OutlinedButton.icon(
                   onPressed: onRefill,
                   style: headerActionButtonStyle,
-                  icon: Icon(Icons.add, size: kIconSizeSmall, color: onPrimary),
+                  icon: Icon(
+                    Icons.add,
+                    size: kIconSizeSmall,
+                    color: headerForeground,
+                  ),
                   label: const FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text('Refill', maxLines: 1),

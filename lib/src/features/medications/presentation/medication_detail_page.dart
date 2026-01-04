@@ -163,6 +163,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
           final onPrimary = colorScheme.onPrimary;
+          final headerForeground = medicationDetailHeaderForegroundColor(
+            context,
+          );
 
           // Check if we have schedules for schedule-specific header content
           final scheduleBox = Hive.box<Schedule>('schedules');
@@ -184,9 +187,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     floating: false,
                     pinned: true,
                     backgroundColor: Colors.transparent,
-                    foregroundColor: onPrimary,
-                    iconTheme: IconThemeData(color: onPrimary),
-                    actionsIconTheme: IconThemeData(color: onPrimary),
+                    foregroundColor: headerForeground,
+                    iconTheme: IconThemeData(color: headerForeground),
+                    actionsIconTheme: IconThemeData(color: headerForeground),
                     elevation: 0,
                     flexibleSpace: LayoutBuilder(
                       builder: (context, constraints) {
@@ -249,6 +252,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                         ),
                                         child: MedicationHeaderWidget(
                                           medication: updatedMed,
+                                          foregroundColor: headerForeground,
                                           onRefill: () => _showRefillDialog(
                                             context,
                                             updatedMed,
@@ -300,7 +304,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                           Text(
                                             updatedMed.name,
                                             style: TextStyle(
-                                              color: onPrimary,
+                                              color: headerForeground,
                                               fontSize: lerpDouble(22, 17, t),
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -331,7 +335,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                               child: Text(
                                                 _formLabel(updatedMed.form),
                                                 style: TextStyle(
-                                                  color: onPrimary,
+                                                  color: headerForeground,
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.w600,
                                                 ),
@@ -499,6 +503,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       ),
                       child: MedicationHeaderWidget(
                         medication: updatedMed,
+                        foregroundColor: medicationDetailHeaderForegroundColor(
+                          context,
+                        ),
                         onRefill: () {},
                         onAdHocDose: () {},
                         hasSchedules: hasSchedules,
