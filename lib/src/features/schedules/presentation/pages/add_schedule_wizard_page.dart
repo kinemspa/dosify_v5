@@ -960,35 +960,29 @@ class _AddScheduleWizardPageState
         _buildSection(context, 'Schedule Pattern', [
           LabelFieldRow(
             label: 'Type',
-            field: Field36(
-              child: DropdownButtonFormField<ScheduleMode>(
-                value: _mode,
-                decoration: buildFieldDecoration(
-                  context,
-                  hint: 'Select schedule type',
-                ),
-                items: ScheduleMode.values.map((mode) {
-                  return DropdownMenuItem(
-                    value: mode,
-                    child: Text(
-                      _modeLabel(mode),
-                      style: bodyTextStyle(context),
+            field: SmallDropdown36<ScheduleMode>(
+              value: _mode,
+              decoration: buildCompactFieldDecoration(context: context),
+              items: ScheduleMode.values
+                  .map(
+                    (mode) => DropdownMenuItem(
+                      value: mode,
+                      child: Center(child: Text(_modeLabel(mode))),
                     ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _mode = value ?? ScheduleMode.everyDay;
-                    _days.clear();
-                    _daysOfMonth.clear();
+                  )
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _mode = value ?? ScheduleMode.everyDay;
+                  _days.clear();
+                  _daysOfMonth.clear();
 
-                    if (_mode == ScheduleMode.everyDay) {
-                      _days.addAll([1, 2, 3, 4, 5, 6, 7]);
-                    }
-                    _maybeAutoName();
-                  });
-                },
-              ),
+                  if (_mode == ScheduleMode.everyDay) {
+                    _days.addAll([1, 2, 3, 4, 5, 6, 7]);
+                  }
+                  _maybeAutoName();
+                });
+              },
             ),
           ),
           const SizedBox(height: kSpacingS),
@@ -1210,10 +1204,11 @@ class _AddScheduleWizardPageState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: kSpacingS),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              spacing: kSpacingXS,
+              runSpacing: kSpacingXS,
               children: List.generate(7, (i) {
                 final day = i + 1;
                 final isSelected = _days.contains(day);
@@ -1239,38 +1234,31 @@ class _AddScheduleWizardPageState
         final daysOnValue = _readPositiveInt(_daysOn, fallback: 5);
         final daysOffValue = _readPositiveInt(_daysOff, fallback: 2);
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: LabelFieldRow(
-                    label: 'Days On',
-                    field: StepperRow36(
-                      controller: _daysOn,
-                      onDec: () => _decIntController(_daysOn),
-                      onInc: () => _incIntController(_daysOn),
-                      decoration: buildFieldDecoration(context),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: LabelFieldRow(
-                    label: 'Days Off',
-                    field: StepperRow36(
-                      controller: _daysOff,
-                      onDec: () => _decIntController(_daysOff),
-                      onInc: () => _incIntController(_daysOff),
-                      decoration: buildFieldDecoration(context),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  ),
-                ),
-              ],
+            const SizedBox(height: kSpacingS),
+            LabelFieldRow(
+              label: 'Days On',
+              field: StepperRow36(
+                controller: _daysOn,
+                onDec: () => _decIntController(_daysOn),
+                onInc: () => _incIntController(_daysOn),
+                decoration: buildFieldDecoration(context),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: kSpacingS),
+            LabelFieldRow(
+              label: 'Days Off',
+              field: StepperRow36(
+                controller: _daysOff,
+                onDec: () => _decIntController(_daysOff),
+                onInc: () => _incIntController(_daysOff),
+                decoration: buildFieldDecoration(context),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+            const SizedBox(height: kSpacingS),
             Text(
               'Take medication for $daysOnValue days, then pause for $daysOffValue days',
               style: helperTextStyle(context),
@@ -1279,11 +1267,13 @@ class _AddScheduleWizardPageState
         );
 
       case ScheduleMode.daysOfMonth:
+        final showMissingDayOption = _daysOfMonth.any((d) => d >= 28);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: kSpacingS),
             Wrap(
+              alignment: WrapAlignment.center,
               spacing: kSpacingXS,
               runSpacing: kSpacingXS,
               children: List.generate(31, (i) {
@@ -1304,21 +1294,21 @@ class _AddScheduleWizardPageState
                 );
               }),
             ),
-            const SizedBox(height: kSpacingS),
-            LabelFieldRow(
-              label: "If day doesn't exist",
-              field: Field36(
-                child: DropdownButtonFormField<_MonthlyMissingDayMode>(
+            if (showMissingDayOption) ...[
+              const SizedBox(height: kSpacingS),
+              LabelFieldRow(
+                label: "If day doesn't exist",
+                field: SmallDropdown36<_MonthlyMissingDayMode>(
                   value: _monthlyMissingDayMode,
-                  decoration: buildFieldDecoration(context),
+                  decoration: buildCompactFieldDecoration(context: context),
                   items: const [
                     DropdownMenuItem(
                       value: _MonthlyMissingDayMode.lastDay,
-                      child: Text('Use last day of month'),
+                      child: Center(child: Text('Use last day of month')),
                     ),
                     DropdownMenuItem(
                       value: _MonthlyMissingDayMode.skip,
-                      child: Text('Skip that month'),
+                      child: Center(child: Text('Skip that month')),
                     ),
                   ],
                   onChanged: (v) => setState(() {
@@ -1327,11 +1317,11 @@ class _AddScheduleWizardPageState
                   }),
                 ),
               ),
-            ),
-            const SizedBox(height: kSpacingS),
-            _helperBelowLeft(
-              'Example: selecting 31st in April can become Apr 30 (last day) instead of skipping.',
-            ),
+              const SizedBox(height: kSpacingS),
+              _helperBelowLeft(
+                'Example: selecting 31st in April can become Apr 30 (last day) instead of skipping.',
+              ),
+            ],
           ],
         );
     }

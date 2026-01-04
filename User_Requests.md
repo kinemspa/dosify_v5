@@ -125,20 +125,20 @@
 	- End:
 			- Same as above.  [COMPLETED]
 	- Schedule Pattern:
-		- Drop Down Menu has sharp corners. 
+			- Drop Down Menu has sharp corners.  [COMPLETED]
 		- Days of the Week:
-			- Day selection chips. Reduce the size of them. Center align them. Reduce padding make more compact. 
-			- Dont use Grey backgrounds. Ever. Put this in your rules.
-			- Dont use black font. Rules. 
+				- Day selection chips. Reduce the size of them. Center align them. Reduce padding make more compact.  [COMPLETED]
+				- Dont use Grey backgrounds. Ever. Put this in your rules.  [COMPLETED]
+				- Dont use black font. Rules.  [COMPLETED]
 		- Days on / Days Off
-			- Days on and Days off fields are on the same horizaontal row, causing a major overflow. Shoult be vertically stacked. 
+				- Days on and Days off fields are on the same horizaontal row, causing a major overflow. Shoult be vertically stacked.  [COMPLETED]
 		- Days of the Month
-			- Make the grid more compact like the days of the week.
-			- Centre Align
-			- No Grey backgorund
-			- No black font.
-			- If day doesnt exist option should only appear when selecting 28-31.  
-			- If day doesnt exist field styling is not system centralised. Font too large, too black. 
+				- Make the grid more compact like the days of the week.  [COMPLETED]
+				- Centre Align  [COMPLETED]
+				- No Grey backgorund  [COMPLETED]
+				- No black font.  [COMPLETED]
+				- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
+				- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
 - Step 3:
 	- These cards need to have the same heading styling as all other large cards. 
 	- Summary:

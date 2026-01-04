@@ -311,10 +311,10 @@ class PrimaryChoiceChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final selectedColor = theme.colorScheme.primary;
-    final unselectedColor = theme.colorScheme.surfaceContainerHighest;
-    final labelColor = selected
-        ? theme.colorScheme.onPrimary
-        : theme.colorScheme.onSurfaceVariant;
+    final unselectedColor = theme.colorScheme.primary.withValues(
+      alpha: kOpacityVeryLow,
+    );
+    final labelColor = selected ? theme.colorScheme.onPrimary : selectedColor;
     return ChoiceChip(
       label: DefaultTextStyle(
         style:
@@ -330,7 +330,13 @@ class PrimaryChoiceChip extends StatelessWidget {
       selectedColor: selectedColor,
       backgroundColor: unselectedColor,
       showCheckmark: false,
-      side: BorderSide(color: theme.colorScheme.outlineVariant),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      side: BorderSide(
+        color: selected
+            ? theme.colorScheme.primary
+            : theme.colorScheme.primary.withValues(alpha: kOpacityMedium),
+      ),
     );
   }
 }
