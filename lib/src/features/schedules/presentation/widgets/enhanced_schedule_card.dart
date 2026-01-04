@@ -237,13 +237,17 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                               context,
                               'Dose',
                               '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                              onEdit: _quickEditDose,
+                              onEdit: () => context.push(
+                                '/schedules/detail/${widget.schedule.id}',
+                              ),
                             ),
                             _buildEditableDetailRow(
                               context,
                               'Times',
                               _getTimesText(),
-                              onEdit: _quickEditTimes,
+                              onEdit: () => context.push(
+                                '/schedules/detail/${widget.schedule.id}',
+                              ),
                             ),
                             _buildDetailRow(context, 'Days', _getDaysText()),
                             _buildDetailRow(
@@ -273,8 +277,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                               child: _buildPrimaryAction(
                                 context,
                                 label: widget.schedule.active
-                                    ? 'Pause Schedule'
-                                    : 'Resume Schedule',
+                                    ? 'Set Paused'
+                                    : 'Set Active',
                                 onTap: _togglePause,
                               ),
                             ),
