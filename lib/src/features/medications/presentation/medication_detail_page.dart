@@ -20,6 +20,7 @@ import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
@@ -771,7 +772,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     value: storageLabel,
                     textColor: onPrimary,
                     trailingIcon: med.lightSensitive
-                        ? Icons.dark_mode_outlined
+                        ? Icons.dark_mode
                         : null,
                   ),
                   const SizedBox(height: 8),
@@ -980,14 +981,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     if (med.activeVialRequiresFreezer) activeIcons.add(Icons.severe_cold);
     if (med.activeVialRequiresRefrigeration) activeIcons.add(Icons.ac_unit);
     if (med.activeVialLightSensitive) {
-      activeIcons.add(Icons.dark_mode_outlined);
+      activeIcons.add(Icons.dark_mode);
     }
 
     final sealedIcons = <IconData>[];
     if (med.backupVialsRequiresFreezer) sealedIcons.add(Icons.severe_cold);
     if (med.backupVialsRequiresRefrigeration) sealedIcons.add(Icons.ac_unit);
     if (med.backupVialsLightSensitive) {
-      sealedIcons.add(Icons.dark_mode_outlined);
+      sealedIcons.add(Icons.dark_mode);
     }
 
     final activeTrailing = _headerMdvRemainingMl(context, med, onPrimary);
@@ -1033,9 +1034,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final currentMl = totalMl > 0 ? currentRaw.clamp(0.0, totalMl) : 0.0;
     if (totalMl <= 0) return null;
 
+    final stockInfo = MedicationDisplayHelpers.calculateStock(med);
     final colored = statusColorOnPrimary(
       context,
-      stockStatusColorFromRatio(context, currentMl / totalMl),
+      stockStatusColorFromPercentage(context, percentage: stockInfo.percentage),
     );
     final baseStyle = helperTextStyle(
       context,
@@ -1069,15 +1071,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final count = med.stockValue.floor();
     if (count <= 0) return null;
 
-    final remainingRatio =
-        med.lowStockVialsThresholdCount != null &&
-            med.lowStockVialsThresholdCount! > 0
-        ? (count / med.lowStockVialsThresholdCount!.toDouble())
-        : 1.0;
-
+    final stockInfo = MedicationDisplayHelpers.calculateStock(med);
     final colored = statusColorOnPrimary(
       context,
-      stockStatusColorFromRatio(context, remainingRatio),
+      stockStatusColorFromPercentage(context, percentage: stockInfo.percentage),
     );
     final baseStyle = helperTextStyle(
       context,
