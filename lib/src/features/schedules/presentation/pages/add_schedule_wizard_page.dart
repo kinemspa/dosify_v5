@@ -1403,7 +1403,7 @@ class _AddScheduleWizardPageState
     return Column(
       children: [
         _buildSection(context, 'Schedule Name', [_buildNameField()]),
-        const SizedBox(height: 16),
+        sectionSpacing,
         _buildSection(context, 'Settings', [_buildSettingsFields()]),
       ],
     );
@@ -1507,15 +1507,30 @@ class _AddScheduleWizardPageState
 
   Widget _buildSettingsFields() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SwitchListTile(
-          title: Text('Active', style: bodyTextStyle(context)),
-          subtitle: Text(
-            'Schedule is enabled',
-            style: helperTextStyle(context),
+        LabelFieldRow(
+          label: 'Status',
+          field: Wrap(
+            spacing: kSpacingS,
+            runSpacing: kSpacingS,
+            children: [
+              PrimaryChoiceChip(
+                label: const Text('Active'),
+                selected: _active,
+                onSelected: (_) => setState(() => _active = true),
+              ),
+              PrimaryChoiceChip(
+                label: const Text('Disabled'),
+                selected: !_active,
+                onSelected: (_) => setState(() => _active = false),
+              ),
+            ],
           ),
-          value: _active,
-          onChanged: (value) => setState(() => _active = value),
+        ),
+        buildHelperText(
+          context,
+          _active ? 'Schedule is enabled' : 'Schedule is disabled',
         ),
         if (_mode == ScheduleMode.daysOnOff) ...[
           const SizedBox(height: 12),
@@ -1721,12 +1736,7 @@ class _AddScheduleWizardPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: cardTitleStyle(
-              context,
-            )?.copyWith(fontWeight: kFontWeightSemiBold),
-          ),
+          Text(title, style: sectionTitleStyle(context)),
           const SizedBox(height: kSpacingM),
           ...children,
         ],
