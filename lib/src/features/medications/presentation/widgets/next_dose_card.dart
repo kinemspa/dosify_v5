@@ -3,12 +3,13 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
+import 'package:dosifi_v5/src/widgets/take_dose_card.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -128,7 +129,7 @@ class _NextDoseCardState extends State<NextDoseCard>
               medicationName: widget.medication.name,
               scheduledTime: dt,
               doseValue: schedule.doseValue,
-              doseUnit: _formLabel(widget.medication.form),
+              doseUnit: schedule.doseUnit,
               existingLog: log,
             ),
           );
@@ -265,14 +266,45 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   Widget _buildDoseCardContent(CalculatedDose dose, int index, int total) {
+    final schedule = widget.schedules.cast<Schedule?>().firstWhere(
+      (s) => s?.id == dose.scheduleId,
+      orElse: () => null,
+    );
+
+    final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
+      widget.medication,
+    );
+
+    final metrics = schedule == null
+        ? '${_formatNumber(dose.doseValue)} ${dose.doseUnit}'
+        : _doseMetricsLabel(schedule);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: kSpacingXS),
       decoration: buildInsetSectionDecoration(context: context),
-      child: DoseSummaryRow(
+      child: TakeDoseCard(
         dose: dose,
+        medicationName: widget.medication.name,
+        strengthOrConcentrationLabel: strengthLabel,
+        doseMetrics: metrics,
         onTap: () => _showDoseActionSheet(dose),
       ),
     );
+  }
+
+  String _doseMetricsLabel(Schedule schedule) {
+    final summary = MedicationDisplayHelpers.doseMetricsSummary(
+      widget.medication,
+      doseTabletQuarters: schedule.doseTabletQuarters,
+      doseCapsules: schedule.doseCapsules,
+      doseSyringes: schedule.doseSyringes,
+      doseVials: schedule.doseVials,
+      doseMassMcg: schedule.doseMassMcg?.toDouble(),
+      doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+      syringeUnits: schedule.doseIU?.toDouble(),
+    );
+    if (summary.isNotEmpty) return summary;
+    return '${_formatNumber(schedule.doseValue)} ${schedule.doseUnit}';
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -676,15 +708,18 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   Color _getStatusColor(DoseStatus status) {
+    final cs = Theme.of(context).colorScheme;
     switch (status) {
       case DoseStatus.taken:
-        return Colors.green;
+        return cs.primary;
       case DoseStatus.overdue:
-        return Theme.of(context).colorScheme.error;
+        return cs.error;
       case DoseStatus.skipped:
-        return Colors.grey;
+        return cs.onSurfaceVariant;
+      case DoseStatus.snoozed:
+        return cs.tertiary;
       default:
-        return Theme.of(context).colorScheme.primary;
+        return cs.primary;
     }
   }
 

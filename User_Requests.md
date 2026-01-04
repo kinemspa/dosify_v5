@@ -58,7 +58,10 @@
 - Take Dose Card:
 	- Dose Name is correct.
 	- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action.
-- Make sure this entire card is a widget. As it will be expanded for the schedules, calendar and home screen. 
+	- Take Dose Card: [COMPLETED]
+		- Dose Name is correct. [COMPLETED]
+		- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action. [COMPLETED]
+- Make sure this entire card is a widget. As it will be expanded for the schedules, calendar and home screen.  [COMPLETED]
 
 
 ### Medication Details Card

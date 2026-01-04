@@ -6,6 +6,40 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Centralized helpers for displaying medication information.
 class MedicationDisplayHelpers {
+  static String strengthOrConcentrationLabel(
+    Medication med, {
+    bool includePerUnit = true,
+  }) {
+    final unit = unitLabel(med.strengthUnit);
+
+    final isPerMl = switch (med.strengthUnit) {
+      Unit.mcgPerMl || Unit.mgPerMl || Unit.gPerMl || Unit.unitsPerMl => true,
+      _ => false,
+    };
+
+    final term = isPerMl ? 'Concentration' : 'Strength';
+    final value = fmt2(med.strengthValue);
+
+    if (isPerMl) {
+      return '$term: $value $unit';
+    }
+
+    if (!includePerUnit) {
+      return '$term: $value $unit';
+    }
+
+    final perUnit = switch (med.form) {
+      MedicationForm.tablet => 'tablet',
+      MedicationForm.capsule => 'capsule',
+      MedicationForm.prefilledSyringe => 'syringe',
+      MedicationForm.singleDoseVial => 'vial',
+      MedicationForm.multiDoseVial => null,
+    };
+
+    if (perUnit == null) return '$term: $value $unit';
+    return '$term: $value $unit per $perUnit';
+  }
+
   static String unitLabel(Unit unit) {
     switch (unit) {
       case Unit.mcg:
