@@ -536,6 +536,28 @@ class ScheduleFormController
         doseIU: doseIU,
         displayUnitCode: displayUnitCode,
         inputModeCode: inputModeCode,
+        startAt: () {
+          final now = DateTime.now();
+          final selectedDay = DateTime(
+            state.startDate.year,
+            state.startDate.month,
+            state.startDate.day,
+          );
+          final today = DateTime(now.year, now.month, now.day);
+          if (selectedDay.isAtSameMomentAs(today)) return now;
+          return selectedDay;
+        }(),
+        endAt: state.noEnd || state.endDate == null
+            ? null
+            : DateTime(
+                state.endDate!.year,
+                state.endDate!.month,
+                state.endDate!.day,
+                23,
+                59,
+                59,
+                999,
+              ),
       );
 
       final box = Hive.box<Schedule>('schedules');
