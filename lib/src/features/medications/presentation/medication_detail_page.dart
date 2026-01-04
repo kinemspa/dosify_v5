@@ -1108,7 +1108,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     return GlassCardSurface(
       useGradient: false,
-      showBorder: false,
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1216,7 +1215,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     if (!hasSchedules) {
       return GlassCardSurface(
         useGradient: false,
-        showBorder: false,
         padding: EdgeInsets.zero,
         child: Padding(
           padding: kDetailCardCollapsedHeaderPadding,
@@ -1250,7 +1248,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     return GlassCardSurface(
       useGradient: false,
-      showBorder: false,
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2380,7 +2377,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     return GlassCardSurface(
       useGradient: false,
-      showBorder: false,
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

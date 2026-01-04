@@ -39,7 +39,7 @@
 - Dark Mode
 	- Can we make text in the app header Black.  [COMPLETED]
 - COllpased cards have different sizes. I like reports size hieght. Make all the same.  [COMPLETED]
-- Only reports card has  a border. Make sure all cards have the same border. 
+- Only reports card has  a border. Make sure all cards have the same border.  [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page? 
 - For MDV - Cant Edit Active Vial expiry date.  
 
@@ -146,6 +146,24 @@
 - Status needs to be a toggle button.  [COMPLETED]
 - Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense.  [COMPLETED]
 - Need to consider the objects that sit in the app header. I need them not to be just text objects. I want some flavour. 
+- DOse Calendar - Needs to use the same Dose calendar widget as the medicaiotn details screen. . 
+- Move DOse Calnedar to top card. 
+- Schedule Details needs to have edit options like medication details. 
+- SO we should have Schedule Status of , Active, Paused, Disabled, Completed. 
+	- Active is of course active
+	- Paused, the ability to pause a schdule until a set date. 
+	- Disabled. Paused indefinately. 
+	- Completed, end of scheudle cycle has passed. 
+- App Header:
+	- Add the Date Icon for the next dose in the app header. 
+	- Add chips for the frequency type. 
+	- Include Pause button. 
+		Pause Button: Has an indefinate and an Pause end date option. Helper text explains the 2 options and how the schedule will behave. 
+
+## Schedule Details Card
+- Frequency is the incorrect m
+
+	
 
 
 
