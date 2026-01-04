@@ -112,7 +112,7 @@
 - Helper Text., We need hel text above the type input selection.  [COMPLETED]
 	- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
 	- Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
-- The incremental field and buttons are wrong. Use the same styling as the add med screen. 
+- The incremental field and buttons are wrong. Use the same styling as the add med screen.  [COMPLETED]
 - Step 1:
 
 - Step 2:
@@ -232,15 +232,19 @@
 - Can change to week view
 - Can change to day view
 - Info module from curr screen that displays at the top to be included. Has left and right buttons, current day, today shortcut, view mode display. 
+- Day view:
+	- Dont allow slecting doses direct from calendar. Hour has to be selected, whcih then displays all the doses below which are then selected. 
 
 
 
 ==============
 # Take Dose Screen
 - Take Dose:
-- Why is tyhere grey chips????????????
-	- Take dose screen to be styled into the same as the ad hoc dialog. Ad hoc dialog is very nice and stylish. I want all Take doses to look like this and display like that.  [COMPLETED]
-
+	- Remove divivder from the top under the firts helper text. 
+	- Why is tyhere grey chips????????????
+	- Status Chips, need to be centred. Colour coordinate them. 
+	- Dose card status symbol not displaying, needs to show and change as status is updated. 
+	- If a MDV, Single Dose Vial or Pre Filled syringe
 - Edit Historical Dose:
 	- Take dose screen to be styled into the same as the ad hoc dialog.  [COMPLETED]
 

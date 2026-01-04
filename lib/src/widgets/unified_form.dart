@@ -461,6 +461,8 @@ class StepperRow36 extends StatelessWidget {
     this.compact = false,
     this.enabled = true,
     this.inputFormatters,
+    this.validator,
+    this.keyboardType,
     this.fixedFieldWidth,
   });
 
@@ -471,6 +473,8 @@ class StepperRow36 extends StatelessWidget {
   final bool compact;
   final bool enabled;
   final List<TextInputFormatter>? inputFormatters;
+  final FormFieldValidator<String>? validator;
+  final TextInputType? keyboardType;
 
   /// When set, bypasses LayoutBuilder (required for use in dialogs).
   final double? fixedFieldWidth;
@@ -522,6 +526,8 @@ class StepperRow36 extends StatelessWidget {
                   style: style,
                   decoration: decoration,
                   enabled: enabled,
+                  validator: validator,
+                  keyboardType: keyboardType,
                   inputFormatters: inputFormatters,
                 );
               },

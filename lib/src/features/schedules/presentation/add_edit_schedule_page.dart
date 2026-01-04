@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -606,54 +607,70 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                         if (state.mode == ScheduleMode.daysOnOff) ...[
                           LabelFieldRow(
                             label: 'Days on',
-                            field: SizedBox(
-                              width: 120,
-                              height: kFieldHeight,
-                              child: Field36(
-                                child: TextFormField(
-                                  controller: _daysOn,
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    labelText: '',
-                                  ),
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(),
-                                  validator: (v) {
-                                    final n = int.tryParse(v?.trim() ?? '');
-                                    if (state.mode == ScheduleMode.daysOnOff &&
-                                        (n == null || n < 1)) {
-                                      return '>= 1';
-                                    }
-                                    return null;
-                                  },
-                                ),
+                            field: StepperRow36(
+                              controller: _daysOn,
+                              onDec: () {
+                                final v =
+                                    int.tryParse(_daysOn.text.trim()) ?? 1;
+                                final next = (v - 1).clamp(1, 1000000);
+                                _daysOn.text = next.toString();
+                              },
+                              onInc: () {
+                                final v =
+                                    int.tryParse(_daysOn.text.trim()) ?? 1;
+                                final next = (v + 1).clamp(1, 1000000);
+                                _daysOn.text = next.toString();
+                              },
+                              decoration: buildCompactFieldDecoration(
+                                context: context,
                               ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(),
+                              validator: (v) {
+                                final n = int.tryParse(v?.trim() ?? '');
+                                if (state.mode == ScheduleMode.daysOnOff &&
+                                    (n == null || n < 1)) {
+                                  return '>= 1';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           LabelFieldRow(
                             label: 'Days off',
-                            field: SizedBox(
-                              width: 120,
-                              height: kFieldHeight,
-                              child: Field36(
-                                child: TextFormField(
-                                  controller: _daysOff,
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    labelText: '',
-                                  ),
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(),
-                                  validator: (v) {
-                                    final n = int.tryParse(v?.trim() ?? '');
-                                    if (state.mode == ScheduleMode.daysOnOff &&
-                                        (n == null || n < 1)) {
-                                      return '>= 1';
-                                    }
-                                    return null;
-                                  },
-                                ),
+                            field: StepperRow36(
+                              controller: _daysOff,
+                              onDec: () {
+                                final v =
+                                    int.tryParse(_daysOff.text.trim()) ?? 1;
+                                final next = (v - 1).clamp(1, 1000000);
+                                _daysOff.text = next.toString();
+                              },
+                              onInc: () {
+                                final v =
+                                    int.tryParse(_daysOff.text.trim()) ?? 1;
+                                final next = (v + 1).clamp(1, 1000000);
+                                _daysOff.text = next.toString();
+                              },
+                              decoration: buildCompactFieldDecoration(
+                                context: context,
                               ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(),
+                              validator: (v) {
+                                final n = int.tryParse(v?.trim() ?? '');
+                                if (state.mode == ScheduleMode.daysOnOff &&
+                                    (n == null || n < 1)) {
+                                  return '>= 1';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                           _helperBelowLeft(
