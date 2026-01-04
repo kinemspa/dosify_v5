@@ -1199,9 +1199,8 @@ class _AddScheduleWizardPageState
               children: List.generate(7, (i) {
                 final day = i + 1;
                 final isSelected = _days.contains(day);
-                return FilterChip(
+                return PrimaryChoiceChip(
                   label: Text(_getDayName(day)),
-                  labelStyle: bodyTextStyle(context),
                   selected: isSelected,
                   onSelected: (selected) {
                     setState(() {
@@ -1272,9 +1271,8 @@ class _AddScheduleWizardPageState
               children: List.generate(31, (i) {
                 final day = i + 1;
                 final isSelected = _daysOfMonth.contains(day);
-                return FilterChip(
+                return PrimaryChoiceChip(
                   label: Text('$day'),
-                  labelStyle: bodyTextStyle(context),
                   selected: isSelected,
                   onSelected: (selected) {
                     setState(() {
