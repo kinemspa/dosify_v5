@@ -97,7 +97,7 @@
 	- Make the Dose name in a bolder font [COMPLETED]
 	- Add a started date [COMPLETED]
 	- Add an End date or doesnt end. [COMPLETED]
-	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size. 
+	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size.  [COMPLETED]
 	- If today, change date icon to today
 - Compact Card:
 	- Next Dose date Icon to inculde the Next icon. Smaller. 

@@ -404,6 +404,7 @@ class _ScheduleCard extends StatelessWidget {
     final next = ScheduleOccurrenceService.nextOccurrence(s);
     final cadence = _ScheduleText.cadenceLabel(s);
     final timesPerDay = _ScheduleText.timesPerDayLabel(s);
+    final timesOfDayLabel = _ScheduleText.timesOfDayLabel(context, s);
     final medTitle = _ScheduleText.medTitle(s);
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
     final startedLabel = _ScheduleText.startedLabel(s);
@@ -486,8 +487,15 @@ class _ScheduleCard extends StatelessWidget {
           ],
           const SizedBox(height: kSpacingS),
           Text(
-            '$cadence · $timesPerDay',
-            style: bodyTextStyle(context),
+            cadence,
+            style: helperTextStyle(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: kSpacingXS),
+          Text(
+            timesOfDayLabel,
+            style: helperTextStyle(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -570,6 +578,15 @@ class _ScheduleText {
     final times = s.timesOfDay ?? [s.minutesOfDay];
     final count = times.isEmpty ? 1 : times.length;
     return '$count×/day';
+  }
+
+  static String timesOfDayLabel(BuildContext context, Schedule s) {
+    final times = s.timesOfDay ?? [s.minutesOfDay];
+    if (times.isEmpty) return '—';
+    final sorted = times.toList()..sort();
+    return sorted
+        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
+        .join(', ');
   }
 
   static String nextDayLabel(BuildContext context, DateTime? dt) {
