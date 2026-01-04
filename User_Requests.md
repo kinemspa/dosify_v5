@@ -4,7 +4,7 @@
 - How does changign the text size in the Android Phone settings impact the app layout and text styling? [COMPLETED] - How do I test this?
 - Dark Theme 
 	- The reconstitution calculator 
-		- Can we change the background blue colour to something a bit darker?
+		- Can we change the background blue colour to something a bit darker? [COMPLETED]
 
 - UI and Real estate. 
 	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED]

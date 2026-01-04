@@ -293,7 +293,7 @@ Color reconBackgroundDarkColor(BuildContext context) {
   final cs = theme.colorScheme;
   if (theme.brightness == Brightness.dark) {
     return Color.alphaBlend(
-      kReconBackgroundDark.withValues(alpha: 0.65),
+      kReconBackgroundDark.withValues(alpha: 0.80),
       cs.surface,
     );
   }
@@ -306,7 +306,7 @@ Color reconBackgroundActiveColor(BuildContext context) {
   final cs = theme.colorScheme;
   if (theme.brightness == Brightness.dark) {
     return Color.alphaBlend(
-      kReconBackgroundActive.withValues(alpha: 0.70),
+      kReconBackgroundActive.withValues(alpha: 0.85),
       cs.surface,
     );
   }
