@@ -773,28 +773,26 @@ class _AddScheduleWizardPageState
       children: [
         _buildSection(context, 'Schedule Dates', [
           LabelFieldRow(
-            label: 'Start',
+            label: 'Start Date',
             field: Row(
               children: [
                 Expanded(
-                  child: Field36(
-                    child: DropdownButtonFormField<_StartFromMode>(
-                      value: _startFromMode,
-                      decoration: buildFieldDecoration(context),
-                      items: const [
-                        DropdownMenuItem(
-                          value: _StartFromMode.now,
-                          child: Text('Now'),
-                        ),
-                        DropdownMenuItem(
-                          value: _StartFromMode.date,
-                          child: Text('Selected date'),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() {
-                        _startFromMode = v ?? _StartFromMode.now;
-                      }),
-                    ),
+                  child: SmallDropdown36<_StartFromMode>(
+                    value: _startFromMode,
+                    decoration: buildCompactFieldDecoration(context: context),
+                    items: const [
+                      DropdownMenuItem(
+                        value: _StartFromMode.now,
+                        child: Center(child: Text('Today')),
+                      ),
+                      DropdownMenuItem(
+                        value: _StartFromMode.date,
+                        child: Center(child: Text('Selected date')),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() {
+                      _startFromMode = v ?? _StartFromMode.now;
+                    }),
                   ),
                 ),
                 if (_startFromMode == _StartFromMode.date) ...[
@@ -853,7 +851,7 @@ class _AddScheduleWizardPageState
           ),
           const SizedBox(height: kSpacingS),
           _helperBelowLeft(
-            "Default is now so you won't get past doses. Use a date to start later.",
+            "Default is today so you won't get past doses. Use a date to start later.",
           ),
           const SizedBox(height: kSpacingS),
           LabelFieldRow(
@@ -861,37 +859,35 @@ class _AddScheduleWizardPageState
             field: Row(
               children: [
                 Expanded(
-                  child: Field36(
-                    child: DropdownButtonFormField<_EndMode>(
-                      value: _endMode,
-                      decoration: buildFieldDecoration(context),
-                      items: const [
-                        DropdownMenuItem(
-                          value: _EndMode.none,
-                          child: Text('No end'),
-                        ),
-                        DropdownMenuItem(
-                          value: _EndMode.date,
-                          child: Text('End date'),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() {
-                        _endMode = v ?? _EndMode.none;
-                        if (_endMode == _EndMode.none) return;
+                  child: SmallDropdown36<_EndMode>(
+                    value: _endMode,
+                    decoration: buildCompactFieldDecoration(context: context),
+                    items: const [
+                      DropdownMenuItem(
+                        value: _EndMode.none,
+                        child: Center(child: Text('No end')),
+                      ),
+                      DropdownMenuItem(
+                        value: _EndMode.date,
+                        child: Center(child: Text('End date')),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() {
+                      _endMode = v ?? _EndMode.none;
+                      if (_endMode == _EndMode.none) return;
 
-                        final startDay = _effectiveStartAt();
-                        final endDay = DateTime(
-                          _endDate.year,
-                          _endDate.month,
-                          _endDate.day,
-                        );
-                        if (endDay.isBefore(
-                          DateTime(startDay.year, startDay.month, startDay.day),
-                        )) {
-                          _endDate = startDay;
-                        }
-                      }),
-                    ),
+                      final startDay = _effectiveStartAt();
+                      final endDay = DateTime(
+                        _endDate.year,
+                        _endDate.month,
+                        _endDate.day,
+                      );
+                      if (endDay.isBefore(
+                        DateTime(startDay.year, startDay.month, startDay.day),
+                      )) {
+                        _endDate = startDay;
+                      }
+                    }),
                   ),
                 ),
                 if (_endMode == _EndMode.date) ...[

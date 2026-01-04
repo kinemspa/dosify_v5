@@ -116,10 +116,10 @@
 - Step 1:
 
 - Step 2:
-	- Schedule Dates Styling of fields is incorrect. not use system design. 
+	- Schedule Dates Styling of fields is incorrect. not use system design.  [COMPLETED]
 	- Start:
-		- Change to Start Date
-		- CHange Now to Today
+		- Change to Start Date [COMPLETED]
+		- CHange Now to Today [COMPLETED]
 		- Selected date calnedar button is causing an overflow. 
 		- Once changed to selected ate, the drop down is becominga calendar button. Calendar button needs to appear below the dropdown, alos make it the same sizing as the system design, same size as the date button on the add med screens. 
 	- End:
