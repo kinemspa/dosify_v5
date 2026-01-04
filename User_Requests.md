@@ -4,7 +4,7 @@
 - Dark Theme 
 	- The reconstitution calculator 
 		- Can we change the background blue colour to something a bit darker? [COMPLETED]
-		- The reconstituted Card needs to be same baclground colour as calculator. 
+		- The reconstituted Card needs to be same baclground colour as calculator. [COMPLETED]
 
 - UI and Real estate. 
 	- The Add med Wizard screen, Even though I love the summary display up the top, it really reduces the visible amount of the actual screen below when the on screen keyboard displays. I think it is an issue. Is there something we can do to address this? [COMPLETED] NOT COMPLETED. STILL THE SAME

@@ -48,7 +48,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
           ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
           : kReconSummaryPadding,
       decoration: BoxDecoration(
-        color: reconBackgroundActiveColor(context),
+        color: reconBackgroundDarkColor(context),
         borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.3),
