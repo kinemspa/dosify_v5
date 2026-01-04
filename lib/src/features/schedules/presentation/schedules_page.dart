@@ -474,7 +474,9 @@ class _ScheduleCard extends StatelessWidget {
             const SizedBox(height: kSpacingXS),
             Text(
               scheduleSubtitle,
-              style: bodyTextStyle(context),
+              style: bodyTextStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightSemiBold),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

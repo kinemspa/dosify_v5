@@ -94,7 +94,7 @@
 # Schedules List
 - Large Cards:
 	- Make Next icon and text smaller. [COMPLETED]
-	- Make the Dose name in a bolder font
+	- Make the Dose name in a bolder font [COMPLETED]
 	- Add a started date
 	- Add an End date or doesnt end.
 	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size. 
