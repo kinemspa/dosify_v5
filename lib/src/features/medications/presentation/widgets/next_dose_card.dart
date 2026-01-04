@@ -34,6 +34,9 @@ class _NextDoseCardState extends State<NextDoseCard>
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
 
+  double _edgeOverscrollAccum = 0;
+  bool _edgeDayChangeTriggered = false;
+
   // Cache of calculated doses for the selected week
   List<CalculatedDose> _weekDoses = [];
 
@@ -188,6 +191,16 @@ class _NextDoseCardState extends State<NextDoseCard>
     _dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
   }
 
+  void _resetDosePager() {
+    _edgeOverscrollAccum = 0;
+    _edgeDayChangeTriggered = false;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_dosePageController.hasClients) return;
+      _dosePageController.jumpToPage(0);
+    });
+  }
+
   void _onDaySelected(DateTime date) {
     setState(() {
       _selectedDate = date;
@@ -203,6 +216,46 @@ class _NextDoseCardState extends State<NextDoseCard>
       _calculateDosesForWeek(date);
       _updateDayDoses();
     });
+
+    _resetDosePager();
+  }
+
+  bool _handleDosePagerNotification(ScrollNotification notification) {
+    if (!_dosePageController.hasClients) return false;
+    if (_dayDoses.isEmpty) return false;
+
+    if (notification is ScrollStartNotification) {
+      _edgeOverscrollAccum = 0;
+      _edgeDayChangeTriggered = false;
+      return false;
+    }
+
+    if (notification is OverscrollNotification && !_edgeDayChangeTriggered) {
+      final position = notification.metrics;
+      final currentPage = (_dosePageController.page ?? 0).round();
+      final isAtFirst = currentPage <= 0;
+      final isAtLast = currentPage >= _dayDoses.length - 1;
+
+      // Overscroll sign: negative at the leading edge, positive at the trailing edge.
+      _edgeOverscrollAccum += notification.overscroll.abs();
+
+      const threshold = 28.0;
+      if (_edgeOverscrollAccum < threshold) return false;
+
+      if (position.atEdge) {
+        if (notification.overscroll < 0 && isAtFirst) {
+          // Dragged right past first card -> previous day.
+          _edgeDayChangeTriggered = true;
+          _onDaySelected(_selectedDate.subtract(const Duration(days: 1)));
+        } else if (notification.overscroll > 0 && isAtLast) {
+          // Dragged left past last card -> next day.
+          _edgeDayChangeTriggered = true;
+          _onDaySelected(_selectedDate.add(const Duration(days: 1)));
+        }
+      }
+    }
+
+    return false;
   }
 
   @override
@@ -244,36 +297,37 @@ class _NextDoseCardState extends State<NextDoseCard>
                     child: child,
                   );
                 },
-                child: GestureDetector(
-                  key: ValueKey(_selectedDate.toString()),
-                  onHorizontalDragEnd: (details) {
-                    if (details.primaryVelocity != null) {
-                      if (details.primaryVelocity! < 0) {
-                        // Swipe left - go to next day
-                        _onDaySelected(
-                          _selectedDate.add(const Duration(days: 1)),
-                        );
-                      } else if (details.primaryVelocity! > 0) {
-                        // Swipe right - go to previous day
-                        _onDaySelected(
-                          _selectedDate.subtract(const Duration(days: 1)),
-                        );
-                      }
-                    }
-                  },
-                  child: _dayDoses.isEmpty
-                      ? _buildEmptyState(context)
-                      : SizedBox(
-                          height: 72,
-                          child: AnimatedBuilder(
-                            animation: _bounceAnimation,
-                            builder: (context, child) {
-                              return Transform.translate(
-                                offset: Offset(_bounceAnimation.value, 0),
-                                child: child,
-                              );
-                            },
+                child: _dayDoses.isEmpty
+                    ? GestureDetector(
+                        key: ValueKey(_selectedDate.toString()),
+                        onHorizontalDragEnd: (details) {
+                          if (details.primaryVelocity == null) return;
+                          if (details.primaryVelocity! < 0) {
+                            _onDaySelected(
+                              _selectedDate.add(const Duration(days: 1)),
+                            );
+                          } else if (details.primaryVelocity! > 0) {
+                            _onDaySelected(
+                              _selectedDate.subtract(const Duration(days: 1)),
+                            );
+                          }
+                        },
+                        child: _buildEmptyState(context),
+                      )
+                    : SizedBox(
+                        height: 72,
+                        child: AnimatedBuilder(
+                          animation: _bounceAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(_bounceAnimation.value, 0),
+                              child: child,
+                            );
+                          },
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: _handleDosePagerNotification,
                             child: PageView.builder(
+                              key: ValueKey(_selectedDate.toString()),
                               controller: _dosePageController,
                               physics: const BouncingScrollPhysics(),
                               itemCount: _dayDoses.length,
@@ -287,7 +341,7 @@ class _NextDoseCardState extends State<NextDoseCard>
                             ),
                           ),
                         ),
-                ),
+                      ),
               ),
             ),
             // Left swipe hint (small chevron)
