@@ -578,6 +578,16 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 ),
               ),
             ),
+            if (isAdHoc) ...[
+              const SizedBox(width: kSpacingXS),
+              Icon(
+                Icons.edit,
+                size: kIconSizeSmall,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -1534,6 +1544,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final cs = Theme.of(context).colorScheme;
     final timeFormat = DateFormat('h:mm a');
 
+    final canEditAdHoc = log.changeType == InventoryChangeType.adHocDose;
+    final linkedAdHocDoseLog = canEditAdHoc
+        ? Hive.box<DoseLog>('dose_logs').get(log.id)
+        : null;
+
     final icon = _getInventoryEventIcon(log.changeType);
     final color = _getInventoryEventColor(cs, log.changeType);
 
@@ -1545,7 +1560,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         ? '${log.description} • empty stock'
         : log.description;
 
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1592,6 +1607,14 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ),
           ),
           const SizedBox(width: kSpacingS),
+          if (linkedAdHocDoseLog != null) ...[
+            Icon(
+              Icons.edit,
+              size: kIconSizeSmall,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            ),
+            const SizedBox(width: kSpacingXS),
+          ],
           Container(
             width: kStepperButtonSize,
             height: kStepperButtonSize,
@@ -1603,6 +1626,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           ),
         ],
       ),
+    );
+
+    if (linkedAdHocDoseLog == null) return row;
+    return InkWell(
+      onTap: () => _showEditAdHocDoseDialog(context, linkedAdHocDoseLog),
+      child: row,
     );
   }
 

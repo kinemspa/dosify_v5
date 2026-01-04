@@ -51,7 +51,7 @@
 - History: 
 	- Date Icon - make smaller. [COMPLETED]
 	- AdHoc Doses should be editable. [COMPLETED]
-	- Indicate entries that are editable.
+	- Indicate entries that are editable. [COMPLETED]
 
 
 ### Schedule
