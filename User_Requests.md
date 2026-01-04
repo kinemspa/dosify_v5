@@ -146,7 +146,7 @@
 - Status needs to be a toggle button.  [COMPLETED]
 - Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense.  [COMPLETED]
 - Need to consider the objects that sit in the app header. I need them not to be just text objects. I want some flavour. [COMPLETED]
-- DOse Calendar - Needs to use the same Dose calendar widget as the medicaiotn details screen. . 
+- DOse Calendar - Needs to use the same Dose calendar widget as the medicaiotn details screen. . [COMPLETED]
 - Move DOse Calnedar to top card. 
 - Schedule Details needs to have edit options like medication details. 
 - SO we should have Schedule Status of , Active, Paused, Disabled, Completed. 
