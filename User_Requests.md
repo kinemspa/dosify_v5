@@ -5,15 +5,7 @@
 	- The reconstitution calculator 
 		- Can we change the background blue colour to something not blue?
 	
-
-
-	
-
-
-
-
 ## Home Screen
-
 
 ==============
 
@@ -22,7 +14,6 @@
 ### Large Cards
 - The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. [COMPLETED] They are still not on the same rows. FIX IT.
 	- Remove the text under the Donut Graph percentage. [COMPLETED]
-
 
 ### Compact Cards
 
@@ -61,7 +52,7 @@
 
 ### Schedule
 - Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps. 
-- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. I paused the schedule now the schedule shows No shcedules. 
+- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. I paused the schedule now the schedule shows No shcedules.  [COMPLETED]
 - Top Area of Schedule should expand or collapse schedule. Currenly it is editing scehdule. the only area to expand and collapse seems to be the little arrow. Make the enitre top orw where the arrow sits the expand and collaps.
 - Set Paused button is not the right terminology.
 - Take Dose Card:

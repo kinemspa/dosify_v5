@@ -171,7 +171,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           // Check if we have schedules for schedule-specific header content
           final scheduleBox = Hive.box<Schedule>('schedules');
           final hasSchedules = scheduleBox.values.any(
-            (s) => s.medicationId == updatedMed.id && s.active,
+            (s) => s.medicationId == updatedMed.id,
           );
           final headerHeight = _measuredExpandedHeaderHeight;
 
@@ -1205,7 +1205,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final scheduleBox = Hive.box<Schedule>('schedules');
     final hasSchedules = scheduleBox.values.any(
-      (s) => s.medicationId == med.id && s.active,
+      (s) => s.medicationId == med.id,
     );
 
     if (!hasSchedules) {
