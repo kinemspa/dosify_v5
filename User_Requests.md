@@ -60,7 +60,7 @@
 - Stack multiple doses on same day vertically. [COMPLETED]
 - Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same? [COMPLETED]
 - Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. [COMPLETED]
-- Currently clicking the schedule collapses/expands the schedule. I want only the collapse row to do this. Clicking the schedule should prompt to edit it, which will prompt a page change dialog. Remove all the little edit icons. 
+- Currently clicking the schedule collapses/expands the schedule. I want only the collapse row to do this. Clicking the schedule should prompt to edit it, which will prompt a page change dialog. Remove all the little edit icons. [COMPLETED]
 
 
 ### Medication Details Card

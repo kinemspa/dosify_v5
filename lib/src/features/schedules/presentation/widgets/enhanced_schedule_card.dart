@@ -34,6 +34,36 @@ class EnhancedScheduleCard extends StatefulWidget {
 class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   bool _isExpanded = false;
 
+  Future<void> _promptEditSchedule() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final cs = Theme.of(dialogContext).colorScheme;
+        return AlertDialog(
+          titleTextStyle: cardTitleStyle(
+            dialogContext,
+          )?.copyWith(color: cs.primary),
+          contentTextStyle: bodyTextStyle(dialogContext),
+          title: const Text('Edit schedule?'),
+          content: const Text('This will open the schedule editor.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Edit'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+    context.push('/schedules/edit/${widget.schedule.id}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -51,7 +81,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => setState(() => _isExpanded = !_isExpanded),
+          onTap: _promptEditSchedule,
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           child: AnimatedContainer(
             duration: kAnimationNormal,
@@ -123,15 +153,22 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     else
                       Text(_getFrequencyText(), style: mutedTextStyle(context)),
                     const SizedBox(width: kSpacingS),
-                    // Expand indicator
-                    AnimatedRotation(
-                      turns: _isExpanded ? 0.5 : 0,
-                      duration: kAnimationFast,
-                      child: Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: kIconSizeMedium,
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: kOpacityMedium,
+                    // Expand/collapse control
+                    InkWell(
+                      onTap: () => setState(() => _isExpanded = !_isExpanded),
+                      borderRadius: BorderRadius.circular(kBorderRadiusFull),
+                      child: Padding(
+                        padding: const EdgeInsets.all(kSpacingXS),
+                        child: AnimatedRotation(
+                          turns: _isExpanded ? 0.5 : 0,
+                          duration: kAnimationFast,
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: kIconSizeMedium,
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -233,21 +270,15 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           context,
                           title: 'Schedule Details',
                           children: [
-                            _buildEditableDetailRow(
+                            _buildDetailRow(
                               context,
                               'Dose',
                               '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                              onEdit: () => context.push(
-                                '/schedules/detail/${widget.schedule.id}',
-                              ),
                             ),
-                            _buildEditableDetailRow(
+                            _buildDetailRow(
                               context,
                               'Times',
                               _getTimesText(),
-                              onEdit: () => context.push(
-                                '/schedules/detail/${widget.schedule.id}',
-                              ),
                             ),
                             _buildDetailRow(context, 'Days', _getDaysText()),
                             _buildDetailRow(
@@ -280,15 +311,6 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                                     ? 'Set Paused'
                                     : 'Set Active',
                                 onTap: _togglePause,
-                              ),
-                            ),
-                            const SizedBox(width: kSpacingS),
-                            // Edit button
-                            _buildSecondaryAction(
-                              context,
-                              icon: Icons.edit_rounded,
-                              onTap: () => context.push(
-                                '/schedules/detail/${widget.schedule.id}',
                               ),
                             ),
                           ],
@@ -463,52 +485,6 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditableDetailRow(
-    BuildContext context,
-    String label,
-    String value, {
-    required VoidCallback onEdit,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-            ),
-          ),
-          InkWell(
-            onTap: onEdit,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Icon(
-                Icons.edit,
-                size: 14,
-                color: Theme.of(context).colorScheme.primary,
-              ),
             ),
           ),
         ],
