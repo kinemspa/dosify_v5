@@ -903,8 +903,16 @@ class _MedLargeCard extends StatelessWidget {
   final Medication m;
   final List<Schedule> schedules;
 
+  int _totalScheduleCount() {
+    return schedules.where((s) => s.medicationId == m.id).length;
+  }
+
   int _activeScheduleCount() {
     return schedules.where((s) => s.medicationId == m.id && s.active).length;
+  }
+
+  int _pausedScheduleCount() {
+    return schedules.where((s) => s.medicationId == m.id && !s.active).length;
   }
 
   @override
@@ -1132,8 +1140,31 @@ class _MedLargeCard extends StatelessWidget {
   Widget _buildLeading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final activeScheduleCount = _activeScheduleCount();
+    final pausedScheduleCount = _pausedScheduleCount();
+    final totalScheduleCount = _totalScheduleCount();
     final strengthQuantityLabel =
         '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
+
+    final hasActiveSchedules = activeScheduleCount > 0;
+    final hasPausedSchedules = !hasActiveSchedules && pausedScheduleCount > 0;
+    final scheduleIconColor = hasActiveSchedules
+      ? cs.primary
+      : hasPausedSchedules
+      ? cs.onSurfaceVariant.withValues(alpha: kOpacityMedium)
+      : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+    final scheduleTextColor = hasActiveSchedules
+      ? cs.primary
+      : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+
+    final scheduleLabel = hasActiveSchedules
+      ? (activeScheduleCount == 1
+          ? '1 active schedule'
+          : '$activeScheduleCount active schedules')
+      : hasPausedSchedules
+      ? (pausedScheduleCount == 1
+          ? '1 paused schedule'
+          : '$pausedScheduleCount paused schedules')
+      : (totalScheduleCount == 0 ? 'No schedules' : '0 active schedules');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1181,23 +1212,15 @@ class _MedLargeCard extends StatelessWidget {
             Icon(
               Icons.calendar_month_rounded,
               size: kIconSizeSmall,
-              color: activeScheduleCount > 0
-                  ? cs.primary
-                  : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+              color: scheduleIconColor,
             ),
             const SizedBox(width: kSpacingXS),
             Expanded(
               child: Text(
-                activeScheduleCount == 1
-                    ? '1 active schedule'
-                    : '$activeScheduleCount active schedules',
+                scheduleLabel,
                 style: helperTextStyle(
                   context,
-                  color: activeScheduleCount > 0
-                      ? cs.primary
-                      : cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMediumLow,
-                        ),
+                  color: scheduleTextColor,
                 )?.copyWith(fontSize: kFontSizeSmall),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

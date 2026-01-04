@@ -594,12 +594,15 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     );
   }
 
-  Future<void> _showEditAdHocDoseDialog(BuildContext context, DoseLog log) async {
+  Future<void> _showEditAdHocDoseDialog(
+    BuildContext context,
+    DoseLog log,
+  ) async {
     final medicationsBox = Hive.box<Medication>('medications');
     final inventoryBox = Hive.box<InventoryLog>('inventory_logs');
 
-    final currentMed = medicationsBox.get(widget.medication.id) ??
-        widget.medication;
+    final currentMed =
+        medicationsBox.get(widget.medication.id) ?? widget.medication;
     final isMdv = currentMed.form == MedicationForm.multiDoseVial;
     final unit = isMdv
         ? 'mL'
@@ -610,13 +613,19 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         ? (currentMed.activeVialVolume ?? currentMed.containerVolumeMl ?? 0)
         : currentMed.stockValue;
 
-    final maxEditableAmount = (currentStock + oldAmount).clamp(0.0, double.infinity);
+    final maxEditableAmount = (currentStock + oldAmount).clamp(
+      0.0,
+      double.infinity,
+    );
 
-    final amountController = TextEditingController(text: _formatAmount(oldAmount));
+    final amountController = TextEditingController(
+      text: _formatAmount(oldAmount),
+    );
     final notesController = TextEditingController(text: log.notes ?? '');
 
     Future<void> applyStockAdjustment(double newAmount) async {
-      final latest = medicationsBox.get(widget.medication.id) ?? widget.medication;
+      final latest =
+          medicationsBox.get(widget.medication.id) ?? widget.medication;
       final latestIsMdv = latest.form == MedicationForm.multiDoseVial;
       final latestStock = latestIsMdv
           ? (latest.activeVialVolume ?? latest.containerVolumeMl ?? 0)
@@ -625,10 +634,14 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       // We want net change to match "-newAmount" instead of "-oldAmount".
       // Delta to apply to current stock is: oldAmount - newAmount.
       final adjustment = oldAmount - newAmount;
-      final updatedStock = (latestStock + adjustment).clamp(0.0, double.infinity);
+      final updatedStock = (latestStock + adjustment).clamp(
+        0.0,
+        double.infinity,
+      );
 
       if (latestIsMdv) {
-        final max = (latest.containerVolumeMl != null && latest.containerVolumeMl! > 0)
+        final max =
+            (latest.containerVolumeMl != null && latest.containerVolumeMl! > 0)
             ? latest.containerVolumeMl!
             : double.infinity;
         medicationsBox.put(
@@ -636,7 +649,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           latest.copyWith(activeVialVolume: updatedStock.clamp(0.0, max)),
         );
       } else {
-        medicationsBox.put(latest.id, latest.copyWith(stockValue: updatedStock));
+        medicationsBox.put(
+          latest.id,
+          latest.copyWith(stockValue: updatedStock),
+        );
       }
     }
 
@@ -655,7 +671,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           previousStock: existing.previousStock,
           newStock: existing.previousStock - newAmount,
           changeAmount: -newAmount,
-          notes: (notes != null && notes.trim().isNotEmpty) ? notes.trim() : existing.notes,
+          notes: (notes != null && notes.trim().isNotEmpty)
+              ? notes.trim()
+              : existing.notes,
           timestamp: existing.timestamp,
         ),
       );
@@ -697,7 +715,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         final cs = Theme.of(dialogContext).colorScheme;
 
         return AlertDialog(
-          titleTextStyle: cardTitleStyle(dialogContext)?.copyWith(color: cs.primary),
+          titleTextStyle: cardTitleStyle(
+            dialogContext,
+          )?.copyWith(color: cs.primary),
           contentTextStyle: bodyTextStyle(dialogContext),
           title: const Text('Edit Ad-Hoc Dose'),
           content: Column(
@@ -713,7 +733,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 children: [
                   Text(
                     'Amount:',
-                    style: helperTextStyle(dialogContext)?.copyWith(fontWeight: kFontWeightMedium),
+                    style: helperTextStyle(
+                      dialogContext,
+                    )?.copyWith(fontWeight: kFontWeightMedium),
                   ),
                   const SizedBox(width: kSpacingS),
                   Expanded(
@@ -732,27 +754,36 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                           (v + 0.1).clamp(0.0, maxEditableAmount),
                         );
                       },
-                      decoration: buildCompactFieldDecoration(context: dialogContext),
+                      decoration: buildCompactFieldDecoration(
+                        context: dialogContext,
+                      ),
                     ),
                   ),
                   const SizedBox(width: kSpacingS),
                   Text(
                     unit,
-                    style: helperTextStyle(dialogContext)?.copyWith(fontWeight: kFontWeightMedium),
+                    style: helperTextStyle(
+                      dialogContext,
+                    )?.copyWith(fontWeight: kFontWeightMedium),
                   ),
                 ],
               ),
               const SizedBox(height: kSpacingM),
               Text(
                 'Notes (optional):',
-                style: helperTextStyle(dialogContext)?.copyWith(fontWeight: kFontWeightMedium),
+                style: helperTextStyle(
+                  dialogContext,
+                )?.copyWith(fontWeight: kFontWeightMedium),
               ),
               const SizedBox(height: kSpacingS),
               TextField(
                 controller: notesController,
                 maxLines: 2,
                 style: bodyTextStyle(dialogContext),
-                decoration: buildFieldDecoration(dialogContext, hint: 'e.g., Taken early'),
+                decoration: buildFieldDecoration(
+                  dialogContext,
+                  hint: 'e.g., Taken early',
+                ),
               ),
             ],
           ),
@@ -793,9 +824,9 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     if (!mounted) return;
     if (saved == true) {
       setState(() {});
-      ScaffoldMessenger.of(this.context).showSnackBar(
-        const SnackBar(content: Text('Ad-hoc dose updated')),
-      );
+      ScaffoldMessenger.of(
+        this.context,
+      ).showSnackBar(const SnackBar(content: Text('Ad-hoc dose updated')));
     }
   }
 

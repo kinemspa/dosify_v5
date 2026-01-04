@@ -46,7 +46,6 @@ class _NextDoseCardState extends State<NextDoseCard>
     _updateDayDoses();
   }
 
-
   void _findNextDose() {
     // Simple logic to find the next future dose and jump to it
     final now = DateTime.now();

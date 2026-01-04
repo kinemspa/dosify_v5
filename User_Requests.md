@@ -59,7 +59,7 @@
 	- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. [COMPLETED]
 - Stack multiple doses on same day vertically. [COMPLETED]
 - Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same? [COMPLETED]
-- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. 
+- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. [COMPLETED]
 - Currently clicking the schedule collapses/expands the schedule. I want only the collapse row to do this. Clicking the schedule should prompt to edit it, which will prompt a page change dialog. Remove all the little edit icons. 
 
 
