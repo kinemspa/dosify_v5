@@ -40,7 +40,7 @@
 	- Can we make text in the app header Black.  [COMPLETED]
 - COllpased cards have different sizes. I like reports size hieght. Make all the same.  [COMPLETED]
 - Only reports card has  a border. Make sure all cards have the same border.  [COMPLETED]
-- For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page? 
+- For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 - For MDV - Cant Edit Active Vial expiry date.  
 
 ### App Header
@@ -161,7 +161,7 @@
 		Pause Button: Has an indefinate and an Pause end date option. Helper text explains the 2 options and how the schedule will behave. 
 
 ## Schedule Details Card
-- Frequency is the incorrect m
+- Frequency is the incorrect term. Needs the Schedule type. Which is Daily, X days, Days of the week, Cycle. The it can display, 
 
 	
 
