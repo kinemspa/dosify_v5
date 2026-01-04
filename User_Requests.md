@@ -108,7 +108,7 @@
 ==============
 # Add Schedule
 - Adding a schedule is still entriing historical entries that become skipped. Fix this.  [COMPLETED]
-- Still Black text on a forumal box that appeare below the inputs on step 1.  
+- Still Black text on a forumal box that appeare below the inputs on step 1.  [COMPLETED]
 - Helper Text., We need hel text above the type input selection.  [COMPLETED]
 	- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
 	- Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
@@ -231,7 +231,7 @@
 - Stacked vertical. 
 - Can change to week view
 - Can change to day view
-- Info module from current calendar
+- Info module from curr screen that displays at the top to be included. Has left and right buttons, current day, today shortcut, view mode display. 
 
 
 

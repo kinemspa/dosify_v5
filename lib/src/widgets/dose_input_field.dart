@@ -1100,7 +1100,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               fontWeight: kFontWeightSemiBold,
               color: _result!.hasError
                   ? cs.onErrorContainer
-                  : (_result!.hasWarning ? warningTint : cs.onSurface),
+                  : (_result!.hasWarning ? warningTint : cs.onSurfaceVariant),
             ),
           ),
 
