@@ -53,8 +53,8 @@
 ### Schedule
 - Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps. 
 - Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. I paused the schedule now the schedule shows No shcedules.  [COMPLETED]
-- Top Area of Schedule should expand or collapse schedule. Currenly it is editing scehdule. the only area to expand and collapse seems to be the little arrow. Make the enitre top orw where the arrow sits the expand and collaps.
-- Set Paused button is not the right terminology.
+- Top Area of Schedule should expand or collapse schedule. Currenly it is editing scehdule. the only area to expand and collapse seems to be the little arrow. Make the enitre top orw where the arrow sits the expand and collaps. [COMPLETED]
+- Set Paused button is not the right terminology. [COMPLETED]
 - Take Dose Card:
 	- Dose Name is correct.
 	- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action.

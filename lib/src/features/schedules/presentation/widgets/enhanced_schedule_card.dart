@@ -58,30 +58,30 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       margin: const EdgeInsets.only(bottom: kSpacingS),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: _promptEditSchedule,
-          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          child: AnimatedContainer(
-            duration: kAnimationNormal,
-            curve: kCurveEmphasized,
-            padding: EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
-            decoration: BoxDecoration(
-              color: _isExpanded ? colorScheme.surface : Colors.transparent,
-              borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-              border: _isExpanded
-                  ? Border.all(
-                      color: colorScheme.outlineVariant.withValues(
-                        alpha: kCardBorderOpacity,
-                      ),
-                      width: kBorderWidthThin,
-                    )
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // COLLAPSED STATE - Ultra Clean Single Row
-                Row(
+        child: AnimatedContainer(
+          duration: kAnimationNormal,
+          curve: kCurveEmphasized,
+          padding: EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
+          decoration: BoxDecoration(
+            color: _isExpanded ? colorScheme.surface : Colors.transparent,
+            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+            border: _isExpanded
+                ? Border.all(
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: kCardBorderOpacity,
+                    ),
+                    width: kBorderWidthThin,
+                  )
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // COLLAPSED STATE - Ultra Clean Single Row
+              InkWell(
+                onTap: () => setState(() => _isExpanded = !_isExpanded),
+                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                child: Row(
                   children: [
                     // Schedule name (primary info)
                     Expanded(
@@ -132,169 +132,169 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       Text(_getFrequencyText(), style: mutedTextStyle(context)),
                     const SizedBox(width: kSpacingS),
                     // Expand/collapse control
-                    InkWell(
-                      onTap: () => setState(() => _isExpanded = !_isExpanded),
-                      borderRadius: BorderRadius.circular(kBorderRadiusFull),
-                      child: Padding(
-                        padding: const EdgeInsets.all(kSpacingXS),
-                        child: AnimatedRotation(
-                          turns: _isExpanded ? 0.5 : 0,
-                          duration: kAnimationFast,
-                          child: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            size: kIconSizeMedium,
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
-                            ),
+                    Padding(
+                      padding: const EdgeInsets.all(kSpacingXS),
+                      child: AnimatedRotation(
+                        turns: _isExpanded ? 0.5 : 0,
+                        duration: kAnimationFast,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: kIconSizeMedium,
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: kOpacityMedium,
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
+              ),
 
-                // EXPANDED STATE - Premium Details
-                AnimatedCrossFade(
-                  duration: kAnimationNormal,
-                  crossFadeState: _isExpanded
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  firstChild: const SizedBox.shrink(),
-                  secondChild: Padding(
-                    padding: const EdgeInsets.only(top: kSpacingL),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Dose & Frequency Row
-                        Row(
-                          children: [
-                            _buildInfoChip(
-                              context,
-                              icon: Icons.medication_rounded,
-                              label:
-                                  '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                              isPrimary: true,
-                            ),
-                            const SizedBox(width: kSpacingS),
-                            _buildInfoChip(
-                              context,
-                              icon: Icons.schedule_rounded,
-                              label: _getTimesText(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: kSpacingM),
-
-                        // Days Row
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: kIconSizeSmall,
-                              color: colorScheme.onSurfaceVariant.withValues(
-                                alpha: kOpacityMedium,
-                              ),
-                            ),
-                            const SizedBox(width: kSpacingS),
-                            Expanded(
-                              child: Text(
-                                _getDaysText(),
-                                style: mutedTextStyle(
-                                  context,
-                                )?.copyWith(fontWeight: kFontWeightMedium),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Adherence (if data exists)
-                        if ((adherenceData['total'] as int) > 0) ...[
-                          const SizedBox(height: kSpacingM),
-                          Row(
-                            children: [
-                              // Progress bar
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                    kSpacingXS,
-                                  ),
-                                  child: LinearProgressIndicator(
-                                    value: adherenceRate / 100,
-                                    minHeight: kSpacingXS,
-                                    backgroundColor:
-                                        colorScheme.surfaceContainerHighest,
-                                    valueColor: AlwaysStoppedAnimation(
-                                      _getAdherenceColor(adherenceRate),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: kSpacingM),
-                              Text(
-                                '${adherenceRate.toStringAsFixed(0)}%',
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: _getAdherenceColor(adherenceRate),
-                                  fontWeight: kFontWeightBold,
-                                ),
-                              ),
-                            ],
+              // EXPANDED STATE - Premium Details
+              AnimatedCrossFade(
+                duration: kAnimationNormal,
+                crossFadeState: _isExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                firstChild: const SizedBox.shrink(),
+                secondChild: Padding(
+                  padding: const EdgeInsets.only(top: kSpacingL),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Dose & Frequency Row
+                      Row(
+                        children: [
+                          _buildInfoChip(
+                            context,
+                            icon: Icons.medication_rounded,
+                            label:
+                                '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                            isPrimary: true,
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          _buildInfoChip(
+                            context,
+                            icon: Icons.schedule_rounded,
+                            label: _getTimesText(),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: kSpacingM),
 
-                        const SizedBox(height: kSpacingL),
+                      // Days Row
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            size: kIconSizeSmall,
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Expanded(
+                            child: Text(
+                              _getDaysText(),
+                              style: mutedTextStyle(
+                                context,
+                              )?.copyWith(fontWeight: kFontWeightMedium),
+                            ),
+                          ),
+                        ],
+                      ),
 
-                        // Schedule Details Section
-                        _buildExpandedSection(
-                          context,
-                          title: 'Schedule Details',
-                          children: [
-                            _buildDetailRow(
-                              context,
-                              'Dose',
-                              '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                            ),
-                            _buildDetailRow(context, 'Times', _getTimesText()),
-                            _buildDetailRow(context, 'Days', _getDaysText()),
-                            _buildDetailRow(
-                              context,
-                              'Started',
-                              DateFormat(
-                                'MMM d, yyyy',
-                              ).format(widget.schedule.createdAt),
-                            ),
-                          ],
-                        ),
+                      // Adherence (if data exists)
+                      if ((adherenceData['total'] as int) > 0) ...[
                         const SizedBox(height: kSpacingM),
-
-                        // Recent Activity Section
-                        _buildExpandedSection(
-                          context,
-                          title: 'Recent Activity',
-                          children: [_buildRecentDoses()],
-                        ),
-                        const SizedBox(height: kSpacingL),
-
-                        // Action Buttons Row (Schedule-level actions only)
                         Row(
                           children: [
-                            // Pause/Resume toggle
+                            // Progress bar
                             Expanded(
-                              child: _buildPrimaryAction(
-                                context,
-                                label: widget.schedule.active
-                                    ? 'Set Paused'
-                                    : 'Set Active',
-                                onTap: _togglePause,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(kSpacingXS),
+                                child: LinearProgressIndicator(
+                                  value: adherenceRate / 100,
+                                  minHeight: kSpacingXS,
+                                  backgroundColor:
+                                      colorScheme.surfaceContainerHighest,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    _getAdherenceColor(adherenceRate),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: kSpacingM),
+                            Text(
+                              '${adherenceRate.toStringAsFixed(0)}%',
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: _getAdherenceColor(adherenceRate),
+                                fontWeight: kFontWeightBold,
                               ),
                             ),
                           ],
                         ),
                       ],
-                    ),
+
+                      const SizedBox(height: kSpacingL),
+
+                      // Schedule Details Section
+                      _buildExpandedSection(
+                        context,
+                        title: 'Schedule Details',
+                        children: [
+                          _buildDetailRow(
+                            context,
+                            'Dose',
+                            '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                          ),
+                          _buildDetailRow(context, 'Times', _getTimesText()),
+                          _buildDetailRow(context, 'Days', _getDaysText()),
+                          _buildDetailRow(
+                            context,
+                            'Started',
+                            DateFormat(
+                              'MMM d, yyyy',
+                            ).format(widget.schedule.createdAt),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: kSpacingM),
+
+                      // Recent Activity Section
+                      _buildExpandedSection(
+                        context,
+                        title: 'Recent Activity',
+                        children: [_buildRecentDoses()],
+                      ),
+                      const SizedBox(height: kSpacingL),
+
+                      // Action Buttons Row (Schedule-level actions only)
+                      Row(
+                        children: [
+                          // Pause/Resume toggle
+                          Expanded(
+                            child: _buildPrimaryAction(
+                              context,
+                              label: widget.schedule.active
+                                  ? 'Pause'
+                                  : 'Resume',
+                              onTap: _togglePause,
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          _buildSecondaryAction(
+                            context,
+                            icon: Icons.edit_rounded,
+                            onTap: _promptEditSchedule,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
