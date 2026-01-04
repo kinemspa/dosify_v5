@@ -30,12 +30,6 @@ class NextDoseCard extends StatefulWidget {
 class _NextDoseCardState extends State<NextDoseCard>
     with SingleTickerProviderStateMixin {
   late DateTime _selectedDate;
-  late PageController _dosePageController;
-  late AnimationController _bounceController;
-  late Animation<double> _bounceAnimation;
-
-  double _edgeOverscrollAccum = 0;
-  bool _edgeDayChangeTriggered = false;
 
   // Cache of calculated doses for the selected week
   List<CalculatedDose> _weekDoses = [];
@@ -48,38 +42,10 @@ class _NextDoseCardState extends State<NextDoseCard>
     super.initState();
     // Always default to today when entering medication details
     _selectedDate = DateTime.now();
-    _dosePageController = PageController(viewportFraction: 0.85);
     _calculateDosesForWeek(_selectedDate);
     _updateDayDoses();
-
-    // Bounce animation to hint at swipe
-    _bounceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _bounceAnimation =
-        TweenSequence<double>([
-          TweenSequenceItem(tween: Tween(begin: 0.0, end: 12.0), weight: 1),
-          TweenSequenceItem(tween: Tween(begin: 12.0, end: -8.0), weight: 1),
-          TweenSequenceItem(tween: Tween(begin: -8.0, end: 0.0), weight: 1),
-        ]).animate(
-          CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
-        );
-
-    // Trigger bounce after short delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted && _dayDoses.length > 1) {
-        _bounceController.forward();
-      }
-    });
   }
 
-  @override
-  void dispose() {
-    _dosePageController.dispose();
-    _bounceController.dispose();
-    super.dispose();
-  }
 
   void _findNextDose() {
     // Simple logic to find the next future dose and jump to it
@@ -191,16 +157,6 @@ class _NextDoseCardState extends State<NextDoseCard>
     _dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
   }
 
-  void _resetDosePager() {
-    _edgeOverscrollAccum = 0;
-    _edgeDayChangeTriggered = false;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_dosePageController.hasClients) return;
-      _dosePageController.jumpToPage(0);
-    });
-  }
-
   void _onDaySelected(DateTime date) {
     setState(() {
       _selectedDate = date;
@@ -216,46 +172,6 @@ class _NextDoseCardState extends State<NextDoseCard>
       _calculateDosesForWeek(date);
       _updateDayDoses();
     });
-
-    _resetDosePager();
-  }
-
-  bool _handleDosePagerNotification(ScrollNotification notification) {
-    if (!_dosePageController.hasClients) return false;
-    if (_dayDoses.isEmpty) return false;
-
-    if (notification is ScrollStartNotification) {
-      _edgeOverscrollAccum = 0;
-      _edgeDayChangeTriggered = false;
-      return false;
-    }
-
-    if (notification is OverscrollNotification && !_edgeDayChangeTriggered) {
-      final position = notification.metrics;
-      final currentPage = (_dosePageController.page ?? 0).round();
-      final isAtFirst = currentPage <= 0;
-      final isAtLast = currentPage >= _dayDoses.length - 1;
-
-      // Overscroll sign: negative at the leading edge, positive at the trailing edge.
-      _edgeOverscrollAccum += notification.overscroll.abs();
-
-      const threshold = 28.0;
-      if (_edgeOverscrollAccum < threshold) return false;
-
-      if (position.atEdge) {
-        if (notification.overscroll < 0 && isAtFirst) {
-          // Dragged right past first card -> previous day.
-          _edgeDayChangeTriggered = true;
-          _onDaySelected(_selectedDate.subtract(const Duration(days: 1)));
-        } else if (notification.overscroll > 0 && isAtLast) {
-          // Dragged left past last card -> next day.
-          _edgeDayChangeTriggered = true;
-          _onDaySelected(_selectedDate.add(const Duration(days: 1)));
-        }
-      }
-    }
-
-    return false;
   }
 
   @override
@@ -274,139 +190,60 @@ class _NextDoseCardState extends State<NextDoseCard>
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Dose card with slide animation - swipe indicators
-        Stack(
-          children: [
-            ClipRect(
-              child: AnimatedSwitcher(
-                duration: kAnimationNormal,
-                switchInCurve: kCurveEmphasized,
-                switchOutCurve: kCurveEmphasized,
-                transitionBuilder: (child, animation) {
-                  return SlideTransition(
-                    position:
-                        Tween<Offset>(
-                          begin: const Offset(1.0, 0),
-                          end: Offset.zero,
-                        ).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: kCurveEmphasized,
-                          ),
-                        ),
-                    child: child,
-                  );
-                },
-                child: _dayDoses.isEmpty
-                    ? GestureDetector(
-                        key: ValueKey(_selectedDate.toString()),
-                        onHorizontalDragEnd: (details) {
-                          if (details.primaryVelocity == null) return;
-                          if (details.primaryVelocity! < 0) {
-                            _onDaySelected(
-                              _selectedDate.add(const Duration(days: 1)),
-                            );
-                          } else if (details.primaryVelocity! > 0) {
-                            _onDaySelected(
-                              _selectedDate.subtract(const Duration(days: 1)),
-                            );
-                          }
-                        },
-                        child: _buildEmptyState(context),
-                      )
-                    : SizedBox(
-                        height: 72,
-                        child: AnimatedBuilder(
-                          animation: _bounceAnimation,
-                          builder: (context, child) {
-                            return Transform.translate(
-                              offset: Offset(_bounceAnimation.value, 0),
-                              child: child,
-                            );
-                          },
-                          child: NotificationListener<ScrollNotification>(
-                            onNotification: _handleDosePagerNotification,
-                            child: PageView.builder(
-                              key: ValueKey(_selectedDate.toString()),
-                              controller: _dosePageController,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: _dayDoses.length,
-                              itemBuilder: (context, index) {
-                                return _buildDoseCardContent(
-                                  _dayDoses[index],
-                                  index,
-                                  _dayDoses.length,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
+        // Doses for selected day
+        ClipRect(
+          child: AnimatedSwitcher(
+            duration: kAnimationNormal,
+            switchInCurve: kCurveEmphasized,
+            switchOutCurve: kCurveEmphasized,
+            transitionBuilder: (child, animation) {
+              return SlideTransition(
+                position:
+                    Tween<Offset>(
+                      begin: const Offset(1.0, 0),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: kCurveEmphasized,
                       ),
-              ),
-            ),
-            // Left swipe hint (small chevron)
-            if (_dayDoses.length > 1)
-              Positioned(
-                left: 2,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Icon(
-                    Icons.chevron_left,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                    ),
+                child: child,
+              );
+            },
+            child: _dayDoses.isEmpty
+                ? GestureDetector(
+                    key: ValueKey(_selectedDate.toString()),
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity == null) return;
+                      if (details.primaryVelocity! < 0) {
+                        _onDaySelected(
+                          _selectedDate.add(const Duration(days: 1)),
+                        );
+                      } else if (details.primaryVelocity! > 0) {
+                        _onDaySelected(
+                          _selectedDate.subtract(const Duration(days: 1)),
+                        );
+                      }
+                    },
+                    child: _buildEmptyState(context),
+                  )
+                : Column(
+                    key: ValueKey(_selectedDate.toString()),
+                    children: [
+                      for (int i = 0; i < _dayDoses.length; i++) ...[
+                        _buildDoseCardContent(
+                          _dayDoses[i],
+                          i,
+                          _dayDoses.length,
+                        ),
+                        if (i != _dayDoses.length - 1)
+                          const SizedBox(height: kSpacingXS),
+                      ],
+                    ],
                   ),
-                ),
-              ),
-            // Right swipe hint (small chevron)
-            if (_dayDoses.length > 1)
-              Positioned(
-                right: 2,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Icon(
-                    Icons.chevron_right,
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                  ),
-                ),
-              ),
-          ],
-        ),
-
-        // Page Indicator (only if multiple doses)
-        if (_dayDoses.length > 1)
-          Padding(
-            padding: const EdgeInsets.only(top: kSpacingXS, bottom: kSpacingS),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_dayDoses.length, (index) {
-                return AnimatedBuilder(
-                  animation: _dosePageController,
-                  builder: (context, child) {
-                    double selected = 0;
-                    if (_dosePageController.hasClients &&
-                        _dosePageController.page != null) {
-                      selected = (_dosePageController.page! - index).abs();
-                    }
-                    final isActive = selected < 0.5;
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      width: isActive ? 12 : 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? colorScheme.primary
-                            : colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(kBorderRadiusFull),
-                      ),
-                    );
-                  },
-                );
-              }),
-            ),
           ),
+        ),
 
         // Day and Date centered below dose card (compact)
         Padding(

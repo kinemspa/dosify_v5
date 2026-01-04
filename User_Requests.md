@@ -47,7 +47,7 @@
 - Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED]
 
 ### Reports Card
-- Minimizing this card is requireing 2 clicks. 
+- Minimizing this card is requireing 2 clicks. [COMPLETED]
 - History: 
 	- Date Icon - make smaller. [COMPLETED]
 	- AdHoc Doses should be editable. [COMPLETED]
@@ -57,7 +57,7 @@
 ### Schedule
 - Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. [COMPLETED]
 	- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. [COMPLETED]
-- Stack multiple doses on same day vertically. 
+- Stack multiple doses on same day vertically. [COMPLETED]
 - Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same? [COMPLETED]
 - Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. 
 - Currently clicking the schedule collapses/expands the schedule. I want only the collapse row to do this. Clicking the schedule should prompt to edit it, which will prompt a page change dialog. Remove all the little edit icons. 
