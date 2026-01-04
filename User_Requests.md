@@ -100,7 +100,7 @@
 	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size.  [COMPLETED]
 	- If today, change date icon to today [COMPLETED]
 - Compact Card:
-	- Next Dose date Icon to inculde the Next icon. Smaller. 
+	- Next Dose date Icon to inculde the Next icon. Smaller.  [COMPLETED]
 	- If today, change date icon to today [COMPLETED]
 
 
