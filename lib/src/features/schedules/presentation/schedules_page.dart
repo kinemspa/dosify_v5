@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -405,6 +406,7 @@ class _ScheduleCard extends StatelessWidget {
     final timesPerDay = _ScheduleText.timesPerDayLabel(s);
     final medTitle = _ScheduleText.medTitle(s);
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
+    final startedLabel = _ScheduleText.startedLabel(s);
 
     if (dense) {
       return GlassCardSurface(
@@ -488,6 +490,13 @@ class _ScheduleCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: kSpacingXS),
+          Text(
+            startedLabel,
+            style: helperTextStyle(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (!s.isActive) ...[
             const SizedBox(height: kSpacingXS),
             Text(scheduleStatusLabel(s), style: mutedTextStyle(context)),
@@ -515,6 +524,12 @@ class _ScheduleText {
     final med = s.medicationName.trim();
     final name = s.name.trim();
     return med.isNotEmpty ? med : name;
+  }
+
+  static String startedLabel(Schedule s) {
+    final start = s.startAt;
+    if (start == null) return 'Start: —';
+    return 'Start: ${DateFormat('d MMM').format(start)}';
   }
 
   static String? scheduleSubtitle(Schedule s) {
