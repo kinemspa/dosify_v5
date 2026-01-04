@@ -63,7 +63,7 @@
 ### Schedule
 - Change Scheduled Doses heading to Doses [COMPLETED]
 - Need some sort of border or  surrounding graphic for the dose as it looks like a lot of unused space surrounding it. [COMPLETED]
-- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. 
+	- Take Dose screen is supposed to be a dialog onot a bottom page. Like the other take doses. Lets unify this. [COMPLETED]
 - Can no longer scroll left and right on the dose cards to the next or previous days. 
 - Schedule editor, has a pause schedule button. Does tnhat change the active or inactive? Can it be worded the same?
 - Actually I think if we do any editing of schedules from here it needs to jump to the actual schedules details screen for editing. 

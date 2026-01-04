@@ -9,13 +9,16 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.d
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
-/// Bottom sheet showing dose details and actions (Take, Snooze, Skip)
+enum DoseActionSheetPresentation { bottomSheet, dialog }
+
+/// Dose details and actions (Take, Snooze, Skip)
 class DoseActionSheet extends StatefulWidget {
   final CalculatedDose dose;
   final void Function(String? notes) onMarkTaken;
   final void Function(String? notes) onSnooze;
   final void Function(String? notes) onSkip;
   final void Function(String? notes) onDelete;
+  final DoseActionSheetPresentation presentation;
 
   const DoseActionSheet({
     super.key,
@@ -24,6 +27,7 @@ class DoseActionSheet extends StatefulWidget {
     required this.onSnooze,
     required this.onSkip,
     required this.onDelete,
+    this.presentation = DoseActionSheetPresentation.dialog,
   });
 
   static Future<void> show(
@@ -34,18 +38,16 @@ class DoseActionSheet extends StatefulWidget {
     required void Function(String? notes) onSkip,
     required void Function(String? notes) onDelete,
   }) {
-    return showModalBottomSheet<void>(
+    return showDialog<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(
-        context,
-      ).colorScheme.surface.withValues(alpha: kOpacityTransparent),
+      useRootNavigator: true,
       builder: (context) => DoseActionSheet(
         dose: dose,
         onMarkTaken: onMarkTaken,
         onSnooze: onSnooze,
         onSkip: onSkip,
         onDelete: onDelete,
+        presentation: DoseActionSheetPresentation.dialog,
       ),
     );
   }
@@ -172,143 +174,172 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(kBorderRadiusLarge),
+    Widget content(BuildContext context, ScrollController scrollController) {
+      return Column(
+        children: [
+          // Header
+          Padding(
+            padding: kBottomSheetHeaderPadding,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Take dose', style: sectionTitleStyle(context)),
+                      Text(
+                        'Confirm status, add notes, and save.',
+                        style: helperTextStyle(context),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                width: kBottomSheetHandleWidth,
-                height: kBottomSheetHandleHeight,
-                margin: kBottomSheetHandleMargin,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(
-                    alpha: kOpacityLow,
-                  ),
-                  borderRadius: BorderRadius.circular(kBottomSheetHandleRadius),
-                ),
-              ),
-              // Header
-              Padding(
-                padding: kBottomSheetHeaderPadding,
-                child: Row(
+          const Divider(height: 1),
+          // Content
+          Expanded(
+            child: ListView(
+              controller: scrollController,
+              padding: kBottomSheetContentPadding,
+              children: [
+                SectionFormCard(
+                  neutral: true,
+                  title: 'Dose',
                   children: [
+                    DoseSummaryRow(
+                      dose: widget.dose,
+                      showMedicationName: true,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: kSpacingM),
+                SectionFormCard(
+                  neutral: true,
+                  title: 'Status',
+                  children: [
+                    _buildStatusChips(),
+                    const SizedBox(height: kSpacingXS),
+                    _buildStatusHint(context),
+                  ],
+                ),
+                const SizedBox(height: kSpacingM),
+                SectionFormCard(
+                  neutral: true,
+                  title: 'Notes',
+                  children: [
+                    TextField(
+                      controller: _notesController,
+                      style: bodyTextStyle(context),
+                      decoration: buildFieldDecoration(
+                        context,
+                        hint: 'Add any notes about this dose…',
+                      ),
+                      maxLines: 3,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: kSpacingM),
+                // Save & Close buttons
+                Row(
+                  children: [
+                    // Close without saving
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Take dose', style: sectionTitleStyle(context)),
-                          Text(
-                            'Confirm status, add notes, and save.',
-                            style: helperTextStyle(context),
-                          ),
-                        ],
+                      child: SizedBox(
+                        height: kLargeButtonHeight,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                    const SizedBox(width: kSpacingM),
+                    // Save & Close
+                    Expanded(
+                      flex: 2,
+                      child: SizedBox(
+                        height: kLargeButtonHeight,
+                        child: FilledButton.icon(
+                          onPressed: () async {
+                            await _saveChanges();
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.save,
+                            size: kIconSizeSmall,
+                          ),
+                          label: const Text('Save & Close'),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const Divider(height: 1),
-              // Content
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: kBottomSheetContentPadding,
-                  children: [
-                    SectionFormCard(
-                      neutral: true,
-                      title: 'Dose',
-                      children: [
-                        DoseSummaryRow(
-                          dose: widget.dose,
-                          showMedicationName: true,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: kSpacingM),
-                    SectionFormCard(
-                      neutral: true,
-                      title: 'Status',
-                      children: [
-                        _buildStatusChips(),
-                        const SizedBox(height: kSpacingXS),
-                        _buildStatusHint(context),
-                      ],
-                    ),
-                    const SizedBox(height: kSpacingM),
-                    SectionFormCard(
-                      neutral: true,
-                      title: 'Notes',
-                      children: [
-                        TextField(
-                          controller: _notesController,
-                          style: bodyTextStyle(context),
-                          decoration: buildFieldDecoration(
-                            context,
-                            hint: 'Add any notes about this dose…',
-                          ),
-                          maxLines: 3,
-                          textCapitalization: TextCapitalization.sentences,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: kSpacingM),
-                    // Save & Close buttons
-                    Row(
-                      children: [
-                        // Close without saving
-                        Expanded(
-                          child: SizedBox(
-                            height: kLargeButtonHeight,
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Close'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: kSpacingM),
-                        // Save & Close
-                        Expanded(
-                          flex: 2,
-                          child: SizedBox(
-                            height: kLargeButtonHeight,
-                            child: FilledButton.icon(
-                              onPressed: () async {
-                                await _saveChanges();
-                                if (context.mounted) Navigator.pop(context);
-                              },
-                              icon: const Icon(
-                                Icons.save,
-                                size: kIconSizeSmall,
-                              ),
-                              label: const Text('Save & Close'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      );
+    }
+
+    if (widget.presentation == DoseActionSheetPresentation.bottomSheet) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(kBorderRadiusLarge),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Handle bar
+                Container(
+                  width: kBottomSheetHandleWidth,
+                  height: kBottomSheetHandleHeight,
+                  margin: kBottomSheetHandleMargin,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurfaceVariant.withValues(
+                      alpha: kOpacityLow,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      kBottomSheetHandleRadius,
+                    ),
+                  ),
+                ),
+                Expanded(child: content(context, scrollController)),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    final dialogScrollController = ScrollController();
+    final maxHeight = MediaQuery.of(context).size.height * 0.82;
+
+    return Dialog(
+      insetPadding: const EdgeInsets.all(kSpacingL),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+          ),
+          child: content(context, dialogScrollController),
+        ),
+      ),
     );
   }
 
