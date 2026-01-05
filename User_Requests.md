@@ -36,10 +36,10 @@
 - On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is.
 
 ### Reports Card
-	- Scheduled Doses should be editable too. 
-	- Should be able to edit the dose time and date aswell. 
+	- Scheduled Doses should be editable too.  [COMPLETED]
+	- Should be able to edit the dose time and date aswell.  [COMPLETED]
 	- Scheudled Dose Date Icon is not showing the date. [COMPLETED]
-	- Make edit icon smaller and lighter
+	- Make edit icon smaller and lighter  [COMPLETED]
 	- AdHoc Dose:
 		- Edit - Editing the dose needs to be the same dialog as taking a dose. 
 	- Scheduled Dose:
@@ -58,21 +58,20 @@
 
 
 ### Medication Details Card
-- Sealed VIals heading should still be in primary colour.  [COMPLETED]
-- Some text is out of horizontal alignment. For example Active VIal Location heading is higher up than the Value.  [COMPLETED]
+- Sealed Vials heading should still be in primary colour. This was not completed. 
+- Make Text field labels and text field values bottom aligned. 
 
 ==============
 ## Add Medication
 
 - Wizard still doesnt have Next button instead of continue button at the bottom when filling in fields.  [COMPLETED]
+- The above task is still not complete.  The continue button is supposed to be a next button to jump to the next field easily while the OSK is displaying. Must be for ALL wizards. 
 
 ### Choose Medicaiotn Type Screen
 
 ### Choose Injection Type Screen
 
 ### Add Medicaiton Tablet
-- Is Ibuprofen allowed to be used as an example? Is there a legal issues here.  [COMPLETED]
-- Go through the entire app and find any exmaple text or helper text that contyains any actual real life medicaiotn names or company names. These are legal issues. [COMPLETED]
 
 ### Add Medicaiton - Multi Dose Vial
 
@@ -80,7 +79,7 @@
 ==============
 # Schedules List
 - Large Cards:
-	- Make Next icon and text smaller. [COMPLETED]
+	- Move Next Icon slightly Left. 
 	- Make the Dose name in a bolder font [COMPLETED]
 	- Add a started date [COMPLETED]
 	- Add an End date or doesnt end. [COMPLETED]

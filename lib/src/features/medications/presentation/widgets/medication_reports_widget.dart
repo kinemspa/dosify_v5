@@ -225,20 +225,20 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         .toList(growable: false);
 
     final adHocDoseLogIds = doseLogs
-      .where((log) => log.scheduleId == 'ad_hoc')
-      .map((log) => log.id)
-      .toSet();
+        .where((log) => log.scheduleId == 'ad_hoc')
+        .map((log) => log.id)
+        .toSet();
 
     // Inventory events for this medication (refills, deductions, adjustments, etc)
     final inventoryLogs = inventoryLogBox.values
         .where((l) => l.medicationId == widget.medication.id)
-      // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
-      // In History, show the editable DoseLog and suppress the duplicate inventory entry.
-      .where(
-        (l) =>
-          !(l.changeType == InventoryChangeType.adHocDose &&
-            adHocDoseLogIds.contains(l.id)),
-      )
+        // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
+        // In History, show the editable DoseLog and suppress the duplicate inventory entry.
+        .where(
+          (l) =>
+              !(l.changeType == InventoryChangeType.adHocDose &&
+                  adHocDoseLogIds.contains(l.id)),
+        )
         .toList(growable: false);
 
     // Status change events for this medication
@@ -588,18 +588,190 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 ),
               ),
             ),
-            if (isAdHoc) ...[
-              const SizedBox(width: kSpacingXS),
-              Icon(
+            const SizedBox(width: kSpacingXS),
+            GestureDetector(
+              onTap: () => _showEditDoseLogTimeDialog(context, log),
+              child: Icon(
                 Icons.edit,
                 size: kIconSizeXSmall,
                 color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
               ),
-            ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _showEditDoseLogTimeDialog(
+    BuildContext context,
+    DoseLog log,
+  ) async {
+    final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+    final notesController = TextEditingController(text: log.notes ?? '');
+    var selected = log.actionTime;
+
+    final saved = await showDialog<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        final cs = Theme.of(dialogContext).colorScheme;
+        final dateFormat = DateFormat('EEE, MMM d, y');
+        final timeFormat = DateFormat('h:mm a');
+
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            Future<void> pickDate() async {
+              final picked = await showDatePicker(
+                context: dialogContext,
+                initialDate: selected,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+              );
+              if (picked == null) return;
+              setDialogState(() {
+                selected = DateTime(
+                  picked.year,
+                  picked.month,
+                  picked.day,
+                  selected.hour,
+                  selected.minute,
+                );
+              });
+            }
+
+            Future<void> pickTime() async {
+              final picked = await showTimePicker(
+                context: dialogContext,
+                initialTime: TimeOfDay.fromDateTime(selected),
+              );
+              if (picked == null) return;
+              setDialogState(() {
+                selected = DateTime(
+                  selected.year,
+                  selected.month,
+                  selected.day,
+                  picked.hour,
+                  picked.minute,
+                );
+              });
+            }
+
+            return AlertDialog(
+              titleTextStyle: cardTitleStyle(
+                dialogContext,
+              )?.copyWith(color: cs.primary),
+              contentTextStyle: bodyTextStyle(dialogContext),
+              title: const Text('Edit Dose Time'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Update the recorded date and time for this dose log.',
+                    style: helperTextStyle(dialogContext),
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: kStandardFieldHeight,
+                          child: OutlinedButton.icon(
+                            onPressed: pickDate,
+                            icon: const Icon(
+                              Icons.calendar_today,
+                              size: kIconSizeSmall,
+                            ),
+                            label: Text(dateFormat.format(selected)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: kSpacingS),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: kStandardFieldHeight,
+                          child: OutlinedButton.icon(
+                            onPressed: pickTime,
+                            icon: const Icon(
+                              Icons.schedule,
+                              size: kIconSizeSmall,
+                            ),
+                            label: Text(timeFormat.format(selected)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  Text(
+                    'Notes (optional):',
+                    style: helperTextStyle(
+                      dialogContext,
+                    )?.copyWith(fontWeight: kFontWeightMedium),
+                  ),
+                  const SizedBox(height: kSpacingS),
+                  TextField(
+                    controller: notesController,
+                    maxLines: 2,
+                    style: bodyTextStyle(dialogContext),
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      hint: 'e.g., Taken early',
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final trimmedNotes = notesController.text.trim();
+                    final updated = DoseLog(
+                      id: log.id,
+                      scheduleId: log.scheduleId,
+                      scheduleName: log.scheduleName,
+                      medicationId: log.medicationId,
+                      medicationName: log.medicationName,
+                      scheduledTime: log.scheduledTime,
+                      actionTime: selected,
+                      doseValue: log.doseValue,
+                      doseUnit: log.doseUnit,
+                      action: log.action,
+                      actualDoseValue: log.actualDoseValue,
+                      actualDoseUnit: log.actualDoseUnit,
+                      notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+                    );
+                    await repo.upsert(updated);
+                    if (dialogContext.mounted) {
+                      Navigator.pop(dialogContext, true);
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    notesController.dispose();
+
+    if (!mounted) return;
+    if (saved == true) {
+      setState(() {});
+      ScaffoldMessenger.of(
+        this.context,
+      ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+    }
   }
 
   Future<void> _showEditAdHocDoseDialog(
