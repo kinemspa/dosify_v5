@@ -26,7 +26,7 @@
 	- Can we change the refill dialog. " Open New VIal" this is not the correct terminology for medicine. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
 - Reconstitution Card:
-	- Why is the text so dark?
+	- Why is the text so dark? [COMPLETED]
 
 ### App Header
 - On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is. [COMPLETED]
