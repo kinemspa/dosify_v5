@@ -39,31 +39,20 @@
 ### Reports Card
 - Should be able to edit the dose time and date aswell.  This is not completed. need to add the date and time into the dose editor. 
 - AdHoc Dose:
-	- Edit - Editing the dose needs to be the same dialog as taking a dose.  [COMPLETED]
 - Scheduled Dose:
-	- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible.  [COMPLETED]
 
 ### Schedule
-- If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation.  [COMPLETED]
-- Pause button. Its too big. Is it possiblke to have the Pause button enable a time frame, pause for ever, pause until etc etc..  [COMPLETED]
-- Take Dose Card:
-	- Dose Name is correct.
-	- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action.
-	- Take Dose Card: [COMPLETED]
-		- Dose Name is correct. [COMPLETED]
-		- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action. [COMPLETED]
-- Make sure this entire card is a widget. As it will be expanded for the schedules, calendar and home screen.  [COMPLETED]
+- Grey Buttonas again. Do not use grey buttons or chips. put this in your rules. 
 
 
 ### Medication Details Card
-- Sealed Vials heading should still be in primary colour. This was not completed.  [COMPLETED]
-- Make Text field labels and text field values bottom aligned.  [COMPLETED]
 
 ==============
 ## Add Medication
 
 - Wizard still doesnt have Next button instead of continue button at the bottom when filling in fields.  [COMPLETED]
 - The above task is still not complete.  The continue button is supposed to be a next button to jump to the next field easily while the OSK is displaying. Must be for ALL wizards.  [COMPLETED]
+- Above Task is still not complete. You changed the continue button to be Next. Great.But it still jumps to the next step. It needs to jump through the fields on the current step. Once at the last field, it then changes to continue. This is so users can fill all the fields on the screen without havign to minimize the OSK to click on the next field to fill out. 
 
 ### Choose Medicaiotn Type Screen
 
@@ -169,7 +158,7 @@
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
 	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number.  [COMPLETED]
 	- Remove 10mL syringe.  [COMPLETED]
-	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg. 
+	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg.  [COMPLETED]
 	- Why does MDV have 2 summary boxes?
 
 
@@ -241,6 +230,7 @@
 
 ==============
 # Take/edit Dose Dialog
+##### Is Requivring a FULL 
 - Take Dose:
 	- Remove divivder from the top under the firts helper text. 
 	- Why is tyhere grey chips????????????

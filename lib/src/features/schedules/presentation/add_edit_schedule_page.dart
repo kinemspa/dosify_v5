@@ -1164,22 +1164,22 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
       return null;
     }
 
-    // For MDV, calculate total strength in vial
+    final volumeMl = med.containerVolumeMl ?? 1.0;
     final strength = med.strengthValue;
-    final perMl = med.perMlValue ?? strength;
-    final volume = med.containerVolumeMl ?? 1.0;
 
-    // Convert to mcg
-    final mcgPerMl = switch (med.strengthUnit) {
-      Unit.mcgPerMl => perMl,
-      Unit.mgPerMl => perMl * 1000,
-      Unit.gPerMl => perMl * 1000000,
-      Unit.unitsPerMl => perMl, // Treat as mcg equivalent
-      _ => perMl,
+    return switch (med.strengthUnit) {
+      // Total amount in vial.
+      Unit.mcg => strength,
+      Unit.mg => strength * 1000,
+      Unit.g => strength * 1000000,
+      Unit.units => strength,
+
+      // Per-mL concentration.
+      Unit.mcgPerMl => strength * volumeMl,
+      Unit.mgPerMl => (strength * 1000) * volumeMl,
+      Unit.gPerMl => (strength * 1000000) * volumeMl,
+      Unit.unitsPerMl => strength * volumeMl,
     };
-
-    // total mcg in vial = (mcg/mL) * (mL)
-    return mcgPerMl * volume;
   }
 
   double? _getTotalVialVolumeMicroliter(Medication? med) {
