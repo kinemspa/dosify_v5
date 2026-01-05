@@ -3434,6 +3434,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       newSealedCount = med.stockValue - 1;
     }
 
+    final usedSealedVial = useStock && sealedVials > 0;
+
     box.put(
       med.id,
       med.copyWith(activeVialVolume: newVolume, stockValue: newSealedCount),
@@ -3449,13 +3451,15 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       newStock: newSealedCount,
       changeAmount: useStock ? -1 : 0,
       notes:
-          '${mode == 'replace' ? 'Replaced' : 'Topped up'} vial to ${_formatNumber(newVolume)} mL',
+          '${mode == 'replace' ? 'Replaced' : 'Topped up'} to ${_formatNumber(newVolume)} mL'
+          '${usedSealedVial ? ' • used 1 sealed vial' : ''}'
+          ' • direct mL',
       timestamp: now,
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
     final actionText = mode == 'replace' ? 'Replaced' : 'Topped up';
-    final stockText = useStock ? ' (1 sealed vial used)' : '';
+    final stockText = usedSealedVial ? ' (1 sealed vial used)' : '';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
