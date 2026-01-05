@@ -43,7 +43,7 @@
 	- Scheudled Dose Date Icon is not showing the date. [COMPLETED]
 	- Make edit icon smaller and lighter  [COMPLETED]
 	- AdHoc Dose:
-		- Edit - Editing the dose needs to be the same dialog as taking a dose. 
+		- Edit - Editing the dose needs to be the same dialog as taking a dose.  [COMPLETED]
 	- Scheduled Dose:
 		- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible.  [COMPLETED]
 
@@ -96,6 +96,7 @@
 - Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
 - Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
 - The incremental field and buttons are wrong. Use the same styling as the add med screen.  [COMPLETED]
+- App Header dynaimc summary needs to contain the active medicine remaining. 
 - Step 1:
 	- Tablets:
 		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet. 
@@ -108,11 +109,9 @@
 
 
 - Step 2:
-	- 
+	- Dont put SO you dont get past doses. This entire app and its helper text. you are not speaking to me. You are speaking to users. 
 	- Schedule Dates Styling of fields is incorrect. not use system design.  [COMPLETED]
 	- Start:
-		- Change to Start Date [COMPLETED]
-		- CHange Now to Today [COMPLETED]
 			- Selected date calnedar button is causing an overflow.  [COMPLETED]
 			- Once changed to selected ate, the drop down is becominga calendar button. Calendar button needs to appear below the dropdown, alos make it the same sizing as the system design, same size as the date button on the add med screens.  [COMPLETED]
 	- End:
@@ -132,6 +131,9 @@
 			- No black font.  [COMPLETED]
 			- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
 			- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
+			- Days of the Month in the dropdown menu once selected is only showing "days of the". Month is cropped off. 
+			- Helper text should state something like, select on which days of the month to for doses. 
+			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?
 - Step 3:
 	- These cards need to have the same heading styling as all other large cards.  [COMPLETED]
 	- Summary:
@@ -171,13 +173,10 @@
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
 	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number. 
 	- Remove 10mL syringe. 
+	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg. 
+	- Why does MDV have 2 summary boxes?
 
 
-
-- Once the med is selected, we need to restyle all of this. It looks disgusting. Look at the edit dialgos on the medicaiont details screens that are used to edit an existing medication.  [COMPLETED]
-- Needs helper text to instruct the user what to do, what the options do.  [COMPLETED]
-- Remove trailing 0s.  [COMPLETED]
-- Dynamic summary, Example = Dose: 1 tablets x 50.0mg = 50.mg total. This needs to be more consise. Also when its s singular remove the plural s.  [COMPLETED]
 - Dynamic Summary, needs to show each metric, Dose: 1 tablet, 20mg, or dose: 0.01mgs, 0.03 mL, 14Units.  [COMPLETED]
 - If a tbalet is selected, incrementing the strenght optino should only increment in units of the med unit that are avaiable as a calculaiton to the unit x strenght per unit. SO if 1 tablet = 10mg. 1st increment will be 2.5mg = 1/4 tablet, 5mg = 1/2 tablet and so forth. Same for all med types. Capsules are whole numbers only, same with single dose vials and pre filled syringes.  [COMPLETED]
 - MDV, this will need the syringe graphic and slider functionality that exists in the Reconstitution calculator. AT the end of the day its how many units in a syringe, which is calculated on the vial concetnraiton that was reconsituted.  [COMPLETED]
