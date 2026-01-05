@@ -106,9 +106,7 @@ class TakeDoseCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       doseMetrics,
-                      style: baseBody?.copyWith(
-                        color: cs.onSurface,
-                      ),
+                      style: baseBody?.copyWith(color: cs.onSurface),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -121,10 +119,7 @@ class TakeDoseCard extends StatelessWidget {
                           color: cs.onSurfaceVariant,
                         ),
                         const SizedBox(width: kSpacingXS),
-                        Text(
-                          dateText,
-                          style: baseHelper,
-                        ),
+                        Text(dateText, style: baseHelper),
                         const SizedBox(width: kSpacingM),
                         Icon(
                           Icons.schedule,

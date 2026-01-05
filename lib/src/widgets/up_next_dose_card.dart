@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
+import 'package:dosifi_v5/src/widgets/take_dose_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class UpNextDoseCard extends StatelessWidget {
@@ -12,12 +13,20 @@ class UpNextDoseCard extends StatelessWidget {
     required this.dose,
     required this.onDoseTap,
     this.showMedicationName = true,
+    this.medicationName,
+    this.strengthOrConcentrationLabel,
+    this.doseMetrics,
+    this.primaryActionLabel,
     super.key,
   });
 
   final CalculatedDose? dose;
   final void Function(CalculatedDose dose) onDoseTap;
   final bool showMedicationName;
+  final String? medicationName;
+  final String? strengthOrConcentrationLabel;
+  final String? doseMetrics;
+  final String? primaryActionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +38,31 @@ class UpNextDoseCard extends StatelessWidget {
       );
     }
 
+    final hasDetails =
+        (medicationName != null && medicationName!.trim().isNotEmpty) &&
+        (strengthOrConcentrationLabel != null &&
+            strengthOrConcentrationLabel!.trim().isNotEmpty) &&
+        (doseMetrics != null && doseMetrics!.trim().isNotEmpty);
+
     return SectionFormCard(
       neutral: true,
       title: 'Up next',
       children: [
-        DoseSummaryRow(
-          dose: dose!,
-          showMedicationName: showMedicationName,
-          onTap: () => onDoseTap(dose!),
-        ),
+        if (hasDetails)
+          TakeDoseCard(
+            dose: dose!,
+            medicationName: medicationName!,
+            strengthOrConcentrationLabel: strengthOrConcentrationLabel!,
+            doseMetrics: doseMetrics!,
+            primaryActionLabel: primaryActionLabel,
+            onTap: () => onDoseTap(dose!),
+          )
+        else
+          DoseSummaryRow(
+            dose: dose!,
+            showMedicationName: showMedicationName,
+            onTap: () => onDoseTap(dose!),
+          ),
       ],
     );
   }

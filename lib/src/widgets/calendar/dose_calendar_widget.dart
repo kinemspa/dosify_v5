@@ -2,6 +2,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_calculation_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -600,6 +601,39 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       }
     }
 
+    Schedule? upNextSchedule;
+    Medication? upNextMedication;
+    String? upNextStrengthLabel;
+    String? upNextDoseMetrics;
+
+    if (nextDose != null) {
+      final scheduleBox = Hive.box<Schedule>('schedules');
+      upNextSchedule = scheduleBox.get(nextDose.scheduleId);
+
+      final medId = upNextSchedule?.medicationId;
+      if (medId != null) {
+        final medBox = Hive.box<Medication>('medications');
+        upNextMedication = medBox.get(medId);
+      }
+
+      final med = upNextMedication;
+      final schedule = upNextSchedule;
+      if (med != null && schedule != null) {
+        upNextStrengthLabel =
+            MedicationDisplayHelpers.strengthOrConcentrationLabel(med);
+        upNextDoseMetrics = MedicationDisplayHelpers.doseMetricsSummary(
+          med,
+          doseTabletQuarters: schedule.doseTabletQuarters,
+          doseCapsules: schedule.doseCapsules,
+          doseSyringes: schedule.doseSyringes,
+          doseVials: schedule.doseVials,
+          doseMassMcg: schedule.doseMassMcg?.toDouble(),
+          doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+          syringeUnits: schedule.doseIU?.toDouble(),
+        );
+      }
+    }
+
     Widget buildBody({double? panelHeight}) {
       return Column(
         children: [
@@ -625,6 +659,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                 dose: nextDose,
                 onDoseTap: _onDoseTapInternal,
                 showMedicationName: true,
+                medicationName:
+                    upNextMedication?.name ?? nextDose?.medicationName,
+                strengthOrConcentrationLabel: upNextStrengthLabel,
+                doseMetrics: upNextDoseMetrics,
               ),
             ),
           // Calendar view
