@@ -2374,7 +2374,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 color: colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              Text('Sealed Vials', style: sectionTitleStyle(context)),
+              Text(
+                'Sealed Vials',
+                style: sectionTitleStyle(
+                  context,
+                )?.copyWith(color: colorScheme.primary),
+              ),
               const Spacer(),
               Text(
                 '${_formatNumber(med.stockValue).split('.')[0]} sealed vials',
