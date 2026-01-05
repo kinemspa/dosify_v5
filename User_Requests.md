@@ -12,7 +12,7 @@
 ## Medication Screen
 
 ### Large Cards
-- Non MDV Large cards, the Storage location text and remaining  text are NOT on the same row. 
+- Non MDV Large cards, the Storage location text and remaining  text are NOT on the same row. [COMPLETED]
 
 ### Compact Cards
 

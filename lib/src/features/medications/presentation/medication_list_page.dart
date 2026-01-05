@@ -1089,6 +1089,10 @@ class _MedLargeCard extends StatelessWidget {
       m.storageLocation,
     );
 
+    final baseRemainingStyle = helperTextStyle(
+      context,
+    )?.copyWith(fontSize: kFontSizeXSmall);
+
     final body = m.form == MedicationForm.multiDoseVial
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1131,6 +1135,16 @@ class _MedLargeCard extends StatelessWidget {
             location: location,
             createdAt: m.createdAt,
             expiry: m.expiry,
+            trailing: RichText(
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              text: _MedicationStockStatusText.textSpanFor(
+                context,
+                m,
+                baseStyle: baseRemainingStyle,
+              ),
+            ),
           );
 
     // Intentionally borderless/compact: keep storage details inline without an inset card.
@@ -1236,9 +1250,6 @@ class _MedLargeCard extends StatelessWidget {
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
     final pctRounded = stockInfo.percentage.clamp(0, 100).round();
     final isMdv = m.form == MedicationForm.multiDoseVial;
-    final baseStyle = helperTextStyle(
-      context,
-    )?.copyWith(fontSize: kFontSizeXSmall);
     final stockColor = stockStatusColorFromPercentage(
       context,
       percentage: stockInfo.percentage,
@@ -1260,20 +1271,7 @@ class _MedLargeCard extends StatelessWidget {
             textColor: stockColor,
           ),
         ),
-        if (!isMdv) ...[
-          const SizedBox(height: kSpacingXS),
-          Align(
-            alignment: Alignment.centerRight,
-            child: RichText(
-              textAlign: TextAlign.right,
-              text: _MedicationStockStatusText.textSpanFor(
-                context,
-                m,
-                baseStyle: baseStyle,
-              ),
-            ),
-          ),
-        ],
+        if (!isMdv) const SizedBox(height: kSpacingXS),
       ],
     );
   }
