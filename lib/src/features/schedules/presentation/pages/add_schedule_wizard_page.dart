@@ -393,9 +393,9 @@ class _AddScheduleWizardPageState
     final formatted = v == v.roundToDouble()
         ? v.toStringAsFixed(0)
         : v
-            .toStringAsFixed(2)
-            .replaceFirst(RegExp(r'\.0+$'), '')
-            .replaceFirst(RegExp(r'(\.\d*[1-9])0+$'), r'$1');
+              .toStringAsFixed(2)
+              .replaceFirst(RegExp(r'\.0+$'), '')
+              .replaceFirst(RegExp(r'(\.\d*[1-9])0+$'), r'$1');
     return 'Remaining: $formatted';
   }
 
@@ -879,7 +879,7 @@ class _AddScheduleWizardPageState
           ),
           const SizedBox(height: kSpacingS),
           _helperBelowLeft(
-            "Default is today so you won't get past doses. Use a date to start later.",
+            'Start today by default. Choose a date to start later.',
           ),
           const SizedBox(height: kSpacingS),
           LabelFieldRow(

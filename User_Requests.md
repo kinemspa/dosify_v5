@@ -110,7 +110,7 @@
 
 
 - Step 2:
-	- Dont put SO you dont get past doses. This entire app and its helper text. you are not speaking to me. You are speaking to users. 
+	- Dont put SO you dont get past doses. This entire app and its helper text. you are not speaking to me. You are speaking to users.  [COMPLETED]
 	- Schedule Dates Styling of fields is incorrect. not use system design.  [COMPLETED]
 	- Start:
 			- Selected date calnedar button is causing an overflow.  [COMPLETED]
