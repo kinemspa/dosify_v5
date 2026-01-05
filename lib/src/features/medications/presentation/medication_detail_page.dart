@@ -3257,7 +3257,13 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Sealed Vials:'),
+                        Text(
+                          'Sealed Vials:',
+                          style: helperTextStyle(
+                            context,
+                            color: theme.colorScheme.primary,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
+                        ),
                         Text(
                           '$sealedVials in stock',
                           style: TextStyle(
