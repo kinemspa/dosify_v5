@@ -8,6 +8,7 @@ class NextDoseDateBadge extends StatelessWidget {
     required this.isActive,
     required this.dense,
     this.showNextLabel = false,
+    this.showTodayIcon = true,
     super.key,
   });
 
@@ -15,6 +16,7 @@ class NextDoseDateBadge extends StatelessWidget {
   final bool isActive;
   final bool dense;
   final bool showNextLabel;
+  final bool showTodayIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,7 @@ class NextDoseDateBadge extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isToday)
+            if (isToday && showTodayIcon)
               Icon(Icons.today, size: dense ? 16 : 18, color: primaryTextColor)
             else
               Text(

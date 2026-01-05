@@ -520,6 +520,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               isActive: true,
               dense: true,
               showNextLabel: false,
+              showTodayIcon: isAdHoc,
             ),
             const SizedBox(width: kSpacingS),
             Expanded(
