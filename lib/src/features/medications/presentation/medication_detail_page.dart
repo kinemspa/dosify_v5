@@ -524,6 +524,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   }
 
   Widget _buildDetailCardsList(BuildContext context, Medication med) {
+    final cs = Theme.of(context).colorScheme;
+
     final cards = <String, Widget>{
       if (med.form == MedicationForm.multiDoseVial)
         _kCardReconstitution: _buildReconstitutionCard(context, med),
@@ -551,6 +553,21 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         !_isDetailsExpanded ||
         (hasReconstitutionCard && !_isReconstitutionExpanded);
 
+    bool isExpandedForCardId(String id) {
+      switch (id) {
+        case _kCardReports:
+          return _isReportsExpanded;
+        case _kCardSchedule:
+          return _isScheduleExpanded;
+        case _kCardDetails:
+          return _isDetailsExpanded;
+        case _kCardReconstitution:
+          return _isReconstitutionExpanded;
+        default:
+          return true;
+      }
+    }
+
     final orderedIds = _cardOrder.where(cards.containsKey).toList();
     for (final id in cards.keys) {
       if (!orderedIds.contains(id)) {
@@ -558,9 +575,33 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       }
     }
 
+    final helper = Padding(
+      padding: const EdgeInsets.only(bottom: kSpacingS),
+      child: Row(
+        children: [
+          Icon(
+            Icons.drag_indicator_rounded,
+            size: kIconSizeSmall,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+          ),
+          const SizedBox(width: kSpacingXS),
+          Expanded(
+            child: Text(
+              reorderEnabled
+                  ? 'Drag a collapsed card to rearrange.'
+                  : 'Tip: Collapse a card to rearrange.'
+                  ,
+              style: helperTextStyle(context),
+            ),
+          ),
+        ],
+      ),
+    );
+
     if (!reorderEnabled) {
       return Column(
         children: [
+          helper,
           for (final entry in orderedIds.asMap().entries)
             Padding(
               padding: EdgeInsets.only(
@@ -581,23 +622,52 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             padding: EdgeInsets.only(
               bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingM,
             ),
-            child: cards[entry.value]!,
+            child: Stack(
+              children: [
+                cards[entry.value]!,
+                if (!isExpandedForCardId(entry.value))
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: IgnorePointer(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: kSpacingXS,
+                          right: kSpacingL,
+                        ),
+                        child: Icon(
+                          Icons.drag_indicator_rounded,
+                          size: kIconSizeMedium,
+                          color: cs.onSurfaceVariant.withValues(
+                            alpha: kOpacityMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
     ];
 
-    return ReorderableListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      buildDefaultDragHandles: false,
-      onReorder: (oldIndex, newIndex) {
-        setState(() {
-          if (newIndex > oldIndex) newIndex -= 1;
-          final id = _cardOrder.removeAt(oldIndex);
-          _cardOrder.insert(newIndex, id);
-        });
-      },
-      children: children,
+    return Column(
+      children: [
+        helper,
+        ReorderableListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          buildDefaultDragHandles: false,
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              if (newIndex > oldIndex) newIndex -= 1;
+              final id = _cardOrder.removeAt(oldIndex);
+              _cardOrder.insert(newIndex, id);
+            });
+          },
+          children: children,
+        ),
+      ],
     );
   }
 
