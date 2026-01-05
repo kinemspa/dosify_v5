@@ -900,24 +900,27 @@ class _DoseInputFieldState extends State<DoseInputField> {
   Widget _buildQuickButtons(ColorScheme cs) {
     final buttons = [('1/4', 0.25), ('1/2', 0.5), ('1', 1.0), ('2', 2.0)];
 
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: kButtonSpacing,
-      runSpacing: kButtonSpacing,
-      children: buttons.map((btn) {
-        return ActionChip(
-          label: Text(btn.$1),
-          onPressed: () => _setQuickValue(btn.$2),
-          padding: const EdgeInsets.symmetric(
-            horizontal: kCardInnerSpacing,
-            vertical: 0,
-          ),
-          backgroundColor: cs.surface,
-          labelStyle: bodyTextStyle(
-            context,
-          )?.copyWith(fontWeight: kFontWeightMedium),
-        );
-      }).toList(),
+    return SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: kButtonSpacing,
+        runSpacing: kButtonSpacing,
+        children: buttons.map((btn) {
+          return ActionChip(
+            label: Text(btn.$1),
+            onPressed: () => _setQuickValue(btn.$2),
+            padding: const EdgeInsets.symmetric(
+              horizontal: kCardInnerSpacing,
+              vertical: 0,
+            ),
+            backgroundColor: cs.surface,
+            labelStyle: bodyTextStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightMedium),
+          );
+        }).toList(),
+      ),
     );
   }
 
