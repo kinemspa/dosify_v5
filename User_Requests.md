@@ -97,7 +97,7 @@
 - Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
 - Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
 - The incremental field and buttons are wrong. Use the same styling as the add med screen.  [COMPLETED]
-- App Header dynaimc summary needs to contain the active medicine remaining. 
+- App Header dynaimc summary needs to contain the active medicine remaining.  [COMPLETED]
 - Step 1:
 	- Tablets:
 		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet. 

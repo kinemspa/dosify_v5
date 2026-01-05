@@ -320,6 +320,18 @@ class _AddScheduleWizardPageState
                         ).colorScheme.onPrimary.withValues(alpha: 0.85),
                       ),
                     ),
+                  if (med != null)
+                    Text(
+                      _remainingStockSummaryLabel(med),
+                      style: helperTextStyle(
+                        context,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   if (med != null && _doseValue.text.isNotEmpty)
                     Text(
                       'Dose: ${_doseMetricsSummaryLabel()}',
@@ -374,6 +386,17 @@ class _AddScheduleWizardPageState
 
     if (perUnit == null) return '$term: $value $unit';
     return '$term: $value $unit per $perUnit';
+  }
+
+  String _remainingStockSummaryLabel(Medication med) {
+    final v = med.stockValue;
+    final formatted = v == v.roundToDouble()
+        ? v.toStringAsFixed(0)
+        : v
+            .toStringAsFixed(2)
+            .replaceFirst(RegExp(r'\.0+$'), '')
+            .replaceFirst(RegExp(r'(\.\d*[1-9])0+$'), r'$1');
+    return 'Remaining: $formatted';
   }
 
   String _doseSummaryLabel() {
