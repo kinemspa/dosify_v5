@@ -586,11 +586,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final hasReconstitutionCard = cards.containsKey(_kCardReconstitution);
 
-    final reorderEnabled =
-        !_isReportsExpanded ||
-        !_isScheduleExpanded ||
-        !_isDetailsExpanded ||
-        (hasReconstitutionCard && !_isReconstitutionExpanded);
+    final allCardsCollapsed =
+        !_isReportsExpanded &&
+        !_isScheduleExpanded &&
+        !_isDetailsExpanded &&
+        (!hasReconstitutionCard || !_isReconstitutionExpanded);
 
     bool isExpandedForCardId(String id) {
       switch (id) {
@@ -614,105 +614,79 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       }
     }
 
-    final helper = Padding(
-      padding: const EdgeInsets.only(bottom: kSpacingS),
-      child: Row(
-        children: [
-          Icon(
-            Icons.drag_indicator_rounded,
-            size: kIconSizeSmall,
-            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+    void showCollapseAllInstruction() {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Collapse all cards first to rearrange them.'),
+            duration: Duration(seconds: 2),
           ),
-          const SizedBox(width: kSpacingXS),
-          Expanded(
-            child: Text(
-              reorderEnabled
-                  ? 'Drag a collapsed card to rearrange.'
-                  : 'Tip: Collapse a card to rearrange.',
-              style: helperTextStyle(context),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (!reorderEnabled) {
-      return Column(
-        children: [
-          helper,
-          for (final entry in orderedIds.asMap().entries)
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingM,
-              ),
-              child: cards[entry.value]!,
-            ),
-        ],
-      );
+        );
     }
 
     final children = <Widget>[
       for (final entry in orderedIds.asMap().entries)
-        ReorderableDelayedDragStartListener(
+        Padding(
           key: ValueKey<String>('detail_card_${entry.value}'),
-          index: entry.key,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingM,
-            ),
-            child: Stack(
-              children: [
-                cards[entry.value]!,
-                if (!isExpandedForCardId(entry.value))
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IgnorePointer(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: kSpacingXS,
-                          right: kSpacingL,
-                        ),
-                        child: Icon(
-                          Icons.drag_indicator_rounded,
-                          size: kIconSizeMedium,
-                          color: cs.onSurfaceVariant.withValues(
-                            alpha: kOpacityMedium,
+          padding: EdgeInsets.only(
+            bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingM,
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              cards[entry.value]!,
+              if (!isExpandedForCardId(entry.value))
+                Positioned(
+                  top: kSpacingS,
+                  left: -kSpacingS,
+                  child: allCardsCollapsed
+                      ? ReorderableDelayedDragStartListener(
+                          index: entry.key,
+                          child: Icon(
+                            Icons.drag_indicator_rounded,
+                            size: kIconSizeMedium,
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                          ),
+                        )
+                      : GestureDetector(
+                          onLongPress: showCollapseAllInstruction,
+                          onTap: showCollapseAllInstruction,
+                          child: Icon(
+                            Icons.drag_indicator_rounded,
+                            size: kIconSizeMedium,
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
     ];
 
-    return Column(
-      children: [
-        helper,
-        ReorderableListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          buildDefaultDragHandles: false,
-          onReorder: (oldIndex, newIndex) {
-            setState(() {
-              if (newIndex > oldIndex) newIndex -= 1;
+    return ReorderableListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      onReorder: (oldIndex, newIndex) {
+        setState(() {
+          if (newIndex > oldIndex) newIndex -= 1;
 
-              final moved = orderedIds.removeAt(oldIndex);
-              orderedIds.insert(newIndex, moved);
+          final moved = orderedIds.removeAt(oldIndex);
+          orderedIds.insert(newIndex, moved);
 
-              _cardOrder
-                ..clear()
-                ..addAll(orderedIds);
-            });
+          _cardOrder
+            ..clear()
+            ..addAll(orderedIds);
+        });
 
-            unawaited(_persistCardOrder(med.id, orderedIds));
-          },
-          children: children,
-        ),
-      ],
+        unawaited(_persistCardOrder(med.id, orderedIds));
+      },
+      children: children,
     );
   }
 

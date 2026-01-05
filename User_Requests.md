@@ -21,9 +21,9 @@
 ==============
 
 # Medication Details Screen
-- Collapse Helper Text. Remove it. 
-- Move Drag Icon to the Left side of the collapsed Cards. 
-- INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. 
+- Collapse Helper Text. Remove it. [COMPLETED]
+- Move Drag Icon to the Left side of the collapsed Cards. [COMPLETED]
+- INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
@@ -53,9 +53,8 @@
 
 ### Schedule
 - Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps. 
-- Pausing the Schedule, removes the schedule from showing on the medicaiont screen. Need to still display disabled schedules. I paused the schedule now the schedule shows No shcedules.  [COMPLETED]
-- Top Area of Schedule should expand or collapse schedule. Currenly it is editing scehdule. the only area to expand and collapse seems to be the little arrow. Make the enitre top orw where the arrow sits the expand and collaps. [COMPLETED]
-- Set Paused button is not the right terminology. [COMPLETED]
+- If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation. 
+- Pause button. Its too big. Is it possiblke to have the Pause button enable a time frame, pause for ever, pause until etc etc..
 - Take Dose Card:
 	- Dose Name is correct.
 	- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action.
@@ -230,6 +229,16 @@
 - Day view:
 	- Dont allow slecting doses direct from calendar. Hour has to be selected, whcih then displays all the doses below which are then selected. 
 
+
+
+==============
+# Dose Cards
+- Too High. 
+- Has time and an action to take at time. Dont need both. 
+- Needs a date icon, will display today
+- Dose instructions:
+	- Take X X at X. 
+- Provide a take, sn
 
 
 ==============
