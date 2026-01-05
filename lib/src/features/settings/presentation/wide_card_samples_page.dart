@@ -415,7 +415,7 @@ final _standardConceptIndices = List<int>.unmodifiable(
 final _sampleMedications = <Medication>[
   Medication(
     id: 'med01',
-    name: 'Semaglutide',
+    name: 'Sample MDV A',
     form: MedicationForm.multiDoseVial,
     strengthValue: 2.4,
     strengthUnit: Unit.mg,
@@ -428,7 +428,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med02',
-    name: 'Levothyroxine',
+    name: 'Sample Tablet A',
     form: MedicationForm.tablet,
     strengthValue: 125,
     strengthUnit: Unit.mcg,
@@ -440,7 +440,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med03',
-    name: 'Vitamin D-3',
+    name: 'Sample Capsule A',
     form: MedicationForm.capsule,
     strengthValue: 5000,
     strengthUnit: Unit.units,
@@ -452,7 +452,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med04',
-    name: 'Trulicity',
+    name: 'Sample Syringe A',
     form: MedicationForm.prefilledSyringe,
     strengthValue: 1.5,
     strengthUnit: Unit.mg,
@@ -465,7 +465,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med05',
-    name: 'Omnitrope',
+    name: 'Sample Vial A',
     form: MedicationForm.singleDoseVial,
     strengthValue: 5,
     strengthUnit: Unit.mg,
@@ -478,7 +478,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med06',
-    name: 'Hydroxyzine',
+    name: 'Sample Tablet B',
     form: MedicationForm.tablet,
     strengthValue: 25,
     strengthUnit: Unit.mg,
@@ -490,7 +490,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med07',
-    name: 'Acyclovir',
+    name: 'Sample Capsule B',
     form: MedicationForm.capsule,
     strengthValue: 400,
     strengthUnit: Unit.mg,
@@ -502,7 +502,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med08',
-    name: 'B12 Injection',
+    name: 'Sample Injection A',
     form: MedicationForm.multiDoseVial,
     strengthValue: 30,
     strengthUnit: Unit.units,
@@ -514,7 +514,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med09',
-    name: 'Progesterone SR',
+    name: 'Sample Capsule C',
     form: MedicationForm.capsule,
     strengthValue: 200,
     strengthUnit: Unit.mg,
@@ -526,7 +526,7 @@ final _sampleMedications = <Medication>[
   ),
   Medication(
     id: 'med10',
-    name: 'Sertraline',
+    name: 'Sample Tablet C',
     form: MedicationForm.tablet,
     strengthValue: 50,
     strengthUnit: Unit.mg,

@@ -40,23 +40,11 @@
 	- Scheduled Doses should be editable too. 
 	- Should be able to edit the dose time and date aswell. 
 	- Scheudled Dose Date Icon is not showing the date. 
-	- AdHoc Doses should be editable. [COMPLETED]
-		- Editing an ad hoc dose, needs to include the ability to select the dose unit type. Same as a dose. 
-	- Indicate entries that are editable. [COMPLETED]
-	- Edit icon should always be to the right of all icons. This is not the case.  [COMPLETED]
-	- Make edit icon smaller and lighter [COMPLETED]
-	- Adhoc doses are showing up as 2 entries.  [COMPLETED]
-	- Add if Recositution of a vial.  [COMPLETED]
-		- If a sealed vial was used or deducted [COMPLETED]
-		- If a new calculation was made, existing, saved, or direct mL entry. [COMPLETED]
+	- Make edit icon smaller and lighter
 	- AdHoc Dose:
 		- Edit - Editing the dose needs to be the same dialog as taking a dose. 
 	- Scheduled Dose:
 		- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible. 
-
-
-
-
 
 ### Schedule
 - Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps.  [COMPLETED]
@@ -86,7 +74,7 @@
 
 ### Add Medicaiton Tablet
 - Is Ibuprofen allowed to be used as an example? Is there a legal issues here.  [COMPLETED]
-- Go through the entire app and find any exmaple text or helper text that contyains any actual real life medicaiotn names or company names. These are legal issues.
+- Go through the entire app and find any exmaple text or helper text that contyains any actual real life medicaiotn names or company names. These are legal issues. [COMPLETED]
 
 ### Add Medicaiton - Multi Dose Vial
 

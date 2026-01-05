@@ -232,7 +232,7 @@ class _UnifiedAddEditMedicationPageState
           child: TextFormField(
             controller: _manufacturerCtrl,
             textCapitalization: TextCapitalization.sentences,
-            decoration: _dec(hint: 'eg. GSK'),
+            decoration: _dec(hint: 'e.g., Example Co.'),
           ),
         ),
       ),
