@@ -224,9 +224,21 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         .where((log) => log.medicationId == widget.medication.id)
         .toList(growable: false);
 
+    final adHocDoseLogIds = doseLogs
+      .where((log) => log.scheduleId == 'ad_hoc')
+      .map((log) => log.id)
+      .toSet();
+
     // Inventory events for this medication (refills, deductions, adjustments, etc)
     final inventoryLogs = inventoryLogBox.values
         .where((l) => l.medicationId == widget.medication.id)
+      // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
+      // In History, show the editable DoseLog and suppress the duplicate inventory entry.
+      .where(
+        (l) =>
+          !(l.changeType == InventoryChangeType.adHocDose &&
+            adHocDoseLogIds.contains(l.id)),
+      )
         .toList(growable: false);
 
     // Status change events for this medication

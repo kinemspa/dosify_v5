@@ -44,7 +44,7 @@
 	- Indicate entries that are editable. [COMPLETED]
 	- Edit icon should always be to the right of all icons. This is not the case.  [COMPLETED]
 	- Make edit icon smaller and lighter [COMPLETED]
-	- Adhoc doses are showing up as 2 entries. 
+	- Adhoc doses are showing up as 2 entries.  [COMPLETED]
 	- Add if Recositution of a vial. 
 		- If a sealed vial was used or deducted
 		- If a new calculation was made, existing, saved, or direct mL entry. 
