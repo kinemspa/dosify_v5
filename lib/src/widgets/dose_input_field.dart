@@ -425,14 +425,35 @@ class _DoseInputFieldState extends State<DoseInputField> {
   void _increment({double? customStep}) {
     final current = double.tryParse(_controller.text) ?? 0;
     final step = _defaultStepperStep(customStep: customStep);
-    final newValue = _snapToReasonablePrecision(current + step);
-    _controller.text = _formatStepperValue(newValue);
+    if (widget.medicationForm == MedicationForm.multiDoseVial &&
+        _mdvMode == MdvInputMode.units) {
+      final isWholeNumber =
+          (current - current.roundToDouble()).abs() < 0.0001;
+      final newValue = isWholeNumber ? (current + step) : current.ceilToDouble();
+      _controller.text = _formatStepperValue(newValue);
+    } else {
+      final newValue = _snapToReasonablePrecision(current + step);
+      _controller.text = _formatStepperValue(newValue);
+    }
     _calculate();
   }
 
   void _decrement({double? customStep}) {
     final current = double.tryParse(_controller.text) ?? 0;
     final step = _defaultStepperStep(customStep: customStep);
+    if (widget.medicationForm == MedicationForm.multiDoseVial &&
+        _mdvMode == MdvInputMode.units) {
+      final isWholeNumber =
+          (current - current.roundToDouble()).abs() < 0.0001;
+      final newValue =
+          isWholeNumber ? (current - step) : current.floorToDouble();
+      if (newValue >= 0) {
+        _controller.text = _formatStepperValue(newValue);
+        _calculate();
+      }
+      return;
+    }
+
     final newValue = _snapToReasonablePrecision(current - step);
     if (newValue >= 0) {
       _controller.text = _formatStepperValue(newValue);
@@ -547,7 +568,9 @@ class _DoseInputFieldState extends State<DoseInputField> {
       return;
 
     final clamped = newUnits.clamp(0, widget.syringeType!.maxUnits.toDouble());
-    final snapped = double.parse(clamped.toStringAsFixed(2));
+    final snapped = _mdvMode == MdvInputMode.units
+      ? clamped.roundToDouble()
+      : double.parse(clamped.toStringAsFixed(2));
 
     // Calculate from units
     final result = DoseCalculator.calculateFromUnitsMDV(
@@ -863,10 +886,16 @@ class _DoseInputFieldState extends State<DoseInputField> {
         Expanded(
           child: TextField(
             controller: _controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.numberWithOptions(
+              decimal: _mdvMode != MdvInputMode.units,
+            ),
             textAlign: TextAlign.center,
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              FilteringTextInputFormatter.allow(
+                _mdvMode == MdvInputMode.units
+                    ? RegExp(r'^\d*')
+                    : RegExp(r'^\d*\.?\d*'),
+              ),
             ],
             decoration: buildFieldDecoration(context, hint: _getInputHint()),
             onChanged: (_) => _calculate(),

@@ -4,7 +4,7 @@
 - Dark Theme 
 	- The reconstitution calculator 
 	
-- Time Picker, the AM / PM text Grey when not selected. White when selected.  Same with the clock numbers.   [COMPLETED]
+- Time Picker, the AM / PM text Grey when not selected. White when selected.  Same with the clock numbers.
 
 ## Home Screen
 
@@ -13,7 +13,6 @@
 ## Medication Screen
 
 ### Large Cards
-- Non MDV Large cards, the Storage location text and remaining  text are NOT on the same row. [COMPLETED]
 
 ### Compact Cards
 
@@ -22,16 +21,12 @@
 ==============
 
 # Medication Details Screen
-- Drag Icon is cropping over the boundary of the card. move it right a bit.  [COMPLETED]
-- INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. [COMPLETED]
-- For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
-	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
+- Minimized Cards, make them taller.
+- MDV: 
+	- Can we change the refill dialog. " Open New VIal" this is not the correct terminology for medicine. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
-- Minimized Cards, make them all the same size as the Reconsitution card in height. [COMPLETED]
 - Reconstitution Card:
-	- Remove the dit button. [COMPLETED]
-	- Can No longer edit the reconstitution. Need to be able to edit the reconstitution.  [COMPLETED]
-	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
+	- Why is the text so d
 
 ### App Header
 - On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is. [COMPLETED]
@@ -170,7 +165,7 @@
 	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both. [COMPLETED]
 	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? [COMPLETED]
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
-	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number. 
+	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number.  [COMPLETED]
 	- Remove 10mL syringe. 
 	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg. 
 	- Why does MDV have 2 summary boxes?
