@@ -119,10 +119,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               setState(() => _isExpandedInternal = !_isExpandedInternal);
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kSpacingL,
-                vertical: kSpacingXS,
-              ),
+              padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
                   Icon(
