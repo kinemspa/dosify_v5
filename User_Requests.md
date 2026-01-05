@@ -132,7 +132,7 @@
 			- No black font.  [COMPLETED]
 			- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
 			- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
-			- Days of the Month in the dropdown menu once selected is only showing "days of the". Month is cropped off. 
+			- Days of the Month in the dropdown menu once selected is only showing "days of the". Month is cropped off.  [COMPLETED]
 			- Helper text should state something like, select on which days of the month to for doses. 
 			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?
 - Step 3:

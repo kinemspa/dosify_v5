@@ -513,7 +513,12 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                                 .map(
                                   (m) => DropdownMenuItem(
                                     value: m,
-                                    child: Text(_modeLabel(m)),
+                                    child: Text(
+                                      _modeLabel(m),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      softWrap: false,
+                                    ),
                                   ),
                                 )
                                 .toList(),

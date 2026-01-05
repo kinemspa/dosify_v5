@@ -943,7 +943,14 @@ class _AddScheduleWizardPageState
                   .map(
                     (mode) => DropdownMenuItem(
                       value: mode,
-                      child: Center(child: Text(_modeLabel(mode))),
+                      child: Center(
+                        child: Text(
+                          _modeLabel(mode),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                        ),
+                      ),
                     ),
                   )
                   .toList(),
