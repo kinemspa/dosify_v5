@@ -579,10 +579,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               const SizedBox(width: kSpacingXS),
               Icon(
                 Icons.edit,
-                size: kIconSizeSmall,
-                color: cs.onSurfaceVariant.withValues(
-                  alpha: kOpacityMediumHigh,
-                ),
+                size: kIconSizeXSmall,
+                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
               ),
             ],
           ],
@@ -1635,14 +1633,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ),
           ),
           const SizedBox(width: kSpacingS),
-          if (linkedAdHocDoseLog != null) ...[
-            Icon(
-              Icons.edit,
-              size: kIconSizeSmall,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-            ),
-            const SizedBox(width: kSpacingXS),
-          ],
           Container(
             width: kStepperButtonSize,
             height: kStepperButtonSize,
@@ -1652,6 +1642,14 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ),
             child: Icon(icon, size: kIconSizeSmall, color: color),
           ),
+          if (linkedAdHocDoseLog != null) ...[
+            const SizedBox(width: kSpacingXS),
+            Icon(
+              Icons.edit,
+              size: kIconSizeXSmall,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+            ),
+          ],
         ],
       ),
     );
