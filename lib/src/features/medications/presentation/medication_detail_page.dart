@@ -1695,9 +1695,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         vertical: kSpacingS,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 90, child: Text(label, style: labelStyle)),
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: labelStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           Expanded(
             child: Text(
               value,

@@ -21,7 +21,7 @@
 ==============
 
 # Medication Details Screen
-- Drag Icon is cropping over the boundary of the card. move i
+- Drag Icon is cropping over the boundary of the card. move it right a bit. 
 - INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
@@ -36,7 +36,7 @@
 
 ### Reports Card
 - History: 
-	- Date Icon - make smaller. [COMPLETED]
+	- Scheduled Doses should be editable too. 
 	- AdHoc Doses should be editable. [COMPLETED]
 		- Editing an ad hoc dose, needs to include the ability to select the dose unit type. Same as a dose. 
 	- Indicate entries that are editable. [COMPLETED]
@@ -65,7 +65,7 @@
 
 ### Medication Details Card
 - Sealed VIals heading should still be in primary colour.  [COMPLETED]
-- Some text is out of horizontal alignment. For example Active VIal Location heading is higher up than the Value. 
+- Some text is out of horizontal alignment. For example Active VIal Location heading is higher up than the Value.  [COMPLETED]
 
 ==============
 ## Add Medication
