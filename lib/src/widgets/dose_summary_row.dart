@@ -7,6 +7,9 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class DoseSummaryRow extends StatelessWidget {
   const DoseSummaryRow({
@@ -64,6 +67,8 @@ class DoseSummaryRow extends StatelessWidget {
     final doseInfo = '${_formatNumber(dose.doseValue)} ${dose.doseUnit}';
     final dateStr = DateFormat('E, MMM d').format(dose.scheduledTime);
 
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+
     final line2 = showMedicationName
         ? '${dose.medicationName} • $doseInfo'
         : doseInfo;
@@ -103,14 +108,24 @@ class DoseSummaryRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      dose.scheduleName,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: kFontWeightSemiBold,
-                        color: cs.primary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            dose.scheduleName,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: kFontWeightSemiBold,
+                              color: cs.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (schedule != null && !schedule.isActive) ...[
+                          const SizedBox(width: kSpacingXS),
+                          ScheduleStatusBadge(schedule: schedule, dense: true),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(

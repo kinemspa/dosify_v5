@@ -49,7 +49,7 @@
 	- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible.  [COMPLETED]
 
 ### Schedule
-- If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation. 
+- If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation.  [COMPLETED]
 - Pause button. Its too big. Is it possiblke to have the Pause button enable a time frame, pause for ever, pause until etc etc..
 - Take Dose Card:
 	- Dose Name is correct.

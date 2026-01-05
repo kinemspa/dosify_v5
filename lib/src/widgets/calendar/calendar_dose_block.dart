@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 /// Displays a dose block in calendar views
 class CalendarDoseBlock extends StatelessWidget {
@@ -22,6 +25,8 @@ class CalendarDoseBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
 
     return InkWell(
       onTap: onTap,
@@ -42,14 +47,24 @@ class CalendarDoseBlock extends StatelessWidget {
           children: [
             // Schedule name
             Flexible(
-              child: Text(
-                dose.scheduleName,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: _getTextColor(colorScheme),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      dose.scheduleName,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: _getTextColor(colorScheme),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (schedule != null && !schedule.isActive && !compact) ...[
+                    const SizedBox(width: kSpacingXS),
+                    ScheduleStatusBadge(schedule: schedule, dense: true),
+                  ],
+                ],
               ),
             ),
 
@@ -193,17 +208,22 @@ class CalendarDoseIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+
     return Container(
       width: kCalendarDoseIndicatorSize,
       height: kCalendarDoseIndicatorSize,
       decoration: BoxDecoration(
-        color: _getColor(colorScheme),
+        color: _getColor(colorScheme, schedule: schedule),
         borderRadius: BorderRadius.circular(2),
       ),
     );
   }
 
-  Color _getColor(ColorScheme colorScheme) {
+  Color _getColor(ColorScheme colorScheme, {Schedule? schedule}) {
+    if (schedule != null && !schedule.isActive) {
+      return colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
+    }
     switch (dose.status) {
       case DoseStatus.taken:
         return colorScheme.primary;

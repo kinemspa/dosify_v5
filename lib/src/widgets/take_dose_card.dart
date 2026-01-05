@@ -7,6 +7,9 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class TakeDoseCard extends StatelessWidget {
   const TakeDoseCard({
@@ -39,6 +42,8 @@ class TakeDoseCard extends StatelessWidget {
 
     final dateText = DateFormat('E, MMM d').format(dose.scheduledTime);
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
+
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
 
     final actionLabel = primaryActionLabel ?? _defaultPrimaryActionLabel(dose);
 
@@ -80,14 +85,24 @@ class TakeDoseCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      dose.scheduleName,
-                      style: baseBody?.copyWith(
-                        fontWeight: kFontWeightSemiBold,
-                        color: cs.primary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            dose.scheduleName,
+                            style: baseBody?.copyWith(
+                              fontWeight: kFontWeightSemiBold,
+                              color: cs.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (schedule != null && !schedule.isActive) ...[
+                          const SizedBox(width: kSpacingXS),
+                          ScheduleStatusBadge(schedule: schedule, dense: true),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
