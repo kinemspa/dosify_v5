@@ -66,7 +66,18 @@ class NextDoseDateBadge extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (isToday && showTodayIcon)
-              Icon(Icons.today, size: dense ? 16 : 18, color: primaryTextColor)
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Today',
+                  style: TextStyle(
+                    fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
+                    fontWeight: kFontWeightExtraBold,
+                    height: 1,
+                    color: primaryTextColor,
+                  ),
+                ),
+              )
             else
               Text(
                 dayText,

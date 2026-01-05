@@ -5,7 +5,8 @@
 	- The reconstitution calculator 
 		- Can we change the background blue colour to something not blue? [COMPLETED]
 	
-- For All today Icons on cards, change to the Text "Today"
+- For All today Icons on cards, change to the Text "Today" [COMPLETED]
+- Time Picker, make all text the grey font. unless selected. 
 
 ## Home Screen
 
