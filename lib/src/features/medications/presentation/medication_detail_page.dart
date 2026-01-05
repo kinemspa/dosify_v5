@@ -639,7 +639,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               if (!isExpandedForCardId(entry.value))
                 Positioned(
                   top: kSpacingS,
-                  left: -kSpacingS,
+                  left: 0,
                   child: allCardsCollapsed
                       ? ReorderableDelayedDragStartListener(
                           index: entry.key,

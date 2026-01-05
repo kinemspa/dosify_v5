@@ -21,7 +21,7 @@
 ==============
 
 # Medication Details Screen
-- Drag Icon is cropping over the boundary of the card. move it right a bit. 
+- Drag Icon is cropping over the boundary of the card. move it right a bit.  [COMPLETED]
 - INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
@@ -29,14 +29,17 @@
 - Minimized Cards, make them all the same size as the Reconsitution card in height. [COMPLETED]
 - Reconstitution Card:
 	- Remove the dit button. [COMPLETED]
+	- Can No longer edit the reconstitution. Need to be able to edit the reconstitution. 
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
-- Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED]
+- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then  alig [COMPLETED]
 
 ### Reports Card
 - History: 
 	- Scheduled Doses should be editable too. 
+	- Should be able to edit the dose time and date aswell. 
+	- Scheudled Dose Date Icon is not showing the date. 
 	- AdHoc Doses should be editable. [COMPLETED]
 		- Editing an ad hoc dose, needs to include the ability to select the dose unit type. Same as a dose. 
 	- Indicate entries that are editable. [COMPLETED]
@@ -46,7 +49,12 @@
 	- Add if Recositution of a vial.  [COMPLETED]
 		- If a sealed vial was used or deducted [COMPLETED]
 		- If a new calculation was made, existing, saved, or direct mL entry. [COMPLETED]
-	
+	- AdHoc Dose:
+		- Edit - Editing the dose needs to be the same dialog as taking a dose. 
+	- Scheduled Dose:
+		- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible. 
+
+
 
 
 
