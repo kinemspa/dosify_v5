@@ -509,18 +509,27 @@ class _ScheduleCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: kSpacingXS),
-          Text(
-            startedLabel,
-            style: helperTextStyle(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: kSpacingXS),
-          Text(
-            endLabel,
-            style: helperTextStyle(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  startedLabel,
+                  style: helperTextStyle(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Expanded(
+                child: Text(
+                  endLabel,
+                  style: helperTextStyle(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
           ),
           if (!s.isActive) ...[
             const SizedBox(height: kSpacingXS),
