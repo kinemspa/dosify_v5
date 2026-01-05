@@ -62,7 +62,7 @@
 
 ### Medication Details Card
 - Sealed Vials heading should still be in primary colour. This was not completed.  [COMPLETED]
-- Make Text field labels and text field values bottom aligned. 
+- Make Text field labels and text field values bottom aligned.  [COMPLETED]
 
 ==============
 ## Add Medication

@@ -1696,7 +1696,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         vertical: kSpacingS,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           SizedBox(
             width: 90,
