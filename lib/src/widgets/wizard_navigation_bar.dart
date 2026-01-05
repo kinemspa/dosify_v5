@@ -37,10 +37,8 @@ class WizardNavigationBar extends StatelessWidget {
     final showNextMode = keyboardOpen && !isLastStep;
 
     final primaryLabel = isLastStep
-        ? saveLabel
-        : (showNextMode
-              ? (canProceed ? nextPageLabel : nextLabel)
-              : continueLabel);
+      ? saveLabel
+      : (showNextMode ? nextLabel : continueLabel);
 
     final VoidCallback? primaryAction;
     if (isLastStep) {

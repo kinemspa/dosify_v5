@@ -68,7 +68,7 @@
 ## Add Medication
 
 - Wizard still doesnt have Next button instead of continue button at the bottom when filling in fields.  [COMPLETED]
-- The above task is still not complete.  The continue button is supposed to be a next button to jump to the next field easily while the OSK is displaying. Must be for ALL wizards. 
+- The above task is still not complete.  The continue button is supposed to be a next button to jump to the next field easily while the OSK is displaying. Must be for ALL wizards.  [COMPLETED]
 
 ### Choose Medicaiotn Type Screen
 
