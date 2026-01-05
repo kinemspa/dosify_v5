@@ -36,7 +36,7 @@
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
-- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is.
+- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is. [COMPLETED]
 
 ### Reports Card
 - Scheduled Doses should be editable too.  [COMPLETED]

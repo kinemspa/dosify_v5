@@ -7,6 +7,7 @@ import 'package:dosifi_v5/src/features/medications/domain/services/medication_st
 import 'package:dosifi_v5/src/features/medications/presentation/controllers/medication_detail_controller.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
@@ -142,25 +143,31 @@ class MedicationHeaderWidget extends ConsumerWidget {
                   ),
                   const SizedBox(height: kSpacingS),
 
-                  // Storage
+                  // Storage + expiry (match Large Cards compact storage rows)
                   if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                    _HeaderInfoTile(
-                      icon: Icons.location_on_outlined,
-                      label: 'Storage Location',
-                      value: storageLabel,
-                      textColor: headerForeground,
-                      valueSize: 11,
-                      trailingIcons: [
+                    CompactStorageLine(
+                      icons: [
                         if (medication.activeVialRequiresFreezer ||
                             medication.requiresFreezer)
-                          Icons.severe_cold,
-                        if (medication.requiresRefrigeration ||
+                          Icons.severe_cold
+                        else if (medication.requiresRefrigeration ||
                             medication.activeVialRequiresRefrigeration)
-                          Icons.ac_unit,
+                          Icons.ac_unit
+                        else
+                          Icons.inventory_2_outlined,
                         if (medication.activeVialLightSensitive ||
                             medication.lightSensitive)
-                          Icons.dark_mode_outlined,
+                          Icons.dark_mode,
                       ],
+                      label: 'Storage',
+                      location: storageLabel,
+                      createdAt: medication.createdAt,
+                      expiry: medication.expiry,
+                      iconColor: headerForeground.withValues(
+                        alpha: kOpacityEmphasis,
+                      ),
+                      textColor: headerForeground,
+                      onPrimaryBackground: true,
                     ),
                   ],
 
@@ -334,7 +341,6 @@ class _HeaderInfoTile extends StatelessWidget {
   final String value;
   final IconData? icon;
   final Color? textColor;
-  final List<IconData>? trailingIcons;
   final double? valueSize;
 
   const _HeaderInfoTile({
@@ -342,7 +348,6 @@ class _HeaderInfoTile extends StatelessWidget {
     required this.value,
     this.icon,
     this.textColor,
-    this.trailingIcons,
     this.valueSize,
   });
 
@@ -387,11 +392,6 @@ class _HeaderInfoTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (trailingIcons != null)
-              for (final icon in trailingIcons!) ...[
-                const SizedBox(width: kSpacingXS),
-                Icon(icon, color: color.withValues(alpha: 0.95), size: 15),
-              ],
           ],
         ),
       ],
