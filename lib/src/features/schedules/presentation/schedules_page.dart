@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_instruction_text.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -486,6 +487,13 @@ class _ScheduleCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ],
+          const SizedBox(height: kSpacingXS),
+          Text(
+            scheduleTakeInstructionLabel(context, s),
+            style: helperTextStyle(context),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: kSpacingS),
           Text(
             cadence,
