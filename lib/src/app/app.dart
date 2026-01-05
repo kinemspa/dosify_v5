@@ -46,17 +46,34 @@ class DosifiApp extends ConsumerWidget {
         scrolledUnderElevation: 0,
       ),
       timePickerTheme: TimePickerThemeData(
-        dialTextColor: schemeLight.onSurfaceVariant.withValues(
-          alpha: kOpacityMediumHigh,
-        ),
-        hourMinuteTextColor: schemeLight.onSurfaceVariant.withValues(
-          alpha: kOpacityMediumHigh,
-        ),
+        dialTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeLight.onPrimary;
+          }
+          return schemeLight.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeLight.onPrimary;
+          }
+          return schemeLight.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
         entryModeIconColor: schemeLight.onSurfaceVariant.withValues(
           alpha: kOpacityMediumHigh,
         ),
         dayPeriodColor: schemeLight.primary,
-        dayPeriodTextColor: schemeLight.onPrimary,
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeLight.onPrimary;
+          }
+          return schemeLight.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
         dayPeriodBorderSide: BorderSide(
           color: schemeLight.outlineVariant.withValues(alpha: 0.50),
           width: 0.75,
@@ -223,17 +240,28 @@ class DosifiApp extends ConsumerWidget {
         scrolledUnderElevation: 0,
       ),
       timePickerTheme: TimePickerThemeData(
-        dialTextColor: schemeDark.onSurfaceVariant.withValues(
-          alpha: kOpacityMediumHigh,
-        ),
-        hourMinuteTextColor: schemeDark.onSurfaceVariant.withValues(
-          alpha: kOpacityMediumHigh,
-        ),
+        dialTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeDark.onPrimary;
+          }
+          return schemeDark.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+        }),
+        hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeDark.onPrimary;
+          }
+          return schemeDark.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+        }),
         entryModeIconColor: schemeDark.onSurfaceVariant.withValues(
           alpha: kOpacityMediumHigh,
         ),
         dayPeriodColor: schemeDark.primary,
-        dayPeriodTextColor: schemeDark.onPrimary,
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeDark.onPrimary;
+          }
+          return schemeDark.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+        }),
         dayPeriodBorderSide: BorderSide(
           color: schemeDark.outlineVariant.withValues(alpha: 0.50),
           width: 0.75,
