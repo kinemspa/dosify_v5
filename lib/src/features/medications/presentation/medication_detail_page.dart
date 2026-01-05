@@ -23,6 +23,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -2510,23 +2511,74 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 kCardPadding,
                 kCardPadding,
               ),
-              child: ReconstitutionSummaryCard(
-                strengthValue: med.strengthValue,
-                strengthUnit: _unitLabel(med.strengthUnit),
-                medicationName: med.name,
-                containerVolumeMl: med.containerVolumeMl,
-                perMlValue: med.perMlValue,
-                volumePerDose: med.volumePerDose,
-                reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
-                syringeSizeMl: 3.0,
-                compact: true,
-                showCardSurface: false,
+              child: InkWell(
+                onTap: () => _editReconstitution(context, med),
+                child: ReconstitutionSummaryCard(
+                  strengthValue: med.strengthValue,
+                  strengthUnit: _unitLabel(med.strengthUnit),
+                  medicationName: med.name,
+                  containerVolumeMl: med.containerVolumeMl,
+                  perMlValue: med.perMlValue,
+                  volumePerDose: med.volumePerDose,
+                  reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
+                  syringeSizeMl: 3.0,
+                  compact: true,
+                  showCardSurface: false,
+                ),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _editReconstitution(BuildContext context, Medication med) async {
+    if (med.form != MedicationForm.multiDoseVial) return;
+    if (med.strengthValue <= 0) return;
+
+    final result = await showModalBottomSheet<ReconstitutionResult>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => ReconstitutionCalculatorDialog(
+          initialStrengthValue: med.strengthValue,
+          unitLabel: med.strengthUnit.name,
+          initialSyringeSize: SyringeSizeMl.ml3,
+          initialVialSize: med.containerVolumeMl,
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    final box = Hive.box<Medication>('medications');
+    final latest = box.get(med.id) ?? med;
+
+    final oldVolume = latest.containerVolumeMl;
+    final newVolume = result.solventVolumeMl;
+    final shouldUpdateActive =
+        latest.activeVialVolume == null ||
+        (oldVolume != null &&
+            (latest.activeVialVolume! - oldVolume).abs() < 0.0001);
+
+    await box.put(
+      latest.id,
+      latest.copyWith(
+        perMlValue: result.perMlConcentration,
+        containerVolumeMl: newVolume,
+        diluentName: result.diluentName ?? latest.diluentName,
+        activeVialVolume: shouldUpdateActive ? newVolume : null,
+      ),
+    );
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(const SnackBar(content: Text('Reconstitution updated')));
   }
 
   Widget _buildCompactGrid(BuildContext context, List<Widget> children) {

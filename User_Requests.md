@@ -32,7 +32,7 @@
 - Minimized Cards, make them all the same size as the Reconsitution card in height. [COMPLETED]
 - Reconstitution Card:
 	- Remove the dit button. [COMPLETED]
-	- Can No longer edit the reconstitution. Need to be able to edit the reconstitution. 
+	- Can No longer edit the reconstitution. Need to be able to edit the reconstitution.  [COMPLETED]
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
