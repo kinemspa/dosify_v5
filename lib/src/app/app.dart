@@ -46,6 +46,15 @@ class DosifiApp extends ConsumerWidget {
         scrolledUnderElevation: 0,
       ),
       timePickerTheme: TimePickerThemeData(
+        dialTextColor: schemeLight.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
+        hourMinuteTextColor: schemeLight.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
+        entryModeIconColor: schemeLight.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
         dayPeriodColor: schemeLight.primary,
         dayPeriodTextColor: schemeLight.onPrimary,
         dayPeriodBorderSide: BorderSide(
@@ -214,6 +223,15 @@ class DosifiApp extends ConsumerWidget {
         scrolledUnderElevation: 0,
       ),
       timePickerTheme: TimePickerThemeData(
+        dialTextColor: schemeDark.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
+        hourMinuteTextColor: schemeDark.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
+        entryModeIconColor: schemeDark.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
         dayPeriodColor: schemeDark.primary,
         dayPeriodTextColor: schemeDark.onPrimary,
         dayPeriodBorderSide: BorderSide(
