@@ -2,6 +2,7 @@
 
 // Dart imports:
 
+import 'dart:async';
 import 'dart:ui';
 
 // Flutter imports:
@@ -13,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -85,12 +87,47 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       _kCardSchedule,
       _kCardDetails,
     ];
+
+    final medId = widget.initial?.id ?? widget.medicationId;
+    if (medId != null && medId.isNotEmpty) {
+      unawaited(_restoreCardOrder(medId));
+    }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String _prefsKeyCardOrder(String medicationId) {
+    return 'med_detail_card_order_$medicationId';
+  }
+
+  Future<void> _restoreCardOrder(String medicationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getStringList(_prefsKeyCardOrder(medicationId));
+      if (stored == null || stored.isEmpty) return;
+      if (!mounted) return;
+
+      setState(() {
+        _cardOrder
+          ..clear()
+          ..addAll(stored);
+      });
+    } catch (_) {
+      // Ignore preference failures; default order will be used.
+    }
+  }
+
+  Future<void> _persistCardOrder(String medicationId, List<String> orderedIds) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefsKeyCardOrder(medicationId), orderedIds);
+    } catch (_) {
+      // Ignore preference failures.
+    }
   }
 
   void _scheduleHeaderHeightMeasurement(BuildContext context) {
@@ -661,9 +698,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           onReorder: (oldIndex, newIndex) {
             setState(() {
               if (newIndex > oldIndex) newIndex -= 1;
-              final id = _cardOrder.removeAt(oldIndex);
-              _cardOrder.insert(newIndex, id);
+
+              final moved = orderedIds.removeAt(oldIndex);
+              orderedIds.insert(newIndex, moved);
+
+              _cardOrder
+                ..clear()
+                ..addAll(orderedIds);
             });
+
+            unawaited(_persistCardOrder(med.id, orderedIds));
           },
           children: children,
         ),
