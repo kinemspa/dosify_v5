@@ -50,7 +50,7 @@
 
 ### Schedule
 - If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation.  [COMPLETED]
-- Pause button. Its too big. Is it possiblke to have the Pause button enable a time frame, pause for ever, pause until etc etc..
+- Pause button. Its too big. Is it possiblke to have the Pause button enable a time frame, pause for ever, pause until etc etc..  [COMPLETED]
 - Take Dose Card:
 	- Dose Name is correct.
 	- Underneath you have Dose amount and then the med type. No. Should have Med Name, Med strenght and Dose in all possibly metrics. Status, Date Icon, Time, And a big action button. Take, or edit depending on the action.

@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
+import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
 /// Enhanced expandable schedule card for medication detail page
@@ -272,15 +273,12 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       // Action Buttons Row (Schedule-level actions only)
                       Row(
                         children: [
-                          // Pause/Resume toggle
-                          Expanded(
-                            child: _buildPrimaryAction(
-                              context,
-                              label: widget.schedule.active
-                                  ? 'Pause'
-                                  : 'Resume',
-                              onTap: _togglePause,
-                            ),
+                          _buildSecondaryAction(
+                            context,
+                            icon: widget.schedule.isActive
+                                ? Icons.pause_circle_outline
+                                : Icons.play_circle_outline,
+                            onTap: _showPauseOptions,
                           ),
                           const SizedBox(width: kSpacingS),
                           _buildSecondaryAction(
@@ -948,36 +946,63 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     }
   }
 
-  void _togglePause() {
-    final scheduleBox = Hive.box<Schedule>('schedules');
-    final updated = Schedule(
-      id: widget.schedule.id,
-      name: widget.schedule.name,
-      medicationName: widget.schedule.medicationName,
-      doseValue: widget.schedule.doseValue,
-      doseUnit: widget.schedule.doseUnit,
-      minutesOfDay: widget.schedule.minutesOfDay,
-      daysOfWeek: widget.schedule.daysOfWeek,
-      active: !widget.schedule.active,
-      medicationId: widget.schedule.medicationId,
-      timesOfDay: widget.schedule.timesOfDay,
-      cycleEveryNDays: widget.schedule.cycleEveryNDays,
-      cycleAnchorDate: widget.schedule.cycleAnchorDate,
-      daysOfMonth: widget.schedule.daysOfMonth,
-      createdAt: widget.schedule.createdAt,
-      minutesOfDayUtc: widget.schedule.minutesOfDayUtc,
-      daysOfWeekUtc: widget.schedule.daysOfWeekUtc,
-      timesOfDayUtc: widget.schedule.timesOfDayUtc,
+  Future<void> _showPauseOptions() async {
+    final choice = await showSchedulePauseDialog(
+      context,
+      schedule: widget.schedule,
     );
-    scheduleBox.put(widget.schedule.id, updated);
+    if (!mounted || choice == null) return;
+
+    final scheduleBox = Hive.box<Schedule>('schedules');
+
+    switch (choice) {
+      case SchedulePauseDialogChoice.resume:
+        scheduleBox.put(
+          widget.schedule.id,
+          widget.schedule.copyWith(active: true, pausedUntil: null),
+        );
+        break;
+
+      case SchedulePauseDialogChoice.pauseIndefinitely:
+        scheduleBox.put(
+          widget.schedule.id,
+          widget.schedule.copyWith(active: false, pausedUntil: null),
+        );
+        break;
+
+      case SchedulePauseDialogChoice.pauseUntilDate:
+        final now = DateTime.now();
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime(now.year, now.month, now.day),
+          firstDate: DateTime(now.year - 1),
+          lastDate: DateTime(now.year + 10),
+        );
+        if (!mounted || picked == null) return;
+
+        final endOfDay = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          23,
+          59,
+          59,
+          999,
+        );
+
+        scheduleBox.put(
+          widget.schedule.id,
+          widget.schedule.copyWith(active: false, pausedUntil: endOfDay),
+        );
+        break;
+    }
 
     if (mounted) {
       setState(() {});
+      final refreshed = scheduleBox.get(widget.schedule.id) ?? widget.schedule;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            updated.active ? 'Schedule resumed' : 'Schedule paused',
-          ),
+          content: Text('Schedule set to ${scheduleStatusLabel(refreshed)}'),
           behavior: SnackBarBehavior.floating,
         ),
       );

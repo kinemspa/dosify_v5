@@ -5,7 +5,11 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
 class ScheduleStatusBadge extends StatelessWidget {
-  const ScheduleStatusBadge({required this.schedule, this.dense = false, super.key});
+  const ScheduleStatusBadge({
+    required this.schedule,
+    this.dense = false,
+    super.key,
+  });
 
   final Schedule schedule;
   final bool dense;
@@ -42,7 +46,8 @@ class ScheduleStatusBadge extends StatelessWidget {
           SizedBox(width: kSpacingXS),
           Text(
             label,
-            style: (dense ? helperTextStyle(context) : null)?.copyWith(
+            style:
+                (dense ? helperTextStyle(context) : null)?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: kFontWeightMedium,
                 ) ??
