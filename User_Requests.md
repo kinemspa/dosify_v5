@@ -21,13 +21,14 @@
 ==============
 
 # Medication Details Screen
+- Collapsed Cards need to be a little higher. Just a smidge. [COMPLETED]
 - Collapse Helper Text. Remove it. [COMPLETED]
 - Move Drag Icon to the Left side of the collapsed Cards. [COMPLETED]
 - INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
-- Minimized Cards, make them all the same size as the Reconsitution card in height. 
+- Minimized Cards, make them all the same size as the Reconsitution card in height. [COMPLETED]
 - Reconstitution Card:
 	- Remove the dit button. [COMPLETED]
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
@@ -238,11 +239,12 @@
 - Needs a date icon, will display today
 - Dose instructions:
 	- Take X X at X. 
-- Provide a take, sn
+- The take button. I am conflicted here. I want the shortcut buttons of take, snooze, skip. But also want the dialog to pop where notes can be added and the status can be changed. 
+
 
 
 ==============
-# Take Dose Screen
+# Take/edit Dose Dialog
 - Take Dose:
 	- Remove divivder from the top under the firts helper text. 
 	- Why is tyhere grey chips????????????
@@ -262,12 +264,19 @@
 ==============
 # Reconstitution  Calculator
 
+
 ## Add Med Wizard - Recon Calc
 
 ## Stand Alone - Recon Calc
 - This is a stand alone version of the recon calculator used in the Add Med MDV wizard. I want it to be exactly the same as that one in an operations perspective. The only difference is that you will have the ability to enter a manual medicaiont name and medicaiont strenght. [COMPLETED]
 - The standalone one will allow for the saving of reconstitution calculations. Which can be opened up and viewe and editied, and or sourced in the add med wizard. [COMPLETED]
 - This should be the one accessible from the hamburger menu. [COMPLETED]
+- The Reconstitution Calculator that is selectable from the Main Menu, is supposed to show the dsame recon calculator as in the Add MEd Screen MDV. 
+- This one has a couple of differecnes because it is a standalone one. 
+- Has the option to add a med name in it. 
+- Requires a med strength.
+- Allows for saving of reconstitotions. 
+- You had supposedly done all of the above, but its not what is accessible or routable from the main menu. 
 
 ==============
 # Analytics
