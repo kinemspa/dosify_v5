@@ -34,7 +34,7 @@
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
-- Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED] No this is not done. The Sotrage Locaiton Text is above the value, the remaining text is on 2 lines. What do you not understand about make it the same as the Large Med Card?
+- Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED]
 
 ### Reports Card
 - History: 

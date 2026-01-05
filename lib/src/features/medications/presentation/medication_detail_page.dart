@@ -852,16 +852,23 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   ),
                   const SizedBox(height: 8),
                 ] else if (storageLabel != null && storageLabel.isNotEmpty) ...[
-                  _HeaderInfoTile(
-                    icon: med.requiresFreezer
-                        ? Icons.severe_cold
-                        : (med.requiresRefrigeration
-                              ? Icons.ac_unit
-                              : Icons.inventory_2_outlined),
+                  CompactStorageLine(
+                    icons: [
+                      if (med.requiresFreezer)
+                        Icons.severe_cold
+                      else if (med.requiresRefrigeration)
+                        Icons.ac_unit
+                      else
+                        Icons.inventory_2_outlined,
+                      if (med.lightSensitive) Icons.dark_mode,
+                    ],
                     label: 'Storage',
-                    value: storageLabel,
+                    location: storageLabel,
+                    createdAt: med.createdAt,
+                    expiry: med.expiry,
+                    iconColor: onPrimary.withValues(alpha: kOpacityEmphasis),
                     textColor: onPrimary,
-                    trailingIcon: med.lightSensitive ? Icons.dark_mode : null,
+                    onPrimaryBackground: true,
                   ),
                   const SizedBox(height: 8),
                 ],
@@ -913,6 +920,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               const SizedBox(height: 4),
               RichText(
                 textAlign: TextAlign.right,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 text: TextSpan(
                   style: helperTextStyle(
                     context,
