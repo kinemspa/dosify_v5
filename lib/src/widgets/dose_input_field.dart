@@ -1099,13 +1099,21 @@ class _DoseInputFieldState extends State<DoseInputField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Main display text
-          Text(
-            _result!.displayText,
-            style: bodyTextStyle(context)?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              color: _result!.hasError
-                  ? cs.onErrorContainer
-                  : (_result!.hasWarning ? warningTint : cs.onSurfaceVariant),
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              _result!.displayText,
+              textAlign: TextAlign.center,
+              style: bodyTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: _result!.hasError
+                    ? cs.onErrorContainer
+                    : (_result!.hasWarning
+                          ? warningTint
+                          : cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumLow,
+                            )),
+              ),
             ),
           ),
 
