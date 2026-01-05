@@ -330,6 +330,20 @@ Color reconBackgroundActiveColor(BuildContext context) {
   return kReconBackgroundActive;
 }
 
+/// Theme-aware foreground color for reconstitution calculator surfaces.
+///
+/// - Light theme: the calculator uses a dark-blue background, so use white.
+/// - Dark theme: the calculator background blends toward app surfaces, so use
+///   standard onSurface text.
+Color reconForegroundColor(BuildContext context) {
+  final theme = Theme.of(context);
+  final cs = theme.colorScheme;
+  if (theme.brightness == Brightness.dark) {
+    return cs.onSurface;
+  }
+  return Colors.white;
+}
+
 /// Reconstitution divider styling
 const double kReconDividerHeight = 1.0;
 const double kReconDividerOpacity = 0.7;

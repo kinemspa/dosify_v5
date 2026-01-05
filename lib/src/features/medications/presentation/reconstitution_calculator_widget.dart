@@ -304,7 +304,9 @@ class _ReconstitutionCalculatorWidgetState
       child: Text(
         text,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
+          color: reconForegroundColor(
+            context,
+          ).withValues(alpha: kReconTextMediumOpacity),
           fontStyle: FontStyle.italic,
         ),
       ),
@@ -317,6 +319,10 @@ class _ReconstitutionCalculatorWidgetState
     if (widget.initialStrengthValue <= 0) {
       return const SizedBox.shrink();
     }
+
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = reconForegroundColor(context);
 
     // Sync dose unit with vial unit when vial changes to/from 'units'
     // This handles the case where user changes medication strength unit
@@ -410,10 +416,8 @@ class _ReconstitutionCalculatorWidgetState
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(
-                      alpha: kReconTextMediumOpacity,
-                    ),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: fg.withValues(alpha: kReconTextMediumOpacity),
                   ),
                   children: [
                     const TextSpan(text: 'Using vial strength: '),
@@ -433,8 +437,8 @@ class _ReconstitutionCalculatorWidgetState
               Text(
                 'To adjust, go to Strength section above',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: kReconTextMutedOpacity),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: fg.withValues(alpha: kReconTextMutedOpacity),
                   fontStyle: FontStyle.italic,
                   fontSize: 10,
                 ),
@@ -447,8 +451,8 @@ class _ReconstitutionCalculatorWidgetState
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
             'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: kReconTextMediumOpacity),
             ),
           ),
         ),
@@ -587,9 +591,9 @@ class _ReconstitutionCalculatorWidgetState
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               'Select a reconstitution option',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                color: fg.withValues(alpha: kReconTextHighOpacity),
               ),
             ),
           ),
@@ -665,8 +669,8 @@ class _ReconstitutionCalculatorWidgetState
           padding: const EdgeInsets.symmetric(),
           child: Text(
             'Drag the syringe or use +/- buttons for fine adjustments (U = Units)',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: kReconTextMediumOpacity),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: kReconTextMediumOpacity),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -877,7 +881,7 @@ class _ReconstitutionCalculatorWidgetState
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: cs.shadow.withValues(alpha: 0.1),
                     blurRadius: 8,
                     spreadRadius: 0,
                     offset: const Offset(0, 2),
@@ -900,10 +904,8 @@ class _ReconstitutionCalculatorWidgetState
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: kReconTextHighOpacity,
-                        ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: fg.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -924,7 +926,7 @@ class _ReconstitutionCalculatorWidgetState
                             text: '  of  ',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withValues(
+                              color: fg.withValues(
                                 alpha: kReconTextHighOpacity,
                               ),
                               fontWeight: FontWeight.w400,
@@ -947,10 +949,8 @@ class _ReconstitutionCalculatorWidgetState
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: kReconTextHighOpacity,
-                        ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: fg.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -968,9 +968,7 @@ class _ReconstitutionCalculatorWidgetState
                           text: '  of  ',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.white.withValues(
-                              alpha: kReconTextHighOpacity,
-                            ),
+                            color: fg.withValues(alpha: kReconTextHighOpacity),
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -1012,10 +1010,8 @@ class _ReconstitutionCalculatorWidgetState
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: kReconTextHighOpacity,
-                        ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: fg.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                         height: 1.4,
                       ),
@@ -1047,10 +1043,8 @@ class _ReconstitutionCalculatorWidgetState
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: kReconTextHighOpacity,
-                        ),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: fg.withValues(alpha: kReconTextHighOpacity),
                         fontWeight: FontWeight.w600,
                       ),
                       children: [
@@ -1072,10 +1066,8 @@ class _ReconstitutionCalculatorWidgetState
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: kReconTextMediumOpacity,
-                        ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: fg.withValues(alpha: kReconTextMediumOpacity),
                         fontWeight: FontWeight.w500,
                         height: 1.4,
                       ),
@@ -1099,10 +1091,8 @@ class _ReconstitutionCalculatorWidgetState
                     'This target dose will become your default dose in the schedule screen. '
                     'Doses can be created, adjusted, and tracked on the schedule screen where all medication administration is managed.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withValues(
-                        alpha: kReconTextMutedOpacity,
-                      ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: fg.withValues(alpha: kReconTextMutedOpacity),
                       fontStyle: FontStyle.italic,
                       height: 1.5,
                     ),
@@ -1165,6 +1155,7 @@ class _ReconstitutionCalculatorWidgetState
   }) {
     final selected = selectedValue == optionValue;
     final theme = Theme.of(context);
+    final fg = reconForegroundColor(context);
     final roundedVolume = roundToHalfMl(calcResult.vialVolume);
     // Calculate actual mL to draw for the dose
     final mlToDraw = (units / 100) * _syringe.ml;
@@ -1202,11 +1193,11 @@ class _ReconstitutionCalculatorWidgetState
                       ],
                     )
                   : null,
-              color: selected ? null : Colors.white.withValues(alpha: 0.03),
+              color: selected ? null : fg.withValues(alpha: 0.03),
               border: Border.all(
                 color: selected
                     ? theme.colorScheme.primary
-                    : Colors.white.withValues(alpha: 0.15),
+                    : fg.withValues(alpha: 0.15),
                 width: kReconOptionBorderWidth,
               ),
               borderRadius: BorderRadius.circular(12),
@@ -1231,7 +1222,7 @@ class _ReconstitutionCalculatorWidgetState
                     if (states.contains(WidgetState.selected)) {
                       return theme.colorScheme.primary;
                     }
-                    return Colors.white.withValues(alpha: 0.5);
+                    return fg.withValues(alpha: 0.5);
                   }),
                 ),
                 const SizedBox(width: 12),
@@ -1246,9 +1237,7 @@ class _ReconstitutionCalculatorWidgetState
                           fontSize: 16,
                           color: selected
                               ? theme.colorScheme.primary
-                              : Colors.white.withValues(
-                                  alpha: kReconTextHighOpacity,
-                                ),
+                              : fg.withValues(alpha: kReconTextHighOpacity),
                         ),
                       ),
                       if (explainerText.isNotEmpty) ...[
@@ -1256,9 +1245,7 @@ class _ReconstitutionCalculatorWidgetState
                         Text(
                           explainerText,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(
-                              alpha: kReconTextMutedOpacity,
-                            ),
+                            color: fg.withValues(alpha: kReconTextMutedOpacity),
                             fontStyle: FontStyle.italic,
                             fontSize: 11,
                           ),
@@ -1269,8 +1256,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? Colors.white.withValues(alpha: 0.9)
-                                : Colors.white.withValues(alpha: 0.7),
+                                ? fg.withValues(alpha: 0.9)
+                                : fg.withValues(alpha: 0.7),
                           ),
                           children: [
                             TextSpan(
@@ -1293,12 +1280,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? Colors.white.withValues(
-                                    alpha: kReconTextHighOpacity,
-                                  )
-                                : Colors.white.withValues(
-                                    alpha: kReconTextLowOpacity,
-                                  ),
+                                ? fg.withValues(alpha: kReconTextHighOpacity)
+                                : fg.withValues(alpha: kReconTextLowOpacity),
                           ),
                           children: [
                             const TextSpan(text: 'Concentration: '),
@@ -1319,12 +1302,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? Colors.white.withValues(
-                                    alpha: kReconTextHighOpacity,
-                                  )
-                                : Colors.white.withValues(
-                                    alpha: kReconTextLowOpacity,
-                                  ),
+                                ? fg.withValues(alpha: kReconTextHighOpacity)
+                                : fg.withValues(alpha: kReconTextLowOpacity),
                           ),
                           children: [
                             TextSpan(text: 'Syringe (${_syringe.label}): '),

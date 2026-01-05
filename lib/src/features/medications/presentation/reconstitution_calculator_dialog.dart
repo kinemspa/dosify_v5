@@ -81,6 +81,10 @@ class _ReconstitutionCalculatorDialogState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = reconForegroundColor(context);
+
     return Container(
       decoration: BoxDecoration(
         color: reconBackgroundDarkColor(context),
@@ -95,7 +99,7 @@ class _ReconstitutionCalculatorDialogState
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: fg.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -106,14 +110,14 @@ class _ReconstitutionCalculatorDialogState
               children: [
                 Icon(
                   Icons.calculate,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: fg.withValues(alpha: 0.9),
                   size: 24,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   'Reconstitution Calculator',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: fg,
                     fontWeight: kFontWeightBold,
                   ),
                 ),
@@ -125,14 +129,19 @@ class _ReconstitutionCalculatorDialogState
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Text(
               'Select a reconstitution option below or fine-tune the values',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.7),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: fg.withValues(alpha: 0.7),
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
             ),
           ),
-          const Divider(color: Colors.white12, height: 1),
+          Divider(
+            color: theme.brightness == Brightness.dark
+                ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
+                : fg.withValues(alpha: 0.12),
+            height: 1,
+          ),
           // Content
           Flexible(
             child: SingleChildScrollView(
@@ -154,7 +163,9 @@ class _ReconstitutionCalculatorDialogState
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: theme.brightness == Brightness.dark
+                      ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
+                      : fg.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -166,10 +177,8 @@ class _ReconstitutionCalculatorDialogState
                     onPressed: () =>
                         Navigator.of(context).pop<ReconstitutionResult>(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
+                      foregroundColor: fg,
+                      side: BorderSide(color: fg.withValues(alpha: 0.3)),
                     ),
                     child: const Text('Cancel'),
                   ),

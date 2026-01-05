@@ -2,7 +2,7 @@
 
 ## Global
 - Dark Theme 
-	- The reconstitution calculator 
+	- The reconstitution calculator [COMPLETED]
 	
 - Time Picker, the AM / PM text Grey when not selected. White when selected.  Same with the clock numbers.
 
@@ -80,8 +80,6 @@
 
 ==============
 # Add Schedule
-- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
-- Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
 - When changing to strenght, can we not abruptly nudge the entire screen. Can there be an easier way to ease the new menu item in?
 - Step 1:
 	- Text "Set Per DOse amount. You can fine tune it later if needed." WHat is this text I never asked for this. There is no fine tuning later section. 
@@ -94,30 +92,14 @@
 
 
 - Step 2:
-	- Dont put SO you dont get past doses. This entire app and its helper text. you are not speaking to me. You are speaking to users.  [COMPLETED]
-	- Schedule Dates Styling of fields is incorrect. not use system design.  [COMPLETED]
+- Schedule Dates card and Patter card are touching. Also headings need to be primary colour. 
 	- Start:
-			- Selected date calnedar button is causing an overflow.  [COMPLETED]
-			- Once changed to selected ate, the drop down is becominga calendar button. Calendar button needs to appear below the dropdown, alos make it the same sizing as the system design, same size as the date button on the add med screens.  [COMPLETED]
 	- End:
-		- Same as above.  [COMPLETED]
 	- Schedule Pattern:
-		- Drop Down Menu has sharp corners.  [COMPLETED]
 		- Days of the Week:
-			- Day selection chips. Reduce the size of them. Center align them. Reduce padding make more compact.  [COMPLETED]
-			- Dont use Grey backgrounds. Ever. Put this in your rules.  [COMPLETED]
-			- Dont use black font. Rules.  [COMPLETED]
+			- Day selection chips. Inactive Chips are too active looking. maybe reduce the border.
 		- Days on / Days Off
-			- Days on and Days off fields are on the same horizaontal row, causing a major overflow. Shoult be vertically stacked.  [COMPLETED]
 		- Days of the Month
-			- Make the grid more compact like the days of the week.  [COMPLETED]
-			- Centre Align  [COMPLETED]
-			- No Grey backgorund  [COMPLETED]
-			- No black font.  [COMPLETED]
-			- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
-			- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
-			- Days of the Month in the dropdown menu once selected is only showing "days of the". Month is cropped off.  [COMPLETED]
-			- Helper text should state something like, select on which days of the month to for doses.  [COMPLETED]
 			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?
 - Step 3:
 	- These cards need to have the same heading styling as all other large cards.  [COMPLETED]
@@ -125,75 +107,16 @@
 		- Dose needs to show the following:
 			- Go and find out the correct terminology for dosing medications. What I care about is framing the correct terms for Say, if a dose is 1 tablet, the tablet is called what?, then we have the strenght of medicaiont in the tabletm what is that called? Same with a capsule, this is like the medicaiont carrier or form. Then if its a single dose vial, we would have the Dose in Volume, the Dose in Strenght, and the DOse in the delivery or admiinstration mechanism, which would be a syringe for this one. These values need to be displayed evetrywhere on the app where these things appear. As this app is to communicate very specifically the details here. If I am using a pre filled syringe, I want the Med Strenght, the Med Volume and the Amount of the measurement in teh administation tool/ method. So go find the correct terminology for this so we can write it in as a rule for you to adhere to across this app. [COMPLETED]
 	- Settings:
-		- The Active button switch, we dont use this switch type anywhere in teh app, why are you using it now? [COMPLETED]
-	- What is cycle start date? We already set the schedule start date on step 2.  [COMPLETED]
 
 - You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route?
-- Add Tablet:
-	- Configure Dose:
-		- the unit type to use should be a dropdown and incremental like the add med wizard objects.  [COMPLETED]
-		- Why is your helper text so lamen? Enter how many you take? WTF is this?
-		- centre the shortcut buttons. This is not completed. They are left alinged.
-		- Incrementaning via med strenght is only incrementing in full tablet calculations, it needs to go in 1/4 tablet calculations. [COMPLETED]
-		- Dosing times should be on the next page along with the schedule type selection. [COMPLETED]
-	- Schedule Type:
-		- Change name to type [COMPLETED]
-		- Days of the month:
-			- If I select the 31st day, how does this translate for 30 day or less months? [COMPLETED]
-			-  I dont like the answer to the above item, if a user wants a monthly, they need to dose every month, if the 31st doesnt occur then the user will miss a month. what is the options here, what do other task schedulers do?  [COMPLETED]
-			- compact the grid, its too spacious. [COMPLETED]
-- Add MDV:
-	- Dose needs to only show 2 decimals.  [COMPLETED]
-	- Default to 1mL syringe. Or to the saved reconstitution settings if exists. [COMPLETED]
-	- Needs helper text, input strenght of dose, or select volume or Units of the syringe size. It will do all the calculaiotns for you based on input. [COMPLETED]
-	- Formula is shwing incorrect.
-		- I have a MDV of BCP-157 which is 16mg at 5mL. I have toggled strenght, and incremented by 1, which puts a 1 there, which is 1mg, it then trhows an error of Dose Exceeds vial Sytrenght of 10mcg. [COMPLETED]
-		- If using strenght, we need to be able to change the unit of strenght from mcg, mg and the value. [COMPLETED]
-		- Changing to volume, I incremented in 1 to . Whcih trhows an error. I suppose this is correct, but I dont know what I am incremewnting in. There is no mL display. [COMPLETED]
-		- Changing to Units, I then increment and 2 syring graphics display. [COMPLETED]
-	- Syringe Graphic should always be showing. [COMPLETED]
-	- The Calculations are all incorrect. There is a bottom summary card, its displaying 1mg, 0,69ml, 69units, while the summary up in the appnbheader is shwoing Dose: 0mg, 0.69 mL, 69 units. [COMPLETED]
-	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both. [COMPLETED]
-	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? [COMPLETED]
-	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
-	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number.  [COMPLETED]
-	- Remove 10mL syringe.  [COMPLETED]
-	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg.  [COMPLETED]
-	- Why does MDV have 2 summary boxes?  [COMPLETED]
 
 
-- Dynamic Summary, needs to show each metric, Dose: 1 tablet, 20mg, or dose: 0.01mgs, 0.03 mL, 14Units.  [COMPLETED]
-- If a tbalet is selected, incrementing the strenght optino should only increment in units of the med unit that are avaiable as a calculaiton to the unit x strenght per unit. SO if 1 tablet = 10mg. 1st increment will be 2.5mg = 1/4 tablet, 5mg = 1/2 tablet and so forth. Same for all med types. Capsules are whole numbers only, same with single dose vials and pre filled syringes.  [COMPLETED]
-- MDV, this will need the syringe graphic and slider functionality that exists in the Reconstitution calculator. AT the end of the day its how many units in a syringe, which is calculated on the vial concetnraiton that was reconsituted.  [COMPLETED]
-- Slider graphic is showing a 5mL or 10 ml syring. Should be able to change the syringe type. Also the bottom text is cropped by the dynamic card vaules below.  [COMPLETED]
-- MDV should also default to the reconstituted value. As this is what the recon value was originally set to.  [COMPLETED]
 
-- Name of Schedule to be Just "1 Tablet" - Dont need the auto generate check box. It should auto generate the name and then the user can rename it if they want. We dont need the time, frequency or med name as this will be showing and referenced from other places. It becomes redundant.  [COMPLETED]
 
 ==============
 # Schedule Details Screen
-- Needs a full rework to align with the med details screen. [COMPLETED]
-- Needs the Med Name at the top as part of the Shedule Name [COMPLETED]
-- Dose needs to show all the calulations. The Unit amount, the strenght and the volume if a liquid. Remove all trailing 0s. Remove plurality on single.  [COMPLETED]
-- Status needs to be a toggle button.  [COMPLETED]
-- Next dose card needs to be the same as the scehdules widget used in the medication details screen. Dose timeline doesnt really make sense.  [COMPLETED]
-- Need to consider the objects that sit in the app header. I need them not to be just text objects. I want some flavour. [COMPLETED]
-- DOse Calendar - Needs to use the same Dose calendar widget as the medicaiotn details screen. . [COMPLETED]
-- Move DOse Calnedar to top card. [COMPLETED]
-- Schedule Details needs to have edit options like medication details. [COMPLETED]
-- SO we should have Schedule Status of , Active, Paused, Disabled, Completed. [COMPLETED]
-	- Active is of course active
-	- Paused, the ability to pause a schdule until a set date. 
-	- Disabled. Paused indefinately. 
-	- Completed, end of scheudle cycle has passed. 
-- App Header:
-	- Add the Date Icon for the next dose in the app header. [COMPLETED]
-	- Add chips for the frequency type. [COMPLETED]
-	- Include Pause button. [COMPLETED]
-		Pause Button: Has an indefinate and an Pause end date option. Helper text explains the 2 options and how the schedule will behave. 
 
 ## Schedule Details Card
-- Frequency is the incorrect term. Needs the Schedule type. Which is Daily, X days, Days of the week, Cycle. The it can display,  [COMPLETED]
 
 	
 
