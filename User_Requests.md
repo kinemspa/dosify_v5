@@ -88,7 +88,7 @@
 	- Change to Start Date: and End Date: [COMPLETED]
 	- change today icon to today text [COMPLETED]
 - Compact Card:
-	- Add on same row ass Dose Name. "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day"
+	- Add on same row ass Dose Name. "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day" [COMPLETED]
 
 
 
