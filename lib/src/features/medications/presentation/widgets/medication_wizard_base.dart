@@ -227,6 +227,9 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
       onContinue: nextStep,
       onSave: saveMedication,
       saveLabel: 'Save Medication',
+      continueLabel: 'Next',
+      nextLabel: 'Next',
+      nextPageLabel: 'Next',
     );
   }
 }

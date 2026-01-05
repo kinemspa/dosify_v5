@@ -33,7 +33,7 @@
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
-- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then  alig [COMPLETED]
+- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I wa [COMPLETED]
 
 ### Reports Card
 - History: 
@@ -78,7 +78,7 @@
 ==============
 ## Add Medication
 
-- Wizard still doesnt have Next button instead of continue button at the bottom when filling in fields. 
+- Wizard still doesnt have Next button instead of continue button at the bottom when filling in fields.  [COMPLETED]
 
 ### Choose Medicaiotn Type Screen
 
