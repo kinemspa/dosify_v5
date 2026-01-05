@@ -192,56 +192,61 @@ class _NextDoseCardState extends State<NextDoseCard>
       children: [
         // Doses for selected day
         ClipRect(
-          child: AnimatedSwitcher(
+          child: AnimatedSize(
             duration: kAnimationNormal,
-            switchInCurve: kCurveEmphasized,
-            switchOutCurve: kCurveEmphasized,
-            transitionBuilder: (child, animation) {
-              return SlideTransition(
-                position:
-                    Tween<Offset>(
-                      begin: const Offset(1.0, 0),
-                      end: Offset.zero,
-                    ).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: kCurveEmphasized,
-                      ),
-                    ),
-                child: child,
-              );
-            },
-            child: _dayDoses.isEmpty
-                ? GestureDetector(
-                    key: ValueKey(_selectedDate.toString()),
-                    onHorizontalDragEnd: (details) {
-                      if (details.primaryVelocity == null) return;
-                      if (details.primaryVelocity! < 0) {
-                        _onDaySelected(
-                          _selectedDate.add(const Duration(days: 1)),
-                        );
-                      } else if (details.primaryVelocity! > 0) {
-                        _onDaySelected(
-                          _selectedDate.subtract(const Duration(days: 1)),
-                        );
-                      }
-                    },
-                    child: _buildEmptyState(context),
-                  )
-                : Column(
-                    key: ValueKey(_selectedDate.toString()),
-                    children: [
-                      for (int i = 0; i < _dayDoses.length; i++) ...[
-                        _buildDoseCardContent(
-                          _dayDoses[i],
-                          i,
-                          _dayDoses.length,
+            curve: kCurveEmphasized,
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: kAnimationNormal,
+              switchInCurve: kCurveEmphasized,
+              switchOutCurve: kCurveEmphasized,
+              transitionBuilder: (child, animation) {
+                return SlideTransition(
+                  position:
+                      Tween<Offset>(
+                        begin: const Offset(1.0, 0),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: kCurveEmphasized,
                         ),
-                        if (i != _dayDoses.length - 1)
-                          const SizedBox(height: kSpacingXS),
+                      ),
+                  child: child,
+                );
+              },
+              child: _dayDoses.isEmpty
+                  ? GestureDetector(
+                      key: ValueKey(_selectedDate.toString()),
+                      onHorizontalDragEnd: (details) {
+                        if (details.primaryVelocity == null) return;
+                        if (details.primaryVelocity! < 0) {
+                          _onDaySelected(
+                            _selectedDate.add(const Duration(days: 1)),
+                          );
+                        } else if (details.primaryVelocity! > 0) {
+                          _onDaySelected(
+                            _selectedDate.subtract(const Duration(days: 1)),
+                          );
+                        }
+                      },
+                      child: _buildEmptyState(context),
+                    )
+                  : Column(
+                      key: ValueKey(_selectedDate.toString()),
+                      children: [
+                        for (int i = 0; i < _dayDoses.length; i++) ...[
+                          _buildDoseCardContent(
+                            _dayDoses[i],
+                            i,
+                            _dayDoses.length,
+                          ),
+                          if (i != _dayDoses.length - 1)
+                            const SizedBox(height: kSpacingXS),
+                        ],
                       ],
-                    ],
-                  ),
+                    ),
+            ),
           ),
         ),
 

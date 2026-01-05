@@ -33,7 +33,7 @@
 	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
-- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I wa [COMPLETED]
+- On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is.
 
 ### Reports Card
 - History: 
@@ -59,7 +59,7 @@
 
 
 ### Schedule
-- Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps. 
+- Can we include som sort of animation when the Schedule card has to expand to fit multiple doses for the day. its jarring how it just snaps.  [COMPLETED]
 - If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation. 
 - Pause button. Its too big. Is it possiblke to have the Pause button enable a time frame, pause for ever, pause until etc etc..
 - Take Dose Card:
