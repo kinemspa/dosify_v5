@@ -1255,6 +1255,10 @@ class _AddScheduleWizardPageState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: kSpacingS),
+            _helperBelowLeft(
+              'Select which days of the month to take this dose (1-31).',
+            ),
+            const SizedBox(height: kSpacingS),
             Wrap(
               alignment: WrapAlignment.center,
               spacing: kSpacingXS,

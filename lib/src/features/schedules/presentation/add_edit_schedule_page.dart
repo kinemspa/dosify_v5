@@ -686,7 +686,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                         if (state.mode == ScheduleMode.daysOfMonth) ...[
                           _helperBelowLeft(
                             context,
-                            'Select days of the month (1-31)',
+                            'Select which days of the month to take this dose (1-31).',
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8),

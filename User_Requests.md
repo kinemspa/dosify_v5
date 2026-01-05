@@ -39,14 +39,14 @@
 - On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is.
 
 ### Reports Card
-	- Scheduled Doses should be editable too.  [COMPLETED]
-	- Should be able to edit the dose time and date aswell.  [COMPLETED]
-	- Scheudled Dose Date Icon is not showing the date. [COMPLETED]
-	- Make edit icon smaller and lighter  [COMPLETED]
-	- AdHoc Dose:
-		- Edit - Editing the dose needs to be the same dialog as taking a dose.  [COMPLETED]
-	- Scheduled Dose:
-		- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible.  [COMPLETED]
+- Scheduled Doses should be editable too.  [COMPLETED]
+- Should be able to edit the dose time and date aswell.  [COMPLETED]
+- Scheudled Dose Date Icon is not showing the date. [COMPLETED]
+- Make edit icon smaller and lighter  [COMPLETED]
+- AdHoc Dose:
+	- Edit - Editing the dose needs to be the same dialog as taking a dose.  [COMPLETED]
+- Scheduled Dose:
+	- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible.  [COMPLETED]
 
 ### Schedule
 - If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation. 
@@ -133,7 +133,7 @@
 			- If day doesnt exist option should only appear when selecting 28-31.  [COMPLETED]
 			- If day doesnt exist field styling is not system centralised. Font too large, too black.  [COMPLETED]
 			- Days of the Month in the dropdown menu once selected is only showing "days of the". Month is cropped off.  [COMPLETED]
-			- Helper text should state something like, select on which days of the month to for doses. 
+			- Helper text should state something like, select on which days of the month to for doses.  [COMPLETED]
 			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?
 - Step 3:
 	- These cards need to have the same heading styling as all other large cards.  [COMPLETED]
