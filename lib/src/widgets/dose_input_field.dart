@@ -787,6 +787,20 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   Widget _buildInputRow(ColorScheme cs) {
+    if (widget.medicationForm != MedicationForm.multiDoseVial) {
+      return StepperRow36(
+        controller: _controller,
+        onDec: _decrement,
+        onInc: _increment,
+        decoration: buildFieldDecoration(context, hint: _getInputHint()),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+        ],
+        onChanged: (_) => _calculate(),
+      );
+    }
+
     final unitLabel = _getInlineUnitLabel();
     return Row(
       children: [

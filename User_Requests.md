@@ -103,7 +103,7 @@
 		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet.  [COMPLETED]
 		- Formula summary needs to be centreed in the field. Text is still too dark.  [COMPLETED]
 		- Centre align the shortcut buttons.  [COMPLETED]
-		- Incremental field and buttons are still incorrect. Look at the dialogs, ad med wizard. i am fucking pissed you do not use the ceentral design system. 
+		- Incremental field and buttons are still incorrect. Look at the dialogs, ad med wizard. i am fucking pissed you do not use the ceentral design system.  [COMPLETED]
 		- If I choose input strenght, I need to have the strength dropdown and incremental buttons. tablets  can have a strenght of mcg, mg, or g. Fucken use your brain. Error or warning text to display when out of bounds of the administration method units, so must be within 1/4, 1/2, 3/4, 1. 
 
 
