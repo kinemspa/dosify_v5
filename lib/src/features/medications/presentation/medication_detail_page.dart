@@ -23,7 +23,6 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -121,7 +120,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     }
   }
 
-  Future<void> _persistCardOrder(String medicationId, List<String> orderedIds) async {
+  Future<void> _persistCardOrder(
+    String medicationId,
+    List<String> orderedIds,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList(_prefsKeyCardOrder(medicationId), orderedIds);
@@ -626,8 +628,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             child: Text(
               reorderEnabled
                   ? 'Drag a collapsed card to rearrange.'
-                  : 'Tip: Collapse a card to rearrange.'
-                  ,
+                  : 'Tip: Collapse a card to rearrange.',
               style: helperTextStyle(context),
             ),
           ),
@@ -2462,30 +2463,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final cs = Theme.of(context).colorScheme;
 
-    Future<void> onEdit() async {
-      final result = await showModalBottomSheet<ReconstitutionResult>(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => ReconstitutionCalculatorDialog(
-          initialStrengthValue: med.strengthValue,
-          unitLabel: _unitLabel(med.strengthUnit),
-          initialDoseValue: med.volumePerDose,
-          initialVialSize: med.containerVolumeMl,
-        ),
-      );
-
-      if (result != null && context.mounted) {
-        final updatedMed = med.copyWith(
-          containerVolumeMl: result.solventVolumeMl,
-          perMlValue: result.perMlConcentration,
-          volumePerDose: result.recommendedUnits / 100,
-        );
-        final box = await Hive.openBox<Medication>('medications');
-        await box.put(updatedMed.id, updatedMed);
-      }
-    }
-
     return GlassCardSurface(
       useGradient: false,
       padding: EdgeInsets.zero,
@@ -2511,18 +2488,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     style: cardTitleStyle(context)?.copyWith(color: cs.primary),
                   ),
                   const Spacer(),
-                  IconButton(
-                    onPressed: onEdit,
-                    constraints: kTightIconButtonConstraints,
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      size: kIconSizeMedium,
-                      color: cs.primary,
-                    ),
-                    tooltip: 'Edit Reconstitution',
-                  ),
                   AnimatedRotation(
                     turns: _isReconstitutionExpanded ? 0 : -0.25,
                     duration: const Duration(milliseconds: 200),

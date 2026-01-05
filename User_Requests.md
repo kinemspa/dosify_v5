@@ -22,14 +22,14 @@
 ==============
 
 # Medication Details Screen
-- Can we have some help text somewhere to state minimize all the cards to arrange them? Maybe put the drag icon on minimized cards to inform user they are rearrangeable. 
-- Re Arrange state is not saving on return to the screen. 
+- Can we have some help text somewhere to state minimize all the cards to arrange them? Maybe put the drag icon on minimized cards to inform user they are rearrangeable. [COMPLETED]
+- Re Arrange state is not saving on return to the screen. [COMPLETED]
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
 - Minimized Cards, make them all the same size as the Reconsitution card in height. 
 - Reconstitution Card:
-	- Remove the dit button.
+	- Remove the dit button. [COMPLETED]
 	- Card within a card is not a good design concept. Make it one card. 
 
 ### App Header
