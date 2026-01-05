@@ -2524,6 +2524,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
                 syringeSizeMl: 3.0,
                 compact: true,
+                showCardSurface: false,
               ),
             ),
           ),

@@ -20,6 +20,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     this.reconFluidName,
     this.syringeSizeMl,
     this.compact = false,
+    this.showCardSurface = true,
   });
 
   final double strengthValue;
@@ -31,6 +32,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
   final String? reconFluidName;
   final double? syringeSizeMl;
   final bool compact;
+  final bool showCardSurface;
 
   String _formatNoTrailing(double value) {
     final str = value.toStringAsFixed(2);
@@ -43,26 +45,34 @@ class ReconstitutionSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final baseForeground = showCardSurface
+        ? Colors.white
+        : theme.colorScheme.onSurface;
+
     return Container(
-      padding: compact
-          ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
-          : kReconSummaryPadding,
-      decoration: BoxDecoration(
-        color: reconBackgroundDarkColor(context),
-        borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.3),
-          width: kReconSummaryBorderWidth,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: showCardSurface
+          ? (compact
+              ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
+              : kReconSummaryPadding)
+          : EdgeInsets.zero,
+      decoration: showCardSurface
+          ? BoxDecoration(
+              color: reconBackgroundDarkColor(context),
+              borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                width: kReconSummaryBorderWidth,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            )
+          : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,7 +97,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(
+                    color: baseForeground.withValues(
                       alpha: kReconTextHighOpacity,
                     ),
                     fontWeight: FontWeight.w600,
@@ -107,7 +117,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                       text: ' of ',
                       style: TextStyle(
                         fontSize: compact ? 12 : 14,
-                        color: Colors.white.withValues(
+                        color: baseForeground.withValues(
                           alpha: kReconTextHighOpacity,
                         ),
                         fontWeight: FontWeight.w400,
@@ -128,7 +138,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                         text: '\nwith ',
                         style: TextStyle(
                           fontSize: compact ? 11 : 13,
-                          color: Colors.white.withValues(
+                          color: baseForeground.withValues(
                             alpha: kReconTextHighOpacity,
                           ),
                           fontWeight: FontWeight.w500,
@@ -146,7 +156,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                         text: ' of $reconFluidName',
                         style: TextStyle(
                           fontSize: compact ? 11 : 13,
-                          color: Colors.white.withValues(
+                          color: baseForeground.withValues(
                             alpha: kReconTextHighOpacity,
                           ),
                           fontWeight: FontWeight.w500,
@@ -185,7 +195,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                  color: baseForeground.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -210,7 +220,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                  color: baseForeground.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -236,7 +246,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                  color: baseForeground.withValues(alpha: kReconTextHighOpacity),
                   fontWeight: FontWeight.w600,
                   height: 1.4,
                 ),
@@ -260,7 +270,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 '${_formatNoTrailing(syringeSizeMl!)} mL Syringe',
                 textAlign: TextAlign.center,
                 style: helperTextStyle(context)?.copyWith(
-                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
+                  color: baseForeground.withValues(alpha: kReconTextHighOpacity),
                   fontSize: 11,
                 ),
               ),

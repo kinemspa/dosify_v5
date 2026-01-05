@@ -12,8 +12,7 @@
 ## Medication Screen
 
 ### Large Cards
-- The Storage row and remaining row need to be the same row. Storage on the left side is 1 row below. Move it up. [COMPLETED] They are still not on the same rows. FIX IT.
-	- Remove the text under the Donut Graph percentage. [COMPLETED]
+- Non MDV Large cards, the Storage location text and remaining  text are NOT on the same row. 
 
 ### Compact Cards
 
@@ -22,15 +21,16 @@
 ==============
 
 # Medication Details Screen
-- Can we have some help text somewhere to state minimize all the cards to arrange them? Maybe put the drag icon on minimized cards to inform user they are rearrangeable. [COMPLETED]
-- Re Arrange state is not saving on return to the screen. [COMPLETED]
+- Collapse Helper Text. Remove it. 
+- Move Drag Icon to the Left side of the collapsed Cards. 
+- INstruct user that if trying to drag when other cards are not callapsed, that cards are not collapsed and all cards need to be callapsed. 
 - For MDV - The Dialog for refill and havign a seperate restock button for a the restock is very clunky. Can we have 2 selections within this dialog to change it? Maybe a page?  [COMPLETED]
 	- You missed the point here. Its either Refill Active Vial Which means to add ot replace current active vial with aa new reconstituted vial. This can be pulled from the sealed vial stock or not. The you have a totall seperate action, for refilling the sealed vials stock. These most likely need to be seperate buttons or pages within the refill dialog. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
 - Minimized Cards, make them all the same size as the Reconsitution card in height. 
 - Reconstitution Card:
 	- Remove the dit button. [COMPLETED]
-	- Card within a card is not a good design concept. Make it one card. 
+	- Card within a card is not a good design concept. Make it one card. [COMPLETED]
 
 ### App Header
 - Can we make the Storage details and expiry info the same as how we did it on the large cards? Place Active Vial Location, Storage Conditoins and Expiry in same row on left, and the remaining in the same row on the right. We did this on the Large Medicaiont Cards on Med list screen. Do the same with the Sealed Vials row too. Mirror the Large Med Cards on the Med List screen. [COMPLETED] No this is not done. The Sotrage Locaiton Text is above the value, the remaining text is on 2 lines. What do you not understand about make it the same as the Large Med Card?
@@ -41,7 +41,8 @@
 	- AdHoc Doses should be editable. [COMPLETED]
 		- Editing an ad hoc dose, needs to include the ability to select the dose unit type. Same as a dose. 
 	- Indicate entries that are editable. [COMPLETED]
-	- Edit icon should always be to the left of all icons. This is not the case. 
+	- Edit icon should always be to the right of all icons. This is not the case. 
+	- Make edit icon smaller and lighter
 	- Adhoc doses are showing up as 2 entries. 
 	- Add if Recositution of a vial. 
 		- If a sealed vial was used or deducted
