@@ -427,9 +427,10 @@ class _DoseInputFieldState extends State<DoseInputField> {
     final step = _defaultStepperStep(customStep: customStep);
     if (widget.medicationForm == MedicationForm.multiDoseVial &&
         _mdvMode == MdvInputMode.units) {
-      final isWholeNumber =
-          (current - current.roundToDouble()).abs() < 0.0001;
-      final newValue = isWholeNumber ? (current + step) : current.ceilToDouble();
+      final isWholeNumber = (current - current.roundToDouble()).abs() < 0.0001;
+      final newValue = isWholeNumber
+          ? (current + step)
+          : current.ceilToDouble();
       _controller.text = _formatStepperValue(newValue);
     } else {
       final newValue = _snapToReasonablePrecision(current + step);
@@ -443,10 +444,10 @@ class _DoseInputFieldState extends State<DoseInputField> {
     final step = _defaultStepperStep(customStep: customStep);
     if (widget.medicationForm == MedicationForm.multiDoseVial &&
         _mdvMode == MdvInputMode.units) {
-      final isWholeNumber =
-          (current - current.roundToDouble()).abs() < 0.0001;
-      final newValue =
-          isWholeNumber ? (current - step) : current.floorToDouble();
+      final isWholeNumber = (current - current.roundToDouble()).abs() < 0.0001;
+      final newValue = isWholeNumber
+          ? (current - step)
+          : current.floorToDouble();
       if (newValue >= 0) {
         _controller.text = _formatStepperValue(newValue);
         _calculate();
@@ -569,8 +570,8 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
     final clamped = newUnits.clamp(0, widget.syringeType!.maxUnits.toDouble());
     final snapped = _mdvMode == MdvInputMode.units
-      ? clamped.roundToDouble()
-      : double.parse(clamped.toStringAsFixed(2));
+        ? clamped.roundToDouble()
+        : double.parse(clamped.toStringAsFixed(2));
 
     // Calculate from units
     final result = DoseCalculator.calculateFromUnitsMDV(

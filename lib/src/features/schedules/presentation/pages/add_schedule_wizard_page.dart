@@ -338,7 +338,9 @@ class _AddScheduleWizardPageState
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  if (med != null && _doseValue.text.isNotEmpty)
+                  if (med != null &&
+                      med.form != MedicationForm.multiDoseVial &&
+                      _doseValue.text.isNotEmpty)
                     Text(
                       'Dose: ${_doseMetricsSummaryLabel()}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(

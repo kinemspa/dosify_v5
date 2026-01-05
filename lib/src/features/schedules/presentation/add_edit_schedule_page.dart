@@ -478,11 +478,12 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                           items: SyringeType.values
                               .where((t) => t != SyringeType.ml_10_0)
                               .map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(type.name),
-                            );
-                          }).toList(),
+                                return DropdownMenuItem(
+                                  value: type,
+                                  child: Text(type.name),
+                                );
+                              })
+                              .toList(),
                           onChanged: notifier.setSyringeType,
                         ),
                       ),

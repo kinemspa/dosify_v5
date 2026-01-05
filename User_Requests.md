@@ -66,13 +66,15 @@
 ==============
 # Schedules List
 - Large Cards:
-	- Move Next Icon slightly Left.  [COMPLETED]
-	- Underneath Dose Name - "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day" (If more than 1 time set for the day) and "Time fo Day Dose 2" Repeat as needed.  [COMPLETED]
-	- Place startdate and end date on same row.  [COMPLETED]
-	- Change to Start Date: and End Date: [COMPLETED]
-	- change today icon to today text [COMPLETED]
+	- Make Next background chip a slight biut taller. Less rounded borders.
+	- Remove the duplicate days and dose times which are underneath the worded insruction. 
+	- Needs Schedule status or chip somewhere. Active, Paused, Disabled, Expired. 
 - Compact Card:
 	- Add on same row ass Dose Name. "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day" [COMPLETED]
+	- Place above text directly under the Dose Name and make the font smaller. 
+	- Needs Schedule status or chip somewhere. Active, Paused, Disabled, Expired.
+- List:
+	- Needs Schedule status or chip somewhere. Active, Paused, Disabled, Expired.
 
 
 
@@ -80,15 +82,13 @@
 # Add Schedule
 - Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
 - Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
-- The incremental field and buttons are wrong. Use the same styling as the add med screen.  [COMPLETED]
-- App Header dynaimc summary needs to contain the active medicine remaining.  [COMPLETED]
+- When changing to strenght, can we not abruptly nudge the entire screen. Can there be an easier way to ease the new menu item in?
 - Step 1:
+	- Text "Set Per DOse amount. You can fine tune it later if needed." WHat is this text I never asked for this. There is no fine tuning later section. 
 	- Tablets:
-		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet.  [COMPLETED]
-		- Formula summary needs to be centreed in the field. Text is still too dark.  [COMPLETED]
-		- Centre align the shortcut buttons.  [COMPLETED]
-		- Incremental field and buttons are still incorrect. Look at the dialogs, ad med wizard. i am fucking pissed you do not use the ceentral design system.  [COMPLETED]
-		- If I choose input strenght, I need to have the strength dropdown and incremental buttons. tablets  can have a strenght of mcg, mg, or g. Fucken use your brain. Error or warning text to display when out of bounds of the administration method units, so must be within 1/4, 1/2, 3/4, 1.  [COMPLETED]
+		- The forumal summary field below only appears once entering data. Why? EveryDose type should have an init amount relative to the medicine. Make sure the forumal display field is there always. Popping things in and out is visually jarring. It also moves the screen around. 
+		- Shortuct buttons have the wrong border colour. Make it the same as everything else.
+		- Incremental field Centre align it in the card. 
 
 
 
@@ -159,7 +159,7 @@
 	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number.  [COMPLETED]
 	- Remove 10mL syringe.  [COMPLETED]
 	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg.  [COMPLETED]
-	- Why does MDV have 2 summary boxes?
+	- Why does MDV have 2 summary boxes?  [COMPLETED]
 
 
 - Dynamic Summary, needs to show each metric, Dose: 1 tablet, 20mg, or dose: 0.01mgs, 0.03 mL, 14Units.  [COMPLETED]
@@ -229,8 +229,8 @@
 
 
 ==============
-# Take/edit Dose Dialog
-##### Is Requivring a FULL 
+# Take/edit Dose Dialog Widget
+##### Is Requiring a FULL OVVERHAUL to manage all the options and all the palces where it can be used.
 - Take Dose:
 	- Remove divivder from the top under the firts helper text. 
 	- Why is tyhere grey chips????????????
