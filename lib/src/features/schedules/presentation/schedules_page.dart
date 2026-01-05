@@ -524,11 +524,14 @@ class _ScheduleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          NextDoseDateBadge(
-            nextDose: next,
-            isActive: s.isActive,
-            dense: false,
-            showNextLabel: true,
+          Padding(
+            padding: const EdgeInsets.only(right: kSpacingXS),
+            child: NextDoseDateBadge(
+              nextDose: next,
+              isActive: s.isActive,
+              dense: false,
+              showNextLabel: true,
+            ),
           ),
         ],
       ),
