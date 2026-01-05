@@ -45,6 +45,7 @@ class DoseCalculationService {
     required DateTime endDate,
     String? scheduleId,
     String? medicationId,
+    bool includeInactive = false,
   }) async {
     final schedules = await _getSchedules(scheduleId, medicationId);
     final doseLogs = await _getDoseLogs(startDate, endDate);
@@ -52,7 +53,7 @@ class DoseCalculationService {
     final doses = <CalculatedDose>[];
 
     for (final schedule in schedules) {
-      if (!schedule.active) continue;
+      if (!includeInactive && !schedule.active) continue;
 
       final scheduleDoses = _calculateScheduleDoses(
         schedule,

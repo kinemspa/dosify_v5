@@ -5,6 +5,8 @@
 	- The reconstitution calculator 
 		- Can we change the background blue colour to something not blue? [COMPLETED]
 	
+- For All today Icons on cards, change to the Text "Today"
+
 ## Home Screen
 
 ==============
@@ -43,7 +45,7 @@
 	- AdHoc Dose:
 		- Edit - Editing the dose needs to be the same dialog as taking a dose. 
 	- Scheduled Dose:
-		- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible. 
+		- Scheduled Doses are disappearing when the schedule is disabled. Need to remain visible.  [COMPLETED]
 
 ### Schedule
 - If the schedule is paused, disabled. It needs to show it everywhere. Including the dose cards, and the calendars. Probably need some sort of other colour representation. 
@@ -80,28 +82,33 @@
 # Schedules List
 - Large Cards:
 	- Move Next Icon slightly Left. 
-	- Make the Dose name in a bolder font [COMPLETED]
-	- Add a started date [COMPLETED]
-	- Add an End date or doesnt end. [COMPLETED]
-	- Seperate Schedule Type and time of day. If multiple times of day they need to show. Reduce text size.  [COMPLETED]
-	- If today, change date icon to today [COMPLETED]
+	- Underneath Dose Name - "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day" (If more than 1 time set for the day) and "Time fo Day Dose 2" Repeat as needed. 
+	- Place startdate and end date on same row. 
+	- Change to Start Date: and End Date:
+	- change today icon to today text
 - Compact Card:
-	- Next Dose date Icon to inculde the Next icon. Smaller.  [COMPLETED]
-	- If today, change date icon to today [COMPLETED]
+	- Add on same row ass Dose Name. "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day"
 
 
 
 ==============
 # Add Schedule
-- Adding a schedule is still entriing historical entries that become skipped. Fix this.  [COMPLETED]
-- Still Black text on a forumal box that appeare below the inputs on step 1.  [COMPLETED]
-- Helper Text., We need hel text above the type input selection.  [COMPLETED]
-	- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
-	- Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
+- Select a Dose input type or mode, Strenght, Volume or Units. Give a light summary.  [COMPLETED]
+- Strength needs to be able to select the STrenght Unit. mcg, mg, g.  [COMPLETED]
 - The incremental field and buttons are wrong. Use the same styling as the add med screen.  [COMPLETED]
 - Step 1:
+	- Tablets:
+		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet. 
+		- Formula summary needs to be centreed in the field. Text is still too dark. 
+		- Centre align the shortcut buttons. 
+		- Incremental field and buttons are still incorrect. Look at the dialogs, ad med wizard. i am fucking pissed you do not use the ceentral design system. 
+		- If I choose input strenght, I need to have the strength dropdown and incremental buttons. tablets  can have a strenght of mcg, mg, or g. Fucken use your brain. Error or warning text to display when out of bounds of the administration method units, so must be within 1/4, 1/2, 3/4, 1. 
+
+
+
 
 - Step 2:
+	- 
 	- Schedule Dates Styling of fields is incorrect. not use system design.  [COMPLETED]
 	- Start:
 		- Change to Start Date [COMPLETED]
@@ -132,6 +139,7 @@
 			- Go and find out the correct terminology for dosing medications. What I care about is framing the correct terms for Say, if a dose is 1 tablet, the tablet is called what?, then we have the strenght of medicaiont in the tabletm what is that called? Same with a capsule, this is like the medicaiont carrier or form. Then if its a single dose vial, we would have the Dose in Volume, the Dose in Strenght, and the DOse in the delivery or admiinstration mechanism, which would be a syringe for this one. These values need to be displayed evetrywhere on the app where these things appear. As this app is to communicate very specifically the details here. If I am using a pre filled syringe, I want the Med Strenght, the Med Volume and the Amount of the measurement in teh administation tool/ method. So go find the correct terminology for this so we can write it in as a rule for you to adhere to across this app. [COMPLETED]
 	- Settings:
 		- The Active button switch, we dont use this switch type anywhere in teh app, why are you using it now? [COMPLETED]
+	- What is cycle start date? We already set the schedule start date on step 2. 
 
 - You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route?
 - Add Tablet:
@@ -161,6 +169,8 @@
 	- Dynamic summary needs to show mg to 3 decimal places or mcgs. Or both. [COMPLETED]
 	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? [COMPLETED]
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
+	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number. 
+	- Remove 10mL syringe. 
 
 
 

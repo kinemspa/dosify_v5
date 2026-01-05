@@ -217,6 +217,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       startDate: missedStart,
       endDate: now,
       medicationId: widget.medication.id,
+      includeInactive: true,
     );
 
     // Dose logs for this medication
