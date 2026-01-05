@@ -44,6 +44,7 @@ class DoseInputField extends StatefulWidget {
     this.syringeType,
     this.initialVolumeMicroliter,
     this.initialSyringeUnits,
+    this.onStrengthUnitChanged,
   });
 
   /// Medication form determines input mode
@@ -77,6 +78,10 @@ class DoseInputField extends StatefulWidget {
   /// Callback when dose changes (returns DoseCalculationResult)
   final ValueChanged<DoseCalculationResult> onDoseChanged;
 
+  /// Optional: called when the user changes the displayed strength unit
+  /// (mcg/mg/g) in tablet strength mode.
+  final ValueChanged<String>? onStrengthUnitChanged;
+
   @override
   State<DoseInputField> createState() => _DoseInputFieldState();
 }
@@ -87,6 +92,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
   _isCountMode; // true = count mode, false = strength mode (tablets/capsules)
   late MdvInputMode _mdvMode; // MDV-specific: strength, volume, or units
   late String _mdvStrengthUnit;
+  late String _strengthUnit;
   DoseCalculationResult? _result;
 
   @override
@@ -98,6 +104,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     _isCountMode = _shouldDefaultToCountMode();
     _mdvMode = _shouldDefaultMdvMode();
     _mdvStrengthUnit = widget.strengthUnit;
+    _strengthUnit = _normalizeStrengthUnit(widget.strengthUnit);
     _initializeValue();
 
     // Schedule calculation after build
@@ -245,7 +252,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
         _mdvMode == MdvInputMode.strength) {
       return _mdvStrengthUnit;
     }
-    return widget.strengthUnit;
+    return _strengthUnit;
+  }
+
+  String _normalizeStrengthUnit(String raw) {
+    final v = raw.trim().toLowerCase();
+    if (v == 'mcg' || v == 'mg' || v == 'g') return v;
+    return 'mg';
   }
 
   void _calculate() {
@@ -265,7 +278,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
           result = DoseCalculator.calculateFromTablets(
             tabletCount: count,
             strengthPerTabletMcg: widget.strengthPerUnitMcg,
-            strengthUnit: widget.strengthUnit,
+            strengthUnit: _effectiveStrengthUnit(),
           );
           break;
 
@@ -581,6 +594,10 @@ class _DoseInputFieldState extends State<DoseInputField> {
           _buildTabletCapsuleHelperText(),
           const SizedBox(height: kSpacingS),
           _buildModeToggle(cs),
+          if (_shouldShowTabletStrengthUnitPicker()) ...[
+            const SizedBox(height: kSpacingS),
+            _buildTabletStrengthUnitPicker(),
+          ],
           const SizedBox(height: kFieldGroupSpacing),
         ],
 
@@ -665,6 +682,40 @@ class _DoseInputFieldState extends State<DoseInputField> {
   bool _supportsModeToggle() {
     return widget.medicationForm == MedicationForm.tablet ||
         widget.medicationForm == MedicationForm.capsule;
+  }
+
+  bool _shouldShowTabletStrengthUnitPicker() {
+    return widget.medicationForm == MedicationForm.tablet && !_isCountMode;
+  }
+
+  Widget _buildTabletStrengthUnitPicker() {
+    return LabelFieldRow(
+      label: 'Unit',
+      field: SmallDropdown36<String>(
+        value: _strengthUnit,
+        items: const [
+          DropdownMenuItem(value: 'mcg', child: Text('mcg')),
+          DropdownMenuItem(value: 'mg', child: Text('mg')),
+          DropdownMenuItem(value: 'g', child: Text('g')),
+        ],
+        onChanged: (value) {
+          if (value == null || value == _strengthUnit) return;
+
+          final raw = double.tryParse(_controller.text.trim());
+          final mcg = raw == null ? null : _convertDisplayUnitToMcg(raw);
+
+          setState(() {
+            _strengthUnit = value;
+            if (mcg != null) {
+              _controller.text = fmt2(_convertMcgToDisplayUnit(mcg));
+            }
+          });
+
+          widget.onStrengthUnitChanged?.call(value);
+          _calculate();
+        },
+      ),
+    );
   }
 
   Widget _buildModeToggle(ColorScheme cs) {

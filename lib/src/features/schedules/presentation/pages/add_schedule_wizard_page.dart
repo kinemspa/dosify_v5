@@ -772,6 +772,11 @@ class _AddScheduleWizardPageState
           initialTabletCount: _getInitialTabletCount(),
           initialCapsuleCount: _getInitialCapsuleCount(),
           initialInjectionCount: _getInitialInjectionCount(),
+          onStrengthUnitChanged: (unit) {
+            setState(() {
+              _doseUnit.text = unit;
+            });
+          },
           onDoseChanged: (result) {
             setState(() {
               _doseResult = result;
