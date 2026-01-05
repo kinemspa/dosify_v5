@@ -100,7 +100,7 @@
 - App Header dynaimc summary needs to contain the active medicine remaining.  [COMPLETED]
 - Step 1:
 	- Tablets:
-		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet. 
+		- Above Dose Type, helper text for sleecting tablet or Strenght per tablet.  [COMPLETED]
 		- Formula summary needs to be centreed in the field. Text is still too dark. 
 		- Centre align the shortcut buttons. 
 		- Incremental field and buttons are still incorrect. Look at the dialogs, ad med wizard. i am fucking pissed you do not use the ceentral design system. 

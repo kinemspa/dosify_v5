@@ -578,9 +578,9 @@ class _DoseInputFieldState extends State<DoseInputField> {
       children: [
         // Mode toggle (tablets/capsules OR MDV)
         if (_supportsModeToggle()) ...[
-          _buildModeToggle(cs),
-          const SizedBox(height: kSpacingS),
           _buildTabletCapsuleHelperText(),
+          const SizedBox(height: kSpacingS),
+          _buildModeToggle(cs),
           const SizedBox(height: kFieldGroupSpacing),
         ],
 
@@ -634,10 +634,15 @@ class _DoseInputFieldState extends State<DoseInputField> {
       return const SizedBox.shrink();
     }
 
+    final countLabel = widget.medicationForm == MedicationForm.tablet
+        ? 'Tablets'
+        : 'Capsules';
+    final perUnitLabel = widget.medicationForm == MedicationForm.tablet
+        ? 'tablet'
+        : 'capsule';
+
     return Text(
-      _isCountMode
-          ? 'Enter how many you take. Use shortcuts for common doses.'
-          : "Enter strength instead and we'll calculate the equivalent dose.",
+      'Select $countLabel to enter how many you take. Select Strength to enter a dose amount — we’ll convert using the strength per $perUnitLabel.',
       style: helperTextStyle(context),
     );
   }
