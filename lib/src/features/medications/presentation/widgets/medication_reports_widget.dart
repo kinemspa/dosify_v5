@@ -16,11 +16,9 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class _HistoryItem {
   const _HistoryItem._({
@@ -504,13 +502,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final title = isAdHoc ? 'Unscheduled' : log.scheduleName;
 
     return InkWell(
-      onTap: () {
-        if (isAdHoc) {
-          _showEditAdHocDoseDialog(context, log);
-          return;
-        }
-        _showUniversalDoseActionSheetForLog(context, log);
-      },
+      onTap: () => _showUniversalDoseActionSheetForLog(context, log),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
         child: Row(
@@ -673,40 +665,27 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     style: helperTextStyle(dialogContext),
                   ),
                   const SizedBox(height: kSpacingM),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: kStandardFieldHeight,
-                          child: OutlinedButton.icon(
-                            onPressed: pickDate,
-                            icon: const Icon(
-                              Icons.calendar_today,
-                              size: kIconSizeSmall,
-                            ),
-                            label: Text(dateFormat.format(selected)),
-                          ),
-                        ),
+                  SizedBox(
+                    height: kStandardFieldHeight,
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: pickDate,
+                      icon: const Icon(
+                        Icons.calendar_today,
+                        size: kIconSizeSmall,
                       ),
-                    ],
+                      label: Text(dateFormat.format(selected)),
+                    ),
                   ),
                   const SizedBox(height: kSpacingS),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: kStandardFieldHeight,
-                          child: OutlinedButton.icon(
-                            onPressed: pickTime,
-                            icon: const Icon(
-                              Icons.schedule,
-                              size: kIconSizeSmall,
-                            ),
-                            label: Text(timeFormat.format(selected)),
-                          ),
-                        ),
-                      ),
-                    ],
+                  SizedBox(
+                    height: kStandardFieldHeight,
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: pickTime,
+                      icon: const Icon(Icons.schedule, size: kIconSizeSmall),
+                      label: Text(timeFormat.format(selected)),
+                    ),
                   ),
                   const SizedBox(height: kSpacingM),
                   Text(
@@ -775,247 +754,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     }
   }
 
-  Future<void> _showEditAdHocDoseDialog(
-    BuildContext context,
-    DoseLog log,
-  ) async {
-    final medicationsBox = Hive.box<Medication>('medications');
-    final inventoryBox = Hive.box<InventoryLog>('inventory_logs');
-
-    final currentMed =
-        medicationsBox.get(widget.medication.id) ?? widget.medication;
-    final isMdv = currentMed.form == MedicationForm.multiDoseVial;
-    final unit = isMdv
-        ? 'mL'
-        : MedicationDisplayHelpers.stockUnitLabel(currentMed.stockUnit);
-
-    final oldAmount = log.doseValue;
-    final currentStock = isMdv
-        ? (currentMed.activeVialVolume ?? currentMed.containerVolumeMl ?? 0)
-        : currentMed.stockValue;
-
-    final maxEditableAmount = (currentStock + oldAmount).clamp(
-      0.0,
-      double.infinity,
-    );
-
-    final amountController = TextEditingController(
-      text: _formatAmount(oldAmount),
-    );
-    final notesController = TextEditingController(text: log.notes ?? '');
-
-    Future<void> applyStockAdjustment(double newAmount) async {
-      final latest =
-          medicationsBox.get(widget.medication.id) ?? widget.medication;
-      final latestIsMdv = latest.form == MedicationForm.multiDoseVial;
-      final latestStock = latestIsMdv
-          ? (latest.activeVialVolume ?? latest.containerVolumeMl ?? 0)
-          : latest.stockValue;
-
-      // We want net change to match "-newAmount" instead of "-oldAmount".
-      // Delta to apply to current stock is: oldAmount - newAmount.
-      final adjustment = oldAmount - newAmount;
-      final updatedStock = (latestStock + adjustment).clamp(
-        0.0,
-        double.infinity,
-      );
-
-      if (latestIsMdv) {
-        final max =
-            (latest.containerVolumeMl != null && latest.containerVolumeMl! > 0)
-            ? latest.containerVolumeMl!
-            : double.infinity;
-        medicationsBox.put(
-          latest.id,
-          latest.copyWith(activeVialVolume: updatedStock.clamp(0.0, max)),
-        );
-      } else {
-        medicationsBox.put(
-          latest.id,
-          latest.copyWith(stockValue: updatedStock),
-        );
-      }
-    }
-
-    Future<void> updateInventoryLog(double newAmount, String? notes) async {
-      final existing = inventoryBox.get(log.id);
-      if (existing == null) return;
-      if (existing.changeType != InventoryChangeType.adHocDose) return;
-
-      inventoryBox.put(
-        existing.id,
-        InventoryLog(
-          id: existing.id,
-          medicationId: existing.medicationId,
-          medicationName: existing.medicationName,
-          changeType: existing.changeType,
-          previousStock: existing.previousStock,
-          newStock: existing.previousStock - newAmount,
-          changeAmount: -newAmount,
-          notes: (notes != null && notes.trim().isNotEmpty)
-              ? notes.trim()
-              : existing.notes,
-          timestamp: existing.timestamp,
-        ),
-      );
-    }
-
-    Future<void> updateDoseLog(double newAmount, String? notes) async {
-      final updated = DoseLog(
-        id: log.id,
-        scheduleId: log.scheduleId,
-        scheduleName: log.scheduleName,
-        medicationId: log.medicationId,
-        medicationName: log.medicationName,
-        scheduledTime: log.scheduledTime,
-        actionTime: log.actionTime,
-        doseValue: newAmount,
-        doseUnit: log.doseUnit,
-        action: log.action,
-        actualDoseValue: log.actualDoseValue,
-        actualDoseUnit: log.actualDoseUnit,
-        notes: (notes != null && notes.trim().isNotEmpty) ? notes.trim() : null,
-      );
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(updated);
-    }
-
-    Future<void> deleteAdHoc() async {
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.delete(log.id);
-      if (inventoryBox.containsKey(log.id)) {
-        await inventoryBox.delete(log.id);
-      }
-      await applyStockAdjustment(0.0);
-    }
-
-    final saved = await showDialog<bool>(
-      context: context,
-      useRootNavigator: true,
-      builder: (dialogContext) {
-        final cs = Theme.of(dialogContext).colorScheme;
-
-        return AlertDialog(
-          titleTextStyle: cardTitleStyle(
-            dialogContext,
-          )?.copyWith(color: cs.primary),
-          contentTextStyle: bodyTextStyle(dialogContext),
-          title: const Text('Edit Ad-Hoc Dose'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Update the amount and notes for this unscheduled dose.',
-                style: helperTextStyle(dialogContext),
-              ),
-              const SizedBox(height: kSpacingM),
-              Row(
-                children: [
-                  Text(
-                    'Amount:',
-                    style: helperTextStyle(
-                      dialogContext,
-                    )?.copyWith(fontWeight: kFontWeightMedium),
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  Expanded(
-                    child: StepperRow36(
-                      controller: amountController,
-                      fixedFieldWidth: 92,
-                      onDec: () {
-                        final v = double.tryParse(amountController.text) ?? 0;
-                        amountController.text = _formatAmount(
-                          (v - 0.1).clamp(0.0, maxEditableAmount),
-                        );
-                      },
-                      onInc: () {
-                        final v = double.tryParse(amountController.text) ?? 0;
-                        amountController.text = _formatAmount(
-                          (v + 0.1).clamp(0.0, maxEditableAmount),
-                        );
-                      },
-                      decoration: buildCompactFieldDecoration(
-                        context: dialogContext,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  Text(
-                    unit,
-                    style: helperTextStyle(
-                      dialogContext,
-                    )?.copyWith(fontWeight: kFontWeightMedium),
-                  ),
-                ],
-              ),
-              const SizedBox(height: kSpacingM),
-              Text(
-                'Notes (optional):',
-                style: helperTextStyle(
-                  dialogContext,
-                )?.copyWith(fontWeight: kFontWeightMedium),
-              ),
-              const SizedBox(height: kSpacingS),
-              TextField(
-                controller: notesController,
-                maxLines: 2,
-                style: bodyTextStyle(dialogContext),
-                decoration: buildFieldDecoration(
-                  dialogContext,
-                  hint: 'e.g., Taken early',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await deleteAdHoc();
-                if (dialogContext.mounted) Navigator.pop(dialogContext, true);
-              },
-              child: Text('Delete', style: TextStyle(color: cs.error)),
-            ),
-            FilledButton(
-              onPressed: () async {
-                final newAmount = double.tryParse(amountController.text) ?? 0;
-                if (newAmount <= 0) return;
-
-                final trimmedNotes = notesController.text.trim();
-                await updateDoseLog(newAmount, trimmedNotes);
-                await updateInventoryLog(newAmount, trimmedNotes);
-                await applyStockAdjustment(newAmount);
-
-                if (dialogContext.mounted) Navigator.pop(dialogContext, true);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-
-    amountController.dispose();
-    notesController.dispose();
-
-    if (!mounted) return;
-    if (saved == true) {
-      setState(() {});
-      ScaffoldMessenger.of(
-        this.context,
-      ).showSnackBar(const SnackBar(content: Text('Ad-hoc dose updated')));
-    }
-  }
-
   Future<void> _showUniversalDoseActionSheetForLog(
     BuildContext context,
     DoseLog log,
   ) {
     final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+    final logBox = Hive.box<DoseLog>('dose_logs');
 
     final dose = CalculatedDose(
       scheduleId: log.scheduleId,
@@ -1039,6 +783,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       dose: dose,
       onMarkTaken: (notes) {
         final trimmed = notes?.trim();
+        final latest = logBox.get(log.id) ?? log;
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -1047,8 +792,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
           actionTime: log.actionTime,
-          doseValue: log.doseValue,
-          doseUnit: log.doseUnit,
+          doseValue: latest.doseValue,
+          doseUnit: latest.doseUnit,
           action: DoseAction.taken,
           actualDoseValue: log.actualDoseValue,
           actualDoseUnit: log.actualDoseUnit,
@@ -1063,6 +808,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       },
       onSnooze: (notes) {
         final trimmed = notes?.trim();
+        final latest = logBox.get(log.id) ?? log;
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -1071,8 +817,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
           actionTime: log.actionTime,
-          doseValue: log.doseValue,
-          doseUnit: log.doseUnit,
+          doseValue: latest.doseValue,
+          doseUnit: latest.doseUnit,
           action: DoseAction.snoozed,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
@@ -1085,6 +831,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       },
       onSkip: (notes) {
         final trimmed = notes?.trim();
+        final latest = logBox.get(log.id) ?? log;
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -1093,8 +840,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
           actionTime: log.actionTime,
-          doseValue: log.doseValue,
-          doseUnit: log.doseUnit,
+          doseValue: latest.doseValue,
+          doseUnit: latest.doseUnit,
           action: DoseAction.skipped,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
@@ -1842,7 +1589,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     if (linkedAdHocDoseLog == null) return row;
     return InkWell(
-      onTap: () => _showEditAdHocDoseDialog(context, linkedAdHocDoseLog),
+      onTap: () =>
+          _showUniversalDoseActionSheetForLog(context, linkedAdHocDoseLog),
       child: row,
     );
   }

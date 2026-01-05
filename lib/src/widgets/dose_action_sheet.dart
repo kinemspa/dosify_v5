@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -58,8 +61,13 @@ class DoseActionSheet extends StatefulWidget {
 
 class _DoseActionSheetState extends State<DoseActionSheet> {
   late final TextEditingController _notesController;
+  TextEditingController? _amountController;
+  double? _originalAdHocAmount;
+  double? _maxAdHocAmount;
   late DoseStatus _selectedStatus;
   bool _hasChanged = false;
+
+  bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
 
   @override
   void initState() {
@@ -68,12 +76,137 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       text: widget.dose.existingLog?.notes ?? '',
     );
     _selectedStatus = widget.dose.status;
+
+    if (_isAdHoc && widget.dose.existingLog != null) {
+      final log = widget.dose.existingLog!;
+      _originalAdHocAmount = log.doseValue;
+      _amountController = TextEditingController(
+        text: _formatAmount(log.doseValue),
+      );
+
+      final medBox = Hive.box<Medication>('medications');
+      final med = medBox.get(log.medicationId);
+      if (med != null) {
+        final isMdv = med.form == MedicationForm.multiDoseVial;
+        final currentStock = isMdv
+            ? (med.activeVialVolume ?? med.containerVolumeMl ?? 0)
+            : med.stockValue;
+        _maxAdHocAmount = (currentStock + log.doseValue).clamp(
+          0.0,
+          double.infinity,
+        );
+      } else {
+        _maxAdHocAmount = double.infinity;
+      }
+    }
   }
 
   @override
   void dispose() {
     _notesController.dispose();
+    _amountController?.dispose();
     super.dispose();
+  }
+
+  String _formatAmount(double value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toStringAsFixed(2);
+  }
+
+  double _adHocStepSize(String unit) {
+    final normalized = unit.trim().toLowerCase();
+    if (normalized == 'ml' || normalized.contains('ml')) return 0.1;
+    return 1.0;
+  }
+
+  Future<void> _saveAdHocAmountAndNotesIfNeeded() async {
+    if (!_isAdHoc) return;
+    final existingLog = widget.dose.existingLog;
+    if (existingLog == null) return;
+    final controller = _amountController;
+    if (controller == null) return;
+
+    final parsedAmount = double.tryParse(controller.text) ?? 0;
+    final maxAmount = _maxAdHocAmount ?? double.infinity;
+    final newAmount = parsedAmount.clamp(0.0, maxAmount);
+    final oldAmount = _originalAdHocAmount ?? existingLog.doseValue;
+    final trimmedNotes = _notesController.text.trim();
+    final newNotes = trimmedNotes.isEmpty ? null : trimmedNotes;
+
+    final amountChanged = (newAmount - oldAmount).abs() > 0.000001;
+    final notesChanged = (existingLog.notes ?? '') != (newNotes ?? '');
+    if (!amountChanged && !notesChanged) return;
+
+    final doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+    final inventoryBox = Hive.box<InventoryLog>('inventory_logs');
+    final medBox = Hive.box<Medication>('medications');
+    final med = medBox.get(existingLog.medicationId);
+
+    if (amountChanged && med != null) {
+      final isMdv = med.form == MedicationForm.multiDoseVial;
+      final latestStock = isMdv
+          ? (med.activeVialVolume ?? med.containerVolumeMl ?? 0)
+          : med.stockValue;
+
+      // We want net change to match "-newAmount" instead of "-oldAmount".
+      // Delta to apply to current stock is: oldAmount - newAmount.
+      final adjustment = oldAmount - newAmount;
+      final updatedStock = (latestStock + adjustment).clamp(
+        0.0,
+        double.infinity,
+      );
+
+      if (isMdv) {
+        final max =
+            (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
+            ? med.containerVolumeMl!
+            : double.infinity;
+        await medBox.put(
+          med.id,
+          med.copyWith(activeVialVolume: updatedStock.clamp(0.0, max)),
+        );
+      } else {
+        await medBox.put(med.id, med.copyWith(stockValue: updatedStock));
+      }
+
+      final inv = inventoryBox.get(existingLog.id);
+      if (inv != null && inv.changeType == InventoryChangeType.adHocDose) {
+        inventoryBox.put(
+          inv.id,
+          InventoryLog(
+            id: inv.id,
+            medicationId: inv.medicationId,
+            medicationName: inv.medicationName,
+            changeType: inv.changeType,
+            previousStock: inv.previousStock,
+            newStock: inv.previousStock - newAmount,
+            changeAmount: -newAmount,
+            notes: newNotes ?? inv.notes,
+            timestamp: inv.timestamp,
+          ),
+        );
+      }
+    }
+
+    final updatedLog = DoseLog(
+      id: existingLog.id,
+      scheduleId: existingLog.scheduleId,
+      scheduleName: existingLog.scheduleName,
+      medicationId: existingLog.medicationId,
+      medicationName: existingLog.medicationName,
+      scheduledTime: existingLog.scheduledTime,
+      actionTime: existingLog.actionTime,
+      doseValue: amountChanged ? newAmount : existingLog.doseValue,
+      doseUnit: existingLog.doseUnit,
+      action: existingLog.action,
+      actualDoseValue: existingLog.actualDoseValue,
+      actualDoseUnit: existingLog.actualDoseUnit,
+      notes: newNotes,
+    );
+    await doseLogRepo.upsert(updatedLog);
+
+    _originalAdHocAmount = updatedLog.doseValue;
+    controller.text = _formatAmount(updatedLog.doseValue);
   }
 
   Future<void> _saveNotesOnly() async {
@@ -115,6 +248,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   Future<void> _saveChanges() async {
+    await _saveAdHocAmountAndNotesIfNeeded();
+
     // If status changed, call appropriate callback
     if (_selectedStatus != widget.dose.status) {
       // Persist an audit event when editing an existing logged dose.
@@ -165,6 +300,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       }
     } else if (widget.dose.existingLog != null) {
       // Status didn't change but might need to save notes
+      if (_isAdHoc) return;
       await _saveNotesOnly();
     }
   }
@@ -208,6 +344,61 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
               controller: scrollController,
               padding: kBottomSheetContentPadding,
               children: [
+                if (_isAdHoc && widget.dose.existingLog != null) ...[
+                  SectionFormCard(
+                    neutral: true,
+                    title: 'Amount',
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StepperRow36(
+                              controller: _amountController!,
+                              fixedFieldWidth: 120,
+                              onDec: () {
+                                final step = _adHocStepSize(
+                                  widget.dose.existingLog!.doseUnit,
+                                );
+                                final max = _maxAdHocAmount ?? double.infinity;
+                                final v =
+                                    double.tryParse(_amountController!.text) ??
+                                    0;
+                                _amountController!.text = _formatAmount(
+                                  (v - step).clamp(0.0, max),
+                                );
+                                setState(() => _hasChanged = true);
+                              },
+                              onInc: () {
+                                final step = _adHocStepSize(
+                                  widget.dose.existingLog!.doseUnit,
+                                );
+                                final max = _maxAdHocAmount ?? double.infinity;
+                                final v =
+                                    double.tryParse(_amountController!.text) ??
+                                    0;
+                                _amountController!.text = _formatAmount(
+                                  (v + step).clamp(0.0, max),
+                                );
+                                setState(() => _hasChanged = true);
+                              },
+                              decoration: buildCompactFieldDecoration(
+                                context: context,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Text(
+                            widget.dose.existingLog!.doseUnit,
+                            style: helperTextStyle(
+                              context,
+                            )?.copyWith(fontWeight: kFontWeightMedium),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: kSpacingM),
+                ],
                 SectionFormCard(
                   neutral: true,
                   title: 'Dose',
@@ -236,6 +427,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   children: [
                     TextField(
                       controller: _notesController,
+                      onChanged: (_) => setState(() => _hasChanged = true),
                       style: bodyTextStyle(context),
                       decoration: buildFieldDecoration(
                         context,
@@ -271,10 +463,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                             await _saveChanges();
                             if (context.mounted) Navigator.pop(context);
                           },
-                          icon: const Icon(
-                            Icons.save,
-                            size: kIconSizeSmall,
-                          ),
+                          icon: const Icon(Icons.save, size: kIconSizeSmall),
                           label: const Text('Save & Close'),
                         ),
                       ),
@@ -348,18 +537,19 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       spacing: kSpacingS,
       runSpacing: kSpacingXS,
       children: [
-        PrimaryChoiceChip(
-          label: const Text('Scheduled'),
-          selected:
-              _selectedStatus == DoseStatus.pending ||
-              _selectedStatus == DoseStatus.overdue,
-          onSelected: (_) {
-            setState(() {
-              _selectedStatus = DoseStatus.pending;
-              _hasChanged = true;
-            });
-          },
-        ),
+        if (!_isAdHoc)
+          PrimaryChoiceChip(
+            label: const Text('Scheduled'),
+            selected:
+                _selectedStatus == DoseStatus.pending ||
+                _selectedStatus == DoseStatus.overdue,
+            onSelected: (_) {
+              setState(() {
+                _selectedStatus = DoseStatus.pending;
+                _hasChanged = true;
+              });
+            },
+          ),
         PrimaryChoiceChip(
           label: const Text('Taken'),
           selected: _selectedStatus == DoseStatus.taken,
