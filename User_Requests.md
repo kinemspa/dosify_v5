@@ -3,7 +3,7 @@
 ## Global
 - Dark Theme 
 	- The reconstitution calculator 
-		- Can we change the background blue colour to something not blue?
+		- Can we change the background blue colour to something not blue? [COMPLETED]
 	
 ## Home Screen
 

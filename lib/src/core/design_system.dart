@@ -307,8 +307,9 @@ Color reconBackgroundDarkColor(BuildContext context) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
   if (theme.brightness == Brightness.dark) {
+    // In dark theme, avoid the blue tint and stay neutral.
     return Color.alphaBlend(
-      kReconBackgroundDark.withValues(alpha: 0.80),
+      cs.onSurface.withValues(alpha: kOpacityFaint),
       cs.surface,
     );
   }
@@ -320,8 +321,9 @@ Color reconBackgroundActiveColor(BuildContext context) {
   final theme = Theme.of(context);
   final cs = theme.colorScheme;
   if (theme.brightness == Brightness.dark) {
+    // Slightly raised/active surface in dark theme, still neutral.
     return Color.alphaBlend(
-      kReconBackgroundActive.withValues(alpha: 0.85),
+      cs.onSurface.withValues(alpha: kOpacitySubtleLow),
       cs.surface,
     );
   }
