@@ -565,14 +565,14 @@ class _ScheduleText {
 
   static String startedLabel(Schedule s) {
     final start = s.startAt;
-    if (start == null) return 'Start: —';
-    return 'Start: ${DateFormat('d MMM').format(start)}';
+    if (start == null) return 'Start Date: —';
+    return 'Start Date: ${DateFormat('d MMM').format(start)}';
   }
 
   static String endLabel(Schedule s) {
     final end = s.endAt;
-    if (end == null) return 'End: No end';
-    return 'End: ${DateFormat('d MMM').format(end)}';
+    if (end == null) return 'End Date: No end';
+    return 'End Date: ${DateFormat('d MMM').format(end)}';
   }
 
   static String? scheduleSubtitle(Schedule s) {
