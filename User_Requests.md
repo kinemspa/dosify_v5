@@ -86,7 +86,7 @@
 	- Underneath Dose Name - "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day" (If more than 1 time set for the day) and "Time fo Day Dose 2" Repeat as needed.  [COMPLETED]
 	- Place startdate and end date on same row.  [COMPLETED]
 	- Change to Start Date: and End Date: [COMPLETED]
-	- change today icon to today text
+	- change today icon to today text [COMPLETED]
 - Compact Card:
 	- Add on same row ass Dose Name. "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day"
 
