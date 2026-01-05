@@ -984,12 +984,24 @@ class _AddScheduleWizardPageState
                   .toList(),
               onChanged: (value) {
                 setState(() {
+                  final wasDaysOnOff = _mode == ScheduleMode.daysOnOff;
                   _mode = value ?? ScheduleMode.everyDay;
                   _days.clear();
                   _daysOfMonth.clear();
 
                   if (_mode == ScheduleMode.everyDay) {
                     _days.addAll([1, 2, 3, 4, 5, 6, 7]);
+                  }
+
+                  if (!wasDaysOnOff &&
+                      _mode == ScheduleMode.daysOnOff &&
+                      widget.initial?.cycleAnchorDate == null) {
+                    final startAt = _effectiveStartAt();
+                    _cycleAnchor = DateTime(
+                      startAt.year,
+                      startAt.month,
+                      startAt.day,
+                    );
                   }
                   _maybeAutoName();
                 });
@@ -1548,11 +1560,11 @@ class _AddScheduleWizardPageState
           _active ? 'Schedule is enabled' : 'Schedule is disabled',
         ),
         if (_mode == ScheduleMode.daysOnOff) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingM),
           ListTile(
-            title: Text('Cycle Start Date', style: bodyTextStyle(context)),
+            title: Text('Cycle Anchor Date', style: bodyTextStyle(context)),
             subtitle: Text(
-              '${_cycleAnchor.year}-${_cycleAnchor.month}-${_cycleAnchor.day}',
+              MaterialLocalizations.of(context).formatCompactDate(_cycleAnchor),
               style: helperTextStyle(context),
             ),
             trailing: const Icon(Icons.calendar_today),
@@ -1567,6 +1579,10 @@ class _AddScheduleWizardPageState
                 setState(() => _cycleAnchor = date);
               }
             },
+          ),
+          buildHelperText(
+            context,
+            'For days on/off schedules, this sets which day the cycle starts on. By default it matches your start date.',
           ),
         ],
       ],

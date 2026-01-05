@@ -3,10 +3,8 @@
 ## Global
 - Dark Theme 
 	- The reconstitution calculator 
-		- Can we change the background blue colour to something not blue? [COMPLETED]
 	
-- For All today Icons on cards, change to the Text "Today" [COMPLETED]
-- Time Picker, make all text the grey font. unless selected.  [COMPLETED]
+- Time Picker, the AM / PM text Grey when not selected. White when selected.  Same with the clock numbers.   [COMPLETED]
 
 ## Home Screen
 
@@ -142,7 +140,7 @@
 			- Go and find out the correct terminology for dosing medications. What I care about is framing the correct terms for Say, if a dose is 1 tablet, the tablet is called what?, then we have the strenght of medicaiont in the tabletm what is that called? Same with a capsule, this is like the medicaiont carrier or form. Then if its a single dose vial, we would have the Dose in Volume, the Dose in Strenght, and the DOse in the delivery or admiinstration mechanism, which would be a syringe for this one. These values need to be displayed evetrywhere on the app where these things appear. As this app is to communicate very specifically the details here. If I am using a pre filled syringe, I want the Med Strenght, the Med Volume and the Amount of the measurement in teh administation tool/ method. So go find the correct terminology for this so we can write it in as a rule for you to adhere to across this app. [COMPLETED]
 	- Settings:
 		- The Active button switch, we dont use this switch type anywhere in teh app, why are you using it now? [COMPLETED]
-	- What is cycle start date? We already set the schedule start date on step 2. 
+	- What is cycle start date? We already set the schedule start date on step 2.  [COMPLETED]
 
 - You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route?
 - Add Tablet:
