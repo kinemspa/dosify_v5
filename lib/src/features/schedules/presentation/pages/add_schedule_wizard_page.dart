@@ -57,6 +57,12 @@ class _AddScheduleWizardPageState
   SyringeType? _selectedSyringeType;
   DoseCalculationResult? _doseResult;
 
+  SyringeType _normalizeSyringeType(SyringeType type) {
+    // The 10mL syringe is no longer offered; normalize legacy selections.
+    if (type == SyringeType.ml_10_0) return SyringeType.ml_5_0;
+    return type;
+  }
+
   // Step 2: Schedule Pattern
   ScheduleMode _mode = ScheduleMode.everyDay;
   final Set<int> _days = {1, 2, 3, 4, 5, 6, 7};
@@ -740,6 +746,7 @@ class _AddScheduleWizardPageState
             field: SmallDropdown36<SyringeType>(
               value: _selectedSyringeType ?? _getSyringeType(),
               items: SyringeType.values
+                  .where((t) => t != SyringeType.ml_10_0)
                   .map(
                     (t) => DropdownMenuItem<SyringeType>(
                       value: t,
@@ -1163,7 +1170,7 @@ class _AddScheduleWizardPageState
     }
 
     if (_selectedSyringeType != null) {
-      return _selectedSyringeType;
+      return _normalizeSyringeType(_selectedSyringeType!);
     }
 
     // Default behavior:
@@ -1176,7 +1183,7 @@ class _AddScheduleWizardPageState
       if (doseVolumeMl <= 1.0) return SyringeType.ml_1_0;
       if (doseVolumeMl <= 3.0) return SyringeType.ml_3_0;
       if (doseVolumeMl <= 5.0) return SyringeType.ml_5_0;
-      return SyringeType.ml_10_0;
+      return SyringeType.ml_5_0;
     }
 
     return SyringeType.ml_1_0;

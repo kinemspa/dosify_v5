@@ -467,14 +467,17 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
                       LabelFieldRow(
                         label: 'Syringe Size',
                         field: DropdownButtonFormField<SyringeType>(
-                          value:
-                              state.selectedSyringeType ??
-                              _getSyringeType(state.selectedMed, null),
+                          value: _getSyringeType(
+                            state.selectedMed,
+                            state.selectedSyringeType,
+                          ),
                           decoration: buildFieldDecoration(
                             context,
                             hint: 'Select syringe size',
                           ),
-                          items: SyringeType.values.map((type) {
+                          items: SyringeType.values
+                              .where((t) => t != SyringeType.ml_10_0)
+                              .map((type) {
                             return DropdownMenuItem(
                               value: type,
                               child: Text(type.name),
@@ -1193,6 +1196,11 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
       return null;
     }
 
+    // The 10mL syringe is no longer offered; normalize legacy selections.
+    if (selected == SyringeType.ml_10_0) {
+      selected = SyringeType.ml_5_0;
+    }
+
     // If user selected a syringe type, use it
     if (selected != null) {
       return selected;
@@ -1205,7 +1213,7 @@ class _AddEditSchedulePageState extends ConsumerState<AddEditSchedulePage> {
     if (volumeMl <= 1.0) return SyringeType.ml_1_0;
     if (volumeMl <= 3.0) return SyringeType.ml_3_0;
     if (volumeMl <= 5.0) return SyringeType.ml_5_0;
-    return SyringeType.ml_10_0;
+    return SyringeType.ml_5_0;
   }
 
   double? _getInitialStrengthMcg() {

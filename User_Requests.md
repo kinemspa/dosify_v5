@@ -26,16 +26,18 @@
 	- Can we change the refill dialog. " Open New VIal" this is not the correct terminology for medicine. 
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
 - Reconstitution Card:
-	- Why is the text so d
+	- Why is the text so dark?
 
 ### App Header
 - On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is. [COMPLETED]
+- Expiry date text is unreadable, What colour is it?
+- Expiry date, can we put the letters Exp in front of the date. 
+- MDV:
+	- Where is the storage details for the sealed vials
+
 
 ### Reports Card
-- Scheduled Doses should be editable too.  [COMPLETED]
-- Should be able to edit the dose time and date aswell.  [COMPLETED]
-- Scheudled Dose Date Icon is not showing the date. [COMPLETED]
-- Make edit icon smaller and lighter  [COMPLETED]
+- Should be able to edit the dose time and date aswell.  This is not completed. need to add the date and time into the dose editor. 
 - AdHoc Dose:
 	- Edit - Editing the dose needs to be the same dialog as taking a dose.  [COMPLETED]
 - Scheduled Dose:
@@ -166,7 +168,7 @@
 	- Syring graphic , the black circle indicator has some other numbers displaying in white, they maybe above hte syringe graphic indicators? [COMPLETED]
 	- Cannot proceed from Step 1. Continue button remains greyed out no matter what settings are entered. [COMPLETED]
 	- Incrementing units should be whole number, and lock in to whole numbers. Dont increment 31.6 to 32.6, incrment to next whole number.  [COMPLETED]
-	- Remove 10mL syringe. 
+	- Remove 10mL syringe.  [COMPLETED]
 	- Dose Calculations are incorrect. Check the Calculations in the engine. I have currently a 16mg vial with 5mL in it. I select 1mL syringe, and enter 1mg. It states its 50 units. It should be 31.3 Units. Also 0.5mL should not equal 1mg. 
 	- Why does MDV have 2 summary boxes?
 
