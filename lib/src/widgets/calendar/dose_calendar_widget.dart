@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_day_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_week_view.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/up_next_dose_card.dart';
@@ -865,6 +866,50 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                         itemCount: dayDoses.length,
                         itemBuilder: (context, index) {
                           final dose = dayDoses[index];
+
+                          final schedule = Hive.box<Schedule>(
+                            'schedules',
+                          ).get(dose.scheduleId);
+                          final med = (schedule?.medicationId != null)
+                              ? Hive.box<Medication>(
+                                  'medications',
+                                ).get(schedule!.medicationId)
+                              : null;
+
+                          if (schedule != null && med != null) {
+                            final strengthLabel =
+                                MedicationDisplayHelpers.strengthOrConcentrationLabel(
+                                  med,
+                                );
+
+                            final metrics =
+                                MedicationDisplayHelpers.doseMetricsSummary(
+                                  med,
+                                  doseTabletQuarters:
+                                      schedule.doseTabletQuarters,
+                                  doseCapsules: schedule.doseCapsules,
+                                  doseSyringes: schedule.doseSyringes,
+                                  doseVials: schedule.doseVials,
+                                  doseMassMcg: schedule.doseMassMcg?.toDouble(),
+                                  doseVolumeMicroliter: schedule
+                                      .doseVolumeMicroliter
+                                      ?.toDouble(),
+                                  syringeUnits: schedule.doseIU?.toDouble(),
+                                );
+
+                            if (strengthLabel.trim().isNotEmpty &&
+                                metrics.trim().isNotEmpty) {
+                              return DoseCard(
+                                dose: dose,
+                                medicationName: med.name,
+                                strengthOrConcentrationLabel: strengthLabel,
+                                doseMetrics: metrics,
+                                isActive: schedule.isActive,
+                                onTap: () => _onDoseTapInternal(dose),
+                              );
+                            }
+                          }
+
                           return DoseSummaryRow(
                             dose: dose,
                             showMedicationName: true,
@@ -889,6 +934,51 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           itemCount: dayDoses.length,
                           itemBuilder: (context, index) {
                             final dose = dayDoses[index];
+
+                            final schedule = Hive.box<Schedule>(
+                              'schedules',
+                            ).get(dose.scheduleId);
+                            final med = (schedule?.medicationId != null)
+                                ? Hive.box<Medication>(
+                                    'medications',
+                                  ).get(schedule!.medicationId)
+                                : null;
+
+                            if (schedule != null && med != null) {
+                              final strengthLabel =
+                                  MedicationDisplayHelpers.strengthOrConcentrationLabel(
+                                    med,
+                                  );
+
+                              final metrics =
+                                  MedicationDisplayHelpers.doseMetricsSummary(
+                                    med,
+                                    doseTabletQuarters:
+                                        schedule.doseTabletQuarters,
+                                    doseCapsules: schedule.doseCapsules,
+                                    doseSyringes: schedule.doseSyringes,
+                                    doseVials: schedule.doseVials,
+                                    doseMassMcg: schedule.doseMassMcg
+                                        ?.toDouble(),
+                                    doseVolumeMicroliter: schedule
+                                        .doseVolumeMicroliter
+                                        ?.toDouble(),
+                                    syringeUnits: schedule.doseIU?.toDouble(),
+                                  );
+
+                              if (strengthLabel.trim().isNotEmpty &&
+                                  metrics.trim().isNotEmpty) {
+                                return DoseCard(
+                                  dose: dose,
+                                  medicationName: med.name,
+                                  strengthOrConcentrationLabel: strengthLabel,
+                                  doseMetrics: metrics,
+                                  isActive: schedule.isActive,
+                                  onTap: () => _onDoseTapInternal(dose),
+                                );
+                              }
+                            }
+
                             return DoseSummaryRow(
                               dose: dose,
                               showMedicationName: true,
