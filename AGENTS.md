@@ -77,6 +77,11 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ## Git Process For Every Change
 
+## Terminal Rule
+
+- Do NOT run `cd` in terminal commands.
+- Use absolute paths or `git -C "<repo>" ...` instead.
+
 1. **Analyze Build**: Before committing, ALWAYS run `dart analyze` (or `flutter analyze`) to ensure there are no build errors or fatal warnings.
 2. **Commit & Push Every Change**:
    - After *every single* logical change (even small ones), you must commit and push.
