@@ -14,6 +14,7 @@ Before implementing ANY UI element:
 
 **Violations:**
 - Using `Colors.blue`, `Color(0xFF...)`, or Material 3 theme colors directly (use design_system.dart colors)
+- Using grey buttons or chips for actions/status (use design-system components and theme semantic colors; avoid greyed-out UI)
 - Hardcoding padding values like `EdgeInsets.all(12)` (use kSpacingXS, kSpacingS, kSpacingM, etc.)
 - Hardcoding border radius like `BorderRadius.circular(8)` (use kBorderRadiusS, kBorderRadiusM, etc.)
 - Creating duplicate widgets across files (create ONE centralized version)

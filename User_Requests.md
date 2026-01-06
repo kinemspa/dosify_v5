@@ -42,7 +42,7 @@
 - Scheduled Dose:
 
 ### Schedule
-- Grey Buttonas again. Do not use grey buttons or chips. put this in your rules. 
+- Grey Buttonas again. Do not use grey buttons or chips. put this in your rules. [COMPLETED]
 
 
 ### Medication Details Card

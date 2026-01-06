@@ -683,7 +683,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       case DoseAction.taken:
         return Colors.green;
       case DoseAction.skipped:
-        return Colors.grey;
+        return Theme.of(context).colorScheme.primary;
       case DoseAction.snoozed:
         return Colors.orange;
     }
@@ -843,7 +843,6 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.grey),
             child: const Text('Skip'),
           ),
         ],
