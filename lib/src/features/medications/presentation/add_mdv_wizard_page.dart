@@ -30,6 +30,7 @@ class AddMdvWizardPage extends ConsumerStatefulWidget {
 class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   int _currentStep = 0;
   final _scrollController = ScrollController();
+  final _stepFocusScope = FocusScopeNode();
 
   final SavedReconstitutionRepository _savedReconRepo =
       SavedReconstitutionRepository();
@@ -200,6 +201,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   void dispose() {
     _vialVolumeCtrl.removeListener(_onVialVolumeChanged);
     _scrollController.dispose();
+    _stepFocusScope.dispose();
     _nameCtrl.dispose();
     _manufacturerCtrl.dispose();
     _descriptionCtrl.dispose();
@@ -398,7 +400,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               padding: kPagePadding,
               child: KeyedSubtree(
                 key: ValueKey<int>(_currentStep),
-                child: _buildStepContent(),
+                child: FocusScope(
+                  node: _stepFocusScope,
+                  child: _buildStepContent(),
+                ),
               ),
             ),
           ),
@@ -1704,6 +1709,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       onContinue: _nextStep,
       onSave: _saveMedication,
       saveLabel: 'Save Medication',
+      fieldFocusScope: _stepFocusScope,
     );
   }
 }

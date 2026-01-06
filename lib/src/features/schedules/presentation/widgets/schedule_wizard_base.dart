@@ -23,6 +23,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
     extends State<T> {
   int _currentStep = 0;
   final _scrollController = ScrollController();
+  final _stepFocusScope = FocusScopeNode();
 
   int get currentStep => _currentStep;
   ScrollController get scrollController => _scrollController;
@@ -45,6 +46,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
   @override
   void dispose() {
     _scrollController.dispose();
+    _stepFocusScope.dispose();
     super.dispose();
   }
 
@@ -76,7 +78,10 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
             child: SingleChildScrollView(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              child: buildStepContent(_currentStep),
+              child: FocusScope(
+                node: _stepFocusScope,
+                child: buildStepContent(_currentStep),
+              ),
             ),
           ),
           _buildNavigationBar(),
@@ -220,6 +225,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
       onContinue: nextStep,
       onSave: saveSchedule,
       saveLabel: 'Save Schedule',
+      fieldFocusScope: _stepFocusScope,
     );
   }
 }

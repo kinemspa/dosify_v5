@@ -28,6 +28,7 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
     extends ConsumerState<T> {
   int _currentStep = 0;
   final _scrollController = ScrollController();
+  final _stepFocusScope = FocusScopeNode();
 
   int get currentStep => _currentStep;
   ScrollController get scrollController => _scrollController;
@@ -47,6 +48,7 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
   @override
   void dispose() {
     _scrollController.dispose();
+    _stepFocusScope.dispose();
     super.dispose();
   }
 
@@ -78,7 +80,10 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
             child: SingleChildScrollView(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              child: buildStepContent(_currentStep),
+              child: FocusScope(
+                node: _stepFocusScope,
+                child: buildStepContent(_currentStep),
+              ),
             ),
           ),
           _buildNavigationBar(),
@@ -227,9 +232,10 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
       onContinue: nextStep,
       onSave: saveMedication,
       saveLabel: 'Save Medication',
-      continueLabel: 'Next',
+      fieldFocusScope: _stepFocusScope,
+      continueLabel: 'Continue',
       nextLabel: 'Next',
-      nextPageLabel: 'Next',
+      nextPageLabel: 'Continue',
     );
   }
 }

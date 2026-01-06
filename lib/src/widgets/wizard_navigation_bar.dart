@@ -10,6 +10,7 @@ class WizardNavigationBar extends StatelessWidget {
     required this.onContinue,
     required this.onSave,
     required this.saveLabel,
+    this.fieldFocusScope,
     this.continueLabel = 'Continue',
     this.nextLabel = 'Next',
     this.nextPageLabel = 'Next Page',
@@ -23,73 +24,98 @@ class WizardNavigationBar extends StatelessWidget {
   final VoidCallback onContinue;
   final VoidCallback onSave;
   final String saveLabel;
+  final FocusScopeNode? fieldFocusScope;
   final String continueLabel;
   final String nextLabel;
   final String nextPageLabel;
+
+  bool _hasNextFocusableField(FocusScopeNode scope) {
+    final focused = scope.focusedChild;
+    if (focused == null) return false;
+
+    final focusables = scope.traversalDescendants
+        .where((node) => node.canRequestFocus && !node.skipTraversal)
+        .toList(growable: false);
+    if (focusables.isEmpty) return false;
+
+    final focusedIndex = focusables.indexOf(focused);
+    if (focusedIndex == -1) return false;
+
+    return focusedIndex < focusables.length - 1;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isLastStep = currentStep >= stepCount - 1;
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    // While the keyboard is open, prefer a "Next" affordance to move focus
-    // through the current step without forcing the user to dismiss the keyboard.
-    final showNextMode = keyboardOpen && !isLastStep;
+    return AnimatedBuilder(
+      animation: FocusManager.instance,
+      builder: (context, _) {
+        final scope = fieldFocusScope ?? FocusScope.of(context);
 
-    final primaryLabel = isLastStep
-      ? saveLabel
-      : (showNextMode ? nextLabel : continueLabel);
+        // While the keyboard is open, show "Next" only if we can actually move
+        // focus to another field on the current step.
+        final hasNextField =
+            keyboardOpen && !isLastStep && _hasNextFocusableField(scope);
+        final showNextMode = hasNextField;
 
-    final VoidCallback? primaryAction;
-    if (isLastStep) {
-      primaryAction = canProceed ? onSave : null;
-    } else if (showNextMode) {
-      primaryAction = () {
-        final moved = FocusScope.of(context).nextFocus();
-        if (moved) return;
+        final primaryLabel = isLastStep
+            ? saveLabel
+            : (showNextMode ? nextLabel : continueLabel);
 
-        // No more fields in this step. Prefer proceeding if allowed.
-        if (canProceed) {
-          onContinue();
-          return;
+        final VoidCallback? primaryAction;
+        if (isLastStep) {
+          primaryAction = canProceed ? onSave : null;
+        } else if (showNextMode) {
+          primaryAction = () {
+            final moved = scope.nextFocus();
+            if (moved) return;
+
+            // No more fields in this step. Prefer proceeding if allowed.
+            if (canProceed) {
+              onContinue();
+              return;
+            }
+
+            scope.unfocus();
+          };
+        } else {
+          primaryAction = canProceed ? onContinue : null;
         }
 
-        FocusScope.of(context).unfocus();
-      };
-    } else {
-      primaryAction = canProceed ? onContinue : null;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(kSpacingM),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: kBorderWidthThin,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (onBack != null)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: onBack,
-                child: const Text('Back'),
+        return Container(
+          padding: const EdgeInsets.all(kSpacingM),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+              top: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                width: kBorderWidthThin,
               ),
             ),
-          if (onBack != null) const SizedBox(width: kSpacingM),
-          Expanded(
-            flex: 2,
-            child: FilledButton(
-              onPressed: primaryAction,
-              child: Text(primaryLabel),
-            ),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              if (onBack != null)
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onBack,
+                    child: const Text('Back'),
+                  ),
+                ),
+              if (onBack != null) const SizedBox(width: kSpacingM),
+              Expanded(
+                flex: 2,
+                child: FilledButton(
+                  onPressed: primaryAction,
+                  child: Text(primaryLabel),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
