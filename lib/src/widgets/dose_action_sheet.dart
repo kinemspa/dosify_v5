@@ -5,10 +5,13 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -406,11 +409,54 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   neutral: true,
                   title: 'Dose',
                   children: [
-                    DoseSummaryRow(
-                      dose: widget.dose,
-                      showMedicationName: true,
-                      onTap: () {},
-                    ),
+                    () {
+                      final schedule = Hive
+                          .box<Schedule>('schedules')
+                          .get(widget.dose.scheduleId);
+
+                      final med = (schedule?.medicationId != null)
+                          ? Hive.box<Medication>('medications').get(
+                              schedule!.medicationId,
+                            )
+                          : null;
+
+                      if (schedule != null && med != null) {
+                        final strengthLabel =
+                            MedicationDisplayHelpers
+                                .strengthOrConcentrationLabel(med);
+
+                        final metrics =
+                            MedicationDisplayHelpers.doseMetricsSummary(
+                          med,
+                          doseTabletQuarters: schedule.doseTabletQuarters,
+                          doseCapsules: schedule.doseCapsules,
+                          doseSyringes: schedule.doseSyringes,
+                          doseVials: schedule.doseVials,
+                          doseMassMcg: schedule.doseMassMcg?.toDouble(),
+                          doseVolumeMicroliter:
+                              schedule.doseVolumeMicroliter?.toDouble(),
+                          syringeUnits: schedule.doseIU?.toDouble(),
+                        );
+
+                        if (strengthLabel.trim().isNotEmpty &&
+                            metrics.trim().isNotEmpty) {
+                          return DoseCard(
+                            dose: widget.dose,
+                            medicationName: med.name,
+                            strengthOrConcentrationLabel: strengthLabel,
+                            doseMetrics: metrics,
+                            isActive: schedule.isActive,
+                            onTap: () {},
+                          );
+                        }
+                      }
+
+                      return DoseSummaryRow(
+                        dose: widget.dose,
+                        showMedicationName: true,
+                        onTap: () {},
+                      );
+                    }(),
                   ],
                 ),
                 const SizedBox(height: kSpacingM),
