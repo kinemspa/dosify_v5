@@ -14,7 +14,7 @@
 - [x] Schedule Dates card and Patter card are touching. Also headings need to be primary colour.
 - [ ] Schedule Pattern:
 	- [ ] Days of the Week:
-		- [ ] Day selection chips. Inactive Chips are too active looking. maybe reduce the border.
+		- [x] Day selection chips. Inactive Chips are too active looking. maybe reduce the border.
 	- [ ] Days of the Month
 		- [ ] How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?
 

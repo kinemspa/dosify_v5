@@ -101,7 +101,7 @@
 	- End:
 	- Schedule Pattern:
 		- Days of the Week:
-			- Day selection chips. Inactive Chips are too active looking. maybe reduce the border.
+			- Day selection chips. Inactive Chips are too active looking. maybe reduce the border. [COMPLETED]
 		- Days on / Days Off
 		- Days of the Month
 			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?

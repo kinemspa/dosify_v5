@@ -335,7 +335,10 @@ class PrimaryChoiceChip extends StatelessWidget {
       side: BorderSide(
         color: selected
             ? theme.colorScheme.primary
-            : theme.colorScheme.primary.withValues(alpha: kOpacityMedium),
+            : theme.colorScheme.outlineVariant.withValues(
+                alpha: kCardBorderOpacity,
+              ),
+        width: selected ? kBorderWidthMedium : kBorderWidthThin,
       ),
     );
   }
