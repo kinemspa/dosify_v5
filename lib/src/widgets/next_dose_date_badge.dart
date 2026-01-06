@@ -2,10 +2,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-enum NextDoseBadgeLabelStyle {
-  standard,
-  tall,
-}
+enum NextDoseBadgeLabelStyle { standard, tall }
 
 class NextDoseDateBadge extends StatelessWidget {
   const NextDoseDateBadge({
@@ -119,10 +116,7 @@ class NextDoseDateBadge extends StatelessWidget {
             horizontal: kSpacingXS,
             vertical: kSpacingXXS,
           )
-        : const EdgeInsets.symmetric(
-            horizontal: kSpacingXS,
-            vertical: 0,
-          );
+        : const EdgeInsets.symmetric(horizontal: kSpacingXS, vertical: 0);
 
     final nextLabelRadius = nextLabelStyle == NextDoseBadgeLabelStyle.tall
         ? kBorderRadiusChipTight

@@ -429,9 +429,7 @@ class _ScheduleCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           medTitle,
-                          style: cardTitleStyle(
-                            context,
-                          )?.copyWith(
+                          style: cardTitleStyle(context)?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: cs.primary,
                           ),
