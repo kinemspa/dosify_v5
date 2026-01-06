@@ -39,10 +39,9 @@ class DoseCard extends StatelessWidget {
 
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
-    final titleStyle = cardTitleStyle(context)?.copyWith(
-      fontWeight: kFontWeightSemiBold,
-      color: cs.primary,
-    );
+    final titleStyle = cardTitleStyle(
+      context,
+    )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary);
 
     final baseBody = bodyTextStyle(context);
     final baseHelper = helperTextStyle(context);
@@ -155,7 +154,10 @@ class DoseCard extends StatelessWidget {
     );
   }
 
-  (Color, IconData) _statusPresentation(BuildContext context, CalculatedDose dose) {
+  (Color, IconData) _statusPresentation(
+    BuildContext context,
+    CalculatedDose dose,
+  ) {
     final cs = Theme.of(context).colorScheme;
     switch (dose.status) {
       case DoseStatus.taken:
