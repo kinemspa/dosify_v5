@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
-import 'package:dosifi_v5/src/widgets/take_dose_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class UpNextDoseCard extends StatelessWidget {
@@ -49,7 +49,7 @@ class UpNextDoseCard extends StatelessWidget {
       title: 'Up next',
       children: [
         if (hasDetails)
-          TakeDoseCard(
+          DoseCard(
             dose: dose!,
             medicationName: medicationName!,
             strengthOrConcentrationLabel: strengthOrConcentrationLabel!,
