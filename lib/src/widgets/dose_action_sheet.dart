@@ -17,10 +17,10 @@ enum DoseActionSheetPresentation { bottomSheet, dialog }
 /// Dose details and actions (Take, Snooze, Skip)
 class DoseActionSheet extends StatefulWidget {
   final CalculatedDose dose;
-  final void Function(String? notes) onMarkTaken;
-  final void Function(String? notes) onSnooze;
-  final void Function(String? notes) onSkip;
-  final void Function(String? notes) onDelete;
+  final Future<void> Function(String? notes, DateTime actionTime) onMarkTaken;
+  final Future<void> Function(String? notes, DateTime actionTime) onSnooze;
+  final Future<void> Function(String? notes, DateTime actionTime) onSkip;
+  final Future<void> Function(String? notes) onDelete;
   final DoseActionSheetPresentation presentation;
 
   const DoseActionSheet({
@@ -36,10 +36,11 @@ class DoseActionSheet extends StatefulWidget {
   static Future<void> show(
     BuildContext context, {
     required CalculatedDose dose,
-    required void Function(String? notes) onMarkTaken,
-    required void Function(String? notes) onSnooze,
-    required void Function(String? notes) onSkip,
-    required void Function(String? notes) onDelete,
+    required Future<void> Function(String? notes, DateTime actionTime)
+    onMarkTaken,
+    required Future<void> Function(String? notes, DateTime actionTime) onSnooze,
+    required Future<void> Function(String? notes, DateTime actionTime) onSkip,
+    required Future<void> Function(String? notes) onDelete,
   }) {
     return showDialog<void>(
       context: context,
@@ -65,6 +66,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   double? _originalAdHocAmount;
   double? _maxAdHocAmount;
   late DoseStatus _selectedStatus;
+  late DateTime _selectedActionTime;
   bool _hasChanged = false;
 
   bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
@@ -76,6 +78,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       text: widget.dose.existingLog?.notes ?? '',
     );
     _selectedStatus = widget.dose.status;
+    _selectedActionTime = widget.dose.existingLog?.actionTime ?? DateTime.now();
 
     if (_isAdHoc && widget.dose.existingLog != null) {
       final log = widget.dose.existingLog!;
@@ -195,7 +198,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       medicationId: existingLog.medicationId,
       medicationName: existingLog.medicationName,
       scheduledTime: existingLog.scheduledTime,
-      actionTime: existingLog.actionTime,
+      actionTime: _selectedActionTime,
       doseValue: amountChanged ? newAmount : existingLog.doseValue,
       doseUnit: existingLog.doseUnit,
       action: existingLog.action,
@@ -221,7 +224,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         medicationId: widget.dose.existingLog!.medicationId,
         medicationName: widget.dose.existingLog!.medicationName,
         scheduledTime: widget.dose.existingLog!.scheduledTime,
-        actionTime: widget.dose.existingLog!.actionTime,
+        actionTime: _selectedActionTime,
         doseValue: widget.dose.existingLog!.doseValue,
         doseUnit: widget.dose.existingLog!.doseUnit,
         action: widget.dose.existingLog!.action,
@@ -284,18 +287,18 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
       switch (_selectedStatus) {
         case DoseStatus.taken:
-          widget.onMarkTaken(notes);
+          await widget.onMarkTaken(notes, _selectedActionTime);
           break;
         case DoseStatus.skipped:
-          widget.onSkip(notes);
+          await widget.onSkip(notes, _selectedActionTime);
           break;
         case DoseStatus.snoozed:
-          widget.onSnooze(notes);
+          await widget.onSnooze(notes, _selectedActionTime);
           break;
         case DoseStatus.pending:
         case DoseStatus.overdue:
           // Revert to original - delete existing log
-          widget.onDelete(notes);
+          await widget.onDelete(notes);
           break;
       }
     } else if (widget.dose.existingLog != null) {
@@ -411,6 +414,84 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   ],
                 ),
                 const SizedBox(height: kSpacingM),
+                if (widget.dose.existingLog != null) ...[
+                  SectionFormCard(
+                    neutral: true,
+                    title: 'Date & Time',
+                    children: [
+                      SizedBox(
+                        height: kStandardFieldHeight,
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedActionTime,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked == null) return;
+                            setState(() {
+                              _selectedActionTime = DateTime(
+                                picked.year,
+                                picked.month,
+                                picked.day,
+                                _selectedActionTime.hour,
+                                _selectedActionTime.minute,
+                              );
+                              _hasChanged = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.calendar_today,
+                            size: kIconSizeSmall,
+                          ),
+                          label: Text(
+                            MaterialLocalizations.of(
+                              context,
+                            ).formatMediumDate(_selectedActionTime),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      SizedBox(
+                        height: kStandardFieldHeight,
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(
+                                _selectedActionTime,
+                              ),
+                            );
+                            if (picked == null) return;
+                            setState(() {
+                              _selectedActionTime = DateTime(
+                                _selectedActionTime.year,
+                                _selectedActionTime.month,
+                                _selectedActionTime.day,
+                                picked.hour,
+                                picked.minute,
+                              );
+                              _hasChanged = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.schedule,
+                            size: kIconSizeSmall,
+                          ),
+                          label: Text(
+                            TimeOfDay.fromDateTime(
+                              _selectedActionTime,
+                            ).format(context),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: kSpacingM),
+                ],
                 SectionFormCard(
                   neutral: true,
                   title: 'Status',

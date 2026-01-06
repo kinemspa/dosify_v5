@@ -746,7 +746,7 @@ class _NextDoseCardState extends State<NextDoseCard>
     DoseActionSheet.show(
       context,
       dose: dose,
-      onMarkTaken: (notes) async {
+      onMarkTaken: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -756,6 +756,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
           scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.taken,
@@ -788,8 +789,8 @@ class _NextDoseCardState extends State<NextDoseCard>
           context,
         ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       },
-      onSnooze: (_) {},
-      onSkip: (notes) async {
+      onSnooze: (_, __) async {},
+      onSkip: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -799,6 +800,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
           scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.skipped,

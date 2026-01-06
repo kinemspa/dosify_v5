@@ -37,7 +37,7 @@
 
 
 ### Reports Card
-- Should be able to edit the dose time and date aswell.  This is not completed. need to add the date and time into the dose editor. 
+- Should be able to edit the dose time and date aswell.  This is not completed. need to add the date and time into the dose editor. [COMPLETED]
 - AdHoc Dose:
 - Scheduled Dose:
 

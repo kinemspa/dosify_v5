@@ -781,7 +781,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return DoseActionSheet.show(
       context,
       dose: dose,
-      onMarkTaken: (notes) {
+      onMarkTaken: (notes, actionTime) async {
         final trimmed = notes?.trim();
         final latest = logBox.get(log.id) ?? log;
         final updated = DoseLog(
@@ -791,7 +791,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           medicationId: log.medicationId,
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
-          actionTime: log.actionTime,
+          actionTime: actionTime,
           doseValue: latest.doseValue,
           doseUnit: latest.doseUnit,
           action: DoseAction.taken,
@@ -800,13 +800,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
-        repo.upsert(updated).then((_) {
-          if (!mounted) return;
-          setState(() {});
-          showUpdatedSnackBar('Dose updated');
-        });
+        await repo.upsert(updated);
+        if (!mounted) return;
+        setState(() {});
+        showUpdatedSnackBar('Dose updated');
       },
-      onSnooze: (notes) {
+      onSnooze: (notes, actionTime) async {
         final trimmed = notes?.trim();
         final latest = logBox.get(log.id) ?? log;
         final updated = DoseLog(
@@ -816,20 +815,19 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           medicationId: log.medicationId,
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
-          actionTime: log.actionTime,
+          actionTime: actionTime,
           doseValue: latest.doseValue,
           doseUnit: latest.doseUnit,
           action: DoseAction.snoozed,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
-        repo.upsert(updated).then((_) {
-          if (!mounted) return;
-          setState(() {});
-          showUpdatedSnackBar('Dose updated');
-        });
+        await repo.upsert(updated);
+        if (!mounted) return;
+        setState(() {});
+        showUpdatedSnackBar('Dose updated');
       },
-      onSkip: (notes) {
+      onSkip: (notes, actionTime) async {
         final trimmed = notes?.trim();
         final latest = logBox.get(log.id) ?? log;
         final updated = DoseLog(
@@ -839,25 +837,23 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           medicationId: log.medicationId,
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
-          actionTime: log.actionTime,
+          actionTime: actionTime,
           doseValue: latest.doseValue,
           doseUnit: latest.doseUnit,
           action: DoseAction.skipped,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
-        repo.upsert(updated).then((_) {
-          if (!mounted) return;
-          setState(() {});
-          showUpdatedSnackBar('Dose updated');
-        });
+        await repo.upsert(updated);
+        if (!mounted) return;
+        setState(() {});
+        showUpdatedSnackBar('Dose updated');
       },
-      onDelete: (_) {
-        repo.delete(log.id).then((_) {
-          if (!mounted) return;
-          setState(() {});
-          showUpdatedSnackBar('Dose log removed');
-        });
+      onDelete: (_) async {
+        await repo.delete(log.id);
+        if (!mounted) return;
+        setState(() {});
+        showUpdatedSnackBar('Dose log removed');
       },
     );
   }
@@ -898,28 +894,28 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return DoseActionSheet.show(
       context,
       dose: dose,
-      onMarkTaken: (notes) {
+      onMarkTaken: (notes, actionTime) async {
         repo.upsert(buildLog(DoseAction.taken, notes)).then((_) {
           if (!mounted) return;
           setState(() {});
           showUpdatedSnackBar('Dose logged');
         });
       },
-      onSnooze: (notes) {
+      onSnooze: (notes, actionTime) async {
         repo.upsert(buildLog(DoseAction.snoozed, notes)).then((_) {
           if (!mounted) return;
           setState(() {});
           showUpdatedSnackBar('Dose logged');
         });
       },
-      onSkip: (notes) {
+      onSkip: (notes, actionTime) async {
         repo.upsert(buildLog(DoseAction.skipped, notes)).then((_) {
           if (!mounted) return;
           setState(() {});
           showUpdatedSnackBar('Dose logged');
         });
       },
-      onDelete: (_) {
+      onDelete: (_) async {
         // Missed doses have no existing log to delete.
       },
     );
