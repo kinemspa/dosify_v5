@@ -633,35 +633,25 @@ class _ScheduleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          medTitle,
-                          style: cardTitleStyle(context)?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: cs.primary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  Text(
+                    medTitle,
+                    style: cardTitleStyle(
+                      context,
+                    )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    scheduleTakeInstructionLabel(context, s),
+                    style: helperTextStyle(
+                      context,
+                      color: cs.onSurfaceVariant.withValues(
+                        alpha: kOpacityMedium,
                       ),
-                      const SizedBox(width: kSpacingS),
-                      Flexible(
-                        child: Text(
-                          scheduleTakeInstructionLabel(context, s),
-                          style: helperTextStyle(
-                            context,
-                            color: cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
-                            ),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-                    ],
+                    )?.copyWith(fontSize: kFontSizeSmall),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: kSpacingXS),
                   Text(
