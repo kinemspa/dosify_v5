@@ -57,7 +57,7 @@ class CompactStorageLine extends StatelessWidget {
     String? expiryText;
     Color? expiryColor;
     if (createdAtValue != null && expiryValue != null) {
-      expiryText = _formatExpiryShort(context, expiryValue);
+      expiryText = 'Exp ${_formatExpiryShort(context, expiryValue)}';
       expiryColor = expiryStatusColor(
         context,
         createdAt: createdAtValue,
