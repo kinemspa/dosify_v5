@@ -17,6 +17,7 @@ class DoseCard extends StatelessWidget {
     required this.doseMetrics,
     required this.onTap,
     this.isActive = true,
+    this.titleTrailing,
     this.primaryActionLabel,
     this.onPrimaryAction,
     super.key,
@@ -28,6 +29,7 @@ class DoseCard extends StatelessWidget {
   final String doseMetrics;
   final VoidCallback onTap;
   final bool isActive;
+  final Widget? titleTrailing;
   final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
 
@@ -90,11 +92,21 @@ class DoseCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      dose.scheduleName,
-                      style: titleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            dose.scheduleName,
+                            style: titleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (titleTrailing != null) ...[
+                          const SizedBox(width: kSpacingS),
+                          titleTrailing!,
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(

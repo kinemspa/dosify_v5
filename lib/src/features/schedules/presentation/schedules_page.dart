@@ -25,6 +25,7 @@ import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 
 enum _SchedView { list, compact, large }
 
@@ -615,6 +616,7 @@ class _ScheduleCard extends StatelessWidget {
                 strengthOrConcentrationLabel: strengthLabel,
                 doseMetrics: metrics,
                 isActive: s.isActive,
+                titleTrailing: ScheduleStatusChip(schedule: s),
                 onTap: () => context.push('/schedules/detail/${s.id}'),
                 onPrimaryAction: () => _showDoseActionSheet(
                   context,

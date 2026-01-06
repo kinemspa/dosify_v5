@@ -22,6 +22,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_serv
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
@@ -273,6 +274,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       strengthOrConcentrationLabel: strengthLabel,
                       doseMetrics: metrics,
                       isActive: widget.schedule.isActive,
+                      titleTrailing: ScheduleStatusChip(
+                        schedule: widget.schedule,
+                      ),
                       onTap: () => setState(() => _isExpanded = !_isExpanded),
                       onPrimaryAction: () => _showDoseActions(dose),
                     );
@@ -299,27 +303,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (!widget.schedule.isActive) ...[
-                              const SizedBox(width: kSpacingXS),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: kSpacingXS,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(
-                                    kSpacingXS,
-                                  ),
-                                ),
-                                child: Text(
-                                  scheduleStatusLabel(widget.schedule),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            const SizedBox(width: kSpacingXS),
+                            ScheduleStatusChip(schedule: widget.schedule),
                           ],
                         ),
                       ),
