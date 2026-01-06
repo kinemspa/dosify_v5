@@ -62,7 +62,7 @@ class DoseCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: kSpacingM,
-            vertical: kSpacingS,
+            vertical: kSpacingXS,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +73,7 @@ class DoseCard extends StatelessWidget {
                   NextDoseDateBadge(
                     nextDose: dose.scheduledTime,
                     isActive: isActive,
-                    dense: false,
+                    dense: true,
                     showNextLabel: false,
                     showTodayIcon: true,
                   ),
@@ -108,21 +108,21 @@ class DoseCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       medicationName,
                       style: baseBody,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       strengthOrConcentrationLabel,
                       style: baseHelper,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       doseMetrics,
                       style: baseBody?.copyWith(color: cs.onSurface),
