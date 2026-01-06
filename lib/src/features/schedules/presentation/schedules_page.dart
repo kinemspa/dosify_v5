@@ -18,7 +18,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_instruction_text.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
@@ -369,6 +368,8 @@ class _ScheduleListRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  ScheduleStatusChip(schedule: s),
+                  const SizedBox(height: kSpacingXS),
                   Text(
                     _ScheduleText.nextDayLabel(context, next),
                     style: helperTextStyle(
@@ -382,18 +383,6 @@ class _ScheduleListRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (!s.isActive) ...[
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      scheduleStatusLabel(s),
-                      style: helperTextStyle(
-                        context,
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMedium,
-                        ),
-                      )?.copyWith(fontSize: kFontSizeSmall),
-                    ),
-                  ],
                 ],
               ),
             ],
@@ -681,13 +670,11 @@ class _ScheduleCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (!s.isActive) ...[
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      scheduleStatusLabel(s),
-                      style: mutedTextStyle(context),
-                    ),
-                  ],
+                  const SizedBox(height: kSpacingXS),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ScheduleStatusChip(schedule: s),
+                  ),
                 ],
               ),
             ),
@@ -759,10 +746,8 @@ class _ScheduleCard extends StatelessWidget {
               ),
             ],
           ),
-          if (!s.isActive) ...[
-            const SizedBox(height: kSpacingXS),
-            Text(scheduleStatusLabel(s), style: mutedTextStyle(context)),
-          ],
+          const SizedBox(height: kSpacingXS),
+          ScheduleStatusChip(schedule: s),
         ],
       ),
       trailing: Column(
