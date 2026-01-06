@@ -107,9 +107,22 @@ class _DoseInputFieldState extends State<DoseInputField> {
     _strengthUnit = _normalizeStrengthUnit(widget.strengthUnit);
     _initializeValue();
 
+    final initialText = _controller.text.trim();
+    if (initialText.isNotEmpty) {
+      _result = _computeResult(initialText);
+    }
+
     // Schedule calculation after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _controller.text.isNotEmpty) {
+      if (!mounted) return;
+
+      // Avoid calling parent callbacks during build; notify after first frame.
+      if (_result != null) {
+        widget.onDoseChanged(_result!);
+        return;
+      }
+
+      if (_controller.text.isNotEmpty) {
         _calculate();
       }
     });
@@ -261,13 +274,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     return 'mg';
   }
 
-  void _calculate() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) {
-      setState(() => _result = null);
-      return;
-    }
-
+  DoseCalculationResult _computeResult(String text) {
     DoseCalculationResult result;
 
     if (_isCountMode) {
@@ -405,6 +412,18 @@ class _DoseInputFieldState extends State<DoseInputField> {
           break;
       }
     }
+
+    return result;
+  }
+
+  void _calculate() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) {
+      setState(() => _result = null);
+      return;
+    }
+
+    final result = _computeResult(text);
 
     setState(() => _result = result);
     widget.onDoseChanged(result);
