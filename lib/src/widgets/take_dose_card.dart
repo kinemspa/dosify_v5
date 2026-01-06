@@ -181,15 +181,7 @@ class TakeDoseCard extends StatelessWidget {
   }
 
   String _defaultPrimaryActionLabel(CalculatedDose dose) {
-    switch (dose.status) {
-      case DoseStatus.pending:
-      case DoseStatus.overdue:
-        return 'Take';
-      case DoseStatus.taken:
-      case DoseStatus.skipped:
-      case DoseStatus.snoozed:
-        return 'Edit';
-    }
+    return 'Actions';
   }
 
   (Color, IconData, String) _statusPresentation(
