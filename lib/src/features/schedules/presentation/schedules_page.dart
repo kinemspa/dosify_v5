@@ -572,6 +572,7 @@ class _ScheduleCard extends StatelessWidget {
               isActive: s.isActive,
               dense: false,
               showNextLabel: true,
+              nextLabelStyle: NextDoseBadgeLabelStyle.tall,
             ),
           ),
         ],

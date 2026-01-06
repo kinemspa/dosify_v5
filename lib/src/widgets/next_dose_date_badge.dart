@@ -2,6 +2,11 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+enum NextDoseBadgeLabelStyle {
+  standard,
+  tall,
+}
+
 class NextDoseDateBadge extends StatelessWidget {
   const NextDoseDateBadge({
     required this.nextDose,
@@ -9,6 +14,7 @@ class NextDoseDateBadge extends StatelessWidget {
     required this.dense,
     this.showNextLabel = false,
     this.showTodayIcon = true,
+    this.nextLabelStyle = NextDoseBadgeLabelStyle.standard,
     super.key,
   });
 
@@ -17,6 +23,7 @@ class NextDoseDateBadge extends StatelessWidget {
   final bool dense;
   final bool showNextLabel;
   final bool showTodayIcon;
+  final NextDoseBadgeLabelStyle nextLabelStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +114,20 @@ class NextDoseDateBadge extends StatelessWidget {
       ),
     );
 
+    final nextLabelPadding = nextLabelStyle == NextDoseBadgeLabelStyle.tall
+        ? const EdgeInsets.symmetric(
+            horizontal: kSpacingXS,
+            vertical: kSpacingXXS,
+          )
+        : const EdgeInsets.symmetric(
+            horizontal: kSpacingXS,
+            vertical: 0,
+          );
+
+    final nextLabelRadius = nextLabelStyle == NextDoseBadgeLabelStyle.tall
+        ? kBorderRadiusChipTight
+        : kBorderRadiusChip;
+
     final circle = shouldShowNext
         ? Stack(
             clipBehavior: Clip.none,
@@ -118,13 +139,10 @@ class NextDoseDateBadge extends StatelessWidget {
                 child: Transform.translate(
                   offset: const Offset(-kSpacingS, kSpacingXS),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: kSpacingXS,
-                      vertical: 0,
-                    ),
+                    padding: nextLabelPadding,
                     decoration: BoxDecoration(
                       color: cs.primary.withValues(alpha: kOpacityEmphasis),
-                      borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                      borderRadius: BorderRadius.circular(nextLabelRadius),
                     ),
                     child: Text(
                       'Next',

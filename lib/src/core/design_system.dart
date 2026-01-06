@@ -191,6 +191,7 @@ const double kPageHorizontalPadding = 16;
 const double kPageVerticalPadding = 16;
 
 /// Generic spacing scale (apply everywhere before creating new values)
+const double kSpacingXXS = 2;
 const double kSpacingXS = 4;
 const double kSpacingS = 8;
 const double kSpacingM = 12;
@@ -252,6 +253,7 @@ const double kBorderRadiusXLarge = 20;
 const double kBorderRadiusXXLarge = 24;
 const double kBorderRadiusFull = 999; // Pill shape
 const double kBorderRadiusChip = 6; // Less rounded for chips
+const double kBorderRadiusChipTight = 4; // Even less rounded for small badges
 
 /// Standard border radius for fields, buttons, cards
 const Radius kStandardRadius = Radius.circular(kBorderRadiusMedium);
