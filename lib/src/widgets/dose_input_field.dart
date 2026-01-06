@@ -882,7 +882,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
   Widget _buildInputRow(ColorScheme cs) {
     if (widget.medicationForm != MedicationForm.multiDoseVial) {
-      return StepperRow36(
+      final stepper = StepperRow36(
         controller: _controller,
         onDec: _decrement,
         onInc: _increment,
@@ -893,6 +893,12 @@ class _DoseInputFieldState extends State<DoseInputField> {
         ],
         onChanged: (_) => _calculate(),
       );
+
+      if (widget.medicationForm == MedicationForm.tablet) {
+        return Center(child: stepper);
+      }
+
+      return stepper;
     }
 
     final unitLabel = _getInlineUnitLabel();

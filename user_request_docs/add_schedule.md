@@ -7,7 +7,7 @@
 - [ ] Tablets:
 		- [x] The forumal summary field below only appears once entering data. Why? EveryDose type should have an init amount relative to the medicine. Make sure the forumal display field is there always. Popping things in and out is visually jarring. It also moves the screen around.
 		- [x] Shortuct buttons have the wrong border colour. Make it the same as everything else.
-	- [ ] Incremental field Centre align it in the card.
+		- [x] Incremental field Centre align it in the card.
 
 ## Step 2
 - [ ] Schedule Dates card and Patter card are touching. Also headings need to be primary colour.
