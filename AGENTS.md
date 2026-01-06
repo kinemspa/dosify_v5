@@ -79,8 +79,10 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ## Terminal Rule
 
-- Do NOT run `cd` in terminal commands.
-- Use absolute paths or `git -C "<repo>" ...` instead.
+- You are always defaulted in the repo root: `F:\Android Apps\dosifi_v5`.
+- Do NOT run any commands that change directories (`cd`, `pushd`, `popd`, etc.).
+- Do NOT use `git -C ...`.
+- Run commands assuming the working directory is already `F:\Android Apps\dosifi_v5`.
 
 1. **Analyze Build**: Before committing, ALWAYS run `dart analyze` (or `flutter analyze`) to ensure there are no build errors or fatal warnings.
 2. **Commit & Push Every Change**:
