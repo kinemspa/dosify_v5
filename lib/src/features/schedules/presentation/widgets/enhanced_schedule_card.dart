@@ -10,11 +10,18 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
@@ -37,6 +44,150 @@ class EnhancedScheduleCard extends StatefulWidget {
 class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   bool _isExpanded = false;
 
+  Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
+    try {
+      final weekday = dose.scheduledTime.weekday;
+      final minutes = dose.scheduledTime.hour * 60 + dose.scheduledTime.minute;
+      final notificationId = ScheduleScheduler.slotIdFor(
+        dose.scheduleId,
+        weekday: weekday,
+        minutes: minutes,
+        occurrence: 0,
+      );
+      await NotificationService.cancel(notificationId);
+    } catch (_) {
+      // Best-effort cancellation only.
+    }
+  }
+
+  Future<void> _showDoseActions(CalculatedDose dose) {
+    return DoseActionSheet.show(
+      context,
+      dose: dose,
+      onMarkTaken: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: widget.schedule.name,
+          medicationId: widget.medication.id,
+          medicationName: widget.medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.taken,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+        await _cancelNotificationForDose(dose);
+
+        final medBox = Hive.box<Medication>('medications');
+        final currentMed = medBox.get(widget.medication.id);
+        if (currentMed != null) {
+          final newStockValue = (currentMed.stockValue - dose.doseValue).clamp(
+            0.0,
+            double.infinity,
+          );
+          await medBox.put(
+            currentMed.id,
+            currentMed.copyWith(stockValue: newStockValue),
+          );
+        }
+
+        if (!mounted) return;
+        setState(() {});
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
+      },
+      onSnooze: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: widget.schedule.name,
+          medicationId: widget.medication.id,
+          medicationName: widget.medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.snoozed,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+
+        if (!mounted) return;
+        setState(() {});
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose snoozed')));
+      },
+      onSkip: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: widget.schedule.name,
+          medicationId: widget.medication.id,
+          medicationName: widget.medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.skipped,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+        await _cancelNotificationForDose(dose);
+
+        if (!mounted) return;
+        setState(() {});
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+      },
+      onDelete: (_) async {
+        final logBox = Hive.box<DoseLog>('dose_logs');
+        final idToDelete =
+            dose.existingLog?.id ??
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final existingLog = logBox.get(idToDelete);
+
+        if (existingLog != null && existingLog.action == DoseAction.taken) {
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(widget.medication.id);
+          if (currentMed != null) {
+            final newStockValue = currentMed.stockValue + dose.doseValue;
+            await medBox.put(
+              currentMed.id,
+              currentMed.copyWith(stockValue: newStockValue),
+            );
+          }
+        }
+
+        final repo = DoseLogRepository(logBox);
+        await repo.delete(idToDelete);
+
+        if (!mounted) return;
+        setState(() {});
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+      },
+    );
+  }
+
   Future<void> _promptEditSchedule() async {
     final confirmed = await showConfirmEditScheduleDialog(context);
     if (!confirmed || !mounted) return;
@@ -48,6 +199,25 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final nextDose = _getNextDose();
+
+    final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
+      widget.medication,
+    );
+    final metrics = MedicationDisplayHelpers.doseMetricsSummary(
+      widget.medication,
+      doseTabletQuarters: widget.schedule.doseTabletQuarters,
+      doseCapsules: widget.schedule.doseCapsules,
+      doseSyringes: widget.schedule.doseSyringes,
+      doseVials: widget.schedule.doseVials,
+      doseMassMcg: widget.schedule.doseMassMcg?.toDouble(),
+      doseVolumeMicroliter: widget.schedule.doseVolumeMicroliter?.toDouble(),
+      syringeUnits: widget.schedule.doseIU?.toDouble(),
+    );
+
+    final canShowDoseCard =
+        nextDose != null &&
+        strengthLabel.trim().isNotEmpty &&
+        metrics.trim().isNotEmpty;
     final adherenceData = _getAdherenceData();
     final adherenceRate = (adherenceData['total'] as int) > 0
         ? adherenceData['rate'] as double
@@ -78,78 +248,114 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // COLLAPSED STATE - Ultra Clean Single Row
-              InkWell(
-                onTap: () => setState(() => _isExpanded = !_isExpanded),
-                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-                child: Row(
-                  children: [
-                    // Schedule name (primary info)
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              widget.schedule.name,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: kFontWeightMedium,
-                                color: colorScheme.onSurface,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (!widget.schedule.isActive) ...[
-                            const SizedBox(width: kSpacingXS),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: kSpacingXS,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(kSpacingXS),
-                              ),
+              if (canShowDoseCard)
+                ValueListenableBuilder(
+                  valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
+                  builder: (context, Box<DoseLog> logBox, _) {
+                    final baseId =
+                        '${widget.schedule.id}_${nextDose.millisecondsSinceEpoch}';
+                    final existingLog =
+                        logBox.get(baseId) ?? logBox.get('${baseId}_snooze');
+
+                    final dose = CalculatedDose(
+                      scheduleId: widget.schedule.id,
+                      scheduleName: widget.schedule.name,
+                      medicationName: widget.medication.name,
+                      scheduledTime: nextDose,
+                      doseValue: widget.schedule.doseValue,
+                      doseUnit: widget.schedule.doseUnit,
+                      existingLog: existingLog,
+                    );
+
+                    return DoseCard(
+                      dose: dose,
+                      medicationName: widget.medication.name,
+                      strengthOrConcentrationLabel: strengthLabel,
+                      doseMetrics: metrics,
+                      isActive: widget.schedule.isActive,
+                      onTap: () => setState(() => _isExpanded = !_isExpanded),
+                      onPrimaryAction: () => _showDoseActions(dose),
+                    );
+                  },
+                )
+              else
+                // COLLAPSED STATE - Ultra Clean Single Row
+                InkWell(
+                  onTap: () => setState(() => _isExpanded = !_isExpanded),
+                  borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                  child: Row(
+                    children: [
+                      // Schedule name (primary info)
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
                               child: Text(
-                                scheduleStatusLabel(widget.schedule),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                                widget.schedule.name,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: kFontWeightMedium,
+                                  color: colorScheme.onSurface,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (!widget.schedule.isActive) ...[
+                              const SizedBox(width: kSpacingXS),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: kSpacingXS,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(
+                                    kSpacingXS,
+                                  ),
+                                ),
+                                child: Text(
+                                  scheduleStatusLabel(widget.schedule),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
-                      ),
-                    ),
-                    // Next dose time OR frequency (secondary info)
-                    if (widget.schedule.isActive && nextDose != null)
-                      Text(
-                        _formatNextDoseShort(nextDose),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: kFontWeightMedium,
                         ),
-                      )
-                    else
-                      Text(_getFrequencyText(), style: mutedTextStyle(context)),
-                    const SizedBox(width: kSpacingS),
-                    // Expand/collapse control
-                    Padding(
-                      padding: const EdgeInsets.all(kSpacingXS),
-                      child: AnimatedRotation(
-                        turns: _isExpanded ? 0.5 : 0,
-                        duration: kAnimationFast,
-                        child: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: kIconSizeMedium,
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: kOpacityMedium,
+                      ),
+                      // Next dose time OR frequency (secondary info)
+                      if (widget.schedule.isActive && nextDose != null)
+                        Text(
+                          _formatNextDoseShort(nextDose),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: kFontWeightMedium,
+                          ),
+                        )
+                      else
+                        Text(
+                          _getFrequencyText(),
+                          style: mutedTextStyle(context),
+                        ),
+                      const SizedBox(width: kSpacingS),
+                      // Expand/collapse control
+                      Padding(
+                        padding: const EdgeInsets.all(kSpacingXS),
+                        child: AnimatedRotation(
+                          turns: _isExpanded ? 0.5 : 0,
+                          duration: kAnimationFast,
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: kIconSizeMedium,
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
               // EXPANDED STATE - Premium Details
               AnimatedCrossFade(
@@ -553,9 +759,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   // Helper methods
   DateTime? _getNextDose() {
-    // TODO: Implement next dose calculation
-    final now = DateTime.now();
-    return now.add(const Duration(hours: 2, minutes: 15));
+    return ScheduleOccurrenceService.nextOccurrence(widget.schedule);
   }
 
   Map<String, dynamic> _getAdherenceData() {
