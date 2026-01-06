@@ -809,6 +809,17 @@ TextStyle? helperTextStyle(BuildContext context, {Color? color}) {
   );
 }
 
+/// Extra-small helper/support text style.
+///
+/// Use for secondary lines that should be visually quieter than normal helper
+/// text (e.g. compact-card subtitles).
+TextStyle? microHelperTextStyle(BuildContext context, {Color? color}) {
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
+}
+
 /// Checkbox label style
 TextStyle? checkboxLabelStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
