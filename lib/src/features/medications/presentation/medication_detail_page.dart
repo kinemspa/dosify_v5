@@ -3193,7 +3193,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
   }
 }
 
-/// MDV Refill dialog - Open new vial with sealed vial management
+/// MDV Refill dialog - Use a new vial with sealed vial management
 void _showMdvRefillDialog(BuildContext context, Medication med) async {
   final currentVolume = med.activeVialVolume ?? 0;
   final vialSize = med.containerVolumeMl ?? 5.0;
@@ -3231,7 +3231,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             children: [
               // Helper text
               Text(
-                'Choose whether to open a new vial or restock your sealed vial inventory.',
+                'Choose whether to use a new vial or restock your sealed vial inventory.',
                 style: helperTextStyle(context),
               ),
               const SizedBox(height: 16),
@@ -3287,7 +3287,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               ),
               const SizedBox(height: 8),
               RadioListTile<String>(
-                title: const Text('Open New Vial'),
+                title: const Text('Use New Vial'),
                 subtitle: const Text('Replace or top up the active vial'),
                 value: 'openVial',
                 groupValue: selectedAction,
@@ -3313,7 +3313,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
 
               if (selectedAction == 'openVial') ...[
                 Text(
-                  'Open vial method:',
+                  'Use vial method:',
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
@@ -3443,7 +3443,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                 });
               },
               child: Text(
-                selectedAction == 'openVial' ? 'Open Vial' : 'Add Vials',
+                selectedAction == 'openVial' ? 'Use New Vial' : 'Add Vials',
               ),
             ),
           ],

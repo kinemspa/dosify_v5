@@ -23,7 +23,7 @@
 # Medication Details Screen
 - Minimized Cards, make them taller. [COMPLETED]
 - MDV: 
-	- Can we change the refill dialog. " Open New VIal" this is not the correct terminology for medicine. 
+	- Can we change the refill dialog. " Open New VIal" this is not the correct terminology for medicine.  [COMPLETED]
 	- When reconsituting the active vial, we need to be able to also pull from the reconsitution calculator, use the same reconsitutiont as done previously, calculate a new reconstitution, retrieve a saved reconsitution, or reconsitution voluem is known and just enter the reconstitution. 
 - Reconstitution Card:
 	- Why is the text so dark? [COMPLETED]
