@@ -8,6 +8,10 @@
 
 ## Home Screen
 
+- Home - Upcoming Widget (DoseCard) [COMPLETED]
+- Home - Schedule Card (DoseCard) [COMPLETED]
+- Home - Calendar Widget (mini calendar) [COMPLETED]
+
 ==============
 
 ## Medication Screen

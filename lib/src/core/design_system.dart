@@ -65,6 +65,11 @@ const double kEmptyStateIconSize = 48;
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
 
+/// Home page - mini calendar height.
+///
+/// Used for the embedded [DoseCalendarWidget] when shown on Home.
+const double kHomeMiniCalendarHeight = 420;
+
 /// Detail-card collapsed header padding (Medication Details screen).
 ///
 /// Matches the Reports card header height for consistent collapsed card sizing.
