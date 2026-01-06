@@ -968,7 +968,8 @@ class _AddScheduleWizardPageState
           ),
           const SizedBox(height: kSpacingS),
           _helperBelowLeft('Optional end date for this schedule.'),
-        ]),
+        ], titlePrimary: true),
+        const SizedBox(height: kSpacingL),
         _buildSection(context, 'Schedule Pattern', [
           LabelFieldRow(
             label: 'Type',
@@ -1019,13 +1020,13 @@ class _AddScheduleWizardPageState
           const SizedBox(height: kSpacingS),
           _helperBelowLeft('Choose how often this schedule repeats.'),
           _buildScheduleModeFields(),
-        ]),
+        ], titlePrimary: true),
         const SizedBox(height: kSpacingL),
         _buildSection(context, 'Dosing Times', [
           _buildTimesList(),
           const SizedBox(height: kSpacingS),
           _helperBelowLeft('Tap a time to edit it.'),
-        ]),
+        ], titlePrimary: true),
       ],
     );
   }
@@ -1747,14 +1748,21 @@ class _AddScheduleWizardPageState
     BuildContext context,
     String title,
     List<Widget> children,
+    {bool titlePrimary = false}
   ) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(kSpacingL),
       decoration: buildInsetSectionDecoration(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: sectionTitleStyle(context)),
+          Text(
+            title,
+            style: sectionTitleStyle(
+              context,
+            )?.copyWith(color: titlePrimary ? cs.primary : null),
+          ),
           const SizedBox(height: kSpacingM),
           ...children,
         ],

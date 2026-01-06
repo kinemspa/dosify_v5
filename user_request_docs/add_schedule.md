@@ -11,7 +11,7 @@
 		- [x] Incremental field Centre align it in the card.
 
 ## Step 2
-- [ ] Schedule Dates card and Patter card are touching. Also headings need to be primary colour.
+- [x] Schedule Dates card and Patter card are touching. Also headings need to be primary colour.
 - [ ] Schedule Pattern:
 	- [ ] Days of the Week:
 		- [ ] Day selection chips. Inactive Chips are too active looking. maybe reduce the border.

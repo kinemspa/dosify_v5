@@ -96,7 +96,7 @@
 
 
 - Step 2:
-- Schedule Dates card and Patter card are touching. Also headings need to be primary colour. 
+- Schedule Dates card and Patter card are touching. Also headings need to be primary colour. [COMPLETED]
 	- Start:
 	- End:
 	- Schedule Pattern:
