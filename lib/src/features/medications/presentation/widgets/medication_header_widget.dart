@@ -757,8 +757,9 @@ class _StockInfoCard extends StatelessWidget {
             Text(
               'Exp ${DateFormat.MMMd().format(medication.expiry!)}',
               style: TextStyle(
-                color: onPrimary.withValues(alpha: 0.65),
-                fontSize: 9,
+                color: onPrimary.withValues(alpha: 0.90),
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.end,
             ),

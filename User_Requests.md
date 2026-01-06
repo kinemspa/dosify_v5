@@ -30,7 +30,7 @@
 
 ### App Header
 - On the Large Med Cards we have Storage Conditions Icons, Expiry, then storage locations. Then aligned right we have the stock. With MDV we have 2 lines for the active and sealed vials. I want this duplicated on the app header for where the storage and remaining stock informaiton is. [COMPLETED]
-- Expiry date text is unreadable, What colour is it?
+- Expiry date text is unreadable, What colour is it? [COMPLETED]
 - Expiry date, can we put the letters Exp in front of the date. 
 - MDV:
 	- Where is the storage details for the sealed vials
