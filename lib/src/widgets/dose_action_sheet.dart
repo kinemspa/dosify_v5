@@ -410,33 +410,35 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   title: 'Dose',
                   children: [
                     () {
-                      final schedule = Hive
-                          .box<Schedule>('schedules')
-                          .get(widget.dose.scheduleId);
+                      final schedule = Hive.box<Schedule>(
+                        'schedules',
+                      ).get(widget.dose.scheduleId);
 
                       final med = (schedule?.medicationId != null)
-                          ? Hive.box<Medication>('medications').get(
-                              schedule!.medicationId,
-                            )
+                          ? Hive.box<Medication>(
+                              'medications',
+                            ).get(schedule!.medicationId)
                           : null;
 
                       if (schedule != null && med != null) {
                         final strengthLabel =
-                            MedicationDisplayHelpers
-                                .strengthOrConcentrationLabel(med);
+                            MedicationDisplayHelpers.strengthOrConcentrationLabel(
+                              med,
+                            );
 
                         final metrics =
                             MedicationDisplayHelpers.doseMetricsSummary(
-                          med,
-                          doseTabletQuarters: schedule.doseTabletQuarters,
-                          doseCapsules: schedule.doseCapsules,
-                          doseSyringes: schedule.doseSyringes,
-                          doseVials: schedule.doseVials,
-                          doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                          doseVolumeMicroliter:
-                              schedule.doseVolumeMicroliter?.toDouble(),
-                          syringeUnits: schedule.doseIU?.toDouble(),
-                        );
+                              med,
+                              doseTabletQuarters: schedule.doseTabletQuarters,
+                              doseCapsules: schedule.doseCapsules,
+                              doseSyringes: schedule.doseSyringes,
+                              doseVials: schedule.doseVials,
+                              doseMassMcg: schedule.doseMassMcg?.toDouble(),
+                              doseVolumeMicroliter: schedule
+                                  .doseVolumeMicroliter
+                                  ?.toDouble(),
+                              syringeUnits: schedule.doseIU?.toDouble(),
+                            );
 
                         if (strengthLabel.trim().isNotEmpty &&
                             metrics.trim().isNotEmpty) {
