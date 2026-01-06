@@ -58,13 +58,31 @@ class CompactStorageLine extends StatelessWidget {
     Color? expiryColor;
     if (createdAtValue != null && expiryValue != null) {
       expiryText = 'Exp ${_formatExpiryShort(context, expiryValue)}';
-      expiryColor = expiryStatusColor(
-        context,
+      final effectiveNow = DateTime.now();
+      final remainingRatio = expiryRemainingRatio(
         createdAt: createdAtValue,
         expiry: expiryValue,
+        now: effectiveNow,
       );
-      if (onPrimaryBackground) {
-        expiryColor = statusColorOnPrimary(context, expiryColor);
+
+      final isExpiredOrWarning =
+          !expiryValue.isAfter(effectiveNow) ||
+          remainingRatio <= kExpiryWarningRemainingRatio;
+
+      if (onPrimaryBackground && !isExpiredOrWarning) {
+        // On primary backgrounds, the neutral (non-warning) expiry label should
+        // stay readable; avoid using a dark neutral tone.
+        expiryColor = resolvedTextColor.withValues(alpha: kOpacityMediumHigh);
+      } else {
+        expiryColor = expiryStatusColor(
+          context,
+          createdAt: createdAtValue,
+          expiry: expiryValue,
+          now: effectiveNow,
+        );
+        if (onPrimaryBackground) {
+          expiryColor = statusColorOnPrimary(context, expiryColor);
+        }
       }
     }
 
