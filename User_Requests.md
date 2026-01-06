@@ -89,7 +89,7 @@
 	- Text "Set Per DOse amount. You can fine tune it later if needed." WHat is this text I never asked for this. There is no fine tuning later section. [COMPLETED]
 	- Tablets:
 		- The forumal summary field below only appears once entering data. Why? EveryDose type should have an init amount relative to the medicine. Make sure the forumal display field is there always. Popping things in and out is visually jarring. It also moves the screen around. [COMPLETED]
-		- Shortuct buttons have the wrong border colour. Make it the same as everything else.
+		- Shortuct buttons have the wrong border colour. Make it the same as everything else. [COMPLETED]
 		- Incremental field Centre align it in the card. 
 
 

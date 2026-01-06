@@ -1013,6 +1013,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
   Widget _buildQuickButtons(ColorScheme cs) {
     final buttons = [('1/4', 0.25), ('1/2', 0.5), ('1', 1.0), ('2', 2.0)];
+    final borderColor = cs.outlineVariant.withValues(alpha: kCardBorderOpacity);
 
     return SizedBox(
       width: double.infinity,
@@ -1029,6 +1030,10 @@ class _DoseInputFieldState extends State<DoseInputField> {
               vertical: 0,
             ),
             backgroundColor: cs.surface,
+            side: BorderSide(color: borderColor, width: kBorderWidthThin),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            ),
             labelStyle: bodyTextStyle(
               context,
             )?.copyWith(fontWeight: kFontWeightMedium),
