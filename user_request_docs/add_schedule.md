@@ -1,6 +1,7 @@
 # Add Schedule
 
 - [ ] When changing to strenght, can we not abruptly nudge the entire screen. Can there be an easier way to ease the new menu item in?
+- [x] When changing to strenght, can we not abruptly nudge the entire screen. Can there be an easier way to ease the new menu item in?
 
 ## Step 1
 - [x] Text "Set Per DOse amount. You can fine tune it later if needed." WHat is this text I never asked for this. There is no fine tuning later section.

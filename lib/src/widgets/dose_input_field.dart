@@ -637,9 +637,15 @@ class _DoseInputFieldState extends State<DoseInputField> {
           _buildTabletCapsuleHelperText(),
           const SizedBox(height: kSpacingS),
           _buildModeToggle(cs),
-          if (_shouldShowTabletStrengthUnitPicker()) ...[
+          if (widget.medicationForm == MedicationForm.tablet) ...[
             const SizedBox(height: kSpacingS),
-            _buildTabletStrengthUnitPicker(),
+            Visibility(
+              visible: _shouldShowTabletStrengthUnitPicker(),
+              maintainAnimation: true,
+              maintainSize: true,
+              maintainState: true,
+              child: _buildTabletStrengthUnitPicker(),
+            ),
           ],
           const SizedBox(height: kFieldGroupSpacing),
         ],
