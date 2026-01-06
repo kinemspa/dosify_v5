@@ -38,6 +38,16 @@ class MedicationHeaderWidget extends ConsumerWidget {
     final theme = Theme.of(context);
     final headerForeground = foregroundColor ?? theme.colorScheme.onPrimary;
 
+    String? cleanText(String? value) {
+      final v = value?.trim();
+      if (v == null || v.isEmpty) return null;
+      return v;
+    }
+
+    String? pickLocation(String? primary, String? fallback) {
+      return cleanText(primary) ?? cleanText(fallback);
+    }
+
     final headerActionButtonStyle = OutlinedButton.styleFrom(
       foregroundColor: headerForeground,
       textStyle: buttonTextStyle(context),
@@ -66,12 +76,19 @@ class MedicationHeaderWidget extends ConsumerWidget {
 
     final strengthPerLabel = 'Strength per ${_formLabel(medication.form)}';
 
-    // Storage Label: Use actual location data
-    final storageLabel = (medication.storageLocation?.isNotEmpty ?? false)
-        ? medication.storageLocation
-        : (medication.activeVialStorageLocation?.isNotEmpty ?? false)
-        ? medication.activeVialStorageLocation
-        : null;
+    final isMdv = medication.form == MedicationForm.multiDoseVial;
+    final combinedLocation = pickLocation(
+      medication.storageLocation,
+      medication.activeVialStorageLocation,
+    );
+    final activeLocation = pickLocation(
+      medication.activeVialStorageLocation,
+      medication.storageLocation,
+    );
+    final sealedLocation = pickLocation(
+      medication.backupVialsStorageLocation,
+      medication.storageLocation,
+    );
 
     final effectiveRowCrossAxisAlignment =
         crossAxisAlignment == CrossAxisAlignment.stretch
@@ -144,23 +161,70 @@ class MedicationHeaderWidget extends ConsumerWidget {
                   const SizedBox(height: kSpacingS),
 
                   // Storage + expiry (match Large Cards compact storage rows)
-                  if (storageLabel != null && storageLabel.isNotEmpty) ...[
+                  if (isMdv) ...[
+                    if (activeLocation != null) ...[
+                      CompactStorageLine(
+                        icons: [
+                          if (medication.activeVialRequiresFreezer)
+                            Icons.severe_cold
+                          else if (medication.activeVialRequiresRefrigeration)
+                            Icons.ac_unit
+                          else
+                            Icons.inventory_2_outlined,
+                          if (medication.activeVialLightSensitive)
+                            Icons.dark_mode,
+                        ],
+                        label: 'Active',
+                        location: activeLocation,
+                        createdAt:
+                            medication.reconstitutedAt ?? medication.createdAt,
+                        expiry: medication.reconstitutedVialExpiry,
+                        iconColor: headerForeground.withValues(
+                          alpha: kOpacityEmphasis,
+                        ),
+                        textColor: headerForeground,
+                        onPrimaryBackground: true,
+                      ),
+                    ],
+                    if (activeLocation != null && sealedLocation != null)
+                      const SizedBox(height: kSpacingXS),
+                    if (sealedLocation != null) ...[
+                      CompactStorageLine(
+                        icons: [
+                          if (medication.backupVialsRequiresFreezer)
+                            Icons.severe_cold
+                          else if (medication.backupVialsRequiresRefrigeration)
+                            Icons.ac_unit
+                          else
+                            Icons.inventory_2_outlined,
+                          if (medication.backupVialsLightSensitive)
+                            Icons.dark_mode,
+                        ],
+                        label: 'Sealed',
+                        location: sealedLocation,
+                        createdAt: medication.createdAt,
+                        expiry:
+                            medication.backupVialsExpiry ?? medication.expiry,
+                        iconColor: headerForeground.withValues(
+                          alpha: kOpacityEmphasis,
+                        ),
+                        textColor: headerForeground,
+                        onPrimaryBackground: true,
+                      ),
+                    ],
+                  ] else if (combinedLocation != null) ...[
                     CompactStorageLine(
                       icons: [
-                        if (medication.activeVialRequiresFreezer ||
-                            medication.requiresFreezer)
+                        if (medication.requiresFreezer)
                           Icons.severe_cold
-                        else if (medication.requiresRefrigeration ||
-                            medication.activeVialRequiresRefrigeration)
+                        else if (medication.requiresRefrigeration)
                           Icons.ac_unit
                         else
                           Icons.inventory_2_outlined,
-                        if (medication.activeVialLightSensitive ||
-                            medication.lightSensitive)
-                          Icons.dark_mode,
+                        if (medication.lightSensitive) Icons.dark_mode,
                       ],
                       label: 'Storage',
-                      location: storageLabel,
+                      location: combinedLocation,
                       createdAt: medication.createdAt,
                       expiry: medication.expiry,
                       iconColor: headerForeground.withValues(

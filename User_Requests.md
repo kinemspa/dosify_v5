@@ -33,7 +33,7 @@
 - Expiry date text is unreadable, What colour is it? [COMPLETED]
 - Expiry date, can we put the letters Exp in front of the date. [COMPLETED]
 - MDV:
-	- Where is the storage details for the sealed vials
+	- Where is the storage details for the sealed vials [COMPLETED]
 
 
 ### Reports Card
