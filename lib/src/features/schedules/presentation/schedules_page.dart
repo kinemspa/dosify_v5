@@ -8,10 +8,19 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_instruction_text.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -399,6 +408,154 @@ class _ScheduleCard extends StatelessWidget {
   final Schedule s;
   final bool dense;
 
+  Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
+    try {
+      final weekday = dose.scheduledTime.weekday;
+      final minutes = dose.scheduledTime.hour * 60 + dose.scheduledTime.minute;
+      final notificationId = ScheduleScheduler.slotIdFor(
+        dose.scheduleId,
+        weekday: weekday,
+        minutes: minutes,
+        occurrence: 0,
+      );
+      await NotificationService.cancel(notificationId);
+    } catch (_) {
+      // Best-effort cancellation only.
+    }
+  }
+
+  Future<void> _showDoseActionSheet(
+    BuildContext context, {
+    required CalculatedDose dose,
+    required Schedule schedule,
+    required Medication medication,
+  }) {
+    return DoseActionSheet.show(
+      context,
+      dose: dose,
+      onMarkTaken: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: dose.scheduleName,
+          medicationId: medication.id,
+          medicationName: medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.taken,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+        await _cancelNotificationForDose(dose);
+
+        final medBox = Hive.box<Medication>('medications');
+        final currentMed = medBox.get(medication.id);
+        if (currentMed != null) {
+          final newStockValue = (currentMed.stockValue - dose.doseValue).clamp(
+            0.0,
+            double.infinity,
+          );
+          await medBox.put(
+            currentMed.id,
+            currentMed.copyWith(stockValue: newStockValue),
+          );
+        }
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
+        }
+      },
+      onSnooze: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: dose.scheduleName,
+          medicationId: medication.id,
+          medicationName: medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.snoozed,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Dose snoozed for 15 minutes')),
+          );
+        }
+      },
+      onSkip: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: dose.scheduleName,
+          medicationId: medication.id,
+          medicationName: medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.skipped,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+        await _cancelNotificationForDose(dose);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+        }
+      },
+      onDelete: (_) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logBox = Hive.box<DoseLog>('dose_logs');
+        final existingLog = logBox.get(logId);
+
+        if (existingLog != null && existingLog.action == DoseAction.taken) {
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(medication.id);
+          if (currentMed != null) {
+            final newStockValue = currentMed.stockValue + dose.doseValue;
+            await medBox.put(
+              currentMed.id,
+              currentMed.copyWith(stockValue: newStockValue),
+            );
+          }
+        }
+
+        final repo = DoseLogRepository(logBox);
+        await repo.delete(logId);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -409,6 +566,68 @@ class _ScheduleCard extends StatelessWidget {
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
     final startedLabel = _ScheduleText.startedLabel(s);
     final endLabel = _ScheduleText.endLabel(s);
+
+    final medId = s.medicationId;
+    final Medication? medication = medId == null
+        ? null
+        : Hive.box<Medication>('medications').get(medId);
+
+    if (next != null && medication != null) {
+      final strengthLabel =
+          MedicationDisplayHelpers.strengthOrConcentrationLabel(medication);
+
+      final metrics = MedicationDisplayHelpers.doseMetricsSummary(
+        medication,
+        doseTabletQuarters: s.doseTabletQuarters,
+        doseCapsules: s.doseCapsules,
+        doseSyringes: s.doseSyringes,
+        doseVials: s.doseVials,
+        doseMassMcg: s.doseMassMcg?.toDouble(),
+        doseVolumeMicroliter: s.doseVolumeMicroliter?.toDouble(),
+        syringeUnits: s.doseIU?.toDouble(),
+      );
+
+      if (strengthLabel.trim().isNotEmpty && metrics.trim().isNotEmpty) {
+        return ValueListenableBuilder(
+          valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
+          builder: (context, Box<DoseLog> logBox, _) {
+            final baseId = '${s.id}_${next.millisecondsSinceEpoch}';
+            final existingLog =
+                logBox.get(baseId) ?? logBox.get('${baseId}_snooze');
+
+            final dose = CalculatedDose(
+              scheduleId: s.id,
+              scheduleName: s.name,
+              medicationName: s.medicationName,
+              scheduledTime: next,
+              doseValue: s.doseValue,
+              doseUnit: s.doseUnit,
+              existingLog: existingLog,
+            );
+
+            return GlassCardSurface(
+              onTap: null,
+              useGradient: false,
+              padding: EdgeInsets.zero,
+              child: DoseCard(
+                dose: dose,
+                medicationName: medication.name,
+                strengthOrConcentrationLabel: strengthLabel,
+                doseMetrics: metrics,
+                isActive: s.isActive,
+                onTap: () => context.push('/schedules/detail/${s.id}'),
+                onPrimaryAction: () => _showDoseActionSheet(
+                  context,
+                  dose: dose,
+                  schedule: s,
+                  medication: medication,
+                ),
+              ),
+            );
+          },
+        );
+      }
+    }
 
     if (dense) {
       return GlassCardSurface(
