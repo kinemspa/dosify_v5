@@ -70,7 +70,7 @@ const double kCardMaxWidth = 800;
 /// Matches the Reports card header height for consistent collapsed card sizing.
 const EdgeInsets kDetailCardCollapsedHeaderPadding = EdgeInsets.symmetric(
   horizontal: kSpacingL,
-  vertical: kSpacingXS + 2,
+  vertical: kSpacingS,
 );
 
 /// Tight icon button sizing (avoids default 48px IconButton height).
