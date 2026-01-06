@@ -8,8 +8,8 @@ import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/take_dose_card.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -287,7 +287,7 @@ class _NextDoseCardState extends State<NextDoseCard>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: kSpacingXS),
       decoration: buildInsetSectionDecoration(context: context),
-      child: TakeDoseCard(
+      child: DoseCard(
         dose: dose,
         medicationName: widget.medication.name,
         strengthOrConcentrationLabel: strengthLabel,
