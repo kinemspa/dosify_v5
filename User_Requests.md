@@ -104,7 +104,7 @@
 			- Day selection chips. Inactive Chips are too active looking. maybe reduce the border. [COMPLETED]
 		- Days on / Days Off
 		- Days of the Month
-			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this?
+			- How can we handle something like, First monday of every month, or first 2 mondays of every month? How do other task apps approach this? [COMPLETED]
 - Step 3:
 	- These cards need to have the same heading styling as all other large cards.  [COMPLETED]
 	- Summary:
@@ -113,7 +113,7 @@
 	- Settings:
 	- Settings: [COMPLETED]
 
-- You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route?
+- You have stated all the below items are completed. None of them are. Are we dealing with a different add schedule screen? Are there multiple? Is there a different one that is not in the route? [COMPLETED]
 
 
 
