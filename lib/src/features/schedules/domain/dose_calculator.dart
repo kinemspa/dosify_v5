@@ -346,6 +346,23 @@ enum SyringeType {
   final String name;
 }
 
+/// Centralized lookup helpers for syringe sizing.
+class SyringeTypeLookup {
+  static SyringeType forVolumeMl(double volumeMl) {
+    if (volumeMl <= 0.3) return SyringeType.ml_0_3;
+    if (volumeMl <= 0.5) return SyringeType.ml_0_5;
+    if (volumeMl <= 1.0) return SyringeType.ml_1_0;
+    if (volumeMl <= 3.0) return SyringeType.ml_3_0;
+    if (volumeMl <= 5.0) return SyringeType.ml_5_0;
+    return SyringeType.ml_10_0;
+  }
+
+  static SyringeType forUnits(double units) {
+    final volumeMl = units / SyringeType.ml_1_0.unitsPerMl;
+    return forVolumeMl(volumeMl);
+  }
+}
+
 // ==================== RESULT CLASSES ====================
 
 /// Result of a dose calculation.

@@ -6,6 +6,31 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Centralized helpers for displaying medication information.
 class MedicationDisplayHelpers {
+  static String formatDoseMassFromMcg(Medication med, double mcg) {
+    switch (med.strengthUnit) {
+      case Unit.mcg:
+      case Unit.mcgPerMl:
+        return '${fmt2(mcg)} mcg';
+      case Unit.mg:
+      case Unit.mgPerMl:
+        return '${fmt3(mcg / 1000)} mg';
+      case Unit.g:
+      case Unit.gPerMl:
+        return '${fmt3(mcg / 1000000)} g';
+      case Unit.units:
+      case Unit.unitsPerMl:
+        return '${fmt2(mcg)} units';
+    }
+  }
+
+  static String formatDoseVolumeFromMicroliter(double microliter) {
+    return '${fmt2(microliter / 1000)} mL';
+  }
+
+  static String formatSyringeUnits(double units) {
+    return '${fmt2(units)} U';
+  }
+
   static String strengthOrConcentrationLabel(
     Medication med, {
     bool includePerUnit = true,
@@ -92,20 +117,7 @@ class MedicationDisplayHelpers {
     }
 
     String formatStrengthFromMcg(double mcg) {
-      switch (med.strengthUnit) {
-        case Unit.mcg:
-        case Unit.mcgPerMl:
-          return '${fmt2(mcg)} mcg';
-        case Unit.mg:
-        case Unit.mgPerMl:
-          return '${fmt3(mcg / 1000)} mg';
-        case Unit.g:
-        case Unit.gPerMl:
-          return '${fmt3(mcg / 1000000)} g';
-        case Unit.units:
-        case Unit.unitsPerMl:
-          return '${fmt2(mcg)} units';
-      }
+      return formatDoseMassFromMcg(med, mcg);
     }
 
     final metrics = <String>[];
@@ -144,11 +156,11 @@ class MedicationDisplayHelpers {
     }
 
     if (doseVolumeMicroliter != null) {
-      metrics.add('${fmt2(doseVolumeMicroliter / 1000)} mL');
+      metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
     }
 
     if (syringeUnits != null) {
-      metrics.add('${fmt2(syringeUnits)} U');
+      metrics.add(formatSyringeUnits(syringeUnits));
     }
 
     if (metrics.isEmpty) return '';

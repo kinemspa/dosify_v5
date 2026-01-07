@@ -5,14 +5,13 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -129,7 +128,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   DateTime? _maxSnoozeUntil() {
-    final schedule = Hive.box<Schedule>('schedules').get(widget.dose.scheduleId);
+    final schedule = Hive.box<Schedule>(
+      'schedules',
+    ).get(widget.dose.scheduleId);
     if (schedule == null) return null;
 
     final now = DateTime.now();
@@ -452,37 +453,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                           : null;
 
                       if (schedule != null && med != null) {
-                        final strengthLabel =
-                            MedicationDisplayHelpers.strengthOrConcentrationLabel(
-                              med,
-                            );
-
-                        final metrics =
-                            MedicationDisplayHelpers.doseMetricsSummary(
-                              med,
-                              doseTabletQuarters: schedule.doseTabletQuarters,
-                              doseCapsules: schedule.doseCapsules,
-                              doseSyringes: schedule.doseSyringes,
-                              doseVials: schedule.doseVials,
-                              doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                              doseVolumeMicroliter: schedule
-                                  .doseVolumeMicroliter
-                                  ?.toDouble(),
-                              syringeUnits: schedule.doseIU?.toDouble(),
-                            );
-
-                        if (strengthLabel.trim().isNotEmpty &&
-                            metrics.trim().isNotEmpty) {
-                          return DoseCard(
-                            dose: widget.dose,
-                            medicationName: med.name,
-                            strengthOrConcentrationLabel: strengthLabel,
-                            doseMetrics: metrics,
-                            isActive: schedule.isActive,
-                            statusOverride: _selectedStatus,
-                            onTap: () {},
-                          );
-                        }
+                        return DoseDialogDosePreview(
+                          med: med,
+                          schedule: schedule,
+                          status: _selectedStatus,
+                        );
                       }
 
                       return DoseSummaryRow(
@@ -600,26 +575,36 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                           onPressed: () async {
                             final now = DateTime.now();
                             final max = _maxSnoozeUntil();
-                            final firstDate = DateTime(now.year, now.month, now.day);
+                            final firstDate = DateTime(
+                              now.year,
+                              now.month,
+                              now.day,
+                            );
                             final lastDate = max != null
                                 ? DateTime(max.year, max.month, max.day)
                                 : now.add(const Duration(days: 60));
 
-                            final initial = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                            final initial =
+                                _selectedSnoozeUntil ?? _defaultSnoozeUntil();
                             final clampedInitialDate = DateTime(
                               initial.year,
                               initial.month,
                               initial.day,
                             );
-                            final safeInitialDate = clampedInitialDate.isBefore(firstDate)
+                            final safeInitialDate =
+                                clampedInitialDate.isBefore(firstDate)
                                 ? firstDate
-                                : (clampedInitialDate.isAfter(lastDate) ? lastDate : clampedInitialDate);
+                                : (clampedInitialDate.isAfter(lastDate)
+                                      ? lastDate
+                                      : clampedInitialDate);
 
                             final pickedDate = await showDatePicker(
                               context: context,
                               initialDate: safeInitialDate,
                               firstDate: firstDate,
-                              lastDate: lastDate.isBefore(firstDate) ? firstDate : lastDate,
+                              lastDate: lastDate.isBefore(firstDate)
+                                  ? firstDate
+                                  : lastDate,
                             );
                             if (pickedDate == null) return;
 
@@ -650,27 +635,31 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                             Icons.snooze_rounded,
                             size: kIconSizeSmall,
                           ),
-                          label: Text(
-                            () {
-                              final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-                              final date = MaterialLocalizations.of(context).formatMediumDate(dt);
-                              final time = TimeOfDay.fromDateTime(dt).format(context);
-                              return '$date • $time';
-                            }(),
-                          ),
+                          label: Text(() {
+                            final dt =
+                                _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                            final date = MaterialLocalizations.of(
+                              context,
+                            ).formatMediumDate(dt);
+                            final time = TimeOfDay.fromDateTime(
+                              dt,
+                            ).format(context);
+                            return '$date • $time';
+                          }()),
                         ),
                       ),
                       if (_maxSnoozeUntil() != null) ...[
                         const SizedBox(height: kSpacingS),
-                        Text(
-                          () {
-                            final max = _maxSnoozeUntil()!;
-                            final date = MaterialLocalizations.of(context).formatMediumDate(max);
-                            final time = TimeOfDay.fromDateTime(max).format(context);
-                            return 'Must be before the next scheduled dose ($date • $time).';
-                          }(),
-                          style: helperTextStyle(context),
-                        ),
+                        Text(() {
+                          final max = _maxSnoozeUntil()!;
+                          final date = MaterialLocalizations.of(
+                            context,
+                          ).formatMediumDate(max);
+                          final time = TimeOfDay.fromDateTime(
+                            max,
+                          ).format(context);
+                          return 'Must be before the next scheduled dose ($date • $time).';
+                        }(), style: helperTextStyle(context)),
                       ],
                     ],
                   ),
