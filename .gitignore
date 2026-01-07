@@ -163,3 +163,6 @@ app.*.symbols
 .python-version
 .gclient_previous_custom_vars
 .gclient_previous_sync_commits
+
+# Project docs (do not track request checklists)
+user_request_docs/*.md
