@@ -149,7 +149,7 @@ class DoseCard extends StatelessWidget {
                   ),
                   const SizedBox(height: kSpacingXS),
                   SizedBox(
-                    height: kLargeButtonHeight,
+                    height: kStandardButtonHeight,
                     child: FilledButton(
                       onPressed: onPrimaryAction ?? onTap,
                       child: Text(actionLabel),
