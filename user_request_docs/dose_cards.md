@@ -10,7 +10,7 @@
 # Take/edit Dose Dialog Widget
 
 - [ ] Take Dose:
-	- [ ] Remove divivder from the top under the firts helper text.
+	- [x] Remove divivder from the top under the firts helper text.
 	- [ ] Why is tyhere grey chips????????????
 	- [ ] Status Chips, need to be centred. Colour coordinate them.
 	- [ ] Dose card status symbol not displaying, needs to show and change as status is updated.

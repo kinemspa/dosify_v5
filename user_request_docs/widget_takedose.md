@@ -10,7 +10,7 @@
 - [x] Ad-hoc amount editing (stepper)
 
 ## Status (Pending)
-- [ ] Remove divider under helper text
+- [x] Remove divider under helper text
 - [ ] MDV/syringe visual graphic + multi-value dose presentation rules
 - [ ] Snooze-until picker + prevent snoozing past next dose
 - [ ] Center status chips + finalize per-status color behavior (taken/snoozed/skipped)

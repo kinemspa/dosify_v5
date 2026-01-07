@@ -343,7 +343,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
               ],
             ),
           ),
-          const Divider(height: 1),
           // Content
           Expanded(
             child: ListView(
