@@ -147,7 +147,7 @@
 ==============
 # Dose Cards
 - Too High. [COMPLETED]
-- Has time and an action to take at time. Dont need both. 
+- Has time and an action to take at time. Dont need both. [COMPLETED]
 - Needs a date icon, will display today
 - Dose instructions:
 	- Take X X at X. 

@@ -189,7 +189,6 @@ class TakeDoseCard extends StatelessWidget {
     CalculatedDose dose,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final timeStr = DateFormat('h:mm a').format(dose.scheduledTime);
 
     switch (dose.status) {
       case DoseStatus.taken:
@@ -203,9 +202,11 @@ class TakeDoseCard extends StatelessWidget {
       case DoseStatus.snoozed:
         return (cs.tertiary, Icons.snooze_rounded, 'Snoozed');
       case DoseStatus.overdue:
-        return (cs.error, Icons.warning_rounded, 'Missed at $timeStr');
+        // Time is already shown in the Date/Time row.
+        return (cs.error, Icons.warning_rounded, 'Missed');
       case DoseStatus.pending:
-        return (cs.primary, Icons.notifications_rounded, 'Take at $timeStr');
+        // Time is already shown in the Date/Time row.
+        return (cs.primary, Icons.notifications_rounded, 'Pending');
     }
   }
 }
