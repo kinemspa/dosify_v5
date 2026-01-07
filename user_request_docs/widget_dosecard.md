@@ -5,22 +5,22 @@
 
 - [x] Date Icon on left. 
     - [x] Changes to Today when today. 
-- [ ] Time below date icon. 
-- [ ] Name of Schedule - MedName
-- [ ] Strenght of Medicine
-- [ ] Dose amount in the values that are available for the medication.
-- [ ] On the right side of the card, a Status Icon in circle or as a chip. not sure yet. 
+- [x] Time shown in the instruction line (no duplicate time display)
+- [x] Name of Schedule - MedName
+- [x] Strenght of Medicine
+- [x] Dose amount in the values that are available for the medication.
+- [x] On the right side of the card, a Status Icon in circle or as a chip. not sure yet. 
 - [ ] Take button. But this button is not very good named Take. I need a name that covers, Take, or edit, skip, snooze ect etc. 
 - Action button is too tall.  [COMPLETED]
 - [x] Time is appearing twice. 
 
 # Usages
 - [ ] This card will be used in the following spots. 
-    - [ ] Medication Details - Schedule Card
-    - [ ] Schedules - Schedule Card
-    - [ ] Calendar - Dose Tray
-    - [ ] Home - Upcoming Widget
-    - [ ] Home - Schedule Card
-    - [ ] Home - Calendar Widget
+    - [x] Medication Details - Schedule Card
+    - [x] Schedules - Schedule Card
+    - [x] Calendar - Dose Tray
+    - [x] Home - Upcoming Widget
+    - [x] Home - Schedule Card
+    - [x] Home - Calendar Widget
 
  
