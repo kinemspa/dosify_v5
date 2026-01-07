@@ -3,14 +3,16 @@
 
 - [ ] Dose Card to visually look similar to the current history list items, but in a card version
 
-- [ ] Date Icon on left. 
-    - [ ] Changes to Today when today. 
+- [x] Date Icon on left. 
+    - [x] Changes to Today when today. 
 - [ ] Time below date icon. 
 - [ ] Name of Schedule - MedName
 - [ ] Strenght of Medicine
 - [ ] Dose amount in the values that are available for the medication.
 - [ ] On the right side of the card, a Status Icon in circle or as a chip. not sure yet. 
 - [ ] Take button. But this button is not very good named Take. I need a name that covers, Take, or edit, skip, snooze ect etc. 
+- Action button is too tall. 
+- [x] Time is appearing twice. 
 
 # Usages
 - [ ] This card will be used in the following spots. 

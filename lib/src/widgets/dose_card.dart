@@ -77,14 +77,6 @@ class DoseCard extends StatelessWidget {
                     showNextLabel: false,
                     showTodayIcon: true,
                   ),
-                  const SizedBox(height: kSpacingXS),
-                  Text(
-                    timeText,
-                    style: baseHelper?.copyWith(fontSize: kFontSizeXSmall),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
                 ],
               ),
               const SizedBox(width: kSpacingM),
@@ -124,7 +116,7 @@ class DoseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: kSpacingXXS),
                     Text(
-                      doseMetrics,
+                      'Take $doseMetrics at $timeText',
                       style: baseBody?.copyWith(color: cs.onSurface),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

@@ -148,7 +148,7 @@
 # Dose Cards
 - Too High. [COMPLETED]
 - Has time and an action to take at time. Dont need both. [COMPLETED]
-- Needs a date icon, will display today
+- Needs a date icon, will display today [COMPLETED]
 - Dose instructions:
 	- Take X X at X. 
 - The take button. I am conflicted here. I want the shortcut buttons of take, snooze, skip. But also want the dialog to pop where notes can be added and the status can be changed. 
