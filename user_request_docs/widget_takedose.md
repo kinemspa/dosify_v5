@@ -1,5 +1,18 @@
-# Take Dose
+# Take Dose Dialog
 - [ ] This will be a working document for the Take Dose dialog widget.
+
+## Checklist (from Dose Cards doc)
+- [x] Remove divider under helper text
+- [x] Remove grey chips
+- [x] Center status chips + color coordinate them
+- [x] Dose card status icon updates live as status changes
+- [ ] If a MDV, Single Dose Vial or Pre Filled syringe, show syringe graphic + multi-value dose rules
+- [x] Helper text is instructional (not "change status if you need to correct")
+- [ ] Cards within cards: match the standard dialog styling
+- [x] Edit Historical Dose uses the same style as Ad-hoc
+- [x] Ad-hoc dose: units slider saves state
+- [x] Ad-hoc dose: units remove trailing 0 / whole numbers
+- [x] Ad-hoc dose: slider tap-to-jump
 
 ## Status (Implemented)
 - [x] Heading + helper text
