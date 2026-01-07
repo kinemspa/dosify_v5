@@ -164,7 +164,10 @@ class DoseCard extends StatelessWidget {
     );
   }
 
-  (Color, IconData) _statusPresentation(BuildContext context, DoseStatus status) {
+  (Color, IconData) _statusPresentation(
+    BuildContext context,
+    DoseStatus status,
+  ) {
     final cs = Theme.of(context).colorScheme;
     switch (status) {
       case DoseStatus.taken:
