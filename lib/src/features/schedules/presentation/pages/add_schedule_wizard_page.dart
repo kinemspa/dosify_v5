@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -1582,6 +1583,53 @@ class _AddScheduleWizardPageState
   @override
   Future<void> saveSchedule() async {
     if (!canProceed) return;
+
+    // Ensure notifications permission (same safety checks as legacy schedule editor)
+    final granted = await NotificationService.ensurePermissionGranted();
+    if (!granted && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enable notifications to receive schedule alerts.'),
+        ),
+      );
+    }
+
+    final canExact = await NotificationService.canScheduleExactAlarms();
+    final enabled = await NotificationService.areNotificationsEnabled();
+    if (mounted && (!enabled || !canExact)) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Allow reminders'),
+          content: Text(
+            !enabled
+                ? 'Notifications are disabled for Dosifi. Enable notifications to receive reminders.'
+                : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver reminders at the exact time.',
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Later'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                if (!enabled) {
+                  await NotificationService.openChannelSettings(
+                    'upcoming_dose',
+                  );
+                }
+                if (!canExact) {
+                  await NotificationService.openExactAlarmsSettings();
+                }
+              },
+              child: const Text('Open settings'),
+            ),
+          ],
+        ),
+      );
+    }
 
     final id =
         widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
