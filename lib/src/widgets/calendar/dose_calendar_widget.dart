@@ -57,6 +57,8 @@ class DoseCalendarWidget extends StatefulWidget {
     this.startDate,
     this.onDoseTap,
     this.showSelectedDayPanel = true,
+    this.showUpNextCard = true,
+    this.requireHourSelectionInDayView = false,
     super.key,
   });
 
@@ -68,6 +70,8 @@ class DoseCalendarWidget extends StatefulWidget {
   final DateTime? startDate;
   final void Function(CalculatedDose dose)? onDoseTap;
   final bool showSelectedDayPanel;
+  final bool showUpNextCard;
+  final bool requireHourSelectionInDayView;
 
   @override
   State<DoseCalendarWidget> createState() => _DoseCalendarWidgetState();
@@ -77,6 +81,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   late CalendarView _currentView;
   late DateTime _currentDate;
   DateTime? _selectedDate; // Track selected date for detail panel
+  int? _selectedHour;
   List<CalculatedDose> _doses = [];
   bool _isLoading = false;
 
@@ -87,7 +92,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     _currentDate = widget.startDate ?? DateTime.now();
     // Auto-select today for month/week views to show today's doses
     if (_currentView != CalendarView.day) {
-      _selectedDate = DateTime.now();
+      _selectedDate = widget.startDate ?? DateTime.now();
+    } else if (widget.requireHourSelectionInDayView) {
+      _selectedHour = DateTime.now().hour;
     }
     _loadDoses();
   }
@@ -177,6 +184,18 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   void _onViewChanged(CalendarView view) {
     setState(() {
       _currentView = view;
+      if (view == CalendarView.day) {
+        _currentDate = _selectedDate ?? DateTime.now();
+        _selectedDate = null;
+        if (widget.requireHourSelectionInDayView) {
+          _selectedHour ??= DateTime.now().hour;
+        } else {
+          _selectedHour = null;
+        }
+      } else {
+        _selectedDate ??= DateTime.now();
+        _selectedHour = null;
+      }
     });
     _loadDoses();
   }
@@ -220,6 +239,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     setState(() {
       _currentDate = today;
       _selectedDate = today; // Also select today
+      if (_currentView == CalendarView.day &&
+          widget.requireHourSelectionInDayView) {
+        _selectedHour = today.hour;
+      }
     });
     _loadDoses();
   }
@@ -246,7 +269,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     _openDoseActionSheetFor(dose);
   }
 
-  void _openDoseActionSheetFor(CalculatedDose dose, {DoseStatus? initialStatus}) {
+  void _openDoseActionSheetFor(
+    CalculatedDose dose, {
+    DoseStatus? initialStatus,
+  }) {
     DoseActionSheet.show(
       context,
       dose: dose,
@@ -371,9 +397,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(label)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(label)));
       }
     } catch (e) {
       if (mounted) {
@@ -675,7 +701,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               onViewChanged: _onViewChanged,
               showViewToggle: showViewToggle,
             ),
-          if (widget.variant == CalendarVariant.full)
+          if (widget.variant == CalendarVariant.full && widget.showUpNextCard)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 kSpacingL,
@@ -711,6 +737,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             Expanded(child: _buildCurrentView())
           else
             Flexible(fit: FlexFit.loose, child: _buildCurrentView()),
+          if (widget.requireHourSelectionInDayView &&
+              _currentView == CalendarView.day)
+            if (widget.variant == CalendarVariant.full && panelHeight != null)
+              SizedBox(height: panelHeight, child: _buildSelectedHourPanel())
+            else
+              Expanded(child: _buildSelectedHourPanel()),
           // Selected date schedules (if date selected, only for week/month views)
           if (_selectedDate != null &&
               _currentView != CalendarView.day &&
@@ -764,7 +796,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return CalendarDayView(
           date: _currentDate,
           doses: _doses,
-          onDoseTap: _onDoseTapInternal,
+          onDoseTap: widget.requireHourSelectionInDayView
+              ? null
+              : _onDoseTapInternal,
+          selectedHour: _selectedHour,
+          onHourTap: widget.requireHourSelectionInDayView
+              ? (hour) => setState(() => _selectedHour = hour)
+              : null,
           onDateChanged: _onDateChanged,
         );
 
@@ -802,6 +840,143 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           startWeekOnMonday: startOnMonday,
         );
     }
+  }
+
+  Widget _buildSelectedHourPanel() {
+    final selectedHour = _selectedHour;
+    if (selectedHour == null) return const SizedBox.shrink();
+
+    final dayDoses = _doses.where((dose) {
+      return dose.scheduledTime.year == _currentDate.year &&
+          dose.scheduledTime.month == _currentDate.month &&
+          dose.scheduledTime.day == _currentDate.day &&
+          dose.scheduledTime.hour == selectedHour;
+    }).toList();
+
+    dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final listBottomPadding =
+        (widget.variant == CalendarVariant.compact
+            ? kSpacingL
+            : kPagePadding.bottom) +
+        safeBottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: kSpacingL,
+              vertical: kSpacingM,
+            ),
+            child: Text(
+              'Hour: ${_formatSelectedHour(selectedHour)}',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: dayDoses.isEmpty
+                ? Center(
+                    child: Text(
+                      'No doses scheduled',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(
+                          alpha: kOpacityLow,
+                        ),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.only(bottom: listBottomPadding),
+                    itemCount: dayDoses.length,
+                    itemBuilder: (context, index) {
+                      final dose = dayDoses[index];
+
+                      final schedule = Hive.box<Schedule>(
+                        'schedules',
+                      ).get(dose.scheduleId);
+                      final med = (schedule?.medicationId != null)
+                          ? Hive.box<Medication>(
+                              'medications',
+                            ).get(schedule!.medicationId)
+                          : null;
+
+                      if (schedule != null && med != null) {
+                        final strengthLabel =
+                            MedicationDisplayHelpers.strengthOrConcentrationLabel(
+                              med,
+                            );
+
+                        final metrics =
+                            MedicationDisplayHelpers.doseMetricsSummary(
+                              med,
+                              doseTabletQuarters: schedule.doseTabletQuarters,
+                              doseCapsules: schedule.doseCapsules,
+                              doseSyringes: schedule.doseSyringes,
+                              doseVials: schedule.doseVials,
+                              doseMassMcg: schedule.doseMassMcg?.toDouble(),
+                              doseVolumeMicroliter:
+                                  schedule.doseVolumeMicroliter?.toDouble(),
+                              syringeUnits: schedule.doseIU?.toDouble(),
+                            );
+
+                        if (strengthLabel.trim().isNotEmpty &&
+                            metrics.trim().isNotEmpty) {
+                          return DoseCard(
+                            dose: dose,
+                            medicationName: med.name,
+                            strengthOrConcentrationLabel: strengthLabel,
+                            doseMetrics: metrics,
+                            isActive: schedule.isActive,
+                            onQuickAction: (status) {
+                              if (widget.onDoseTap != null) {
+                                widget.onDoseTap!(dose);
+                                return;
+                              }
+                              _openDoseActionSheetFor(
+                                dose,
+                                initialStatus: status,
+                              );
+                            },
+                            onTap: () => _onDoseTapInternal(dose),
+                          );
+                        }
+                      }
+
+                      return DoseSummaryRow(
+                        dose: dose,
+                        showMedicationName: true,
+                        onTap: () => _onDoseTapInternal(dose),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatSelectedHour(int hour) {
+    if (hour == 0) return '12 AM';
+    if (hour < 12) return '$hour AM';
+    if (hour == 12) return '12 PM';
+    return '${hour - 12} PM';
   }
 
   Widget _buildSelectedDayPanel() {

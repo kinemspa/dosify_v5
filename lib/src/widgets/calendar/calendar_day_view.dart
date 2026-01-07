@@ -19,6 +19,8 @@ class CalendarDayView extends StatefulWidget {
     required this.date,
     required this.doses,
     this.onDoseTap,
+    this.selectedHour,
+    this.onHourTap,
     this.onDateChanged,
     super.key,
   });
@@ -26,6 +28,8 @@ class CalendarDayView extends StatefulWidget {
   final DateTime date;
   final List<CalculatedDose> doses;
   final void Function(CalculatedDose dose)? onDoseTap;
+  final int? selectedHour;
+  final void Function(int hour)? onHourTap;
   final void Function(DateTime date)? onDateChanged;
 
   @override
@@ -166,6 +170,8 @@ class _CalendarDayViewState extends State<CalendarDayView> {
                 hour: hour,
                 doses: _getDosesForHour(hour),
                 onDoseTap: widget.onDoseTap,
+                isSelected: widget.selectedHour == hour,
+                onHourTap: widget.onHourTap,
               );
             },
           ),
@@ -184,11 +190,19 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 }
 
 class _HourRow extends StatelessWidget {
-  const _HourRow({required this.hour, required this.doses, this.onDoseTap});
+  const _HourRow({
+    required this.hour,
+    required this.doses,
+    this.onDoseTap,
+    this.isSelected = false,
+    this.onHourTap,
+  });
 
   final int hour;
   final List<CalculatedDose> doses;
   final void Function(CalculatedDose dose)? onDoseTap;
+  final bool isSelected;
+  final void Function(int hour)? onHourTap;
 
   String _formatHour(int hour) {
     if (hour == 0) return '12 AM';
@@ -199,9 +213,13 @@ class _HourRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SizedBox(
       height: kCalendarHourHeight,
-      child: Row(
+      child: InkWell(
+        onTap: onHourTap != null ? () => onHourTap!(hour) : null,
+        child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Time label
@@ -234,6 +252,9 @@ class _HourRow extends StatelessWidget {
                     ).colorScheme.outline.withAlpha((0.2 * 255).round()),
                   ),
                 ),
+                color: isSelected
+                    ? colorScheme.primary.withAlpha((0.06 * 255).round())
+                    : null,
               ),
               child: doses.isEmpty
                   ? null
@@ -263,6 +284,7 @@ class _HourRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
