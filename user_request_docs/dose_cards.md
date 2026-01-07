@@ -11,7 +11,7 @@
 
 - [ ] Take Dose:
 	- [x] Remove divivder from the top under the firts helper text.
-	- [ ] Why is tyhere grey chips????????????
+	- [x] Why is tyhere grey chips????????????
 	- [ ] Status Chips, need to be centred. Colour coordinate them.
 	- [ ] Dose card status symbol not displaying, needs to show and change as status is updated.
 	- [ ] If a MDV, Single Dose Vial or Pre Filled syringe, we need to be showing the syringe graphic. It is paramounbt. Plus the 2 or 3 values of the dose.

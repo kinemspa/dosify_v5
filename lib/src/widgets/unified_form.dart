@@ -311,9 +311,7 @@ class PrimaryChoiceChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final selectedColor = theme.colorScheme.primary;
-    final unselectedColor = theme.colorScheme.primary.withValues(
-      alpha: kOpacityVeryLow,
-    );
+    final unselectedColor = theme.colorScheme.surface.withValues(alpha: 0);
     final labelColor = selected ? theme.colorScheme.onPrimary : selectedColor;
     return ChoiceChip(
       label: DefaultTextStyle(

@@ -160,7 +160,7 @@
 ##### Is Requiring a FULL OVVERHAUL to manage all the options and all the palces where it can be used.
 - Take Dose:
 	- Remove divivder from the top under the firts helper text.  [COMPLETED]
-	- Why is tyhere grey chips????????????
+	- Why is tyhere grey chips???????????? [COMPLETED]
 	- Status Chips, need to be centred. Colour coordinate them. 
 	- Dose card status symbol not displaying, needs to show and change as status is updated. 
 	- If a MDV, Single Dose Vial or Pre Filled syringe, we need to be showing the syringe graphic. It is paramounbt. Plus the 2 or 3 values of the dose. 
