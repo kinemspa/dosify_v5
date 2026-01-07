@@ -114,8 +114,17 @@ class HomePage extends StatelessWidget {
         await repo.upsert(log);
 
         if (context.mounted) {
+          final now = DateTime.now();
+          final sameDay =
+              actionTime.year == now.year &&
+              actionTime.month == now.month &&
+              actionTime.day == now.day;
+          final time = TimeOfDay.fromDateTime(actionTime).format(context);
+          final label = sameDay
+              ? 'Dose snoozed until $time'
+              : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Dose snoozed for 15 minutes')),
+            SnackBar(content: Text(label)),
           );
         }
       },

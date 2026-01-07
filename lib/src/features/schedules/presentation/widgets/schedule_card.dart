@@ -453,6 +453,8 @@ class ScheduleCard extends StatelessWidget {
       return;
     }
 
+    final snoozeUntil = next.add(const Duration(minutes: 15));
+
     final logId = '${s.id}_${next.millisecondsSinceEpoch}_snooze';
     final log = DoseLog(
       id: logId,
@@ -461,6 +463,7 @@ class ScheduleCard extends StatelessWidget {
       medicationId: s.medicationId ?? 'unknown',
       medicationName: s.medicationName,
       scheduledTime: next,
+      actionTime: snoozeUntil,
       doseValue: s.doseValue,
       doseUnit: s.doseUnit,
       action: DoseAction.snoozed,
@@ -472,18 +475,17 @@ class ScheduleCard extends StatelessWidget {
 
       // Reschedule notification for 15 minutes later as a one-off snooze alarm.
       try {
-        final snoozeDt = next.add(const Duration(minutes: 15));
-        final minutes = snoozeDt.hour * 60 + snoozeDt.minute;
+        final minutes = snoozeUntil.hour * 60 + snoozeUntil.minute;
         final occurrence = occ?.occurrence ?? 0;
         final id = ScheduleScheduler.slotIdFor(
           s.id,
-          weekday: snoozeDt.weekday,
+          weekday: snoozeUntil.weekday,
           minutes: minutes,
           occurrence: occurrence,
         );
         await NotificationService.scheduleAtAlarmClock(
           id,
-          snoozeDt,
+          snoozeUntil,
           title: s.name,
           body: '${s.medicationName} • ${s.doseValue} ${s.doseUnit}',
         );
@@ -491,8 +493,17 @@ class ScheduleCard extends StatelessWidget {
         // ignore scheduling failure - best effort
       }
       if (context.mounted) {
+        final now = DateTime.now();
+        final sameDay =
+            snoozeUntil.year == now.year &&
+            snoozeUntil.month == now.month &&
+            snoozeUntil.day == now.day;
+        final time = TimeOfDay.fromDateTime(snoozeUntil).format(context);
+        final label = sameDay
+            ? 'Dose snoozed until $time'
+            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} • $time';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Dose snoozed for 15 minutes')),
+          SnackBar(content: Text(label)),
         );
       }
     } catch (e) {

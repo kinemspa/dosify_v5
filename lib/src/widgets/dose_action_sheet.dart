@@ -11,6 +11,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -70,6 +71,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   double? _maxAdHocAmount;
   late DoseStatus _selectedStatus;
   late DateTime _selectedActionTime;
+  DateTime? _selectedSnoozeUntil;
   bool _hasChanged = false;
 
   bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
@@ -82,6 +84,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     );
     _selectedStatus = widget.dose.status;
     _selectedActionTime = widget.dose.existingLog?.actionTime ?? DateTime.now();
+    _selectedSnoozeUntil = _selectedStatus == DoseStatus.snoozed
+        ? _selectedActionTime
+        : _defaultSnoozeUntil();
 
     if (_isAdHoc && widget.dose.existingLog != null) {
       final log = widget.dose.existingLog!;
@@ -117,6 +122,30 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   String _formatAmount(double value) {
     if (value == value.roundToDouble()) return value.toInt().toString();
     return value.toStringAsFixed(2);
+  }
+
+  DateTime _defaultSnoozeUntil() {
+    return DateTime.now().add(const Duration(minutes: 15));
+  }
+
+  DateTime? _maxSnoozeUntil() {
+    final schedule = Hive.box<Schedule>('schedules').get(widget.dose.scheduleId);
+    if (schedule == null) return null;
+
+    final now = DateTime.now();
+    final fromForNext = widget.dose.scheduledTime.isAfter(now)
+        ? widget.dose.scheduledTime.add(const Duration(minutes: 1))
+        : now;
+
+    final next = ScheduleOccurrenceService.nextOccurrence(
+      schedule,
+      from: fromForNext,
+    );
+    if (next == null) return null;
+
+    final max = next.subtract(const Duration(minutes: 1));
+    if (max.isBefore(now)) return now;
+    return max;
   }
 
   double _adHocStepSize(String unit) {
@@ -296,7 +325,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           await widget.onSkip(notes, _selectedActionTime);
           break;
         case DoseStatus.snoozed:
-          await widget.onSnooze(notes, _selectedActionTime);
+          await widget.onSnooze(
+            notes,
+            _selectedSnoozeUntil ?? _defaultSnoozeUntil(),
+          );
           break;
         case DoseStatus.pending:
         case DoseStatus.overdue:
@@ -487,6 +519,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                                 _selectedActionTime.hour,
                                 _selectedActionTime.minute,
                               );
+                              if (_selectedStatus == DoseStatus.snoozed) {
+                                _selectedSnoozeUntil = _selectedActionTime;
+                              }
                               _hasChanged = true;
                             });
                           },
@@ -522,6 +557,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                                 picked.hour,
                                 picked.minute,
                               );
+                              if (_selectedStatus == DoseStatus.snoozed) {
+                                _selectedSnoozeUntil = _selectedActionTime;
+                              }
                               _hasChanged = true;
                             });
                           },
@@ -550,6 +588,94 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   ],
                 ),
                 const SizedBox(height: kSpacingM),
+                if (_selectedStatus == DoseStatus.snoozed) ...[
+                  SectionFormCard(
+                    neutral: true,
+                    title: 'Snooze Until',
+                    children: [
+                      SizedBox(
+                        height: kStandardFieldHeight,
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final now = DateTime.now();
+                            final max = _maxSnoozeUntil();
+                            final firstDate = DateTime(now.year, now.month, now.day);
+                            final lastDate = max != null
+                                ? DateTime(max.year, max.month, max.day)
+                                : now.add(const Duration(days: 60));
+
+                            final initial = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                            final clampedInitialDate = DateTime(
+                              initial.year,
+                              initial.month,
+                              initial.day,
+                            );
+                            final safeInitialDate = clampedInitialDate.isBefore(firstDate)
+                                ? firstDate
+                                : (clampedInitialDate.isAfter(lastDate) ? lastDate : clampedInitialDate);
+
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: safeInitialDate,
+                              firstDate: firstDate,
+                              lastDate: lastDate.isBefore(firstDate) ? firstDate : lastDate,
+                            );
+                            if (pickedDate == null) return;
+
+                            final pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(initial),
+                            );
+                            if (pickedTime == null) return;
+
+                            var dt = DateTime(
+                              pickedDate.year,
+                              pickedDate.month,
+                              pickedDate.day,
+                              pickedTime.hour,
+                              pickedTime.minute,
+                            );
+
+                            if (dt.isBefore(now)) dt = now;
+                            if (max != null && dt.isAfter(max)) dt = max;
+
+                            setState(() {
+                              _selectedSnoozeUntil = dt;
+                              _selectedActionTime = dt;
+                              _hasChanged = true;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.snooze_rounded,
+                            size: kIconSizeSmall,
+                          ),
+                          label: Text(
+                            () {
+                              final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                              final date = MaterialLocalizations.of(context).formatMediumDate(dt);
+                              final time = TimeOfDay.fromDateTime(dt).format(context);
+                              return '$date • $time';
+                            }(),
+                          ),
+                        ),
+                      ),
+                      if (_maxSnoozeUntil() != null) ...[
+                        const SizedBox(height: kSpacingS),
+                        Text(
+                          () {
+                            final max = _maxSnoozeUntil()!;
+                            final date = MaterialLocalizations.of(context).formatMediumDate(max);
+                            final time = TimeOfDay.fromDateTime(max).format(context);
+                            return 'Must be before the next scheduled dose ($date • $time).';
+                          }(),
+                          style: helperTextStyle(context),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: kSpacingM),
+                ],
                 SectionFormCard(
                   neutral: true,
                   title: 'Notes',
@@ -700,6 +826,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           onSelected: (_) {
             setState(() {
               _selectedStatus = DoseStatus.snoozed;
+              final until = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+              final max = _maxSnoozeUntil();
+              final clamped = max != null && until.isAfter(max) ? max : until;
+              _selectedSnoozeUntil = clamped;
+              _selectedActionTime = clamped;
               _hasChanged = true;
             });
           },
