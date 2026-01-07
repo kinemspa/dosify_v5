@@ -162,9 +162,9 @@
 	- Remove divivder from the top under the firts helper text.  [COMPLETED]
 	- Why is tyhere grey chips???????????? [COMPLETED]
 	- Status Chips, need to be centred. Colour coordinate them.  [COMPLETED]
-	- Dose card status symbol not displaying, needs to show and change as status is updated. 
+	- Dose card status symbol not displaying, needs to show and change as status is updated.  [COMPLETED]
 	- If a MDV, Single Dose Vial or Pre Filled syringe, we need to be showing the syringe graphic. It is paramounbt. Plus the 2 or 3 values of the dose. 
-	- Helper text: Change status if you need to correct this dose? WTF is this lamen crap. be instructional. 
+	- Helper text: Change status if you need to correct this dose? WTF is this lamen crap. be instructional.  [COMPLETED]
 	- Cards wwithin cards, I stated to make this screen look like the other dialog pop screens, the cards within this make it not look like that at all.
 	 
 - Edit Historical Dose:

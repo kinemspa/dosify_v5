@@ -447,6 +447,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                             strengthOrConcentrationLabel: strengthLabel,
                             doseMetrics: metrics,
                             isActive: schedule.isActive,
+                            statusOverride: _selectedStatus,
                             onTap: () {},
                           );
                         }
@@ -731,8 +732,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         Expanded(
           child: Text(
             _hasChanged
-                ? 'Status changed — press Save & Close to apply.'
-                : 'Change status if you need to correct this dose.',
+                ? 'Press Save & Close to apply changes.'
+                : 'Select a status, add notes, then press Save & Close.',
             style: helperTextStyle(context),
           ),
         ),

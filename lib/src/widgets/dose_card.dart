@@ -17,6 +17,7 @@ class DoseCard extends StatelessWidget {
     required this.doseMetrics,
     required this.onTap,
     this.isActive = true,
+    this.statusOverride,
     this.titleTrailing,
     this.primaryActionLabel,
     this.onPrimaryAction,
@@ -29,6 +30,7 @@ class DoseCard extends StatelessWidget {
   final String doseMetrics;
   final VoidCallback onTap;
   final bool isActive;
+  final DoseStatus? statusOverride;
   final Widget? titleTrailing;
   final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
@@ -37,7 +39,11 @@ class DoseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final (statusColor, statusIcon) = _statusPresentation(context, dose);
+    final effectiveStatus = statusOverride ?? dose.status;
+    final (statusColor, statusIcon) = _statusPresentation(
+      context,
+      effectiveStatus,
+    );
 
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
@@ -158,12 +164,9 @@ class DoseCard extends StatelessWidget {
     );
   }
 
-  (Color, IconData) _statusPresentation(
-    BuildContext context,
-    CalculatedDose dose,
-  ) {
+  (Color, IconData) _statusPresentation(BuildContext context, DoseStatus status) {
     final cs = Theme.of(context).colorScheme;
-    switch (dose.status) {
+    switch (status) {
       case DoseStatus.taken:
         return (cs.primary, Icons.check_rounded);
       case DoseStatus.skipped:
