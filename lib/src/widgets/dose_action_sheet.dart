@@ -661,13 +661,16 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   Widget _buildStatusChips() {
+    final cs = Theme.of(context).colorScheme;
     return Wrap(
       spacing: kSpacingS,
       runSpacing: kSpacingXS,
+      alignment: WrapAlignment.center,
       children: [
         if (!_isAdHoc)
           PrimaryChoiceChip(
             label: const Text('Scheduled'),
+            color: cs.primary,
             selected:
                 _selectedStatus == DoseStatus.pending ||
                 _selectedStatus == DoseStatus.overdue,
@@ -680,6 +683,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           ),
         PrimaryChoiceChip(
           label: const Text('Taken'),
+          color: cs.primary,
           selected: _selectedStatus == DoseStatus.taken,
           onSelected: (_) {
             setState(() {
@@ -690,6 +694,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
         PrimaryChoiceChip(
           label: const Text('Snoozed'),
+          color: cs.secondary,
           selected: _selectedStatus == DoseStatus.snoozed,
           onSelected: (_) {
             setState(() {
@@ -700,6 +705,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
         PrimaryChoiceChip(
           label: const Text('Skipped'),
+          color: cs.error,
           selected: _selectedStatus == DoseStatus.skipped,
           onSelected: (_) {
             setState(() {

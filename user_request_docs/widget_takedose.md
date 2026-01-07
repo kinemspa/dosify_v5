@@ -13,7 +13,7 @@
 - [x] Remove divider under helper text
 - [ ] MDV/syringe visual graphic + multi-value dose presentation rules
 - [ ] Snooze-until picker + prevent snoozing past next dose
-- [ ] Center status chips + finalize per-status color behavior (taken/snoozed/skipped)
+- [x] Center status chips + finalize per-status color behavior (taken/snoozed/skipped)
 
 - [ ] We need to come up with a naming concept for this dialog. Will it be the DOse Status Editor Dialog widget? Dose Taker? Dose Instructions WIdget?
 

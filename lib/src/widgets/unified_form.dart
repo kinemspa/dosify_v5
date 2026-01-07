@@ -302,15 +302,17 @@ class PrimaryChoiceChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onSelected,
+    this.color,
     super.key,
   });
   final Widget label;
   final bool selected;
   final ValueChanged<bool> onSelected;
+  final Color? color;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedColor = theme.colorScheme.primary;
+    final selectedColor = color ?? theme.colorScheme.primary;
     final unselectedColor = theme.colorScheme.surface.withValues(alpha: 0);
     final labelColor = selected ? theme.colorScheme.onPrimary : selectedColor;
     return ChoiceChip(
@@ -332,7 +334,7 @@ class PrimaryChoiceChip extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       side: BorderSide(
         color: selected
-            ? theme.colorScheme.primary
+            ? selectedColor
             : theme.colorScheme.outlineVariant.withValues(
                 alpha: kCardBorderOpacity,
               ),
