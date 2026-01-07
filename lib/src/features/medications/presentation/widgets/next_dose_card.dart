@@ -292,6 +292,7 @@ class _NextDoseCardState extends State<NextDoseCard>
         medicationName: widget.medication.name,
         strengthOrConcentrationLabel: strengthLabel,
         doseMetrics: metrics,
+        onQuickAction: (status) => _showDoseActionSheet(dose, initialStatus: status),
         onTap: () => _showDoseActionSheet(dose),
       ),
     );
@@ -742,10 +743,11 @@ class _NextDoseCardState extends State<NextDoseCard>
     return value.toString();
   }
 
-  void _showDoseActionSheet(CalculatedDose dose) {
+  void _showDoseActionSheet(CalculatedDose dose, {DoseStatus? initialStatus}) {
     DoseActionSheet.show(
       context,
       dose: dose,
+      initialStatus: initialStatus,
       onMarkTaken: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
@@ -789,7 +791,45 @@ class _NextDoseCardState extends State<NextDoseCard>
           context,
         ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       },
-      onSnooze: (_, __) async {},
+      onSnooze: (notes, actionTime) async {
+        final logId =
+            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+        final log = DoseLog(
+          id: logId,
+          scheduleId: dose.scheduleId,
+          scheduleName: dose.scheduleName,
+          medicationId: widget.medication.id,
+          medicationName: widget.medication.name,
+          scheduledTime: dose.scheduledTime,
+          actionTime: actionTime,
+          doseValue: dose.doseValue,
+          doseUnit: dose.doseUnit,
+          action: DoseAction.snoozed,
+          notes: notes?.isEmpty ?? true ? null : notes,
+        );
+
+        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        await repo.upsert(log);
+
+        if (!mounted) return;
+        setState(() {
+          _calculateDosesForWeek(_selectedDate);
+          _updateDayDoses();
+        });
+
+        final now = DateTime.now();
+        final sameDay =
+            actionTime.year == now.year &&
+            actionTime.month == now.month &&
+            actionTime.day == now.day;
+        final time = TimeOfDay.fromDateTime(actionTime).format(context);
+        final label = sameDay
+            ? 'Dose snoozed until $time'
+            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(label)),
+        );
+      },
       onSkip: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';

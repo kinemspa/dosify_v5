@@ -61,10 +61,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     }
   }
 
-  Future<void> _showDoseActions(CalculatedDose dose) {
+  Future<void> _showDoseActions(CalculatedDose dose, {DoseStatus? initialStatus}) {
     return DoseActionSheet.show(
       context,
       dose: dose,
+      initialStatus: initialStatus,
       onMarkTaken: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
@@ -278,6 +279,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                         schedule: widget.schedule,
                       ),
                       onTap: () => setState(() => _isExpanded = !_isExpanded),
+                      onQuickAction: (status) =>
+                          _showDoseActions(dose, initialStatus: status),
                       onPrimaryAction: () => _showDoseActions(dose),
                     );
                   },

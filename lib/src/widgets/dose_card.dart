@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/widgets/dose_quick_action_row.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
 class DoseCard extends StatelessWidget {
@@ -21,6 +22,7 @@ class DoseCard extends StatelessWidget {
     this.titleTrailing,
     this.primaryActionLabel,
     this.onPrimaryAction,
+    this.onQuickAction,
     super.key,
   });
 
@@ -34,6 +36,7 @@ class DoseCard extends StatelessWidget {
   final Widget? titleTrailing;
   final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
+  final ValueChanged<DoseStatus>? onQuickAction;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +58,7 @@ class DoseCard extends StatelessWidget {
     final baseHelper = helperTextStyle(context);
 
     final actionLabel = primaryActionLabel ?? 'Actions';
+    final hasQuickActions = onQuickAction != null;
 
     return Material(
       color: Colors.transparent,
@@ -148,13 +152,16 @@ class DoseCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: kSpacingXS),
-                  SizedBox(
-                    height: kStandardButtonHeight,
-                    child: FilledButton(
-                      onPressed: onPrimaryAction ?? onTap,
-                      child: Text(actionLabel),
+                  if (hasQuickActions)
+                    DoseQuickActionRow(onAction: onQuickAction!)
+                  else
+                    SizedBox(
+                      height: kStandardButtonHeight,
+                      child: FilledButton(
+                        onPressed: onPrimaryAction ?? onTap,
+                        child: Text(actionLabel),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],

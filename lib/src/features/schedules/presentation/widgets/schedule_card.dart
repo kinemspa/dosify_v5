@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard({
@@ -168,11 +169,21 @@ class ScheduleCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          Text(
-            s.name,
-            style: sectionTitleStyle(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  s.name,
+                  style: sectionTitleStyle(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (!s.isActive) ...[
+                const SizedBox(width: kSpacingS),
+                ScheduleStatusBadge(schedule: s, dense: true),
+              ],
+            ],
           ),
           const SizedBox(height: kFieldSpacing),
           Text(
@@ -502,9 +513,9 @@ class ScheduleCard extends StatelessWidget {
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} • $time';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(label)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(label)));
       }
     } catch (e) {
       if (context.mounted) {

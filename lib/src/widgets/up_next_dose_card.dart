@@ -12,6 +12,7 @@ class UpNextDoseCard extends StatelessWidget {
   const UpNextDoseCard({
     required this.dose,
     required this.onDoseTap,
+    this.onQuickAction,
     this.showMedicationName = true,
     this.medicationName,
     this.strengthOrConcentrationLabel,
@@ -22,6 +23,7 @@ class UpNextDoseCard extends StatelessWidget {
 
   final CalculatedDose? dose;
   final void Function(CalculatedDose dose) onDoseTap;
+  final ValueChanged<DoseStatus>? onQuickAction;
   final bool showMedicationName;
   final String? medicationName;
   final String? strengthOrConcentrationLabel;
@@ -55,6 +57,7 @@ class UpNextDoseCard extends StatelessWidget {
             strengthOrConcentrationLabel: strengthOrConcentrationLabel!,
             doseMetrics: doseMetrics!,
             primaryActionLabel: primaryActionLabel,
+            onQuickAction: onQuickAction,
             onTap: () => onDoseTap(dose!),
           )
         else

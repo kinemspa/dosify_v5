@@ -239,16 +239,18 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   void _onDoseTapInternal(CalculatedDose dose) {
-    // If external handler provided, use it
     if (widget.onDoseTap != null) {
       widget.onDoseTap!(dose);
       return;
     }
+    _openDoseActionSheetFor(dose);
+  }
 
-    // Otherwise show bottom sheet with dose details
+  void _openDoseActionSheetFor(CalculatedDose dose, {DoseStatus? initialStatus}) {
     DoseActionSheet.show(
       context,
       dose: dose,
+      initialStatus: initialStatus,
       onMarkTaken: (notes, actionTime) =>
           _markDoseAsTaken(dose, notes, actionTime),
       onSnooze: (notes, actionTime) => _snoozeDose(dose, notes, actionTime),
@@ -684,6 +686,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               child: UpNextDoseCard(
                 dose: nextDose,
                 onDoseTap: _onDoseTapInternal,
+                onQuickAction: (status) {
+                  final d = nextDose;
+                  if (d == null) return;
+                  if (widget.onDoseTap != null) {
+                    widget.onDoseTap!(d);
+                    return;
+                  }
+                  _openDoseActionSheetFor(d, initialStatus: status);
+                },
                 showMedicationName: true,
                 medicationName:
                     upNextMedication?.name ?? nextDose?.medicationName,
@@ -914,6 +925,16 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                                 strengthOrConcentrationLabel: strengthLabel,
                                 doseMetrics: metrics,
                                 isActive: schedule.isActive,
+                                onQuickAction: (status) {
+                                  if (widget.onDoseTap != null) {
+                                    widget.onDoseTap!(dose);
+                                    return;
+                                  }
+                                  _openDoseActionSheetFor(
+                                    dose,
+                                    initialStatus: status,
+                                  );
+                                },
                                 onTap: () => _onDoseTapInternal(dose),
                               );
                             }
@@ -983,6 +1004,16 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                                   strengthOrConcentrationLabel: strengthLabel,
                                   doseMetrics: metrics,
                                   isActive: schedule.isActive,
+                                  onQuickAction: (status) {
+                                    if (widget.onDoseTap != null) {
+                                      widget.onDoseTap!(dose);
+                                      return;
+                                    }
+                                    _openDoseActionSheetFor(
+                                      dose,
+                                      initialStatus: status,
+                                    );
+                                  },
                                   onTap: () => _onDoseTapInternal(dose),
                                 );
                               }

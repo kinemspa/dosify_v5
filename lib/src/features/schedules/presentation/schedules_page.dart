@@ -419,10 +419,12 @@ class _ScheduleCard extends StatelessWidget {
     required CalculatedDose dose,
     required Schedule schedule,
     required Medication medication,
+    DoseStatus? initialStatus,
   }) {
     return DoseActionSheet.show(
       context,
       dose: dose,
+      initialStatus: initialStatus,
       onMarkTaken: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
@@ -616,6 +618,13 @@ class _ScheduleCard extends StatelessWidget {
                 isActive: s.isActive,
                 titleTrailing: ScheduleStatusChip(schedule: s),
                 onTap: () => context.push('/schedules/detail/${s.id}'),
+                onQuickAction: (status) => _showDoseActionSheet(
+                  context,
+                  dose: dose,
+                  schedule: s,
+                  medication: medication,
+                  initialStatus: status,
+                ),
                 onPrimaryAction: () => _showDoseActionSheet(
                   context,
                   dose: dose,

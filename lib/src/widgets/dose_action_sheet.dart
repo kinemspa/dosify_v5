@@ -25,6 +25,7 @@ class DoseActionSheet extends StatefulWidget {
   final Future<void> Function(String? notes, DateTime actionTime) onSkip;
   final Future<void> Function(String? notes) onDelete;
   final DoseActionSheetPresentation presentation;
+  final DoseStatus? initialStatus;
 
   const DoseActionSheet({
     super.key,
@@ -34,6 +35,7 @@ class DoseActionSheet extends StatefulWidget {
     required this.onSkip,
     required this.onDelete,
     this.presentation = DoseActionSheetPresentation.dialog,
+    this.initialStatus,
   });
 
   static Future<void> show(
@@ -44,6 +46,7 @@ class DoseActionSheet extends StatefulWidget {
     required Future<void> Function(String? notes, DateTime actionTime) onSnooze,
     required Future<void> Function(String? notes, DateTime actionTime) onSkip,
     required Future<void> Function(String? notes) onDelete,
+    DoseStatus? initialStatus,
   }) {
     return showDialog<void>(
       context: context,
@@ -55,6 +58,7 @@ class DoseActionSheet extends StatefulWidget {
         onSkip: onSkip,
         onDelete: onDelete,
         presentation: DoseActionSheetPresentation.dialog,
+        initialStatus: initialStatus,
       ),
     );
   }
@@ -81,11 +85,21 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     _notesController = TextEditingController(
       text: widget.dose.existingLog?.notes ?? '',
     );
-    _selectedStatus = widget.dose.status;
-    _selectedActionTime = widget.dose.existingLog?.actionTime ?? DateTime.now();
-    _selectedSnoozeUntil = _selectedStatus == DoseStatus.snoozed
-        ? _selectedActionTime
-        : _defaultSnoozeUntil();
+    _selectedStatus = widget.initialStatus ?? widget.dose.status;
+
+    final baseActionTime = widget.dose.existingLog?.actionTime ?? DateTime.now();
+    _selectedActionTime = baseActionTime;
+    if (widget.dose.existingLog == null && _selectedStatus == DoseStatus.snoozed) {
+      final until = _defaultSnoozeUntil();
+      final max = _maxSnoozeUntil();
+      final clamped = max != null && until.isAfter(max) ? max : until;
+      _selectedSnoozeUntil = clamped;
+      _selectedActionTime = clamped;
+    } else {
+      _selectedSnoozeUntil = _selectedStatus == DoseStatus.snoozed
+          ? _selectedActionTime
+          : _defaultSnoozeUntil();
+    }
 
     if (_isAdHoc && widget.dose.existingLog != null) {
       final log = widget.dose.existingLog!;

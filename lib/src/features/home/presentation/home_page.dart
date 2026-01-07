@@ -49,10 +49,12 @@ class HomePage extends StatelessWidget {
     required CalculatedDose dose,
     required Schedule schedule,
     required Medication medication,
+    DoseStatus? initialStatus,
   }) {
     return DoseActionSheet.show(
       context,
       dose: dose,
+      initialStatus: initialStatus,
       onMarkTaken: (notes, actionTime) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
@@ -308,6 +310,20 @@ class HomePage extends StatelessWidget {
                               medication: medication,
                             );
                           },
+                          onQuickAction: (status) {
+                            final schedule = result.schedule;
+                            final medication = result.medication;
+                            final resolvedDose = result.dose;
+                            if (schedule == null || medication == null) return;
+                            if (resolvedDose == null) return;
+                            _showDoseActionSheet(
+                              context,
+                              dose: resolvedDose,
+                              schedule: schedule,
+                              medication: medication,
+                              initialStatus: status,
+                            );
+                          },
                         );
                       },
                     );
@@ -425,6 +441,14 @@ class HomePage extends StatelessWidget {
                                       onTap: () => context.push(
                                         '/schedules/detail/${schedule.id}',
                                       ),
+                                      onQuickAction: (status) =>
+                                          _showDoseActionSheet(
+                                            context,
+                                            dose: dose,
+                                            schedule: schedule,
+                                            medication: med,
+                                            initialStatus: status,
+                                          ),
                                       onPrimaryAction: () =>
                                           _showDoseActionSheet(
                                             context,

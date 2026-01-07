@@ -72,7 +72,7 @@
 - Large Cards:
 	- Make Next background chip a slight biut taller. Less rounded borders. [COMPLETED]
 	- Remove the duplicate days and dose times which are underneath the worded insruction. [COMPLETED]
-	- Needs Schedule status or chip somewhere. Active, Paused, Disabled, Expired. 
+	- Needs Schedule status or chip somewhere. Active, Paused, Disabled, Expired.  [COMPLETED]
 - Compact Card:
 	- Add on same row ass Dose Name. "Take "DOSE" of "MEdicineName" on "Schedule Type" at "Time of Day" [COMPLETED]
 	- Place above text directly under the Dose Name and make the font smaller.  [COMPLETED]
@@ -151,7 +151,7 @@
 - Needs a date icon, will display today [COMPLETED]
 - Dose instructions:
 	- Take X X at X. 
-- The take button. I am conflicted here. I want the shortcut buttons of take, snooze, skip. But also want the dialog to pop where notes can be added and the status can be changed. 
+- The take button. I am conflicted here. I want the shortcut buttons of take, snooze, skip. But also want the dialog to pop where notes can be added and the status can be changed.  [COMPLETED]
 
 
 
