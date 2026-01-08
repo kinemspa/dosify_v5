@@ -59,6 +59,11 @@ final router = GoRouter(
           builder: (context, state) => const MedicationListPage(),
         ),
         GoRoute(
+          path: '/reconstitution',
+          name: 'reconstitutionAlias',
+          redirect: (context, state) => '/medications/reconstitution',
+        ),
+        GoRoute(
           path: '/calendar',
           name: 'calendar',
           builder: (context, state) => const CalendarPage(),

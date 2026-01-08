@@ -191,6 +191,7 @@
 - Requires a med strength.
 - Allows for saving of reconstitotions. 
 - You had supposedly done all of the above, but its not what is accessible or routable from the main menu. 
+- You had supposedly done all of the above, but its not what is accessible or routable from the main menu.  [COMPLETED]
 
 ==============
 # Analytics
