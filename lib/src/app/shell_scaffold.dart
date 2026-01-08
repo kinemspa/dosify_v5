@@ -35,11 +35,25 @@ class ShellScaffold extends ConsumerWidget {
   final Widget child;
 
   int _locationToIndex(String location, List<NavItemConfig> items) {
-    // Find the first item whose location is a prefix of the current location
-    final index = items.indexWhere(
-      (e) => location == e.location || location.startsWith('${e.location}/'),
-    );
-    return index == -1 ? 0 : index;
+    // Choose the most specific match (longest location prefix).
+    // This prevents routes like '/medications/reconstitution' from matching
+    // '/medications' when both tabs are present.
+    var bestIndex = -1;
+    var bestLength = -1;
+
+    for (var i = 0; i < items.length; i++) {
+      final candidate = items[i].location;
+      final matches =
+          location == candidate || location.startsWith('$candidate/');
+      if (!matches) continue;
+
+      if (candidate.length > bestLength) {
+        bestLength = candidate.length;
+        bestIndex = i;
+      }
+    }
+
+    return bestIndex == -1 ? 0 : bestIndex;
   }
 
   @override
