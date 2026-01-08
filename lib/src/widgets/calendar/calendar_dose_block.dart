@@ -113,7 +113,7 @@ class CalendarDoseBlock extends StatelessWidget {
         icon = Icons.snooze;
         break;
       case DoseStatus.overdue:
-        label = 'OVERDUE';
+        label = 'MISSED';
         icon = Icons.warning;
         break;
       case DoseStatus.pending:

@@ -248,7 +248,7 @@ class DoseCard extends StatelessWidget {
       case DoseStatus.snoozed:
         return 'SNOOZED';
       case DoseStatus.overdue:
-        return 'OVERDUE';
+        return 'MISSED';
       case DoseStatus.pending:
         return 'PENDING';
     }

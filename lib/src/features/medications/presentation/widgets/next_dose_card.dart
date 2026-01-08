@@ -497,7 +497,7 @@ class _NextDoseCardState extends State<NextDoseCard>
         break;
       case DoseStatus.overdue:
         color = Theme.of(context).colorScheme.error;
-        label = 'Overdue';
+        label = 'Missed';
         break;
       case DoseStatus.pending:
         color = Theme.of(context).colorScheme.primary;
