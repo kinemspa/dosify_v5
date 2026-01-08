@@ -165,4 +165,3 @@ app.*.symbols
 .gclient_previous_sync_commits
 
 # Project docs (do not track request checklists)
-user_request_docs/*.md
