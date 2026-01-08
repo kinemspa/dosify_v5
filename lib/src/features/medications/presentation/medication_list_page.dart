@@ -56,38 +56,39 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       tooltip: 'Change layout',
       icon: Icon(
         _getViewIcon(_view),
-        color: _view == _MedView.large
-            ? cs.primary
-            : kTextLighterGrey(context),
+        color: _view == _MedView.large ? cs.primary : kTextLighterGrey(context),
       ),
       onSelected: (v) => _saveView(v),
-      itemBuilder: (context) => const [
-        CheckedPopupMenuItem(
-          value: _MedView.large,
-          checked: false,
-          child: Text('Large cards'),
-        ),
-        CheckedPopupMenuItem(
-          value: _MedView.compact,
-          checked: false,
-          child: Text('Compact cards'),
-        ),
-        CheckedPopupMenuItem(
-          value: _MedView.list,
-          checked: false,
-          child: Text('List'),
-        ),
-      ].map((item) {
-        // Swap in checked-state dynamically without rebuilding the const list.
-        if (item.value == _view) {
-          return CheckedPopupMenuItem<_MedView>(
-            value: item.value,
-            checked: true,
-            child: item.child!,
-          );
-        }
-        return item;
-      }).toList(growable: false),
+      itemBuilder: (context) =>
+          const [
+                CheckedPopupMenuItem(
+                  value: _MedView.large,
+                  checked: false,
+                  child: Text('Large cards'),
+                ),
+                CheckedPopupMenuItem(
+                  value: _MedView.compact,
+                  checked: false,
+                  child: Text('Compact cards'),
+                ),
+                CheckedPopupMenuItem(
+                  value: _MedView.list,
+                  checked: false,
+                  child: Text('List'),
+                ),
+              ]
+              .map((item) {
+                // Swap in checked-state dynamically without rebuilding the const list.
+                if (item.value == _view) {
+                  return CheckedPopupMenuItem<_MedView>(
+                    value: item.value,
+                    checked: true,
+                    child: item.child!,
+                  );
+                }
+                return item;
+              })
+              .toList(growable: false),
     );
   }
 
@@ -385,13 +386,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             ),
           // When search is expanded, only show layout button
           if (_searchExpanded) const SizedBox(width: 8),
-          if (_searchExpanded)
-            _buildLayoutMenuButton(context),
+          if (_searchExpanded) _buildLayoutMenuButton(context),
           if (!_searchExpanded) const Spacer(),
 
           // Layout toggle as popup menu
-          if (!_searchExpanded)
-            _buildLayoutMenuButton(context),
+          if (!_searchExpanded) _buildLayoutMenuButton(context),
 
           if (!_searchExpanded) const SizedBox(width: 8),
 
@@ -1188,23 +1187,23 @@ class _MedLargeCard extends StatelessWidget {
     final hasActiveSchedules = activeScheduleCount > 0;
     final hasPausedSchedules = !hasActiveSchedules && pausedScheduleCount > 0;
     final scheduleIconColor = hasActiveSchedules
-      ? cs.primary
-      : hasPausedSchedules
-      ? cs.onSurfaceVariant.withValues(alpha: kOpacityMedium)
-      : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+        ? cs.primary
+        : hasPausedSchedules
+        ? cs.onSurfaceVariant.withValues(alpha: kOpacityMedium)
+        : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
     final scheduleTextColor = hasActiveSchedules
-      ? cs.primary
-      : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+        ? cs.primary
+        : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
 
     final scheduleLabel = hasActiveSchedules
-      ? (activeScheduleCount == 1
-          ? '1 active schedule'
-          : '$activeScheduleCount active schedules')
-      : hasPausedSchedules
-      ? (pausedScheduleCount == 1
-          ? '1 paused schedule'
-          : '$pausedScheduleCount paused schedules')
-      : (totalScheduleCount == 0 ? 'No schedules' : '0 active schedules');
+        ? (activeScheduleCount == 1
+              ? '1 active schedule'
+              : '$activeScheduleCount active schedules')
+        : hasPausedSchedules
+        ? (pausedScheduleCount == 1
+              ? '1 paused schedule'
+              : '$pausedScheduleCount paused schedules')
+        : (totalScheduleCount == 0 ? 'No schedules' : '0 active schedules');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

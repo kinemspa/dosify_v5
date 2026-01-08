@@ -114,12 +114,12 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ---
 
-# Task Tracking Workflow (User_Requests.md)
+# Task Tracking Workflow (user_request_docs/)
 
-`User_Requests.md` is the single running task sheet for work requests.
+`user_request_docs/` is the single source of truth for work requests.
 
-- **Always read `User_Requests.md` before starting new work**, unless the user explicitly provides a different task list in the prompt.
-- **When a task is implemented**, mark it as completed in `User_Requests.md` by appending ` [COMPLETED]` to the end of the bullet.
-- **Do not delete tasks** from `User_Requests.md` (the user will confirm completion or delete them).
+- **Always read the relevant file in `user_request_docs/` before starting new work** (e.g., the screen/widget you are about to change).
+- **When a task is implemented**, mark it as completed in that same file by appending ` [COMPLETED]` to the end of the bullet.
+- **Do not delete tasks** from these files (the user will confirm completion or delete them).
 - **If the user says a task is not completed as desired**, the user will remove the `[COMPLETED]` label and may add notes; treat that as the authoritative re-opened requirement.
 - **Keep edits minimal**: only touch the specific bullets you completed and do not rewrite sections or reformat the file.
