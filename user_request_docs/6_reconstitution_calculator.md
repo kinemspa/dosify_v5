@@ -9,4 +9,4 @@
 - [x] Has the option to add a med name in it.
 - [x] Requires a med strength.
 - [x] Allows for saving of reconstitotions.
-- [x] You had supposedly done all of the above, but its not what is accessible or routable from the main menu.
+- [x] You had supposedly done all of the above, but its not what is accessible or routable from the main menu. [COMPLETED]
