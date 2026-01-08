@@ -50,6 +50,47 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   String _query = '';
   bool _searchExpanded = false;
 
+  Widget _buildLayoutMenuButton(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return PopupMenuButton<_MedView>(
+      tooltip: 'Change layout',
+      icon: Icon(
+        _getViewIcon(_view),
+        color: _view == _MedView.large
+            ? cs.primary
+            : kTextLighterGrey(context),
+      ),
+      onSelected: (v) => _saveView(v),
+      itemBuilder: (context) => const [
+        CheckedPopupMenuItem(
+          value: _MedView.large,
+          checked: false,
+          child: Text('Large cards'),
+        ),
+        CheckedPopupMenuItem(
+          value: _MedView.compact,
+          checked: false,
+          child: Text('Compact cards'),
+        ),
+        CheckedPopupMenuItem(
+          value: _MedView.list,
+          checked: false,
+          child: Text('List'),
+        ),
+      ].map((item) {
+        // Swap in checked-state dynamically without rebuilding the const list.
+        if (item.value == _view) {
+          return CheckedPopupMenuItem<_MedView>(
+            value: item.value,
+            checked: true,
+            child: item.child!,
+          );
+        }
+        return item;
+      }).toList(growable: false),
+    );
+  }
+
   ({int fieldPriority, int startsWithPriority, int indexPriority})
   _searchRelevanceKey(Medication m, String qLower) {
     final name = m.name.toLowerCase();
@@ -345,20 +386,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           // When search is expanded, only show layout button
           if (_searchExpanded) const SizedBox(width: 8),
           if (_searchExpanded)
-            IconButton(
-              icon: Icon(_getViewIcon(_view), color: kTextLighterGrey(context)),
-              tooltip: 'Change layout',
-              onPressed: _cycleView,
-            ),
+            _buildLayoutMenuButton(context),
           if (!_searchExpanded) const Spacer(),
 
           // Layout toggle as popup menu
           if (!_searchExpanded)
-            IconButton(
-              icon: Icon(_getViewIcon(_view), color: kTextLighterGrey(context)),
-              tooltip: 'Change layout',
-              onPressed: _cycleView,
-            ),
+            _buildLayoutMenuButton(context),
 
           if (!_searchExpanded) const SizedBox(width: 8),
 
@@ -587,13 +620,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     });
 
     return items;
-  }
-
-  Future<void> _cycleView() async {
-    final order = [_MedView.large, _MedView.compact, _MedView.list];
-    final idx = order.indexOf(_view);
-    final next = order[(idx + 1) % order.length];
-    await _saveView(next);
   }
 
   // Helpers for list view formatting (duplicated from card helpers)
