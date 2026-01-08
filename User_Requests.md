@@ -200,7 +200,7 @@
 
 ==============
 # Inventory
-- A new screen that provides a high level of all stock. 
+- A new screen that provides a high level of all stock.  [COMPLETED]
 
 
 

@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/shell_scaffold.dart';
 import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
+import 'package:dosifi_v5/src/features/inventory/presentation/inventory_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/calendar_page.dart';
 import 'package:dosifi_v5/src/features/home/presentation/home_page.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -77,6 +78,11 @@ final router = GoRouter(
           path: '/supplies',
           name: 'supplies',
           builder: (context, state) => const SuppliesPage(),
+        ),
+        GoRoute(
+          path: '/inventory',
+          name: 'inventory',
+          builder: (context, state) => const InventoryPage(),
         ),
         GoRoute(
           path: '/supplies/add',
