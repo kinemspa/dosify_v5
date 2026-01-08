@@ -111,14 +111,23 @@ class DoseDialogDosePreview extends StatelessWidget {
     if (!_isInjection(med.form)) return null;
 
     final units = schedule.doseIU?.toDouble();
-    if (units == null) return null;
+    final volumeMicroliter = schedule.doseVolumeMicroliter?.toDouble();
+    final volumeMl = volumeMicroliter != null
+        ? (volumeMicroliter / 1000)
+        : null;
 
-    final syringeType = SyringeTypeLookup.forUnits(units);
+    if (units == null && volumeMl == null) return null;
+
+    final syringeType = units != null
+        ? SyringeTypeLookup.forUnits(units)
+        : SyringeTypeLookup.forVolumeMl(volumeMl!);
     final totalUnits = syringeType.maxUnits;
+
+    final fillUnits = units ?? (volumeMl! * syringeType.unitsPerMl);
 
     return WhiteSyringeGauge(
       totalUnits: totalUnits,
-      fillUnits: units.clamp(0.0, totalUnits),
+      fillUnits: fillUnits.clamp(0.0, totalUnits),
       showValueLabel: false,
     );
   }
@@ -244,4 +253,90 @@ class _DoseValueRow {
 
   final String label;
   final String value;
+}
+
+class DoseDialogDoseFallbackSummary extends StatelessWidget {
+  const DoseDialogDoseFallbackSummary({required this.dose, super.key});
+
+  final CalculatedDose dose;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final date = MaterialLocalizations.of(
+      context,
+    ).formatMediumDate(dose.scheduledTime);
+    final time = TimeOfDay.fromDateTime(dose.scheduledTime).format(context);
+
+    final doseText = '${_formatDoseValue(dose.doseValue)} ${dose.doseUnit}';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          dose.scheduleName,
+          style: bodyTextStyle(
+            context,
+          )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingXXS),
+        Text(
+          dose.medicationName,
+          style: bodyTextStyle(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingS),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text('Dose', style: fieldLabelStyle(context)),
+            ),
+            const SizedBox(width: kSpacingM),
+            Expanded(
+              child: Text(
+                doseText,
+                style: bodyTextStyle(context)?.copyWith(
+                  color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: kSpacingS),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 90,
+              child: Text('Scheduled', style: fieldLabelStyle(context)),
+            ),
+            const SizedBox(width: kSpacingM),
+            Expanded(
+              child: Text(
+                '$date • $time',
+                style: bodyTextStyle(context)?.copyWith(
+                  color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _formatDoseValue(double value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    var str = value.toStringAsFixed(3);
+    str = str.replaceAll(RegExp(r'0+$'), '');
+    str = str.replaceAll(RegExp(r'\.$'), '');
+    return str;
+  }
 }

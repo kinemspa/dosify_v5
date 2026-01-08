@@ -12,7 +12,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.d
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
-import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 enum DoseActionSheetPresentation { bottomSheet, dialog }
@@ -87,9 +86,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     );
     _selectedStatus = widget.initialStatus ?? widget.dose.status;
 
-    final baseActionTime = widget.dose.existingLog?.actionTime ?? DateTime.now();
+    final baseActionTime =
+        widget.dose.existingLog?.actionTime ?? DateTime.now();
     _selectedActionTime = baseActionTime;
-    if (widget.dose.existingLog == null && _selectedStatus == DoseStatus.snoozed) {
+    if (widget.dose.existingLog == null &&
+        _selectedStatus == DoseStatus.snoozed) {
       final until = _defaultSnoozeUntil();
       final max = _maxSnoozeUntil();
       final clamped = max != null && until.isAfter(max) ? max : until;
@@ -161,6 +162,27 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final max = next.subtract(const Duration(minutes: 1));
     if (max.isBefore(now)) return now;
     return max;
+  }
+
+  Future<void> _showSnoozePastNextDoseAlert(DateTime max) {
+    final date = MaterialLocalizations.of(context).formatMediumDate(max);
+    final time = TimeOfDay.fromDateTime(max).format(context);
+    return showDialog<void>(
+      context: context,
+      useRootNavigator: true,
+      builder: (context) => AlertDialog(
+        title: const Text('Snooze limit'),
+        content: Text(
+          'Snooze time must be before the next scheduled dose. The latest allowed snooze is $date • $time.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   double _adHocStepSize(String unit) {
@@ -474,11 +496,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                         );
                       }
 
-                      return DoseSummaryRow(
-                        dose: widget.dose,
-                        showMedicationName: true,
-                        onTap: () {},
-                      );
+                      return DoseDialogDoseFallbackSummary(dose: widget.dose);
                     }(),
                   ],
                 ),
@@ -637,7 +655,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                             );
 
                             if (dt.isBefore(now)) dt = now;
-                            if (max != null && dt.isAfter(max)) dt = max;
+                            if (max != null && dt.isAfter(max)) {
+                              await _showSnoozePastNextDoseAlert(max);
+                              dt = max;
+                            }
 
                             setState(() {
                               _selectedSnoozeUntil = dt;
