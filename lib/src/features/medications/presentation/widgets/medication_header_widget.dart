@@ -13,7 +13,6 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 
 class MedicationHeaderWidget extends ConsumerWidget {
   const MedicationHeaderWidget({
@@ -810,20 +809,6 @@ class _StockInfoCard extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.1,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ],
-
-          // Expiry Text (condensed)
-          if (medication.expiry != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Exp ${DateFormat.MMMd().format(medication.expiry!)}',
-              style: TextStyle(
-                color: onPrimary.withValues(alpha: 0.90),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.end,
             ),
