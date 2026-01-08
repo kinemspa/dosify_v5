@@ -201,6 +201,15 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     );
   }
 
+  Widget _buildEditIndicatorIcon(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Icon(
+      Icons.edit,
+      size: kIconSizeXXSmall,
+      color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+    );
+  }
+
   Widget _buildHistoryTab(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
@@ -474,6 +483,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 ),
               ),
             ),
+            const SizedBox(width: kSpacingXS),
+            _buildEditIndicatorIcon(context),
           ],
         ),
       ),
@@ -586,11 +597,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             const SizedBox(width: kSpacingXS),
             GestureDetector(
               onTap: () => _showEditDoseLogTimeDialog(context, log),
-              child: Icon(
-                Icons.edit,
-                size: kIconSizeXSmall,
-                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-              ),
+              child: _buildEditIndicatorIcon(context),
             ),
           ],
         ),
@@ -1575,11 +1582,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           ),
           if (linkedAdHocDoseLog != null) ...[
             const SizedBox(width: kSpacingXS),
-            Icon(
-              Icons.edit,
-              size: kIconSizeXSmall,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-            ),
+            _buildEditIndicatorIcon(context),
           ],
         ],
       ),

@@ -53,6 +53,7 @@ const double kStandardButtonHeight = 36;
 const double kLargeButtonHeight = 44;
 
 /// Icon sizes
+const double kIconSizeXXSmall = 12;
 const double kIconSizeXSmall = 14;
 const double kIconSizeSmall = 16;
 const double kIconSizeMedium = 20;
