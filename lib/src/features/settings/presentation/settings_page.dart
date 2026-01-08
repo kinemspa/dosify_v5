@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -15,17 +16,20 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
     return Scaffold(
       appBar: const GradientAppBar(title: 'Settings', forceBackButton: true),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(kSpacingM),
         children: [
-          const Text(
+          Text(
             'UI Customization',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
             title: const Text('Theme mode'),
@@ -71,12 +75,14 @@ class SettingsPage extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(height: 24),
-          const Text(
+          const SizedBox(height: kSpacingL),
+          Text(
             'Navigation',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
           ListTile(
             leading: const Icon(Icons.tab_outlined),
             title: const Text('Bottom navigation tabs'),
@@ -84,12 +90,14 @@ class SettingsPage extends ConsumerWidget {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/bottom-nav'),
           ),
-          const SizedBox(height: 24),
-          const Text(
+          const SizedBox(height: kSpacingL),
+          Text(
             'UI Components',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
           ListTile(
             leading: const Icon(Icons.view_carousel_outlined),
             title: const Text('Wide Card Samples'),
