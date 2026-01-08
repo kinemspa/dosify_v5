@@ -6,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 
 /// Repository for medication data access
 /// Abstracts Hive database operations for better testability and maintainability
@@ -27,6 +28,26 @@ class MedicationRepository {
 
   /// Delete a medication
   Future<void> delete(String id) async {
+    // IMPORTANT:
+    // Deleting a medication must remove associated schedules and cancel their
+    // notifications, while preserving historical data like dose logs.
+    final scheduleBox = Hive.box<Schedule>('schedules');
+    final linkedSchedules = scheduleBox.values
+        .where((s) => s.medicationId == id)
+        .toList(growable: false);
+
+    for (final s in linkedSchedules) {
+      // Best-effort cancellation; deletion should still proceed.
+      try {
+        await ScheduleScheduler.cancelFor(s.id, days: s.daysOfWeek);
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Failed to cancel notifications for schedule ${s.id}: $e');
+        }
+      }
+      await scheduleBox.delete(s.id);
+    }
+
     await _box.delete(id);
   }
 

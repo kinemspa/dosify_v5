@@ -34,14 +34,14 @@ class DosifiApp extends ConsumerWidget {
           displayColor: schemeLight.onSurface.withValues(alpha: kOpacityHigh),
         )
         .copyWith(
-      bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
-      bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
-      titleSmall: baseLight.textTheme.titleSmall?.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-      ),
-      labelLarge: baseLight.textTheme.labelLarge?.copyWith(fontSize: 12),
-    );
+          bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
+          bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
+          titleSmall: baseLight.textTheme.titleSmall?.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+          labelLarge: baseLight.textTheme.labelLarge?.copyWith(fontSize: 12),
+        );
     final light = baseLight.copyWith(
       textTheme: lightTextTheme,
       appBarTheme: const AppBarTheme(
@@ -233,14 +233,14 @@ class DosifiApp extends ConsumerWidget {
           displayColor: schemeDark.onSurface.withValues(alpha: kOpacityHigh),
         )
         .copyWith(
-      bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 13),
-      bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
-      titleSmall: baseDark.textTheme.titleSmall?.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-      ),
-      labelLarge: baseDark.textTheme.labelLarge?.copyWith(fontSize: 12),
-    );
+          bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 13),
+          bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
+          titleSmall: baseDark.textTheme.titleSmall?.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+          labelLarge: baseDark.textTheme.labelLarge?.copyWith(fontSize: 12),
+        );
     final dark = baseDark.copyWith(
       textTheme: darkTextTheme,
       appBarTheme: const AppBarTheme(
@@ -254,13 +254,17 @@ class DosifiApp extends ConsumerWidget {
           if (states.contains(WidgetState.selected)) {
             return schemeDark.onPrimary;
           }
-          return schemeDark.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+          return schemeDark.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
         }),
         hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return schemeDark.onPrimary;
           }
-          return schemeDark.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+          return schemeDark.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
         }),
         entryModeIconColor: schemeDark.onSurfaceVariant.withValues(
           alpha: kOpacityMediumHigh,
@@ -270,7 +274,9 @@ class DosifiApp extends ConsumerWidget {
           if (states.contains(WidgetState.selected)) {
             return schemeDark.onPrimary;
           }
-          return schemeDark.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+          return schemeDark.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
         }),
         dayPeriodBorderSide: BorderSide(
           color: schemeDark.outlineVariant.withValues(alpha: 0.50),

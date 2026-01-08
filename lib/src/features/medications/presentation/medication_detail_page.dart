@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
@@ -5177,7 +5178,7 @@ void _deleteMedication(BuildContext context, Medication med) async {
         contentTextStyle: bodyTextStyle(dialogContext),
         title: const Text('Delete Medication'),
         content: Text(
-          'Are you sure you want to delete ${med.name}? This action cannot be undone.',
+          'Deleting ${med.name} will delete all associated schedules and cancel their notifications. Historical dose and inventory data will be kept.',
         ),
         actions: [
           TextButton(
@@ -5195,8 +5196,8 @@ void _deleteMedication(BuildContext context, Medication med) async {
   );
 
   if (confirm == true) {
-    final box = Hive.box<Medication>('medications');
-    await box.delete(med.id);
+    final repo = MedicationRepository(Hive.box<Medication>('medications'));
+    await repo.delete(med.id);
     if (context.mounted) {
       context.pop(); // Go back to list
     }
