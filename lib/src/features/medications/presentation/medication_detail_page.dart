@@ -41,8 +41,7 @@ import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
 enum _ReconstitutionUpdateAction {
@@ -1469,14 +1468,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (schedules.isNotEmpty) ...[
-          SizedBox(
-            height: kDetailCompactCalendarHeight,
-            child: DoseCalendarWidget(
-              variant: CalendarVariant.compact,
-              defaultView: CalendarView.week,
-              medicationId: med.id,
-            ),
-          ),
+          NextDoseCard(medication: med, schedules: schedules),
           const SizedBox(height: kSpacingM),
           // Show ALL schedules including paused ones
           ...schedules.map(
