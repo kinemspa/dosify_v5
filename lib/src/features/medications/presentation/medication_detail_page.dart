@@ -3959,11 +3959,24 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
 
   // Calculate concentration for strength-to-volume conversion
   // concentration = mg per mL (or mcg per mL depending on strengthUnit)
-  final double? concentration =
-      (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
-      ? med.strengthValue / med.containerVolumeMl!
-      : null;
+  final double? concentration = switch (med.strengthUnit) {
+    Unit.mcgPerMl ||
+    Unit.mgPerMl ||
+    Unit.gPerMl ||
+    Unit.unitsPerMl => (med.perMlValue ?? med.strengthValue),
+    _ => (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
+        ? (med.strengthValue / med.containerVolumeMl!)
+        : null,
+  };
+  final Unit strengthDoseUnit = switch (med.strengthUnit) {
+    Unit.mcgPerMl => Unit.mcg,
+    Unit.mgPerMl => Unit.mg,
+    Unit.gPerMl => Unit.g,
+    Unit.unitsPerMl => Unit.units,
+    _ => med.strengthUnit,
+  };
   final String strengthUnit = _unitLabel(med.strengthUnit);
+  final String strengthDoseUnitLabel = _unitLabel(strengthDoseUnit);
 
   final volumeController = TextEditingController(text: isMdv ? '0.5' : '1');
   final strengthController = TextEditingController();
@@ -4058,7 +4071,16 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                       if (isMdv && concentration != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          '${_formatNumber(med.strengthValue)} $strengthUnit / ${_formatNumber(med.containerVolumeMl!)} mL',
+                          switch (med.strengthUnit) {
+                            Unit.mcgPerMl ||
+                            Unit.mgPerMl ||
+                            Unit.gPerMl ||
+                            Unit.unitsPerMl =>
+                              '${_formatNumber(med.perMlValue ?? med.strengthValue)} $strengthUnit',
+                            _ when med.containerVolumeMl != null =>
+                              '${_formatNumber(med.strengthValue)} $strengthUnit / ${_formatNumber(med.containerVolumeMl!)} mL',
+                            _ => '${_formatNumber(med.strengthValue)} $strengthUnit',
+                          },
                           style: TextStyle(
                             fontSize: 12,
                             color: colorScheme.onSurfaceVariant,
@@ -4367,7 +4389,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                           const TextSpan(text: ' for a dose of '),
                           TextSpan(
                             text:
-                                '${_formatNumber(displayStrength)} $strengthUnit',
+                                '${_formatNumber(displayStrength)} $strengthDoseUnitLabel',
                             style: TextStyle(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.bold,
