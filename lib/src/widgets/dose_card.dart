@@ -63,6 +63,7 @@ class DoseCard extends StatelessWidget {
 
     final actionLabel = primaryActionLabel ?? 'Actions';
     final hasQuickActions = onQuickAction != null;
+    final showEditOnly = effectiveStatus != DoseStatus.pending;
 
     return Material(
       color: Colors.transparent,
@@ -179,21 +180,28 @@ class DoseCard extends StatelessWidget {
                     child: Center(
                       child: Text(
                         statusLabel,
-                        style: helperTextStyle(
-                          context,
-                          color: statusColor,
-                        )?.copyWith(
-                          fontSize: kFontSizeXXSmall,
-                          fontWeight: kFontWeightExtraBold,
-                          height: 1,
-                        ),
+                        style: helperTextStyle(context, color: statusColor)
+                            ?.copyWith(
+                              fontSize: kFontSizeXXSmall,
+                              fontWeight: kFontWeightExtraBold,
+                              height: 1,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
                   const SizedBox(height: kSpacingXS),
-                  if (hasQuickActions)
+                  if (showEditOnly)
+                    SizedBox(
+                      height: kStandardButtonHeight,
+                      child: FilledButton.icon(
+                        onPressed: onPrimaryAction ?? onTap,
+                        icon: const Icon(Icons.edit_rounded),
+                        label: const Text('Edit'),
+                      ),
+                    )
+                  else if (hasQuickActions)
                     DoseQuickActionRow(onAction: onQuickAction!)
                   else
                     SizedBox(
