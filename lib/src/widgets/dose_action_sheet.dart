@@ -96,6 +96,21 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
 
+  Color _statusAccentColor(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    switch (_selectedStatus) {
+      case DoseStatus.taken:
+        return kDoseStatusTakenGreen;
+      case DoseStatus.snoozed:
+        return kDoseStatusSnoozedOrange;
+      case DoseStatus.skipped:
+        return cs.error;
+      case DoseStatus.pending:
+      case DoseStatus.overdue:
+        return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -690,7 +705,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                       _hasChanged = true;
                     });
                   },
-                  icon: const Icon(Icons.calendar_today, size: kIconSizeSmall),
+                  icon: Icon(
+                    Icons.calendar_today,
+                    size: kIconSizeSmall,
+                    color: _statusAccentColor(context),
+                  ),
                   label: Text(
                     MaterialLocalizations.of(
                       context,
@@ -723,7 +742,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                       _hasChanged = true;
                     });
                   },
-                  icon: const Icon(Icons.schedule, size: kIconSizeSmall),
+                  icon: Icon(
+                    Icons.schedule,
+                    size: kIconSizeSmall,
+                    color: _statusAccentColor(context),
+                  ),
                   label: Text(
                     TimeOfDay.fromDateTime(_selectedActionTime).format(context),
                   ),
