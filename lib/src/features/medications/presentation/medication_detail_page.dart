@@ -28,7 +28,6 @@ import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
@@ -1468,13 +1467,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (schedules.isNotEmpty) ...[
-          // Show doses for active schedules only.
-          // Keep headings minimal: the card title already conveys "Schedule".
-          NextDoseCard(
-            medication: med,
-            schedules: schedules.where((s) => s.active).toList(),
-          ),
-          const SizedBox(height: kSpacingM),
           // Show ALL schedules including paused ones
           ...schedules.map(
             (schedule) =>
