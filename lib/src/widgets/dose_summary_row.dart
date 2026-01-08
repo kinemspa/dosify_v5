@@ -68,6 +68,13 @@ class DoseSummaryRow extends StatelessWidget {
     final dateStr = DateFormat('E, MMM d').format(dose.scheduledTime);
 
     final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final isDisabled = schedule != null && !schedule.isActive;
+
+    if (isDisabled) {
+      statusColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+      statusIcon = Icons.do_not_disturb_on_rounded;
+      statusText = 'Disabled';
+    }
 
     final line2 = showMedicationName
         ? '${dose.medicationName} • $doseInfo'

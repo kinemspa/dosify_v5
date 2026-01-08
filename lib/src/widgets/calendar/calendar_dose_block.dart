@@ -96,6 +96,28 @@ class CalendarDoseBlock extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    if (schedule != null && !schedule.isActive) {
+      final disabledColor = colorScheme.onSurfaceVariant.withValues(
+        alpha: kOpacityMediumHigh,
+      );
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.do_not_disturb_on_rounded, size: 12, color: disabledColor),
+          const SizedBox(width: 4),
+          Text(
+            'DISABLED',
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: disabledColor,
+            ),
+          ),
+        ],
+      );
+    }
+
     String label;
     IconData icon;
 

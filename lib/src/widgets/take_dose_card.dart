@@ -190,6 +190,14 @@ class TakeDoseCard extends StatelessWidget {
   ) {
     final cs = Theme.of(context).colorScheme;
 
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    if (schedule != null && !schedule.isActive) {
+      final disabledColor = cs.onSurfaceVariant.withValues(
+        alpha: kOpacityMediumHigh,
+      );
+      return (disabledColor, Icons.do_not_disturb_on_rounded, 'Disabled');
+    }
+
     switch (dose.status) {
       case DoseStatus.taken:
         final actionTime = dose.existingLog?.actionTime;

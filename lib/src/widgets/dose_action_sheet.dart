@@ -98,6 +98,14 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   Color _statusAccentColor(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
+    final schedule = Hive.box<Schedule>(
+      'schedules',
+    ).get(widget.dose.scheduleId);
+    if (schedule != null && !schedule.isActive) {
+      return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
+    }
+
     switch (_selectedStatus) {
       case DoseStatus.taken:
         return kDoseStatusTakenGreen;

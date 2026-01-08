@@ -45,12 +45,14 @@ class DoseCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final effectiveStatus = statusOverride ?? dose.status;
+    final disabled = !isActive;
     final (statusColor, statusIcon) = _statusPresentation(
       context,
       effectiveStatus,
+      disabled: disabled,
     );
 
-    final statusLabel = _statusLabel(effectiveStatus);
+    final statusLabel = _statusLabel(effectiveStatus, disabled: disabled);
 
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
@@ -222,9 +224,17 @@ class DoseCard extends StatelessWidget {
 
   (Color, IconData) _statusPresentation(
     BuildContext context,
-    DoseStatus status,
-  ) {
+    DoseStatus status, {
+    required bool disabled,
+  }) {
     final cs = Theme.of(context).colorScheme;
+
+    if (disabled) {
+      return (
+        cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+        Icons.do_not_disturb_on_rounded,
+      );
+    }
     switch (status) {
       case DoseStatus.taken:
         return (kDoseStatusTakenGreen, Icons.check_rounded);
@@ -239,7 +249,8 @@ class DoseCard extends StatelessWidget {
     }
   }
 
-  String _statusLabel(DoseStatus status) {
+  String _statusLabel(DoseStatus status, {required bool disabled}) {
+    if (disabled) return 'DISABLED';
     switch (status) {
       case DoseStatus.taken:
         return 'TAKEN';
