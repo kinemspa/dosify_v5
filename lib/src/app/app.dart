@@ -28,7 +28,12 @@ class DosifiApp extends ConsumerWidget {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-    final lightTextTheme = baseLight.textTheme.copyWith(
+    final lightTextTheme = baseLight.textTheme
+        .apply(
+          bodyColor: schemeLight.onSurface.withValues(alpha: kOpacityHigh),
+          displayColor: schemeLight.onSurface.withValues(alpha: kOpacityHigh),
+        )
+        .copyWith(
       bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
       bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
       titleSmall: baseLight.textTheme.titleSmall?.copyWith(
@@ -222,7 +227,12 @@ class DosifiApp extends ConsumerWidget {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-    final darkTextTheme = baseDark.textTheme.copyWith(
+    final darkTextTheme = baseDark.textTheme
+        .apply(
+          bodyColor: schemeDark.onSurface.withValues(alpha: kOpacityHigh),
+          displayColor: schemeDark.onSurface.withValues(alpha: kOpacityHigh),
+        )
+        .copyWith(
       bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 13),
       bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
       titleSmall: baseDark.textTheme.titleSmall?.copyWith(
