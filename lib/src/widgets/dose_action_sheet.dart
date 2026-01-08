@@ -385,372 +385,289 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    Widget content(BuildContext context, ScrollController scrollController) {
-      return Column(
+    Widget formContent(
+      BuildContext context,
+      ScrollController scrollController,
+    ) {
+      return ListView(
+        controller: scrollController,
+        padding: kBottomSheetContentPadding,
         children: [
-          // Header
-          Padding(
-            padding: kBottomSheetHeaderPadding,
-            child: Row(
+          if (_isAdHoc && widget.dose.existingLog != null) ...[
+            SectionFormCard(
+              neutral: true,
+              title: 'Amount',
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Take dose', style: sectionTitleStyle(context)),
-                      Text(
-                        'Confirm status, add notes, and save.',
-                        style: helperTextStyle(context),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-          // Content
-          Expanded(
-            child: ListView(
-              controller: scrollController,
-              padding: kBottomSheetContentPadding,
-              children: [
-                if (_isAdHoc && widget.dose.existingLog != null) ...[
-                  SectionFormCard(
-                    neutral: true,
-                    title: 'Amount',
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StepperRow36(
-                              controller: _amountController!,
-                              fixedFieldWidth: 120,
-                              onDec: () {
-                                final step = _adHocStepSize(
-                                  widget.dose.existingLog!.doseUnit,
-                                );
-                                final max = _maxAdHocAmount ?? double.infinity;
-                                final v =
-                                    double.tryParse(_amountController!.text) ??
-                                    0;
-                                _amountController!.text = _formatAmount(
-                                  (v - step).clamp(0.0, max),
-                                );
-                                setState(() => _hasChanged = true);
-                              },
-                              onInc: () {
-                                final step = _adHocStepSize(
-                                  widget.dose.existingLog!.doseUnit,
-                                );
-                                final max = _maxAdHocAmount ?? double.infinity;
-                                final v =
-                                    double.tryParse(_amountController!.text) ??
-                                    0;
-                                _amountController!.text = _formatAmount(
-                                  (v + step).clamp(0.0, max),
-                                );
-                                setState(() => _hasChanged = true);
-                              },
-                              decoration: buildCompactFieldDecoration(
-                                context: context,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: kSpacingS),
-                          Text(
-                            widget.dose.existingLog!.doseUnit,
-                            style: helperTextStyle(
-                              context,
-                            )?.copyWith(fontWeight: kFontWeightMedium),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: kSpacingM),
-                ],
-                SectionFormCard(
-                  neutral: true,
-                  title: 'Dose',
-                  children: [
-                    () {
-                      final schedule = Hive.box<Schedule>(
-                        'schedules',
-                      ).get(widget.dose.scheduleId);
-
-                      final med = (schedule?.medicationId != null)
-                          ? Hive.box<Medication>(
-                              'medications',
-                            ).get(schedule!.medicationId)
-                          : null;
-
-                      if (schedule != null && med != null) {
-                        return DoseDialogDosePreview(
-                          med: med,
-                          schedule: schedule,
-                          status: _selectedStatus,
-                        );
-                      }
-
-                      return DoseDialogDoseFallbackSummary(dose: widget.dose);
-                    }(),
-                  ],
-                ),
-                const SizedBox(height: kSpacingM),
-                if (widget.dose.existingLog != null) ...[
-                  SectionFormCard(
-                    neutral: true,
-                    title: 'Date & Time',
-                    children: [
-                      SizedBox(
-                        height: kStandardFieldHeight,
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: _selectedActionTime,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked == null) return;
-                            setState(() {
-                              _selectedActionTime = DateTime(
-                                picked.year,
-                                picked.month,
-                                picked.day,
-                                _selectedActionTime.hour,
-                                _selectedActionTime.minute,
-                              );
-                              if (_selectedStatus == DoseStatus.snoozed) {
-                                _selectedSnoozeUntil = _selectedActionTime;
-                              }
-                              _hasChanged = true;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.calendar_today,
-                            size: kIconSizeSmall,
-                          ),
-                          label: Text(
-                            MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(_selectedActionTime),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: kSpacingS),
-                      SizedBox(
-                        height: kStandardFieldHeight,
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final picked = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay.fromDateTime(
-                                _selectedActionTime,
-                              ),
-                            );
-                            if (picked == null) return;
-                            setState(() {
-                              _selectedActionTime = DateTime(
-                                _selectedActionTime.year,
-                                _selectedActionTime.month,
-                                _selectedActionTime.day,
-                                picked.hour,
-                                picked.minute,
-                              );
-                              if (_selectedStatus == DoseStatus.snoozed) {
-                                _selectedSnoozeUntil = _selectedActionTime;
-                              }
-                              _hasChanged = true;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.schedule,
-                            size: kIconSizeSmall,
-                          ),
-                          label: Text(
-                            TimeOfDay.fromDateTime(
-                              _selectedActionTime,
-                            ).format(context),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: kSpacingM),
-                ],
-                SectionFormCard(
-                  neutral: true,
-                  title: 'Status',
-                  children: [
-                    _buildStatusChips(),
-                    const SizedBox(height: kSpacingXS),
-                    _buildStatusHint(context),
-                  ],
-                ),
-                const SizedBox(height: kSpacingM),
-                if (_selectedStatus == DoseStatus.snoozed) ...[
-                  SectionFormCard(
-                    neutral: true,
-                    title: 'Snooze Until',
-                    children: [
-                      SizedBox(
-                        height: kStandardFieldHeight,
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final max = _maxSnoozeUntil();
-                            final firstDate = DateTime(
-                              now.year,
-                              now.month,
-                              now.day,
-                            );
-                            final lastDate = max != null
-                                ? DateTime(max.year, max.month, max.day)
-                                : now.add(const Duration(days: 60));
-
-                            final initial =
-                                _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-                            final clampedInitialDate = DateTime(
-                              initial.year,
-                              initial.month,
-                              initial.day,
-                            );
-                            final safeInitialDate =
-                                clampedInitialDate.isBefore(firstDate)
-                                ? firstDate
-                                : (clampedInitialDate.isAfter(lastDate)
-                                      ? lastDate
-                                      : clampedInitialDate);
-
-                            final pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: safeInitialDate,
-                              firstDate: firstDate,
-                              lastDate: lastDate.isBefore(firstDate)
-                                  ? firstDate
-                                  : lastDate,
-                            );
-                            if (pickedDate == null) return;
-
-                            final pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay.fromDateTime(initial),
-                            );
-                            if (pickedTime == null) return;
-
-                            var dt = DateTime(
-                              pickedDate.year,
-                              pickedDate.month,
-                              pickedDate.day,
-                              pickedTime.hour,
-                              pickedTime.minute,
-                            );
-
-                            if (dt.isBefore(now)) dt = now;
-                            if (max != null && dt.isAfter(max)) {
-                              await _showSnoozePastNextDoseAlert(max);
-                              dt = max;
-                            }
-
-                            setState(() {
-                              _selectedSnoozeUntil = dt;
-                              _selectedActionTime = dt;
-                              _hasChanged = true;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.snooze_rounded,
-                            size: kIconSizeSmall,
-                          ),
-                          label: Text(() {
-                            final dt =
-                                _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-                            final date = MaterialLocalizations.of(
-                              context,
-                            ).formatMediumDate(dt);
-                            final time = TimeOfDay.fromDateTime(
-                              dt,
-                            ).format(context);
-                            return '$date • $time';
-                          }()),
-                        ),
-                      ),
-                      if (_maxSnoozeUntil() != null) ...[
-                        const SizedBox(height: kSpacingS),
-                        Text(() {
-                          final max = _maxSnoozeUntil()!;
-                          final date = MaterialLocalizations.of(
-                            context,
-                          ).formatMediumDate(max);
-                          final time = TimeOfDay.fromDateTime(
-                            max,
-                          ).format(context);
-                          return 'Must be before the next scheduled dose ($date • $time).';
-                        }(), style: helperTextStyle(context)),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: kSpacingM),
-                ],
-                SectionFormCard(
-                  neutral: true,
-                  title: 'Notes',
-                  children: [
-                    TextField(
-                      controller: _notesController,
-                      onChanged: (_) => setState(() => _hasChanged = true),
-                      style: bodyTextStyle(context),
-                      decoration: buildFieldDecoration(
-                        context,
-                        hint: 'Add any notes about this dose…',
-                      ),
-                      maxLines: 3,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: kSpacingM),
-                // Save & Close buttons
                 Row(
                   children: [
-                    // Close without saving
                     Expanded(
-                      child: SizedBox(
-                        height: kLargeButtonHeight,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Close'),
+                      child: StepperRow36(
+                        controller: _amountController!,
+                        fixedFieldWidth: 120,
+                        onDec: () {
+                          final step = _adHocStepSize(
+                            widget.dose.existingLog!.doseUnit,
+                          );
+                          final max = _maxAdHocAmount ?? double.infinity;
+                          final v =
+                              double.tryParse(_amountController!.text) ?? 0;
+                          _amountController!.text = _formatAmount(
+                            (v - step).clamp(0.0, max),
+                          );
+                          setState(() => _hasChanged = true);
+                        },
+                        onInc: () {
+                          final step = _adHocStepSize(
+                            widget.dose.existingLog!.doseUnit,
+                          );
+                          final max = _maxAdHocAmount ?? double.infinity;
+                          final v =
+                              double.tryParse(_amountController!.text) ?? 0;
+                          _amountController!.text = _formatAmount(
+                            (v + step).clamp(0.0, max),
+                          );
+                          setState(() => _hasChanged = true);
+                        },
+                        decoration: buildCompactFieldDecoration(
+                          context: context,
                         ),
                       ),
                     ),
-                    const SizedBox(width: kSpacingM),
-                    // Save & Close
-                    Expanded(
-                      flex: 2,
-                      child: SizedBox(
-                        height: kLargeButtonHeight,
-                        child: FilledButton.icon(
-                          onPressed: () async {
-                            await _saveChanges();
-                            if (context.mounted) Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.save, size: kIconSizeSmall),
-                          label: const Text('Save & Close'),
-                        ),
-                      ),
+                    const SizedBox(width: kSpacingS),
+                    Text(
+                      widget.dose.existingLog!.doseUnit,
+                      style: helperTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightMedium),
                     ),
                   ],
                 ),
               ],
             ),
+            const SizedBox(height: kSpacingM),
+          ],
+          SectionFormCard(
+            neutral: true,
+            title: 'Dose',
+            children: [
+              () {
+                final schedule = Hive.box<Schedule>(
+                  'schedules',
+                ).get(widget.dose.scheduleId);
+
+                final med = (schedule?.medicationId != null)
+                    ? Hive.box<Medication>(
+                        'medications',
+                      ).get(schedule!.medicationId)
+                    : null;
+
+                if (schedule != null && med != null) {
+                  return DoseDialogDosePreview(
+                    med: med,
+                    schedule: schedule,
+                    status: _selectedStatus,
+                  );
+                }
+
+                return DoseDialogDoseFallbackSummary(dose: widget.dose);
+              }(),
+            ],
+          ),
+          const SizedBox(height: kSpacingM),
+          SectionFormCard(
+            neutral: true,
+            title: 'Date & Time',
+            children: [
+              SizedBox(
+                height: kStandardFieldHeight,
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedActionTime,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked == null) return;
+                    setState(() {
+                      _selectedActionTime = DateTime(
+                        picked.year,
+                        picked.month,
+                        picked.day,
+                        _selectedActionTime.hour,
+                        _selectedActionTime.minute,
+                      );
+                      if (_selectedStatus == DoseStatus.snoozed) {
+                        _selectedSnoozeUntil = _selectedActionTime;
+                      }
+                      _hasChanged = true;
+                    });
+                  },
+                  icon: const Icon(Icons.calendar_today, size: kIconSizeSmall),
+                  label: Text(
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatMediumDate(_selectedActionTime),
+                  ),
+                ),
+              ),
+              const SizedBox(height: kSpacingS),
+              SizedBox(
+                height: kStandardFieldHeight,
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
+                    );
+                    if (picked == null) return;
+                    setState(() {
+                      _selectedActionTime = DateTime(
+                        _selectedActionTime.year,
+                        _selectedActionTime.month,
+                        _selectedActionTime.day,
+                        picked.hour,
+                        picked.minute,
+                      );
+                      if (_selectedStatus == DoseStatus.snoozed) {
+                        _selectedSnoozeUntil = _selectedActionTime;
+                      }
+                      _hasChanged = true;
+                    });
+                  },
+                  icon: const Icon(Icons.schedule, size: kIconSizeSmall),
+                  label: Text(
+                    TimeOfDay.fromDateTime(_selectedActionTime).format(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: kSpacingM),
+          SectionFormCard(
+            neutral: true,
+            title: 'Status',
+            children: [
+              _buildStatusChips(),
+              const SizedBox(height: kSpacingXS),
+              _buildStatusHint(context),
+            ],
+          ),
+          const SizedBox(height: kSpacingM),
+          if (_selectedStatus == DoseStatus.snoozed) ...[
+            SectionFormCard(
+              neutral: true,
+              title: 'Snooze Until',
+              children: [
+                SizedBox(
+                  height: kStandardFieldHeight,
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final now = DateTime.now();
+                      final max = _maxSnoozeUntil();
+                      final firstDate = DateTime(now.year, now.month, now.day);
+                      final lastDate = max != null
+                          ? DateTime(max.year, max.month, max.day)
+                          : now.add(const Duration(days: 60));
+
+                      final initial =
+                          _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                      final clampedInitialDate = DateTime(
+                        initial.year,
+                        initial.month,
+                        initial.day,
+                      );
+                      final safeInitialDate =
+                          clampedInitialDate.isBefore(firstDate)
+                          ? firstDate
+                          : (clampedInitialDate.isAfter(lastDate)
+                                ? lastDate
+                                : clampedInitialDate);
+
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: safeInitialDate,
+                        firstDate: firstDate,
+                        lastDate: lastDate.isBefore(firstDate)
+                            ? firstDate
+                            : lastDate,
+                      );
+                      if (pickedDate == null) return;
+
+                      final pickedTime = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.fromDateTime(initial),
+                      );
+                      if (pickedTime == null) return;
+
+                      var dt = DateTime(
+                        pickedDate.year,
+                        pickedDate.month,
+                        pickedDate.day,
+                        pickedTime.hour,
+                        pickedTime.minute,
+                      );
+
+                      if (dt.isBefore(now)) dt = now;
+                      if (max != null && dt.isAfter(max)) {
+                        await _showSnoozePastNextDoseAlert(max);
+                        dt = max;
+                      }
+
+                      setState(() {
+                        _selectedSnoozeUntil = dt;
+                        _selectedActionTime = dt;
+                        _hasChanged = true;
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.snooze_rounded,
+                      size: kIconSizeSmall,
+                    ),
+                    label: Text(() {
+                      final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                      final date = MaterialLocalizations.of(
+                        context,
+                      ).formatMediumDate(dt);
+                      final time = TimeOfDay.fromDateTime(dt).format(context);
+                      return '$date • $time';
+                    }()),
+                  ),
+                ),
+                if (_maxSnoozeUntil() != null) ...[
+                  const SizedBox(height: kSpacingS),
+                  Text(() {
+                    final max = _maxSnoozeUntil()!;
+                    final date = MaterialLocalizations.of(
+                      context,
+                    ).formatMediumDate(max);
+                    final time = TimeOfDay.fromDateTime(max).format(context);
+                    return 'Must be before the next scheduled dose ($date • $time).';
+                  }(), style: helperTextStyle(context)),
+                ],
+              ],
+            ),
+            const SizedBox(height: kSpacingM),
+          ],
+          SectionFormCard(
+            neutral: true,
+            title: 'Notes',
+            children: [
+              TextField(
+                controller: _notesController,
+                onChanged: (_) => setState(() => _hasChanged = true),
+                style: bodyTextStyle(context),
+                decoration: buildFieldDecoration(
+                  context,
+                  hint: 'Add any notes about this dose…',
+                ),
+                maxLines: 3,
+                textCapitalization: TextCapitalization.sentences,
+              ),
+            ],
           ),
         ],
       );
@@ -785,7 +702,64 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     ),
                   ),
                 ),
-                Expanded(child: content(context, scrollController)),
+                Padding(
+                  padding: kBottomSheetHeaderPadding,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Take dose',
+                              style: sectionTitleStyle(context),
+                            ),
+                            Text(
+                              'Confirm status, adjust timing if needed, add notes, and save.',
+                              style: helperTextStyle(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(child: formContent(context, scrollController)),
+                Padding(
+                  padding: kBottomSheetContentPadding,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: kLargeButtonHeight,
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: kSpacingM),
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: kLargeButtonHeight,
+                          child: FilledButton.icon(
+                            onPressed: () async {
+                              await _saveChanges();
+                              if (context.mounted) Navigator.pop(context);
+                            },
+                            icon: const Icon(Icons.save, size: kIconSizeSmall),
+                            label: const Text('Save & Close'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           );
@@ -794,20 +768,46 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     }
 
     final dialogScrollController = ScrollController();
-    final maxHeight = MediaQuery.of(context).size.height * 0.82;
+    final maxHeight = MediaQuery.of(context).size.height * 0.70;
 
-    return Dialog(
-      insetPadding: const EdgeInsets.all(kSpacingL),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+    return AlertDialog(
+      titleTextStyle: cardTitleStyle(
+        context,
+      )?.copyWith(color: colorScheme.primary),
+      contentTextStyle: bodyTextStyle(context),
+      title: const Text('Take dose'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Confirm status, adjust timing if needed, add notes, and save.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingM),
+              Expanded(child: formContent(context, dialogScrollController)),
+            ],
           ),
-          child: content(context, dialogScrollController),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton.icon(
+          onPressed: () async {
+            await _saveChanges();
+            if (context.mounted) Navigator.pop(context);
+          },
+          icon: const Icon(Icons.save, size: kIconSizeSmall),
+          label: const Text('Save & Close'),
+        ),
+      ],
     );
   }
 
@@ -834,7 +834,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           ),
         PrimaryChoiceChip(
           label: const Text('Taken'),
-          color: cs.primary,
+          color: kDoseStatusTakenGreen,
           selected: _selectedStatus == DoseStatus.taken,
           onSelected: (_) {
             setState(() {
@@ -845,7 +845,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
         PrimaryChoiceChip(
           label: const Text('Snoozed'),
-          color: cs.secondary,
+          color: kDoseStatusSnoozedOrange,
           selected: _selectedStatus == DoseStatus.snoozed,
           onSelected: (_) {
             setState(() {

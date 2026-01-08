@@ -319,6 +319,7 @@ const Color kReconBackgroundActive = Color(
 ///
 /// Use these instead of hardcoding colors in widgets.
 const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
+const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
 
 /// Theme-aware reconstitution calculator background.
 ///

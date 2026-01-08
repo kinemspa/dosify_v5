@@ -235,11 +235,11 @@ class DoseDialogDosePreview extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     switch (status) {
       case DoseStatus.taken:
-        return (cs.primary, Icons.check_rounded);
+        return (kDoseStatusTakenGreen, Icons.check_rounded);
       case DoseStatus.skipped:
-        return (cs.onSurfaceVariant, Icons.block_rounded);
+        return (cs.error, Icons.block_rounded);
       case DoseStatus.snoozed:
-        return (cs.tertiary, Icons.snooze_rounded);
+        return (kDoseStatusSnoozedOrange, Icons.snooze_rounded);
       case DoseStatus.overdue:
         return (cs.error, Icons.warning_rounded);
       case DoseStatus.pending:
