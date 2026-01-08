@@ -136,9 +136,9 @@ class HomePage extends StatelessWidget {
               request.actionTime.year == now.year &&
               request.actionTime.month == now.month &&
               request.actionTime.day == now.day;
-          final time = TimeOfDay.fromDateTime(request.actionTime).format(
-            context,
-          );
+          final time = TimeOfDay.fromDateTime(
+            request.actionTime,
+          ).format(context);
           final label = sameDay
               ? 'Dose snoozed until $time'
               : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
@@ -189,7 +189,8 @@ class HomePage extends StatelessWidget {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(medication.id);
           if (currentMed != null) {
-            final oldValue = existingLog.actualDoseValue ?? existingLog.doseValue;
+            final oldValue =
+                existingLog.actualDoseValue ?? existingLog.doseValue;
             final oldUnit = existingLog.actualDoseUnit ?? existingLog.doseUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,

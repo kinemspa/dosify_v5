@@ -59,8 +59,7 @@ class DoseActionSheet extends StatefulWidget {
     onMarkTaken,
     required Future<void> Function(DoseActionSheetSaveRequest request) onSnooze,
     required Future<void> Function(DoseActionSheetSaveRequest request) onSkip,
-    required Future<void> Function(DoseActionSheetSaveRequest request)
-    onDelete,
+    required Future<void> Function(DoseActionSheetSaveRequest request) onDelete,
     DoseStatus? initialStatus,
   }) {
     return showDialog<void>(
@@ -150,7 +149,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           existing?.actualDoseValue ?? widget.dose.doseValue;
       _doseOverrideUnit = existing?.actualDoseUnit ?? widget.dose.doseUnit;
       _doseOverrideController = TextEditingController(
-        text: _formatAmount(_originalDoseOverrideValue ?? widget.dose.doseValue),
+        text: _formatAmount(
+          _originalDoseOverrideValue ?? widget.dose.doseValue,
+        ),
       );
     }
   }
@@ -235,8 +236,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final parsed = double.tryParse(controller.text);
     if (parsed == null) return (null, unit);
 
-    final baselineValue = widget.dose.existingLog?.doseValue ?? widget.dose.doseValue;
-    final baselineUnit = widget.dose.existingLog?.doseUnit ?? widget.dose.doseUnit;
+    final baselineValue =
+        widget.dose.existingLog?.doseValue ?? widget.dose.doseValue;
+    final baselineUnit =
+        widget.dose.existingLog?.doseUnit ?? widget.dose.doseUnit;
 
     final normalizedUnit = (unit ?? '').trim();
     if ((parsed - baselineValue).abs() <= 0.000001 &&
@@ -345,7 +348,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       final trimmedNotes = _notesController.text.trim();
       final newNotes = trimmedNotes.isEmpty ? null : trimmedNotes;
 
-      final (newActualDoseValue, newActualDoseUnit) = _resolvedActualDoseOverride();
+      final (newActualDoseValue, newActualDoseUnit) =
+          _resolvedActualDoseOverride();
 
       final notesChanged = (existing.notes ?? '') != (newNotes ?? '');
       final actualValueChanged =
@@ -359,7 +363,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
       if (existing.action == DoseAction.taken &&
           (actualValueChanged || actualUnitChanged)) {
-        final schedule = Hive.box<Schedule>('schedules').get(existing.scheduleId);
+        final schedule = Hive.box<Schedule>(
+          'schedules',
+        ).get(existing.scheduleId);
         final medBox = Hive.box<Medication>('medications');
         final med = medBox.get(existing.medicationId);
 

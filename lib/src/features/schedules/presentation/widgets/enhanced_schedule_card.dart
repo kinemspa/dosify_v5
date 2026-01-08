@@ -192,7 +192,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
-            final oldValue = existingLog.actualDoseValue ?? existingLog.doseValue;
+            final oldValue =
+                existingLog.actualDoseValue ?? existingLog.doseValue;
             final oldUnit = existingLog.actualDoseUnit ?? existingLog.doseUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
