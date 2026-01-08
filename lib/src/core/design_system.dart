@@ -78,6 +78,10 @@ const EdgeInsets kDetailCardCollapsedHeaderPadding = EdgeInsets.symmetric(
   vertical: kSpacingS,
 );
 
+/// Width reserved at the start of a collapsed detail-card header when showing
+/// a reorder drag handle.
+const double kDetailCardReorderHandleGutterWidth = kIconSizeMedium + kSpacingS;
+
 /// Tight icon button sizing (avoids default 48px IconButton height).
 const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
   width: kIconButtonSize,

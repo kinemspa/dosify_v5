@@ -659,30 +659,34 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               cards[entry.value]!,
               if (!isExpandedForCardId(entry.value))
                 Positioned(
-                  top: kSpacingS,
                   left: 0,
-                  child: allCardsCollapsed
-                      ? ReorderableDelayedDragStartListener(
-                          index: entry.key,
-                          child: Icon(
-                            Icons.drag_indicator_rounded,
-                            size: kIconSizeMedium,
-                            color: cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
+                  top: 0,
+                  bottom: 0,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: allCardsCollapsed
+                        ? ReorderableDelayedDragStartListener(
+                            index: entry.key,
+                            child: Icon(
+                              Icons.drag_indicator_rounded,
+                              size: kIconSizeMedium,
+                              color: cs.onSurfaceVariant.withValues(
+                                alpha: kOpacityMedium,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onLongPress: showCollapseAllInstruction,
+                            onTap: showCollapseAllInstruction,
+                            child: Icon(
+                              Icons.drag_indicator_rounded,
+                              size: kIconSizeMedium,
+                              color: cs.onSurfaceVariant.withValues(
+                                alpha: kOpacityMedium,
+                              ),
                             ),
                           ),
-                        )
-                      : GestureDetector(
-                          onLongPress: showCollapseAllInstruction,
-                          onTap: showCollapseAllInstruction,
-                          child: Icon(
-                            Icons.drag_indicator_rounded,
-                            size: kIconSizeMedium,
-                            color: cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
-                            ),
-                          ),
-                        ),
+                  ),
                 ),
             ],
           ),
@@ -1235,6 +1239,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
+                  if (!_isDetailsExpanded)
+                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
                   Icon(
                     Icons.info_outline,
                     size: kIconSizeMedium,
@@ -1335,6 +1341,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           padding: kDetailCardCollapsedHeaderPadding,
           child: Row(
             children: [
+              const SizedBox(width: kDetailCardReorderHandleGutterWidth),
               Icon(
                 Icons.calendar_month_rounded,
                 size: kIconSizeMedium,
@@ -1374,6 +1381,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
+                  if (!_isScheduleExpanded)
+                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
                   Icon(
                     Icons.calendar_month_rounded,
                     size: kIconSizeMedium,
@@ -2494,6 +2503,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
+                  if (!_isReconstitutionExpanded)
+                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
                   Icon(
                     Icons.science_outlined,
                     size: kIconSizeMedium,
@@ -3965,9 +3976,10 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
     Unit.mgPerMl ||
     Unit.gPerMl ||
     Unit.unitsPerMl => (med.perMlValue ?? med.strengthValue),
-    _ => (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
-        ? (med.strengthValue / med.containerVolumeMl!)
-        : null,
+    _ =>
+      (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
+          ? (med.strengthValue / med.containerVolumeMl!)
+          : null,
   };
   final Unit strengthDoseUnit = switch (med.strengthUnit) {
     Unit.mcgPerMl => Unit.mcg,
@@ -4080,7 +4092,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                               '${_formatNumber(med.perMlValue ?? med.strengthValue)} $strengthUnit',
                             _ when med.containerVolumeMl != null =>
                               '${_formatNumber(med.strengthValue)} $strengthUnit / ${_formatNumber(med.containerVolumeMl!)} mL',
-                            _ => '${_formatNumber(med.strengthValue)} $strengthUnit',
+                            _ =>
+                              '${_formatNumber(med.strengthValue)} $strengthUnit',
                           },
                           style: TextStyle(
                             fontSize: 12,

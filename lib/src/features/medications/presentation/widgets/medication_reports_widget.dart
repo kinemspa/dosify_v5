@@ -120,6 +120,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
                 children: [
+                  if (!isExpanded)
+                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
                   Icon(
                     Icons.bar_chart_rounded,
                     size: kIconSizeMedium,
