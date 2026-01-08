@@ -38,15 +38,15 @@ class NextDoseDateBadge extends StatelessWidget {
     final accentColor = activeColor ?? cs.primary;
 
     final circleBg = isEnabled
-      ? accentColor.withValues(alpha: kOpacitySubtle)
+        ? accentColor.withValues(alpha: kOpacitySubtle)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityFaint);
 
     final circleBorder = isEnabled
-      ? accentColor.withValues(alpha: kOpacityMediumLow)
+        ? accentColor.withValues(alpha: kOpacityMediumLow)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityVeryLow);
 
     final primaryTextColor = isEnabled
-      ? accentColor.withValues(alpha: kOpacityFull)
+        ? accentColor.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
 
     final shouldShowNext = showNextLabel && isEnabled;
