@@ -5,6 +5,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -16,13 +17,27 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 enum DoseActionSheetPresentation { bottomSheet, dialog }
 
+class DoseActionSheetSaveRequest {
+  const DoseActionSheetSaveRequest({
+    required this.notes,
+    required this.actionTime,
+    this.actualDoseValue,
+    this.actualDoseUnit,
+  });
+
+  final String? notes;
+  final DateTime actionTime;
+  final double? actualDoseValue;
+  final String? actualDoseUnit;
+}
+
 /// Dose details and actions (Take, Snooze, Skip)
 class DoseActionSheet extends StatefulWidget {
   final CalculatedDose dose;
-  final Future<void> Function(String? notes, DateTime actionTime) onMarkTaken;
-  final Future<void> Function(String? notes, DateTime actionTime) onSnooze;
-  final Future<void> Function(String? notes, DateTime actionTime) onSkip;
-  final Future<void> Function(String? notes) onDelete;
+  final Future<void> Function(DoseActionSheetSaveRequest request) onMarkTaken;
+  final Future<void> Function(DoseActionSheetSaveRequest request) onSnooze;
+  final Future<void> Function(DoseActionSheetSaveRequest request) onSkip;
+  final Future<void> Function(DoseActionSheetSaveRequest request) onDelete;
   final DoseActionSheetPresentation presentation;
   final DoseStatus? initialStatus;
 
@@ -40,11 +55,12 @@ class DoseActionSheet extends StatefulWidget {
   static Future<void> show(
     BuildContext context, {
     required CalculatedDose dose,
-    required Future<void> Function(String? notes, DateTime actionTime)
+    required Future<void> Function(DoseActionSheetSaveRequest request)
     onMarkTaken,
-    required Future<void> Function(String? notes, DateTime actionTime) onSnooze,
-    required Future<void> Function(String? notes, DateTime actionTime) onSkip,
-    required Future<void> Function(String? notes) onDelete,
+    required Future<void> Function(DoseActionSheetSaveRequest request) onSnooze,
+    required Future<void> Function(DoseActionSheetSaveRequest request) onSkip,
+    required Future<void> Function(DoseActionSheetSaveRequest request)
+    onDelete,
     DoseStatus? initialStatus,
   }) {
     return showDialog<void>(
@@ -71,6 +87,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   TextEditingController? _amountController;
   double? _originalAdHocAmount;
   double? _maxAdHocAmount;
+  TextEditingController? _doseOverrideController;
+  double? _originalDoseOverrideValue;
+  String? _doseOverrideUnit;
   late DoseStatus _selectedStatus;
   late DateTime _selectedActionTime;
   DateTime? _selectedSnoozeUntil;
@@ -124,12 +143,23 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         _maxAdHocAmount = double.infinity;
       }
     }
+
+    if (!_isAdHoc) {
+      final existing = widget.dose.existingLog;
+      _originalDoseOverrideValue =
+          existing?.actualDoseValue ?? widget.dose.doseValue;
+      _doseOverrideUnit = existing?.actualDoseUnit ?? widget.dose.doseUnit;
+      _doseOverrideController = TextEditingController(
+        text: _formatAmount(_originalDoseOverrideValue ?? widget.dose.doseValue),
+      );
+    }
   }
 
   @override
   void dispose() {
     _notesController.dispose();
     _amountController?.dispose();
+    _doseOverrideController?.dispose();
     super.dispose();
   }
 
@@ -189,6 +219,32 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final normalized = unit.trim().toLowerCase();
     if (normalized == 'ml' || normalized.contains('ml')) return 0.1;
     return 1.0;
+  }
+
+  double _doseOverrideStepSize(String unit) {
+    final normalized = unit.trim().toLowerCase();
+    if (normalized == 'ml' || normalized.contains('ml')) return 0.1;
+    return 1.0;
+  }
+
+  (double?, String?) _resolvedActualDoseOverride() {
+    final controller = _doseOverrideController;
+    if (controller == null) return (null, null);
+
+    final unit = _doseOverrideUnit;
+    final parsed = double.tryParse(controller.text);
+    if (parsed == null) return (null, unit);
+
+    final baselineValue = widget.dose.existingLog?.doseValue ?? widget.dose.doseValue;
+    final baselineUnit = widget.dose.existingLog?.doseUnit ?? widget.dose.doseUnit;
+
+    final normalizedUnit = (unit ?? '').trim();
+    if ((parsed - baselineValue).abs() <= 0.000001 &&
+        normalizedUnit.toLowerCase() == baselineUnit.trim().toLowerCase()) {
+      return (null, null);
+    }
+
+    return (parsed.clamp(0.0, double.infinity), unit);
   }
 
   Future<void> _saveAdHocAmountAndNotesIfNeeded() async {
@@ -281,25 +337,85 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     controller.text = _formatAmount(updatedLog.doseValue);
   }
 
-  Future<void> _saveNotesOnly() async {
+  Future<void> _saveExistingLogEdits() async {
     if (widget.dose.existingLog == null) return;
 
     try {
-      // Update the existing log with new notes
+      final existing = widget.dose.existingLog!;
+      final trimmedNotes = _notesController.text.trim();
+      final newNotes = trimmedNotes.isEmpty ? null : trimmedNotes;
+
+      final (newActualDoseValue, newActualDoseUnit) = _resolvedActualDoseOverride();
+
+      final notesChanged = (existing.notes ?? '') != (newNotes ?? '');
+      final actualValueChanged =
+          (existing.actualDoseValue ?? 0) != (newActualDoseValue ?? 0) ||
+          (existing.actualDoseValue == null) != (newActualDoseValue == null);
+      final actualUnitChanged =
+          (existing.actualDoseUnit ?? '') != (newActualDoseUnit ?? '') ||
+          (existing.actualDoseUnit == null) != (newActualDoseUnit == null);
+
+      if (!notesChanged && !actualValueChanged && !actualUnitChanged) return;
+
+      if (existing.action == DoseAction.taken &&
+          (actualValueChanged || actualUnitChanged)) {
+        final schedule = Hive.box<Schedule>('schedules').get(existing.scheduleId);
+        final medBox = Hive.box<Medication>('medications');
+        final med = medBox.get(existing.medicationId);
+
+        if (med != null) {
+          final oldValue = existing.actualDoseValue ?? existing.doseValue;
+          final oldUnit = existing.actualDoseUnit ?? existing.doseUnit;
+          final newValue = newActualDoseValue ?? existing.doseValue;
+          final newUnit = newActualDoseUnit ?? existing.doseUnit;
+
+          final oldDelta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: med,
+            schedule: schedule,
+            doseValue: oldValue,
+            doseUnit: oldUnit,
+            preferDoseValue: true,
+          );
+          final newDelta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: med,
+            schedule: schedule,
+            doseValue: newValue,
+            doseUnit: newUnit,
+            preferDoseValue: true,
+          );
+
+          if (oldDelta != null && newDelta != null) {
+            final adjustment = oldDelta - newDelta;
+            if (adjustment.abs() > 0.000001) {
+              final updatedMed = adjustment > 0
+                  ? MedicationStockAdjustment.restore(
+                      medication: med,
+                      delta: adjustment,
+                    )
+                  : MedicationStockAdjustment.deduct(
+                      medication: med,
+                      delta: -adjustment,
+                    );
+              await medBox.put(med.id, updatedMed);
+            }
+          }
+        }
+      }
+
       final updatedLog = DoseLog(
-        id: widget.dose.existingLog!.id,
-        scheduleId: widget.dose.existingLog!.scheduleId,
-        scheduleName: widget.dose.existingLog!.scheduleName,
-        medicationId: widget.dose.existingLog!.medicationId,
-        medicationName: widget.dose.existingLog!.medicationName,
-        scheduledTime: widget.dose.existingLog!.scheduledTime,
+        id: existing.id,
+        scheduleId: existing.scheduleId,
+        scheduleName: existing.scheduleName,
+        medicationId: existing.medicationId,
+        medicationName: existing.medicationName,
+        scheduledTime: existing.scheduledTime,
         actionTime: _selectedActionTime,
-        doseValue: widget.dose.existingLog!.doseValue,
-        doseUnit: widget.dose.existingLog!.doseUnit,
-        action: widget.dose.existingLog!.action,
-        actualDoseValue: widget.dose.existingLog!.actualDoseValue,
-        actualDoseUnit: widget.dose.existingLog!.actualDoseUnit,
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
+        doseValue: existing.doseValue,
+        doseUnit: existing.doseUnit,
+        action: existing.action,
+        actualDoseValue: newActualDoseValue,
+        actualDoseUnit: newActualDoseUnit,
+        notes: newNotes,
       );
 
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -321,6 +437,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   Future<void> _saveChanges() async {
     await _saveAdHocAmountAndNotesIfNeeded();
+
+    final (actualDoseValue, actualDoseUnit) = _resolvedActualDoseOverride();
 
     // If status changed, call appropriate callback
     if (_selectedStatus != widget.dose.status) {
@@ -354,29 +472,35 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           ? null
           : _notesController.text;
 
+      final request = DoseActionSheetSaveRequest(
+        notes: notes,
+        actionTime: _selectedStatus == DoseStatus.snoozed
+            ? (_selectedSnoozeUntil ?? _defaultSnoozeUntil())
+            : _selectedActionTime,
+        actualDoseValue: actualDoseValue,
+        actualDoseUnit: actualDoseUnit,
+      );
+
       switch (_selectedStatus) {
         case DoseStatus.taken:
-          await widget.onMarkTaken(notes, _selectedActionTime);
+          await widget.onMarkTaken(request);
           break;
         case DoseStatus.skipped:
-          await widget.onSkip(notes, _selectedActionTime);
+          await widget.onSkip(request);
           break;
         case DoseStatus.snoozed:
-          await widget.onSnooze(
-            notes,
-            _selectedSnoozeUntil ?? _defaultSnoozeUntil(),
-          );
+          await widget.onSnooze(request);
           break;
         case DoseStatus.pending:
         case DoseStatus.overdue:
           // Revert to original - delete existing log
-          await widget.onDelete(notes);
+          await widget.onDelete(request);
           break;
       }
     } else if (widget.dose.existingLog != null) {
       // Status didn't change but might need to save notes
       if (_isAdHoc) return;
-      await _saveNotesOnly();
+      await _saveExistingLogEdits();
     }
   }
 
@@ -474,6 +598,62 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             ],
           ),
           const SizedBox(height: kSpacingM),
+          if (!_isAdHoc) ...[
+            SectionFormCard(
+              neutral: true,
+              title: 'Dose change',
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: StepperRow36(
+                        controller: _doseOverrideController!,
+                        fixedFieldWidth: 120,
+                        onDec: () {
+                          final unit = _doseOverrideUnit ?? '';
+                          final step = _doseOverrideStepSize(unit);
+                          final v =
+                              double.tryParse(_doseOverrideController!.text) ??
+                              0;
+                          _doseOverrideController!.text = _formatAmount(
+                            (v - step).clamp(0.0, double.infinity),
+                          );
+                          setState(() => _hasChanged = true);
+                        },
+                        onInc: () {
+                          final unit = _doseOverrideUnit ?? '';
+                          final step = _doseOverrideStepSize(unit);
+                          final v =
+                              double.tryParse(_doseOverrideController!.text) ??
+                              0;
+                          _doseOverrideController!.text = _formatAmount(
+                            (v + step).clamp(0.0, double.infinity),
+                          );
+                          setState(() => _hasChanged = true);
+                        },
+                        decoration: buildCompactFieldDecoration(
+                          context: context,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: kSpacingS),
+                    Text(
+                      _doseOverrideUnit ?? widget.dose.doseUnit,
+                      style: helperTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightMedium),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: kSpacingS),
+                Text(
+                  'Use this to record the actual dose taken, if different from the scheduled dose.',
+                  style: helperTextStyle(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: kSpacingM),
+          ],
           SectionFormCard(
             neutral: true,
             title: 'Date & Time',

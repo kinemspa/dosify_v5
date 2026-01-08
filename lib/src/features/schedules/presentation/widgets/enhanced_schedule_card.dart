@@ -72,7 +72,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       context,
       dose: dose,
       initialStatus: initialStatus,
-      onMarkTaken: (notes, actionTime) async {
+      onMarkTaken: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -82,11 +82,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
           scheduledTime: dose.scheduledTime,
-          actionTime: actionTime,
+          actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.taken,
-          notes: notes?.isEmpty ?? true ? null : notes,
+          actualDoseValue: request.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit,
+          notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -96,11 +98,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(widget.medication.id);
         if (currentMed != null) {
+          final effectiveDoseValue = request.actualDoseValue ?? dose.doseValue;
+          final effectiveDoseUnit = request.actualDoseUnit ?? dose.doseUnit;
           final delta = MedicationStockAdjustment.tryCalculateStockDelta(
             medication: currentMed,
             schedule: widget.schedule,
-            doseValue: dose.doseValue,
-            doseUnit: dose.doseUnit,
+            doseValue: effectiveDoseValue,
+            doseUnit: effectiveDoseUnit,
+            preferDoseValue: request.actualDoseValue != null,
           );
           if (delta != null) {
             await medBox.put(
@@ -119,7 +124,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       },
-      onSnooze: (notes, actionTime) async {
+      onSnooze: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
         final log = DoseLog(
@@ -129,11 +134,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
           scheduledTime: dose.scheduledTime,
-          actionTime: actionTime,
+          actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.snoozed,
-          notes: notes?.isEmpty ?? true ? null : notes,
+          actualDoseValue: request.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit,
+          notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -145,7 +152,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Dose snoozed')));
       },
-      onSkip: (notes, actionTime) async {
+      onSkip: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -155,11 +162,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
           scheduledTime: dose.scheduledTime,
-          actionTime: actionTime,
+          actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.skipped,
-          notes: notes?.isEmpty ?? true ? null : notes,
+          actualDoseValue: request.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit,
+          notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -172,7 +181,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
       },
-      onDelete: (_) async {
+      onDelete: (request) async {
         final logBox = Hive.box<DoseLog>('dose_logs');
         final idToDelete =
             dose.existingLog?.id ??
@@ -183,11 +192,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
+            final oldValue = existingLog.actualDoseValue ?? existingLog.doseValue;
+            final oldUnit = existingLog.actualDoseUnit ?? existingLog.doseUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: widget.schedule,
-              doseValue: dose.doseValue,
-              doseUnit: dose.doseUnit,
+              doseValue: oldValue,
+              doseUnit: oldUnit,
+              preferDoseValue: existingLog.actualDoseValue != null,
             );
             if (delta != null) {
               await medBox.put(

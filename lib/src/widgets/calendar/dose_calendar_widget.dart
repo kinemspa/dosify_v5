@@ -277,18 +277,16 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       context,
       dose: dose,
       initialStatus: initialStatus,
-      onMarkTaken: (notes, actionTime) =>
-          _markDoseAsTaken(dose, notes, actionTime),
-      onSnooze: (notes, actionTime) => _snoozeDose(dose, notes, actionTime),
-      onSkip: (notes, actionTime) => _skipDose(dose, notes, actionTime),
-      onDelete: (_) => _deleteDoseLog(dose),
+      onMarkTaken: (request) => _markDoseAsTaken(dose, request),
+      onSnooze: (request) => _snoozeDose(dose, request),
+      onSkip: (request) => _skipDose(dose, request),
+      onDelete: (request) => _deleteDoseLog(dose),
     );
   }
 
   Future<void> _markDoseAsTaken(
     CalculatedDose dose,
-    String? notes,
-    DateTime actionTime,
+    DoseActionSheetSaveRequest request,
   ) async {
     final logId =
         '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
@@ -300,11 +298,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       medicationId: medicationId,
       medicationName: dose.medicationName,
       scheduledTime: dose.scheduledTime,
-      actionTime: actionTime,
+      actionTime: request.actionTime,
       doseValue: dose.doseValue,
       doseUnit: dose.doseUnit,
       action: DoseAction.taken,
-      notes: notes?.isEmpty ?? true ? null : notes,
+      actualDoseValue: request.actualDoseValue,
+      actualDoseUnit: request.actualDoseUnit,
+      notes: request.notes?.isEmpty ?? true ? null : request.notes,
     );
 
     try {
@@ -312,7 +312,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await repo.upsert(log);
 
       // Deduct medication stock
-      await _deductStock(dose);
+      await _deductStock(
+        dose,
+        doseValueOverride: request.actualDoseValue,
+        doseUnitOverride: request.actualDoseUnit,
+        preferDoseValue: request.actualDoseValue != null,
+      );
 
       // Cancel the notification for this dose
       await _cancelNotificationForDose(dose);
@@ -359,8 +364,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   Future<void> _snoozeDose(
     CalculatedDose dose,
-    String? notes,
-    DateTime actionTime,
+    DoseActionSheetSaveRequest request,
   ) async {
     final logId =
         '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
@@ -372,11 +376,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       medicationId: medicationId,
       medicationName: dose.medicationName,
       scheduledTime: dose.scheduledTime,
-      actionTime: actionTime,
+      actionTime: request.actionTime,
       doseValue: dose.doseValue,
       doseUnit: dose.doseUnit,
       action: DoseAction.snoozed,
-      notes: notes?.isEmpty ?? true ? null : notes,
+      actualDoseValue: request.actualDoseValue,
+      actualDoseUnit: request.actualDoseUnit,
+      notes: request.notes?.isEmpty ?? true ? null : request.notes,
     );
 
     try {
@@ -390,13 +396,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       if (mounted) {
         final now = DateTime.now();
         final sameDay =
-            actionTime.year == now.year &&
-            actionTime.month == now.month &&
-            actionTime.day == now.day;
-        final time = TimeOfDay.fromDateTime(actionTime).format(context);
+            request.actionTime.year == now.year &&
+            request.actionTime.month == now.month &&
+            request.actionTime.day == now.day;
+        final time = TimeOfDay.fromDateTime(request.actionTime).format(context);
         final label = sameDay
             ? 'Dose snoozed until $time'
-            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
+            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(label)));
@@ -412,8 +418,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   Future<void> _skipDose(
     CalculatedDose dose,
-    String? notes,
-    DateTime actionTime,
+    DoseActionSheetSaveRequest request,
   ) async {
     final logId =
         '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
@@ -425,11 +430,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       medicationId: medicationId,
       medicationName: dose.medicationName,
       scheduledTime: dose.scheduledTime,
-      actionTime: actionTime,
+      actionTime: request.actionTime,
       doseValue: dose.doseValue,
       doseUnit: dose.doseUnit,
       action: DoseAction.skipped,
-      notes: notes?.isEmpty ?? true ? null : notes,
+      actualDoseValue: request.actualDoseValue,
+      actualDoseUnit: request.actualDoseUnit,
+      notes: request.notes?.isEmpty ?? true ? null : request.notes,
     );
 
     try {
@@ -464,7 +471,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
       // Restore stock if the dose was previously taken
       if (dose.existingLog!.action == DoseAction.taken) {
-        await _restoreStock(dose);
+        final existing = dose.existingLog!;
+        final oldDoseValue = existing.actualDoseValue ?? existing.doseValue;
+        final oldDoseUnit = existing.actualDoseUnit ?? existing.doseUnit;
+        await _restoreStock(
+          dose,
+          doseValueOverride: oldDoseValue,
+          doseUnitOverride: oldDoseUnit,
+          preferDoseValue: existing.actualDoseValue != null,
+        );
       }
 
       await _loadDoses();
@@ -484,7 +499,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   /// Deducts medication stock when a dose is taken
-  Future<bool> _deductStock(CalculatedDose dose) async {
+  Future<bool> _deductStock(
+    CalculatedDose dose, {
+    double? doseValueOverride,
+    String? doseUnitOverride,
+    bool preferDoseValue = false,
+  }) async {
     try {
       // Get the schedule to access medication info
       final scheduleBox = Hive.box<Schedule>('schedules');
@@ -501,11 +521,14 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return true; // Medication not found, skip
       }
 
+      final effectiveDoseValue = doseValueOverride ?? dose.doseValue;
+      final effectiveDoseUnit = doseUnitOverride ?? dose.doseUnit;
       final delta = MedicationStockAdjustment.tryCalculateStockDelta(
         medication: med,
         schedule: schedule,
-        doseValue: dose.doseValue,
-        doseUnit: dose.doseUnit,
+        doseValue: effectiveDoseValue,
+        doseUnit: effectiveDoseUnit,
+        preferDoseValue: preferDoseValue,
       );
 
       if (delta == null || delta <= 0) {
@@ -525,7 +548,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   /// Restores medication stock when a taken dose is reset
-  Future<bool> _restoreStock(CalculatedDose dose) async {
+  Future<bool> _restoreStock(
+    CalculatedDose dose, {
+    double? doseValueOverride,
+    String? doseUnitOverride,
+    bool preferDoseValue = false,
+  }) async {
     try {
       // Get the schedule to access medication info
       final scheduleBox = Hive.box<Schedule>('schedules');
@@ -542,11 +570,14 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return true; // Medication not found
       }
 
+      final effectiveDoseValue = doseValueOverride ?? dose.doseValue;
+      final effectiveDoseUnit = doseUnitOverride ?? dose.doseUnit;
       final delta = MedicationStockAdjustment.tryCalculateStockDelta(
         medication: med,
         schedule: schedule,
-        doseValue: dose.doseValue,
-        doseUnit: dose.doseUnit,
+        doseValue: effectiveDoseValue,
+        doseUnit: effectiveDoseUnit,
+        preferDoseValue: preferDoseValue,
       );
 
       if (delta == null || delta <= 0) {

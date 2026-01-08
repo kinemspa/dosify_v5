@@ -426,7 +426,7 @@ class _ScheduleCard extends StatelessWidget {
       context,
       dose: dose,
       initialStatus: initialStatus,
-      onMarkTaken: (notes, actionTime) async {
+      onMarkTaken: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -436,11 +436,13 @@ class _ScheduleCard extends StatelessWidget {
           medicationId: medication.id,
           medicationName: medication.name,
           scheduledTime: dose.scheduledTime,
-          actionTime: actionTime,
+          actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.taken,
-          notes: notes?.isEmpty ?? true ? null : notes,
+          actualDoseValue: request.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit,
+          notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -450,11 +452,14 @@ class _ScheduleCard extends StatelessWidget {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(medication.id);
         if (currentMed != null) {
+          final effectiveDoseValue = request.actualDoseValue ?? dose.doseValue;
+          final effectiveDoseUnit = request.actualDoseUnit ?? dose.doseUnit;
           final delta = MedicationStockAdjustment.tryCalculateStockDelta(
             medication: currentMed,
             schedule: schedule,
-            doseValue: dose.doseValue,
-            doseUnit: dose.doseUnit,
+            doseValue: effectiveDoseValue,
+            doseUnit: effectiveDoseUnit,
+            preferDoseValue: request.actualDoseValue != null,
           );
           if (delta != null) {
             await medBox.put(
@@ -473,7 +478,7 @@ class _ScheduleCard extends StatelessWidget {
           ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
         }
       },
-      onSnooze: (notes, actionTime) async {
+      onSnooze: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
         final log = DoseLog(
@@ -483,11 +488,13 @@ class _ScheduleCard extends StatelessWidget {
           medicationId: medication.id,
           medicationName: medication.name,
           scheduledTime: dose.scheduledTime,
-          actionTime: actionTime,
+          actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.snoozed,
-          notes: notes?.isEmpty ?? true ? null : notes,
+          actualDoseValue: request.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit,
+          notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -496,19 +503,21 @@ class _ScheduleCard extends StatelessWidget {
         if (context.mounted) {
           final now = DateTime.now();
           final sameDay =
-              actionTime.year == now.year &&
-              actionTime.month == now.month &&
-              actionTime.day == now.day;
-          final time = TimeOfDay.fromDateTime(actionTime).format(context);
+              request.actionTime.year == now.year &&
+              request.actionTime.month == now.month &&
+              request.actionTime.day == now.day;
+          final time = TimeOfDay.fromDateTime(request.actionTime).format(
+            context,
+          );
           final label = sameDay
               ? 'Dose snoozed until $time'
-              : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
+              : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(label)));
         }
       },
-      onSkip: (notes, actionTime) async {
+      onSkip: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final log = DoseLog(
@@ -518,11 +527,13 @@ class _ScheduleCard extends StatelessWidget {
           medicationId: medication.id,
           medicationName: medication.name,
           scheduledTime: dose.scheduledTime,
-          actionTime: actionTime,
+          actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
           action: DoseAction.skipped,
-          notes: notes?.isEmpty ?? true ? null : notes,
+          actualDoseValue: request.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit,
+          notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
@@ -535,7 +546,7 @@ class _ScheduleCard extends StatelessWidget {
           ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
         }
       },
-      onDelete: (_) async {
+      onDelete: (request) async {
         final logId =
             '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
         final logBox = Hive.box<DoseLog>('dose_logs');
@@ -545,11 +556,14 @@ class _ScheduleCard extends StatelessWidget {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(medication.id);
           if (currentMed != null) {
+            final oldValue = existingLog.actualDoseValue ?? existingLog.doseValue;
+            final oldUnit = existingLog.actualDoseUnit ?? existingLog.doseUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: schedule,
-              doseValue: dose.doseValue,
-              doseUnit: dose.doseUnit,
+              doseValue: oldValue,
+              doseUnit: oldUnit,
+              preferDoseValue: existingLog.actualDoseValue != null,
             );
             if (delta != null) {
               await medBox.put(

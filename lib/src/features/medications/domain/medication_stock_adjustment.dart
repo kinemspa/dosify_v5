@@ -11,8 +11,18 @@ class MedicationStockAdjustment {
     Schedule? schedule,
     double? doseValue,
     String? doseUnit,
+    bool preferDoseValue = false,
   }) {
     final StockUnit stockUnit = medication.stockUnit;
+
+    if (preferDoseValue && doseValue != null && doseValue > 0) {
+      final delta = _tryCalculateFromDoseValue(
+        medication: medication,
+        doseValue: doseValue,
+        doseUnit: doseUnit,
+      );
+      if (delta != null && delta > 0) return delta;
+    }
 
     if (schedule != null) {
       final calculated = _tryCalculateFromSchedule(
@@ -47,6 +57,30 @@ class MedicationStockAdjustment {
       final massDelta = _tryConvertMassToStockUnit(doseValue, unit, stockUnit);
       if (massDelta != null && massDelta > 0) return massDelta;
     }
+
+    return null;
+  }
+
+  static double? _tryCalculateFromDoseValue({
+    required Medication medication,
+    required double doseValue,
+    String? doseUnit,
+  }) {
+    final StockUnit stockUnit = medication.stockUnit;
+    final unit = (doseUnit ?? '').trim().toLowerCase();
+
+    if (stockUnit == StockUnit.multiDoseVials) {
+      // For MDV, delta is mL consumed; only accept direct volume units.
+      if (_looksLikeMl(unit)) return doseValue;
+      return null;
+    }
+
+    if (unit.isEmpty || _doseUnitMatchesStockUnit(unit, stockUnit)) {
+      return doseValue;
+    }
+
+    final massDelta = _tryConvertMassToStockUnit(doseValue, unit, stockUnit);
+    if (massDelta != null && massDelta > 0) return massDelta;
 
     return null;
   }
