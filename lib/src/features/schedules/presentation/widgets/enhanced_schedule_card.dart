@@ -33,10 +33,12 @@ class EnhancedScheduleCard extends StatefulWidget {
     super.key,
     required this.schedule,
     required this.medication,
+    this.showDoseCardWhenPossible = true,
   });
 
   final Schedule schedule;
   final Medication medication;
+  final bool showDoseCardWhenPossible;
 
   @override
   State<EnhancedScheduleCard> createState() => _EnhancedScheduleCardState();
@@ -61,7 +63,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     }
   }
 
-  Future<void> _showDoseActions(CalculatedDose dose, {DoseStatus? initialStatus}) {
+  Future<void> _showDoseActions(
+    CalculatedDose dose, {
+    DoseStatus? initialStatus,
+  }) {
     return DoseActionSheet.show(
       context,
       dose: dose,
@@ -250,7 +255,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (canShowDoseCard)
+              if (widget.showDoseCardWhenPossible && canShowDoseCard)
                 ValueListenableBuilder(
                   valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
                   builder: (context, Box<DoseLog> logBox, _) {

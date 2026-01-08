@@ -41,6 +41,8 @@ import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
 enum _ReconstitutionUpdateAction {
@@ -1467,10 +1469,22 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (schedules.isNotEmpty) ...[
+          SizedBox(
+            height: kDetailCompactCalendarHeight,
+            child: DoseCalendarWidget(
+              variant: CalendarVariant.compact,
+              defaultView: CalendarView.week,
+              medicationId: med.id,
+            ),
+          ),
+          const SizedBox(height: kSpacingM),
           // Show ALL schedules including paused ones
           ...schedules.map(
-            (schedule) =>
-                EnhancedScheduleCard(schedule: schedule, medication: med),
+            (schedule) => EnhancedScheduleCard(
+              schedule: schedule,
+              medication: med,
+              showDoseCardWhenPossible: false,
+            ),
           ),
           // Adherence now moved to MedicationReportsWidget tabs
         ],

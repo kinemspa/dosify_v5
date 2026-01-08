@@ -71,6 +71,11 @@ const double kCardMaxWidth = 800;
 /// Used for the embedded [DoseCalendarWidget] when shown on Home.
 const double kHomeMiniCalendarHeight = 420;
 
+/// Detail pages - compact calendar height.
+///
+/// Used for embedded [DoseCalendarWidget] on detail screens.
+const double kDetailCompactCalendarHeight = 400;
+
 /// Detail-card collapsed header padding (Medication Details screen).
 ///
 /// Matches the Reports card header height for consistent collapsed card sizing.

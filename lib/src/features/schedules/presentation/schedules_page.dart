@@ -495,9 +495,9 @@ class _ScheduleCard extends StatelessWidget {
           final label = sameDay
               ? 'Dose snoozed until $time'
               : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(label)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(label)));
         }
       },
       onSkip: (notes, actionTime) async {
