@@ -114,12 +114,12 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ---
 
-# Task Tracking Workflow (user_request_docs/)
+# Task Tracking Workflow (backlog/)
 
-`user_request_docs/` is the single source of truth for work requests.
+`backlog/` is the single source of truth for work requests.
 
-- **Always read the relevant file in `user_request_docs/` before starting new work** (e.g., the screen/widget you are about to change).
-- **When a task is implemented**, mark it as completed in that same file by appending ` [COMPLETED]` to the end of the bullet.
+- **Always read the relevant file in `backlog/` before starting new work** (e.g., the screen/widget you are about to change).
+- **When a task is implemented**, mark it as completed in that same file by checking the checkbox (`- [x]`).
 - **Do not delete tasks** from these files (the user will confirm completion or delete them).
-- **If the user says a task is not completed as desired**, the user will remove the `[COMPLETED]` label and may add notes; treat that as the authoritative re-opened requirement.
+- **If the user says a task is not completed as desired**, the user will uncheck the box (`- [ ]`) and may add notes; treat that as the authoritative re-opened requirement.
 - **Keep edits minimal**: only touch the specific bullets you completed and do not rewrite sections or reformat the file.

@@ -13,4 +13,4 @@
 
 This is a separate UI from the Dose Card.
 
-See: `user_request_docs/10.2_widget_takedose.md`
+See: `backlog/10.2_widget_takedose.md`

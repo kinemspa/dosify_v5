@@ -6,6 +6,6 @@ This folder contains user request notes and the split checklist files.
 
 - [x] Completion method: use markdown checkboxes only (`- [ ]` / `- [x]`).
 - [x] Do not use `[COMPLETED]` tags (they are redundant).
-- [x] Template: `user_request_docs/TEMPLATE.md`
+- [x] Template: `backlog/TEMPLATE.md`
 
 - [x] Note: Some files in this folder may be intentionally untracked (draft notes).
