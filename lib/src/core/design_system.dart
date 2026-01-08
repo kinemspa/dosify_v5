@@ -315,6 +315,11 @@ const Color kReconBackgroundActive = Color(
   0xFF1A1E37,
 ); // Slightly lighter for active state
 
+/// Semantic status colors
+///
+/// Use these instead of hardcoding colors in widgets.
+const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
+
 /// Theme-aware reconstitution calculator background.
 ///
 /// In light theme, keeps the signature dark-blue look.

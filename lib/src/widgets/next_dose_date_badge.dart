@@ -9,6 +9,7 @@ class NextDoseDateBadge extends StatelessWidget {
     required this.nextDose,
     required this.isActive,
     required this.dense,
+    this.activeColor,
     this.showNextLabel = false,
     this.showTodayIcon = true,
     this.nextLabelStyle = NextDoseBadgeLabelStyle.standard,
@@ -18,6 +19,7 @@ class NextDoseDateBadge extends StatelessWidget {
   final DateTime? nextDose;
   final bool isActive;
   final bool dense;
+  final Color? activeColor;
   final bool showNextLabel;
   final bool showTodayIcon;
   final NextDoseBadgeLabelStyle nextLabelStyle;
@@ -33,16 +35,18 @@ class NextDoseDateBadge extends StatelessWidget {
         ? kNextDoseDateCircleSizeCompact
         : kNextDoseDateCircleSizeLarge;
 
+    final accentColor = activeColor ?? cs.primary;
+
     final circleBg = isEnabled
-        ? cs.primary.withValues(alpha: kOpacitySubtle)
+      ? accentColor.withValues(alpha: kOpacitySubtle)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityFaint);
 
     final circleBorder = isEnabled
-        ? cs.primary.withValues(alpha: kOpacityMediumLow)
+      ? accentColor.withValues(alpha: kOpacityMediumLow)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityVeryLow);
 
     final primaryTextColor = isEnabled
-        ? cs.primary.withValues(alpha: kOpacityFull)
+      ? accentColor.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
 
     final shouldShowNext = showNextLabel && isEnabled;
@@ -135,7 +139,7 @@ class NextDoseDateBadge extends StatelessWidget {
                   child: Container(
                     padding: nextLabelPadding,
                     decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: kOpacityEmphasis),
+                      color: accentColor.withValues(alpha: kOpacityEmphasis),
                       borderRadius: BorderRadius.circular(nextLabelRadius),
                     ),
                     child: Text(
@@ -144,7 +148,7 @@ class NextDoseDateBadge extends StatelessWidget {
                         fontSize: kFontSizeXXSmall,
                         fontWeight: kFontWeightExtraBold,
                         height: 1,
-                        color: cs.onPrimary,
+                        color: statusColorOnPrimary(context, accentColor),
                       ),
                     ),
                   ),

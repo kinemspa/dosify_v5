@@ -50,6 +50,8 @@ class DoseCard extends StatelessWidget {
       effectiveStatus,
     );
 
+    final statusLabel = _statusLabel(effectiveStatus);
+
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
     final titleStyle = cardTitleStyle(
@@ -86,6 +88,7 @@ class DoseCard extends StatelessWidget {
                     nextDose: dose.scheduledTime,
                     isActive: isActive,
                     dense: true,
+                    activeColor: statusColor,
                     showNextLabel: false,
                     showTodayIcon: true,
                   ),
@@ -160,16 +163,33 @@ class DoseCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: kLargeButtonHeight,
-                    height: kLargeButtonHeight,
+                    height: kStandardButtonHeight,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: kSpacingS,
+                      vertical: kSpacingXS,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: kOpacityMinimal),
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: kOpacityMediumLow),
+                        width: kBorderWidthThin,
+                      ),
                     ),
-                    child: Icon(
-                      statusIcon,
-                      size: kIconSizeMedium,
-                      color: statusColor,
+                    child: Center(
+                      child: Text(
+                        statusLabel,
+                        style: helperTextStyle(
+                          context,
+                          color: statusColor,
+                        )?.copyWith(
+                          fontSize: kFontSizeXXSmall,
+                          fontWeight: kFontWeightExtraBold,
+                          height: 1,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                   const SizedBox(height: kSpacingXS),
@@ -199,7 +219,7 @@ class DoseCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     switch (status) {
       case DoseStatus.taken:
-        return (cs.primary, Icons.check_rounded);
+        return (kDoseStatusTakenGreen, Icons.check_rounded);
       case DoseStatus.skipped:
         return (cs.onSurfaceVariant, Icons.block_rounded);
       case DoseStatus.snoozed:
@@ -208,6 +228,21 @@ class DoseCard extends StatelessWidget {
         return (cs.error, Icons.warning_rounded);
       case DoseStatus.pending:
         return (cs.primary, Icons.notifications_rounded);
+    }
+  }
+
+  String _statusLabel(DoseStatus status) {
+    switch (status) {
+      case DoseStatus.taken:
+        return 'TAKEN';
+      case DoseStatus.skipped:
+        return 'SKIPPED';
+      case DoseStatus.snoozed:
+        return 'SNOOZED';
+      case DoseStatus.overdue:
+        return 'OVERDUE';
+      case DoseStatus.pending:
+        return 'PENDING';
     }
   }
 }

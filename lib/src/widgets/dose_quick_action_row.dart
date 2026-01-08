@@ -18,8 +18,8 @@ class DoseQuickActionRow extends StatelessWidget {
         _QuickIconButton(
           tooltip: 'Take',
           icon: Icons.check_rounded,
-          backgroundColor: cs.primary,
-          foregroundColor: cs.onPrimary,
+          backgroundColor: kDoseStatusTakenGreen,
+          foregroundColor: statusColorOnPrimary(context, kDoseStatusTakenGreen),
           onPressed: () => onAction(DoseStatus.taken),
         ),
         const SizedBox(width: kSpacingXS),
