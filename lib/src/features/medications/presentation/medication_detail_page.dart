@@ -3455,14 +3455,259 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
 void _showMdvRefillDialog(BuildContext context, Medication med) async {
   final currentVolume = med.activeVialVolume ?? 0;
   final vialSize = med.containerVolumeMl ?? 5.0;
-  int sealedVials = med.stockValue.toInt();
 
-  // Track options
-  String selectedAction = 'openVial'; // 'openVial' | 'restockSealed'
-  String selectedMode = 'replace'; // 'replace' | 'topUp'
-  bool useFromStock = sealedVials > 0;
-
+  // Flow state
+  var step = 0;
+  var selectedAction = 'refillActive'; // 'refillActive' | 'restockSealed'
+  var selectedMode = 'replace'; // 'replace' | 'topUp'
+  var selectedSource = 'fromStock'; // 'fromStock' | 'otherSource'
   final restockController = TextEditingController(text: '1');
+
+  double? selectedReconstitutionVolume;
+  double? selectedPerMl;
+  String? selectedDiluentName;
+  String? selectedReconLabel;
+
+  Future<double?> promptForReconstitutionVolume(
+    BuildContext sheetContext,
+    double initial,
+  ) async {
+    final controller = TextEditingController(text: initial.toStringAsFixed(2));
+    return showModalBottomSheet<double>(
+      context: sheetContext,
+      isScrollControlled: true,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: kSpacingL,
+              right: kSpacingL,
+              top: kSpacingL,
+              bottom: kSpacingL + MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Reconstitution Volume', style: cardTitleStyle(context)),
+                const SizedBox(height: kSpacingS),
+                Text(
+                  'Enter the total mL of diluent used for this vial.',
+                  style: helperTextStyle(context),
+                ),
+                const SizedBox(height: kSpacingM),
+                Center(
+                  child: StepperRow36(
+                    controller: controller,
+                    fixedFieldWidth: 100,
+                    onDec: () {
+                      final v = double.tryParse(controller.text) ?? 0;
+                      if (v <= 0) return;
+                      controller.text = (v - 0.1)
+                          .clamp(0.0, double.infinity)
+                          .toStringAsFixed(2);
+                    },
+                    onInc: () {
+                      final v = double.tryParse(controller.text) ?? 0;
+                      controller.text = (v + 0.1).toStringAsFixed(2);
+                    },
+                    decoration: buildCompactFieldDecoration(context: context),
+                  ),
+                ),
+                const SizedBox(height: kSpacingM),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: kSpacingM),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          final v = double.tryParse(controller.text.trim());
+                          if (v == null || v <= 0) {
+                            ScaffoldMessenger.of(context)
+                              ..clearSnackBars()
+                              ..showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                    'Enter a volume greater than 0.',
+                                  ),
+                                  backgroundColor: theme.colorScheme.error,
+                                ),
+                              );
+                            return;
+                          }
+                          Navigator.of(context).pop(v);
+                        },
+                        child: const Text('Use Volume'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> pickReconstitution(BuildContext dialogContext) async {
+    final box = Hive.box<Medication>('medications');
+    final latest = box.get(med.id) ?? med;
+
+    Future<void> setRecon({
+      required double volumeMl,
+      required double perMl,
+      String? diluentName,
+      required String label,
+    }) async {
+      selectedReconstitutionVolume = volumeMl;
+      selectedPerMl = perMl;
+      selectedDiluentName = diluentName;
+      selectedReconLabel = label;
+    }
+
+    final picked = await showModalBottomSheet<String>(
+      context: dialogContext,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(kSpacingL),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Reconstitute Active Vial',
+                  style: cardTitleStyle(context),
+                ),
+                const SizedBox(height: kSpacingS),
+                Text(
+                  'Choose how to set the reconstitution volume.',
+                  style: helperTextStyle(context),
+                ),
+                const SizedBox(height: kSpacingM),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Use Previous Reconstitution'),
+                  onTap: () => Navigator.of(context).pop('previous'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Calculate New Reconstitution'),
+                  onTap: () => Navigator.of(context).pop('calculate'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Use Saved Reconstitution'),
+                  onTap: () => Navigator.of(context).pop('saved'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Enter Known Reconstitution Volume'),
+                  onTap: () => Navigator.of(context).pop('known'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (picked == null) return;
+
+    if (picked == 'previous') {
+      final previous = latest.containerVolumeMl;
+      final previousPerMl = latest.perMlValue;
+      if (previous == null || previous <= 0) {
+        if (!dialogContext.mounted) return;
+        ScaffoldMessenger.of(dialogContext)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(content: Text('Set a reconstitution volume first.')),
+          );
+        return;
+      }
+      await setRecon(
+        volumeMl: previous,
+        perMl: previousPerMl ?? (latest.strengthValue / previous),
+        diluentName: latest.diluentName,
+        label: 'Previous',
+      );
+      return;
+    }
+
+    if (picked == 'known') {
+      final initial = (latest.containerVolumeMl ?? vialSize).clamp(0.1, 9999.0);
+      final volume = await promptForReconstitutionVolume(
+        dialogContext,
+        initial,
+      );
+      if (volume == null) return;
+      await setRecon(
+        volumeMl: volume,
+        perMl: latest.strengthValue / volume,
+        diluentName: latest.diluentName,
+        label: 'Known volume',
+      );
+      return;
+    }
+
+    if (picked == 'saved') {
+      final saved = await showModalBottomSheet<SavedReconstitutionCalculation>(
+        context: dialogContext,
+        isScrollControlled: true,
+        builder: (context) {
+          final height = MediaQuery.of(context).size.height;
+          return SizedBox(
+            height: height * 0.8,
+            child: SavedReconstitutionSheet(
+              repo: SavedReconstitutionRepository(),
+              onSelect: (item) => Navigator.of(context).pop(item),
+            ),
+          );
+        },
+      );
+      if (saved == null) return;
+      await setRecon(
+        volumeMl: saved.solventVolumeMl,
+        perMl: saved.perMlConcentration,
+        diluentName: saved.diluentName,
+        label: 'Saved: ${saved.name}',
+      );
+      return;
+    }
+
+    final result = await showModalBottomSheet<ReconstitutionResult>(
+      context: dialogContext,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => ReconstitutionCalculatorDialog(
+          initialStrengthValue: med.strengthValue,
+          unitLabel: med.strengthUnit.name,
+          initialSyringeSize: SyringeSizeMl.ml3,
+          initialVialSize: med.containerVolumeMl,
+        ),
+      ),
+    );
+
+    if (result == null) return;
+    await setRecon(
+      volumeMl: result.solventVolumeMl,
+      perMl: result.perMlConcentration,
+      diluentName: result.diluentName,
+      label: 'Calculated',
+    );
+  }
 
   final result = await showDialog<Map<String, dynamic>>(
     context: context,
@@ -3470,88 +3715,93 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     builder: (dialogContext) => StatefulBuilder(
       builder: (context, setState) {
         final theme = Theme.of(context);
+        final cs = theme.colorScheme;
+        final sealedVials = med.stockValue.toInt();
+
+        final canUseFromStock = sealedVials > 0;
+        final willUseFromStock =
+            selectedSource == 'fromStock' && canUseFromStock;
+
         final previewVolume = selectedMode == 'replace'
-            ? vialSize
+            ? (selectedReconstitutionVolume ?? vialSize)
             : currentVolume + vialSize;
 
         final restockAmount = int.tryParse(restockController.text) ?? 0;
         final restockPreviewTotal = sealedVials + restockAmount;
 
-        return AlertDialog(
-          titleTextStyle: cardTitleStyle(
-            context,
-          )?.copyWith(color: theme.colorScheme.primary),
-          contentTextStyle: bodyTextStyle(context),
-          title: const Text('Multi Dose Vial'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Helper text
-              Text(
-                'Choose whether to use a new vial or restock your sealed vial inventory.',
-                style: helperTextStyle(context),
-              ),
-              const SizedBox(height: 16),
+        final title = selectedAction == 'restockSealed'
+            ? 'Restock Sealed Vials'
+            : 'Refill Active Vial';
 
-              // Current state
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(kSpacingM),
-                decoration: buildInsetSectionDecoration(context: context),
-                child: Column(
+        final canContinue = switch (selectedAction) {
+          'restockSealed' => restockAmount > 0,
+          _ =>
+            selectedMode == 'topUp' ||
+                (selectedReconstitutionVolume != null && selectedPerMl != null),
+        };
+
+        Widget buildHeaderCard() {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(kSpacingM),
+            decoration: buildInsetSectionDecoration(context: context),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Active Vial:'),
-                        Text(
-                          '${_formatNumber(currentVolume)} mL remaining',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Sealed Vials:',
-                          style: helperTextStyle(
-                            context,
-                            color: theme.colorScheme.primary,
-                          )?.copyWith(fontWeight: kFontWeightSemiBold),
-                        ),
-                        Text(
-                          '$sealedVials in stock',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: sealedVials == 0
-                                ? theme.colorScheme.error
-                                : null,
-                          ),
-                        ),
-                      ],
+                    const Text('Active Vial:'),
+                    Text(
+                      '${_formatNumber(currentVolume)} mL remaining',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: kSpacingXS),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Sealed Vials:',
+                      style: helperTextStyle(
+                        context,
+                        color: cs.primary,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    ),
+                    Text(
+                      '$sealedVials in stock',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: sealedVials == 0 ? cs.error : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }
 
-              // Primary selection (2 options)
-              const Text(
-                'Action:',
-                style: TextStyle(fontWeight: FontWeight.w500),
+        Widget content;
+        if (step == 0) {
+          content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose what you want to do.',
+                style: helperTextStyle(context),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingM),
+              buildHeaderCard(),
+              const SizedBox(height: kSpacingM),
               RadioListTile<String>(
-                title: const Text('Use New Vial'),
-                subtitle: const Text('Replace or top up the active vial'),
-                value: 'openVial',
+                title: const Text('Refill Active Vial'),
+                subtitle: const Text('Replace or top up your active vial'),
+                value: 'refillActive',
                 groupValue: selectedAction,
-                onChanged: (v) {
-                  setState(() => selectedAction = v ?? 'openVial');
-                },
+                onChanged: (v) =>
+                    setState(() => selectedAction = v ?? 'refillActive'),
                 dense: true,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -3560,150 +3810,256 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                 subtitle: const Text('Add sealed vials to your inventory'),
                 value: 'restockSealed',
                 groupValue: selectedAction,
-                onChanged: (v) {
-                  setState(() => selectedAction = v ?? 'openVial');
-                },
+                onChanged: (v) =>
+                    setState(() => selectedAction = v ?? 'refillActive'),
                 dense: true,
                 contentPadding: EdgeInsets.zero,
               ),
-
-              const SizedBox(height: 8),
-
-              if (selectedAction == 'openVial') ...[
-                Text(
-                  'Use vial method:',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8),
-                ChoiceChip(
-                  label: Text(
-                    'Replace (discard ${_formatNumber(currentVolume)} mL)',
-                  ),
-                  selected: selectedMode == 'replace',
-                  onSelected: (_) => setState(() => selectedMode = 'replace'),
-                ),
-                const SizedBox(height: 4),
-                ChoiceChip(
-                  label: Text('Top Up (add ${_formatNumber(vialSize)} mL)'),
-                  selected: selectedMode == 'topUp',
-                  onSelected: (_) => setState(() => selectedMode = 'topUp'),
-                ),
-                const SizedBox(height: 16),
-
-                CheckboxListTile(
-                  title: const Text('Use sealed vial from stock'),
-                  subtitle: sealedVials == 0
-                      ? Text(
-                          'No sealed vials available',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        )
-                      : Text(
-                          'Will deduct 1 vial (${sealedVials - 1} remaining)',
-                        ),
-                  value: useFromStock,
-                  onChanged: sealedVials == 0
-                      ? null
-                      : (v) => setState(() => useFromStock = v ?? false),
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-
-                const SizedBox(height: 12),
-
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('New Volume:'),
-                      Text(
-                        '${_formatNumber(previewVolume)} mL',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ] else ...[
-                Text(
-                  'Add sealed vials:',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: StepperRow36(
-                    controller: restockController,
-                    fixedFieldWidth: 80,
-                    onDec: () {
-                      final v = int.tryParse(restockController.text) ?? 0;
-                      if (v > 0) {
-                        restockController.text = (v - 1).toString();
-                        setState(() {});
-                      }
-                    },
-                    onInc: () {
-                      final v = int.tryParse(restockController.text) ?? 0;
-                      restockController.text = (v + 1).toString();
+            ],
+          );
+        } else if (selectedAction == 'restockSealed') {
+          content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Add sealed vials to your stock.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingM),
+              buildHeaderCard(),
+              const SizedBox(height: kSpacingM),
+              Center(
+                child: StepperRow36(
+                  controller: restockController,
+                  fixedFieldWidth: 80,
+                  onDec: () {
+                    final v = int.tryParse(restockController.text) ?? 0;
+                    if (v > 0) {
+                      restockController.text = (v - 1).toString();
                       setState(() {});
-                    },
-                    decoration: buildCompactFieldDecoration(context: context),
-                  ),
+                    }
+                  },
+                  onInc: () {
+                    final v = int.tryParse(restockController.text) ?? 0;
+                    restockController.text = (v + 1).toString();
+                    setState(() {});
+                  },
+                  decoration: buildCompactFieldDecoration(context: context),
                 ),
-                const SizedBox(height: 16),
-
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('New Total:'),
-                      Text(
-                        '$restockPreviewTotal vials',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+              ),
+              const SizedBox(height: kSpacingM),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(kSpacingM),
+                decoration: buildInsetSectionDecoration(context: context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('New Total:'),
+                    Text(
+                      '$restockPreviewTotal vials',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        } else if (step == 1) {
+          content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose how to refill your active vial.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingM),
+              buildHeaderCard(),
+              const SizedBox(height: kSpacingM),
+              RadioListTile<String>(
+                title: Text(
+                  'Replace (discard ${_formatNumber(currentVolume)} mL)',
+                ),
+                value: 'replace',
+                groupValue: selectedMode,
+                onChanged: (v) => setState(() => selectedMode = v ?? 'replace'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              RadioListTile<String>(
+                title: Text('Top Up (add ${_formatNumber(vialSize)} mL)'),
+                value: 'topUp',
+                groupValue: selectedMode,
+                onChanged: (v) => setState(() => selectedMode = v ?? 'replace'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          );
+        } else if (step == 2) {
+          content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose where the vial comes from.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingM),
+              buildHeaderCard(),
+              const SizedBox(height: kSpacingM),
+              RadioListTile<String>(
+                title: const Text('Use sealed vial from stock'),
+                subtitle: canUseFromStock
+                    ? Text('Will deduct 1 vial (${sealedVials - 1} remaining)')
+                    : Text(
+                        'No sealed vials available',
+                        style: TextStyle(color: cs.error),
+                      ),
+                value: 'fromStock',
+                groupValue: selectedSource,
+                onChanged: canUseFromStock
+                    ? (v) => setState(() => selectedSource = v ?? 'fromStock')
+                    : null,
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              RadioListTile<String>(
+                title: const Text('Use other source'),
+                subtitle: const Text('Does not change sealed vial stock'),
+                value: 'otherSource',
+                groupValue: selectedSource,
+                onChanged: (v) =>
+                    setState(() => selectedSource = v ?? 'otherSource'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          );
+        } else {
+          content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                selectedMode == 'replace'
+                    ? 'Set the reconstitution for the new active vial.'
+                    : 'Top up adds a fixed amount (no reconstitution change).',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingM),
+              if (selectedMode == 'replace') ...[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Choose Reconstitution Method'),
+                  subtitle: Text(selectedReconLabel ?? 'Not selected'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await pickReconstitution(dialogContext);
+                    if (!dialogContext.mounted) return;
+                    setState(() {});
+                  },
                 ),
               ],
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(kSpacingM),
+                decoration: buildInsetSectionDecoration(context: context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('New Volume:'),
+                    Text(
+                      '${_formatNumber(previewVolume)} mL',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
+          );
+        }
+
+        void back() {
+          if (step == 0) return;
+          setState(() => step -= 1);
+        }
+
+        void next() {
+          if (selectedAction == 'restockSealed') {
+            setState(() => step = 1);
+            return;
+          }
+          if (step < 3) {
+            setState(() => step += 1);
+          }
+        }
+
+        return AlertDialog(
+          titleTextStyle: cardTitleStyle(context)?.copyWith(color: cs.primary),
+          contentTextStyle: bodyTextStyle(context),
+          title: Text(title),
+          content: SingleChildScrollView(child: content),
           actions: [
+            if (step > 0)
+              TextButton(onPressed: back, child: const Text('Back')),
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Cancel'),
             ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context, {
-                  'action': selectedAction,
-                  'mode': selectedMode,
-                  'useFromStock': useFromStock,
-                  'restockAmount': restockAmount,
-                });
-              },
-              child: Text(
-                selectedAction == 'openVial' ? 'Use New Vial' : 'Add Vials',
+            if (step == 0)
+              FilledButton(
+                onPressed: () {
+                  if (selectedAction == 'restockSealed') {
+                    setState(() => step = 1);
+                    return;
+                  }
+                  setState(() => step = 1);
+                },
+                child: const Text('Continue'),
+              )
+            else if (selectedAction == 'restockSealed' && step == 1)
+              FilledButton(
+                onPressed: canContinue
+                    ? () {
+                        Navigator.of(dialogContext).pop({
+                          'action': 'restockSealed',
+                          'restockAmount': restockAmount,
+                        });
+                      }
+                    : null,
+                child: const Text('Add Vials'),
+              )
+            else if (selectedAction == 'refillActive' && step < 3)
+              FilledButton(onPressed: next, child: const Text('Continue'))
+            else
+              FilledButton(
+                onPressed: canContinue
+                    ? () {
+                        Navigator.of(dialogContext).pop({
+                          'action': 'refillActive',
+                          'mode': selectedMode,
+                          'source': selectedSource,
+                          'useFromStock': willUseFromStock,
+                          'reconVolume': selectedReconstitutionVolume,
+                          'perMl': selectedPerMl,
+                          'diluentName': selectedDiluentName,
+                          'reconLabel': selectedReconLabel,
+                        });
+                      }
+                    : null,
+                child: Text(
+                  selectedMode == 'replace' ? 'Replace Vial' : 'Top Up',
+                ),
               ),
-            ),
           ],
         );
       },
@@ -3747,30 +4103,72 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     }
 
     final mode = result['mode'] as String;
-    final useStock = result['useFromStock'] as bool;
-
-    double newVolume;
-    double newSealedCount = med.stockValue;
+    final useStock = (result['useFromStock'] as bool?) ?? false;
     final previousSealedCount = med.stockValue;
-
-    if (mode == 'replace') {
-      newVolume = vialSize;
-    } else {
-      newVolume = currentVolume + vialSize;
-    }
-
-    if (useStock && sealedVials > 0) {
+    var newSealedCount = med.stockValue;
+    final usedSealedVial = useStock && previousSealedCount.toInt() > 0;
+    if (usedSealedVial) {
       newSealedCount = med.stockValue - 1;
     }
 
-    final usedSealedVial = useStock && sealedVials > 0;
+    if (mode == 'topUp') {
+      final newVolume = currentVolume + vialSize;
+      box.put(
+        med.id,
+        med.copyWith(activeVialVolume: newVolume, stockValue: newSealedCount),
+      );
+
+      final inventoryLog = InventoryLog(
+        id: 'vial_${med.id}_${now.millisecondsSinceEpoch}',
+        medicationId: med.id,
+        medicationName: med.name,
+        changeType: InventoryChangeType.vialOpened,
+        previousStock: previousSealedCount,
+        newStock: newSealedCount,
+        changeAmount: usedSealedVial ? -1 : 0,
+        notes:
+            'Topped up to ${_formatNumber(newVolume)} mL'
+            '${usedSealedVial ? ' • used 1 sealed vial' : ''}'
+            ' • direct mL',
+        timestamp: now,
+      );
+      inventoryLogBox.put(inventoryLog.id, inventoryLog);
+
+      final stockText = usedSealedVial ? ' (1 sealed vial used)' : '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Topped up vial - ${_formatNumber(newVolume)} mL$stockText',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final reconVolume = result['reconVolume'] as double?;
+    final perMl = result['perMl'] as double?;
+    if (reconVolume == null ||
+        perMl == null ||
+        reconVolume <= 0 ||
+        perMl <= 0) {
+      return;
+    }
+
+    final diluentName = result['diluentName'] as String?;
+    final reconLabel = result['reconLabel'] as String?;
 
     box.put(
       med.id,
-      med.copyWith(activeVialVolume: newVolume, stockValue: newSealedCount),
+      med.copyWith(
+        containerVolumeMl: reconVolume,
+        perMlValue: perMl,
+        diluentName: diluentName,
+        activeVialVolume: reconVolume,
+        reconstitutedAt: now,
+        stockValue: newSealedCount,
+      ),
     );
 
-    // Log the vial opening for reporting
     final inventoryLog = InventoryLog(
       id: 'vial_${med.id}_${now.millisecondsSinceEpoch}',
       medicationId: med.id,
@@ -3778,21 +4176,20 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       changeType: InventoryChangeType.vialOpened,
       previousStock: previousSealedCount,
       newStock: newSealedCount,
-      changeAmount: useStock ? -1 : 0,
+      changeAmount: usedSealedVial ? -1 : 0,
       notes:
-          '${mode == 'replace' ? 'Replaced' : 'Topped up'} to ${_formatNumber(newVolume)} mL'
+          'Replaced to ${_formatNumber(reconVolume)} mL'
           '${usedSealedVial ? ' • used 1 sealed vial' : ''}'
-          ' • direct mL',
+          '${reconLabel != null ? ' • $reconLabel' : ''}',
       timestamp: now,
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
-    final actionText = mode == 'replace' ? 'Replaced' : 'Topped up';
     final stockText = usedSealedVial ? ' (1 sealed vial used)' : '';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '$actionText vial - ${_formatNumber(newVolume)} mL$stockText',
+          'Replaced vial - ${_formatNumber(reconVolume)} mL$stockText',
         ),
       ),
     );
