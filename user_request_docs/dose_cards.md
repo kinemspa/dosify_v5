@@ -1,5 +1,7 @@
 # Dose Cards
 
+## Requests
+
 - [x] Too High.
 - [x] Has time and an action to take at time. Dont need both.
 - [x] Needs a date icon, will display today
@@ -11,4 +13,4 @@
 
 This is a separate UI from the Dose Card.
 
-See: `user_request_docs/widget_takedose.md`
+See: `user_request_docs/10.2_widget_takedose.md`
