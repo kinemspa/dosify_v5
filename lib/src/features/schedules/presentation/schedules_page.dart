@@ -368,8 +368,6 @@ class _ScheduleListRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ScheduleStatusChip(schedule: s),
-                  const SizedBox(height: kSpacingXS),
                   Text(
                     _ScheduleText.nextDayLabel(context, next),
                     style: helperTextStyle(
@@ -383,6 +381,8 @@ class _ScheduleListRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: kSpacingXS),
+                  ScheduleStatusIcon(schedule: s, size: kIconSizeXSmall),
                 ],
               ),
             ],
@@ -616,7 +616,10 @@ class _ScheduleCard extends StatelessWidget {
                 strengthOrConcentrationLabel: strengthLabel,
                 doseMetrics: metrics,
                 isActive: s.isActive,
-                titleTrailing: ScheduleStatusChip(schedule: s),
+                leadingFooter: ScheduleStatusIcon(
+                  schedule: s,
+                  size: kIconSizeXSmall,
+                ),
                 onTap: () => context.push('/schedules/detail/${s.id}'),
                 onQuickAction: (status) => _showDoseActionSheet(
                   context,
@@ -639,6 +642,10 @@ class _ScheduleCard extends StatelessWidget {
     }
 
     if (dense) {
+      final medName = s.medicationName.trim();
+      final scheduleName = s.name.trim();
+      final showScheduleName = medName.isNotEmpty && scheduleName.isNotEmpty;
+
       return GlassCardSurface(
         onTap: () => context.push('/schedules/detail/${s.id}'),
         useGradient: false,
@@ -659,18 +666,17 @@ class _ScheduleCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    scheduleTakeInstructionLabel(context, s),
-                    style: helperTextStyle(
-                      context,
-                      color: cs.onSurfaceVariant.withValues(
-                        alpha: kOpacityMedium,
-                      ),
-                    )?.copyWith(fontSize: kFontSizeSmall),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  if (showScheduleName) ...[
+                    const SizedBox(height: kSpacingXXS),
+                    Text(
+                      scheduleName,
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: kSpacingXS),
                   Text(
                     scheduleSubtitle ?? '$cadence · $timesPerDay',
@@ -678,20 +684,23 @@ class _ScheduleCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: kSpacingXS),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ScheduleStatusChip(schedule: s),
-                  ),
                 ],
               ),
             ),
             const SizedBox(width: kSpacingS),
-            NextDoseDateBadge(
-              nextDose: next,
-              isActive: s.isActive,
-              dense: true,
-              showNextLabel: true,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NextDoseDateBadge(
+                  nextDose: next,
+                  isActive: s.isActive,
+                  dense: true,
+                  showNextLabel: true,
+                ),
+                const SizedBox(height: kSpacingXS),
+                ScheduleStatusIcon(schedule: s, size: kIconSizeXSmall),
+              ],
             ),
           ],
         ),
@@ -754,8 +763,6 @@ class _ScheduleCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: kSpacingXS),
-          ScheduleStatusChip(schedule: s),
         ],
       ),
       trailing: Column(
@@ -772,6 +779,8 @@ class _ScheduleCard extends StatelessWidget {
               nextLabelStyle: NextDoseBadgeLabelStyle.tall,
             ),
           ),
+          const SizedBox(height: kSpacingXS),
+          ScheduleStatusIcon(schedule: s, size: kIconSizeXSmall),
         ],
       ),
     );

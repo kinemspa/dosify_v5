@@ -20,6 +20,7 @@ class DoseCard extends StatelessWidget {
     this.isActive = true,
     this.statusOverride,
     this.titleTrailing,
+    this.leadingFooter,
     this.primaryActionLabel,
     this.onPrimaryAction,
     this.onQuickAction,
@@ -34,6 +35,7 @@ class DoseCard extends StatelessWidget {
   final bool isActive;
   final DoseStatus? statusOverride;
   final Widget? titleTrailing;
+  final Widget? leadingFooter;
   final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
   final ValueChanged<DoseStatus>? onQuickAction;
@@ -87,6 +89,10 @@ class DoseCard extends StatelessWidget {
                     showNextLabel: false,
                     showTodayIcon: true,
                   ),
+                  if (leadingFooter != null) ...[
+                    const SizedBox(height: kSpacingXS),
+                    leadingFooter!,
+                  ],
                 ],
               ),
               const SizedBox(width: kSpacingM),

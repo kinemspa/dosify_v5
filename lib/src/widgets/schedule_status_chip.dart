@@ -59,3 +59,31 @@ class ScheduleStatusChip extends StatelessWidget {
     }
   }
 }
+
+class ScheduleStatusIcon extends StatelessWidget {
+  const ScheduleStatusIcon({super.key, required this.schedule, this.size});
+
+  final Schedule schedule;
+  final double? size;
+
+  @override
+  Widget build(BuildContext context) {
+    final (color, icon) = _presentation(context, schedule);
+    return Icon(icon, size: size ?? kIconSizeXSmall, color: color);
+  }
+
+  (Color, IconData) _presentation(BuildContext context, Schedule schedule) {
+    final cs = Theme.of(context).colorScheme;
+
+    switch (schedule.status) {
+      case ScheduleStatus.active:
+        return (cs.primary, scheduleStatusIcon(schedule));
+      case ScheduleStatus.paused:
+        return (cs.tertiary, scheduleStatusIcon(schedule));
+      case ScheduleStatus.disabled:
+        return (cs.error, scheduleStatusIcon(schedule));
+      case ScheduleStatus.completed:
+        return (cs.primary, scheduleStatusIcon(schedule));
+    }
+  }
+}
