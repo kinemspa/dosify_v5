@@ -1,7 +1,7 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_calculation_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
@@ -501,15 +501,21 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return true; // Medication not found, skip
       }
 
-      // Calculate stock delta based on medication and dose type
-      final delta = _calculateStockDelta(med, schedule);
+      final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+        medication: med,
+        schedule: schedule,
+        doseValue: dose.doseValue,
+        doseUnit: dose.doseUnit,
+      );
 
-      if (delta <= 0) {
+      if (delta == null || delta <= 0) {
         return true; // Can't calculate delta, skip
       }
 
-      final newStock = (med.stockValue - delta).clamp(0.0, double.infinity);
-      await medBox.put(med.id, med.copyWith(stockValue: newStock));
+      await medBox.put(
+        med.id,
+        MedicationStockAdjustment.deduct(medication: med, delta: delta),
+      );
 
       return true;
     } catch (e) {
@@ -536,101 +542,27 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return true; // Medication not found
       }
 
-      // Calculate stock delta
-      final delta = _calculateStockDelta(med, schedule);
+      final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+        medication: med,
+        schedule: schedule,
+        doseValue: dose.doseValue,
+        doseUnit: dose.doseUnit,
+      );
 
-      if (delta <= 0) {
+      if (delta == null || delta <= 0) {
         return true; // Can't calculate delta
       }
 
-      final newStock = med.stockValue + delta;
-      await medBox.put(med.id, med.copyWith(stockValue: newStock));
+      await medBox.put(
+        med.id,
+        MedicationStockAdjustment.restore(medication: med, delta: delta),
+      );
 
       return true;
     } catch (e) {
       debugPrint('[DoseCalendar] Failed to restore stock: $e');
       return false;
     }
-  }
-
-  double _calculateStockDelta(Medication med, Schedule schedule) {
-    var delta = 0.0;
-
-    switch (med.stockUnit) {
-      case StockUnit.tablets:
-        if (schedule.doseTabletQuarters != null) {
-          delta = schedule.doseTabletQuarters! / 4.0;
-        } else if (schedule.doseMassMcg != null) {
-          final perTabMcg = _convertToMcg(med.strengthValue, med.strengthUnit);
-          delta = (schedule.doseMassMcg! / perTabMcg).clamp(0, double.infinity);
-        }
-      case StockUnit.capsules:
-        if (schedule.doseCapsules != null) {
-          delta = schedule.doseCapsules!.toDouble();
-        } else if (schedule.doseMassMcg != null) {
-          final perCapMcg = _convertToMcg(med.strengthValue, med.strengthUnit);
-          delta = (schedule.doseMassMcg! / perCapMcg).clamp(0, double.infinity);
-        }
-      case StockUnit.preFilledSyringes:
-        if (schedule.doseSyringes != null)
-          delta = schedule.doseSyringes!.toDouble();
-      case StockUnit.singleDoseVials:
-        if (schedule.doseVials != null) delta = schedule.doseVials!.toDouble();
-      case StockUnit.multiDoseVials:
-        // For MDV: stockValue = active vial mL remaining
-        // Deduct the raw mL volume used, NOT a vial fraction
-        var usedMl = 0.0;
-        if (schedule.doseVolumeMicroliter != null) {
-          usedMl = schedule.doseVolumeMicroliter! / 1000.0;
-        } else if (schedule.doseMassMcg != null) {
-          double? mgPerMl;
-          switch (med.strengthUnit) {
-            case Unit.mgPerMl:
-              mgPerMl = med.perMlValue ?? med.strengthValue;
-            case Unit.mcgPerMl:
-              mgPerMl = (med.perMlValue ?? med.strengthValue) / 1000.0;
-            case Unit.gPerMl:
-              mgPerMl = (med.perMlValue ?? med.strengthValue) * 1000.0;
-            default:
-              mgPerMl = null;
-          }
-          if (mgPerMl != null)
-            usedMl = (schedule.doseMassMcg! / 1000.0) / mgPerMl;
-        } else if (schedule.doseIU != null) {
-          double? iuPerMl;
-          if (med.strengthUnit == Unit.unitsPerMl) {
-            iuPerMl = med.perMlValue ?? med.strengthValue;
-          }
-          if (iuPerMl != null) usedMl = schedule.doseIU! / iuPerMl;
-        }
-        // Deduct mL directly from active vial stock
-        if (usedMl > 0) {
-          delta = usedMl;
-        }
-      case StockUnit.mcg:
-        if (schedule.doseMassMcg != null)
-          delta = schedule.doseMassMcg!.toDouble();
-      case StockUnit.mg:
-        if (schedule.doseMassMcg != null)
-          delta = schedule.doseMassMcg! / 1000.0;
-      case StockUnit.g:
-        if (schedule.doseMassMcg != null) delta = schedule.doseMassMcg! / 1e6;
-    }
-
-    return delta;
-  }
-
-  double _convertToMcg(double value, Unit unit) {
-    return switch (unit) {
-      Unit.mcg => value,
-      Unit.mg => value * 1000,
-      Unit.g => value * 1e6,
-      Unit.units => value,
-      Unit.mcgPerMl => value,
-      Unit.mgPerMl => value * 1000,
-      Unit.gPerMl => value * 1e6,
-      Unit.unitsPerMl => value,
-    };
   }
 
   @override
@@ -931,8 +863,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                               doseSyringes: schedule.doseSyringes,
                               doseVials: schedule.doseVials,
                               doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                              doseVolumeMicroliter:
-                                  schedule.doseVolumeMicroliter?.toDouble(),
+                              doseVolumeMicroliter: schedule
+                                  .doseVolumeMicroliter
+                                  ?.toDouble(),
                               syringeUnits: schedule.doseIU?.toDouble(),
                             );
 

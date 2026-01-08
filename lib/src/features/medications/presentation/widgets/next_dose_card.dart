@@ -3,6 +3,7 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -292,7 +293,8 @@ class _NextDoseCardState extends State<NextDoseCard>
         medicationName: widget.medication.name,
         strengthOrConcentrationLabel: strengthLabel,
         doseMetrics: metrics,
-        onQuickAction: (status) => _showDoseActionSheet(dose, initialStatus: status),
+        onQuickAction: (status) =>
+            _showDoseActionSheet(dose, initialStatus: status),
         onTap: () => _showDoseActionSheet(dose),
       ),
     );
@@ -772,14 +774,22 @@ class _NextDoseCardState extends State<NextDoseCard>
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(widget.medication.id);
         if (currentMed != null) {
-          final newStockValue = (currentMed.stockValue - dose.doseValue).clamp(
-            0.0,
-            double.infinity,
+          final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+          final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: currentMed,
+            schedule: schedule,
+            doseValue: dose.doseValue,
+            doseUnit: dose.doseUnit,
           );
-          await medBox.put(
-            currentMed.id,
-            currentMed.copyWith(stockValue: newStockValue),
-          );
+          if (delta != null) {
+            await medBox.put(
+              currentMed.id,
+              MedicationStockAdjustment.deduct(
+                medication: currentMed,
+                delta: delta,
+              ),
+            );
+          }
         }
 
         if (!mounted) return;
@@ -826,9 +836,9 @@ class _NextDoseCardState extends State<NextDoseCard>
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(label)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(label)));
       },
       onSkip: (notes, actionTime) async {
         final logId =
@@ -870,11 +880,24 @@ class _NextDoseCardState extends State<NextDoseCard>
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
-            final newStockValue = currentMed.stockValue + dose.doseValue;
-            await medBox.put(
-              currentMed.id,
-              currentMed.copyWith(stockValue: newStockValue),
+            final schedule = Hive.box<Schedule>(
+              'schedules',
+            ).get(dose.scheduleId);
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: dose.doseValue,
+              doseUnit: dose.doseUnit,
             );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
           }
         }
 

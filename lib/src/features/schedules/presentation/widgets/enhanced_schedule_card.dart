@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -95,14 +96,21 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(widget.medication.id);
         if (currentMed != null) {
-          final newStockValue = (currentMed.stockValue - dose.doseValue).clamp(
-            0.0,
-            double.infinity,
+          final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: currentMed,
+            schedule: widget.schedule,
+            doseValue: dose.doseValue,
+            doseUnit: dose.doseUnit,
           );
-          await medBox.put(
-            currentMed.id,
-            currentMed.copyWith(stockValue: newStockValue),
-          );
+          if (delta != null) {
+            await medBox.put(
+              currentMed.id,
+              MedicationStockAdjustment.deduct(
+                medication: currentMed,
+                delta: delta,
+              ),
+            );
+          }
         }
 
         if (!mounted) return;
@@ -175,11 +183,21 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
-            final newStockValue = currentMed.stockValue + dose.doseValue;
-            await medBox.put(
-              currentMed.id,
-              currentMed.copyWith(stockValue: newStockValue),
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: widget.schedule,
+              doseValue: dose.doseValue,
+              doseUnit: dose.doseUnit,
             );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
           }
         }
 

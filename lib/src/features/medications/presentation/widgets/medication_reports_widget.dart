@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_calculation_service.d
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
@@ -793,6 +794,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       onMarkTaken: (notes, actionTime) async {
         final trimmed = notes?.trim();
         final latest = logBox.get(log.id) ?? log;
+
+        if (latest.action != DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: latest.doseValue,
+              doseUnit: latest.doseUnit,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.deduct(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
+
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -817,6 +842,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       onSnooze: (notes, actionTime) async {
         final trimmed = notes?.trim();
         final latest = logBox.get(log.id) ?? log;
+
+        if (latest.action == DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: latest.doseValue,
+              doseUnit: latest.doseUnit,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
+
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -839,6 +888,30 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       onSkip: (notes, actionTime) async {
         final trimmed = notes?.trim();
         final latest = logBox.get(log.id) ?? log;
+
+        if (latest.action == DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: latest.doseValue,
+              doseUnit: latest.doseUnit,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
+
         final updated = DoseLog(
           id: log.id,
           scheduleId: log.scheduleId,
@@ -859,6 +932,29 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         showUpdatedSnackBar('Dose updated');
       },
       onDelete: (_) async {
+        final latest = logBox.get(log.id) ?? log;
+        if (latest.action == DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: latest.doseValue,
+              doseUnit: latest.doseUnit,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
         await repo.delete(log.id);
         if (!mounted) return;
         setState(() {});
@@ -904,6 +1000,27 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       context,
       dose: dose,
       onMarkTaken: (notes, actionTime) async {
+        final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+        final medBox = Hive.box<Medication>('medications');
+        final currentMed = medBox.get(widget.medication.id);
+        if (currentMed != null) {
+          final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: currentMed,
+            schedule: schedule,
+            doseValue: dose.doseValue,
+            doseUnit: dose.doseUnit,
+          );
+          if (delta != null) {
+            await medBox.put(
+              currentMed.id,
+              MedicationStockAdjustment.deduct(
+                medication: currentMed,
+                delta: delta,
+              ),
+            );
+          }
+        }
+
         repo.upsert(buildLog(DoseAction.taken, notes)).then((_) {
           if (!mounted) return;
           setState(() {});

@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -79,14 +80,21 @@ class HomePage extends StatelessWidget {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(medication.id);
         if (currentMed != null) {
-          final newStockValue = (currentMed.stockValue - dose.doseValue).clamp(
-            0.0,
-            double.infinity,
+          final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: currentMed,
+            schedule: schedule,
+            doseValue: dose.doseValue,
+            doseUnit: dose.doseUnit,
           );
-          await medBox.put(
-            currentMed.id,
-            currentMed.copyWith(stockValue: newStockValue),
-          );
+          if (delta != null) {
+            await medBox.put(
+              currentMed.id,
+              MedicationStockAdjustment.deduct(
+                medication: currentMed,
+                delta: delta,
+              ),
+            );
+          }
         }
 
         if (context.mounted) {
@@ -125,9 +133,9 @@ class HomePage extends StatelessWidget {
           final label = sameDay
               ? 'Dose snoozed until $time'
               : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(actionTime)} • $time';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(label)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(label)));
         }
       },
       onSkip: (notes, actionTime) async {
@@ -164,6 +172,30 @@ class HomePage extends StatelessWidget {
 
         final logBox = Hive.box<DoseLog>('dose_logs');
         final repo = DoseLogRepository(logBox);
+
+        final existingLog = logBox.get(logId);
+        if (existingLog != null && existingLog.action == DoseAction.taken) {
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(medication.id);
+          if (currentMed != null) {
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: dose.doseValue,
+              doseUnit: dose.doseUnit,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
+
         await repo.delete(logId);
         await repo.delete(snoozeId);
 
