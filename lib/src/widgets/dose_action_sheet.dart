@@ -6,12 +6,14 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -117,6 +119,45 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       case DoseStatus.overdue:
         return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
     }
+  }
+
+  Widget _buildDoseCardPreview(BuildContext context) {
+    final schedule = Hive.box<Schedule>(
+      'schedules',
+    ).get(widget.dose.scheduleId);
+    if (schedule == null) {
+      return DoseDialogDoseFallbackSummary(dose: widget.dose);
+    }
+
+    final med = Hive.box<Medication>('medications').get(schedule.medicationId);
+    if (med == null) {
+      return DoseDialogDoseFallbackSummary(dose: widget.dose);
+    }
+
+    final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
+      med,
+    );
+    final metrics = MedicationDisplayHelpers.doseMetricsSummary(
+      med,
+      doseTabletQuarters: schedule.doseTabletQuarters,
+      doseCapsules: schedule.doseCapsules,
+      doseSyringes: schedule.doseSyringes,
+      doseVials: schedule.doseVials,
+      doseMassMcg: schedule.doseMassMcg?.toDouble(),
+      doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+      syringeUnits: schedule.doseIU?.toDouble(),
+    );
+
+    return DoseCard(
+      dose: widget.dose,
+      medicationName: med.name,
+      strengthOrConcentrationLabel: strengthLabel,
+      doseMetrics: metrics,
+      isActive: schedule.isActive,
+      statusOverride: _selectedStatus,
+      showActions: false,
+      onTap: () {},
+    );
   }
 
   @override
@@ -542,351 +583,299 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       BuildContext context,
       ScrollController scrollController,
     ) {
-      return ListView(
+      return Scrollbar(
         controller: scrollController,
-        padding: kBottomSheetContentPadding,
-        children: [
-          if (_isAdHoc && widget.dose.existingLog != null) ...[
-            SectionFormCard(
-              neutral: true,
-              title: 'Amount',
+        child: ListView(
+          controller: scrollController,
+          padding: kBottomSheetContentPadding,
+          children: [
+            _buildDoseCardPreview(context),
+            const SizedBox(height: kSpacingS),
+            _buildStatusChips(),
+            const SizedBox(height: kSpacingXS),
+            _buildStatusHint(context),
+            const SizedBox(height: kSpacingM),
+            Text('Date & Time', style: sectionTitleStyle(context)),
+            const SizedBox(height: kSpacingS),
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: StepperRow36(
-                        controller: _amountController!,
-                        fixedFieldWidth: 120,
-                        onDec: () {
-                          final step = _adHocStepSize(
-                            widget.dose.existingLog!.doseUnit,
-                          );
-                          final max = _maxAdHocAmount ?? double.infinity;
-                          final v =
-                              double.tryParse(_amountController!.text) ?? 0;
-                          _amountController!.text = _formatAmount(
-                            (v - step).clamp(0.0, max),
-                          );
-                          setState(() => _hasChanged = true);
-                        },
-                        onInc: () {
-                          final step = _adHocStepSize(
-                            widget.dose.existingLog!.doseUnit,
-                          );
-                          final max = _maxAdHocAmount ?? double.infinity;
-                          final v =
-                              double.tryParse(_amountController!.text) ?? 0;
-                          _amountController!.text = _formatAmount(
-                            (v + step).clamp(0.0, max),
-                          );
-                          setState(() => _hasChanged = true);
-                        },
-                        decoration: buildCompactFieldDecoration(
+                Expanded(
+                  child: SizedBox(
+                    height: kStandardFieldHeight,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final picked = await showDatePicker(
                           context: context,
-                        ),
+                          initialDate: _selectedActionTime,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked == null) return;
+                        setState(() {
+                          _selectedActionTime = DateTime(
+                            picked.year,
+                            picked.month,
+                            picked.day,
+                            _selectedActionTime.hour,
+                            _selectedActionTime.minute,
+                          );
+                          if (_selectedStatus == DoseStatus.snoozed) {
+                            _selectedSnoozeUntil = _selectedActionTime;
+                          }
+                          _hasChanged = true;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.calendar_today,
+                        size: kIconSizeSmall,
+                        color: _statusAccentColor(context),
+                      ),
+                      label: Text(
+                        MaterialLocalizations.of(
+                          context,
+                        ).formatMediumDate(_selectedActionTime),
                       ),
                     ),
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      widget.dose.existingLog!.doseUnit,
-                      style: helperTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightMedium),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: kSpacingM),
-          ],
-          SectionFormCard(
-            neutral: true,
-            title: 'Dose',
-            children: [
-              () {
-                final schedule = Hive.box<Schedule>(
-                  'schedules',
-                ).get(widget.dose.scheduleId);
-
-                final med = (schedule?.medicationId != null)
-                    ? Hive.box<Medication>(
-                        'medications',
-                      ).get(schedule!.medicationId)
-                    : null;
-
-                if (schedule != null && med != null) {
-                  return DoseDialogDosePreview(
-                    med: med,
-                    schedule: schedule,
-                    status: _selectedStatus,
-                  );
-                }
-
-                return DoseDialogDoseFallbackSummary(dose: widget.dose);
-              }(),
-            ],
-          ),
-          const SizedBox(height: kSpacingM),
-          if (!_isAdHoc) ...[
-            SectionFormCard(
-              neutral: true,
-              title: 'Dose change',
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: StepperRow36(
-                        controller: _doseOverrideController!,
-                        fixedFieldWidth: 120,
-                        onDec: () {
-                          final unit = _doseOverrideUnit ?? '';
-                          final step = _doseOverrideStepSize(unit);
-                          final v =
-                              double.tryParse(_doseOverrideController!.text) ??
-                              0;
-                          _doseOverrideController!.text = _formatAmount(
-                            (v - step).clamp(0.0, double.infinity),
-                          );
-                          setState(() => _hasChanged = true);
-                        },
-                        onInc: () {
-                          final unit = _doseOverrideUnit ?? '';
-                          final step = _doseOverrideStepSize(unit);
-                          final v =
-                              double.tryParse(_doseOverrideController!.text) ??
-                              0;
-                          _doseOverrideController!.text = _formatAmount(
-                            (v + step).clamp(0.0, double.infinity),
-                          );
-                          setState(() => _hasChanged = true);
-                        },
-                        decoration: buildCompactFieldDecoration(
-                          context: context,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      _doseOverrideUnit ?? widget.dose.doseUnit,
-                      style: helperTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightMedium),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  'Use this to record the actual dose taken, if different from the scheduled dose.',
-                  style: helperTextStyle(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: kSpacingM),
-          ],
-          SectionFormCard(
-            neutral: true,
-            title: 'Date & Time',
-            children: [
-              SizedBox(
-                height: kStandardFieldHeight,
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedActionTime,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked == null) return;
-                    setState(() {
-                      _selectedActionTime = DateTime(
-                        picked.year,
-                        picked.month,
-                        picked.day,
-                        _selectedActionTime.hour,
-                        _selectedActionTime.minute,
-                      );
-                      if (_selectedStatus == DoseStatus.snoozed) {
-                        _selectedSnoozeUntil = _selectedActionTime;
-                      }
-                      _hasChanged = true;
-                    });
-                  },
-                  icon: Icon(
-                    Icons.calendar_today,
-                    size: kIconSizeSmall,
-                    color: _statusAccentColor(context),
                   ),
-                  label: Text(
-                    MaterialLocalizations.of(
+                ),
+                const SizedBox(width: kSpacingS),
+                Expanded(
+                  child: SizedBox(
+                    height: kStandardFieldHeight,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.fromDateTime(
+                            _selectedActionTime,
+                          ),
+                        );
+                        if (picked == null) return;
+                        setState(() {
+                          _selectedActionTime = DateTime(
+                            _selectedActionTime.year,
+                            _selectedActionTime.month,
+                            _selectedActionTime.day,
+                            picked.hour,
+                            picked.minute,
+                          );
+                          if (_selectedStatus == DoseStatus.snoozed) {
+                            _selectedSnoozeUntil = _selectedActionTime;
+                          }
+                          _hasChanged = true;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.schedule,
+                        size: kIconSizeSmall,
+                        color: _statusAccentColor(context),
+                      ),
+                      label: Text(
+                        TimeOfDay.fromDateTime(
+                          _selectedActionTime,
+                        ).format(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: kSpacingM),
+            if (_isAdHoc && widget.dose.existingLog != null) ...[
+              Text('Amount', style: sectionTitleStyle(context)),
+              const SizedBox(height: kSpacingS),
+              Row(
+                children: [
+                  Expanded(
+                    child: StepperRow36(
+                      controller: _amountController!,
+                      onDec: () {
+                        final step = _adHocStepSize(
+                          widget.dose.existingLog!.doseUnit,
+                        );
+                        final max = _maxAdHocAmount ?? double.infinity;
+                        final v = double.tryParse(_amountController!.text) ?? 0;
+                        _amountController!.text = _formatAmount(
+                          (v - step).clamp(0.0, max),
+                        );
+                        setState(() => _hasChanged = true);
+                      },
+                      onInc: () {
+                        final step = _adHocStepSize(
+                          widget.dose.existingLog!.doseUnit,
+                        );
+                        final max = _maxAdHocAmount ?? double.infinity;
+                        final v = double.tryParse(_amountController!.text) ?? 0;
+                        _amountController!.text = _formatAmount(
+                          (v + step).clamp(0.0, max),
+                        );
+                        setState(() => _hasChanged = true);
+                      },
+                      decoration: buildCompactFieldDecoration(context: context),
+                    ),
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  Text(
+                    widget.dose.existingLog!.doseUnit,
+                    style: helperTextStyle(
                       context,
-                    ).formatMediumDate(_selectedActionTime),
+                    )?.copyWith(fontWeight: kFontWeightMedium),
                   ),
-                ),
+                ],
               ),
+              const SizedBox(height: kSpacingM),
+            ],
+            if (!_isAdHoc) ...[
+              Text('Dose change', style: sectionTitleStyle(context)),
+              const SizedBox(height: kSpacingS),
+              Row(
+                children: [
+                  Expanded(
+                    child: StepperRow36(
+                      controller: _doseOverrideController!,
+                      onDec: () {
+                        final unit = _doseOverrideUnit ?? '';
+                        final step = _doseOverrideStepSize(unit);
+                        final v =
+                            double.tryParse(_doseOverrideController!.text) ?? 0;
+                        _doseOverrideController!.text = _formatAmount(
+                          (v - step).clamp(0.0, double.infinity),
+                        );
+                        setState(() => _hasChanged = true);
+                      },
+                      onInc: () {
+                        final unit = _doseOverrideUnit ?? '';
+                        final step = _doseOverrideStepSize(unit);
+                        final v =
+                            double.tryParse(_doseOverrideController!.text) ?? 0;
+                        _doseOverrideController!.text = _formatAmount(
+                          (v + step).clamp(0.0, double.infinity),
+                        );
+                        setState(() => _hasChanged = true);
+                      },
+                      decoration: buildCompactFieldDecoration(context: context),
+                    ),
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  Text(
+                    _doseOverrideUnit ?? widget.dose.doseUnit,
+                    style: helperTextStyle(
+                      context,
+                    )?.copyWith(fontWeight: kFontWeightMedium),
+                  ),
+                ],
+              ),
+              const SizedBox(height: kSpacingS),
+              Text(
+                'Use this to record the actual dose taken, if different from the scheduled dose.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingM),
+            ],
+            if (_selectedStatus == DoseStatus.snoozed) ...[
+              Text('Snooze Until', style: sectionTitleStyle(context)),
               const SizedBox(height: kSpacingS),
               SizedBox(
                 height: kStandardFieldHeight,
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    final picked = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
+                    final now = DateTime.now();
+                    final max = _maxSnoozeUntil();
+                    final firstDate = DateTime(now.year, now.month, now.day);
+                    final lastDate = max != null
+                        ? DateTime(max.year, max.month, max.day)
+                        : now.add(const Duration(days: 60));
+
+                    final initial =
+                        _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                    final clampedInitialDate = DateTime(
+                      initial.year,
+                      initial.month,
+                      initial.day,
                     );
-                    if (picked == null) return;
+                    final safeInitialDate =
+                        clampedInitialDate.isBefore(firstDate)
+                        ? firstDate
+                        : (clampedInitialDate.isAfter(lastDate)
+                              ? lastDate
+                              : clampedInitialDate);
+
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: safeInitialDate,
+                      firstDate: firstDate,
+                      lastDate: lastDate.isBefore(firstDate)
+                          ? firstDate
+                          : lastDate,
+                    );
+                    if (pickedDate == null) return;
+
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(initial),
+                    );
+                    if (pickedTime == null) return;
+
+                    var dt = DateTime(
+                      pickedDate.year,
+                      pickedDate.month,
+                      pickedDate.day,
+                      pickedTime.hour,
+                      pickedTime.minute,
+                    );
+
+                    if (dt.isBefore(now)) dt = now;
+                    if (max != null && dt.isAfter(max)) {
+                      await _showSnoozePastNextDoseAlert(max);
+                      dt = max;
+                    }
+
                     setState(() {
-                      _selectedActionTime = DateTime(
-                        _selectedActionTime.year,
-                        _selectedActionTime.month,
-                        _selectedActionTime.day,
-                        picked.hour,
-                        picked.minute,
-                      );
-                      if (_selectedStatus == DoseStatus.snoozed) {
-                        _selectedSnoozeUntil = _selectedActionTime;
-                      }
+                      _selectedSnoozeUntil = dt;
+                      _selectedActionTime = dt;
                       _hasChanged = true;
                     });
                   },
-                  icon: Icon(
-                    Icons.schedule,
-                    size: kIconSizeSmall,
-                    color: _statusAccentColor(context),
-                  ),
-                  label: Text(
-                    TimeOfDay.fromDateTime(_selectedActionTime).format(context),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: kSpacingM),
-          SectionFormCard(
-            neutral: true,
-            title: 'Status',
-            children: [
-              _buildStatusChips(),
-              const SizedBox(height: kSpacingXS),
-              _buildStatusHint(context),
-            ],
-          ),
-          const SizedBox(height: kSpacingM),
-          if (_selectedStatus == DoseStatus.snoozed) ...[
-            SectionFormCard(
-              neutral: true,
-              title: 'Snooze Until',
-              children: [
-                SizedBox(
-                  height: kStandardFieldHeight,
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () async {
-                      final now = DateTime.now();
-                      final max = _maxSnoozeUntil();
-                      final firstDate = DateTime(now.year, now.month, now.day);
-                      final lastDate = max != null
-                          ? DateTime(max.year, max.month, max.day)
-                          : now.add(const Duration(days: 60));
-
-                      final initial =
-                          _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-                      final clampedInitialDate = DateTime(
-                        initial.year,
-                        initial.month,
-                        initial.day,
-                      );
-                      final safeInitialDate =
-                          clampedInitialDate.isBefore(firstDate)
-                          ? firstDate
-                          : (clampedInitialDate.isAfter(lastDate)
-                                ? lastDate
-                                : clampedInitialDate);
-
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: safeInitialDate,
-                        firstDate: firstDate,
-                        lastDate: lastDate.isBefore(firstDate)
-                            ? firstDate
-                            : lastDate,
-                      );
-                      if (pickedDate == null) return;
-
-                      final pickedTime = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.fromDateTime(initial),
-                      );
-                      if (pickedTime == null) return;
-
-                      var dt = DateTime(
-                        pickedDate.year,
-                        pickedDate.month,
-                        pickedDate.day,
-                        pickedTime.hour,
-                        pickedTime.minute,
-                      );
-
-                      if (dt.isBefore(now)) dt = now;
-                      if (max != null && dt.isAfter(max)) {
-                        await _showSnoozePastNextDoseAlert(max);
-                        dt = max;
-                      }
-
-                      setState(() {
-                        _selectedSnoozeUntil = dt;
-                        _selectedActionTime = dt;
-                        _hasChanged = true;
-                      });
-                    },
-                    icon: const Icon(
-                      Icons.snooze_rounded,
-                      size: kIconSizeSmall,
-                    ),
-                    label: Text(() {
-                      final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-                      final date = MaterialLocalizations.of(
-                        context,
-                      ).formatMediumDate(dt);
-                      final time = TimeOfDay.fromDateTime(dt).format(context);
-                      return '$date • $time';
-                    }()),
-                  ),
-                ),
-                if (_maxSnoozeUntil() != null) ...[
-                  const SizedBox(height: kSpacingS),
-                  Text(() {
-                    final max = _maxSnoozeUntil()!;
+                  icon: const Icon(Icons.snooze_rounded, size: kIconSizeSmall),
+                  label: Text(() {
+                    final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
                     final date = MaterialLocalizations.of(
                       context,
-                    ).formatMediumDate(max);
-                    final time = TimeOfDay.fromDateTime(max).format(context);
-                    return 'Must be before the next scheduled dose ($date • $time).';
-                  }(), style: helperTextStyle(context)),
-                ],
-              ],
-            ),
-            const SizedBox(height: kSpacingM),
-          ],
-          SectionFormCard(
-            neutral: true,
-            title: 'Notes',
-            children: [
-              TextField(
-                controller: _notesController,
-                onChanged: (_) => setState(() => _hasChanged = true),
-                style: bodyTextStyle(context),
-                decoration: buildFieldDecoration(
-                  context,
-                  hint: 'Add any notes about this dose…',
+                    ).formatMediumDate(dt);
+                    final time = TimeOfDay.fromDateTime(dt).format(context);
+                    return '$date • $time';
+                  }()),
                 ),
-                maxLines: 3,
-                textCapitalization: TextCapitalization.sentences,
               ),
+              if (_maxSnoozeUntil() != null) ...[
+                const SizedBox(height: kSpacingS),
+                Text(() {
+                  final max = _maxSnoozeUntil()!;
+                  final date = MaterialLocalizations.of(
+                    context,
+                  ).formatMediumDate(max);
+                  final time = TimeOfDay.fromDateTime(max).format(context);
+                  return 'Must be before the next scheduled dose ($date • $time).';
+                }(), style: helperTextStyle(context)),
+              ],
+              const SizedBox(height: kSpacingM),
             ],
-          ),
-        ],
+            Text('Notes', style: sectionTitleStyle(context)),
+            const SizedBox(height: kSpacingS),
+            TextField(
+              controller: _notesController,
+              onChanged: (_) => setState(() => _hasChanged = true),
+              style: bodyTextStyle(context),
+              decoration: buildFieldDecoration(
+                context,
+                hint: 'Add any notes about this dose…',
+              ),
+              maxLines: 3,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+          ],
+        ),
       );
     }
 
@@ -1033,7 +1022,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     return Wrap(
       spacing: kSpacingS,
       runSpacing: kSpacingXS,
-      alignment: WrapAlignment.center,
+      alignment: WrapAlignment.start,
       children: [
         if (!_isAdHoc)
           PrimaryChoiceChip(

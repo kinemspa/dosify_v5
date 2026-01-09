@@ -21,6 +21,7 @@ class DoseCard extends StatelessWidget {
     this.statusOverride,
     this.titleTrailing,
     this.leadingFooter,
+    this.showActions = true,
     this.primaryActionLabel,
     this.onPrimaryAction,
     this.onQuickAction,
@@ -36,6 +37,7 @@ class DoseCard extends StatelessWidget {
   final DoseStatus? statusOverride;
   final Widget? titleTrailing;
   final Widget? leadingFooter;
+  final bool showActions;
   final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
   final ValueChanged<DoseStatus>? onQuickAction;
@@ -161,60 +163,64 @@ class DoseCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: kSpacingM),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    height: kStandardButtonHeight,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: kSpacingS,
-                      vertical: kSpacingXS,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: kOpacityMinimal),
-                      borderRadius: BorderRadius.circular(kBorderRadiusChip),
-                      border: Border.all(
-                        color: statusColor.withValues(alpha: kOpacityMediumLow),
-                        width: kBorderWidthThin,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        statusLabel,
-                        style: helperTextStyle(context, color: statusColor)
-                            ?.copyWith(
-                              fontSize: kFontSizeXXSmall,
-                              fontWeight: kFontWeightExtraBold,
-                              height: 1,
-                            ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: kSpacingXS),
-                  if (showEditOnly)
-                    SizedBox(
+              if (showActions) ...[
+                const SizedBox(width: kSpacingM),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
                       height: kStandardButtonHeight,
-                      child: FilledButton.icon(
-                        onPressed: onPrimaryAction ?? onTap,
-                        icon: const Icon(Icons.edit_rounded),
-                        label: const Text('Edit'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingS,
+                        vertical: kSpacingXS,
                       ),
-                    )
-                  else if (hasQuickActions)
-                    DoseQuickActionRow(onAction: onQuickAction!)
-                  else
-                    SizedBox(
-                      height: kStandardButtonHeight,
-                      child: FilledButton(
-                        onPressed: onPrimaryAction ?? onTap,
-                        child: Text(actionLabel),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: kOpacityMinimal),
+                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                        border: Border.all(
+                          color: statusColor.withValues(
+                            alpha: kOpacityMediumLow,
+                          ),
+                          width: kBorderWidthThin,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          statusLabel,
+                          style: helperTextStyle(context, color: statusColor)
+                              ?.copyWith(
+                                fontSize: kFontSizeXXSmall,
+                                fontWeight: kFontWeightExtraBold,
+                                height: 1,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
-                ],
-              ),
+                    const SizedBox(height: kSpacingXS),
+                    if (showEditOnly)
+                      SizedBox(
+                        height: kStandardButtonHeight,
+                        child: FilledButton.icon(
+                          onPressed: onPrimaryAction ?? onTap,
+                          icon: const Icon(Icons.edit_rounded),
+                          label: const Text('Edit'),
+                        ),
+                      )
+                    else if (hasQuickActions)
+                      DoseQuickActionRow(onAction: onQuickAction!)
+                    else
+                      SizedBox(
+                        height: kStandardButtonHeight,
+                        child: FilledButton(
+                          onPressed: onPrimaryAction ?? onTap,
+                          child: Text(actionLabel),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
