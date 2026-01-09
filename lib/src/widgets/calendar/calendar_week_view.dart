@@ -117,7 +117,7 @@ class CalendarWeekView extends StatelessWidget {
           _WeekHeader(startDate: startDate, onDayTap: onDayTap),
           // Week grid
           SizedBox(
-            height: 160, // Reduced height for week grid
+            height: kCalendarWeekGridHeight,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(7, (index) {

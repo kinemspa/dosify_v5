@@ -165,6 +165,7 @@ const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarDoseIndicatorSpacing = 2;
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
 const double kCalendarWeekHeaderHeight = 56;
+const double kCalendarWeekGridHeight = 140;
 const EdgeInsets kCalendarWeekHeaderCellMargin = EdgeInsets.all(kSpacingXS);
 const double kCalendarWeekHeaderCellBorderRadius = kBorderRadiusSmall;
 const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
