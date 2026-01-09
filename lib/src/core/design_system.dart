@@ -163,6 +163,30 @@ const double kCalendarDoseBlockHeight = 60; // Default dose block height
 const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarDoseIndicatorSpacing = 2;
+
+/// Calendar selected-day (Dose Card Stage) layout
+const double kCalendarStageHourLabelWidth = 60;
+const EdgeInsets kCalendarStageHourLabelPadding = EdgeInsets.only(
+  top: kListItemSpacing,
+  right: kCardInnerSpacing,
+);
+const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
+  kSpacingM,
+  0,
+  kSpacingM,
+  kSpacingS,
+);
+const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
+  bottom: kSpacingS,
+);
+const EdgeInsets kCalendarSelectedDayHeaderPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingXS,
+);
+
+EdgeInsets calendarStageListPadding(double bottomPadding) {
+  return EdgeInsets.only(bottom: bottomPadding);
+}
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
 const double kCalendarWeekHeaderHeight = 40;
 const double kCalendarWeekGridHeight = 108;
@@ -220,8 +244,8 @@ const double kCalendarDayOverflowTextOpacity = kOpacityMedium;
 /// height to the selected-day list panel so the calendar grid remains stable
 /// across Day/Week/Month views.
 const double kCalendarSelectedDayPanelHeightRatioDay = 0.42;
-const double kCalendarSelectedDayPanelHeightRatioWeek = 0.42;
-const double kCalendarSelectedDayPanelHeightRatioMonth = 0.30;
+const double kCalendarSelectedDayPanelHeightRatioWeek = 0.45;
+const double kCalendarSelectedDayPanelHeightRatioMonth = 0.42;
 
 // ============================================================================
 // SPACING CONSTANTS
@@ -1015,6 +1039,28 @@ TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
   return Theme.of(
     context,
   ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightSemiBold);
+}
+
+/// Calendar selected-day stage header title style.
+TextStyle? calendarSelectedDayHeaderTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.titleSmall?.copyWith(
+        fontSize: kFontSizeMedium,
+        fontWeight: kFontWeightSemiBold,
+        color: Theme.of(
+          context,
+        ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+      );
+}
+
+/// Calendar selected-day stage hour label style (left column, like day view).
+TextStyle? calendarStageHourLabelTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+        fontSize: kFontSizeSmall,
+        height: kLineHeightTight,
+        color: Theme.of(
+          context,
+        ).colorScheme.onSurface.withValues(alpha: kOpacityMedium),
+      );
 }
 
 /// Calendar week-view header day label style (e.g. Mon)

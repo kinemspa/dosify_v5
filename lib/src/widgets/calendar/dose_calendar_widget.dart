@@ -711,6 +711,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           if (_selectedDate != null &&
               _currentView != CalendarView.day &&
               widget.showSelectedDayPanel)
+            const SizedBox(height: kSpacingS),
+          if (_selectedDate != null &&
+              _currentView != CalendarView.day &&
+              widget.showSelectedDayPanel)
             if (widget.variant == CalendarVariant.compact)
               _buildSelectedDayPanel()
             else if (widget.variant == CalendarVariant.full &&
@@ -961,11 +965,17 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     // Sort by time
     dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
+    final dosesByHour = <int, List<CalculatedDose>>{};
+    for (final dose in dayDoses) {
+      dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
+    }
+    final hours = dosesByHour.keys.toList()..sort();
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = safeBottom + kSpacingL;
+    final listBottomPadding = safeBottom + kSpacingXXL + kSpacingXL;
 
     Widget buildDoseCardFor(CalculatedDose dose) {
       final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
@@ -1024,18 +1034,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           children: [
             // Header with date and close button
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kSpacingM,
-                vertical: kSpacingS,
-              ),
+              padding: kCalendarSelectedDayHeaderPadding,
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       _formatSelectedDate(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: calendarSelectedDayHeaderTextStyle(context),
                     ),
                   ),
                   IconButton(
@@ -1062,11 +1067,44 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                   : Scrollbar(
                       thumbVisibility: true,
                       child: ListView.builder(
-                        padding: EdgeInsets.only(bottom: listBottomPadding),
-                        itemCount: dayDoses.length,
+                        padding: calendarStageListPadding(listBottomPadding),
+                        itemCount: hours.length,
                         itemBuilder: (context, index) {
-                          final dose = dayDoses[index];
-                          return buildDoseCardFor(dose);
+                          final hour = hours[index];
+                          final hourDoses = dosesByHour[hour] ?? const [];
+
+                          return Padding(
+                            padding: kCalendarStageHourRowPadding,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: kCalendarStageHourLabelWidth,
+                                  child: Padding(
+                                    padding: kCalendarStageHourLabelPadding,
+                                    child: Text(
+                                      _formatSelectedHour(hour),
+                                      textAlign: TextAlign.right,
+                                      style: calendarStageHourLabelTextStyle(
+                                        context,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      for (final dose in hourDoses)
+                                        Padding(
+                                          padding: kCalendarStageDoseCardPadding,
+                                          child: buildDoseCardFor(dose),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                       ),
                     ),
