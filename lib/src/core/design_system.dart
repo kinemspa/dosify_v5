@@ -187,6 +187,7 @@ const EdgeInsets kCalendarSelectedDayHeaderPadding = EdgeInsets.symmetric(
 EdgeInsets calendarStageListPadding(double bottomPadding) {
   return EdgeInsets.only(bottom: bottomPadding);
 }
+
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
 const double kCalendarWeekHeaderHeight = 40;
 const double kCalendarWeekGridHeight = 108;
@@ -1044,23 +1045,23 @@ TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
 /// Calendar selected-day stage header title style.
 TextStyle? calendarSelectedDayHeaderTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.titleSmall?.copyWith(
-        fontSize: kFontSizeMedium,
-        fontWeight: kFontWeightSemiBold,
-        color: Theme.of(
-          context,
-        ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
-      );
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightSemiBold,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+  );
 }
 
 /// Calendar selected-day stage hour label style (left column, like day view).
 TextStyle? calendarStageHourLabelTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
-        fontSize: kFontSizeSmall,
-        height: kLineHeightTight,
-        color: Theme.of(
-          context,
-        ).colorScheme.onSurface.withValues(alpha: kOpacityMedium),
-      );
+    fontSize: kFontSizeSmall,
+    height: kLineHeightTight,
+    color: Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: kOpacityMedium),
+  );
 }
 
 /// Calendar week-view header day label style (e.g. Mon)

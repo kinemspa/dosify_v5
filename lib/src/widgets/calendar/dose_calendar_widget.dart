@@ -84,6 +84,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   List<CalculatedDose> _doses = [];
   bool _isLoading = false;
 
+  final ScrollController _dayStageScrollController = ScrollController();
+  final ScrollController _selectedDayScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -105,6 +108,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         oldWidget.medicationId != widget.medicationId) {
       _loadDoses();
     }
+  }
+
+  @override
+  void dispose() {
+    _dayStageScrollController.dispose();
+    _selectedDayScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDoses() async {
@@ -728,37 +738,46 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final boundedHeight = constraints.hasBoundedHeight
+        final safeBoundedHeight = constraints.hasBoundedHeight
             ? constraints.maxHeight
             : null;
-        final effectiveHeight = widget.height ?? boundedHeight;
+
+        final fallbackHeight = switch (widget.variant) {
+          CalendarVariant.mini => kHomeMiniCalendarHeight,
+          CalendarVariant.compact => kDetailCompactCalendarHeight,
+          CalendarVariant.full => MediaQuery.sizeOf(context).height * 0.75,
+        };
+
+        final effectiveHeight =
+            widget.height ?? safeBoundedHeight ?? fallbackHeight;
 
         final selectedDayPanelRatio = switch (_currentView) {
           CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
           CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
           CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
         };
-        final panelHeight =
-            (widget.variant == CalendarVariant.full && effectiveHeight != null)
+        final panelHeight = widget.variant == CalendarVariant.full
             ? effectiveHeight * selectedDayPanelRatio
             : null;
 
-        return Container(
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: widget.variant == CalendarVariant.full
-                ? null
-                : BorderRadius.circular(kBorderRadiusMedium),
-            border: widget.variant != CalendarVariant.full
-                ? Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.2),
-                  )
-                : null,
+        return SizedBox(
+          height: effectiveHeight,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: widget.variant == CalendarVariant.full
+                  ? null
+                  : BorderRadius.circular(kBorderRadiusMedium),
+              border: widget.variant != CalendarVariant.full
+                  ? Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.2),
+                    )
+                  : null,
+            ),
+            child: buildBody(panelHeight: panelHeight),
           ),
-          child: buildBody(panelHeight: panelHeight),
         );
       },
     );
@@ -869,8 +888,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         }
       },
       child: Scrollbar(
+        controller: _dayStageScrollController,
         thumbVisibility: true,
         child: ListView.builder(
+          controller: _dayStageScrollController,
           padding: calendarStageListPadding(listBottomPadding),
           itemCount: hours.length,
           itemBuilder: (context, index) {
@@ -1162,8 +1183,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                       ),
                     )
                   : Scrollbar(
+                      controller: _selectedDayScrollController,
                       thumbVisibility: true,
                       child: ListView.builder(
+                        controller: _selectedDayScrollController,
                         padding: calendarStageListPadding(listBottomPadding),
                         itemCount: hours.length,
                         itemBuilder: (context, index) {
@@ -1193,7 +1216,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                                     children: [
                                       for (final dose in hourDoses)
                                         Padding(
-                                          padding: kCalendarStageDoseCardPadding,
+                                          padding:
+                                              kCalendarStageDoseCardPadding,
                                           child: _buildDoseCardFor(dose),
                                         ),
                                     ],

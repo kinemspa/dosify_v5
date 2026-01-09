@@ -6,9 +6,9 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -51,7 +51,6 @@ class _ReconstitutionCalculatorPageState
   String? _initialDoseUnit;
   SyringeSizeMl? _initialSyringeSize;
   double? _initialVialSize;
-  int _calculatorInstance = 0;
 
   @override
   void initState() {
@@ -91,10 +90,45 @@ class _ReconstitutionCalculatorPageState
     super.dispose();
   }
 
-  void _onCalculation(ReconstitutionResult result, bool isValid) {
+  Future<void> _openCalculatorSheet() async {
+    final strengthValue = double.tryParse(_strengthCtrl.text.trim()) ?? 0;
+    if (strengthValue <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter vial strength first')),
+      );
+      return;
+    }
+
+    final result = await showModalBottomSheet<ReconstitutionResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => ReconstitutionCalculatorDialog(
+          initialStrengthValue: strengthValue,
+          unitLabel: _selectedUnit,
+          initialDoseValue: _initialDoseValue,
+          initialDoseUnit: _initialDoseUnit,
+          initialSyringeSize: _initialSyringeSize,
+          initialVialSize: _initialVialSize,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+    if (result == null) return;
+
     setState(() {
       _lastResult = result;
-      _canSave = isValid;
+      _canSave = true;
+
+      _initialDoseValue = result.recommendedDose;
+      _initialDoseUnit = result.doseUnit;
+      _initialSyringeSize = _syringeFromMl(result.syringeSizeMl);
+      _initialVialSize = result.solventVolumeMl;
     });
   }
 
@@ -252,8 +286,6 @@ class _ReconstitutionCalculatorPageState
                 _initialDoseUnit = item.doseUnit;
                 _initialSyringeSize = _syringeFromMl(item.syringeSizeMl);
                 _initialVialSize = item.solventVolumeMl;
-
-                _calculatorInstance += 1;
               });
               Navigator.of(context).pop();
             },
@@ -266,6 +298,9 @@ class _ReconstitutionCalculatorPageState
   @override
   Widget build(BuildContext context) {
     final strengthValue = double.tryParse(_strengthCtrl.text) ?? 0;
+    final medName = _medNameCtrl.text.trim().isNotEmpty
+        ? _medNameCtrl.text.trim()
+        : 'Medication';
 
     return Scaffold(
       appBar: GradientAppBar(
@@ -378,33 +413,37 @@ class _ReconstitutionCalculatorPageState
             ],
           ),
           sectionSpacing,
-          if (strengthValue > 0)
-            ReconstitutionCalculatorWidget(
-              key: ValueKey(_calculatorInstance),
-              initialStrengthValue: strengthValue,
-              unitLabel: _selectedUnit,
-              medicationName: _medNameCtrl.text.trim().isNotEmpty
-                  ? _medNameCtrl.text.trim()
-                  : null,
-              initialDoseValue: _initialDoseValue,
-              initialDoseUnit: _initialDoseUnit,
-              initialSyringeSize: _initialSyringeSize,
-              initialVialSize: _initialVialSize,
-              showSummary: true,
-              onCalculate: _onCalculation,
-            )
-          else
-            SectionFormCard(
-              title: 'Calculator',
-              neutral: true,
-              children: [
+          SectionFormCard(
+            title: 'Calculator',
+            neutral: true,
+            children: [
+              if (strengthValue <= 0)
                 Text(
                   'Enter the vial strength above to use the calculator',
                   style: helperTextStyle(context),
                   textAlign: TextAlign.center,
+                )
+              else ...[
+                if (_lastResult != null)
+                  ReconstitutionSummaryCard(
+                    strengthValue: strengthValue,
+                    strengthUnit: _selectedUnit,
+                    medicationName: medName,
+                    containerVolumeMl: _lastResult!.solventVolumeMl,
+                    perMlValue: _lastResult!.perMlConcentration,
+                    reconFluidName: _lastResult!.diluentName,
+                    syringeSizeMl: _lastResult!.syringeSizeMl,
+                    compact: false,
+                    showCardSurface: true,
+                  ),
+                const SizedBox(height: kSpacingM),
+                FilledButton(
+                  onPressed: _openCalculatorSheet,
+                  child: Text(_lastResult == null ? 'Open Calculator' : 'Recalculate'),
                 ),
               ],
-            ),
+            ],
+          ),
         ],
       ),
     );
