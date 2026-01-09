@@ -952,65 +952,49 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       ),
               ),
               const SizedBox(height: 4),
-              RichText(
-                textAlign: TextAlign.right,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  style: helperTextStyle(
-                    context,
-                    color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-                  )?.copyWith(fontSize: kFontSizeSmall),
-                  children: [
-                    TextSpan(
-                      text: _formatNumber(
-                        (isMdv &&
-                                med.containerVolumeMl != null &&
-                                med.containerVolumeMl! > 0)
-                            ? (med.activeVialVolume ?? med.containerVolumeMl!)
-                            : med.stockValue,
+              if (!isMdv) ...[
+                RichText(
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: helperTextStyle(
+                      context,
+                      color: onPrimary.withValues(alpha: kOpacityMediumHigh),
+                    )?.copyWith(fontSize: kFontSizeSmall),
+                    children: [
+                      TextSpan(
+                        text: _formatNumber(med.stockValue),
+                        style: helperTextStyle(
+                          context,
+                          color: onPrimary.withValues(
+                            alpha: kOpacityMediumHigh,
+                          ),
+                        )?.copyWith(
+                          fontSize: kFontSizeSmall,
+                          fontWeight: FontWeight.w800,
+                          color: gaugeLabelColor,
+                        ),
                       ),
-                      style:
-                          helperTextStyle(
-                            context,
-                            color: onPrimary.withValues(
-                              alpha: kOpacityMediumHigh,
+                      const TextSpan(text: ' / '),
+                      TextSpan(
+                        text: _formatNumber(initial),
+                        style: helperTextStyle(context, color: onPrimary)
+                            ?.copyWith(
+                              fontSize: kFontSizeSmall,
+                              fontWeight: FontWeight.w800,
                             ),
-                          )?.copyWith(
-                            fontSize: kFontSizeSmall,
-                            fontWeight: FontWeight.w800,
-                            color: gaugeLabelColor,
-                          ),
-                    ),
-                    const TextSpan(text: ' / '),
-                    TextSpan(
-                      text: _formatNumber(initial),
-                      style: helperTextStyle(context, color: onPrimary)
-                          ?.copyWith(
-                            fontSize: kFontSizeSmall,
-                            fontWeight: FontWeight.w800,
-                          ),
-                    ),
-                    TextSpan(text: ' $unit'),
-                  ],
+                      ),
+                      TextSpan(text: ' $unit'),
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                helperLabel,
-                style: helperTextStyle(
-                  context,
-                  color: onPrimary.withValues(alpha: kOpacityMediumLow),
-                )?.copyWith(fontSize: kFontSizeSmall),
-                textAlign: TextAlign.right,
-              ),
-              if (extraStockLabel != null) ...[
-                const SizedBox(height: 2),
                 Text(
-                  extraStockLabel,
+                  helperLabel,
                   style: helperTextStyle(
                     context,
-                    color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-                  )?.copyWith(fontWeight: FontWeight.w700),
+                    color: onPrimary.withValues(alpha: kOpacityMediumLow),
+                  )?.copyWith(fontSize: kFontSizeSmall),
                   textAlign: TextAlign.right,
                 ),
               ],
