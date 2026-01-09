@@ -18,6 +18,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
   const MedicationHeaderWidget({
     required this.medication,
     required this.onRefill,
+    this.onRestock,
     this.onAdHocDose,
     this.hasSchedules = false,
     this.crossAxisAlignment = CrossAxisAlignment.stretch,
@@ -27,6 +28,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
 
   final Medication medication;
   final VoidCallback onRefill;
+  final VoidCallback? onRestock;
   final VoidCallback? onAdHocDose;
   final bool hasSchedules;
   final CrossAxisAlignment crossAxisAlignment;
@@ -270,6 +272,24 @@ class MedicationHeaderWidget extends ConsumerWidget {
                     label: const FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text('Adhoc', maxLines: 1),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: kButtonSpacing),
+              ],
+              if (isMdv && onRestock != null) ...[
+                Flexible(
+                  child: OutlinedButton.icon(
+                    onPressed: onRestock,
+                    style: headerActionButtonStyle,
+                    icon: Icon(
+                      Icons.inventory_2_outlined,
+                      size: kIconSizeSmall,
+                      color: headerForeground,
+                    ),
+                    label: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Restock', maxLines: 1),
                     ),
                   ),
                 ),
