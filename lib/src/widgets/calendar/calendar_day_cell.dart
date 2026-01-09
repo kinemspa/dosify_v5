@@ -76,10 +76,7 @@ class CalendarDayCell extends StatelessWidget {
                       right: -kSpacingXS,
                       bottom: -kSpacingXS,
                       child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: kSpacingXS,
-                          vertical: kSpacingXS / 2,
-                        ),
+                        padding: kCalendarDayCountBadgePadding,
                         decoration: BoxDecoration(
                           color: isSelected
                               ? colorScheme.onPrimary.withValues(
@@ -127,16 +124,21 @@ class CalendarDayCell extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Wrap(
-                        spacing: kCalendarDoseIndicatorSpacing,
-                        runSpacing: kCalendarDoseIndicatorSpacing,
-                        alignment: WrapAlignment.center,
-                        children: doses
-                            .take(kCalendarMonthMaxDoseIndicators)
-                            .map((dose) {
-                              return CalendarDoseIndicator(dose: dose);
-                            })
-                            .toList(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:
+                            doses
+                                .take(kCalendarMonthMaxDoseIndicators)
+                                .expand(
+                                  (dose) => [
+                                    CalendarDoseIndicator(dose: dose),
+                                    const SizedBox(
+                                      width: kCalendarDoseIndicatorSpacing,
+                                    ),
+                                  ],
+                                )
+                                .toList()
+                              ..removeLast(),
                       ),
                       if (doses.length > kCalendarMonthMaxDoseIndicators)
                         Padding(
