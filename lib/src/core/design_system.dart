@@ -164,6 +164,10 @@ const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarDoseIndicatorSpacing = 2;
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
+const double kCalendarWeekHeaderHeight = 56;
+const EdgeInsets kCalendarWeekHeaderCellMargin = EdgeInsets.all(kSpacingXS);
+const double kCalendarWeekHeaderCellBorderRadius = kBorderRadiusSmall;
+const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
 
 /// Bottom sheet sizing
@@ -956,6 +960,20 @@ TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
   return Theme.of(
     context,
   ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightSemiBold);
+}
+
+/// Calendar week-view header day label style (e.g. Mon)
+TextStyle? calendarWeekHeaderDayLabelTextStyle(BuildContext context) {
+  return Theme.of(
+    context,
+  ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightSemiBold);
+}
+
+/// Calendar week-view header day number style (e.g. 9)
+TextStyle? calendarWeekHeaderDayNumberTextStyle(BuildContext context) {
+  return Theme.of(
+    context,
+  ).textTheme.bodySmall?.copyWith(fontWeight: kFontWeightSemiBold);
 }
 
 /// Error text style

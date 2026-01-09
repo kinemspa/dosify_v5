@@ -160,7 +160,7 @@ class _WeekHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60,
+      height: kCalendarWeekHeaderHeight,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
@@ -182,14 +182,16 @@ class _WeekHeader extends StatelessWidget {
             child: InkWell(
               onTap: onDayTap != null ? () => onDayTap!(day) : null,
               child: Container(
-                margin: const EdgeInsets.all(4),
+                margin: kCalendarWeekHeaderCellMargin,
                 decoration: isToday
                     ? BoxDecoration(
                         border: Border.all(
                           color: colorScheme.primary,
-                          width: 1,
+                          width: kBorderWidthThin,
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(
+                          kCalendarWeekHeaderCellBorderRadius,
+                        ),
                       )
                     : null,
                 child: Column(
@@ -197,28 +199,30 @@ class _WeekHeader extends StatelessWidget {
                   children: [
                     Text(
                       DateFormat.E().format(day),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isToday
-                            ? colorScheme.primary
-                            : colorScheme.onSurface.withAlpha(
-                                (0.6 * 255).round(),
-                              ),
-                        fontWeight: isToday
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
+                      style: calendarWeekHeaderDayLabelTextStyle(context)
+                          ?.copyWith(
+                            color: isToday
+                                ? colorScheme.primary
+                                : colorScheme.onSurface.withAlpha(
+                                    (0.6 * 255).round(),
+                                  ),
+                            fontWeight: isToday
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kCalendarWeekHeaderLabelGap),
                     Text(
                       day.day.toString(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: isToday
-                            ? colorScheme.primary
-                            : colorScheme.onSurface,
-                        fontWeight: isToday
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
+                      style: calendarWeekHeaderDayNumberTextStyle(context)
+                          ?.copyWith(
+                            color: isToday
+                                ? colorScheme.primary
+                                : colorScheme.onSurface,
+                            fontWeight: isToday
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                     ),
                   ],
                 ),
