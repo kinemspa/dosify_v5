@@ -28,10 +28,14 @@ class DosifiApp extends ConsumerWidget {
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
+
+    final lightOnSurfaceTextColor = schemeLight.onSurface.withValues(
+      alpha: kOpacityMediumHigh,
+    );
     final lightTextTheme = baseLight.textTheme
         .apply(
-          bodyColor: schemeLight.onSurface.withValues(alpha: kOpacityHigh),
-          displayColor: schemeLight.onSurface.withValues(alpha: kOpacityHigh),
+          bodyColor: lightOnSurfaceTextColor,
+          displayColor: lightOnSurfaceTextColor,
         )
         .copyWith(
           bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
@@ -44,11 +48,14 @@ class DosifiApp extends ConsumerWidget {
         );
     final light = baseLight.copyWith(
       textTheme: lightTextTheme,
-      appBarTheme: const AppBarTheme(
+      iconTheme: IconThemeData(color: lightOnSurfaceTextColor),
+      primaryIconTheme: IconThemeData(color: lightOnSurfaceTextColor),
+      appBarTheme: AppBarTheme(
         centerTitle: true,
         toolbarHeight: 48,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        foregroundColor: lightOnSurfaceTextColor,
       ),
       timePickerTheme: TimePickerThemeData(
         dialTextColor: WidgetStateColor.resolveWith((states) {

@@ -62,11 +62,7 @@ class CalendarHeader extends StatelessWidget {
             child: Center(
               child: Text(
                 _formatTitle(),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                  fontSize: 14,
-                ),
+                style: calendarHeaderTitleTextStyle(context),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 textAlign: TextAlign.center,

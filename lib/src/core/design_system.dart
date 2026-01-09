@@ -1025,6 +1025,18 @@ TextStyle? calendarWeekHeaderDayNumberTextStyle(BuildContext context) {
   ).textTheme.bodySmall?.copyWith(fontWeight: kFontWeightSemiBold);
 }
 
+/// Calendar header (Month/Year) title style.
+///
+/// Uses an onSurface color with reduced opacity to avoid overly-dark/black text.
+TextStyle? calendarHeaderTitleTextStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.titleSmall?.copyWith(
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightSemiBold,
+    color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
+  );
+}
+
 /// Error text style
 TextStyle? errorTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
