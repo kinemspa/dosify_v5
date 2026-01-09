@@ -821,116 +821,115 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final colorScheme = theme.colorScheme;
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding =
-        (widget.variant == CalendarVariant.compact
-            ? kSpacingL
-            : kPagePadding.bottom) +
-        safeBottom;
+    final listBottomPadding = safeBottom + kSpacingL;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
+    return Padding(
+      padding: const EdgeInsets.only(top: kSpacingS),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+              width: 1,
+            ),
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kSpacingL,
-              vertical: kSpacingM,
-            ),
-            child: Text(
-              'Hour: ${_formatSelectedHour(selectedHour)}',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingL,
+                vertical: kSpacingM,
+              ),
+              child: Text(
+                'Hour: ${_formatSelectedHour(selectedHour)}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: dayDoses.isEmpty
-                ? Center(
-                    child: Text(
-                      'No doses scheduled',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(
-                          alpha: kOpacityLow,
+            Expanded(
+              child: dayDoses.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No doses scheduled',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(
+                            alpha: kOpacityLow,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.only(bottom: listBottomPadding),
-                    itemCount: dayDoses.length,
-                    itemBuilder: (context, index) {
-                      final dose = dayDoses[index];
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.only(bottom: listBottomPadding),
+                      itemCount: dayDoses.length,
+                      itemBuilder: (context, index) {
+                        final dose = dayDoses[index];
 
-                      final schedule = Hive.box<Schedule>(
-                        'schedules',
-                      ).get(dose.scheduleId);
-                      final med = (schedule?.medicationId != null)
-                          ? Hive.box<Medication>(
-                              'medications',
-                            ).get(schedule!.medicationId)
-                          : null;
+                        final schedule = Hive.box<Schedule>(
+                          'schedules',
+                        ).get(dose.scheduleId);
+                        final med = (schedule?.medicationId != null)
+                            ? Hive.box<Medication>(
+                                'medications',
+                              ).get(schedule!.medicationId)
+                            : null;
 
-                      if (schedule != null && med != null) {
-                        final strengthLabel =
-                            MedicationDisplayHelpers.strengthOrConcentrationLabel(
-                              med,
-                            );
-
-                        final metrics =
-                            MedicationDisplayHelpers.doseMetricsSummary(
-                              med,
-                              doseTabletQuarters: schedule.doseTabletQuarters,
-                              doseCapsules: schedule.doseCapsules,
-                              doseSyringes: schedule.doseSyringes,
-                              doseVials: schedule.doseVials,
-                              doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                              doseVolumeMicroliter: schedule
-                                  .doseVolumeMicroliter
-                                  ?.toDouble(),
-                              syringeUnits: schedule.doseIU?.toDouble(),
-                            );
-
-                        if (strengthLabel.trim().isNotEmpty &&
-                            metrics.trim().isNotEmpty) {
-                          return DoseCard(
-                            dose: dose,
-                            medicationName: med.name,
-                            strengthOrConcentrationLabel: strengthLabel,
-                            doseMetrics: metrics,
-                            isActive: schedule.isActive,
-                            onQuickAction: (status) {
-                              if (widget.onDoseTap != null) {
-                                widget.onDoseTap!(dose);
-                                return;
-                              }
-                              _openDoseActionSheetFor(
-                                dose,
-                                initialStatus: status,
+                        if (schedule != null && med != null) {
+                          final strengthLabel =
+                              MedicationDisplayHelpers.strengthOrConcentrationLabel(
+                                med,
                               );
-                            },
-                            onTap: () => _onDoseTapInternal(dose),
-                          );
-                        }
-                      }
 
-                      return DoseSummaryRow(
-                        dose: dose,
-                        showMedicationName: true,
-                        onTap: () => _onDoseTapInternal(dose),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                          final metrics =
+                              MedicationDisplayHelpers.doseMetricsSummary(
+                                med,
+                                doseTabletQuarters: schedule.doseTabletQuarters,
+                                doseCapsules: schedule.doseCapsules,
+                                doseSyringes: schedule.doseSyringes,
+                                doseVials: schedule.doseVials,
+                                doseMassMcg: schedule.doseMassMcg?.toDouble(),
+                                doseVolumeMicroliter: schedule
+                                    .doseVolumeMicroliter
+                                    ?.toDouble(),
+                                syringeUnits: schedule.doseIU?.toDouble(),
+                              );
+
+                          if (strengthLabel.trim().isNotEmpty &&
+                              metrics.trim().isNotEmpty) {
+                            return DoseCard(
+                              dose: dose,
+                              medicationName: med.name,
+                              strengthOrConcentrationLabel: strengthLabel,
+                              doseMetrics: metrics,
+                              isActive: schedule.isActive,
+                              onQuickAction: (status) {
+                                if (widget.onDoseTap != null) {
+                                  widget.onDoseTap!(dose);
+                                  return;
+                                }
+                                _openDoseActionSheetFor(
+                                  dose,
+                                  initialStatus: status,
+                                );
+                              },
+                              onTap: () => _onDoseTapInternal(dose),
+                            );
+                          }
+                        }
+
+                        return DoseSummaryRow(
+                          dose: dose,
+                          showMedicationName: true,
+                          onTap: () => _onDoseTapInternal(dose),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -958,11 +957,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final colorScheme = theme.colorScheme;
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding =
-        (widget.variant == CalendarVariant.compact
-            ? kSpacingL
-            : kPagePadding.bottom) +
-        safeBottom;
+    final listBottomPadding = safeBottom + kSpacingL;
 
     Widget buildDoseCardFor(CalculatedDose dose) {
       final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
@@ -1004,69 +999,72 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
+    return Padding(
+      padding: const EdgeInsets.only(top: kSpacingS),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border(
+            top: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+              width: 1,
+            ),
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with date and close button
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kSpacingM,
-              vertical: kSpacingS,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _formatSelectedDate(),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => setState(() => _selectedDate = null),
-                  tooltip: 'Close',
-                ),
-              ],
-            ),
-          ),
-          // Dose list
-          Expanded(
-            child: dayDoses.isEmpty
-                ? Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with date and close button
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingM,
+                vertical: kSpacingS,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
                     child: Text(
-                      'No doses scheduled',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(
-                          alpha: kOpacityLow,
-                        ),
+                      _formatSelectedDate(),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  )
-                : Scrollbar(
-                    thumbVisibility: true,
-                    child: ListView.builder(
-                      padding: EdgeInsets.only(bottom: listBottomPadding),
-                      itemCount: dayDoses.length,
-                      itemBuilder: (context, index) {
-                        final dose = dayDoses[index];
-                        return buildDoseCardFor(dose);
-                      },
-                    ),
                   ),
-          ),
-        ],
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => setState(() => _selectedDate = null),
+                    tooltip: 'Close',
+                  ),
+                ],
+              ),
+            ),
+            // Dose list
+            Expanded(
+              child: dayDoses.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No doses scheduled',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(
+                            alpha: kOpacityLow,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Scrollbar(
+                      thumbVisibility: true,
+                      child: ListView.builder(
+                        padding: EdgeInsets.only(bottom: listBottomPadding),
+                        itemCount: dayDoses.length,
+                        itemBuilder: (context, index) {
+                          final dose = dayDoses[index];
+                          return buildDoseCardFor(dose);
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
