@@ -20,11 +20,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
@@ -35,7 +33,6 @@ import 'package:dosifi_v5/src/features/medications/presentation/widgets/medicati
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
-import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
@@ -43,13 +40,6 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
-
-enum _ReconstitutionUpdateAction {
-  usePrevious,
-  calculateNew,
-  useSaved,
-  enterKnownVolume,
-}
 
 /// Modern, revolutionized medication detail screen with:
 /// - Hero header with gradient and key stats
@@ -85,8 +75,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   static const String _kCardDetails = 'details';
   static const String _kCardReconstitution = 'reconstitution';
 
-  final SavedReconstitutionRepository _savedReconstitutionRepo =
-      SavedReconstitutionRepository();
+
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -2612,96 +2601,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     if (med.form != MedicationForm.multiDoseVial) return;
     if (med.strengthValue <= 0) return;
 
-    final action = await _pickReconstitutionUpdateAction(context);
-    if (action == null) return;
-
-    if (!mounted) return;
     final box = Hive.box<Medication>('medications');
     final latest = box.get(med.id) ?? med;
-
-    Future<void> applyNewVolume(double newVolume, {String? diluentName}) async {
-      if (newVolume <= 0) return;
-      final perMl = latest.strengthValue / newVolume;
-      await box.put(
-        latest.id,
-        latest.copyWith(
-          containerVolumeMl: newVolume,
-          perMlValue: perMl,
-          diluentName: diluentName ?? latest.diluentName,
-          activeVialVolume: newVolume,
-          reconstitutedAt: DateTime.now(),
-        ),
-      );
-    }
-
-    if (action == _ReconstitutionUpdateAction.usePrevious) {
-      final previous = latest.containerVolumeMl;
-      if (previous == null || previous <= 0) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(
-            const SnackBar(content: Text('Set a reconstitution volume first.')),
-          );
-        return;
-      }
-
-      await box.put(
-        latest.id,
-        latest.copyWith(
-          activeVialVolume: previous,
-          reconstitutedAt: DateTime.now(),
-        ),
-      );
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          const SnackBar(content: Text('Active vial reconstituted')),
-        );
-      return;
-    }
-
-    if (action == _ReconstitutionUpdateAction.enterKnownVolume) {
-      final volume = await _promptForReconstitutionVolume(context, latest);
-      if (volume == null) return;
-      await applyNewVolume(volume);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(const SnackBar(content: Text('Reconstitution updated')));
-      return;
-    }
-
-    if (action == _ReconstitutionUpdateAction.useSaved) {
-      final saved = await showModalBottomSheet<SavedReconstitutionCalculation>(
-        context: context,
-        isScrollControlled: true,
-        builder: (context) {
-          final height = MediaQuery.of(context).size.height;
-          return SizedBox(
-            height: height * 0.8,
-            child: SavedReconstitutionSheet(
-              repo: _savedReconstitutionRepo,
-              onSelect: (item) => Navigator.of(context).pop(item),
-            ),
-          );
-        },
-      );
-      if (saved == null) return;
-      await applyNewVolume(
-        saved.solventVolumeMl,
-        diluentName: saved.diluentName,
-      );
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(const SnackBar(content: Text('Reconstitution updated')));
-      return;
-    }
 
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: context,
@@ -2714,7 +2615,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
           initialSyringeSize: SyringeSizeMl.ml3,
-          initialVialSize: med.containerVolumeMl,
+          initialVialSize: latest.containerVolumeMl,
+          initialDiluentName: latest.diluentName,
         ),
       ),
     );
@@ -2736,159 +2638,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(const SnackBar(content: Text('Reconstitution updated')));
-  }
-
-  Future<_ReconstitutionUpdateAction?> _pickReconstitutionUpdateAction(
-    BuildContext context,
-  ) {
-    return showModalBottomSheet<_ReconstitutionUpdateAction>(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(kSpacingL),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Reconstitute Active Vial',
-                  style: cardTitleStyle(context),
-                ),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  'Choose how to set the reconstitution volume.',
-                  style: helperTextStyle(context),
-                ),
-                const SizedBox(height: kSpacingM),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Use Previous Reconstitution'),
-                  onTap: () => Navigator.of(
-                    context,
-                  ).pop(_ReconstitutionUpdateAction.usePrevious),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Calculate New Reconstitution'),
-                  onTap: () => Navigator.of(
-                    context,
-                  ).pop(_ReconstitutionUpdateAction.calculateNew),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Use Saved Reconstitution'),
-                  onTap: () => Navigator.of(
-                    context,
-                  ).pop(_ReconstitutionUpdateAction.useSaved),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Enter Known Reconstitution Volume'),
-                  onTap: () => Navigator.of(
-                    context,
-                  ).pop(_ReconstitutionUpdateAction.enterKnownVolume),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<double?> _promptForReconstitutionVolume(
-    BuildContext context,
-    Medication med,
-  ) async {
-    final controller = TextEditingController(
-      text: (med.containerVolumeMl ?? 0).toString(),
-    );
-
-    final result = await showModalBottomSheet<double>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: kSpacingL,
-              right: kSpacingL,
-              top: kSpacingL,
-              bottom: kSpacingL + MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Reconstitution Volume', style: cardTitleStyle(context)),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  'Enter the total mL of diluent used for this vial.',
-                  style: helperTextStyle(context),
-                ),
-                const SizedBox(height: kSpacingM),
-                Center(
-                  child: StepperRow36(
-                    controller: controller,
-                    fixedFieldWidth: 100,
-                    onDec: () {
-                      final v = double.tryParse(controller.text) ?? 0;
-                      if (v <= 0) return;
-                      controller.text = (v - 0.1)
-                          .clamp(0.0, double.infinity)
-                          .toStringAsFixed(2);
-                    },
-                    onInc: () {
-                      final v = double.tryParse(controller.text) ?? 0;
-                      controller.text = (v + 0.1).toStringAsFixed(2);
-                    },
-                    decoration: buildCompactFieldDecoration(context: context),
-                  ),
-                ),
-                const SizedBox(height: kSpacingM),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: kSpacingM),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          final v = double.tryParse(controller.text.trim());
-                          if (v == null || v <= 0) {
-                            ScaffoldMessenger.of(context)
-                              ..clearSnackBars()
-                              ..showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Enter a volume greater than 0.',
-                                  ),
-                                  backgroundColor: theme.colorScheme.error,
-                                ),
-                              );
-                            return;
-                          }
-                          Navigator.of(context).pop(v);
-                        },
-                        child: const Text('Use Volume'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    return result;
   }
 
   Widget _buildCompactGrid(BuildContext context, List<Widget> children) {
@@ -3517,95 +3266,6 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   String? selectedDiluentName;
   String? selectedReconLabel;
 
-  Future<double?> promptForReconstitutionVolume(
-    BuildContext sheetContext,
-    double initial,
-  ) async {
-    final controller = TextEditingController(text: initial.toStringAsFixed(2));
-    return showModalBottomSheet<double>(
-      context: sheetContext,
-      isScrollControlled: true,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: kSpacingL,
-              right: kSpacingL,
-              top: kSpacingL,
-              bottom: kSpacingL + MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Reconstitution Volume', style: cardTitleStyle(context)),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  'Enter the total mL of diluent used for this vial.',
-                  style: helperTextStyle(context),
-                ),
-                const SizedBox(height: kSpacingM),
-                Center(
-                  child: StepperRow36(
-                    controller: controller,
-                    fixedFieldWidth: 100,
-                    onDec: () {
-                      final v = double.tryParse(controller.text) ?? 0;
-                      if (v <= 0) return;
-                      controller.text = (v - 0.1)
-                          .clamp(0.0, double.infinity)
-                          .toStringAsFixed(2);
-                    },
-                    onInc: () {
-                      final v = double.tryParse(controller.text) ?? 0;
-                      controller.text = (v + 0.1).toStringAsFixed(2);
-                    },
-                    decoration: buildCompactFieldDecoration(context: context),
-                  ),
-                ),
-                const SizedBox(height: kSpacingM),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: kSpacingM),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          final v = double.tryParse(controller.text.trim());
-                          if (v == null || v <= 0) {
-                            ScaffoldMessenger.of(context)
-                              ..clearSnackBars()
-                              ..showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Enter a volume greater than 0.',
-                                  ),
-                                  backgroundColor: theme.colorScheme.error,
-                                ),
-                              );
-                            return;
-                          }
-                          Navigator.of(context).pop(v);
-                        },
-                        child: const Text('Use Volume'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> pickReconstitution(BuildContext dialogContext) async {
     final box = Hive.box<Medication>('medications');
     final latest = box.get(med.id) ?? med;
@@ -3622,117 +3282,6 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       selectedReconLabel = label;
     }
 
-    final picked = await showModalBottomSheet<String>(
-      context: dialogContext,
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(kSpacingL),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Reconstitute Active Vial',
-                  style: cardTitleStyle(context),
-                ),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  'Choose how to set the reconstitution volume.',
-                  style: helperTextStyle(context),
-                ),
-                const SizedBox(height: kSpacingM),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Use Previous Reconstitution'),
-                  onTap: () => Navigator.of(context).pop('previous'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Calculate New Reconstitution'),
-                  onTap: () => Navigator.of(context).pop('calculate'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Use Saved Reconstitution'),
-                  onTap: () => Navigator.of(context).pop('saved'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Enter Known Reconstitution Volume'),
-                  onTap: () => Navigator.of(context).pop('known'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (picked == null) return;
-
-    if (picked == 'previous') {
-      final previous = latest.containerVolumeMl;
-      final previousPerMl = latest.perMlValue;
-      if (previous == null || previous <= 0) {
-        if (!dialogContext.mounted) return;
-        ScaffoldMessenger.of(dialogContext)
-          ..clearSnackBars()
-          ..showSnackBar(
-            const SnackBar(content: Text('Set a reconstitution volume first.')),
-          );
-        return;
-      }
-      await setRecon(
-        volumeMl: previous,
-        perMl: previousPerMl ?? (latest.strengthValue / previous),
-        diluentName: latest.diluentName,
-        label: 'Previous',
-      );
-      return;
-    }
-
-    if (picked == 'known') {
-      final initial = (latest.containerVolumeMl ?? vialSize).clamp(0.1, 9999.0);
-      final volume = await promptForReconstitutionVolume(
-        dialogContext,
-        initial,
-      );
-      if (volume == null) return;
-      await setRecon(
-        volumeMl: volume,
-        perMl: latest.strengthValue / volume,
-        diluentName: latest.diluentName,
-        label: 'Known volume',
-      );
-      return;
-    }
-
-    if (picked == 'saved') {
-      final saved = await showModalBottomSheet<SavedReconstitutionCalculation>(
-        context: dialogContext,
-        isScrollControlled: true,
-        builder: (context) {
-          final height = MediaQuery.of(context).size.height;
-          return SizedBox(
-            height: height * 0.8,
-            child: SavedReconstitutionSheet(
-              repo: SavedReconstitutionRepository(),
-              onSelect: (item) => Navigator.of(context).pop(item),
-            ),
-          );
-        },
-      );
-      if (saved == null) return;
-      await setRecon(
-        volumeMl: saved.solventVolumeMl,
-        perMl: saved.perMlConcentration,
-        diluentName: saved.diluentName,
-        label: 'Saved: ${saved.name}',
-      );
-      return;
-    }
-
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: dialogContext,
       isScrollControlled: true,
@@ -3744,17 +3293,25 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
           initialSyringeSize: SyringeSizeMl.ml3,
-          initialVialSize: med.containerVolumeMl,
+          initialVialSize:
+              selectedReconstitutionVolume ??
+              latest.containerVolumeMl ??
+              vialSize,
+          initialDiluentName: selectedDiluentName ?? latest.diluentName,
         ),
       ),
     );
 
     if (result == null) return;
+    final diluent = (result.diluentName ?? selectedDiluentName)?.trim();
+    final label = diluent == null || diluent.isEmpty
+        ? '${result.solventVolumeMl.toStringAsFixed(2)} mL'
+        : '${result.solventVolumeMl.toStringAsFixed(2)} mL $diluent';
     await setRecon(
       volumeMl: result.solventVolumeMl,
       perMl: result.perMlConcentration,
       diluentName: result.diluentName,
-      label: 'Calculated',
+      label: label,
     );
   }
 

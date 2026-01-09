@@ -23,6 +23,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
     required this.unitLabel,
     super.key,
     this.medicationName,
+    this.initialDiluentName,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -36,6 +37,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
   final double initialStrengthValue;
   final String unitLabel;
   final String? medicationName;
+  final String? initialDiluentName;
   final double? initialDoseValue;
   final String? initialDoseUnit;
   final SyringeSizeMl? initialSyringeSize;
@@ -85,6 +87,10 @@ class _ReconstitutionCalculatorWidgetState
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
+    }
+    final initialDiluentName = widget.initialDiluentName?.trim();
+    if (initialDiluentName != null && initialDiluentName.isNotEmpty) {
+      _diluentNameCtrl.text = initialDiluentName;
     }
     _selectedUnits = _syringe.totalUnits * 0.5;
     _targetUnits = _selectedUnits;

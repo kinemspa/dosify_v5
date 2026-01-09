@@ -49,6 +49,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
     super.key,
     required this.initialStrengthValue,
     required this.unitLabel, // e.g., mg, mcg, g, units
+    this.initialDiluentName,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -57,6 +58,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
 
   final double initialStrengthValue; // total quantity in the vial (S)
   final String unitLabel;
+  final String? initialDiluentName;
   final double? initialDoseValue;
   final String? initialDoseUnit; // 'mcg'|'mg'|'g'|'units'
   final SyringeSizeMl? initialSyringeSize;
@@ -149,6 +151,7 @@ class _ReconstitutionCalculatorDialogState
               child: ReconstitutionCalculatorWidget(
                 initialStrengthValue: widget.initialStrengthValue,
                 unitLabel: widget.unitLabel,
+                initialDiluentName: widget.initialDiluentName,
                 initialDoseValue: widget.initialDoseValue,
                 initialDoseUnit: widget.initialDoseUnit,
                 initialSyringeSize: widget.initialSyringeSize,
