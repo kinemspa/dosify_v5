@@ -114,7 +114,11 @@ class CalendarWeekView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Day headers
-          _WeekHeader(startDate: startDate, onDayTap: onDayTap),
+          _WeekHeader(
+            startDate: startDate,
+            selectedDate: selectedDate,
+            onDayTap: onDayTap,
+          ),
           // Week grid
           SizedBox(
             height: kCalendarWeekGridHeight,
@@ -146,9 +150,14 @@ class CalendarWeekView extends StatelessWidget {
 }
 
 class _WeekHeader extends StatelessWidget {
-  const _WeekHeader({required this.startDate, this.onDayTap});
+  const _WeekHeader({
+    required this.startDate,
+    this.selectedDate,
+    this.onDayTap,
+  });
 
   final DateTime startDate;
+  final DateTime? selectedDate;
   final void Function(DateTime date)? onDayTap;
 
   bool _isToday(DateTime date) {
@@ -156,6 +165,14 @@ class _WeekHeader extends StatelessWidget {
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
+  }
+
+  bool _isSelected(DateTime date) {
+    final selected = selectedDate;
+    if (selected == null) return false;
+    return date.year == selected.year &&
+        date.month == selected.month &&
+        date.day == selected.day;
   }
 
   @override
@@ -176,6 +193,7 @@ class _WeekHeader extends StatelessWidget {
         children: List.generate(7, (index) {
           final day = startDate.add(Duration(days: index));
           final isToday = _isToday(day);
+          final isSelected = _isSelected(day) && !isToday;
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
 
@@ -184,8 +202,13 @@ class _WeekHeader extends StatelessWidget {
               onTap: onDayTap != null ? () => onDayTap!(day) : null,
               child: Container(
                 margin: kCalendarWeekHeaderCellMargin,
-                decoration: isToday
+                decoration: (isToday || isSelected)
                     ? BoxDecoration(
+                        color: isSelected
+                            ? colorScheme.primary.withValues(
+                                alpha: kOpacityFaint,
+                              )
+                            : null,
                         border: Border.all(
                           color: colorScheme.primary,
                           width: kBorderWidthThin,
@@ -204,10 +227,12 @@ class _WeekHeader extends StatelessWidget {
                           ?.copyWith(
                             color: isToday
                                 ? colorScheme.primary
+                                : isSelected
+                                ? colorScheme.primary
                                 : colorScheme.onSurface.withAlpha(
                                     (0.6 * 255).round(),
                                   ),
-                            fontWeight: isToday
+                            fontWeight: (isToday || isSelected)
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                           ),
@@ -219,10 +244,12 @@ class _WeekHeader extends StatelessWidget {
                           ?.copyWith(
                             color: isToday
                                 ? colorScheme.primary
+                                : isSelected
+                                ? colorScheme.primary
                                 : colorScheme.onSurface.withValues(
                                     alpha: kOpacityHigh,
                                   ),
-                            fontWeight: isToday
+                            fontWeight: (isToday || isSelected)
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                           ),
@@ -286,10 +313,7 @@ class _DayColumn extends StatelessWidget {
         child: doses.isEmpty
             ? const SizedBox.shrink()
             : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: kListItemSpacing,
-                  vertical: kCardInnerSpacing,
-                ),
+                padding: kCalendarWeekColumnPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: doses.map((dose) {
@@ -316,32 +340,18 @@ class _CompactDoseIndicator extends StatelessWidget {
   final VoidCallback? onTap;
 
   Color _getBackgroundColor(BuildContext context) {
-    final now = DateTime.now();
-    final isToday =
-        dose.scheduledTime.year == now.year &&
-        dose.scheduledTime.month == now.month &&
-        dose.scheduledTime.day == now.day;
-
     final cs = Theme.of(context).colorScheme;
 
     switch (dose.status) {
       case DoseStatus.taken:
-        return kDoseStatusTakenGreen;
+        return cs.primary.withValues(alpha: kOpacityFaint);
       case DoseStatus.skipped:
-        return Color.alphaBlend(
-          cs.onSurface.withValues(alpha: kOpacityFaint),
-          cs.surface,
-        );
+        return cs.onSurfaceVariant.withValues(alpha: kOpacityFaint);
       case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange.withValues(alpha: kOpacitySubtle);
+        return cs.tertiary.withValues(alpha: kOpacityFaint);
       case DoseStatus.overdue:
-        return cs.error;
+        return cs.error.withValues(alpha: kOpacityFaint);
       case DoseStatus.pending:
-        if (isToday) {
-          // Highlight today's pending doses
-          return cs.primary;
-        }
-        // Future doses unfilled
         return kColorTransparent;
     }
   }
@@ -350,36 +360,27 @@ class _CompactDoseIndicator extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     switch (dose.status) {
       case DoseStatus.taken:
-        return kDoseStatusTakenGreen;
+        return cs.primary.withValues(alpha: kOpacityMediumLow);
       case DoseStatus.skipped:
         return cs.outline.withValues(alpha: kOpacityMediumLow);
       case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange;
+        return cs.tertiary.withValues(alpha: kOpacityMediumLow);
       case DoseStatus.overdue:
-        return cs.error;
+        return cs.error.withValues(alpha: kOpacityMediumLow);
       case DoseStatus.pending:
         return cs.primary.withValues(alpha: kOpacityMediumLow);
     }
   }
 
   Color _getTextColor(BuildContext context) {
-    final now = DateTime.now();
-    final isToday =
-        dose.scheduledTime.year == now.year &&
-        dose.scheduledTime.month == now.month &&
-        dose.scheduledTime.day == now.day;
-
     final cs = Theme.of(context).colorScheme;
 
     switch (dose.status) {
       case DoseStatus.taken:
-        return kColorOnFilledStatus;
+        return cs.primary;
       case DoseStatus.overdue:
-        return cs.onError;
+        return cs.error;
       case DoseStatus.pending:
-        if (isToday) {
-          return cs.onPrimary;
-        }
         return cs.primary;
       default:
         return cs.onSurface;
@@ -420,11 +421,9 @@ class _CompactDoseIndicator extends StatelessWidget {
             width: kBorderWidthMedium,
           ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
-            Flexible(
+            Expanded(
               child: Text(
                 _getDisplayText(),
                 style: calendarWeekDoseIndicatorValueTextStyle(
@@ -434,15 +433,14 @@ class _CompactDoseIndicator extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Flexible(
-              child: Text(
-                DateFormat('h:mm a').format(dose.scheduledTime).toLowerCase(),
-                style: calendarWeekDoseIndicatorTimeTextStyle(
-                  context,
-                  color: textColor,
-                ),
-                overflow: TextOverflow.ellipsis,
+            const SizedBox(width: kSpacingXS),
+            Text(
+              DateFormat('h:mm a').format(dose.scheduledTime).toLowerCase(),
+              style: calendarWeekDoseIndicatorTimeTextStyle(
+                context,
+                color: textColor,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

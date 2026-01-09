@@ -314,14 +314,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                           ),
                                           onRestock:
                                               updatedMed.form ==
-                                                      MedicationForm
-                                                          .multiDoseVial
-                                                  ? () =>
-                                                      _showRestockSealedVialsDialog(
-                                                        context,
-                                                        updatedMed,
-                                                      )
-                                                  : null,
+                                                  MedicationForm.multiDoseVial
+                                              ? () =>
+                                                    _showRestockSealedVialsDialog(
+                                                      context,
+                                                      updatedMed,
+                                                    )
+                                              : null,
                                           onAdHocDose: () =>
                                               _showAdHocDoseDialog(
                                                 context,
@@ -1082,10 +1081,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: () => _showRestockSealedVialsDialog(
-                            context,
-                            med,
-                          ),
+                          onTap: () =>
+                              _showRestockSealedVialsDialog(context, med),
                           borderRadius: BorderRadius.circular(8),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -3788,12 +3785,12 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             selectedSource == 'fromStock' && canUseFromStock;
 
         final previewVolume = selectedMode == 'replace'
-          ? (selectedReconstitutionVolume ?? vialSize)
-          : currentVolume + vialSize;
+            ? (selectedReconstitutionVolume ?? vialSize)
+            : currentVolume + vialSize;
 
         final canSave =
-          selectedMode == 'topUp' ||
-          (selectedReconstitutionVolume != null && selectedPerMl != null);
+            selectedMode == 'topUp' ||
+            (selectedReconstitutionVolume != null && selectedPerMl != null);
 
         Widget buildHeaderCard() {
           return Container(
@@ -3850,14 +3847,15 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             const SizedBox(height: kSpacingM),
             Text(
               'Action:',
-              style: helperTextStyle(context)?.copyWith(
-                fontWeight: kFontWeightSemiBold,
-                color: cs.primary,
-              ),
+              style: helperTextStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
             ),
             const SizedBox(height: kSpacingXS),
             RadioListTile<String>(
-              title: Text('Replace (discard ${_formatNumber(currentVolume)} mL)'),
+              title: Text(
+                'Replace (discard ${_formatNumber(currentVolume)} mL)',
+              ),
               value: 'replace',
               groupValue: selectedMode,
               onChanged: (v) => setState(() => selectedMode = v ?? 'replace'),
@@ -3875,17 +3873,19 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             const SizedBox(height: kSpacingS),
             Text(
               'Source:',
-              style: helperTextStyle(context)?.copyWith(
-                fontWeight: kFontWeightSemiBold,
-                color: cs.primary,
-              ),
+              style: helperTextStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
             ),
             const SizedBox(height: kSpacingXS),
             RadioListTile<String>(
               title: const Text('Use sealed vial from stock'),
               subtitle: canUseFromStock
                   ? Text('Will deduct 1 vial (${sealedVials - 1} remaining)')
-                  : Text('No sealed vials available', style: TextStyle(color: cs.error)),
+                  : Text(
+                      'No sealed vials available',
+                      style: TextStyle(color: cs.error),
+                    ),
               value: 'fromStock',
               groupValue: selectedSource,
               onChanged: canUseFromStock
@@ -3899,7 +3899,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               subtitle: const Text('Does not change sealed vial stock'),
               value: 'otherSource',
               groupValue: selectedSource,
-              onChanged: (v) => setState(() => selectedSource = v ?? 'otherSource'),
+              onChanged: (v) =>
+                  setState(() => selectedSource = v ?? 'otherSource'),
               dense: true,
               contentPadding: EdgeInsets.zero,
             ),
@@ -3963,7 +3964,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                       });
                     }
                   : null,
-              child: Text(selectedMode == 'replace' ? 'Replace Vial' : 'Top Up'),
+              child: Text(
+                selectedMode == 'replace' ? 'Replace Vial' : 'Top Up',
+              ),
             ),
           ],
         );

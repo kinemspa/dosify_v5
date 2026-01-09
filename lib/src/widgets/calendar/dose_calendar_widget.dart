@@ -254,29 +254,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   void _onDayTap(DateTime date) {
-    // In Week view, tapping anything on a day should switch to Day view.
-    // In Month view, keep the existing behavior: show the selected-day list
-    // panel below the calendar.
-    final shouldSwitchToDayView = _currentView == CalendarView.week;
-
     setState(() {
-      if (shouldSwitchToDayView) {
-        _currentView = CalendarView.day;
-        _currentDate = date;
-        _selectedDate = null;
-        if (widget.requireHourSelectionInDayView) {
-          _selectedHour ??= DateTime.now().hour;
-        } else {
-          _selectedHour = null;
-        }
-      } else {
-        _selectedDate = date;
-      }
+      // In Week/Month views, tapping a date selects that day.
+      // Day view is only entered via explicit view switching.
+      _selectedDate = date;
+      _currentDate = date;
     });
-
-    if (shouldSwitchToDayView) {
-      _loadDoses();
-    }
   }
 
   void _onDoseTapInternal(CalculatedDose dose) {

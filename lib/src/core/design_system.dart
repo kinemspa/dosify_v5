@@ -164,17 +164,22 @@ const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarDoseIndicatorSpacing = 2;
 const double kCalendarWeekColumnWidth = 80; // Width of day column in week view
-const double kCalendarWeekHeaderHeight = 56;
-const double kCalendarWeekGridHeight = 140;
-const EdgeInsets kCalendarWeekHeaderCellMargin = EdgeInsets.all(kSpacingXS);
+const double kCalendarWeekHeaderHeight = 44;
+const double kCalendarWeekGridHeight = 120;
+const EdgeInsets kCalendarWeekHeaderCellMargin = EdgeInsets.all(kSpacingXXS);
 const double kCalendarWeekHeaderCellBorderRadius = kBorderRadiusSmall;
 const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
 
 /// Week-view compact dose indicator sizing.
-const double kCalendarWeekDoseIndicatorHeight = kStandardFieldHeight;
+const double kCalendarWeekDoseIndicatorHeight = 32;
 const EdgeInsets kCalendarWeekDoseIndicatorPadding = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: kSpacingXXS,
+);
+
+const EdgeInsets kCalendarWeekColumnPadding = EdgeInsets.symmetric(
+  horizontal: kListItemSpacing,
+  vertical: kCardInnerSpacing,
 );
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
 
@@ -1021,9 +1026,11 @@ TextStyle? calendarWeekHeaderDayLabelTextStyle(BuildContext context) {
 
 /// Calendar week-view header day number style (e.g. 9)
 TextStyle? calendarWeekHeaderDayNumberTextStyle(BuildContext context) {
-  return Theme.of(
-    context,
-  ).textTheme.bodySmall?.copyWith(fontWeight: kFontWeightSemiBold);
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: kFontSizeSmall,
+    height: kLineHeightTight,
+    fontWeight: kFontWeightSemiBold,
+  );
 }
 
 /// Calendar header (Month/Year) title style.
