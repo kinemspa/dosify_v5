@@ -745,9 +745,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ? constraints.maxHeight
             : null;
         final effectiveHeight = widget.height ?? boundedHeight;
+
+        final selectedDayPanelRatio = switch (_currentView) {
+          CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
+          CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
+          CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
+        };
         final panelHeight =
             (widget.variant == CalendarVariant.full && effectiveHeight != null)
-            ? effectiveHeight * kCalendarSelectedDayPanelHeightRatio
+            ? effectiveHeight * selectedDayPanelRatio
             : null;
 
         return Container(

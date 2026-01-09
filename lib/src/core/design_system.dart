@@ -213,7 +213,9 @@ const double kCalendarDayOverflowTextOpacity = kOpacityMedium;
 /// In the full-screen calendar, allocate a fixed portion of the available
 /// height to the selected-day list panel so the calendar grid remains stable
 /// across Day/Week/Month views.
-const double kCalendarSelectedDayPanelHeightRatio = 0.42;
+const double kCalendarSelectedDayPanelHeightRatioDay = 0.42;
+const double kCalendarSelectedDayPanelHeightRatioWeek = 0.42;
+const double kCalendarSelectedDayPanelHeightRatioMonth = 0.30;
 
 // ============================================================================
 // SPACING CONSTANTS
