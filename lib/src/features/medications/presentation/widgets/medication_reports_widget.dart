@@ -202,6 +202,22 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     );
   }
 
+  String _effectiveScheduleName({
+    required String scheduleId,
+    required String? scheduleName,
+  }) {
+    if (scheduleId == 'ad_hoc') return 'Unscheduled';
+
+    final trimmed = scheduleName?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+
+    final schedule = Hive.box<Schedule>('schedules').get(scheduleId);
+    final fallback = schedule?.name.trim();
+    if (fallback != null && fallback.isNotEmpty) return fallback;
+
+    return 'Scheduled dose';
+  }
+
   Widget _buildEditIndicatorIcon(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Icon(
@@ -426,6 +442,11 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final cs = Theme.of(context).colorScheme;
     final timeFormat = DateFormat('h:mm a');
 
+    final scheduleName = _effectiveScheduleName(
+      scheduleId: dose.scheduleId,
+      scheduleName: dose.scheduleName,
+    );
+
     return InkWell(
       onTap: () => _showUniversalDoseActionSheetForMissedDose(context, dose),
       child: Padding(
@@ -445,7 +466,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${dose.scheduleName} • ${dose.doseValue} ${dose.doseUnit}',
+                    '$scheduleName • ${dose.doseValue} ${dose.doseUnit}',
                     style: helperTextStyle(
                       context,
                       color: cs.onSurfaceVariant.withValues(
@@ -513,7 +534,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         break;
     }
 
-    final title = isAdHoc ? 'Unscheduled' : log.scheduleName;
+    final title = _effectiveScheduleName(
+      scheduleId: log.scheduleId,
+      scheduleName: isAdHoc ? 'Unscheduled' : log.scheduleName,
+    );
 
     return InkWell(
       onTap: () => _showUniversalDoseActionSheetForLog(context, log),
