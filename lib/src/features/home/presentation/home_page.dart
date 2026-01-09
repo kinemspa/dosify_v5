@@ -485,8 +485,9 @@ class HomePage extends StatelessWidget {
                                       titleTrailing: ScheduleStatusChip(
                                         schedule: schedule,
                                       ),
-                                      onTap: () => context.push(
-                                        '/schedules/detail/${schedule.id}',
+                                      onTap: () => context.pushNamed(
+                                        'scheduleDetail',
+                                        pathParameters: {'id': schedule.id},
                                       ),
                                       onQuickAction: (status) =>
                                           _showDoseActionSheet(

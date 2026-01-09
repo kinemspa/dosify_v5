@@ -45,7 +45,8 @@ class ScheduleCard extends StatelessWidget {
             ).format(context);
 
       return GlassCardSurface(
-        onTap: () => context.push('/schedules/detail/${s.id}'),
+        onTap: () =>
+            context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
         useGradient: useGradient,
         child: IntrinsicHeight(
           child: Row(
@@ -157,7 +158,8 @@ class ScheduleCard extends StatelessWidget {
 
     // Large Card (Existing Logic with Glass Surface)
     return GlassCardSurface(
-      onTap: () => context.push('/schedules/detail/${s.id}'),
+      onTap: () =>
+          context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
       useGradient: useGradient,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,7 +252,10 @@ class ScheduleCard extends StatelessWidget {
                 )
               else
                 FilledButton.tonal(
-                  onPressed: () => context.push('/schedules/detail/${s.id}'),
+                  onPressed: () => context.pushNamed(
+                    'scheduleDetail',
+                    pathParameters: {'id': s.id},
+                  ),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,

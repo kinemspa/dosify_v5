@@ -744,8 +744,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             ),
         if (logs.length > 3)
           TextButton(
-            onPressed: () =>
-                context.push('/schedules/detail/${widget.schedule.id}'),
+            onPressed: () => context.pushNamed(
+              'scheduleDetail',
+              pathParameters: {'id': widget.schedule.id},
+            ),
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: const Size(0, 0),

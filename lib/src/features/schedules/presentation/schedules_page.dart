@@ -331,7 +331,8 @@ class _ScheduleListRow extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => context.push('/schedules/detail/${s.id}'),
+        onTap: () =>
+            context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
         borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -653,7 +654,10 @@ class _ScheduleCard extends StatelessWidget {
                   schedule: s,
                   size: kIconSizeXSmall,
                 ),
-                onTap: () => context.push('/schedules/detail/${s.id}'),
+                onTap: () => context.pushNamed(
+                  'scheduleDetail',
+                  pathParameters: {'id': s.id},
+                ),
                 onQuickAction: (status) => _showDoseActionSheet(
                   context,
                   dose: dose,
@@ -680,7 +684,8 @@ class _ScheduleCard extends StatelessWidget {
       final showScheduleName = medName.isNotEmpty && scheduleName.isNotEmpty;
 
       return GlassCardSurface(
-        onTap: () => context.push('/schedules/detail/${s.id}'),
+        onTap: () =>
+            context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
         useGradient: false,
         padding: kCompactCardPadding,
         child: Row(
@@ -741,7 +746,8 @@ class _ScheduleCard extends StatelessWidget {
     }
 
     return LargeCard(
-      onTap: () => context.push('/schedules/detail/${s.id}'),
+      onTap: () =>
+          context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
       dense: true,
       leading: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
