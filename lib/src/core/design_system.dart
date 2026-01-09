@@ -183,7 +183,10 @@ const EdgeInsets kBottomSheetHandleMargin = EdgeInsets.symmetric(
 
 /// Month-view day cell styling
 const double kCalendarDayNumberSize = 24;
-const EdgeInsets kCalendarDayNumberPadding = EdgeInsets.all(kSpacingXS);
+const EdgeInsets kCalendarDayNumberPadding = EdgeInsets.only(
+  left: kSpacingXS,
+  top: kSpacingXS,
+);
 const EdgeInsets kCalendarDayDoseIndicatorPadding = EdgeInsets.all(
   kSpacingXS / 2,
 );

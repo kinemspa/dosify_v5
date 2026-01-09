@@ -52,75 +52,72 @@ class CalendarDayCell extends StatelessWidget {
           children: [
             Padding(
               padding: kCalendarDayNumberPadding,
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    SizedBox(
-                      width: kCalendarDayNumberSize,
-                      height: kCalendarDayNumberSize,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${date.day}',
-                          style: calendarDayNumberTextStyle(context)?.copyWith(
-                            color: _getTextColor(colorScheme),
-                            fontWeight: (isToday || isSelected)
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(
+                    width: kCalendarDayNumberSize,
+                    height: kCalendarDayNumberSize,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        '${date.day}',
+                        style: calendarDayNumberTextStyle(context)?.copyWith(
+                          color: _getTextColor(colorScheme),
+                          fontWeight: (isToday || isSelected)
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ),
-                    if (doseCount > 0)
-                      Positioned(
-                        right: -kSpacingXS,
-                        bottom: -kSpacingXS,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: kSpacingXS,
-                            vertical: kSpacingXS / 2,
+                  ),
+                  if (doseCount > 0)
+                    Positioned(
+                      right: -kSpacingXS,
+                      bottom: -kSpacingXS,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: kSpacingXS,
+                          vertical: kSpacingXS / 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? colorScheme.onPrimary.withValues(
+                                  alpha: kOpacityFaint,
+                                )
+                              : colorScheme.primary.withValues(
+                                  alpha: kOpacityFaint,
+                                ),
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusChipTight,
                           ),
-                          decoration: BoxDecoration(
+                          border: Border.all(
                             color: isSelected
                                 ? colorScheme.onPrimary.withValues(
-                                    alpha: kOpacityFaint,
+                                    alpha: kOpacityMediumLow,
                                   )
-                                : colorScheme.primary.withValues(
-                                    alpha: kOpacityFaint,
+                                : colorScheme.outlineVariant.withValues(
+                                    alpha: kOpacityMediumLow,
                                   ),
-                            borderRadius: BorderRadius.circular(
-                              kBorderRadiusChipTight,
-                            ),
-                            border: Border.all(
-                              color: isSelected
-                                  ? colorScheme.onPrimary.withValues(
-                                      alpha: kOpacityMediumLow,
-                                    )
-                                  : colorScheme.outlineVariant.withValues(
-                                      alpha: kOpacityMediumLow,
-                                    ),
-                              width: kBorderWidthThin,
-                            ),
-                          ),
-                          child: Text(
-                            doseCountText,
-                            style: calendarDayCountBadgeTextStyle(context)
-                                ?.copyWith(
-                                  color: isSelected
-                                      ? colorScheme.onPrimary
-                                      : (isCurrentMonth
-                                            ? colorScheme.primary
-                                            : colorScheme.primary.withValues(
-                                                alpha: kOpacityMedium,
-                                              )),
-                                ),
+                            width: kBorderWidthThin,
                           ),
                         ),
+                        child: Text(
+                          doseCountText,
+                          style: calendarDayCountBadgeTextStyle(context)
+                              ?.copyWith(
+                                color: isSelected
+                                    ? colorScheme.onPrimary
+                                    : (isCurrentMonth
+                                          ? colorScheme.primary
+                                          : colorScheme.primary.withValues(
+                                              alpha: kOpacityMedium,
+                                            )),
+                              ),
+                        ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
             if (doses.isNotEmpty)
