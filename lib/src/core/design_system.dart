@@ -169,6 +169,13 @@ const double kCalendarWeekGridHeight = 140;
 const EdgeInsets kCalendarWeekHeaderCellMargin = EdgeInsets.all(kSpacingXS);
 const double kCalendarWeekHeaderCellBorderRadius = kBorderRadiusSmall;
 const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
+
+/// Week-view compact dose indicator sizing.
+const double kCalendarWeekDoseIndicatorHeight = kStandardFieldHeight;
+const EdgeInsets kCalendarWeekDoseIndicatorPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingXS,
+  vertical: kSpacingXXS,
+);
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
 
 /// Bottom sheet sizing
@@ -329,6 +336,12 @@ const Color kReconBackgroundActive = Color(
 /// Use these instead of hardcoding colors in widgets.
 const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
 const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
+
+/// Common utility colors.
+///
+/// Keep these centralized so feature code never references `Colors.*`.
+const Color kColorTransparent = Color(0x00000000);
+const Color kColorOnFilledStatus = Colors.white;
 
 /// Theme-aware reconstitution calculator background.
 ///
@@ -843,6 +856,35 @@ TextStyle? microHelperTextStyle(BuildContext context, {Color? color}) {
     context,
     color: color,
   )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
+}
+
+/// Week-view compact dose indicator (value/initial) text style.
+TextStyle? calendarWeekDoseIndicatorValueTextStyle(
+  BuildContext context, {
+  Color? color,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: kFontSizeSmall,
+    height: kLineHeightTight,
+    fontWeight: kFontWeightBold,
+    color: color ?? cs.onSurface,
+  );
+}
+
+/// Week-view compact dose indicator (time) text style.
+TextStyle? calendarWeekDoseIndicatorTimeTextStyle(
+  BuildContext context, {
+  Color? color,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  final base = color ?? cs.onSurface;
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: kFontSizeXSmall,
+    height: kLineHeightTight,
+    fontWeight: kFontWeightMedium,
+    color: base.withValues(alpha: kOpacityMedium),
+  );
 }
 
 /// Checkbox label style
