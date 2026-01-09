@@ -659,7 +659,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               cards[entry.value]!,
               if (!isExpandedForCardId(entry.value))
                 Positioned(
-                  left: 0,
+                  left: kSpacingS,
                   top: 0,
                   bottom: 0,
                   child: Align(
