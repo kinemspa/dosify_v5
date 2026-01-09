@@ -48,76 +48,82 @@ class CalendarDayCell extends StatelessWidget {
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Date number
             Padding(
               padding: kCalendarDayNumberPadding,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: kCalendarDayNumberSize,
-                    height: kCalendarDayNumberSize,
-                    decoration: isToday
-                        ? BoxDecoration(
-                            color: colorScheme.primary,
-                            shape: BoxShape.circle,
-                          )
-                        : null,
-                    child: Center(
-                      child: Text(
-                        '${date.day}',
-                        style: calendarDayNumberTextStyle(context)?.copyWith(
-                          color: _getTextColor(colorScheme),
-                          fontWeight: isToday
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (doseCount > 0)
-                    Positioned(
-                      right: -kSpacingXS,
-                      bottom: -kSpacingXS,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: kSpacingXS,
-                          vertical: kSpacingXS / 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withValues(
-                            alpha: kOpacityFaint,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadiusSmall,
-                          ),
-                          border: Border.all(
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: kOpacityMediumLow,
-                            ),
-                            width: kBorderWidthThin,
-                          ),
-                        ),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SizedBox(
+                      width: kCalendarDayNumberSize,
+                      height: kCalendarDayNumberSize,
+                      child: Align(
+                        alignment: Alignment.center,
                         child: Text(
-                          doseCountText,
-                          style: calendarDayCountBadgeTextStyle(context)
-                              ?.copyWith(
-                                color: isCurrentMonth
-                                    ? colorScheme.primary
-                                    : colorScheme.primary.withValues(
-                                        alpha: kOpacityMedium,
-                                      ),
-                              ),
+                          '${date.day}',
+                          style: calendarDayNumberTextStyle(context)?.copyWith(
+                            color: _getTextColor(colorScheme),
+                            fontWeight:
+                                (isToday || isSelected)
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                          ),
                         ),
                       ),
                     ),
-                ],
+                    if (doseCount > 0)
+                      Positioned(
+                        right: -kSpacingXS,
+                        bottom: -kSpacingXS,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: kSpacingXS,
+                            vertical: kSpacingXS / 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? colorScheme.onPrimary.withValues(
+                                    alpha: kOpacityFaint,
+                                  )
+                                : colorScheme.primary.withValues(
+                                    alpha: kOpacityFaint,
+                                  ),
+                            borderRadius: BorderRadius.circular(
+                              kBorderRadiusSmall,
+                            ),
+                            border: Border.all(
+                              color: isSelected
+                                  ? colorScheme.onPrimary.withValues(
+                                      alpha: kOpacityMediumLow,
+                                    )
+                                  : colorScheme.outlineVariant.withValues(
+                                      alpha: kOpacityMediumLow,
+                                    ),
+                              width: kBorderWidthThin,
+                            ),
+                          ),
+                          child: Text(
+                            doseCountText,
+                            style: calendarDayCountBadgeTextStyle(context)
+                                ?.copyWith(
+                                  color: isSelected
+                                      ? colorScheme.onPrimary
+                                      : (isCurrentMonth
+                                            ? colorScheme.primary
+                                            : colorScheme.primary.withValues(
+                                                alpha: kOpacityMedium,
+                                              )),
+                                ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-
-            // Dose indicators (dots)
             if (doses.isNotEmpty)
               Expanded(
                 child: Padding(
@@ -140,10 +146,15 @@ class CalendarDayCell extends StatelessWidget {
                             '+${doses.length - 5}',
                             style: calendarDayOverflowTextStyle(context)
                                 ?.copyWith(
-                                  color: colorScheme.onSurfaceVariant
-                                      .withValues(
-                                        alpha: kCalendarDayOverflowTextOpacity,
-                                      ),
+                                  color: isSelected
+                                      ? colorScheme.onPrimary.withValues(
+                                          alpha: kOpacityMediumHigh,
+                                        )
+                                      : colorScheme.onSurfaceVariant
+                                          .withValues(
+                                            alpha:
+                                                kCalendarDayOverflowTextOpacity,
+                                          ),
                                 ),
                           ),
                         ),
@@ -159,7 +170,7 @@ class CalendarDayCell extends StatelessWidget {
 
   Color _getBackgroundColor(ColorScheme colorScheme) {
     if (isSelected) {
-      return colorScheme.primary.withValues(alpha: kOpacitySubtleLow);
+      return colorScheme.primary;
     }
     if (isToday) {
       return colorScheme.primary.withValues(alpha: kOpacityFaint);
@@ -172,7 +183,7 @@ class CalendarDayCell extends StatelessWidget {
 
   Color _getBorderColor(ColorScheme colorScheme) {
     if (isSelected) {
-      return colorScheme.primary.withValues(alpha: kOpacityMediumHigh);
+      return colorScheme.primary.withValues(alpha: kOpacityTransparent);
     }
     if (isToday) {
       return colorScheme.primary.withValues(alpha: kOpacitySubtle);
@@ -182,7 +193,7 @@ class CalendarDayCell extends StatelessWidget {
 
   double _getBorderWidth() {
     if (isSelected) {
-      return kBorderWidthThick;
+      return kBorderWidthThin;
     }
     if (isToday) {
       return kBorderWidthMedium;
@@ -191,9 +202,8 @@ class CalendarDayCell extends StatelessWidget {
   }
 
   Color _getTextColor(ColorScheme colorScheme) {
-    if (isToday) {
-      return colorScheme.onPrimary;
-    }
+    if (isSelected) return colorScheme.onPrimary;
+    if (isToday) return colorScheme.primary;
     if (!isCurrentMonth) {
       return colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
     }
