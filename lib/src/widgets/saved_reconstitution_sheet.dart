@@ -94,6 +94,12 @@ class SavedReconstitutionSheet extends StatelessWidget {
                       subtitleParts.add(
                         '${item.solventVolumeMl.toStringAsFixed(2)} mL',
                       );
+                      subtitleParts.add(
+                        '${item.recommendedUnits.toStringAsFixed(0)} units',
+                      );
+                      subtitleParts.add(
+                        '${item.syringeSizeMl.toStringAsFixed(1)} mL syringe',
+                      );
 
                       return InkWell(
                         onTap: () => onSelect(item),
