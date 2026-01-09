@@ -330,37 +330,20 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     children: [
                       // Schedule name (primary info)
                       Expanded(
-                        child: Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                widget.schedule.name,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: kFontWeightMedium,
-                                  color: colorScheme.onSurface,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: kSpacingXS),
-                            ScheduleStatusChip(schedule: widget.schedule),
-                          ],
+                        child: Text(
+                          widget.schedule.name,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: kFontWeightMedium,
+                            color: colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Next dose time OR frequency (secondary info)
-                      if (widget.schedule.isActive && nextDose != null)
-                        Text(
-                          _formatNextDoseShort(nextDose),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: kFontWeightMedium,
-                          ),
-                        )
-                      else
-                        Text(
-                          _getFrequencyText(),
-                          style: mutedTextStyle(context),
-                        ),
+                      // Frequency (secondary info) - no time in saved schedule rows
+                      Text(_getFrequencyText(), style: mutedTextStyle(context)),
+                      const SizedBox(width: kSpacingS),
+                      // Status on the right
+                      ScheduleStatusChip(schedule: widget.schedule),
                       const SizedBox(width: kSpacingS),
                       // Expand/collapse control
                       Padding(
@@ -393,48 +376,6 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Dose & Frequency Row
-                      Row(
-                        children: [
-                          _buildInfoChip(
-                            context,
-                            icon: Icons.medication_rounded,
-                            label:
-                                '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
-                            isPrimary: true,
-                          ),
-                          const SizedBox(width: kSpacingS),
-                          _buildInfoChip(
-                            context,
-                            icon: Icons.schedule_rounded,
-                            label: _getTimesText(),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: kSpacingM),
-
-                      // Days Row
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_rounded,
-                            size: kIconSizeSmall,
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
-                            ),
-                          ),
-                          const SizedBox(width: kSpacingS),
-                          Expanded(
-                            child: Text(
-                              _getDaysText(),
-                              style: mutedTextStyle(
-                                context,
-                              )?.copyWith(fontWeight: kFontWeightMedium),
-                            ),
-                          ),
-                        ],
-                      ),
-
                       // Adherence (if data exists)
                       if ((adherenceData['total'] as int) > 0) ...[
                         const SizedBox(height: kSpacingM),
@@ -490,27 +431,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: kSpacingM),
-
-                      // Recent Activity Section
-                      _buildExpandedSection(
-                        context,
-                        title: 'Recent Activity',
-                        children: [_buildRecentDoses()],
-                      ),
                       const SizedBox(height: kSpacingL),
 
                       // Action Buttons Row (Schedule-level actions only)
                       Row(
                         children: [
-                          _buildSecondaryAction(
-                            context,
-                            icon: widget.schedule.isActive
-                                ? Icons.pause_circle_outline
-                                : Icons.play_circle_outline,
-                            onTap: _showPauseOptions,
-                          ),
-                          const SizedBox(width: kSpacingS),
                           _buildSecondaryAction(
                             context,
                             icon: Icons.edit_rounded,
@@ -609,18 +534,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: colorScheme.surfaceContainerHighest,
+      color: colorScheme.primary.withValues(alpha: kOpacitySubtle),
       borderRadius: BorderRadius.circular(kBorderRadiusSmall),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(kBorderRadiusSmall),
         child: Container(
           padding: const EdgeInsets.all(kSpacingM),
-          child: Icon(
-            icon,
-            size: kIconSizeMedium,
-            color: colorScheme.onSurfaceVariant,
-          ),
+          child: Icon(icon, size: kIconSizeMedium, color: colorScheme.primary),
         ),
       ),
     );

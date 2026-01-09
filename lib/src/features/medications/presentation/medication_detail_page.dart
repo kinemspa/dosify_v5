@@ -965,16 +965,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     children: [
                       TextSpan(
                         text: _formatNumber(med.stockValue),
-                        style: helperTextStyle(
-                          context,
-                          color: onPrimary.withValues(
-                            alpha: kOpacityMediumHigh,
-                          ),
-                        )?.copyWith(
-                          fontSize: kFontSizeSmall,
-                          fontWeight: FontWeight.w800,
-                          color: gaugeLabelColor,
-                        ),
+                        style:
+                            helperTextStyle(
+                              context,
+                              color: onPrimary.withValues(
+                                alpha: kOpacityMediumHigh,
+                              ),
+                            )?.copyWith(
+                              fontSize: kFontSizeSmall,
+                              fontWeight: FontWeight.w800,
+                              color: gaugeLabelColor,
+                            ),
                       ),
                       const TextSpan(text: ' / '),
                       TextSpan(
@@ -1513,6 +1514,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         if (schedules.isNotEmpty) ...[
           NextDoseCard(medication: med, schedules: schedules),
           const SizedBox(height: kSpacingM),
+          _buildSectionTitle(context, 'Saved Schedules'),
+          const SizedBox(height: kSpacingS),
           // Show ALL schedules including paused ones
           ...schedules.map(
             (schedule) => EnhancedScheduleCard(
