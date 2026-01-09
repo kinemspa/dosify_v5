@@ -970,10 +970,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           ? Hive.box<Medication>('medications').get(schedule!.medicationId)
           : null;
 
-      final strengthLabel =
-          med != null
-              ? MedicationDisplayHelpers.strengthOrConcentrationLabel(med)
-              : '';
+      final strengthLabel = med != null
+          ? MedicationDisplayHelpers.strengthOrConcentrationLabel(med)
+          : '';
 
       final metrics = med != null && schedule != null
           ? MedicationDisplayHelpers.doseMetricsSummary(
@@ -1081,9 +1080,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         _selectedDate!.month == now.month &&
         _selectedDate!.day == now.day;
 
-    final formatted = MaterialLocalizations.of(context).formatFullDate(
-      _selectedDate!,
-    );
+    final formatted = MaterialLocalizations.of(
+      context,
+    ).formatFullDate(_selectedDate!);
 
     return isToday ? 'Today — $formatted' : formatted;
   }
