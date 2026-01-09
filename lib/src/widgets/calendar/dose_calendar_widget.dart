@@ -18,7 +18,6 @@ import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/up_next_dose_card.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 
 /// Main calendar widget that integrates all calendar views.
 ///
@@ -965,6 +964,47 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             : kPagePadding.bottom) +
         safeBottom;
 
+    Widget buildDoseCardFor(CalculatedDose dose) {
+      final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+      final med = (schedule?.medicationId != null)
+          ? Hive.box<Medication>('medications').get(schedule!.medicationId)
+          : null;
+
+      final strengthLabel =
+          med != null
+              ? MedicationDisplayHelpers.strengthOrConcentrationLabel(med)
+              : '';
+
+      final metrics = med != null && schedule != null
+          ? MedicationDisplayHelpers.doseMetricsSummary(
+              med,
+              doseTabletQuarters: schedule.doseTabletQuarters,
+              doseCapsules: schedule.doseCapsules,
+              doseSyringes: schedule.doseSyringes,
+              doseVials: schedule.doseVials,
+              doseMassMcg: schedule.doseMassMcg?.toDouble(),
+              doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+              syringeUnits: schedule.doseIU?.toDouble(),
+            )
+          : '${dose.doseValue} ${dose.doseUnit}';
+
+      return DoseCard(
+        dose: dose,
+        medicationName: med?.name ?? dose.medicationName,
+        strengthOrConcentrationLabel: strengthLabel,
+        doseMetrics: metrics,
+        isActive: schedule?.isActive ?? true,
+        onQuickAction: (status) {
+          if (widget.onDoseTap != null) {
+            widget.onDoseTap!(dose);
+            return;
+          }
+          _openDoseActionSheetFor(dose, initialStatus: status);
+        },
+        onTap: () => _onDoseTapInternal(dose),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -981,8 +1021,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           // Header with date and close button
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: kSpacingL,
-              vertical: kSpacingM,
+              horizontal: kSpacingM,
+              vertical: kSpacingS,
             ),
             child: Row(
               children: [
@@ -1003,169 +1043,30 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ),
           ),
           // Dose list
-          widget.variant == CalendarVariant.compact
-              ? (dayDoses.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(kSpacingL),
-                        child: Center(
-                          child: Text(
-                            'No doses scheduled',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: kOpacityLow,
-                              ),
-                            ),
-                          ),
+          Expanded(
+            child: dayDoses.isEmpty
+                ? Center(
+                    child: Text(
+                      'No doses scheduled',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(
+                          alpha: kOpacityLow,
                         ),
-                      )
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.only(bottom: listBottomPadding),
-                        itemCount: dayDoses.length,
-                        itemBuilder: (context, index) {
-                          final dose = dayDoses[index];
-
-                          final schedule = Hive.box<Schedule>(
-                            'schedules',
-                          ).get(dose.scheduleId);
-                          final med = (schedule?.medicationId != null)
-                              ? Hive.box<Medication>(
-                                  'medications',
-                                ).get(schedule!.medicationId)
-                              : null;
-
-                          if (schedule != null && med != null) {
-                            final strengthLabel =
-                                MedicationDisplayHelpers.strengthOrConcentrationLabel(
-                                  med,
-                                );
-
-                            final metrics =
-                                MedicationDisplayHelpers.doseMetricsSummary(
-                                  med,
-                                  doseTabletQuarters:
-                                      schedule.doseTabletQuarters,
-                                  doseCapsules: schedule.doseCapsules,
-                                  doseSyringes: schedule.doseSyringes,
-                                  doseVials: schedule.doseVials,
-                                  doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                                  doseVolumeMicroliter: schedule
-                                      .doseVolumeMicroliter
-                                      ?.toDouble(),
-                                  syringeUnits: schedule.doseIU?.toDouble(),
-                                );
-
-                            if (strengthLabel.trim().isNotEmpty &&
-                                metrics.trim().isNotEmpty) {
-                              return DoseCard(
-                                dose: dose,
-                                medicationName: med.name,
-                                strengthOrConcentrationLabel: strengthLabel,
-                                doseMetrics: metrics,
-                                isActive: schedule.isActive,
-                                onQuickAction: (status) {
-                                  if (widget.onDoseTap != null) {
-                                    widget.onDoseTap!(dose);
-                                    return;
-                                  }
-                                  _openDoseActionSheetFor(
-                                    dose,
-                                    initialStatus: status,
-                                  );
-                                },
-                                onTap: () => _onDoseTapInternal(dose),
-                              );
-                            }
-                          }
-
-                          return DoseSummaryRow(
-                            dose: dose,
-                            showMedicationName: true,
-                            onTap: () => _onDoseTapInternal(dose),
-                          );
-                        },
-                      ))
-              : Expanded(
-                  child: dayDoses.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No doses scheduled',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: kOpacityLow,
-                              ),
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: EdgeInsets.only(bottom: listBottomPadding),
-                          itemCount: dayDoses.length,
-                          itemBuilder: (context, index) {
-                            final dose = dayDoses[index];
-
-                            final schedule = Hive.box<Schedule>(
-                              'schedules',
-                            ).get(dose.scheduleId);
-                            final med = (schedule?.medicationId != null)
-                                ? Hive.box<Medication>(
-                                    'medications',
-                                  ).get(schedule!.medicationId)
-                                : null;
-
-                            if (schedule != null && med != null) {
-                              final strengthLabel =
-                                  MedicationDisplayHelpers.strengthOrConcentrationLabel(
-                                    med,
-                                  );
-
-                              final metrics =
-                                  MedicationDisplayHelpers.doseMetricsSummary(
-                                    med,
-                                    doseTabletQuarters:
-                                        schedule.doseTabletQuarters,
-                                    doseCapsules: schedule.doseCapsules,
-                                    doseSyringes: schedule.doseSyringes,
-                                    doseVials: schedule.doseVials,
-                                    doseMassMcg: schedule.doseMassMcg
-                                        ?.toDouble(),
-                                    doseVolumeMicroliter: schedule
-                                        .doseVolumeMicroliter
-                                        ?.toDouble(),
-                                    syringeUnits: schedule.doseIU?.toDouble(),
-                                  );
-
-                              if (strengthLabel.trim().isNotEmpty &&
-                                  metrics.trim().isNotEmpty) {
-                                return DoseCard(
-                                  dose: dose,
-                                  medicationName: med.name,
-                                  strengthOrConcentrationLabel: strengthLabel,
-                                  doseMetrics: metrics,
-                                  isActive: schedule.isActive,
-                                  onQuickAction: (status) {
-                                    if (widget.onDoseTap != null) {
-                                      widget.onDoseTap!(dose);
-                                      return;
-                                    }
-                                    _openDoseActionSheetFor(
-                                      dose,
-                                      initialStatus: status,
-                                    );
-                                  },
-                                  onTap: () => _onDoseTapInternal(dose),
-                                );
-                              }
-                            }
-
-                            return DoseSummaryRow(
-                              dose: dose,
-                              showMedicationName: true,
-                              onTap: () => _onDoseTapInternal(dose),
-                            );
-                          },
-                        ),
-                ),
+                      ),
+                    ),
+                  )
+                : Scrollbar(
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      padding: EdgeInsets.only(bottom: listBottomPadding),
+                      itemCount: dayDoses.length,
+                      itemBuilder: (context, index) {
+                        final dose = dayDoses[index];
+                        return buildDoseCardFor(dose);
+                      },
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -1180,18 +1081,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         _selectedDate!.month == now.month &&
         _selectedDate!.day == now.day;
 
-    // Get day name (e.g., "Sunday", "Monday")
-    final dayName = DateFormat.EEEE().format(_selectedDate!);
+    final formatted = MaterialLocalizations.of(context).formatFullDate(
+      _selectedDate!,
+    );
 
-    // Format date using system locale (respects day-month-year vs month-day-year)
-    // This will automatically use the correct format for the device locale
-    final formattedDate = DateFormat.yMMMd().format(_selectedDate!);
-
-    if (isToday) {
-      return 'Today, $dayName — $formattedDate';
-    } else {
-      return '$dayName, $formattedDate';
-    }
+    return isToday ? 'Today — $formatted' : formatted;
   }
 }
 
