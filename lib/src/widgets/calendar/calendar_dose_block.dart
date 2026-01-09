@@ -166,7 +166,7 @@ class CalendarDoseBlock extends StatelessWidget {
       case DoseStatus.skipped:
         return colorScheme.errorContainer.withValues(alpha: 0.3);
       case DoseStatus.snoozed:
-        return Colors.orange.withValues(alpha: 0.2);
+        return kDoseStatusSnoozedOrange.withValues(alpha: kOpacitySubtle);
       case DoseStatus.overdue:
         return colorScheme.errorContainer.withValues(alpha: 0.5);
       case DoseStatus.pending:
@@ -181,7 +181,7 @@ class CalendarDoseBlock extends StatelessWidget {
       case DoseStatus.skipped:
         return colorScheme.error.withValues(alpha: 0.5);
       case DoseStatus.snoozed:
-        return Colors.orange.withValues(alpha: 0.7);
+        return kDoseStatusSnoozedOrange.withValues(alpha: kOpacityMediumHigh);
       case DoseStatus.overdue:
         return colorScheme.error;
       case DoseStatus.pending:
@@ -196,11 +196,11 @@ class CalendarDoseBlock extends StatelessWidget {
       case DoseStatus.skipped:
         return colorScheme.error;
       case DoseStatus.snoozed:
-        return Colors.orange.shade800;
+        return kDoseStatusSnoozedOrange;
       case DoseStatus.overdue:
         return colorScheme.error;
       case DoseStatus.pending:
-        return colorScheme.onSurface;
+        return colorScheme.onSurface.withValues(alpha: kOpacityHigh);
     }
   }
 
@@ -211,7 +211,7 @@ class CalendarDoseBlock extends StatelessWidget {
       case DoseStatus.skipped:
         return colorScheme.error;
       case DoseStatus.snoozed:
-        return Colors.orange;
+        return kDoseStatusSnoozedOrange;
       case DoseStatus.overdue:
         return colorScheme.error;
       case DoseStatus.pending:
@@ -252,7 +252,7 @@ class CalendarDoseIndicator extends StatelessWidget {
       case DoseStatus.skipped:
         return colorScheme.error;
       case DoseStatus.snoozed:
-        return Colors.orange;
+        return kDoseStatusSnoozedOrange;
       case DoseStatus.overdue:
         return colorScheme.error;
       case DoseStatus.pending:

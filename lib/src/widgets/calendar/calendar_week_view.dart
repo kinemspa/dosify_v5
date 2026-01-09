@@ -219,7 +219,9 @@ class _WeekHeader extends StatelessWidget {
                           ?.copyWith(
                             color: isToday
                                 ? colorScheme.primary
-                                : colorScheme.onSurface,
+                                : colorScheme.onSurface.withValues(
+                                    alpha: kOpacityHigh,
+                                  ),
                             fontWeight: isToday
                                 ? FontWeight.bold
                                 : FontWeight.normal,

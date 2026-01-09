@@ -223,7 +223,7 @@ class _DayHeaders extends StatelessWidget {
                     color: isToday
                         ? colorScheme.primary
                         : isSelected
-                        ? colorScheme.onSurface
+                        ? colorScheme.onSurface.withValues(alpha: kOpacityHigh)
                         : colorScheme.onSurface.withValues(
                             alpha: kOpacityMedium,
                           ),

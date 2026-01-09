@@ -281,13 +281,15 @@ class CalendarViewToggle extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary : Colors.transparent,
+          color: isSelected ? colorScheme.primary : kColorTransparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           style: theme.textTheme.labelMedium?.copyWith(
-            color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+            color: isSelected
+                ? colorScheme.onPrimary
+                : colorScheme.onSurface.withValues(alpha: kOpacityHigh),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

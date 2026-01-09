@@ -207,6 +207,6 @@ class CalendarDayCell extends StatelessWidget {
     if (!isCurrentMonth) {
       return colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
     }
-    return colorScheme.onSurface;
+    return colorScheme.onSurface.withValues(alpha: kOpacityHigh);
   }
 }
