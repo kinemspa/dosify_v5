@@ -13,9 +13,9 @@ String scheduleStatusLabel(Schedule s) {
 
 IconData scheduleStatusIcon(Schedule s) {
   return switch (s.status) {
-    ScheduleStatus.active => Icons.play_circle_outline,
+    ScheduleStatus.active => Icons.check_circle_outline,
     ScheduleStatus.paused => Icons.pause_circle_outline,
     ScheduleStatus.disabled => Icons.block_outlined,
-    ScheduleStatus.completed => Icons.check_circle_outline,
+    ScheduleStatus.completed => Icons.check_circle,
   };
 }
