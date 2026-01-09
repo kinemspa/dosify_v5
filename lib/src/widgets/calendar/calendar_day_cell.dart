@@ -131,15 +131,18 @@ class CalendarDayCell extends StatelessWidget {
                         spacing: kCalendarDoseIndicatorSpacing,
                         runSpacing: kCalendarDoseIndicatorSpacing,
                         alignment: WrapAlignment.center,
-                        children: doses.take(5).map((dose) {
-                          return CalendarDoseIndicator(dose: dose);
-                        }).toList(),
+                        children: doses
+                            .take(kCalendarMonthMaxDoseIndicators)
+                            .map((dose) {
+                              return CalendarDoseIndicator(dose: dose);
+                            })
+                            .toList(),
                       ),
-                      if (doses.length > 5)
+                      if (doses.length > kCalendarMonthMaxDoseIndicators)
                         Padding(
                           padding: const EdgeInsets.only(top: kSpacingXS / 2),
                           child: Text(
-                            '+${doses.length - 5}',
+                            '+${doses.length - kCalendarMonthMaxDoseIndicators}',
                             style: calendarDayOverflowTextStyle(context)
                                 ?.copyWith(
                                   color: isSelected

@@ -190,6 +190,7 @@ const EdgeInsets kCalendarDayNumberPadding = EdgeInsets.only(
 const EdgeInsets kCalendarDayDoseIndicatorPadding = EdgeInsets.all(
   kSpacingXS / 2,
 );
+const int kCalendarMonthMaxDoseIndicators = 3;
 const double kCalendarDayCellBorderRadius = kBorderRadiusSmall;
 const double kCalendarDayOverflowTextOpacity = kOpacityMedium;
 
