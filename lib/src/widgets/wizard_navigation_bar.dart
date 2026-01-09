@@ -29,19 +29,14 @@ class WizardNavigationBar extends StatelessWidget {
   final String nextLabel;
   final String nextPageLabel;
 
-  bool _hasNextFocusableField(FocusScopeNode scope) {
-    final focused = scope.focusedChild;
-    if (focused == null) return false;
-
-    final focusables = scope.traversalDescendants
+  List<FocusNode> _focusableFields(FocusScopeNode scope) {
+    return scope.traversalDescendants
         .where((node) => node.canRequestFocus && !node.skipTraversal)
         .toList(growable: false);
-    if (focusables.isEmpty) return false;
+  }
 
-    final focusedIndex = focusables.indexOf(focused);
-    if (focusedIndex == -1) return false;
-
-    return focusedIndex < focusables.length - 1;
+  bool _hasAnyFocusableField(FocusScopeNode scope) {
+    return _focusableFields(scope).isNotEmpty;
   }
 
   @override
@@ -54,11 +49,10 @@ class WizardNavigationBar extends StatelessWidget {
       builder: (context, _) {
         final scope = fieldFocusScope ?? FocusScope.of(context);
 
-        // While the keyboard is open, show "Next" only if we can actually move
-        // focus to another field on the current step.
-        final hasNextField =
-            keyboardOpen && !isLastStep && _hasNextFocusableField(scope);
-        final showNextMode = hasNextField;
+        // While the keyboard is open, the primary action should advance through
+        // fields (not wizard steps) as long as there are focusable fields.
+        final showNextMode =
+            keyboardOpen && !isLastStep && _hasAnyFocusableField(scope);
 
         final primaryLabel = isLastStep
             ? saveLabel
@@ -69,10 +63,32 @@ class WizardNavigationBar extends StatelessWidget {
           primaryAction = canProceed ? onSave : null;
         } else if (showNextMode) {
           primaryAction = () {
-            final moved = scope.nextFocus();
-            if (moved) return;
+            final focusables = _focusableFields(scope);
+            if (focusables.isEmpty) {
+              if (canProceed) {
+                onContinue();
+                return;
+              }
+              scope.unfocus();
+              return;
+            }
 
-            // No more fields in this step. Prefer proceeding if allowed.
+            final focused = scope.focusedChild;
+            final focusedIndex = focused == null
+                ? -1
+                : focusables.indexOf(focused);
+
+            if (focusedIndex == -1) {
+              focusables.first.requestFocus();
+              return;
+            }
+
+            if (focusedIndex < focusables.length - 1) {
+              focusables[focusedIndex + 1].requestFocus();
+              return;
+            }
+
+            // Last field on this step; proceed if allowed.
             if (canProceed) {
               onContinue();
               return;
