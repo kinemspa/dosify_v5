@@ -73,8 +73,8 @@ class CalendarDayCell extends StatelessWidget {
                   ),
                   if (doseCount > 0)
                     Positioned(
-                      right: -kSpacingXS,
-                      bottom: -kSpacingXS,
+                      right: 0,
+                      top: 0,
                       child: Container(
                         padding: kCalendarDayCountBadgePadding,
                         decoration: BoxDecoration(

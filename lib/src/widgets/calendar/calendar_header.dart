@@ -89,6 +89,11 @@ class CalendarHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               minimumSize: const Size(0, 32),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  kCalendarTodayButtonBorderRadius,
+                ),
+              ),
             ),
             child: const Text('Today', style: TextStyle(fontSize: 12)),
           ),

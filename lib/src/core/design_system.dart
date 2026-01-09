@@ -207,7 +207,8 @@ const EdgeInsets kCalendarDayDoseIndicatorPadding = EdgeInsets.all(
   kSpacingXS / 2,
 );
 const int kCalendarMonthMaxDoseIndicators = 3;
-const double kCalendarDayCellBorderRadius = kBorderRadiusSmall;
+const double kCalendarDayCellBorderRadius = kBorderRadiusSmall / 2;
+const double kCalendarTodayButtonBorderRadius = kBorderRadiusSmall / 2;
 const double kCalendarDayOverflowTextOpacity = kOpacityMedium;
 
 /// In the full-screen calendar, allocate a fixed portion of the available
