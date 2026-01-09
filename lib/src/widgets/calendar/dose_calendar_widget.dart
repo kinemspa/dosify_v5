@@ -767,16 +767,16 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   Widget _buildCurrentView() {
     switch (_currentView) {
       case CalendarView.day:
+        if (!widget.requireHourSelectionInDayView) {
+          return _buildDayStageView();
+        }
+
         return CalendarDayView(
           date: _currentDate,
           doses: _doses,
-          onDoseTap: widget.requireHourSelectionInDayView
-              ? null
-              : _onDoseTapInternal,
+          onDoseTap: null,
           selectedHour: _selectedHour,
-          onHourTap: widget.requireHourSelectionInDayView
-              ? (hour) => setState(() => _selectedHour = hour)
-              : null,
+          onHourTap: (hour) => setState(() => _selectedHour = hour),
           onDateChanged: _onDateChanged,
         );
 
@@ -814,6 +814,103 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           startWeekOnMonday: startOnMonday,
         );
     }
+  }
+
+  Widget _buildDayStageView() {
+    final dayDoses = _doses.where((dose) {
+      return dose.scheduledTime.year == _currentDate.year &&
+          dose.scheduledTime.month == _currentDate.month &&
+          dose.scheduledTime.day == _currentDate.day;
+    }).toList();
+    dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
+    final dosesByHour = <int, List<CalculatedDose>>{};
+    for (final dose in dayDoses) {
+      dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
+    }
+    final hours = dosesByHour.keys.toList()..sort();
+
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final listBottomPadding = safeBottom + kSpacingXXL + kSpacingXL;
+
+    if (dayDoses.isEmpty) {
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.event_available,
+              size: 64,
+              color: cs.primary.withAlpha((0.3 * 255).round()),
+            ),
+            const SizedBox(height: kSectionSpacing),
+            Text(
+              'No doses scheduled',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: cs.onSurface.withAlpha((0.6 * 255).round()),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        // Swipe left = next day, swipe right = previous day
+        if (details.primaryVelocity != null) {
+          if (details.primaryVelocity! < -500) {
+            _onDateChanged(_currentDate.add(const Duration(days: 1)));
+          } else if (details.primaryVelocity! > 500) {
+            _onDateChanged(_currentDate.subtract(const Duration(days: 1)));
+          }
+        }
+      },
+      child: Scrollbar(
+        thumbVisibility: true,
+        child: ListView.builder(
+          padding: calendarStageListPadding(listBottomPadding),
+          itemCount: hours.length,
+          itemBuilder: (context, index) {
+            final hour = hours[index];
+            final hourDoses = dosesByHour[hour] ?? const [];
+
+            return Padding(
+              padding: kCalendarStageHourRowPadding,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: kCalendarStageHourLabelWidth,
+                    child: Padding(
+                      padding: kCalendarStageHourLabelPadding,
+                      child: Text(
+                        _formatSelectedHour(hour),
+                        textAlign: TextAlign.right,
+                        style: calendarStageHourLabelTextStyle(context),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        for (final dose in hourDoses)
+                          Padding(
+                            padding: kCalendarStageDoseCardPadding,
+                            child: _buildDoseCardFor(dose),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildSelectedHourPanel() {
@@ -953,6 +1050,46 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     return '${hour - 12} PM';
   }
 
+  Widget _buildDoseCardFor(CalculatedDose dose) {
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final med = (schedule?.medicationId != null)
+        ? Hive.box<Medication>('medications').get(schedule!.medicationId)
+        : null;
+
+    final strengthLabel = med != null
+        ? MedicationDisplayHelpers.strengthOrConcentrationLabel(med)
+        : '';
+
+    final metrics = med != null && schedule != null
+        ? MedicationDisplayHelpers.doseMetricsSummary(
+            med,
+            doseTabletQuarters: schedule.doseTabletQuarters,
+            doseCapsules: schedule.doseCapsules,
+            doseSyringes: schedule.doseSyringes,
+            doseVials: schedule.doseVials,
+            doseMassMcg: schedule.doseMassMcg?.toDouble(),
+            doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+            syringeUnits: schedule.doseIU?.toDouble(),
+          )
+        : '${dose.doseValue} ${dose.doseUnit}';
+
+    return DoseCard(
+      dose: dose,
+      medicationName: med?.name ?? dose.medicationName,
+      strengthOrConcentrationLabel: strengthLabel,
+      doseMetrics: metrics,
+      isActive: schedule?.isActive ?? true,
+      onQuickAction: (status) {
+        if (widget.onDoseTap != null) {
+          widget.onDoseTap!(dose);
+          return;
+        }
+        _openDoseActionSheetFor(dose, initialStatus: status);
+      },
+      onTap: () => _onDoseTapInternal(dose),
+    );
+  }
+
   Widget _buildSelectedDayPanel() {
     if (_selectedDate == null) return const SizedBox.shrink();
 
@@ -976,46 +1113,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final listBottomPadding = safeBottom + kSpacingXXL + kSpacingXL;
-
-    Widget buildDoseCardFor(CalculatedDose dose) {
-      final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
-      final med = (schedule?.medicationId != null)
-          ? Hive.box<Medication>('medications').get(schedule!.medicationId)
-          : null;
-
-      final strengthLabel = med != null
-          ? MedicationDisplayHelpers.strengthOrConcentrationLabel(med)
-          : '';
-
-      final metrics = med != null && schedule != null
-          ? MedicationDisplayHelpers.doseMetricsSummary(
-              med,
-              doseTabletQuarters: schedule.doseTabletQuarters,
-              doseCapsules: schedule.doseCapsules,
-              doseSyringes: schedule.doseSyringes,
-              doseVials: schedule.doseVials,
-              doseMassMcg: schedule.doseMassMcg?.toDouble(),
-              doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-              syringeUnits: schedule.doseIU?.toDouble(),
-            )
-          : '${dose.doseValue} ${dose.doseUnit}';
-
-      return DoseCard(
-        dose: dose,
-        medicationName: med?.name ?? dose.medicationName,
-        strengthOrConcentrationLabel: strengthLabel,
-        doseMetrics: metrics,
-        isActive: schedule?.isActive ?? true,
-        onQuickAction: (status) {
-          if (widget.onDoseTap != null) {
-            widget.onDoseTap!(dose);
-            return;
-          }
-          _openDoseActionSheetFor(dose, initialStatus: status);
-        },
-        onTap: () => _onDoseTapInternal(dose),
-      );
-    }
 
     return Padding(
       padding: const EdgeInsets.only(top: kSpacingS),
@@ -1097,7 +1194,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                                       for (final dose in hourDoses)
                                         Padding(
                                           padding: kCalendarStageDoseCardPadding,
-                                          child: buildDoseCardFor(dose),
+                                          child: _buildDoseCardFor(dose),
                                         ),
                                     ],
                                   ),
