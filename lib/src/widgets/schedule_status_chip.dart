@@ -5,19 +5,30 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
 class ScheduleStatusChip extends StatelessWidget {
-  const ScheduleStatusChip({super.key, required this.schedule});
+  const ScheduleStatusChip({
+    super.key,
+    required this.schedule,
+    this.dense = false,
+  });
 
   final Schedule schedule;
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
     final label = scheduleStatusLabel(schedule);
     final (color, icon) = _presentation(context, schedule);
 
+    final iconSize = dense ? kIconSizeXSmall : kIconSizeSmall;
+    final fontSize = dense ? kFontSizeXSmall : kFontSizeSmall;
+    final horizontalPadding = dense ? kSpacingXS : kSpacingS;
+    final verticalPadding = dense ? kSpacingXXS : kSpacingXS;
+    final labelGap = dense ? kSpacingXXS : kSpacingXS;
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: kSpacingS,
-        vertical: kSpacingXS,
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: kOpacityMinimal),
@@ -30,14 +41,14 @@ class ScheduleStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: kIconSizeSmall, color: color),
-          const SizedBox(width: kSpacingXS),
+          Icon(icon, size: iconSize, color: color),
+          SizedBox(width: labelGap),
           Text(
             label,
-            style: helperTextStyle(context, color: color)?.copyWith(
-              fontWeight: kFontWeightSemiBold,
-              fontSize: kFontSizeSmall,
-            ),
+            style: helperTextStyle(
+              context,
+              color: color,
+            )?.copyWith(fontWeight: kFontWeightSemiBold, fontSize: fontSize),
           ),
         ],
       ),
