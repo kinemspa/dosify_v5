@@ -388,8 +388,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                                 child: LinearProgressIndicator(
                                   value: adherenceRate / 100,
                                   minHeight: kSpacingXS,
-                                  backgroundColor:
-                                      colorScheme.surfaceContainerHighest,
+                                  backgroundColor: colorScheme.primary
+                                      .withValues(alpha: kOpacityMinimal),
                                   valueColor: AlwaysStoppedAnimation(
                                     _getAdherenceColor(adherenceRate),
                                   ),
