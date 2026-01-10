@@ -1,4 +1,5 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
@@ -546,10 +547,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return true; // Can't calculate delta, skip
       }
 
-      await medBox.put(
-        med.id,
-        MedicationStockAdjustment.deduct(medication: med, delta: delta),
+      final updated = MedicationStockAdjustment.deduct(
+        medication: med,
+        delta: delta,
       );
+      await medBox.put(med.id, updated);
+      await LowStockNotifier.handleStockChange(before: med, after: updated);
 
       return true;
     } catch (e) {
@@ -595,10 +598,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return true; // Can't calculate delta
       }
 
-      await medBox.put(
-        med.id,
-        MedicationStockAdjustment.restore(medication: med, delta: delta),
+      final updated = MedicationStockAdjustment.restore(
+        medication: med,
+        delta: delta,
       );
+      await medBox.put(med.id, updated);
+      await LowStockNotifier.handleStockChange(before: med, after: updated);
 
       return true;
     } catch (e) {

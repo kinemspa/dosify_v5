@@ -1,6 +1,7 @@
 // ignore_for_file: unused_element, unused_local_variable
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
@@ -787,12 +788,17 @@ class _NextDoseCardState extends State<NextDoseCard>
             preferDoseValue: request.actualDoseValue != null,
           );
           if (delta != null) {
+            final updated = MedicationStockAdjustment.deduct(
+              medication: currentMed,
+              delta: delta,
+            );
             await medBox.put(
               currentMed.id,
-              MedicationStockAdjustment.deduct(
-                medication: currentMed,
-                delta: delta,
-              ),
+              updated,
+            );
+            await LowStockNotifier.handleStockChange(
+              before: currentMed,
+              after: updated,
             );
           }
         }

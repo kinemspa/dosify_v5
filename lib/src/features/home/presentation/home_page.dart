@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
@@ -184,12 +185,17 @@ class HomePage extends StatefulWidget {
             preferDoseValue: request.actualDoseValue != null,
           );
           if (delta != null) {
+            final updated = MedicationStockAdjustment.deduct(
+              medication: currentMed,
+              delta: delta,
+            );
             await medBox.put(
               currentMed.id,
-              MedicationStockAdjustment.deduct(
-                medication: currentMed,
-                delta: delta,
-              ),
+              updated,
+            );
+            await LowStockNotifier.handleStockChange(
+              before: currentMed,
+              after: updated,
             );
           }
         }
@@ -292,12 +298,17 @@ class HomePage extends StatefulWidget {
               preferDoseValue: existingLog.actualDoseValue != null,
             );
             if (delta != null) {
+              final updated = MedicationStockAdjustment.restore(
+                medication: currentMed,
+                delta: delta,
+              );
               await medBox.put(
                 currentMed.id,
-                MedicationStockAdjustment.restore(
-                  medication: currentMed,
-                  delta: delta,
-                ),
+                updated,
+              );
+              await LowStockNotifier.handleStockChange(
+                before: currentMed,
+                after: updated,
               );
             }
           }
@@ -314,7 +325,6 @@ class HomePage extends StatefulWidget {
       },
     );
   }
-
 }
 
 class _HomePageState extends State<HomePage> {
@@ -407,13 +417,14 @@ class _HomePageState extends State<HomePage> {
                             schedule: item.schedule,
                             medication: item.medication,
                           ),
-                          onQuickAction: (status) => widget._showDoseActionSheet(
-                            context,
-                            dose: item.dose,
-                            schedule: item.schedule,
-                            medication: item.medication,
-                            initialStatus: status,
-                          ),
+                          onQuickAction: (status) =>
+                              widget._showDoseActionSheet(
+                                context,
+                                dose: item.dose,
+                                schedule: item.schedule,
+                                medication: item.medication,
+                                initialStatus: status,
+                              ),
                           onPrimaryAction: () => widget._showDoseActionSheet(
                             context,
                             dose: item.dose,
@@ -446,9 +457,11 @@ class _HomePageState extends State<HomePage> {
                     .toList();
 
                 schedules.sort((a, b) {
-                  final an = ScheduleOccurrenceService.nextOccurrence(a) ??
+                  final an =
+                      ScheduleOccurrenceService.nextOccurrence(a) ??
                       DateTime(9999);
-                  final bn = ScheduleOccurrenceService.nextOccurrence(b) ??
+                  final bn =
+                      ScheduleOccurrenceService.nextOccurrence(b) ??
                       DateTime(9999);
                   return an.compareTo(bn);
                 });
@@ -487,9 +500,10 @@ class _HomePageState extends State<HomePage> {
                               );
                             }
 
-                            final next = ScheduleOccurrenceService.nextOccurrence(
-                              schedule,
-                            );
+                            final next =
+                                ScheduleOccurrenceService.nextOccurrence(
+                                  schedule,
+                                );
                             if (next == null) {
                               return Row(
                                 children: [
@@ -525,26 +539,29 @@ class _HomePageState extends State<HomePage> {
                             }
 
                             final strengthLabel =
-                                MedicationDisplayHelpers
-                                    .strengthOrConcentrationLabel(med);
-                            final metrics = MedicationDisplayHelpers
-                                .doseMetricsSummary(
-                              med,
-                              doseTabletQuarters: schedule.doseTabletQuarters,
-                              doseCapsules: schedule.doseCapsules,
-                              doseSyringes: schedule.doseSyringes,
-                              doseVials: schedule.doseVials,
-                              doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                              doseVolumeMicroliter:
-                                  schedule.doseVolumeMicroliter?.toDouble(),
-                              syringeUnits: schedule.doseIU?.toDouble(),
-                            );
+                                MedicationDisplayHelpers.strengthOrConcentrationLabel(
+                                  med,
+                                );
+                            final metrics =
+                                MedicationDisplayHelpers.doseMetricsSummary(
+                                  med,
+                                  doseTabletQuarters:
+                                      schedule.doseTabletQuarters,
+                                  doseCapsules: schedule.doseCapsules,
+                                  doseSyringes: schedule.doseSyringes,
+                                  doseVials: schedule.doseVials,
+                                  doseMassMcg: schedule.doseMassMcg?.toDouble(),
+                                  doseVolumeMicroliter: schedule
+                                      .doseVolumeMicroliter
+                                      ?.toDouble(),
+                                  syringeUnits: schedule.doseIU?.toDouble(),
+                                );
 
                             final baseId =
                                 '${schedule.id}_${next.millisecondsSinceEpoch}';
                             final existingLog =
                                 logBox.get(baseId) ??
-                                    logBox.get('${baseId}_snooze');
+                                logBox.get('${baseId}_snooze');
                             final dose = CalculatedDose(
                               scheduleId: schedule.id,
                               scheduleName: schedule.name,
@@ -572,19 +589,20 @@ class _HomePageState extends State<HomePage> {
                               ),
                               onQuickAction: schedule.isActive
                                   ? (status) => widget._showDoseActionSheet(
-                                        context,
-                                        dose: dose,
-                                        schedule: schedule,
-                                        medication: med,
-                                        initialStatus: status,
-                                      )
+                                      context,
+                                      dose: dose,
+                                      schedule: schedule,
+                                      medication: med,
+                                      initialStatus: status,
+                                    )
                                   : null,
-                              onPrimaryAction: () => widget._showDoseActionSheet(
-                                context,
-                                dose: dose,
-                                schedule: schedule,
-                                medication: med,
-                              ),
+                              onPrimaryAction: () =>
+                                  widget._showDoseActionSheet(
+                                    context,
+                                    dose: dose,
+                                    schedule: schedule,
+                                    medication: med,
+                                  ),
                             );
                           },
                         ),
@@ -618,14 +636,16 @@ class _HomePageState extends State<HomePage> {
       valueListenable: Hive.box<Medication>('medications').listenable(),
       builder: (context, Box<Medication> medBox, _) {
         final meds = medBox.values.toList()
-          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+          ..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
 
         if (_reportIncludedMedicationIds == null) {
           _reportIncludedMedicationIds = meds.map((m) => m.id).toSet();
         } else {
           final currentIds = meds.map((m) => m.id).toSet();
-          _reportIncludedMedicationIds =
-              _reportIncludedMedicationIds!.intersection(currentIds);
+          _reportIncludedMedicationIds = _reportIncludedMedicationIds!
+              .intersection(currentIds);
           if (_reportIncludedMedicationIds!.isEmpty && currentIds.isNotEmpty) {
             _reportIncludedMedicationIds = currentIds;
           }
@@ -662,10 +682,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: kSpacingM),
               if (included.isEmpty)
-                Text(
-                  'No medications selected',
-                  style: mutedTextStyle(context),
-                )
+                Text('No medications selected', style: mutedTextStyle(context))
               else
                 for (final med in meds)
                   if (included.contains(med.id)) ...[
@@ -712,7 +729,9 @@ class _HomePageState extends State<HomePage> {
                     child: Icon(
                       Icons.drag_indicator_rounded,
                       size: kIconSizeMedium,
-                      color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+                      color: cs.onSurfaceVariant.withValues(
+                        alpha: kOpacityMedium,
+                      ),
                     ),
                   ),
                 ),

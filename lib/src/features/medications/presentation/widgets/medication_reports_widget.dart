@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -842,12 +843,17 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   latest.actualDoseValue != null,
             );
             if (delta != null) {
+              final updatedMed = MedicationStockAdjustment.deduct(
+                medication: currentMed,
+                delta: delta,
+              );
               await medBox.put(
                 currentMed.id,
-                MedicationStockAdjustment.deduct(
-                  medication: currentMed,
-                  delta: delta,
-                ),
+                updatedMed,
+              );
+              await LowStockNotifier.handleStockChange(
+                before: currentMed,
+                after: updatedMed,
               );
             }
           }
@@ -893,12 +899,17 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               preferDoseValue: latest.actualDoseValue != null,
             );
             if (delta != null) {
+              final updatedMed = MedicationStockAdjustment.restore(
+                medication: currentMed,
+                delta: delta,
+              );
               await medBox.put(
                 currentMed.id,
-                MedicationStockAdjustment.restore(
-                  medication: currentMed,
-                  delta: delta,
-                ),
+                updatedMed,
+              );
+              await LowStockNotifier.handleStockChange(
+                before: currentMed,
+                after: updatedMed,
               );
             }
           }

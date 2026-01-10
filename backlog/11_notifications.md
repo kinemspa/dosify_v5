@@ -4,8 +4,8 @@
 
 ### Take Dose Reminder
 
-- [ ] Take DOse Reminder should be similar to the take dose card. 
-- [ ] Need to cater for multiple doses at once. Can we collectively group them?
+- [x] Take DOse Reminder should be similar to the take dose card. 
+- [x] Need to cater for multiple doses at once. Can we collectively group them?
 
 ### Expiry Reminder
 
@@ -13,7 +13,7 @@
 
 ### Low Stock Reminder
 
-- [ ] Provide the Refill or Restock buttons. 
+- [x] Provide the Refill or Restock buttons. 
 
 ### Notification Management
 

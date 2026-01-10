@@ -215,6 +215,16 @@ class ScheduleScheduler {
             );
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now) && _withinBounds(s, dtLocal)) {
+              final groupKey = _doseGroupKey(dtLocal);
+              final summaryId = _stableHash31('dose_summary|$groupKey');
+              await NotificationService.scheduleAtAlarmClock(
+                summaryId,
+                dtLocal,
+                title: 'Upcoming doses',
+                body: 'Tap to view your doses',
+                groupKey: groupKey,
+                setAsGroupSummary: true,
+              );
               final id = slotIdFor(
                 s.id,
                 weekday: date.weekday,
@@ -226,6 +236,7 @@ class ScheduleScheduler {
                 dtLocal,
                 title: title,
                 body: body,
+                groupKey: groupKey,
               );
             }
           }
@@ -241,6 +252,16 @@ class ScheduleScheduler {
               mLocal % 60,
             );
             if (dt.isAfter(now) && _withinBounds(s, dt)) {
+              final groupKey = _doseGroupKey(dt);
+              final summaryId = _stableHash31('dose_summary|$groupKey');
+              await NotificationService.scheduleAtAlarmClock(
+                summaryId,
+                dt,
+                title: 'Upcoming doses',
+                body: 'Tap to view your doses',
+                groupKey: groupKey,
+                setAsGroupSummary: true,
+              );
               final id = slotIdFor(
                 s.id,
                 weekday: date.weekday,
@@ -252,12 +273,22 @@ class ScheduleScheduler {
                 dt,
                 title: title,
                 body: body,
+                groupKey: groupKey,
               );
             }
           }
         }
       }
     }
+  }
+
+  static String _doseGroupKey(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    final hh = dt.hour.toString().padLeft(2, '0');
+    final mm = dt.minute.toString().padLeft(2, '0');
+    return 'upcoming_dose|$y$m$d|$hh$mm';
   }
 
   /// Cancel scheduled notifications for a schedule (best-effort)

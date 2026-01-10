@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -626,6 +627,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                       delta: -adjustment,
                     );
               await medBox.put(med.id, updatedMed);
+              await LowStockNotifier.handleStockChange(
+                before: med,
+                after: updatedMed,
+              );
             }
           }
         }

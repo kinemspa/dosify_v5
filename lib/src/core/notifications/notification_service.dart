@@ -19,6 +19,8 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static const MethodChannel _platform = MethodChannel('dosifi/notifications');
   static void _log(String msg) => debugPrint('[NotificationService] $msg');
+
+  static int stableIdForKey(String key) => _stableHash31(key);
   // Test hooks: allow overriding scheduling/cancel behavior for tests. When non-null,
   // the overrides will be called in place of the real plugin methods to avoid
   // platform channel invocations during unit/widget tests.
@@ -65,7 +67,19 @@ class NotificationService {
     const initSettings = InitializationSettings(android: androidInit);
 
     _log('Initializing FlutterLocalNotificationsPlugin...');
-    await _fln.initialize(initSettings);
+    await _fln.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (response) {
+        _log(
+          'NotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+        );
+      },
+      onDidReceiveBackgroundNotificationResponse: (response) {
+        _log(
+          'BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+        );
+      },
+    );
 
     // Timezone for scheduled notifications
     _log('Initializing TimeZones...');
@@ -310,6 +324,36 @@ class NotificationService {
       ),
     );
     await _fln.show(id, title, body, details);
+  }
+
+  static Future<void> showLowStockAlert(
+    int id, {
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'low_stock',
+        'Low Stock',
+        icon: '@mipmap/ic_launcher',
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+        actions: const [
+          AndroidNotificationAction(
+            'refill',
+            'Refill',
+            showsUserInterface: true,
+          ),
+          AndroidNotificationAction(
+            'restock',
+            'Restock',
+            showsUserInterface: true,
+          ),
+        ],
+      ),
+    );
+    await _fln.show(id, title, body, details, payload: payload);
   }
 
   // Schedule using a local DateTime (interpreted in the device's current timezone)
@@ -653,6 +697,8 @@ class NotificationService {
     required String title,
     required String body,
     String channelId = 'upcoming_dose',
+    String? groupKey,
+    bool setAsGroupSummary = false,
   }) async {
     if (scheduleAtAlarmClockOverride != null) {
       await scheduleAtAlarmClockOverride!(
@@ -681,6 +727,8 @@ class NotificationService {
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
+        groupKey: groupKey,
+        setAsGroupSummary: setAsGroupSummary,
       ),
     );
     try {
@@ -881,5 +929,20 @@ class NotificationService {
     } catch (e) {
       _log('scheduleInSecondsAlarmClock failed: $e');
     }
+  }
+
+  static int _stableHash31(String input) {
+    // Deterministic, platform-independent hash for stable notification IDs.
+    // Keeps values within signed 32-bit positive range.
+    var hash = 0;
+    for (final unit in input.codeUnits) {
+      hash = 0x1fffffff & hash + unit;
+      hash = 0x1fffffff & hash + (0x0007ffff & hash) << 10;
+      hash ^= hash >> 6;
+    }
+    hash = 0x1fffffff & hash + (0x03ffffff & hash) << 3;
+    hash ^= hash >> 11;
+    hash = 0x1fffffff & hash + (0x00003fff & hash) << 15;
+    return hash;
   }
 }
