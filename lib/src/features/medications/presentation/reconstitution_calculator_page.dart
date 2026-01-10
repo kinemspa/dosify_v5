@@ -439,7 +439,9 @@ class _ReconstitutionCalculatorPageState
                 const SizedBox(height: kSpacingM),
                 FilledButton(
                   onPressed: _openCalculatorSheet,
-                  child: Text(_lastResult == null ? 'Open Calculator' : 'Recalculate'),
+                  child: Text(
+                    _lastResult == null ? 'Open Calculator' : 'Recalculate',
+                  ),
                 ),
               ],
             ],
