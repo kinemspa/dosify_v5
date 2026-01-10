@@ -22,12 +22,97 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
-import 'package:dosifi_v5/src/widgets/up_next_dose_card.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  List<
+    ({
+      CalculatedDose dose,
+      Schedule schedule,
+      Medication medication,
+      String strengthLabel,
+      String metrics,
+    })
+  >
+  _resolveTodayDoses(
+    Iterable<Schedule> schedules,
+    Box<Medication> meds,
+    Box<DoseLog> logs,
+  ) {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    final end = start
+        .add(const Duration(days: 1))
+        .subtract(const Duration(milliseconds: 1));
+
+    final items =
+        <
+          ({
+            CalculatedDose dose,
+            Schedule schedule,
+            Medication medication,
+            String strengthLabel,
+            String metrics,
+          })
+        >[];
+
+    for (final schedule in schedules) {
+      if (!schedule.isActive) continue;
+      final medId = schedule.medicationId;
+      if (medId == null) continue;
+      final med = meds.get(medId);
+      if (med == null) continue;
+
+      final times = ScheduleOccurrenceService.occurrencesInRange(
+        schedule,
+        start,
+        end,
+      );
+
+      if (times.isEmpty) continue;
+
+      final strengthLabel =
+          MedicationDisplayHelpers.strengthOrConcentrationLabel(med);
+      final metrics = MedicationDisplayHelpers.doseMetricsSummary(
+        med,
+        doseTabletQuarters: schedule.doseTabletQuarters,
+        doseCapsules: schedule.doseCapsules,
+        doseSyringes: schedule.doseSyringes,
+        doseVials: schedule.doseVials,
+        doseMassMcg: schedule.doseMassMcg?.toDouble(),
+        doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+        syringeUnits: schedule.doseIU?.toDouble(),
+      );
+
+      for (final dt in times) {
+        final baseId = '${schedule.id}_${dt.millisecondsSinceEpoch}';
+        final existingLog = logs.get(baseId) ?? logs.get('${baseId}_snooze');
+        final dose = CalculatedDose(
+          scheduleId: schedule.id,
+          scheduleName: schedule.name,
+          medicationName: med.name,
+          scheduledTime: dt,
+          doseValue: schedule.doseValue,
+          doseUnit: schedule.doseUnit,
+          existingLog: existingLog,
+        );
+
+        items.add((
+          dose: dose,
+          schedule: schedule,
+          medication: med,
+          strengthLabel: strengthLabel,
+          metrics: metrics,
+        ));
+      }
+    }
+
+    items.sort((a, b) => a.dose.scheduledTime.compareTo(b.dose.scheduledTime));
+    return items;
+  }
 
   Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
     try {
@@ -223,89 +308,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  ({
-    CalculatedDose? dose,
-    Schedule? schedule,
-    Medication? medication,
-    String? strengthLabel,
-    String? metrics,
-  })
-  _resolveUpNext(
-    Iterable<Schedule> schedules,
-    Box<Medication> meds,
-    Box<DoseLog> logs,
-  ) {
-    final now = DateTime.now();
-
-    DateTime? bestTime;
-    Schedule? bestSchedule;
-    Medication? bestMedication;
-
-    for (final schedule in schedules) {
-      if (!schedule.isActive) continue;
-      final medId = schedule.medicationId;
-      if (medId == null) continue;
-      final med = meds.get(medId);
-      if (med == null) continue;
-
-      final next = ScheduleOccurrenceService.nextOccurrence(
-        schedule,
-        from: now,
-      );
-      if (next == null) continue;
-
-      if (bestTime == null || next.isBefore(bestTime)) {
-        bestTime = next;
-        bestSchedule = schedule;
-        bestMedication = med;
-      }
-    }
-
-    if (bestTime == null || bestSchedule == null || bestMedication == null) {
-      return (
-        dose: null,
-        schedule: null,
-        medication: null,
-        strengthLabel: null,
-        metrics: null,
-      );
-    }
-
-    final baseId = '${bestSchedule.id}_${bestTime.millisecondsSinceEpoch}';
-    final existingLog = logs.get(baseId) ?? logs.get('${baseId}_snooze');
-    final dose = CalculatedDose(
-      scheduleId: bestSchedule.id,
-      scheduleName: bestSchedule.name,
-      medicationName: bestMedication.name,
-      scheduledTime: bestTime,
-      doseValue: bestSchedule.doseValue,
-      doseUnit: bestSchedule.doseUnit,
-      existingLog: existingLog,
-    );
-
-    final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
-      bestMedication,
-    );
-    final metrics = MedicationDisplayHelpers.doseMetricsSummary(
-      bestMedication,
-      doseTabletQuarters: bestSchedule.doseTabletQuarters,
-      doseCapsules: bestSchedule.doseCapsules,
-      doseSyringes: bestSchedule.doseSyringes,
-      doseVials: bestSchedule.doseVials,
-      doseMassMcg: bestSchedule.doseMassMcg?.toDouble(),
-      doseVolumeMicroliter: bestSchedule.doseVolumeMicroliter?.toDouble(),
-      syringeUnits: bestSchedule.doseIU?.toDouble(),
-    );
-
-    return (
-      dose: dose,
-      schedule: bestSchedule,
-      medication: bestMedication,
-      strengthLabel: strengthLabel,
-      metrics: metrics,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -335,42 +337,54 @@ class HomePage extends StatelessWidget {
                         'dose_logs',
                       ).listenable(),
                       builder: (context, Box<DoseLog> logBox, _) {
-                        final result = _resolveUpNext(
+                        final items = _resolveTodayDoses(
                           scheduleBox.values,
                           medBox,
                           logBox,
                         );
 
-                        return UpNextDoseCard(
-                          dose: result.dose,
-                          medicationName: result.medication?.name,
-                          strengthOrConcentrationLabel: result.strengthLabel,
-                          doseMetrics: result.metrics,
-                          onDoseTap: (CalculatedDose dose) {
-                            final schedule = result.schedule;
-                            final medication = result.medication;
-                            if (schedule == null || medication == null) return;
-                            _showDoseActionSheet(
-                              context,
-                              dose: dose,
-                              schedule: schedule,
-                              medication: medication,
-                            );
-                          },
-                          onQuickAction: (status) {
-                            final schedule = result.schedule;
-                            final medication = result.medication;
-                            final resolvedDose = result.dose;
-                            if (schedule == null || medication == null) return;
-                            if (resolvedDose == null) return;
-                            _showDoseActionSheet(
-                              context,
-                              dose: resolvedDose,
-                              schedule: schedule,
-                              medication: medication,
-                              initialStatus: status,
-                            );
-                          },
+                        return SectionFormCard(
+                          neutral: true,
+                          title: 'Today',
+                          children: [
+                            if (items.isEmpty)
+                              Text(
+                                'No doses today',
+                                style: mutedTextStyle(context),
+                              )
+                            else
+                              for (final item in items) ...[
+                                DoseCard(
+                                  dose: item.dose,
+                                  medicationName: item.medication.name,
+                                  strengthOrConcentrationLabel:
+                                      item.strengthLabel,
+                                  doseMetrics: item.metrics,
+                                  isActive: item.schedule.isActive,
+                                  onTap: () => _showDoseActionSheet(
+                                    context,
+                                    dose: item.dose,
+                                    schedule: item.schedule,
+                                    medication: item.medication,
+                                  ),
+                                  onQuickAction: (status) =>
+                                      _showDoseActionSheet(
+                                        context,
+                                        dose: item.dose,
+                                        schedule: item.schedule,
+                                        medication: item.medication,
+                                        initialStatus: status,
+                                      ),
+                                  onPrimaryAction: () => _showDoseActionSheet(
+                                    context,
+                                    dose: item.dose,
+                                    schedule: item.schedule,
+                                    medication: item.medication,
+                                  ),
+                                ),
+                                const SizedBox(height: kSpacingS),
+                              ],
+                          ],
                         );
                       },
                     );
