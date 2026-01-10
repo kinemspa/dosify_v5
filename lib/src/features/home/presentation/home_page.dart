@@ -406,11 +406,11 @@ class HomePage extends StatelessWidget {
                         'dose_logs',
                       ).listenable(),
                       builder: (context, Box<DoseLog> logBox, _) {
-                        final activeSchedules = scheduleBox.values
-                            .where((s) => s.isActive && s.medicationId != null)
+                        final schedules = scheduleBox.values
+                            .where((s) => s.medicationId != null)
                             .toList();
 
-                        activeSchedules.sort((a, b) {
+                        schedules.sort((a, b) {
                           final an =
                               ScheduleOccurrenceService.nextOccurrence(a) ??
                               DateTime(9999);
@@ -420,19 +420,17 @@ class HomePage extends StatelessWidget {
                           return an.compareTo(bn);
                         });
 
-                        final visible = activeSchedules.take(3).toList();
-
                         return SectionFormCard(
                           neutral: true,
                           title: 'Schedules',
                           children: [
-                            if (visible.isEmpty)
+                            if (schedules.isEmpty)
                               Text(
-                                'No active schedules',
+                                'No schedules',
                                 style: mutedTextStyle(context),
                               )
                             else
-                              for (final schedule in visible) ...[
+                              for (final schedule in schedules) ...[
                                 Builder(
                                   builder: (context) {
                                     final medId = schedule.medicationId;
@@ -442,7 +440,23 @@ class HomePage extends StatelessWidget {
 
                                     final med = medBox.get(medId);
                                     if (med == null) {
-                                      return const SizedBox.shrink();
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              schedule.name,
+                                              style: mutedTextStyle(context),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const SizedBox(width: kSpacingS),
+                                          ScheduleStatusChip(
+                                            schedule: schedule,
+                                            dense: true,
+                                          ),
+                                        ],
+                                      );
                                     }
 
                                     final next =
@@ -450,7 +464,43 @@ class HomePage extends StatelessWidget {
                                           schedule,
                                         );
                                     if (next == null) {
-                                      return const SizedBox.shrink();
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  schedule.name,
+                                                  style: bodyTextStyle(context),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(
+                                                  height: kSpacingXXS,
+                                                ),
+                                                Text(
+                                                  'No upcoming dose',
+                                                  style: mutedTextStyle(
+                                                    context,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: kSpacingS),
+                                          ScheduleStatusChip(
+                                            schedule: schedule,
+                                            dense: true,
+                                          ),
+                                        ],
+                                      );
                                     }
 
                                     final strengthLabel =
@@ -496,21 +546,24 @@ class HomePage extends StatelessWidget {
                                           strengthLabel,
                                       doseMetrics: metrics,
                                       isActive: schedule.isActive,
+                                      showActions: schedule.isActive,
                                       titleTrailing: ScheduleStatusChip(
                                         schedule: schedule,
+                                        dense: true,
                                       ),
                                       onTap: () => context.pushNamed(
                                         'scheduleDetail',
                                         pathParameters: {'id': schedule.id},
                                       ),
-                                      onQuickAction: (status) =>
-                                          _showDoseActionSheet(
-                                            context,
-                                            dose: dose,
-                                            schedule: schedule,
-                                            medication: med,
-                                            initialStatus: status,
-                                          ),
+                                      onQuickAction: schedule.isActive
+                                          ? (status) => _showDoseActionSheet(
+                                              context,
+                                              dose: dose,
+                                              schedule: schedule,
+                                              medication: med,
+                                              initialStatus: status,
+                                            )
+                                          : null,
                                       onPrimaryAction: () =>
                                           _showDoseActionSheet(
                                             context,
