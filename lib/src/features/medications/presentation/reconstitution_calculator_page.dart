@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
@@ -51,6 +52,43 @@ class _ReconstitutionCalculatorPageState
   String? _initialDoseUnit;
   SyringeSizeMl? _initialSyringeSize;
   double? _initialVialSize;
+  String? _initialDiluentName;
+
+  bool _isSameResult(ReconstitutionResult a, ReconstitutionResult b) {
+    bool sameDouble(double? x, double? y) {
+      if (x == null && y == null) return true;
+      if (x == null || y == null) return false;
+      return (x - y).abs() < 1e-9;
+    }
+
+    return sameDouble(a.perMlConcentration, b.perMlConcentration) &&
+        sameDouble(a.solventVolumeMl, b.solventVolumeMl) &&
+        sameDouble(a.recommendedUnits, b.recommendedUnits) &&
+        sameDouble(a.syringeSizeMl, b.syringeSizeMl) &&
+        sameDouble(a.recommendedDose, b.recommendedDose) &&
+        sameDouble(a.maxVialSizeMl, b.maxVialSizeMl) &&
+        a.diluentName == b.diluentName &&
+        a.doseUnit == b.doseUnit;
+  }
+
+  void _onCalculation(ReconstitutionResult result, bool isValid) {
+    final shouldUpdate =
+        _lastResult == null ||
+        !_isSameResult(_lastResult!, result) ||
+        _canSave != isValid;
+    if (!shouldUpdate) return;
+
+    setState(() {
+      _lastResult = result;
+      _canSave = isValid;
+
+      _initialDoseValue = result.recommendedDose;
+      _initialDoseUnit = result.doseUnit;
+      _initialSyringeSize = _syringeFromMl(result.syringeSizeMl);
+      _initialVialSize = result.solventVolumeMl;
+      _initialDiluentName = result.diluentName;
+    });
+  }
 
   @override
   void initState() {
@@ -88,48 +126,6 @@ class _ReconstitutionCalculatorPageState
     _strengthCtrl.dispose();
     _medNameCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _openCalculatorSheet() async {
-    final strengthValue = double.tryParse(_strengthCtrl.text.trim()) ?? 0;
-    if (strengthValue <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter vial strength first')),
-      );
-      return;
-    }
-
-    final result = await showModalBottomSheet<ReconstitutionResult>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => ReconstitutionCalculatorDialog(
-          initialStrengthValue: strengthValue,
-          unitLabel: _selectedUnit,
-          initialDoseValue: _initialDoseValue,
-          initialDoseUnit: _initialDoseUnit,
-          initialSyringeSize: _initialSyringeSize,
-          initialVialSize: _initialVialSize,
-        ),
-      ),
-    );
-
-    if (!mounted) return;
-    if (result == null) return;
-
-    setState(() {
-      _lastResult = result;
-      _canSave = true;
-
-      _initialDoseValue = result.recommendedDose;
-      _initialDoseUnit = result.doseUnit;
-      _initialSyringeSize = _syringeFromMl(result.syringeSizeMl);
-      _initialVialSize = result.solventVolumeMl;
-    });
   }
 
   String _newId() => DateTime.now().microsecondsSinceEpoch.toString();
@@ -286,6 +282,19 @@ class _ReconstitutionCalculatorPageState
                 _initialDoseUnit = item.doseUnit;
                 _initialSyringeSize = _syringeFromMl(item.syringeSizeMl);
                 _initialVialSize = item.solventVolumeMl;
+                _initialDiluentName = item.diluentName;
+
+                _lastResult = ReconstitutionResult(
+                  perMlConcentration: item.perMlConcentration,
+                  solventVolumeMl: item.solventVolumeMl,
+                  recommendedUnits: item.recommendedUnits,
+                  syringeSizeMl: item.syringeSizeMl,
+                  diluentName: item.diluentName,
+                  recommendedDose: item.recommendedDose,
+                  doseUnit: item.doseUnit,
+                  maxVialSizeMl: item.maxVialSizeMl,
+                );
+                _canSave = true;
               });
               Navigator.of(context).pop();
             },
@@ -437,10 +446,23 @@ class _ReconstitutionCalculatorPageState
                     showCardSurface: true,
                   ),
                 const SizedBox(height: kSpacingM),
-                FilledButton(
-                  onPressed: _openCalculatorSheet,
-                  child: Text(
-                    _lastResult == null ? 'Open Calculator' : 'Recalculate',
+                Container(
+                  decoration: BoxDecoration(
+                    color: reconBackgroundDarkColor(context),
+                    borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+                  ),
+                  padding: const EdgeInsets.all(kSpacingL),
+                  child: ReconstitutionCalculatorWidget(
+                    key: ValueKey(_loadedSavedId ?? 'new'),
+                    initialStrengthValue: strengthValue,
+                    unitLabel: _selectedUnit,
+                    medicationName: medName,
+                    initialDiluentName: _initialDiluentName,
+                    initialDoseValue: _initialDoseValue,
+                    initialDoseUnit: _initialDoseUnit,
+                    initialSyringeSize: _initialSyringeSize,
+                    initialVialSize: _initialVialSize,
+                    onCalculate: _onCalculation,
                   ),
                 ),
               ],
