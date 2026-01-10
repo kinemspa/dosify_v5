@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -319,14 +320,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   static const _kCardToday = 'today';
   static const _kCardSchedules = 'schedules';
+  static const _kCardReports = 'reports';
   static const _kCardCalendar = 'calendar';
 
   late final List<String> _cardOrder;
+  Set<String>? _reportIncludedMedicationIds;
 
   @override
   void initState() {
     super.initState();
-    _cardOrder = <String>[_kCardToday, _kCardSchedules, _kCardCalendar];
+    _cardOrder = <String>[
+      _kCardToday,
+      _kCardSchedules,
+      _kCardReports,
+      _kCardCalendar,
+    ];
     unawaited(_restoreCardOrder());
   }
 
@@ -337,7 +345,12 @@ class _HomePageState extends State<HomePage> {
     final stored = prefs.getStringList(_prefsKeyCardOrder());
     if (stored == null || stored.isEmpty) return;
 
-    final allowed = <String>{_kCardToday, _kCardSchedules, _kCardCalendar};
+    final allowed = <String>{
+      _kCardToday,
+      _kCardSchedules,
+      _kCardReports,
+      _kCardCalendar,
+    };
     final filtered = stored.where(allowed.contains).toList();
     for (final id in allowed) {
       if (!filtered.contains(id)) filtered.add(id);
@@ -601,9 +614,74 @@ class _HomePageState extends State<HomePage> {
       ],
     );
 
+    final reportsCard = ValueListenableBuilder(
+      valueListenable: Hive.box<Medication>('medications').listenable(),
+      builder: (context, Box<Medication> medBox, _) {
+        final meds = medBox.values.toList()
+          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+        if (_reportIncludedMedicationIds == null) {
+          _reportIncludedMedicationIds = meds.map((m) => m.id).toSet();
+        } else {
+          final currentIds = meds.map((m) => m.id).toSet();
+          _reportIncludedMedicationIds =
+              _reportIncludedMedicationIds!.intersection(currentIds);
+          if (_reportIncludedMedicationIds!.isEmpty && currentIds.isNotEmpty) {
+            _reportIncludedMedicationIds = currentIds;
+          }
+        }
+
+        final included = _reportIncludedMedicationIds!;
+
+        return SectionFormCard(
+          neutral: true,
+          title: 'Reports',
+          children: [
+            if (meds.isEmpty)
+              Text('No medications', style: mutedTextStyle(context))
+            else ...[
+              Wrap(
+                spacing: kSpacingS,
+                runSpacing: kSpacingS,
+                children: [
+                  for (final med in meds)
+                    PrimaryChoiceChip(
+                      label: Text(med.name),
+                      selected: included.contains(med.id),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            included.add(med.id);
+                          } else {
+                            included.remove(med.id);
+                          }
+                        });
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: kSpacingM),
+              if (included.isEmpty)
+                Text(
+                  'No medications selected',
+                  style: mutedTextStyle(context),
+                )
+              else
+                for (final med in meds)
+                  if (included.contains(med.id)) ...[
+                    MedicationReportsWidget(medication: med),
+                    const SizedBox(height: kSpacingM),
+                  ],
+            ],
+          ],
+        );
+      },
+    );
+
     final cards = <String, Widget>{
       _kCardToday: todayCard,
       _kCardSchedules: schedulesCard,
+      _kCardReports: reportsCard,
       _kCardCalendar: calendarCard,
     };
 
