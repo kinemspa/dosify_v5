@@ -67,19 +67,27 @@ class NotificationService {
     const initSettings = InitializationSettings(android: androidInit);
 
     _log('Initializing FlutterLocalNotificationsPlugin...');
-    await _fln.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (response) {
-        _log(
-          'NotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
-        );
-      },
-      onDidReceiveBackgroundNotificationResponse: (response) {
-        _log(
-          'BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
-        );
-      },
-    );
+    try {
+      await _fln
+          .initialize(
+            initSettings,
+            onDidReceiveNotificationResponse: (response) {
+              _log(
+                'NotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+              );
+            },
+            onDidReceiveBackgroundNotificationResponse: (response) {
+              _log(
+                'BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+              );
+            },
+          )
+          .timeout(const Duration(seconds: 3));
+    } catch (e) {
+      _log('FlutterLocalNotificationsPlugin.initialize failed/timeout: $e');
+      // Do not block app startup if the notifications plugin is unavailable.
+      return;
+    }
 
     // Timezone for scheduled notifications
     _log('Initializing TimeZones...');

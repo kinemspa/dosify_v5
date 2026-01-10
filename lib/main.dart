@@ -25,10 +25,6 @@ Future<void> main() async {
       await HiveBootstrap.init();
       print('Dosifi: Hive initialized');
 
-      print('Dosifi: Initializing NotificationService...');
-      await NotificationService.init();
-      print('Dosifi: NotificationService initialized');
-
       print('Dosifi: Initializing MCPToolkit...');
       MCPToolkitBinding.instance
         ..initialize() // NEW: Initializes MCP bridge
@@ -38,9 +34,20 @@ Future<void> main() async {
       print('Dosifi: Running App...');
       runApp(const ProviderScope(child: DosifiApp()));
 
-      // Kick off rescheduling in the background so startup isn't blocked
+      // Initialize notifications + reschedule in the background.
+      // This must never block app startup (some devices can hang on plugin init).
       // ignore: unawaited_futures
-      ScheduleScheduler.rescheduleAllActiveIfStale().catchError((_) {});
+      () async {
+        try {
+          print('Dosifi: Initializing NotificationService (background)...');
+          await NotificationService.init().timeout(const Duration(seconds: 4));
+          print('Dosifi: NotificationService initialized');
+
+          await ScheduleScheduler.rescheduleAllActiveIfStale();
+        } catch (e) {
+          print('Dosifi: Notification init/reschedule skipped: $e');
+        }
+      }();
     },
     MCPToolkitBinding.instance.handleZoneError,
   );
