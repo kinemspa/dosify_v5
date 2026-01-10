@@ -394,8 +394,6 @@ class _ScheduleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final next = ScheduleOccurrenceService.nextOccurrence(s);
-    final cadence = _ScheduleText.cadenceLabel(s);
-    final timesPerDay = _ScheduleText.timesPerDayLabel(s);
     final medTitle = _ScheduleText.medTitle(s);
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
     final startedLabel = _ScheduleText.startedLabel(s);
@@ -440,8 +438,10 @@ class _ScheduleCard extends StatelessWidget {
                   ],
                   const SizedBox(height: kSpacingXS),
                   Text(
-                    scheduleSubtitle ?? '$cadence · $timesPerDay',
-                    style: helperTextStyle(context),
+                    scheduleDoseSummaryLabel(s),
+                    style: helperTextStyle(
+                      context,
+                    )?.copyWith(fontSize: kFontSizeXSmall),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

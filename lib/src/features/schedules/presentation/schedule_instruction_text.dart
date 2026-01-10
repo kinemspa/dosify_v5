@@ -14,6 +14,12 @@ String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
   return 'Take $dose of $medName on $type at $time';
 }
 
+String scheduleDoseSummaryLabel(Schedule schedule) {
+  final dose = _doseLabel(schedule);
+  final type = _scheduleTypeLabel(schedule);
+  return '$dose · $type';
+}
+
 String _doseLabel(Schedule s) {
   final value = _formatNumber(s.doseValue);
   final unit = s.doseUnit.trim();
@@ -63,5 +69,7 @@ String _timesLabel(BuildContext context, Schedule s) {
 String _formatNumber(double v) {
   // Display like: 1, 1.5, 0.25 (trim trailing zeros).
   final fixed = v.toStringAsFixed(2);
-  return fixed.replaceFirst(RegExp(r'\.0+$'), '').replaceFirst(RegExp(r'(\.\d*[1-9])0+$'), r'$1');
+  return fixed
+      .replaceFirst(RegExp(r'\.0+$'), '')
+      .replaceFirst(RegExp(r'(\.\d*[1-9])0+$'), r'$1');
 }
