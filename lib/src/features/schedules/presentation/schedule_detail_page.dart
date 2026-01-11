@@ -192,14 +192,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             children: [
               Icon(
                 Icons.notifications_outlined,
-                size: 64,
+                size: kEmptyStateIconSize,
                 color: Theme.of(context).colorScheme.outline,
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Schedule not found',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              const SizedBox(height: kSpacingL),
+              Text('Schedule not found', style: sectionTitleStyle(context)),
             ],
           ),
         ),
@@ -231,22 +228,22 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             body: SafeArea(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(kSpacingXXL),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.error_outline,
-                        size: 56,
+                        size: kEmptyStateIconSize,
                         color: Theme.of(context).colorScheme.error,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: kSpacingM),
                       Text(
                         'Unable to open schedule details',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: sectionTitleStyle(context),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: kSpacingM),
                       FilledButton(
                         onPressed: () => context.pop(),
                         child: const Text('Back'),
