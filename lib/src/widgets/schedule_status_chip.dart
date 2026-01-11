@@ -25,6 +25,7 @@ class ScheduleStatusChip extends StatelessWidget {
     final verticalPadding = dense ? kSpacingXXS : kSpacingXS;
     final labelGap = dense ? kSpacingXXS : kSpacingXS;
     final borderRadius = dense ? kBorderRadiusChipTight : kBorderRadiusChip;
+    final showIcon = !dense;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -42,8 +43,10 @@ class ScheduleStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: iconSize, color: color),
-          SizedBox(width: labelGap),
+          if (showIcon) ...[
+            Icon(icon, size: iconSize, color: color),
+            SizedBox(width: labelGap),
+          ],
           Text(
             label,
             style: helperTextStyle(

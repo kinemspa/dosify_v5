@@ -460,7 +460,12 @@ class _ScheduleCard extends StatelessWidget {
                   showNextLabel: true,
                 ),
                 const SizedBox(height: kSpacingXS),
-                ScheduleStatusChip(schedule: s, dense: true),
+                SizedBox(
+                  width: kNextDoseDateCircleSizeCompact,
+                  child: Center(
+                    child: ScheduleStatusChip(schedule: s, dense: true),
+                  ),
+                ),
               ],
             ),
           ],
