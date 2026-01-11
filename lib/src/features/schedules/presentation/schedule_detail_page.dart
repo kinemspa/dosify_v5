@@ -421,6 +421,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     }
   }
 
+  String _formatDateTime(BuildContext context, DateTime dt) {
+    return '${DateFormat('EEE, MMM d, y').format(dt)}  ${TimeOfDay.fromDateTime(dt).format(context)}';
+  }
+
   List<Widget> _buildSections(
     BuildContext context,
     Schedule s,
@@ -431,11 +435,561 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         padding: const EdgeInsets.only(bottom: kSpacingS),
         child: SectionFormCard(
           neutral: true,
+          title: 'Schedule Details',
+          children: _buildScheduleDetailsCardChildren(context, s),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: SectionFormCard(
+          neutral: true,
           title: 'Schedules',
           children: [_buildMedicationSchedulesSection(context, s)],
         ),
       ),
     ];
+  }
+
+  List<Widget> _buildScheduleDetailsCardChildren(
+    BuildContext context,
+    Schedule s,
+  ) {
+    final startAtLabel = s.startAt == null
+        ? 'Not set'
+        : _formatDateTime(context, s.startAt!);
+    final endAtLabel = s.endAt == null
+        ? 'Not set'
+        : _formatDateTime(context, s.endAt!);
+
+    return [
+      buildDetailInfoRow(
+        context,
+        label: 'Name',
+        value: s.name.trim().isEmpty ? '' : s.name,
+        onTap: () => _promptEditName(context, s),
+      ),
+      buildDetailInfoRow(
+        context,
+        label: 'Dose',
+        value: _getDoseDisplay(s),
+        onTap: () => _promptEditDose(context, s),
+      ),
+      buildDetailInfoRow(
+        context,
+        label: 'Type',
+        value: _scheduleTypeText(s),
+        onTap: () => _promptEditScheduleType(context, s),
+        maxLines: 2,
+      ),
+      buildDetailInfoRow(
+        context,
+        label: 'Times',
+        value: _timesText(context, s),
+        onTap: () => _promptEditTimes(context, s),
+        maxLines: 2,
+      ),
+      buildDetailInfoRow(
+        context,
+        label: 'Start',
+        value: startAtLabel,
+        onTap: () => _promptEditStartAt(context, s),
+        maxLines: 2,
+      ),
+      buildDetailInfoRow(
+        context,
+        label: 'End',
+        value: endAtLabel,
+        onTap: () => _promptEditEndAt(context, s),
+        maxLines: 2,
+      ),
+    ];
+  }
+
+  Future<void> _updateSchedule(BuildContext context, Schedule updated) async {
+    try {
+      final scheduleBox = Hive.box<Schedule>('schedules');
+      await ScheduleScheduler.cancelFor(updated.id);
+      await scheduleBox.put(updated.id, updated);
+
+      if (updated.isActive) {
+        await ScheduleScheduler.scheduleFor(updated);
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Schedule updated'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update schedule: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _promptEditName(BuildContext context, Schedule s) async {
+    final controller = TextEditingController(text: s.name);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Edit name'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(hintText: 'Schedule name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final value = controller.text.trim();
+                Navigator.of(dialogContext).pop(value);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    final value = newName?.trim();
+    if (value == null || value.isEmpty || value == s.name) return;
+
+    await _updateSchedule(context, s.copyWithDetails(name: value));
+  }
+
+  Future<void> _promptEditDose(BuildContext context, Schedule s) async {
+    final valueController = TextEditingController(
+      text: s.doseValue == s.doseValue.roundToDouble()
+          ? s.doseValue.toStringAsFixed(0)
+          : s.doseValue.toString(),
+    );
+
+    final unitOptions = <String>{
+      s.doseUnit,
+      'mcg',
+      'mg',
+      'g',
+      'ml',
+      'iu',
+      'units',
+      'tablets',
+      'capsules',
+      'syringes',
+      'vials',
+    }.toList()..sort();
+
+    String selectedUnit = s.doseUnit;
+
+    final result = await showDialog<(double, String)>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Edit dose'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: valueController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(labelText: 'Amount'),
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  DropdownButtonFormField<String>(
+                    value: selectedUnit,
+                    decoration: const InputDecoration(labelText: 'Unit'),
+                    items: [
+                      for (final u in unitOptions)
+                        DropdownMenuItem(value: u, child: Text(u)),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setStateDialog(() => selectedUnit = value);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final parsed = double.tryParse(valueController.text.trim());
+                    if (parsed == null) return;
+                    Navigator.of(dialogContext).pop((parsed, selectedUnit));
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null) return;
+    final (newValue, newUnit) = result;
+    if (newValue == s.doseValue && newUnit == s.doseUnit) return;
+
+    await _updateSchedule(
+      context,
+      s.copyWithDetails(doseValue: newValue, doseUnit: newUnit),
+    );
+  }
+
+  Future<void> _promptEditTimes(BuildContext context, Schedule s) async {
+    final initialTimes = (s.timesOfDay == null || s.timesOfDay!.isEmpty)
+        ? <int>[s.minutesOfDay]
+        : List<int>.from(s.timesOfDay!);
+    initialTimes.sort();
+
+    final updated = await showDialog<List<int>>(
+      context: context,
+      builder: (dialogContext) {
+        var times = List<int>.from(initialTimes);
+
+        return StatefulBuilder(
+          builder: (dialogContext, setStateDialog) {
+            Future<void> pickAndSetTime(int index) async {
+              final current = TimeOfDay(
+                hour: times[index] ~/ 60,
+                minute: times[index] % 60,
+              );
+              final picked = await showTimePicker(
+                context: dialogContext,
+                initialTime: current,
+              );
+              if (picked == null) return;
+              final minutes = picked.hour * 60 + picked.minute;
+              setStateDialog(() {
+                times[index] = minutes;
+                times.sort();
+              });
+            }
+
+            Future<void> addTime() async {
+              final picked = await showTimePicker(
+                context: dialogContext,
+                initialTime: TimeOfDay.now(),
+              );
+              if (picked == null) return;
+              final minutes = picked.hour * 60 + picked.minute;
+              setStateDialog(() {
+                times.add(minutes);
+                times.sort();
+              });
+            }
+
+            return AlertDialog(
+              title: const Text('Edit times'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < times.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: kSpacingS),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => pickAndSetTime(i),
+                                child: Text(
+                                  TimeOfDay(
+                                    hour: times[i] ~/ 60,
+                                    minute: times[i] % 60,
+                                  ).format(dialogContext),
+                                ),
+                              ),
+                            ),
+                            if (times.length > 1) ...[
+                              const SizedBox(width: kSpacingS),
+                              IconButton(
+                                onPressed: () {
+                                  setStateDialog(() => times.removeAt(i));
+                                },
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: addTime,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add time'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(times),
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (updated == null) return;
+    if (updated.isEmpty) return;
+
+    final times = List<int>.from(updated)..sort();
+    final newMinutesOfDay = times.first;
+    final newTimesOfDay = times.length > 1 ? times : null;
+
+    final isSame =
+        (s.minutesOfDay == newMinutesOfDay) &&
+        ((s.timesOfDay == null && newTimesOfDay == null) ||
+            (s.timesOfDay != null &&
+                newTimesOfDay != null &&
+                _listEqualsInt(s.timesOfDay!, newTimesOfDay)));
+
+    if (isSame) return;
+
+    await _updateSchedule(
+      context,
+      s.copyWithDetails(
+        minutesOfDay: newMinutesOfDay,
+        timesOfDay: newTimesOfDay,
+      ),
+    );
+  }
+
+  bool _listEqualsInt(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  Future<void> _promptEditScheduleType(BuildContext context, Schedule s) async {
+    if (s.hasCycle || s.hasDaysOfMonth) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Edit schedule type'),
+          content: const Text(
+            'This schedule type is currently edited from the full schedule editor.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.push('/schedules/edit/${widget.scheduleId}');
+              },
+              child: const Text('Open editor'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final updatedDays = await showDialog<List<int>>(
+      context: context,
+      builder: (dialogContext) {
+        var selected = Set<int>.from(s.daysOfWeek);
+        const labels = <int, String>{
+          1: 'Mon',
+          2: 'Tue',
+          3: 'Wed',
+          4: 'Thu',
+          5: 'Fri',
+          6: 'Sat',
+          7: 'Sun',
+        };
+
+        return StatefulBuilder(
+          builder: (dialogContext, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Edit days'),
+              content: Wrap(
+                spacing: kSpacingXS,
+                runSpacing: kSpacingXS,
+                children: [
+                  for (final day in labels.keys)
+                    FilterChip(
+                      label: Text(labels[day]!),
+                      selected: selected.contains(day),
+                      onSelected: (isSelected) {
+                        setStateDialog(() {
+                          if (isSelected) {
+                            selected.add(day);
+                          } else {
+                            selected.remove(day);
+                          }
+                        });
+                      },
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final days = selected.toList()..sort();
+                    Navigator.of(dialogContext).pop(days);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (updatedDays == null) return;
+    if (updatedDays.isEmpty) return;
+    if (_listEqualsInt(s.daysOfWeek, updatedDays)) return;
+
+    await _updateSchedule(context, s.copyWithDetails(daysOfWeek: updatedDays));
+  }
+
+  Future<void> _promptEditStartAt(BuildContext context, Schedule s) async {
+    await _promptEditBoundaryDateTime(
+      context,
+      title: 'Edit start date',
+      initial: s.startAt,
+      onSave: (value) =>
+          _updateSchedule(context, s.copyWithDetails(startAt: value)),
+    );
+  }
+
+  Future<void> _promptEditEndAt(BuildContext context, Schedule s) async {
+    await _promptEditBoundaryDateTime(
+      context,
+      title: 'Edit end date',
+      initial: s.endAt,
+      onSave: (value) =>
+          _updateSchedule(context, s.copyWithDetails(endAt: value)),
+    );
+  }
+
+  Future<void> _promptEditBoundaryDateTime(
+    BuildContext context, {
+    required String title,
+    required DateTime? initial,
+    required Future<void> Function(DateTime? value) onSave,
+  }) async {
+    final result = await showDialog<DateTime?>(
+      context: context,
+      builder: (dialogContext) {
+        DateTime? selected = initial;
+
+        Future<void> pick() async {
+          final now = DateTime.now();
+          final initialDate = selected ?? now;
+          final pickedDate = await showDatePicker(
+            context: dialogContext,
+            initialDate: DateTime(
+              initialDate.year,
+              initialDate.month,
+              initialDate.day,
+            ),
+            firstDate: DateTime(now.year - 10),
+            lastDate: DateTime(now.year + 20),
+          );
+          if (pickedDate == null) return;
+          final pickedTime = await showTimePicker(
+            context: dialogContext,
+            initialTime: TimeOfDay.fromDateTime(initialDate),
+          );
+          if (pickedTime == null) return;
+          selected = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        }
+
+        return StatefulBuilder(
+          builder: (dialogContext, setStateDialog) {
+            return AlertDialog(
+              title: Text(title),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    selected == null
+                        ? 'Not set'
+                        : _formatDateTime(dialogContext, selected!),
+                    style: bodyTextStyle(dialogContext),
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await pick();
+                      setStateDialog(() {});
+                    },
+                    icon: const Icon(Icons.calendar_today_outlined),
+                    label: Text(selected == null ? 'Set' : 'Change'),
+                  ),
+                ],
+              ),
+              actions: [
+                if (selected != null)
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(null),
+                    child: const Text('Clear'),
+                  ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(initial),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(selected),
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == initial) return;
+    await onSave(result);
   }
 
   Widget _buildMedicationSchedulesSection(BuildContext context, Schedule s) {

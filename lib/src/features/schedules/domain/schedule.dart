@@ -201,6 +201,73 @@ class Schedule {
     );
   }
 
+  Schedule copyWithDetails({
+    String? name,
+    String? medicationName,
+    double? doseValue,
+    String? doseUnit,
+    int? minutesOfDay,
+    List<int>? daysOfWeek,
+    Object? timesOfDay = _noChange,
+    Object? timesOfDayUtc = _noChange,
+    Object? cycleEveryNDays = _noChange,
+    Object? cycleAnchorDate = _noChange,
+    Object? daysOfMonth = _noChange,
+    Object? startAt = _noChange,
+    Object? endAt = _noChange,
+    Object? monthlyMissingDayBehaviorCode = _noChange,
+    bool? active,
+    Object? pausedUntil = _noChange,
+  }) {
+    return Schedule(
+      id: id,
+      name: name ?? this.name,
+      medicationName: medicationName ?? this.medicationName,
+      doseValue: doseValue ?? this.doseValue,
+      doseUnit: doseUnit ?? this.doseUnit,
+      minutesOfDay: minutesOfDay ?? this.minutesOfDay,
+      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
+      minutesOfDayUtc: minutesOfDayUtc,
+      daysOfWeekUtc: daysOfWeekUtc,
+      medicationId: medicationId,
+      active: active ?? this.active,
+      pausedUntil: pausedUntil == _noChange
+          ? this.pausedUntil
+          : pausedUntil as DateTime?,
+      timesOfDay: timesOfDay == _noChange
+          ? this.timesOfDay
+          : timesOfDay as List<int>?,
+      timesOfDayUtc: timesOfDayUtc == _noChange
+          ? this.timesOfDayUtc
+          : timesOfDayUtc as List<int>?,
+      cycleEveryNDays: cycleEveryNDays == _noChange
+          ? this.cycleEveryNDays
+          : cycleEveryNDays as int?,
+      cycleAnchorDate: cycleAnchorDate == _noChange
+          ? this.cycleAnchorDate
+          : cycleAnchorDate as DateTime?,
+      daysOfMonth: daysOfMonth == _noChange
+          ? this.daysOfMonth
+          : daysOfMonth as List<int>?,
+      doseUnitCode: doseUnitCode,
+      doseMassMcg: doseMassMcg,
+      doseVolumeMicroliter: doseVolumeMicroliter,
+      doseTabletQuarters: doseTabletQuarters,
+      doseCapsules: doseCapsules,
+      doseSyringes: doseSyringes,
+      doseVials: doseVials,
+      doseIU: doseIU,
+      displayUnitCode: displayUnitCode,
+      inputModeCode: inputModeCode,
+      startAt: startAt == _noChange ? this.startAt : startAt as DateTime?,
+      endAt: endAt == _noChange ? this.endAt : endAt as DateTime?,
+      monthlyMissingDayBehaviorCode: monthlyMissingDayBehaviorCode == _noChange
+          ? this.monthlyMissingDayBehaviorCode
+          : monthlyMissingDayBehaviorCode as int?,
+      createdAt: createdAt,
+    );
+  }
+
   MonthlyMissingDayBehavior get monthlyMissingDayBehavior {
     final code = monthlyMissingDayBehaviorCode;
     if (code == null) return MonthlyMissingDayBehavior.skip;
