@@ -819,14 +819,20 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
         return StatefulBuilder(
           builder: (dialogContext, setStateDialog) {
+            final theme = Theme.of(dialogContext);
+            final cs = theme.colorScheme;
             return AlertDialog(
+              titleTextStyle: cardTitleStyle(
+                dialogContext,
+              )?.copyWith(color: cs.primary),
+              contentTextStyle: bodyTextStyle(dialogContext),
               title: const Text('Edit days'),
               content: Wrap(
                 spacing: kSpacingXS,
                 runSpacing: kSpacingXS,
                 children: [
                   for (final day in labels.keys)
-                    FilterChip(
+                    PrimaryFilterChip(
                       label: Text(labels[day]!),
                       selected: selected.contains(day),
                       onSelected: (isSelected) {

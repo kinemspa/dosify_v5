@@ -471,6 +471,58 @@ class PrimaryChoiceChip extends StatelessWidget {
   }
 }
 
+/// Primary-styled filter chip (multi-select).
+///
+/// Matches [PrimaryChoiceChip] visuals but uses [FilterChip].
+class PrimaryFilterChip extends StatelessWidget {
+  const PrimaryFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+    this.color,
+    super.key,
+  });
+
+  final Widget label;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedColor = color ?? theme.colorScheme.primary;
+    final unselectedColor = theme.colorScheme.surface.withValues(alpha: 0);
+    final labelColor = selected ? theme.colorScheme.onPrimary : selectedColor;
+    return FilterChip(
+      label: DefaultTextStyle(
+        style:
+            theme.textTheme.labelLarge?.copyWith(
+              color: labelColor,
+              fontWeight: FontWeight.w600,
+            ) ??
+            TextStyle(color: labelColor),
+        child: label,
+      ),
+      selected: selected,
+      onSelected: onSelected,
+      selectedColor: selectedColor,
+      backgroundColor: unselectedColor,
+      showCheckmark: false,
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      side: BorderSide(
+        color: selected
+            ? selectedColor
+            : theme.colorScheme.outlineVariant.withValues(
+                alpha: kCardBorderOpacity,
+              ),
+        width: selected ? kBorderWidthMedium : kBorderWidthThin,
+      ),
+    );
+  }
+}
+
 /// Visual syringe gauge with tick markers
 /// Reusable soft white card decoration used across selection tiles and neutral form sections
 BoxDecoration softWhiteCardDecoration(BuildContext context) {
