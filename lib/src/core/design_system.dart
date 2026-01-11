@@ -253,10 +253,24 @@ const double kCalendarSelectedDayPanelHeightRatioMonth = 0.42;
 // ============================================================================
 
 /// Page-level spacing
-const EdgeInsets kPagePadding = EdgeInsets.fromLTRB(16, 16, 16, 100);
+const double kPageBottomPadding = 100;
+const EdgeInsets kPagePadding = EdgeInsets.fromLTRB(
+  16,
+  16,
+  16,
+  kPageBottomPadding,
+);
 const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(16, 16, 16, 16);
 const double kPageHorizontalPadding = 16;
 const double kPageVerticalPadding = 16;
+
+/// Detail pages - padding for the sections list under the header.
+const EdgeInsets kDetailPageSectionsPadding = EdgeInsets.fromLTRB(
+  kPageHorizontalPadding,
+  kSpacingS,
+  kPageHorizontalPadding,
+  kPageBottomPadding,
+);
 
 /// Generic spacing scale (apply everywhere before creating new values)
 const double kSpacingXXS = 2;

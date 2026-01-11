@@ -205,7 +205,7 @@ class DetailPageScaffold extends StatelessWidget {
           ),
           // Main content sections
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+            padding: kDetailPageSectionsPadding,
             sliver: SliverList(delegate: SliverChildListDelegate(sections)),
           ),
         ],
