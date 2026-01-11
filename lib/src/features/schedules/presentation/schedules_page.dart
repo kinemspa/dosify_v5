@@ -289,14 +289,14 @@ class _SchedulesPageState extends State<SchedulesPage> {
         return ListView.separated(
           padding: const EdgeInsets.all(kPageHorizontalPadding),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
           itemBuilder: (context, i) => _ScheduleCard(s: items[i], dense: true),
         );
       case _SchedView.large:
         return ListView.separated(
           padding: const EdgeInsets.all(kPageHorizontalPadding),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, __) => const SizedBox(height: kSpacingM),
           itemBuilder: (context, i) => _ScheduleCard(s: items[i], dense: false),
         );
     }
