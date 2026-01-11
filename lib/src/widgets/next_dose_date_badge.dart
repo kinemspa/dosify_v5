@@ -170,7 +170,7 @@ class NextDoseDateBadge extends StatelessWidget {
           style: helperTextStyle(
             context,
             color: isEnabled
-                ? cs.primary.withValues(alpha: kOpacityFull)
+                ? accentColor.withValues(alpha: kOpacityFull)
                 : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
           )?.copyWith(fontSize: kFontSizeXSmall),
           maxLines: 1,

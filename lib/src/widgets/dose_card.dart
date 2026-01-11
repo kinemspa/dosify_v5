@@ -103,7 +103,7 @@ class DoseCard extends StatelessWidget {
                     style: helperTextStyle(
                       context,
                       color: isActive
-                          ? cs.onSurface.withValues(alpha: kOpacityMediumHigh)
+                          ? statusColor.withValues(alpha: kOpacityFull)
                           : cs.onSurfaceVariant.withValues(
                               alpha: kOpacityMediumLow,
                             ),
@@ -149,14 +149,21 @@ class DoseCard extends StatelessWidget {
                     const SizedBox(height: kSpacingXXS),
                     Text(
                       strengthOrConcentrationLabel,
-                      style: baseHelper,
+                      style: baseHelper?.copyWith(fontSize: kFontSizeXSmall),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: kSpacingXXS),
                     Text(
                       'Take $doseMetrics',
-                      style: baseHelper?.copyWith(color: cs.onSurface),
+                      style: baseBody?.copyWith(
+                        color: isActive
+                            ? statusColor.withValues(alpha: kOpacityFull)
+                            : cs.onSurfaceVariant.withValues(
+                                alpha: kOpacityMediumLow,
+                              ),
+                        fontWeight: kFontWeightSemiBold,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -169,10 +176,9 @@ class DoseCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      height: kStandardButtonHeight,
                       padding: const EdgeInsets.symmetric(
                         horizontal: kSpacingS,
-                        vertical: kSpacingXS,
+                        vertical: kSpacingXXS,
                       ),
                       decoration: BoxDecoration(
                         color: statusColor.withValues(alpha: kOpacityMinimal),
@@ -202,7 +208,7 @@ class DoseCard extends StatelessWidget {
                     if (showEditOnly)
                       SizedBox(
                         height: kStandardButtonHeight,
-                        child: FilledButton.icon(
+                        child: OutlinedButton.icon(
                           onPressed: onPrimaryAction ?? onTap,
                           icon: const Icon(Icons.edit_rounded),
                           label: const Text('Edit'),
@@ -245,11 +251,11 @@ class DoseCard extends StatelessWidget {
       case DoseStatus.taken:
         return (kDoseStatusTakenGreen, Icons.check_rounded);
       case DoseStatus.skipped:
-        return (cs.onSurfaceVariant, Icons.block_rounded);
+        return (cs.error, Icons.block_rounded);
       case DoseStatus.snoozed:
-        return (cs.tertiary, Icons.snooze_rounded);
+        return (kDoseStatusSnoozedOrange, Icons.snooze_rounded);
       case DoseStatus.overdue:
-        return (cs.error, Icons.warning_rounded);
+        return (kDoseStatusMissedDarkRed, Icons.warning_rounded);
       case DoseStatus.pending:
         return (cs.primary, Icons.notifications_rounded);
     }

@@ -403,6 +403,7 @@ const LinearGradient kDetailHeaderGradient = LinearGradient(
 /// Use these instead of hardcoding colors in widgets.
 const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
 const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
+const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);
 
 /// Common utility colors.
 ///
