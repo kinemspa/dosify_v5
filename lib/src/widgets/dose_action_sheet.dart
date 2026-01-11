@@ -904,6 +904,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             if (!_isAdHoc) ...[
               Text('Dose change', style: sectionTitleStyle(context)),
               const SizedBox(height: kSpacingS),
+              Text(
+                'Use this to record the actual dose taken, if different from the scheduled dose.',
+                style: helperTextStyle(context),
+              ),
+              const SizedBox(height: kSpacingS),
               Builder(
                 builder: (context) {
                   final schedule = Hive.box<Schedule>(
@@ -1103,16 +1108,22 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   );
                 },
               ),
-              const SizedBox(height: kSpacingS),
-              Text(
-                'Use this to record the actual dose taken, if different from the scheduled dose.',
-                style: helperTextStyle(context),
-              ),
               const SizedBox(height: kSpacingM),
             ],
             if (_selectedStatus == DoseStatus.snoozed) ...[
               Text('Snooze Until', style: sectionTitleStyle(context)),
               const SizedBox(height: kSpacingS),
+              if (_maxSnoozeUntil() != null) ...[
+                Text(() {
+                  final max = _maxSnoozeUntil()!;
+                  final date = MaterialLocalizations.of(
+                    context,
+                  ).formatMediumDate(max);
+                  final time = TimeOfDay.fromDateTime(max).format(context);
+                  return 'Must be before the next scheduled dose ($date • $time).';
+                }(), style: helperTextStyle(context)),
+                const SizedBox(height: kSpacingS),
+              ],
               SizedBox(
                 height: kStandardFieldHeight,
                 width: double.infinity,
@@ -1189,17 +1200,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   }()),
                 ),
               ),
-              if (_maxSnoozeUntil() != null) ...[
-                const SizedBox(height: kSpacingS),
-                Text(() {
-                  final max = _maxSnoozeUntil()!;
-                  final date = MaterialLocalizations.of(
-                    context,
-                  ).formatMediumDate(max);
-                  final time = TimeOfDay.fromDateTime(max).format(context);
-                  return 'Must be before the next scheduled dose ($date • $time).';
-                }(), style: helperTextStyle(context)),
-              ],
               const SizedBox(height: kSpacingM),
             ],
             Text('Notes', style: sectionTitleStyle(context)),
