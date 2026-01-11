@@ -316,6 +316,12 @@ const EdgeInsets kButtonContentPadding = EdgeInsets.symmetric(
   horizontal: 12,
   vertical: 10,
 );
+
+/// Dense button padding used for compact button rows (e.g., 3-up action buttons).
+const EdgeInsets kDenseButtonContentPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingXS,
+);
 const EdgeInsets kCompactButtonPadding = EdgeInsets.zero;
 
 // ============================================================================

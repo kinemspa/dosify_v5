@@ -1428,10 +1428,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       return const SizedBox.shrink();
     }
 
+    final cs = Theme.of(context).colorScheme;
+
     final doses = _getDosesForDate(date, s);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: kSpacingL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1441,36 +1443,34 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               if (isToday)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: kSpacingS,
+                    vertical: kSpacingXS,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(4),
+                    color: cs.primary,
+                    borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
                   ),
-                  child: const Text(
+                  child: Text(
                     'TODAY',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: helperTextStyle(context, color: cs.onPrimary)
+                        ?.copyWith(
+                          fontSize: kFontSizeXSmall,
+                          fontWeight: kFontWeightExtraBold,
+                          height: kLineHeightTight,
+                        ),
                   ),
                 ),
-              if (isToday) const SizedBox(width: 8),
+              if (isToday) const SizedBox(width: kSpacingS),
               Text(
                 DateFormat('EEE, MMM d').format(date),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isToday
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface,
+                style: bodyTextStyle(context)?.copyWith(
+                  fontWeight: kFontWeightBold,
+                  color: isToday ? cs.primary : cs.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
           // Doses for this day
           ...doses.map((dt) {
             final existingLog = _getExistingLog(dt);
@@ -1496,13 +1496,14 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     required bool isPast,
     required bool isToday,
   }) {
+    final cs = Theme.of(context).colorScheme;
     final isTaken = existingLog?.action == DoseAction.taken;
     final hasLog = existingLog != null;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: kSpacingS),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(kSpacingM),
         decoration: BoxDecoration(
           color: hasLog
               ? _getActionColor(
@@ -1513,24 +1514,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     ? Theme.of(
                         context,
                       ).colorScheme.primary.withValues(alpha: 0.08)
-                    : Theme.of(context).colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(8),
+                    : cs.surfaceContainerHighest.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
           border: hasLog
               ? Border.all(
                   color: _getActionColor(context, existingLog.action),
                   width: 1.5,
                 )
               : (isToday
-                    ? Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 1.5,
-                      )
-                    : Border.all(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withValues(alpha: 0.2),
-                      )),
+                    ? Border.all(color: cs.primary, width: 1.5)
+                    : Border.all(color: cs.outline.withValues(alpha: 0.2))),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1539,31 +1532,27 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               children: [
                 Icon(
                   hasLog ? _getActionIcon(existingLog.action) : Icons.schedule,
-                  size: 18,
+                  size: kIconSizeSmall,
                   color: hasLog
                       ? _getActionColor(context, existingLog.action)
-                      : (isToday
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurfaceVariant),
+                      : (isToday ? cs.primary : cs.onSurfaceVariant),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: kSpacingS),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         TimeOfDay.fromDateTime(dt).format(context),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                        style: cardTitleStyle(
+                          context,
+                        )?.copyWith(color: cs.onSurface),
                       ),
                       Text(
                         _getDoseDisplay(s),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        style: helperTextStyle(
+                          context,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -1572,20 +1561,29 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 if (hasLog)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: kSpacingS,
+                      vertical: kSpacingXS,
                     ),
                     decoration: BoxDecoration(
                       color: _getActionColor(context, existingLog.action),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(
+                        kBorderRadiusChipTight,
+                      ),
                     ),
                     child: Text(
                       _getActionLabel(existingLog.action).toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          helperTextStyle(
+                            context,
+                            color: statusColorOnPrimary(
+                              context,
+                              _getActionColor(context, existingLog.action),
+                            ),
+                          )?.copyWith(
+                            fontSize: kFontSizeXSmall,
+                            fontWeight: kFontWeightExtraBold,
+                            height: kLineHeightTight,
+                          ),
                     ),
                   ),
               ],
@@ -1593,7 +1591,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
             // Show notes and injection site if logged
             if (hasLog && existingLog.notes != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingS),
               () {
                 final notes = existingLog.notes!.trim();
                 final hasInjectionSite = notes.contains('Site:');
@@ -1612,29 +1610,27 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     if (displayNotes.isNotEmpty)
                       Text(
                         displayNotes,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
+                        style: helperTextStyle(
+                          context,
+                          color: cs.onSurfaceVariant,
+                        )?.copyWith(fontStyle: FontStyle.italic),
                       ),
                     if (injectionSite != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: kSpacingXS),
                       Row(
                         children: [
                           Icon(
                             Icons.location_on,
-                            size: 12,
-                            color: Theme.of(context).colorScheme.primary,
+                            size: kIconSizeXXSmall,
+                            color: cs.primary,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: kSpacingXS),
                           Text(
                             injectionSite,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: helperTextStyle(
+                              context,
+                              color: cs.primary,
+                            )?.copyWith(fontWeight: kFontWeightSemiBold),
                           ),
                         ],
                       ),
@@ -1646,7 +1642,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
             // Action buttons for future or today's doses
             if (!isPast || isToday) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingS),
               Row(
                 children: [
                   if (!isTaken) ...[
@@ -1660,20 +1656,20 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                             existingLog: existingLog,
                           );
                         },
-                        icon: const Icon(Icons.check, size: 14),
+                        icon: const Icon(Icons.check, size: kIconSizeXSmall),
                         label: Text(
                           existingLog != null ? 'Edit' : 'Take',
-                          style: const TextStyle(fontSize: 12),
+                          style: helperTextStyle(context)?.copyWith(
+                            fontSize: kFontSizeXSmall,
+                            fontWeight: kFontWeightSemiBold,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
+                          padding: kDenseButtonContentPadding,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: kSpacingXS),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
@@ -1684,20 +1680,20 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                             existingLog: existingLog,
                           );
                         },
-                        icon: const Icon(Icons.snooze, size: 14),
-                        label: const Text(
+                        icon: const Icon(Icons.snooze, size: kIconSizeXSmall),
+                        label: Text(
                           'Snooze',
-                          style: TextStyle(fontSize: 12),
+                          style: helperTextStyle(context)?.copyWith(
+                            fontSize: kFontSizeXSmall,
+                            fontWeight: kFontWeightSemiBold,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
+                          padding: kDenseButtonContentPadding,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: kSpacingXS),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
@@ -1708,16 +1704,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                             existingLog: existingLog,
                           );
                         },
-                        icon: const Icon(Icons.close, size: 14),
-                        label: const Text(
+                        icon: const Icon(Icons.close, size: kIconSizeXSmall),
+                        label: Text(
                           'Skip',
-                          style: TextStyle(fontSize: 12),
+                          style: helperTextStyle(context)?.copyWith(
+                            fontSize: kFontSizeXSmall,
+                            fontWeight: kFontWeightSemiBold,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
+                          padding: kDenseButtonContentPadding,
                         ),
                       ),
                     ),
@@ -1732,16 +1728,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                             existingLog: existingLog,
                           );
                         },
-                        icon: const Icon(Icons.edit, size: 14),
-                        label: const Text(
+                        icon: const Icon(Icons.edit, size: kIconSizeXSmall),
+                        label: Text(
                           'Edit',
-                          style: TextStyle(fontSize: 12),
+                          style: helperTextStyle(context)?.copyWith(
+                            fontSize: kFontSizeXSmall,
+                            fontWeight: kFontWeightSemiBold,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
+                          padding: kDenseButtonContentPadding,
                         ),
                       ),
                     ),
