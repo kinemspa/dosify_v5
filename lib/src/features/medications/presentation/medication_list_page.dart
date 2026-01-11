@@ -50,27 +50,42 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   String _query = '';
   bool _searchExpanded = false;
 
-  IconData _getViewIcon(_MedView v) => switch (v) {
-    _MedView.list => Icons.view_list,
-    _MedView.compact => Icons.view_comfy_alt,
-    _MedView.large => Icons.view_comfortable,
-  };
-
-  _MedView _nextView(_MedView current) {
-    final idx = _MedView.values.indexOf(current);
-    return _MedView.values[(idx + 1) % _MedView.values.length];
-  }
-
   Widget _buildLayoutCycleButton(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
-    return IconButton(
-      tooltip: 'Change layout',
-      icon: Icon(
-        _getViewIcon(_view),
-        color: iconColor,
+    return SizedBox(
+      height: kStandardButtonHeight,
+      child: SegmentedButton<_MedView>(
+        showSelectedIcon: false,
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          iconColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? cs.onSecondaryContainer
+                : iconColor,
+          ),
+        ),
+        segments: const <ButtonSegment<_MedView>>[
+          ButtonSegment(
+            value: _MedView.list,
+            icon: Icon(Icons.view_list, size: kIconSizeMedium),
+          ),
+          ButtonSegment(
+            value: _MedView.compact,
+            icon: Icon(Icons.view_comfy_alt, size: kIconSizeMedium),
+          ),
+          ButtonSegment(
+            value: _MedView.large,
+            icon: Icon(Icons.view_comfortable, size: kIconSizeMedium),
+          ),
+        ],
+        selected: <_MedView>{_view},
+        onSelectionChanged: (selection) {
+          if (selection.isEmpty) return;
+          _saveView(selection.first);
+        },
       ),
-      onPressed: () => _saveView(_nextView(_view)),
     );
   }
 
