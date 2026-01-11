@@ -163,7 +163,12 @@ class _SchedulesPageState extends State<SchedulesPage> {
     final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+      padding: const EdgeInsets.fromLTRB(
+        kPageHorizontalPadding,
+        kSpacingXS,
+        kSpacingXS,
+        kSpacingXS,
+      ),
       child: Row(
         children: [
           if (_searchExpanded)
@@ -192,7 +197,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search schedules',
             ),
-          if (_searchExpanded) const SizedBox(width: 8),
+          if (_searchExpanded) const SizedBox(width: kSpacingS),
           if (_searchExpanded)
             IconButton(
               icon: Icon(_viewIcon(_view), color: iconColor),
@@ -206,7 +211,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
-          if (!_searchExpanded) const SizedBox(width: 8),
+          if (!_searchExpanded) const SizedBox(width: kSpacingS),
           if (!_searchExpanded)
             PopupMenuButton<_SchedFilter>(
               icon: Icon(
