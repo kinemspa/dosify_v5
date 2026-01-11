@@ -63,11 +63,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   Widget _buildLayoutCycleButton(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
     return IconButton(
       tooltip: 'Change layout',
       icon: Icon(
         _getViewIcon(_view),
-        color: _view == _MedView.large ? cs.primary : kTextLighterGrey(context),
+        color: iconColor,
       ),
       onPressed: () => _saveView(_nextView(_view)),
     );
