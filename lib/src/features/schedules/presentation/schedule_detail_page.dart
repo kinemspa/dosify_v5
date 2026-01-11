@@ -540,12 +540,17 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
+          titleTextStyle: dialogTitleTextStyle(dialogContext),
+          contentTextStyle: dialogContentTextStyle(dialogContext),
           title: const Text('Edit name'),
           content: TextField(
             controller: controller,
             autofocus: true,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(hintText: 'Schedule name'),
+            decoration: buildFieldDecoration(
+              dialogContext,
+              hint: 'Schedule name',
+            ),
           ),
           actions: [
             TextButton(
@@ -599,6 +604,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         return StatefulBuilder(
           builder: (dialogContext, setStateDialog) {
             return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
               title: const Text('Edit dose'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -608,12 +615,18 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(labelText: 'Amount'),
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      label: 'Amount',
+                    ),
                   ),
                   const SizedBox(height: kSpacingM),
                   DropdownButtonFormField<String>(
                     value: selectedUnit,
-                    decoration: const InputDecoration(labelText: 'Unit'),
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      label: 'Unit',
+                    ),
                     items: [
                       for (final u in unitOptions)
                         DropdownMenuItem(value: u, child: Text(u)),
@@ -699,6 +712,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             }
 
             return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
               title: const Text('Edit times'),
               content: SingleChildScrollView(
                 child: Column(
@@ -885,6 +900,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         return StatefulBuilder(
           builder: (dialogContext, setStateDialog) {
             return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
               title: const Text('Edit cycle'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -893,9 +910,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   TextField(
                     controller: nController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Every N days',
-                      hintText: '2',
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      label: 'Every N days',
+                      hint: '2',
                     ),
                   ),
                   const SizedBox(height: kSpacingM),
@@ -983,6 +1001,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         return StatefulBuilder(
           builder: (dialogContext, setStateDialog) {
             return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
               title: const Text('Edit monthly schedule'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -991,16 +1011,18 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   TextField(
                     controller: daysController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Days of month (1–31)',
-                      hintText: '1, 15, 31',
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      label: 'Days of month (1–31)',
+                      hint: '1, 15, 31',
                     ),
                   ),
                   const SizedBox(height: kSpacingM),
                   DropdownButtonFormField<MonthlyMissingDayBehavior>(
                     value: behavior,
-                    decoration: const InputDecoration(
-                      labelText: 'If a day doesn’t exist',
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      label: 'If a day doesn’t exist',
                     ),
                     items: const [
                       DropdownMenuItem(
@@ -1131,6 +1153,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         return StatefulBuilder(
           builder: (dialogContext, setStateDialog) {
             return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
               title: Text(title),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1884,6 +1908,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
+            titleTextStyle: dialogTitleTextStyle(context),
+            contentTextStyle: dialogContentTextStyle(context),
             title: const Text('Delete schedule?'),
             content: Text(
               'Delete "${schedule.name}"? This will cancel its notifications.',
@@ -1963,7 +1989,10 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return AlertDialog(
+      titleTextStyle: dialogTitleTextStyle(context),
+      contentTextStyle: dialogContentTextStyle(context),
       title: Text(widget.existingLog != null ? 'Edit Dose' : _actionLabel),
       content: SingleChildScrollView(
         child: Column(
@@ -1973,10 +2002,10 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
             // Notes field
             TextFormField(
               controller: widget.notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes (optional)',
-                hintText: 'Add any notes about this dose...',
-                border: OutlineInputBorder(),
+              decoration: buildFieldDecoration(
+                context,
+                label: 'Notes (optional)',
+                hint: 'Add any notes about this dose...',
               ),
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
@@ -1984,13 +2013,13 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
 
             // Injection site field (only for injections)
             if (widget.isInjection) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingM),
               TextFormField(
                 controller: _injectionSiteController,
-                decoration: const InputDecoration(
-                  labelText: 'Injection Site (optional)',
-                  hintText: 'e.g., Left arm, Right thigh...',
-                  border: OutlineInputBorder(),
+                decoration: buildFieldDecoration(
+                  context,
+                  label: 'Injection Site (optional)',
+                  hint: 'e.g., Left arm, Right thigh...',
                 ),
                 textCapitalization: TextCapitalization.sentences,
               ),
@@ -2003,6 +2032,7 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
         if (widget.existingLog != null)
           TextButton(
             onPressed: () => Navigator.of(context).pop({'delete': true}),
+            style: TextButton.styleFrom(foregroundColor: cs.error),
             child: const Text('Delete'),
           ),
 

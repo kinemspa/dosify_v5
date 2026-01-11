@@ -1092,6 +1092,21 @@ TextStyle? calendarHeaderTitleTextStyle(BuildContext context) {
   );
 }
 
+/// Standard dialog title text style.
+///
+/// Use for [AlertDialog.titleTextStyle] to keep dialogs consistent.
+TextStyle? dialogTitleTextStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return cardTitleStyle(context)?.copyWith(color: cs.primary);
+}
+
+/// Standard dialog content text style.
+///
+/// Use for [AlertDialog.contentTextStyle] to keep dialogs consistent.
+TextStyle? dialogContentTextStyle(BuildContext context) {
+  return bodyTextStyle(context);
+}
+
 /// Error text style
 TextStyle? errorTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
