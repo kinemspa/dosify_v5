@@ -311,31 +311,27 @@ class DetailStatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final muted = cs.onPrimary.withValues(alpha: kOpacityMedium);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: kIconSizeSmall,
-              color: Colors.white.withValues(alpha: kOpacityMedium),
-            ),
-            const SizedBox(width: 4),
+            Icon(icon, size: kIconSizeSmall, color: muted),
+            const SizedBox(width: kSpacingXS),
             Text(
               label,
-              style: helperTextStyle(context)?.copyWith(
-                color: Colors.white.withValues(alpha: kOpacityMedium),
-              ),
+              style: helperTextStyle(context)?.copyWith(color: muted),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: kSpacingXXS),
         Text(
           value,
           style: bodyTextStyle(
             context,
-          )?.copyWith(color: Colors.white, fontWeight: kFontWeightSemiBold),
+          )?.copyWith(color: cs.onPrimary, fontWeight: kFontWeightSemiBold),
         ),
       ],
     );
