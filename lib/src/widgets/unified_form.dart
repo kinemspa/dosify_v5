@@ -114,6 +114,133 @@ class SectionFormCard extends StatelessWidget {
   }
 }
 
+/// Collapsible version of [SectionFormCard] that keeps the same styling.
+///
+/// This is used for reorderable/collapsible sections (e.g. Home screen cards)
+/// where dragging should only be enabled when all cards are collapsed.
+class CollapsibleSectionFormCard extends StatelessWidget {
+  const CollapsibleSectionFormCard({
+    required this.title,
+    required this.children,
+    required this.isExpanded,
+    required this.onExpandedChanged,
+    super.key,
+    this.leading,
+    this.trailing,
+    this.neutral = false,
+    this.backgroundColor,
+    this.reserveReorderHandleGutterWhenCollapsed = false,
+  });
+
+  final String title;
+  final List<Widget> children;
+  final bool isExpanded;
+  final ValueChanged<bool> onExpandedChanged;
+  final Widget? leading;
+  final Widget? trailing;
+  final bool neutral;
+  final Color? backgroundColor;
+  final bool reserveReorderHandleGutterWhenCollapsed;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            backgroundColor ??
+            (neutral
+                ? (isDark
+                      ? Color.alphaBlend(
+                          cs.onSurface.withValues(alpha: kOpacityFaint),
+                          cs.surface,
+                        )
+                      : cs.surfaceContainerLowest)
+                : cs.primary.withValues(alpha: isDark ? kOpacityFaint : 0.03)),
+        borderRadius: BorderRadius.circular(12),
+        border: neutral
+            ? Border.all(
+                color: cs.outlineVariant.withValues(
+                  alpha: isDark ? kOpacityMediumHigh : 0.5,
+                ),
+                width: kOutlineWidth,
+              )
+            : Border.all(
+                color: cs.primary.withValues(
+                  alpha: isDark ? kOpacitySubtleLow : 0.06,
+                ),
+                width: kOutlineWidth,
+              ),
+        boxShadow: neutral
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => onExpandedChanged(!isExpanded),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  if (!isExpanded && reserveReorderHandleGutterWhenCollapsed)
+                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
+                  if (leading != null) ...[
+                    leading!,
+                    const SizedBox(width: kSpacingS),
+                  ],
+                  Expanded(
+                    child: Text(title, style: sectionTitleStyle(context)),
+                  ),
+                  if (trailing != null) trailing!,
+                  AnimatedRotation(
+                    turns: isExpanded ? 0 : -0.25,
+                    duration: kAnimationNormal,
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: kIconSizeLarge,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            duration: kAnimationNormal,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [const SizedBox(height: 8), ...children],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A left-label / right-field row. Label has fixed width and unified style.
 class LabelFieldRow extends StatelessWidget {
   const LabelFieldRow({

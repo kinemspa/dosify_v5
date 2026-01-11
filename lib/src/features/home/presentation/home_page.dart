@@ -189,10 +189,7 @@ class HomePage extends StatefulWidget {
               medication: currentMed,
               delta: delta,
             );
-            await medBox.put(
-              currentMed.id,
-              updated,
-            );
+            await medBox.put(currentMed.id, updated);
             await LowStockNotifier.handleStockChange(
               before: currentMed,
               after: updated,
@@ -302,10 +299,7 @@ class HomePage extends StatefulWidget {
                 medication: currentMed,
                 delta: delta,
               );
-              await medBox.put(
-                currentMed.id,
-                updated,
-              );
+              await medBox.put(currentMed.id, updated);
               await LowStockNotifier.handleStockChange(
                 before: currentMed,
                 after: updated,
@@ -336,6 +330,11 @@ class _HomePageState extends State<HomePage> {
   late final List<String> _cardOrder;
   Set<String>? _reportIncludedMedicationIds;
 
+  bool _isTodayExpanded = true;
+  bool _isSchedulesExpanded = true;
+  bool _isReportsExpanded = true;
+  bool _isCalendarExpanded = true;
+
   @override
   void initState() {
     super.initState();
@@ -350,6 +349,15 @@ class _HomePageState extends State<HomePage> {
 
   String _prefsKeyCardOrder() => 'home_card_order';
 
+  List<String> _dedupeCardIdsPreserveOrder(Iterable<String> ids) {
+    final seen = <String>{};
+    final out = <String>[];
+    for (final id in ids) {
+      if (seen.add(id)) out.add(id);
+    }
+    return out;
+  }
+
   Future<void> _restoreCardOrder() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getStringList(_prefsKeyCardOrder());
@@ -361,7 +369,9 @@ class _HomePageState extends State<HomePage> {
       _kCardReports,
       _kCardCalendar,
     };
-    final filtered = stored.where(allowed.contains).toList();
+    final filtered = _dedupeCardIdsPreserveOrder(
+      stored.where(allowed.contains),
+    );
     for (final id in allowed) {
       if (!filtered.contains(id)) filtered.add(id);
     }
@@ -376,11 +386,31 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _persistCardOrder(List<String> orderedIds) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefsKeyCardOrder(), orderedIds);
+    await prefs.setStringList(
+      _prefsKeyCardOrder(),
+      _dedupeCardIdsPreserveOrder(orderedIds),
+    );
   }
 
   Widget _buildHomeCards(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
+    final allCardsCollapsed =
+        !_isTodayExpanded &&
+        !_isSchedulesExpanded &&
+        !_isReportsExpanded &&
+        !_isCalendarExpanded;
+
+    void showCollapseAllInstruction() {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Collapse all cards first to rearrange them.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+    }
 
     final todayCard = ValueListenableBuilder(
       valueListenable: Hive.box<Schedule>('schedules').listenable(),
@@ -397,9 +427,15 @@ class _HomePageState extends State<HomePage> {
                   logBox,
                 );
 
-                return SectionFormCard(
+                return CollapsibleSectionFormCard(
                   neutral: true,
                   title: 'Today',
+                  isExpanded: _isTodayExpanded,
+                  reserveReorderHandleGutterWhenCollapsed: true,
+                  onExpandedChanged: (expanded) {
+                    if (!mounted) return;
+                    setState(() => _isTodayExpanded = expanded);
+                  },
                   children: [
                     if (items.isEmpty)
                       Text('No doses today', style: mutedTextStyle(context))
@@ -466,9 +502,15 @@ class _HomePageState extends State<HomePage> {
                   return an.compareTo(bn);
                 });
 
-                return SectionFormCard(
+                return CollapsibleSectionFormCard(
                   neutral: true,
                   title: 'Schedules',
+                  isExpanded: _isSchedulesExpanded,
+                  reserveReorderHandleGutterWhenCollapsed: true,
+                  onExpandedChanged: (expanded) {
+                    if (!mounted) return;
+                    setState(() => _isSchedulesExpanded = expanded);
+                  },
                   children: [
                     if (schedules.isEmpty)
                       Text('No schedules', style: mutedTextStyle(context))
@@ -617,9 +659,15 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    final calendarCard = SectionFormCard(
+    final calendarCard = CollapsibleSectionFormCard(
       neutral: true,
       title: 'Calendar',
+      isExpanded: _isCalendarExpanded,
+      reserveReorderHandleGutterWhenCollapsed: true,
+      onExpandedChanged: (expanded) {
+        if (!mounted) return;
+        setState(() => _isCalendarExpanded = expanded);
+      },
       children: [
         SizedBox(
           height: kHomeMiniCalendarHeight,
@@ -653,9 +701,15 @@ class _HomePageState extends State<HomePage> {
 
         final included = _reportIncludedMedicationIds!;
 
-        return SectionFormCard(
+        return CollapsibleSectionFormCard(
           neutral: true,
           title: 'Reports',
+          isExpanded: _isReportsExpanded,
+          reserveReorderHandleGutterWhenCollapsed: true,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isReportsExpanded = expanded);
+          },
           children: [
             if (meds.isEmpty)
               Text('No medications', style: mutedTextStyle(context))
@@ -702,7 +756,9 @@ class _HomePageState extends State<HomePage> {
       _kCardCalendar: calendarCard,
     };
 
-    final orderedIds = _cardOrder.where(cards.containsKey).toList();
+    final orderedIds = _dedupeCardIdsPreserveOrder(
+      _cardOrder.where(cards.containsKey),
+    );
     for (final id in cards.keys) {
       if (!orderedIds.contains(id)) orderedIds.add(id);
     }
@@ -718,24 +774,40 @@ class _HomePageState extends State<HomePage> {
             clipBehavior: Clip.none,
             children: [
               cards[entry.value]!,
-              Positioned(
-                left: kSpacingS,
-                top: 0,
-                bottom: 0,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: ReorderableDelayedDragStartListener(
-                    index: entry.key,
-                    child: Icon(
-                      Icons.drag_indicator_rounded,
-                      size: kIconSizeMedium,
-                      color: cs.onSurfaceVariant.withValues(
-                        alpha: kOpacityMedium,
-                      ),
-                    ),
+              if (!(entry.value == _kCardToday && _isTodayExpanded) &&
+                  !(entry.value == _kCardSchedules && _isSchedulesExpanded) &&
+                  !(entry.value == _kCardReports && _isReportsExpanded) &&
+                  !(entry.value == _kCardCalendar && _isCalendarExpanded))
+                Positioned(
+                  left: kSpacingS,
+                  top: 0,
+                  bottom: 0,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: allCardsCollapsed
+                        ? ReorderableDelayedDragStartListener(
+                            index: entry.key,
+                            child: Icon(
+                              Icons.drag_indicator_rounded,
+                              size: kIconSizeMedium,
+                              color: cs.onSurfaceVariant.withValues(
+                                alpha: kOpacityMedium,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onLongPress: showCollapseAllInstruction,
+                            onTap: showCollapseAllInstruction,
+                            child: Icon(
+                              Icons.drag_indicator_rounded,
+                              size: kIconSizeMedium,
+                              color: cs.onSurfaceVariant.withValues(
+                                alpha: kOpacityMedium,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
