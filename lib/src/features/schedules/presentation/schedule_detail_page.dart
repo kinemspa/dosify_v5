@@ -1904,24 +1904,31 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final ok =
         await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            titleTextStyle: dialogTitleTextStyle(context),
-            contentTextStyle: dialogContentTextStyle(context),
-            title: const Text('Delete schedule?'),
-            content: Text(
-              'Delete "${schedule.name}"? This will cancel its notifications.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+          builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(context),
+              contentTextStyle: dialogContentTextStyle(context),
+              title: const Text('Delete schedule?'),
+              content: Text(
+                'Delete "${schedule.name}"? This will cancel its notifications.',
               ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cs.error,
+                    foregroundColor: cs.onError,
+                  ),
+                  child: const Text('Delete'),
+                ),
+              ],
+            );
+          },
         ) ??
         false;
 
