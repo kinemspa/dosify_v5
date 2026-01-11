@@ -14,6 +14,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+@pragma('vm:entry-point')
+void dosifiNotificationTapBackground(NotificationResponse response) {
+  debugPrint(
+    '[NotificationService] BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+  );
+}
+
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _fln =
       FlutterLocalNotificationsPlugin();
@@ -125,11 +132,8 @@ class NotificationService {
                 'NotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
               );
             },
-            onDidReceiveBackgroundNotificationResponse: (response) {
-              _log(
-                'BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
-              );
-            },
+            onDidReceiveBackgroundNotificationResponse:
+                dosifiNotificationTapBackground,
           )
           .timeout(const Duration(seconds: 3));
     } catch (e) {

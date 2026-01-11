@@ -22,6 +22,7 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
+import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -225,8 +226,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
           return DetailPageScaffold(
             title: mergedTitle,
+            expandedTitle: 'Schedule Details',
             onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
             onDelete: () => _confirmDelete(context, s),
+            topRightAction: _buildTopRightStatusBadge(context, s),
             statsBannerContent: _buildScheduleHeader(
               context,
               s,
@@ -279,23 +282,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }) {
     return DetailStatsBanner(
       title: title,
-      headerChips: Wrap(
-        spacing: kSpacingS,
-        runSpacing: kSpacingXS,
-        children: [
-          PrimaryChoiceChip(
-            label: Text(_scheduleTypeChipText(s)),
-            selected: true,
-            onSelected: (_) {},
-          ),
-          if (!s.isCompleted)
-            PrimaryChoiceChip(
-              label: Text(s.isActive ? 'Pause' : 'Resume'),
-              selected: false,
-              onSelected: (_) => _promptPauseFromHeader(context, s),
-            ),
-        ],
-      ),
       row1Left: DetailStatItem(
         icon: Icons.medication_outlined,
         label: 'Dose',
@@ -319,28 +305,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       row3Left: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.event,
-                size: kIconSizeSmall,
-                color: Colors.white.withValues(alpha: kOpacityMedium),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Next dose',
-                style: helperTextStyle(context)?.copyWith(
-                  color: Colors.white.withValues(alpha: kOpacityMedium),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: kSpacingXS),
           NextDoseDateBadge(
             nextDose: nextDose,
             isActive: s.isActive,
             dense: true,
-            showNextLabel: true,
+            showNextLabel: false,
           ),
         ],
       ),
@@ -348,6 +317,20 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         icon: Icons.timer_outlined,
         label: 'In',
         value: nextDose == null ? '—' : _getTimeUntil(nextDose),
+      ),
+    );
+  }
+
+  Widget _buildTopRightStatusBadge(BuildContext context, Schedule s) {
+    final badge = ScheduleStatusChip(schedule: s, dense: true);
+    if (s.isCompleted) return badge;
+
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () => _promptPauseFromHeader(context, s),
+        borderRadius: BorderRadius.circular(kBorderRadiusChip),
+        child: badge,
       ),
     );
   }
@@ -1377,22 +1360,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return 'Days of week';
   }
 
-  String _scheduleTypeChipText(Schedule schedule) {
-    if (schedule.daysOfMonth?.isNotEmpty == true) return 'Monthly';
-    if (schedule.hasCycle && schedule.cycleEveryNDays != null) {
-      final n = schedule.cycleEveryNDays!;
-      return '$n day${n == 1 ? '' : 's'}';
-    }
-    final ds = schedule.daysOfWeek.toList();
-    if (ds.length == 7) return 'Daily';
-    return 'Days of week';
-  }
-
   String _timesText(BuildContext context, Schedule schedule) {
     final ts = schedule.timesOfDay ?? [schedule.minutesOfDay];
     return ts
         .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
-        .join(', ');
+        .join('\n');
   }
 
   DateTime? _nextOccurrence(Schedule s) {

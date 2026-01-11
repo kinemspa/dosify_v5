@@ -16,14 +16,18 @@ class DetailPageScaffold extends StatelessWidget {
     required this.sections,
     required this.onEdit,
     required this.onDelete,
+    this.expandedTitle,
+    this.topRightAction,
     super.key,
   });
 
   final String title;
+  final String? expandedTitle;
   final Widget statsBannerContent;
   final List<Widget> sections;
   final VoidCallback onEdit;
   final Future<void> Function() onDelete;
+  final Widget? topRightAction;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +45,11 @@ class DetailPageScaffold extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
+              if (topRightAction != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: kSpacingS),
+                  child: Center(child: topRightAction),
+                ),
               PopupMenuButton<String>(
                 tooltip: 'Menu',
                 icon: const Icon(Icons.menu, color: Colors.white),
@@ -134,18 +143,47 @@ class DetailPageScaffold extends StatelessWidget {
                         final appBarHeight = constraints.maxHeight;
                         final scrollProgress =
                             ((280 - appBarHeight) / (280 - 48)).clamp(0.0, 1.0);
-                        return Opacity(
-                          opacity: scrollProgress,
-                          child: Text(
-                            title,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+
+                        final textStyle = const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        );
+
+                        if (expandedTitle == null || expandedTitle!.isEmpty) {
+                          return Opacity(
+                            opacity: scrollProgress,
+                            child: Text(
+                              title,
+                              style: textStyle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          );
+                        }
+
+                        return Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Opacity(
+                              opacity: 1 - scrollProgress,
+                              child: Text(
+                                expandedTitle!,
+                                style: textStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Opacity(
+                              opacity: scrollProgress,
+                              child: Text(
+                                title,
+                                style: textStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
