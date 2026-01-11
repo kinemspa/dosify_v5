@@ -178,9 +178,13 @@ class _SchedulesPageState extends State<SchedulesPage> {
                 decoration: buildFieldDecoration(
                   context,
                   hint: 'Search schedules',
-                  prefixIcon: Icon(Icons.search, size: 20, color: iconColor),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: kIconSizeMedium,
+                    color: iconColor,
+                  ),
                   suffixIcon: IconButton(
-                    iconSize: 20,
+                    iconSize: kIconSizeMedium,
                     icon: Icon(Icons.close, color: iconColor),
                     onPressed: () => setState(() {
                       _searchExpanded = false;
