@@ -311,6 +311,87 @@ class NotificationService {
     _log('showTest() completed');
   }
 
+  static Future<void> showTestExpiryReminder() async {
+    final id = stableIdForKey('test|expiry');
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'expiry',
+        'Expiry',
+        icon: '@mipmap/ic_launcher',
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    await _fln.show(
+      id,
+      'Expiry reminder',
+      'A medication is expiring soon',
+      details,
+    );
+  }
+
+  static Future<void> showTestLowStockReminder() async {
+    final id = stableIdForKey('test|low_stock');
+    await showLowStockAlert(
+      id,
+      title: 'Low stock',
+      body: 'Medication stock is low',
+      payload: 'test|low_stock',
+    );
+  }
+
+  static Future<void> showTestGroupedUpcomingDoseReminders() async {
+    const groupKey = 'test_group|upcoming_dose';
+
+    final item1 = stableIdForKey('test_group|dose_1');
+    final item2 = stableIdForKey('test_group|dose_2');
+    final summary = stableIdForKey('test_group|dose_summary');
+
+    const itemDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'upcoming_dose',
+        'Upcoming Dose',
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+        groupKey: groupKey,
+      ),
+    );
+
+    const summaryDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'upcoming_dose',
+        'Upcoming Dose',
+        icon: '@mipmap/ic_launcher',
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+        groupKey: groupKey,
+        setAsGroupSummary: true,
+      ),
+    );
+
+    await _fln.show(
+      item1,
+      'Dose reminder',
+      'Medication A · due soon',
+      itemDetails,
+    );
+    await _fln.show(
+      item2,
+      'Dose reminder',
+      'Medication B · due soon',
+      itemDetails,
+    );
+    await _fln.show(
+      summary,
+      '2 dose reminders',
+      'Open Dosifi to review',
+      summaryDetails,
+    );
+  }
+
   static Future<void> showDelayed(
     int seconds, {
     required String title,

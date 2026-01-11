@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -18,6 +19,23 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
+
+    Future<void> runNotificationTest(Future<void> Function() action) async {
+      final ok = await NotificationService.ensurePermissionGranted();
+      if (!ok) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Notification permission denied')),
+        );
+        return;
+      }
+      await action();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Test notification sent')));
+    }
+
     return Scaffold(
       appBar: const GradientAppBar(title: 'Settings', forceBackButton: true),
       body: ListView(
@@ -165,6 +183,47 @@ class SettingsPage extends ConsumerWidget {
                 },
               );
             },
+          ),
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Notifications',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: const Icon(Icons.notifications_active_outlined),
+            title: const Text('Show test dose reminder'),
+            subtitle: const Text('Preview the Upcoming Dose notification'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () => runNotificationTest(NotificationService.showTest),
+          ),
+          ListTile(
+            leading: const Icon(Icons.stacked_bar_chart_outlined),
+            title: const Text('Show test grouped reminders'),
+            subtitle: const Text('Preview grouped upcoming doses'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () => runNotificationTest(
+              NotificationService.showTestGroupedUpcomingDoseReminders,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.inventory_2_outlined),
+            title: const Text('Show test low stock'),
+            subtitle: const Text('Preview Refill/Restock actions'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () => runNotificationTest(
+              NotificationService.showTestLowStockReminder,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.event_busy_outlined),
+            title: const Text('Show test expiry reminder'),
+            subtitle: const Text('Preview an Expiry notification'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () =>
+                runNotificationTest(NotificationService.showTestExpiryReminder),
           ),
           ListTile(
             leading: const Icon(Icons.bug_report),
