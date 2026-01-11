@@ -1,15 +1,15 @@
 # Schedules List
 
+- [ ] Reduce status card size by 30%. rerduce border radius. 
+- [ ] Opening a Schedule to Schedule Details presents a blank white screen. 
+
 ## Large Cards
-- [x] Move status Icon to under date and time section and reduce its size.
 
 
 ## Compact Card
-- [x] Move Schedule name under med name, make it bold.
-- [x] Move status Icon to under date and time section and reduce its size. This currently has made compact cards as tall as large cards.
-- [x] Remove the dose text. make it brief.
+- [x] Dose text needs to include Scheudle type, not in brackets. Make the text smaller. 
 - 
 
 ## List
-- [x] Move status Icon to under date and time section and reduce its size.
+- [x] Status icon same as above. 
 
