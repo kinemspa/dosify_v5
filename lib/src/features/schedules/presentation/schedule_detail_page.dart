@@ -422,7 +422,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   String _formatDateTime(BuildContext context, DateTime dt) {
-    return '${DateFormat('EEE, MMM d, y').format(dt)}  ${TimeOfDay.fromDateTime(dt).format(context)}';
+    return '${DateFormat('EEE, MMM d, y').format(dt)} • ${TimeOfDay.fromDateTime(dt).format(context)}';
   }
 
   List<Widget> _buildSections(
@@ -465,7 +465,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       buildDetailInfoRow(
         context,
         label: 'Name',
-        value: s.name.trim().isEmpty ? '' : s.name,
+        value: s.name.trim().isEmpty ? '—' : s.name,
         onTap: () => _promptEditName(context, s),
       ),
       buildDetailInfoRow(
@@ -793,29 +793,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   Future<void> _promptEditScheduleType(BuildContext context, Schedule s) async {
-    if (s.hasCycle || s.hasDaysOfMonth) {
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Edit schedule type'),
-          content: const Text(
-            'This schedule type is currently edited from the full schedule editor.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Close'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.push('/schedules/edit/${widget.scheduleId}');
-              },
-              child: const Text('Open editor'),
-            ),
-          ],
-        ),
-      );
+    if (s.hasDaysOfMonth) {
+      await _promptEditMonthlyType(context, s);
+      return;
+    }
+
+    if (s.hasCycle) {
+      await _promptEditCycleType(context, s);
       return;
     }
 
@@ -881,6 +865,202 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     if (_listEqualsInt(s.daysOfWeek, updatedDays)) return;
 
     await _updateSchedule(context, s.copyWithDetails(daysOfWeek: updatedDays));
+  }
+
+  Future<void> _promptEditCycleType(BuildContext context, Schedule s) async {
+    final nController = TextEditingController(
+      text: (s.cycleEveryNDays ?? 1).toString(),
+    );
+    DateTime? anchor = s.cycleAnchorDate;
+
+    final result = await showDialog<(int, DateTime?)>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Edit cycle'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: nController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Every N days',
+                      hintText: '2',
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  Text(
+                    anchor == null
+                        ? 'Anchor date: Not set'
+                        : 'Anchor date: ${DateFormat('d MMM y').format(anchor!)}',
+                    style: bodyTextStyle(dialogContext),
+                  ),
+                  const SizedBox(height: kSpacingS),
+                  Row(
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final now = DateTime.now();
+                          final picked = await showDatePicker(
+                            context: dialogContext,
+                            initialDate: anchor ?? now,
+                            firstDate: DateTime(now.year - 10),
+                            lastDate: DateTime(now.year + 20),
+                          );
+                          if (picked == null) return;
+                          setStateDialog(() {
+                            anchor = DateTime(
+                              picked.year,
+                              picked.month,
+                              picked.day,
+                            );
+                          });
+                        },
+                        icon: const Icon(Icons.calendar_today_outlined),
+                        label: Text(anchor == null ? 'Set' : 'Change'),
+                      ),
+                      const SizedBox(width: kSpacingS),
+                      if (anchor != null)
+                        TextButton(
+                          onPressed: () => setStateDialog(() => anchor = null),
+                          child: const Text('Clear'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final parsed = int.tryParse(nController.text.trim());
+                    if (parsed == null || parsed <= 0) return;
+                    Navigator.of(dialogContext).pop((parsed, anchor));
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null) return;
+    final (n, newAnchor) = result;
+    if (s.cycleEveryNDays == n && s.cycleAnchorDate == newAnchor) return;
+
+    await _updateSchedule(
+      context,
+      s.copyWithDetails(cycleEveryNDays: n, cycleAnchorDate: newAnchor),
+    );
+  }
+
+  Future<void> _promptEditMonthlyType(BuildContext context, Schedule s) async {
+    final initialDays = (s.daysOfMonth ?? const <int>[]).toList()..sort();
+    final daysController = TextEditingController(
+      text: initialDays.isEmpty ? '' : initialDays.join(', '),
+    );
+
+    MonthlyMissingDayBehavior behavior = s.monthlyMissingDayBehavior;
+
+    final result = await showDialog<(List<int>, MonthlyMissingDayBehavior)>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setStateDialog) {
+            return AlertDialog(
+              title: const Text('Edit monthly schedule'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: daysController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Days of month (1–31)',
+                      hintText: '1, 15, 31',
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  DropdownButtonFormField<MonthlyMissingDayBehavior>(
+                    value: behavior,
+                    decoration: const InputDecoration(
+                      labelText: 'If a day doesn’t exist',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: MonthlyMissingDayBehavior.skip,
+                        child: Text('Skip that month'),
+                      ),
+                      DropdownMenuItem(
+                        value: MonthlyMissingDayBehavior.lastDay,
+                        child: Text('Use last day of month'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setStateDialog(() => behavior = value);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final raw = daysController.text.trim();
+                    final parts = raw.isEmpty
+                        ? <String>[]
+                        : raw.split(RegExp('[^0-9]+'));
+                    final days = <int>{};
+                    for (final part in parts) {
+                      if (part.isEmpty) continue;
+                      final value = int.tryParse(part);
+                      if (value == null) return;
+                      if (value < 1 || value > 31) return;
+                      days.add(value);
+                    }
+                    final sorted = days.toList()..sort();
+                    if (sorted.isEmpty) return;
+                    Navigator.of(dialogContext).pop((sorted, behavior));
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null) return;
+    final (days, newBehavior) = result;
+
+    final sameDays =
+        (s.daysOfMonth ?? const <int>[]).length == days.length &&
+        _listEqualsInt((s.daysOfMonth ?? const <int>[]).toList()..sort(), days);
+    final sameBehavior = s.monthlyMissingDayBehavior == newBehavior;
+    if (sameDays && sameBehavior) return;
+
+    await _updateSchedule(
+      context,
+      s.copyWithDetails(
+        daysOfMonth: days,
+        monthlyMissingDayBehaviorCode: newBehavior.index,
+      ),
+    );
   }
 
   Future<void> _promptEditStartAt(BuildContext context, Schedule s) async {
