@@ -50,36 +50,26 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   String _query = '';
   bool _searchExpanded = false;
 
-  Widget _buildLayoutToggle(BuildContext context) {
-    return SegmentedButton<_MedView>(
-      segments: const [
-        ButtonSegment(
-          value: _MedView.large,
-          label: Text('Large'),
-          icon: Icon(Icons.view_comfortable),
-        ),
-        ButtonSegment(
-          value: _MedView.compact,
-          label: Text('Compact'),
-          icon: Icon(Icons.view_comfy_alt),
-        ),
-        ButtonSegment(
-          value: _MedView.list,
-          label: Text('List'),
-          icon: Icon(Icons.view_list),
-        ),
-      ],
-      selected: <_MedView>{_view},
-      showSelectedIcon: false,
-      style: const ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  IconData _getViewIcon(_MedView v) => switch (v) {
+    _MedView.list => Icons.view_list,
+    _MedView.compact => Icons.view_comfy_alt,
+    _MedView.large => Icons.view_comfortable,
+  };
+
+  _MedView _nextView(_MedView current) {
+    final idx = _MedView.values.indexOf(current);
+    return _MedView.values[(idx + 1) % _MedView.values.length];
+  }
+
+  Widget _buildLayoutCycleButton(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return IconButton(
+      tooltip: 'Change layout',
+      icon: Icon(
+        _getViewIcon(_view),
+        color: _view == _MedView.large ? cs.primary : kTextLighterGrey(context),
       ),
-      onSelectionChanged: (selection) {
-        if (selection.isNotEmpty) {
-          _saveView(selection.first);
-        }
-      },
+      onPressed: () => _saveView(_nextView(_view)),
     );
   }
 
@@ -371,11 +361,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             ),
           // When search is expanded, only show layout button
           if (_searchExpanded) const SizedBox(width: 8),
-          if (_searchExpanded) _buildLayoutToggle(context),
+          if (_searchExpanded) _buildLayoutCycleButton(context),
           if (!_searchExpanded) const Spacer(),
 
-          // Layout toggle
-          if (!_searchExpanded) _buildLayoutToggle(context),
+          // Layout button (tap to cycle)
+          if (!_searchExpanded) _buildLayoutCycleButton(context),
 
           if (!_searchExpanded) const SizedBox(width: 8),
 
