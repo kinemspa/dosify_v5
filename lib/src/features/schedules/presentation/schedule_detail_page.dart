@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -16,11 +15,8 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
+import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
@@ -36,12 +32,6 @@ class ScheduleDetailPage extends StatefulWidget {
 
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   late final DoseLogRepository _doseLogRepo;
-
-  Future<void> _promptEditSchedule(Schedule s) async {
-    final confirmed = await showConfirmEditScheduleDialog(context);
-    if (!confirmed || !mounted) return;
-    context.push('/schedules/edit/${s.id}');
-  }
 
   String _mergedTitle(Schedule s) {
     final med = s.medicationName.trim();
@@ -226,10 +216,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
           return DetailPageScaffold(
             title: mergedTitle,
-            expandedTitle: 'Schedule Details',
             onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
             onDelete: () => _confirmDelete(context, s),
-            topRightAction: _buildTopRightStatusBadge(context, s),
             statsBannerContent: _buildScheduleHeader(
               context,
               s,
@@ -280,48 +268,97 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime? nextDose, {
     required String title,
   }) {
-    return DetailStatsBanner(
-      title: title,
-      row1Left: DetailStatItem(
-        icon: Icons.medication_outlined,
-        label: 'Dose',
-        value: _getDoseDisplay(s),
-      ),
-      row1Right: DetailStatItem(
-        icon: scheduleStatusIcon(s),
-        label: 'Status',
-        value: scheduleStatusLabel(s),
-      ),
-      row2Left: DetailStatItem(
-        icon: Icons.repeat,
-        label: 'Type',
-        value: _scheduleTypeText(s),
-      ),
-      row2Right: DetailStatItem(
-        icon: Icons.access_time,
-        label: 'Times',
-        value: _timesText(context, s),
-      ),
-      row3Left: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          NextDoseDateBadge(
-            nextDose: nextDose,
-            isActive: s.isActive,
-            dense: true,
-            showNextLabel: false,
-          ),
-        ],
-      ),
-      row3Right: DetailStatItem(
-        icon: Icons.timer_outlined,
-        label: 'In',
-        value: nextDose == null ? '—' : _getTimeUntil(nextDose),
-      ),
+    final cs = Theme.of(context).colorScheme;
+    final headerOnPrimary = cs.onPrimary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Schedule Details',
+                style: sectionTitleStyle(
+                  context,
+                )?.copyWith(color: headerOnPrimary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            _buildHeaderStatusBadge(context, s),
+          ],
+        ),
+        const SizedBox(height: kSpacingM),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: DetailStatItem(
+                icon: Icons.medication_outlined,
+                label: 'Dose',
+                value: _getDoseDisplay(s),
+              ),
+            ),
+            const SizedBox(width: kPageHorizontalPadding),
+            Expanded(
+              child: DetailStatItem(
+                icon: scheduleStatusIcon(s),
+                label: 'Status',
+                value: scheduleStatusLabel(s),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: kCardInnerSpacing),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: DetailStatItem(
+                icon: Icons.repeat,
+                label: 'Type',
+                value: _scheduleTypeText(s),
+              ),
+            ),
+            const SizedBox(width: kPageHorizontalPadding),
+            Expanded(
+              child: DetailStatItem(
+                icon: Icons.access_time,
+                label: 'Times',
+                value: _timesText(context, s),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: kCardInnerSpacing),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: NextDoseDateBadge(
+                nextDose: nextDose,
+                isActive: s.isActive,
+                dense: true,
+                showNextLabel: false,
+              ),
+            ),
+            const SizedBox(width: kPageHorizontalPadding),
+            Expanded(
+              child: DetailStatItem(
+                icon: Icons.timer_outlined,
+                label: 'In',
+                value: nextDose == null ? '—' : _getTimeUntil(nextDose),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildTopRightStatusBadge(BuildContext context, Schedule s) {
+  Widget _buildHeaderStatusBadge(BuildContext context, Schedule s) {
     final badge = ScheduleStatusChip(schedule: s, dense: true);
     if (s.isCompleted) return badge;
 
@@ -390,76 +427,18 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime? nextDose,
   ) {
     return [
-      _buildNextDoseCard(context, s),
-
-      // Dose Calendar Section
       Padding(
         padding: const EdgeInsets.only(bottom: kSpacingS),
         child: SectionFormCard(
           neutral: true,
-          title: 'Dose Calendar',
-          children: [
-            SizedBox(
-              height: 400,
-              child: DoseCalendarWidget(
-                variant: CalendarVariant.compact,
-                defaultView: CalendarView.week,
-                scheduleId: s.id,
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      // Schedule Details Card
-      Padding(
-        padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: SectionFormCard(
-          neutral: true,
-          title: 'Schedule Details',
-          children: [
-            buildDetailInfoRow(
-              context,
-              label: 'Dose',
-              value: _getDoseDisplay(s),
-              onTap: () => _promptEditSchedule(s),
-            ),
-            buildDetailInfoWidgetRow(
-              context,
-              label: 'Status',
-              child: _buildStatusToggle(context, s),
-            ),
-            // Week 5: Show reconstitution badge if applicable
-            if (s.medicationId != null) _buildReconstitutionBadge(s),
-            buildDetailInfoRow(
-              context,
-              label: 'Type',
-              value: _scheduleTypeText(s),
-              onTap: () => _promptEditSchedule(s),
-            ),
-            if (_scheduleTypeText(s) == 'Days of week' ||
-                _scheduleTypeText(s) == 'Days of month')
-              buildDetailInfoRow(
-                context,
-                label: 'Pattern',
-                value: _frequencyText(s),
-                onTap: () => _promptEditSchedule(s),
-              ),
-            buildDetailInfoRow(
-              context,
-              label: 'Times',
-              value: _timesText(context, s),
-              onTap: () => _promptEditSchedule(s),
-            ),
-            // Week 5: Add Recalculate button for MDV schedules with reconstitution
-            if (s.medicationId != null) _buildRecalculateButton(s),
-          ],
+          title: 'Schedules',
+          children: [_buildMedicationSchedulesSection(context, s)],
         ),
       ),
     ];
   }
 
-  Widget _buildNextDoseCard(BuildContext context, Schedule s) {
+  Widget _buildMedicationSchedulesSection(BuildContext context, Schedule s) {
     final medId = s.medicationId;
     if (medId == null) return const SizedBox.shrink();
 
@@ -467,98 +446,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final med = medBox.get(medId);
     if (med == null) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: kSpacingS),
-      child: EnhancedScheduleCard(schedule: s, medication: med),
-    );
-  }
-
-  Widget _buildStatusToggle(BuildContext context, Schedule s) {
-    if (s.isCompleted) {
-      return Wrap(
-        spacing: kSpacingS,
-        runSpacing: kSpacingXS,
-        children: [
-          PrimaryChoiceChip(
-            label: const Text('Completed'),
-            selected: true,
-            onSelected: (_) {},
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: kSpacingS,
-          runSpacing: kSpacingXS,
-          children: [
-            PrimaryChoiceChip(
-              label: const Text('Active'),
-              selected: s.isActive,
-              onSelected: (selected) async {
-                if (!selected) return;
-                await _setScheduleStatus(
-                  context,
-                  s,
-                  active: true,
-                  pausedUntil: null,
-                );
-              },
-            ),
-            PrimaryChoiceChip(
-              label: const Text('Paused'),
-              selected: s.isPaused,
-              onSelected: (selected) async {
-                if (!selected) return;
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now().add(const Duration(days: 1)),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
-                );
-                if (picked == null) return;
-                final endOfDay = DateTime(
-                  picked.year,
-                  picked.month,
-                  picked.day,
-                  23,
-                  59,
-                );
-                await _setScheduleStatus(
-                  context,
-                  s,
-                  active: false,
-                  pausedUntil: endOfDay,
-                );
-              },
-            ),
-            PrimaryChoiceChip(
-              label: const Text('Disabled'),
-              selected: s.isDisabled,
-              onSelected: (selected) async {
-                if (!selected) return;
-                await _setScheduleStatus(
-                  context,
-                  s,
-                  active: false,
-                  pausedUntil: null,
-                );
-              },
-            ),
-          ],
-        ),
-        if (s.isPaused && s.pausedUntil != null) ...[
-          const SizedBox(height: kSpacingXS),
-          Text(
-            'Paused until ${DateFormat('d MMM y').format(s.pausedUntil!)}',
-            style: helperTextStyle(context),
-          ),
-        ],
-      ],
-    );
+    return MedicationSchedulesSection(medication: med);
   }
 
   Future<void> _setScheduleStatus(
@@ -1188,107 +1076,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return '${_formatNumber(s.doseValue)} ${s.doseUnit}'.trim();
   }
 
-  /// Week 5: Build reconstitution badge if medication has reconstitution data
-  Widget _buildReconstitutionBadge(Schedule s) {
-    try {
-      final medicationBox = Hive.box<Medication>('medications');
-      final medication = medicationBox.get(s.medicationId);
-
-      if (medication == null || medication.reconstitutedAt == null) {
-        return const SizedBox.shrink();
-      }
-
-      final recon = medication.reconstitutedAt!;
-      final expiry = medication.reconstitutedVialExpiry;
-      final reconDate = '${recon.month}/${recon.day}/${recon.year}';
-
-      String badgeText;
-      Color badgeColor;
-      IconData badgeIcon;
-
-      if (expiry != null) {
-        final now = DateTime.now();
-        final daysLeft = expiry.difference(now).inDays;
-
-        if (daysLeft < 0) {
-          badgeText = 'Vial expired ${-daysLeft} days ago';
-          badgeColor = Theme.of(context).colorScheme.error;
-          badgeIcon = Icons.warning;
-        } else if (daysLeft == 0) {
-          badgeText = 'Vial expires today';
-          badgeColor = Theme.of(context).colorScheme.error;
-          badgeIcon = Icons.warning;
-        } else if (daysLeft == 1) {
-          badgeText = 'Vial expires tomorrow';
-          badgeColor = Colors.orange;
-          badgeIcon = Icons.info_outline;
-        } else if (daysLeft <= 3) {
-          badgeText = 'Vial expires in $daysLeft days';
-          badgeColor = Colors.orange;
-          badgeIcon = Icons.info_outline;
-        } else {
-          badgeText = 'Reconstituted on $reconDate';
-          badgeColor = Theme.of(context).colorScheme.primary;
-          badgeIcon = Icons.check_circle_outline;
-        }
-      } else {
-        badgeText = 'Reconstituted on $reconDate';
-        badgeColor = Theme.of(context).colorScheme.primary;
-        badgeIcon = Icons.check_circle_outline;
-      }
-
-      return Padding(
-        padding: const EdgeInsets.only(left: 120, top: 4, bottom: 8),
-        child: Row(
-          children: [
-            Icon(badgeIcon, size: 14, color: badgeColor),
-            const SizedBox(width: 4),
-            Text(
-              badgeText,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: badgeColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      return const SizedBox.shrink();
-    }
-  }
-
-  /// Week 5: Build recalculate button for MDV schedules with reconstitution
-  Widget _buildRecalculateButton(Schedule s) {
-    try {
-      final medicationBox = Hive.box<Medication>('medications');
-      final medication = medicationBox.get(s.medicationId);
-
-      if (medication == null ||
-          medication.form != MedicationForm.multiDoseVial ||
-          medication.reconstitutedAt == null) {
-        return const SizedBox.shrink();
-      }
-
-      return Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: OutlinedButton.icon(
-          onPressed: () {
-            // Open medication detail page which has the reconstitution calculator
-            context.push('/medications/detail/${medication.id}');
-          },
-          icon: const Icon(Icons.calculate, size: 18),
-          label: const Text('Recalculate Reconstitution'),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-        ),
-      );
-    } catch (e) {
-      return const SizedBox.shrink();
-    }
-  }
-
   bool _hasDosesOnDate(DateTime date, Schedule s) {
     final onDay = s.hasCycle && s.cycleEveryNDays != null
         ? (() {
@@ -1328,25 +1115,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         .toStringAsFixed(3)
         .replaceAll(RegExp(r'0+$'), '')
         .replaceAll(RegExp(r'\.$'), '');
-  }
-
-  String _frequencyText(Schedule schedule) {
-    if (schedule.hasCycle && schedule.cycleEveryNDays != null) {
-      final n = schedule.cycleEveryNDays!;
-      return 'Every $n day${n == 1 ? '' : 's'}';
-    }
-
-    final daysOfMonth = (schedule.daysOfMonth ?? <int>[]).toList()..sort();
-    if (daysOfMonth.isNotEmpty) {
-      return daysOfMonth.join(', ');
-    }
-
-    final ds = schedule.daysOfWeek.toList()..sort();
-    if (ds.length == 7) {
-      return 'Every day';
-    }
-    const dlabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return ds.map((i) => dlabels[i - 1]).join(', ');
   }
 
   String _scheduleTypeText(Schedule schedule) {

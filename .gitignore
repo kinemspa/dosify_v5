@@ -80,6 +80,9 @@ linked_*.ds
 unlinked.ds
 unlinked_spec.ds
 
+# Tooling artifacts
+undefined/
+
 # Android related
 **/android/**/gradle-wrapper.jar
 .gradle/

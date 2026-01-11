@@ -28,7 +28,6 @@ import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -37,8 +36,8 @@ import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
 /// Modern, revolutionized medication detail screen with:
@@ -74,8 +73,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   static const String _kCardSchedule = 'schedule';
   static const String _kCardDetails = 'details';
   static const String _kCardReconstitution = 'reconstitution';
-
-
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -1461,7 +1458,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   showBorder: false,
                 ),
                 padding: kInsetSectionPadding,
-                child: _buildScheduleSection(context, med, nextDose),
+                child: MedicationSchedulesSection(medication: med),
               ),
             ),
           ),
@@ -1485,38 +1482,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       );
     }
     return Text(title, style: sectionTitleStyle(context));
-  }
-
-  Widget _buildScheduleSection(
-    BuildContext context,
-    Medication med,
-    ScheduledDose? nextDose,
-  ) {
-    final scheduleBox = Hive.box<Schedule>('schedules');
-    final schedules = scheduleBox.values
-        .where((s) => s.medicationId == med.id)
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (schedules.isNotEmpty) ...[
-          NextDoseCard(medication: med, schedules: schedules),
-          const SizedBox(height: kSpacingM),
-          _buildSectionTitle(context, 'Saved Schedules'),
-          const SizedBox(height: kSpacingS),
-          // Show ALL schedules including paused ones
-          ...schedules.map(
-            (schedule) => EnhancedScheduleCard(
-              schedule: schedule,
-              medication: med,
-              showDoseCardWhenPossible: false,
-            ),
-          ),
-          // Adherence now moved to MedicationReportsWidget tabs
-        ],
-      ],
-    );
   }
 
   Widget divvyIcon(IconData icon, {Color? color, double? size}) {
