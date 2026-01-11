@@ -731,7 +731,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               _currentView != CalendarView.day &&
               widget.showSelectedDayPanel)
             if (widget.variant == CalendarVariant.compact)
-              _buildSelectedDayPanel()
+              Flexible(fit: FlexFit.loose, child: _buildSelectedDayPanel())
             else if (widget.variant == CalendarVariant.full &&
                 panelHeight != null)
               SizedBox(height: panelHeight, child: _buildSelectedDayPanel())

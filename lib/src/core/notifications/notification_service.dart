@@ -20,6 +20,55 @@ class NotificationService {
   static const MethodChannel _platform = MethodChannel('dosifi/notifications');
   static void _log(String msg) => debugPrint('[NotificationService] $msg');
 
+  static Future<void>? _tzInitFuture;
+
+  static Future<void> _ensureTimeZoneReady() {
+    // tz.local is a late-init field; if any scheduling path runs before init
+    // completes (or if init is skipped), using tz.local will throw.
+    return _tzInitFuture ??= () async {
+      _log('Ensuring TimeZones are initialized...');
+      try {
+        tz.initializeTimeZones();
+
+        String localTz;
+        try {
+          localTz = await FlutterTimezone.getLocalTimezone().timeout(
+            const Duration(seconds: 2),
+            onTimeout: () {
+              _log('Timeout getting local timezone (ensure)');
+              return 'UTC';
+            },
+          );
+          _log('Resolved local timezone (ensure): $localTz');
+        } catch (e) {
+          localTz = 'UTC';
+          _log('Failed to resolve timezone (ensure), defaulting to UTC: $e');
+        }
+
+        try {
+          tz.setLocalLocation(tz.getLocation(localTz));
+        } catch (e) {
+          _log('Unknown/invalid timezone "$localTz"; falling back to UTC: $e');
+          tz.setLocalLocation(tz.getLocation('UTC'));
+        }
+
+        final now = tz.TZDateTime.now(tz.local);
+        _log(
+          'tz.local ready: ${tz.local.name}, now=$now, offset=${now.timeZoneOffset}',
+        );
+      } catch (e) {
+        // Last-resort fallback.
+        _log('Timezone initialization failed; forcing UTC: $e');
+        try {
+          tz.initializeTimeZones();
+          tz.setLocalLocation(tz.getLocation('UTC'));
+        } catch (_) {
+          // If even this fails, let scheduling throw; but this should be extremely rare.
+        }
+      }
+    }();
+  }
+
   static int stableIdForKey(String key) => _stableHash31(key);
   // Test hooks: allow overriding scheduling/cancel behavior for tests. When non-null,
   // the overrides will be called in place of the real plugin methods to avoid
@@ -89,33 +138,7 @@ class NotificationService {
       return;
     }
 
-    // Timezone for scheduled notifications
-    _log('Initializing TimeZones...');
-    tz.initializeTimeZones();
-    String localTz;
-    try {
-      _log('Getting local timezone...');
-      // Add timeout to prevent hang
-      localTz = await FlutterTimezone.getLocalTimezone().timeout(
-        const Duration(seconds: 2),
-        onTimeout: () {
-          _log('Timeout getting local timezone');
-          return 'UTC';
-        },
-      );
-      _log('Resolved local timezone via flutter_timezone: $localTz');
-    } catch (e) {
-      // Fallback to system default if plugin fails
-      localTz = 'UTC';
-      _log(
-        'Failed to resolve timezone via plugin, defaulting to UTC. Error: $e',
-      );
-    }
-    tz.setLocalLocation(tz.getLocation(localTz));
-    final now = tz.TZDateTime.now(tz.local);
-    _log(
-      'tz.local set to ${tz.local.name}, now=$now, offset=${now.timeZoneOffset}',
-    );
+    await _ensureTimeZoneReady();
 
     final android = _fln
         .resolvePlatformSpecificImplementation<
@@ -789,6 +812,7 @@ class NotificationService {
     String? groupKey,
     bool setAsGroupSummary = false,
   }) async {
+    await _ensureTimeZoneReady();
     if (scheduleAtAlarmClockOverride != null) {
       await scheduleAtAlarmClockOverride!(
         id,
@@ -874,6 +898,7 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    await _ensureTimeZoneReady();
     _log(
       'scheduleAtAlarmClockUtc(id=$id, whenUtc=${whenUtc.toIso8601String()}, title=$title)',
     );
@@ -949,6 +974,7 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    await _ensureTimeZoneReady();
     final nowTz = tz.TZDateTime.now(tz.local);
     final tzWhen = nowTz.add(Duration(seconds: seconds));
     _log(
@@ -988,6 +1014,7 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    await _ensureTimeZoneReady();
     final nowTz = tz.TZDateTime.now(tz.local);
     final tzWhen = nowTz.add(Duration(seconds: seconds));
     _log(
