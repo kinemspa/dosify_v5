@@ -20,8 +20,16 @@ Future<SchedulePauseDialogChoice?> showSchedulePauseDialog(
   return showDialog<SchedulePauseDialogChoice>(
     context: context,
     builder: (ctx) {
+      final cs = Theme.of(ctx).colorScheme;
       return SimpleDialog(
+        titleTextStyle: dialogTitleTextStyle(ctx),
         title: Text(title),
+        contentPadding: const EdgeInsets.fromLTRB(
+          kSpacingL,
+          kSpacingS,
+          kSpacingL,
+          kSpacingL,
+        ),
         children: [
           if (!schedule.isActive)
             SimpleDialogOption(
@@ -30,7 +38,7 @@ Future<SchedulePauseDialogChoice?> showSchedulePauseDialog(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Resume'),
+                  Text('Resume', style: bodyTextStyle(ctx)),
                   const SizedBox(height: kSpacingXS),
                   Text(
                     'Re-enable the schedule and notifications.',
@@ -45,7 +53,7 @@ Future<SchedulePauseDialogChoice?> showSchedulePauseDialog(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Pause until date'),
+                Text('Pause until date', style: bodyTextStyle(ctx)),
                 const SizedBox(height: kSpacingXS),
                 Text(
                   'Stops notifications until the chosen date, then auto-resumes.',
@@ -61,7 +69,7 @@ Future<SchedulePauseDialogChoice?> showSchedulePauseDialog(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Pause indefinitely'),
+                Text('Pause indefinitely', style: bodyTextStyle(ctx)),
                 const SizedBox(height: kSpacingXS),
                 Text(
                   'Stops notifications until you resume manually.',
@@ -74,9 +82,7 @@ Future<SchedulePauseDialogChoice?> showSchedulePauseDialog(
             onPressed: () => Navigator.of(ctx).pop(null),
             child: Text(
               'Cancel',
-              style: bodyTextStyle(
-                ctx,
-              )?.copyWith(color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+              style: bodyTextStyle(ctx)?.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         ],
