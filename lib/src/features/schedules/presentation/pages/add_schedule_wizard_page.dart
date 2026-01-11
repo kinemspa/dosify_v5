@@ -87,6 +87,16 @@ class _AddScheduleWizardPageState
   final _name = TextEditingController();
   bool _nameAuto = true;
 
+  void _onNameChanged() {
+    // Keep the wizard navigation bar in sync with validation state.
+    // Without this, the Save button can remain enabled/disabled after edits,
+    // and pressing Save can appear to do nothing.
+    if (!mounted) return;
+    if (currentStep == 2) {
+      setState(() {});
+    }
+  }
+
   int _readPositiveInt(
     TextEditingController controller, {
     required int fallback,
@@ -110,6 +120,7 @@ class _AddScheduleWizardPageState
   @override
   void initState() {
     super.initState();
+    _name.addListener(_onNameChanged);
     if (widget.initial != null) {
       _loadInitialData(widget.initial!);
     }
@@ -117,6 +128,7 @@ class _AddScheduleWizardPageState
 
   @override
   void dispose() {
+    _name.removeListener(_onNameChanged);
     _doseValue.dispose();
     _doseUnit.dispose();
     _daysOn.dispose();
@@ -1584,10 +1596,12 @@ class _AddScheduleWizardPageState
   Future<void> saveSchedule() async {
     if (!canProceed) return;
 
+    final messenger = ScaffoldMessenger.of(context);
+
     // Ensure notifications permission (same safety checks as legacy schedule editor)
     final granted = await NotificationService.ensurePermissionGranted();
     if (!granted && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Enable notifications to receive schedule alerts.'),
         ),
@@ -1773,21 +1787,34 @@ class _AddScheduleWizardPageState
           : MonthlyMissingDayBehavior.skip.index,
     );
 
-    final box = Hive.box<Schedule>('schedules');
-    await box.put(id, schedule);
-
-    if (schedule.active) {
-      await ScheduleScheduler.scheduleFor(schedule);
-    } else {
-      await ScheduleScheduler.cancelFor(schedule.id);
+    try {
+      final box = Hive.box<Schedule>('schedules');
+      await box.put(id, schedule);
+    } catch (e) {
+      if (mounted) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Failed to save schedule')),
+        );
+      }
+      return;
     }
 
-    if (mounted) {
-      context.go('/schedules');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Schedule "${schedule.name}" saved')),
-      );
+    // Scheduling notifications is best-effort; a failure should not block saving.
+    try {
+      if (schedule.active) {
+        await ScheduleScheduler.scheduleFor(schedule);
+      } else {
+        await ScheduleScheduler.cancelFor(schedule.id);
+      }
+    } catch (_) {
+      // Intentionally ignore; user may have disabled exact alarms/notifications.
     }
+
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(content: Text('Schedule "${schedule.name}" saved')),
+    );
+    context.go('/schedules');
   }
 
   // ==================== HELPERS ====================
@@ -1795,9 +1822,9 @@ class _AddScheduleWizardPageState
   Widget _buildSection(
     BuildContext context,
     String title,
-    List<Widget> children,
-    {bool titlePrimary = false}
-  ) {
+    List<Widget> children, {
+    bool titlePrimary = false,
+  }) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(kSpacingL),

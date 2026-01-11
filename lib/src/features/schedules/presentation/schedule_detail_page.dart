@@ -218,22 +218,55 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return ValueListenableBuilder(
       valueListenable: box.listenable(),
       builder: (context, Box<Schedule> box, _) {
-        final s = box.get(widget.scheduleId) ?? schedule;
-        final nextDose = _nextOccurrence(s);
-        final mergedTitle = _mergedTitle(s);
+        try {
+          final s = box.get(widget.scheduleId) ?? schedule;
+          final nextDose = _nextOccurrence(s);
+          final mergedTitle = _mergedTitle(s);
 
-        return DetailPageScaffold(
-          title: mergedTitle,
-          onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
-          onDelete: () => _confirmDelete(context, s),
-          statsBannerContent: _buildScheduleHeader(
-            context,
-            s,
-            nextDose,
+          return DetailPageScaffold(
             title: mergedTitle,
-          ),
-          sections: _buildSections(context, s, nextDose),
-        );
+            onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
+            onDelete: () => _confirmDelete(context, s),
+            statsBannerContent: _buildScheduleHeader(
+              context,
+              s,
+              nextDose,
+              title: mergedTitle,
+            ),
+            sections: _buildSections(context, s, nextDose),
+          );
+        } catch (e) {
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 56,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Unable to open schedule details',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Back'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
       },
     );
   }
@@ -1394,10 +1427,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     await ScheduleScheduler.cancelFor(schedule.id);
     await Hive.box<Schedule>('schedules').delete(schedule.id);
     if (context.mounted) {
+      final messenger = ScaffoldMessenger.of(context);
       context.pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Deleted "${schedule.name}"')));
+      messenger.showSnackBar(
+        SnackBar(content: Text('Deleted "${schedule.name}"')),
+      );
     }
   }
 }

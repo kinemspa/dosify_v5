@@ -2,11 +2,10 @@
 
 ## Requests
 
-- [x] Turn this calendar into a widget we can re use. 
-- [x] Dark Grey and black fonts exist on this page. Rectity. 
 
 ### Monthly View
 - [x] There are now bottom overflows on every single day block. 
+    - [ ] Still exists. Its a mess. 
 - [x] Reduce the Day bloack rounded corners radius by half. 
 - [x] Reduce the Today button rounder corners by half. 
 - [x] Day numbers need to be top left of each square. Not done properly, there must be padding keeping them in the middle. 
@@ -19,22 +18,28 @@
 ### Weekly View
 - [x] Day objects are too tall. Reduce them. Number is too big. Not completed. 
 - [x] Dose objects on each week are styled in a way we dont see anywhere on this app. Change it. - Nothing was changed. 
-- [x] Do not open the take dose widget when selecting the the objects on the calendar. 
-- [x] Change to the day when selecting anything on that day - You misunderstood this. I didnt want to change to day view, I want the selection to change to the day of the week n the week view. 
-- [x] Take Dose Card to only pop when selecting the card below. 
+    - [ ] still look the same. 
 
 ### Day View
 - [x] Just extends the Dose Card Stage to full screen with the hours seton the left.
+- [ ] View. It should be full screen and just show the dose card in each hour stacked vertically.
 
 
 ### Dose Card Stage
 - [x] Heading needs to be in OS regional Date format layout. 
 - [x] Need to have the Dose Stage appear like it is the Day view. Place the Hours on the left of the dose cards like the day view. 
+    - [ ] There is too much space on the left of the time. I want it very small and fully left aligned to allow the dose card to take up most of the screen.
+- Dont need a close button. What is ti closing?
 - [x] Way too much space and padding surrounding the heading - Nothing has chanhged here. Still way to much space above and below. Reduce the text size. 
+    - Still way too much.
 - [x] Must use the Dose Card widget for all doses. Stack vertically.
 - [x] Need scroll down indicator. 
+    - [ ] This is too prominent. 
 - [x] Stage needs to extend down to bottom of page. Its currently stopping above the FAB. 
+    - [ ] Was not completed. FAB needs to hovering over the top. 
 - [x] Needs some padding between the Calendar, currently huggin the bottom border of calnedar.
+    - [ ] Something is wrong here. WHy cant you fix this, there is a wierd backgorund colour making this look like a card withn a card. WTF?
+    
 
 
 

@@ -2,6 +2,7 @@
 
 ## Requests
 
+- [ ] Timepicker, The editing field such as hour has a light blue colour with white font. The white font is not readable, should be dark like the other fonts on the screen. 
 - [x] Deleting a Medication.
 	- Warngin Dialog needs to state. Deleting a medication will delete all associated schedules. But will maintain and historical data. 
 	- Deleting Medication must delete schedules, all futere schduled doses and associated notifications. Currently Is not doing this. 
@@ -34,4 +35,6 @@
 			- 22 (1)
 			- 24 (2)
 			- 32 (3)
+		- [ ] Can we put in a plan to remove all the hardcoded fonts. 
+		
 

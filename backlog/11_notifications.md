@@ -24,3 +24,4 @@
 
 ## Notes
 - A notification can’t expand into a full Flutter widget UI without launching the app. We can show actions (e.g., Take/Snooze/Skip) and deep-link into the Take Dose dialog inside the app.
+    - [ ] Ok lets implement that. 
