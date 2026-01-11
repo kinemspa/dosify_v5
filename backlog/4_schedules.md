@@ -1,6 +1,6 @@
 # Schedules List
 
-- [ ] Reduce status card size by 30%. rerduce border radius. 
+- [x] Reduce status card size by 30%. rerduce border radius. 
 - [x] Opening a Schedule to Schedule Details presents a blank white screen. 
 
 ## Large Cards

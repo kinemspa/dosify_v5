@@ -19,11 +19,12 @@ class ScheduleStatusChip extends StatelessWidget {
     final label = scheduleStatusLabel(schedule);
     final (color, icon) = _presentation(context, schedule);
 
-    final iconSize = dense ? kIconSizeXSmall : kIconSizeSmall;
-    final fontSize = dense ? kFontSizeXSmall : kFontSizeSmall;
-    final horizontalPadding = dense ? kSpacingXS : kSpacingS;
+    final iconSize = dense ? kIconSizeXXSmall : kIconSizeSmall;
+    final fontSize = dense ? kFontSizeXXSmall : kFontSizeSmall;
+    final horizontalPadding = dense ? kSpacingXXS : kSpacingS;
     final verticalPadding = dense ? kSpacingXXS : kSpacingXS;
     final labelGap = dense ? kSpacingXXS : kSpacingXS;
+    final borderRadius = dense ? kBorderRadiusChipTight : kBorderRadiusChip;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -32,7 +33,7 @@ class ScheduleStatusChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: kOpacityMinimal),
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
           color: color.withValues(alpha: kOpacityMedium),
           width: kBorderWidthThin,
