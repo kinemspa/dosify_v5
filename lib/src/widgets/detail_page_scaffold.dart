@@ -31,6 +31,9 @@ class DetailPageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final headerForeground = cs.onPrimary;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -42,7 +45,7 @@ class DetailPageScaffold extends StatelessWidget {
             floating: false,
             pinned: true,
             backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
+            foregroundColor: headerForeground,
             elevation: 0,
             actions: [
               if (topRightAction != null)
@@ -52,7 +55,7 @@ class DetailPageScaffold extends StatelessWidget {
                 ),
               PopupMenuButton<String>(
                 tooltip: 'Menu',
-                icon: const Icon(Icons.menu, color: Colors.white),
+                icon: Icon(Icons.menu, color: headerForeground),
                 onSelected: (value) async {
                   switch (value) {
                     case 'home':
@@ -130,8 +133,8 @@ class DetailPageScaffold extends StatelessWidget {
                   ),
                   child: FlexibleSpaceBar(
                     titlePadding: EdgeInsets.only(
-                      left: scrollProgress > 0.5 ? 0 : 56,
-                      bottom: 16,
+                      left: scrollProgress > 0.5 ? 0 : kToolbarHeight,
+                      bottom: kSpacingL,
                     ),
                     centerTitle: scrollProgress > 0.5,
                     title: LayoutBuilder(
@@ -140,10 +143,8 @@ class DetailPageScaffold extends StatelessWidget {
                         final scrollProgress =
                             ((280 - appBarHeight) / (280 - 48)).clamp(0.0, 1.0);
 
-                        final textStyle = const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        final textStyle = detailCollapsedTitleTextStyle(
+                          context,
                         );
 
                         if (expandedTitle == null || expandedTitle!.isEmpty) {
@@ -243,11 +244,7 @@ class DetailStatsBanner extends StatelessWidget {
         Center(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: kFontWeightBold,
-              fontSize: 24,
-            ),
+            style: detailHeaderBannerTitleTextStyle(context),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -263,7 +260,7 @@ class DetailStatsBanner extends StatelessWidget {
         Row(
           children: [
             Expanded(child: row1Left),
-            const SizedBox(width: 8),
+            const SizedBox(width: kSpacingS),
             row1Right,
           ],
         ),

@@ -694,6 +694,10 @@ const double kFontSizeMedium = 13;
 const double kFontSizeLarge = 15;
 const double kFontSizeXLarge = 17;
 
+// Detail header typography
+const double kFontSizeDetailCollapsedTitle = 16;
+const double kFontSizeDetailHeaderTitle = 24;
+
 /// Next-dose date badge typography (Schedules list)
 const double kNextDoseDateCircleDayFontSizeCompact = 15;
 const double kNextDoseDateCircleDayFontSizeLarge = 18;
@@ -1122,6 +1126,26 @@ TextStyle? calendarHeaderTitleTextStyle(BuildContext context) {
 TextStyle? dialogTitleTextStyle(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
   return cardTitleStyle(context)?.copyWith(color: cs.primary);
+}
+
+/// Collapsed title style used in detail-page headers.
+TextStyle? detailCollapsedTitleTextStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    fontSize: kFontSizeDetailCollapsedTitle,
+    fontWeight: kFontWeightSemiBold,
+    color: cs.onPrimary,
+  );
+}
+
+/// Large title style used in detail-page header banners.
+TextStyle? detailHeaderBannerTitleTextStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.titleLarge?.copyWith(
+    fontSize: kFontSizeDetailHeaderTitle,
+    fontWeight: kFontWeightBold,
+    color: cs.onPrimary,
+  );
 }
 
 /// Standard dialog content text style.
