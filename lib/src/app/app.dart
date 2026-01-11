@@ -68,7 +68,7 @@ class DosifiApp extends ConsumerWidget {
         }),
         hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return schemeLight.onPrimary;
+            return schemeLight.onPrimaryContainer;
           }
           return schemeLight.onSurfaceVariant.withValues(
             alpha: kOpacityMediumHigh,
@@ -267,7 +267,7 @@ class DosifiApp extends ConsumerWidget {
         }),
         hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return schemeDark.onPrimary;
+            return schemeDark.onPrimaryContainer;
           }
           return schemeDark.onSurfaceVariant.withValues(
             alpha: kOpacityMediumHigh,
