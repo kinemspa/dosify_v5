@@ -362,7 +362,7 @@ class _ScheduleListRow extends StatelessWidget {
           ),
           const SizedBox(width: kSpacingS),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
@@ -375,12 +375,10 @@ class _ScheduleListRow extends StatelessWidget {
                 )?.copyWith(fontWeight: kFontWeightSemiBold),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: kSpacingXS),
-              Align(
-                alignment: Alignment.center,
-                child: ScheduleStatusChip(schedule: s, dense: true),
-              ),
+              ScheduleStatusChip(schedule: s, dense: true),
             ],
           ),
         ],
