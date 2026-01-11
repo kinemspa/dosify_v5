@@ -382,6 +382,16 @@ const Color kReconBackgroundActive = Color(
   0xFF1A1E37,
 ); // Slightly lighter for active state
 
+/// Detail page header gradient colors (shared by Medication/Schedule headers).
+const Color kDetailHeaderGradientStart = Color(0xFF09A8BD);
+const Color kDetailHeaderGradientEnd = Color(0xFF18537D);
+
+const LinearGradient kDetailHeaderGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [kDetailHeaderGradientStart, kDetailHeaderGradientEnd],
+);
+
 /// Semantic status colors
 ///
 /// Use these instead of hardcoding colors in widgets.

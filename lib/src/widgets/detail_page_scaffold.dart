@@ -126,11 +126,7 @@ class DetailPageScaffold extends StatelessWidget {
 
                 return Container(
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF09A8BD), Color(0xFF18537D)],
-                    ),
+                    gradient: kDetailHeaderGradient,
                   ),
                   child: FlexibleSpaceBar(
                     titlePadding: EdgeInsets.only(
