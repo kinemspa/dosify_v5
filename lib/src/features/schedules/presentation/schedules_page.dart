@@ -374,7 +374,10 @@ class _ScheduleListRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: kSpacingXS),
-                  ScheduleStatusChip(schedule: s, dense: true),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ScheduleStatusChip(schedule: s, dense: true),
+                  ),
                 ],
               ),
             ],
@@ -547,7 +550,10 @@ class _ScheduleCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: kSpacingXS),
-          ScheduleStatusChip(schedule: s, dense: true),
+          Align(
+            alignment: Alignment.center,
+            child: ScheduleStatusChip(schedule: s, dense: true),
+          ),
         ],
       ),
     );
