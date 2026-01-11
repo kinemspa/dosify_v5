@@ -60,7 +60,7 @@ class DoseCard extends StatelessWidget {
 
     final titleStyle = cardTitleStyle(
       context,
-    )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary);
+    )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor);
 
     final baseBody = bodyTextStyle(context);
     final baseHelper = helperTextStyle(context);
