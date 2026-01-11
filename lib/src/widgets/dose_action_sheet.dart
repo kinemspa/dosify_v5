@@ -670,71 +670,81 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   Future<void> _saveChanges() async {
-    await _saveAdHocAmountAndNotesIfNeeded();
+    try {
+      await _saveAdHocAmountAndNotesIfNeeded();
 
-    final (actualDoseValue, actualDoseUnit) = _resolvedActualDoseOverride();
+      final (actualDoseValue, actualDoseUnit) = _resolvedActualDoseOverride();
 
-    // If status changed, call appropriate callback
-    if (_selectedStatus != widget.dose.status) {
-      // Persist an audit event when editing an existing logged dose.
-      // This keeps a record of "status changed" even if the change reverts
-      // back to pending/overdue (which deletes the original log).
-      if (widget.dose.existingLog != null) {
-        final auditBox = Hive.box<DoseStatusChangeLog>(
-          'dose_status_change_logs',
+      // If status changed, call appropriate callback
+      if (_selectedStatus != widget.dose.status) {
+        // Persist an audit event when editing an existing logged dose.
+        // This keeps a record of "status changed" even if the change reverts
+        // back to pending/overdue (which deletes the original log).
+        if (widget.dose.existingLog != null) {
+          final auditBox = Hive.box<DoseStatusChangeLog>(
+            'dose_status_change_logs',
+          );
+          final now = DateTime.now();
+          final id = now.microsecondsSinceEpoch.toString();
+          auditBox.put(
+            id,
+            DoseStatusChangeLog(
+              id: id,
+              scheduleId: widget.dose.scheduleId,
+              scheduleName: widget.dose.scheduleName,
+              medicationId: widget.dose.existingLog!.medicationId,
+              medicationName: widget.dose.existingLog!.medicationName,
+              scheduledTime: widget.dose.scheduledTime,
+              changeTime: now,
+              fromStatus: widget.dose.status.name,
+              toStatus: _selectedStatus.name,
+              notes: _notesController.text.isEmpty
+                  ? null
+                  : _notesController.text,
+            ),
+          );
+        }
+
+        final notes = _notesController.text.isEmpty
+            ? null
+            : _notesController.text;
+
+        final request = DoseActionSheetSaveRequest(
+          notes: notes,
+          actionTime: _selectedStatus == DoseStatus.snoozed
+              ? (_selectedSnoozeUntil ?? _defaultSnoozeUntil())
+              : _selectedActionTime,
+          actualDoseValue: actualDoseValue,
+          actualDoseUnit: actualDoseUnit,
         );
-        final now = DateTime.now();
-        final id = now.microsecondsSinceEpoch.toString();
-        auditBox.put(
-          id,
-          DoseStatusChangeLog(
-            id: id,
-            scheduleId: widget.dose.scheduleId,
-            scheduleName: widget.dose.scheduleName,
-            medicationId: widget.dose.existingLog!.medicationId,
-            medicationName: widget.dose.existingLog!.medicationName,
-            scheduledTime: widget.dose.scheduledTime,
-            changeTime: now,
-            fromStatus: widget.dose.status.name,
-            toStatus: _selectedStatus.name,
-            notes: _notesController.text.isEmpty ? null : _notesController.text,
-          ),
+
+        switch (_selectedStatus) {
+          case DoseStatus.taken:
+            await widget.onMarkTaken(request);
+            break;
+          case DoseStatus.skipped:
+            await widget.onSkip(request);
+            break;
+          case DoseStatus.snoozed:
+            await widget.onSnooze(request);
+            break;
+          case DoseStatus.pending:
+          case DoseStatus.overdue:
+            // Revert to original - delete existing log
+            await widget.onDelete(request);
+            break;
+        }
+      } else if (widget.dose.existingLog != null) {
+        // Status didn't change but might need to save notes
+        if (_isAdHoc) return;
+        await _saveExistingLogEdits();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving dose changes: $e')),
         );
       }
-
-      final notes = _notesController.text.isEmpty
-          ? null
-          : _notesController.text;
-
-      final request = DoseActionSheetSaveRequest(
-        notes: notes,
-        actionTime: _selectedStatus == DoseStatus.snoozed
-            ? (_selectedSnoozeUntil ?? _defaultSnoozeUntil())
-            : _selectedActionTime,
-        actualDoseValue: actualDoseValue,
-        actualDoseUnit: actualDoseUnit,
-      );
-
-      switch (_selectedStatus) {
-        case DoseStatus.taken:
-          await widget.onMarkTaken(request);
-          break;
-        case DoseStatus.skipped:
-          await widget.onSkip(request);
-          break;
-        case DoseStatus.snoozed:
-          await widget.onSnooze(request);
-          break;
-        case DoseStatus.pending:
-        case DoseStatus.overdue:
-          // Revert to original - delete existing log
-          await widget.onDelete(request);
-          break;
-      }
-    } else if (widget.dose.existingLog != null) {
-      // Status didn't change but might need to save notes
-      if (_isAdHoc) return;
-      await _saveExistingLogEdits();
     }
   }
 
@@ -775,6 +785,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                           lastDate: DateTime(2100),
                         );
                         if (picked == null) return;
+                        if (!context.mounted) return;
                         setState(() {
                           _selectedActionTime = DateTime(
                             picked.year,
@@ -815,6 +826,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                           ),
                         );
                         if (picked == null) return;
+                        if (!context.mounted) return;
                         setState(() {
                           _selectedActionTime = DateTime(
                             _selectedActionTime.year,
@@ -1136,12 +1148,14 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                           : lastDate,
                     );
                     if (pickedDate == null) return;
+                    if (!context.mounted) return;
 
                     final pickedTime = await showTimePicker(
                       context: context,
                       initialTime: TimeOfDay.fromDateTime(initial),
                     );
                     if (pickedTime == null) return;
+                    if (!context.mounted) return;
 
                     var dt = DateTime(
                       pickedDate.year,
@@ -1154,6 +1168,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     if (dt.isBefore(now)) dt = now;
                     if (max != null && dt.isAfter(max)) {
                       await _showSnoozePastNextDoseAlert(max);
+                      if (!context.mounted) return;
                       dt = max;
                     }
 
@@ -1348,7 +1363,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     return Wrap(
       spacing: kSpacingS,
       runSpacing: kSpacingXS,
-      alignment: WrapAlignment.start,
+      alignment: WrapAlignment.center,
       children: [
         if (!_isAdHoc)
           PrimaryChoiceChip(
