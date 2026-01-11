@@ -21,9 +21,8 @@ class ScheduleStatusBadge extends StatelessWidget {
     if (schedule.isActive) return const SizedBox.shrink();
 
     final label = scheduleStatusLabel(schedule);
-    final icon = scheduleStatusIcon(schedule);
 
-    final iconColor = switch (schedule.status) {
+    final textColor = switch (schedule.status) {
       ScheduleStatus.paused => cs.primary,
       ScheduleStatus.disabled => cs.onSurfaceVariant,
       ScheduleStatus.completed => cs.onSurfaceVariant,
@@ -33,7 +32,7 @@ class ScheduleStatusBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: dense ? kSpacingXS : kSpacingS,
-        vertical: dense ? 1 : 2,
+        vertical: dense ? kSpacingXXS : kSpacingXS,
       ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
@@ -42,20 +41,12 @@ class ScheduleStatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: dense ? 12 : kIconSizeSmall, color: iconColor),
-          SizedBox(width: kSpacingXS),
           Text(
             label,
-            style:
-                (dense ? helperTextStyle(context) : null)?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontWeight: kFontWeightMedium,
-                ) ??
-                TextStyle(
-                  fontSize: kFontSizeXSmall,
-                  fontWeight: kFontWeightMedium,
-                  color: cs.onSurfaceVariant,
-                ),
+            style: helperTextStyle(context, color: textColor)?.copyWith(
+              fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
+              fontWeight: kFontWeightMedium,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

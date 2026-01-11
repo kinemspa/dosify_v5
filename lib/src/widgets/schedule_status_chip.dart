@@ -17,15 +17,12 @@ class ScheduleStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = scheduleStatusLabel(schedule);
-    final (color, icon) = _presentation(context, schedule);
+    final color = _statusColor(context, schedule);
 
-    final iconSize = dense ? kIconSizeXXSmall : kIconSizeSmall;
     final fontSize = dense ? kFontSizeXXSmall : kFontSizeSmall;
     final horizontalPadding = dense ? kSpacingXXS : kSpacingS;
     final verticalPadding = dense ? kSpacingXXS : kSpacingXS;
-    final labelGap = dense ? kSpacingXXS : kSpacingXS;
     final borderRadius = dense ? kBorderRadiusChipTight : kBorderRadiusChip;
-    final showIcon = !dense;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -43,10 +40,6 @@ class ScheduleStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showIcon) ...[
-            Icon(icon, size: iconSize, color: color),
-            SizedBox(width: labelGap),
-          ],
           Text(
             label,
             style: helperTextStyle(
@@ -59,18 +52,18 @@ class ScheduleStatusChip extends StatelessWidget {
     );
   }
 
-  (Color, IconData) _presentation(BuildContext context, Schedule schedule) {
+  Color _statusColor(BuildContext context, Schedule schedule) {
     final cs = Theme.of(context).colorScheme;
 
     switch (schedule.status) {
       case ScheduleStatus.active:
-        return (cs.primary, scheduleStatusIcon(schedule));
+        return cs.primary;
       case ScheduleStatus.paused:
-        return (cs.tertiary, scheduleStatusIcon(schedule));
+        return cs.tertiary;
       case ScheduleStatus.disabled:
-        return (cs.error, scheduleStatusIcon(schedule));
+        return cs.error;
       case ScheduleStatus.completed:
-        return (cs.primary, scheduleStatusIcon(schedule));
+        return cs.primary;
     }
   }
 }
