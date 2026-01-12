@@ -3305,7 +3305,6 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
           return Container(
             width: double.infinity,
             padding: const EdgeInsets.all(kSpacingM),
-            decoration: buildInsetSectionDecoration(context: context),
             child: Column(
               children: [
                 Row(
@@ -3431,7 +3430,6 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(kSpacingM),
-              decoration: buildInsetSectionDecoration(context: context),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
