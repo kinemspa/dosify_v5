@@ -3,7 +3,6 @@ import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -60,16 +59,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final idx = _MedView.values.indexOf(_view);
     final next = _MedView.values[(idx + 1) % _MedView.values.length];
     _saveView(next);
-  }
-
-  Widget _buildLayoutCycleButton(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
-    return IconButton(
-      tooltip: 'Change layout',
-      icon: Icon(_viewIcon(_view), color: iconColor),
-      onPressed: _cycleView,
-    );
   }
 
   ({int fieldPriority, int startsWithPriority, int indexPriority})
@@ -292,90 +281,68 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   Widget _buildToolbar(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+      padding: const EdgeInsets.fromLTRB(
+        kPageHorizontalPadding,
+        kSpacingXS,
+        kSpacingXS,
+        kSpacingXS,
+      ),
       child: Row(
         children: [
-          // Search section - expands to layout button when activated
           if (_searchExpanded)
             Expanded(
-              child: SizedBox(
-                height: 36,
-                child: TextField(
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.search,
-                      size: 20,
-                      color: kTextLighterGrey(context),
-                    ),
-                    hintText: 'Search medications',
-                    isDense: true,
-                    filled: true,
-                    fillColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerLowest,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    suffixIcon: IconButton(
-                      iconSize: 20,
-                      icon: Icon(Icons.close, color: kTextLighterGrey(context)),
-                      onPressed: () => setState(() {
-                        _searchExpanded = false;
-                        _query = '';
-                      }),
-                    ),
+              child: TextField(
+                autofocus: true,
+                decoration: buildFieldDecoration(
+                  context,
+                  hint: 'Search medications',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: kIconSizeMedium,
+                    color: iconColor,
                   ),
-                  onChanged: (v) => setState(() => _query = v.trim()),
+                  suffixIcon: IconButton(
+                    iconSize: kIconSizeMedium,
+                    icon: Icon(Icons.close, color: iconColor),
+                    onPressed: () => setState(() {
+                      _searchExpanded = false;
+                      _query = '';
+                    }),
+                  ),
                 ),
+                onChanged: (v) => setState(() => _query = v.trim()),
               ),
             )
           else
             IconButton(
-              icon: Icon(Icons.search, color: kTextLighterGrey(context)),
+              icon: Icon(Icons.search, color: iconColor),
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search medications',
             ),
-          // When search is expanded, only show layout button
-          if (_searchExpanded) const SizedBox(width: 8),
-          if (_searchExpanded) _buildLayoutCycleButton(context),
+          if (_searchExpanded) const SizedBox(width: kSpacingS),
+          if (_searchExpanded)
+            IconButton(
+              icon: Icon(_viewIcon(_view), color: iconColor),
+              tooltip: 'Change layout',
+              onPressed: _cycleView,
+            ),
           if (!_searchExpanded) const Spacer(),
-
-          // Layout button (tap to cycle)
-          if (!_searchExpanded) _buildLayoutCycleButton(context),
-
-          if (!_searchExpanded) const SizedBox(width: 8),
-
-          // Filter button
+          if (!_searchExpanded)
+            IconButton(
+              icon: Icon(_viewIcon(_view), color: iconColor),
+              tooltip: 'Change layout',
+              onPressed: _cycleView,
+            ),
+          if (!_searchExpanded) const SizedBox(width: kSpacingS),
           if (!_searchExpanded)
             PopupMenuButton<_FilterBy>(
               icon: Icon(
                 Icons.filter_list,
-                color: _filterBy != _FilterBy.all
-                    ? Theme.of(context).colorScheme.primary
-                    : kTextLighterGrey(context),
+                color: _filterBy != _FilterBy.all ? cs.primary : iconColor,
               ),
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
@@ -427,11 +394,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 ),
               ],
             ),
-
-          // Sort button
           if (!_searchExpanded)
             PopupMenuButton<Object>(
-              icon: Icon(Icons.sort, color: kTextLighterGrey(context)),
+              icon: Icon(Icons.sort, color: iconColor),
               tooltip: 'Sort medications',
               onSelected: (value) => setState(() {
                 if (value is _SortBy) {
@@ -471,9 +436,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     children: [
                       Icon(
                         _sortAsc ? Icons.arrow_upward : Icons.arrow_downward,
-                        size: 18,
+                        size: kIconSizeSmall,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: kSpacingS),
                       Text(_sortAsc ? 'Ascending' : 'Descending'),
                     ],
                   ),
