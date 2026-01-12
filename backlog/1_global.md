@@ -6,7 +6,7 @@
 - [x] Deleting a Medication.
 	- Warngin Dialog needs to state. Deleting a medication will delete all associated schedules. But will maintain and historical data. 
 	- Deleting Medication must delete schedules, all futere schduled doses and associated notifications. Currently Is not doing this. 
-- [ ] I want to number the doses. So Dose 1, 2 3 etc etc. Numbered according to the schedule. Each Schedule starts from 1. 
+- [x] I want to number the doses. So Dose 1, 2 3 etc etc. Numbered according to the schedule. Each Schedule starts from 1. 
 - [ ] I want to include images for all medicaitons like the syringe. So for Tablets its a tablet image and the number of tablets, capsules the same, pre filled syringe is a syringe graphic, single dose vial can be an ampule or vial icon. 
 
 - Text sizes:

@@ -311,6 +311,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       doseMetrics: metrics,
                       isActive: widget.schedule.isActive,
                       compact: true,
+                      doseNumber: ScheduleOccurrenceService.occurrenceNumber(
+                        widget.schedule,
+                        nextDose,
+                      ),
                       titleTrailing: ScheduleStatusChip(
                         schedule: widget.schedule,
                       ),

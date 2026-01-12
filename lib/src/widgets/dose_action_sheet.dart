@@ -162,6 +162,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       strengthOrConcentrationLabel: strengthLabel,
       doseMetrics: metrics,
       isActive: schedule.isActive,
+      doseNumber: ScheduleOccurrenceService.occurrenceNumber(
+        schedule,
+        widget.dose.scheduledTime,
+      ),
       statusOverride: _selectedStatus,
       showActions: false,
       onTap: () {},

@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_day_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
@@ -1040,6 +1041,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                               strengthOrConcentrationLabel: strengthLabel,
                               doseMetrics: metrics,
                               isActive: schedule.isActive,
+                              doseNumber:
+                                  ScheduleOccurrenceService.occurrenceNumber(
+                                schedule,
+                                dose.scheduledTime,
+                              ),
                               onQuickAction: (status) {
                                 if (widget.onDoseTap != null) {
                                   widget.onDoseTap!(dose);
@@ -1105,6 +1111,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       strengthOrConcentrationLabel: strengthLabel,
       doseMetrics: metrics,
       isActive: schedule?.isActive ?? true,
+      doseNumber: schedule == null
+          ? null
+          : ScheduleOccurrenceService.occurrenceNumber(
+              schedule,
+              dose.scheduledTime,
+            ),
       onQuickAction: (status) {
         if (widget.onDoseTap != null) {
           widget.onDoseTap!(dose);

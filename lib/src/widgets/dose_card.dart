@@ -19,6 +19,7 @@ class DoseCard extends StatelessWidget {
     required this.onTap,
     this.isActive = true,
     this.compact = false,
+    this.doseNumber,
     this.statusOverride,
     this.titleTrailing,
     this.leadingFooter,
@@ -36,6 +37,7 @@ class DoseCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool isActive;
   final bool compact;
+  final int? doseNumber;
   final DoseStatus? statusOverride;
   final Widget? titleTrailing;
   final Widget? leadingFooter;
@@ -119,6 +121,23 @@ class DoseCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
+                  if (doseNumber != null) ...[
+                    const SizedBox(height: kSpacingXXS),
+                    Text(
+                      'Dose $doseNumber',
+                      style: helperTextStyle(
+                        context,
+                        color: isActive
+                            ? statusColor.withValues(alpha: kOpacityFull)
+                            : cs.onSurfaceVariant.withValues(
+                                alpha: kOpacityMediumLow,
+                              ),
+                      )?.copyWith(fontSize: kFontSizeXXSmall),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                   if (leadingFooter != null) ...[
                     const SizedBox(height: kSpacingXS),
                     leadingFooter!,

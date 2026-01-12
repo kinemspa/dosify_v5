@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjus
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
@@ -295,6 +296,12 @@ class _NextDoseCardState extends State<NextDoseCard>
         strengthOrConcentrationLabel: strengthLabel,
         doseMetrics: metrics,
         compact: true,
+        doseNumber: schedule == null
+            ? null
+            : ScheduleOccurrenceService.occurrenceNumber(
+                schedule,
+                dose.scheduledTime,
+              ),
         onQuickAction: (status) =>
             _showDoseActionSheet(dose, initialStatus: status),
         onTap: () => _showDoseActionSheet(dose),

@@ -107,6 +107,22 @@ class ScheduleOccurrenceService {
     DateTime start,
     DateTime end,
   ) {
+    return occurrencesInRangeWithReferenceNow(
+      schedule,
+      start,
+      end,
+      referenceNow: DateTime.now(),
+    );
+  }
+
+  /// Like [occurrencesInRange], but allows controlling the reference "now"
+  /// used by cyclic schedules when no anchor date exists.
+  static List<DateTime> occurrencesInRangeWithReferenceNow(
+    Schedule schedule,
+    DateTime start,
+    DateTime end, {
+    required DateTime referenceNow,
+  }) {
     final occurrences = <DateTime>[];
     final times = schedule.timesOfDay ?? [schedule.minutesOfDay];
 
@@ -114,7 +130,7 @@ class ScheduleOccurrenceService {
     final endDate = DateTime(end.year, end.month, end.day);
 
     while (current.isBefore(endDate) || current.isAtSameMomentAs(endDate)) {
-      if (_isScheduledOnDay(schedule, current, DateTime.now())) {
+      if (_isScheduledOnDay(schedule, current, referenceNow)) {
         for (final minutes in times) {
           final dt = DateTime(
             current.year,
@@ -134,5 +150,30 @@ class ScheduleOccurrenceService {
     }
 
     return occurrences;
+  }
+
+  /// Returns the 1-based occurrence number for a given scheduled dose time.
+  ///
+  /// The numbering starts at 1 per schedule, based on all scheduled occurrences
+  /// from the schedule's effective start to the provided [occurrence]
+  /// (inclusive).
+  ///
+  /// Returns null if the [occurrence] is not a valid occurrence for the
+  /// schedule.
+  static int? occurrenceNumber(Schedule schedule, DateTime occurrence) {
+    final start = schedule.startAt ?? schedule.createdAt;
+    if (occurrence.isBefore(start)) return null;
+
+    final referenceNow = schedule.cycleAnchorDate ?? start;
+    final occurrences = occurrencesInRangeWithReferenceNow(
+      schedule,
+      start,
+      occurrence,
+      referenceNow: referenceNow,
+    );
+
+    final idx = occurrences.indexWhere((dt) => dt == occurrence);
+    if (idx < 0) return null;
+    return idx + 1;
   }
 }

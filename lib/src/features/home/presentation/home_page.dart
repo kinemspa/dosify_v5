@@ -447,6 +447,10 @@ class _HomePageState extends State<HomePage> {
                           strengthOrConcentrationLabel: item.strengthLabel,
                           doseMetrics: item.metrics,
                           isActive: item.schedule.isActive,
+                          doseNumber: ScheduleOccurrenceService.occurrenceNumber(
+                            item.schedule,
+                            item.dose.scheduledTime,
+                          ),
                           onTap: () => widget._showDoseActionSheet(
                             context,
                             dose: item.dose,
@@ -621,6 +625,11 @@ class _HomePageState extends State<HomePage> {
                               doseMetrics: metrics,
                               isActive: schedule.isActive,
                               showActions: schedule.isActive,
+                              doseNumber:
+                                  ScheduleOccurrenceService.occurrenceNumber(
+                                schedule,
+                                next,
+                              ),
                               titleTrailing: ScheduleStatusChip(
                                 schedule: schedule,
                                 dense: true,
