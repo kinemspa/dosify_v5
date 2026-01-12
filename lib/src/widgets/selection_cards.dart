@@ -122,3 +122,92 @@ class SelectionOptionCard extends StatelessWidget {
     );
   }
 }
+
+class SelectableOptionCard extends StatelessWidget {
+  const SelectableOptionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+    super.key,
+    this.enabled = true,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final foreground = enabled
+        ? cs.onSurface
+        : cs.onSurface.withValues(alpha: kOpacityMedium);
+    final subtitleColor = enabled
+        ? cs.onSurface.withValues(alpha: kOpacityMedium)
+        : cs.onSurface.withValues(alpha: kOpacityLow);
+
+    return GlassCardSurface(
+      onTap: enabled ? onTap : null,
+      useGradient: false,
+      padding: const EdgeInsets.symmetric(
+        horizontal: kCardPadding,
+        vertical: kSpacingM,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: kStandardFieldHeight,
+            height: kStandardFieldHeight,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(
+                alpha: enabled ? kOpacitySubtle : kOpacityLow,
+              ),
+              borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+            ),
+            child: Icon(
+              icon,
+              color: enabled
+                  ? cs.primary
+                  : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+              size: kIconSizeMedium,
+            ),
+          ),
+          const SizedBox(width: kSpacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: bodyTextStyle(context)?.copyWith(
+                    fontWeight: kFontWeightBold,
+                    color: foreground,
+                  ),
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  subtitle,
+                  style: mutedTextStyle(context)?.copyWith(color: subtitleColor),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: kSpacingS),
+          Icon(
+            selected ? Icons.check_circle : Icons.circle_outlined,
+            color: selected
+                ? cs.primary
+                : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+            size: kIconSizeMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}

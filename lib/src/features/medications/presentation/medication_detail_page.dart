@@ -32,6 +32,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/widgets/medicati
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
+import 'package:dosifi_v5/src/widgets/selection_cards.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
@@ -3360,23 +3361,21 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
             ),
             const SizedBox(height: kSpacingXS),
-            RadioListTile<String>(
-              title: Text(
-                'Replace (discard ${_formatNumber(currentVolume)} mL)',
-              ),
-              value: 'replace',
-              groupValue: selectedMode,
-              onChanged: (v) => setState(() => selectedMode = v ?? 'replace'),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+            SelectableOptionCard(
+              icon: Icons.swap_horiz,
+              title: 'Replace',
+              subtitle:
+                  'Discard ${_formatNumber(currentVolume)} mL and start a new vial.',
+              selected: selectedMode == 'replace',
+              onTap: () => setState(() => selectedMode = 'replace'),
             ),
-            RadioListTile<String>(
-              title: Text('Top Up (add ${_formatNumber(vialSize)} mL)'),
-              value: 'topUp',
-              groupValue: selectedMode,
-              onChanged: (v) => setState(() => selectedMode = v ?? 'replace'),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+            const SizedBox(height: kSpacingS),
+            SelectableOptionCard(
+              icon: Icons.add,
+              title: 'Top Up',
+              subtitle: 'Add ${_formatNumber(vialSize)} mL to the active vial.',
+              selected: selectedMode == 'topUp',
+              onTap: () => setState(() => selectedMode = 'topUp'),
             ),
             const SizedBox(height: kSpacingS),
             Text(
@@ -3386,31 +3385,23 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
             ),
             const SizedBox(height: kSpacingXS),
-            RadioListTile<String>(
-              title: const Text('Use sealed vial from stock'),
+            SelectableOptionCard(
+              icon: Icons.inventory_2_outlined,
+              title: 'Use sealed vial from stock',
               subtitle: canUseFromStock
-                  ? Text('Will deduct 1 vial (${sealedVials - 1} remaining)')
-                  : Text(
-                      'No sealed vials available',
-                      style: TextStyle(color: cs.error),
-                    ),
-              value: 'fromStock',
-              groupValue: selectedSource,
-              onChanged: canUseFromStock
-                  ? (v) => setState(() => selectedSource = v ?? 'fromStock')
-                  : null,
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+                  ? 'Deducts 1 vial (${sealedVials - 1} remaining)'
+                  : 'No sealed vials available',
+              selected: selectedSource == 'fromStock',
+              enabled: canUseFromStock,
+              onTap: () => setState(() => selectedSource = 'fromStock'),
             ),
-            RadioListTile<String>(
-              title: const Text('Use other source'),
-              subtitle: const Text('Does not change sealed vial stock'),
-              value: 'otherSource',
-              groupValue: selectedSource,
-              onChanged: (v) =>
-                  setState(() => selectedSource = v ?? 'otherSource'),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+            const SizedBox(height: kSpacingS),
+            SelectableOptionCard(
+              icon: Icons.local_shipping_outlined,
+              title: 'Use other source',
+              subtitle: 'Does not change sealed vial stock.',
+              selected: selectedSource == 'otherSource',
+              onTap: () => setState(() => selectedSource = 'otherSource'),
             ),
             const SizedBox(height: kSpacingS),
             if (selectedMode == 'replace') ...[
