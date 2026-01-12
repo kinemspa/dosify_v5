@@ -91,6 +91,11 @@ class MedicationHeaderWidget extends ConsumerWidget {
       medication.storageLocation,
     );
 
+    final activeVialNow = medication.activeVialVolume ??
+        medication.containerVolumeMl ??
+        0;
+    final activeVialMax = medication.containerVolumeMl ?? 0;
+
     final effectiveRowCrossAxisAlignment =
         crossAxisAlignment == CrossAxisAlignment.stretch
         ? CrossAxisAlignment.start
@@ -180,6 +185,9 @@ class MedicationHeaderWidget extends ConsumerWidget {
                         createdAt:
                             medication.reconstitutedAt ?? medication.createdAt,
                         expiry: medication.reconstitutedVialExpiry,
+                        trailingText: activeVialMax > 0
+                            ? '${_formatNumber(activeVialNow)}/${_formatNumber(activeVialMax)}mL remaining'
+                            : null,
                         iconColor: headerForeground.withValues(
                           alpha: kOpacityEmphasis,
                         ),
@@ -796,14 +804,6 @@ class _StockInfoCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(text: ' $unit'),
-                  if (isMdv)
-                    TextSpan(
-                      text: ' remaining in active vial',
-                      style: TextStyle(
-                        color: onPrimary.withValues(alpha: 0.75),
-                        letterSpacing: 0.2,
-                      ),
-                    ),
                 ],
               ),
             ),

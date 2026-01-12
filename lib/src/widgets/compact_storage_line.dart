@@ -12,6 +12,7 @@ class CompactStorageLine extends StatelessWidget {
     required this.createdAt,
     required this.expiry,
     this.trailing,
+    this.trailingText,
     this.iconColor,
     this.textColor,
     this.onPrimaryBackground = false,
@@ -23,6 +24,7 @@ class CompactStorageLine extends StatelessWidget {
   final DateTime? createdAt;
   final DateTime? expiry;
   final Widget? trailing;
+  final String? trailingText;
   final Color? iconColor;
   final Color? textColor;
   final bool onPrimaryBackground;
@@ -133,7 +135,18 @@ class CompactStorageLine extends StatelessWidget {
             ],
           ),
         ),
-        if (trailing != null) ...[const SizedBox(width: kSpacingS), trailing!],
+        if (trailing != null) ...[
+          const SizedBox(width: kSpacingS),
+          trailing!,
+        ] else if (trailingText != null) ...[
+          const SizedBox(width: kSpacingS),
+          Text(
+            trailingText!,
+            style: baseStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ],
     );
   }
