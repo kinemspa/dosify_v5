@@ -120,6 +120,7 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 - **Always read the relevant file in `backlog/` before starting new work** (e.g., the screen/widget you are about to change).
 - **When a task is implemented**, mark it as completed in that same file by checking the checkbox (`- [x]`).
+- **If a `backlog/*.md` file is locally modified**, assume the user may have added/edited tasks; preserve all user edits and only update checkboxes for items you actually completed.
 - **Do not delete tasks** from these files (the user will confirm completion or delete them).
 - **If the user says a task is not completed as desired**, the user will uncheck the box (`- [ ]`) and may add notes; treat that as the authoritative re-opened requirement.
 - **Keep edits minimal**: only touch the specific bullets you completed and do not rewrite sections or reformat the file.
