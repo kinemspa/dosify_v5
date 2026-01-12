@@ -35,10 +35,6 @@ class WizardNavigationBar extends StatelessWidget {
         .toList(growable: false);
   }
 
-  bool _hasAnyFocusableField(FocusScopeNode scope) {
-    return _focusableFields(scope).isNotEmpty;
-  }
-
   @override
   Widget build(BuildContext context) {
     final isLastStep = currentStep >= stepCount - 1;
@@ -49,51 +45,34 @@ class WizardNavigationBar extends StatelessWidget {
       builder: (context, _) {
         final scope = fieldFocusScope ?? FocusScope.of(context);
 
-        // While the keyboard is open, the primary action should advance through
-        // fields (not wizard steps) as long as there are focusable fields.
-        final showNextMode =
-            keyboardOpen && !isLastStep && _hasAnyFocusableField(scope);
+        final focusables = _focusableFields(scope);
+        final focused = scope.focusedChild;
+        final focusedIndex = focused == null ? -1 : focusables.indexOf(focused);
+        final hasMoreFieldToFocus =
+            focusedIndex >= 0 && focusedIndex < focusables.length - 1;
+
+        // While the keyboard is open, never show "Continue".
+        // The primary action should move through fields and only advance the
+        // wizard step when there are no more focusable fields.
+        final showKeyboardNext = keyboardOpen && !isLastStep;
 
         final primaryLabel = isLastStep
             ? saveLabel
-            : (showNextMode ? nextLabel : continueLabel);
+            : (showKeyboardNext
+                  ? (hasMoreFieldToFocus ? nextLabel : nextPageLabel)
+                  : continueLabel);
 
         final VoidCallback? primaryAction;
         if (isLastStep) {
           primaryAction = canProceed ? onSave : null;
-        } else if (showNextMode) {
+        } else if (showKeyboardNext) {
           primaryAction = () {
-            final focusables = _focusableFields(scope);
-            if (focusables.isEmpty) {
-              if (canProceed) {
-                onContinue();
-                return;
-              }
-              scope.unfocus();
-              return;
-            }
-
-            final focused = scope.focusedChild;
-            final focusedIndex = focused == null
-                ? -1
-                : focusables.indexOf(focused);
-
-            if (focusedIndex == -1) {
-              focusables.first.requestFocus();
-              return;
-            }
-
-            if (focusedIndex < focusables.length - 1) {
-              focusables[focusedIndex + 1].requestFocus();
-              return;
-            }
-
-            // Last field on this step; proceed if allowed.
+            final moved = scope.nextFocus();
+            if (moved) return;
             if (canProceed) {
               onContinue();
               return;
             }
-
             scope.unfocus();
           };
         } else {
