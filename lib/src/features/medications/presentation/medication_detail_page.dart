@@ -3255,19 +3255,37 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   final currentVolume = med.activeVialVolume ?? 0;
   final vialSize = med.containerVolumeMl ?? 5.0;
 
+  // Initialize from latest saved settings (in case the page is stale).
+  final box = Hive.box<Medication>('medications');
+  final latest = box.get(med.id) ?? med;
+
   // Single-page dialog state
   var selectedMode = 'replace'; // 'replace' | 'topUp'
   var selectedSource = 'fromStock'; // 'fromStock' | 'otherSource'
 
-  double? selectedReconstitutionVolume;
-  double? selectedPerMl;
-  String? selectedDiluentName;
+  double? selectedPerMl = latest.perMlValue;
+  String? selectedDiluentName = latest.diluentName;
+
+  final replaceVolumeCtrl = TextEditingController(
+    text: fmt2(latest.containerVolumeMl ?? vialSize),
+  );
+  var replaceVolumeSetBy = latest.containerVolumeMl != null
+      ? 'From previous reconstitution'
+      : null;
+
+  double? selectedRecommendedUnits;
   String? selectedReconLabel;
 
-  Future<void> pickReconstitution(BuildContext dialogContext) async {
-    final box = Hive.box<Medication>('medications');
-    final latest = box.get(med.id) ?? med;
+  final topUpVolumeCtrl = TextEditingController(text: fmt2(vialSize));
+  var topUpVolumeSetBy = latest.containerVolumeMl != null
+      ? 'From previous reconstitution'
+      : null;
 
+  double? topUpPerMl = latest.perMlValue;
+  String? topUpDiluentName = latest.diluentName;
+  String? topUpReconLabel;
+
+  Future<void> pickReconstitution(BuildContext dialogContext) async {
     final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
     final initialDoseUnit = med.strengthUnit.name;
     final initialSyringe = (latest.volumePerDose != null &&
@@ -3276,15 +3294,19 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         : SyringeSizeMl.ml1;
 
     Future<void> setRecon({
-      required double volumeMl,
       required double perMl,
+      required double volumeMl,
       String? diluentName,
+      double? recommendedUnits,
       required String label,
     }) async {
-      selectedReconstitutionVolume = volumeMl;
       selectedPerMl = perMl;
       selectedDiluentName = diluentName;
+      selectedRecommendedUnits = recommendedUnits;
       selectedReconLabel = label;
+
+      replaceVolumeCtrl.text = fmt2(volumeMl);
+      replaceVolumeSetBy = 'From new reconstitution';
     }
 
     final result = await showModalBottomSheet<ReconstitutionResult>(
@@ -3304,10 +3326,10 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
           initialDoseUnit: initialDoseUnit,
           initialSyringeSize: initialSyringe,
           initialVialSize:
-              selectedReconstitutionVolume ??
-              latest.containerVolumeMl ??
-              vialSize,
-          initialDiluentName: selectedDiluentName ?? latest.diluentName,
+              (double.tryParse(replaceVolumeCtrl.text) ?? 0) > 0
+                  ? (double.tryParse(replaceVolumeCtrl.text) ?? vialSize)
+                  : (latest.containerVolumeMl ?? vialSize),
+          initialDiluentName: selectedDiluentName,
         ),
       ),
     );
@@ -3318,11 +3340,52 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         ? '${result.solventVolumeMl.toStringAsFixed(2)} mL'
         : '${result.solventVolumeMl.toStringAsFixed(2)} mL $diluent';
     await setRecon(
-      volumeMl: result.solventVolumeMl,
       perMl: result.perMlConcentration,
+      volumeMl: result.solventVolumeMl,
       diluentName: result.diluentName,
+      recommendedUnits: result.recommendedUnits,
       label: label,
     );
+  }
+
+  Future<void> pickTopUpStrength(BuildContext dialogContext) async {
+    final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
+    final initialDoseUnit = med.strengthUnit.name;
+    final initialSyringe = (latest.volumePerDose != null &&
+            latest.volumePerDose! > 0)
+        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        : SyringeSizeMl.ml1;
+
+    final result = await showModalBottomSheet<ReconstitutionResult>(
+      context: dialogContext,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(
+        dialogContext,
+      ).colorScheme.surface.withValues(alpha: 0.0),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => ReconstitutionCalculatorDialog(
+          initialStrengthValue: med.strengthValue,
+          unitLabel: med.strengthUnit.name,
+          initialDoseValue: initialDoseAmount,
+          initialDoseUnit: initialDoseUnit,
+          initialSyringeSize: initialSyringe,
+          initialVialSize: latest.containerVolumeMl ?? vialSize,
+          initialDiluentName: topUpDiluentName,
+        ),
+      ),
+    );
+
+    if (result == null) return;
+    topUpPerMl = result.perMlConcentration;
+    topUpDiluentName = result.diluentName;
+
+    final diluent = (result.diluentName ?? topUpDiluentName)?.trim();
+    topUpReconLabel = diluent == null || diluent.isEmpty
+        ? '${result.perMlConcentration.toStringAsFixed(2)} ${MedicationDisplayHelpers.unitLabel(med.strengthUnit)}/mL'
+        : '${result.perMlConcentration.toStringAsFixed(2)} ${MedicationDisplayHelpers.unitLabel(med.strengthUnit)}/mL • $diluent';
   }
 
   final result = await showDialog<Map<String, dynamic>>(
@@ -3338,13 +3401,35 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         final willUseFromStock =
             selectedSource == 'fromStock' && canUseFromStock;
 
-        final previewVolume = selectedMode == 'replace'
-            ? (selectedReconstitutionVolume ?? vialSize)
-            : currentVolume + vialSize;
+        final replaceVolume = (double.tryParse(replaceVolumeCtrl.text) ?? 0)
+          .clamp(0.0, double.infinity);
+        final topUpAddVolume = (double.tryParse(topUpVolumeCtrl.text) ?? 0)
+          .clamp(0.0, double.infinity);
 
-        final canSave =
-            selectedMode == 'topUp' ||
-            (selectedReconstitutionVolume != null && selectedPerMl != null);
+        final previewVolume = selectedMode == 'replace'
+          ? (replaceVolume > 0 ? replaceVolume : vialSize)
+          : currentVolume + topUpAddVolume;
+
+        final unit = MedicationDisplayHelpers.unitLabel(med.strengthUnit);
+        final currentPerMl = med.perMlValue;
+        final effectiveTopUpPerMl = topUpPerMl ?? currentPerMl;
+        final canPreviewTopUpConc =
+          currentPerMl != null && effectiveTopUpPerMl != null;
+        final previewNewPerMl = canPreviewTopUpConc &&
+            currentVolume > 0 &&
+            topUpAddVolume > 0 &&
+            (currentVolume + topUpAddVolume) > 0
+          ? ((currentPerMl * currentVolume) +
+              (effectiveTopUpPerMl * topUpAddVolume)) /
+            (currentVolume + topUpAddVolume)
+          : null;
+
+        final canSave = selectedMode == 'replace'
+          ? (selectedPerMl != null &&
+            selectedPerMl! > 0 &&
+            (replaceVolume > 0 || vialSize > 0))
+          : (topUpAddVolume > 0 &&
+            (effectiveTopUpPerMl == null || effectiveTopUpPerMl > 0));
 
         Widget buildHeaderCard() {
           return Container(
@@ -3358,7 +3443,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                     const Text('Active Vial:'),
                     Text(
                       '${_formatNumber(currentVolume)} mL remaining',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
                     ),
                   ],
                 ),
@@ -3375,8 +3462,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                     ),
                     Text(
                       '$sealedVials in stock',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: bodyTextStyle(context)?.copyWith(
+                        fontWeight: kFontWeightSemiBold,
                         color: sealedVials == 0 ? cs.error : null,
                       ),
                     ),
@@ -3452,7 +3539,13 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Reconstitution'),
-                subtitle: Text(selectedReconLabel ?? 'Not selected'),
+                subtitle: Text(
+                  selectedReconLabel ??
+                      (latest.containerVolumeMl != null &&
+                              latest.perMlValue != null
+                          ? 'Using previous reconstitution'
+                          : 'Not selected'),
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () async {
                   await pickReconstitution(dialogContext);
@@ -3461,6 +3554,149 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                 },
               ),
               const SizedBox(height: kSpacingXS),
+              Text(
+                'Volume (mL):',
+                style: helperTextStyle(
+                  context,
+                )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
+              ),
+              const SizedBox(height: kSpacingXS),
+              Center(
+                child: StepperRow36(
+                  controller: replaceVolumeCtrl,
+                  fixedFieldWidth: 96,
+                  onDec: () {
+                    final v = double.tryParse(replaceVolumeCtrl.text) ?? 0;
+                    final next = (v - 0.1).clamp(0.0, 9999.0);
+                    replaceVolumeCtrl.text = fmt2(next);
+                    replaceVolumeSetBy = 'Manually set';
+                    setState(() {});
+                  },
+                  onInc: () {
+                    final v = double.tryParse(replaceVolumeCtrl.text) ?? 0;
+                    final next = (v + 0.1).clamp(0.0, 9999.0);
+                    replaceVolumeCtrl.text = fmt2(next);
+                    replaceVolumeSetBy = 'Manually set';
+                    setState(() {});
+                  },
+                  onChanged: (_) {
+                    replaceVolumeSetBy = 'Manually set';
+                    setState(() {});
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  ],
+                  decoration: buildCompactFieldDecoration(context: context),
+                ),
+              ),
+              if (replaceVolumeSetBy != null) ...[
+                const SizedBox(height: kSpacingXS),
+                Center(
+                  child: Text(
+                    replaceVolumeSetBy!,
+                    style: helperTextStyle(context),
+                  ),
+                ),
+              ],
+              const SizedBox(height: kSpacingXS),
+            ],
+            if (selectedMode == 'topUp') ...[
+              Text(
+                'Add Volume (mL):',
+                style: helperTextStyle(
+                  context,
+                )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
+              ),
+              const SizedBox(height: kSpacingXS),
+              Center(
+                child: StepperRow36(
+                  controller: topUpVolumeCtrl,
+                  fixedFieldWidth: 96,
+                  onDec: () {
+                    final v = double.tryParse(topUpVolumeCtrl.text) ?? 0;
+                    final next = (v - 0.1).clamp(0.0, 9999.0);
+                    topUpVolumeCtrl.text = fmt2(next);
+                    topUpVolumeSetBy = 'Manually set';
+                    setState(() {});
+                  },
+                  onInc: () {
+                    final v = double.tryParse(topUpVolumeCtrl.text) ?? 0;
+                    final next = (v + 0.1).clamp(0.0, 9999.0);
+                    topUpVolumeCtrl.text = fmt2(next);
+                    topUpVolumeSetBy = 'Manually set';
+                    setState(() {});
+                  },
+                  onChanged: (_) {
+                    topUpVolumeSetBy = 'Manually set';
+                    setState(() {});
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  ],
+                  decoration: buildCompactFieldDecoration(context: context),
+                ),
+              ),
+              if (topUpVolumeSetBy != null) ...[
+                const SizedBox(height: kSpacingXS),
+                Center(
+                  child: Text(
+                    topUpVolumeSetBy!,
+                    style: helperTextStyle(context),
+                  ),
+                ),
+              ],
+              const SizedBox(height: kSpacingS),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Top-up Strength'),
+                subtitle: Text(
+                  topUpReconLabel ??
+                      (topUpPerMl != null
+                          ? '${fmt2(topUpPerMl!)} $unit/mL'
+                          : 'Not set'),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await pickTopUpStrength(dialogContext);
+                  if (!dialogContext.mounted) return;
+                  setState(() {});
+                },
+              ),
+              if (canPreviewTopUpConc) ...[
+                const SizedBox(height: kSpacingXS),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(kSpacingM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Current: ${fmt2(currentPerMl)} $unit/mL',
+                        style: helperTextStyle(context),
+                      ),
+                      Text(
+                        'Top-up: ${fmt2(effectiveTopUpPerMl)} $unit/mL',
+                        style: helperTextStyle(context),
+                      ),
+                      if (previewNewPerMl != null)
+                        Text(
+                          'New: ${fmt2(previewNewPerMl)} $unit/mL',
+                          style: helperTextStyle(
+                            context,
+                            color: cs.primary,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: kSpacingS),
             ],
             Container(
               width: double.infinity,
@@ -3471,8 +3707,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                   const Text('New Volume:'),
                   Text(
                     '${_formatNumber(previewVolume)} mL',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                    style: bodyTextStyle(context)?.copyWith(
+                      fontWeight: kFontWeightSemiBold,
                       color: cs.primary,
                     ),
                   ),
@@ -3499,10 +3735,17 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                         'mode': selectedMode,
                         'source': selectedSource,
                         'useFromStock': willUseFromStock,
-                        'reconVolume': selectedReconstitutionVolume,
+                        'reconVolume':
+                            (double.tryParse(replaceVolumeCtrl.text) ?? 0),
                         'perMl': selectedPerMl,
                         'diluentName': selectedDiluentName,
+                        'recommendedUnits': selectedRecommendedUnits,
                         'reconLabel': selectedReconLabel,
+                        'topUpVolume':
+                            (double.tryParse(topUpVolumeCtrl.text) ?? 0),
+                        'topUpPerMl': topUpPerMl,
+                        'topUpDiluentName': topUpDiluentName,
+                        'topUpReconLabel': topUpReconLabel,
                       });
                     }
                   : null,
@@ -3515,6 +3758,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       },
     ),
   );
+
+  replaceVolumeCtrl.dispose();
+  topUpVolumeCtrl.dispose();
 
   if (result != null && context.mounted) {
     final box = Hive.box<Medication>('medications');
@@ -3530,10 +3776,34 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     }
 
     if (mode == 'topUp') {
-      final newVolume = currentVolume + vialSize;
+      final addVolume = (result['topUpVolume'] as double?) ?? vialSize;
+      final newVolume = currentVolume + addVolume;
+
+      final unit = MedicationDisplayHelpers.unitLabel(med.strengthUnit);
+      final currentPerMl = med.perMlValue;
+      final topPerMl = (result['topUpPerMl'] as double?) ?? currentPerMl;
+      final newPerMl = (currentPerMl != null &&
+              topPerMl != null &&
+              currentPerMl > 0 &&
+              topPerMl > 0 &&
+              currentVolume > 0 &&
+              addVolume > 0 &&
+              (currentVolume + addVolume) > 0)
+          ? ((currentPerMl * currentVolume) + (topPerMl * addVolume)) /
+              (currentVolume + addVolume)
+          : null;
+
+      final topUpDiluent = result['topUpDiluentName'] as String?;
       box.put(
         med.id,
-        med.copyWith(activeVialVolume: newVolume, stockValue: newSealedCount),
+        med.copyWith(
+          activeVialVolume: newVolume,
+          containerVolumeMl: newVolume,
+          perMlValue: newPerMl ?? med.perMlValue,
+          diluentName: topUpDiluent ?? med.diluentName,
+          stockValue: newSealedCount,
+          reconstitutedAt: now,
+        ),
       );
 
       final inventoryLog = InventoryLog(
@@ -3545,9 +3815,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         newStock: newSealedCount,
         changeAmount: usedSealedVial ? -1 : 0,
         notes:
-            'Topped up to ${_formatNumber(newVolume)} mL'
+            'Topped up +${_formatNumber(addVolume)} mL to ${_formatNumber(newVolume)} mL'
             '${usedSealedVial ? ' • used 1 sealed vial' : ''}'
-            ' • direct mL',
+            '${(currentPerMl != null && topPerMl != null) ? ' • ${fmt2(currentPerMl)}→${fmt2(newPerMl ?? currentPerMl)} $unit/mL' : ''}',
         timestamp: now,
       );
       inventoryLogBox.put(inventoryLog.id, inventoryLog);
@@ -3574,12 +3844,16 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
 
     final diluentName = result['diluentName'] as String?;
     final reconLabel = result['reconLabel'] as String?;
+    final recommendedUnits = result['recommendedUnits'] as double?;
 
     box.put(
       med.id,
       med.copyWith(
         containerVolumeMl: reconVolume,
         perMlValue: perMl,
+        volumePerDose: recommendedUnits != null && recommendedUnits > 0
+            ? (recommendedUnits / 100)
+            : med.volumePerDose,
         diluentName: diluentName,
         activeVialVolume: reconVolume,
         reconstitutedAt: now,
