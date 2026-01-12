@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:dosifi_v5/src/app/app_navigator.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -42,6 +43,17 @@ class NotificationDeepLinkHandler {
   ) async {
     final payload = response.payload;
     if (payload == null || payload.trim().isEmpty) return;
+
+    // Best-effort: clear the tapped/acted notification so dose reminders do not
+    // accumulate in the tray across days.
+    final id = response.id;
+    if (id != null) {
+      try {
+        await NotificationService.cancel(id);
+      } catch (_) {
+        // Best-effort only.
+      }
+    }
 
     if (payload.startsWith('low_stock:')) {
       final id = payload.substring('low_stock:'.length);
