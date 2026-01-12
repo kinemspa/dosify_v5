@@ -311,6 +311,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       doseMetrics: metrics,
                       isActive: widget.schedule.isActive,
                       compact: true,
+                      medicationFormIcon:
+                          MedicationDisplayHelpers.medicationFormIcon(
+                            widget.medication.form,
+                          ),
                       doseNumber: ScheduleOccurrenceService.occurrenceNumber(
                         widget.schedule,
                         nextDose,

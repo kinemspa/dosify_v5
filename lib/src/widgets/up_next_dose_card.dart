@@ -18,6 +18,7 @@ class UpNextDoseCard extends StatelessWidget {
     this.strengthOrConcentrationLabel,
     this.doseMetrics,
     this.primaryActionLabel,
+    this.medicationFormIcon,
     super.key,
   });
 
@@ -29,6 +30,7 @@ class UpNextDoseCard extends StatelessWidget {
   final String? strengthOrConcentrationLabel;
   final String? doseMetrics;
   final String? primaryActionLabel;
+  final IconData? medicationFormIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,7 @@ class UpNextDoseCard extends StatelessWidget {
             strengthOrConcentrationLabel: strengthOrConcentrationLabel!,
             doseMetrics: doseMetrics!,
             primaryActionLabel: primaryActionLabel,
+            medicationFormIcon: medicationFormIcon,
             onQuickAction: onQuickAction,
             onTap: () => onDoseTap(dose!),
           )

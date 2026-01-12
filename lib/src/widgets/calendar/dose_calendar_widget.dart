@@ -706,6 +706,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                     upNextMedication?.name ?? nextDose?.medicationName,
                 strengthOrConcentrationLabel: upNextStrengthLabel,
                 doseMetrics: upNextDoseMetrics,
+                medicationFormIcon: upNextMedication == null
+                    ? null
+                    : MedicationDisplayHelpers.medicationFormIcon(
+                        upNextMedication.form,
+                      ),
               ),
             ),
           // Calendar view
@@ -1041,11 +1046,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                               strengthOrConcentrationLabel: strengthLabel,
                               doseMetrics: metrics,
                               isActive: schedule.isActive,
+                              medicationFormIcon:
+                                  MedicationDisplayHelpers.medicationFormIcon(
+                                    med.form,
+                                  ),
                               doseNumber:
                                   ScheduleOccurrenceService.occurrenceNumber(
-                                schedule,
-                                dose.scheduledTime,
-                              ),
+                                    schedule,
+                                    dose.scheduledTime,
+                                  ),
                               onQuickAction: (status) {
                                 if (widget.onDoseTap != null) {
                                   widget.onDoseTap!(dose);
@@ -1111,6 +1120,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       strengthOrConcentrationLabel: strengthLabel,
       doseMetrics: metrics,
       isActive: schedule?.isActive ?? true,
+      medicationFormIcon: med == null
+          ? null
+          : MedicationDisplayHelpers.medicationFormIcon(med.form),
       doseNumber: schedule == null
           ? null
           : ScheduleOccurrenceService.occurrenceNumber(

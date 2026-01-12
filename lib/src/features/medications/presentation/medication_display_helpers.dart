@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -6,6 +8,17 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Centralized helpers for displaying medication information.
 class MedicationDisplayHelpers {
+  static IconData medicationFormIcon(MedicationForm form) {
+    // Keep icons consistent with the add-medication wizards.
+    return switch (form) {
+      MedicationForm.tablet => Icons.medication,
+      MedicationForm.capsule => Icons.medication_liquid,
+      MedicationForm.prefilledSyringe => Icons.vaccines,
+      MedicationForm.singleDoseVial => Icons.science,
+      MedicationForm.multiDoseVial => Icons.science,
+    };
+  }
+
   static String formatDoseMassFromMcg(Medication med, double mcg) {
     switch (med.strengthUnit) {
       case Unit.mcg:

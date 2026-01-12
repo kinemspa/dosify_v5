@@ -20,6 +20,7 @@ class DoseCard extends StatelessWidget {
     this.isActive = true,
     this.compact = false,
     this.doseNumber,
+    this.medicationFormIcon,
     this.statusOverride,
     this.titleTrailing,
     this.leadingFooter,
@@ -38,6 +39,7 @@ class DoseCard extends StatelessWidget {
   final bool isActive;
   final bool compact;
   final int? doseNumber;
+  final IconData? medicationFormIcon;
   final DoseStatus? statusOverride;
   final Widget? titleTrailing;
   final Widget? leadingFooter;
@@ -77,6 +79,11 @@ class DoseCard extends StatelessWidget {
     final actionLabel = primaryActionLabel ?? 'Actions';
     final hasQuickActions = onQuickAction != null;
     final showEditOnly = effectiveStatus != DoseStatus.pending;
+
+    final takeText = 'Take $doseMetrics';
+    final takeColor = isActive
+      ? statusColor.withValues(alpha: kOpacityFull)
+      : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
 
     return Material(
       color: Colors.transparent,
@@ -180,19 +187,38 @@ class DoseCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: kSpacingXXS),
-                    Text(
-                      'Take $doseMetrics',
-                      style: baseBody?.copyWith(
-                        color: isActive
-                            ? statusColor.withValues(alpha: kOpacityFull)
-                            : cs.onSurfaceVariant.withValues(
-                                alpha: kOpacityMediumLow,
+                    if (medicationFormIcon != null)
+                      Row(
+                        children: [
+                          Icon(
+                            medicationFormIcon,
+                            size: kIconSizeSmall,
+                            color: takeColor,
+                          ),
+                          const SizedBox(width: kSpacingXS),
+                          Expanded(
+                            child: Text(
+                              takeText,
+                              style: baseBody?.copyWith(
+                                color: takeColor,
+                                fontWeight: kFontWeightSemiBold,
                               ),
-                        fontWeight: kFontWeightSemiBold,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Text(
+                        takeText,
+                        style: baseBody?.copyWith(
+                          color: takeColor,
+                          fontWeight: kFontWeightSemiBold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ],
                 ),
               ),

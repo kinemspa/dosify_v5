@@ -296,6 +296,9 @@ class _NextDoseCardState extends State<NextDoseCard>
         strengthOrConcentrationLabel: strengthLabel,
         doseMetrics: metrics,
         compact: true,
+        medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
+          widget.medication.form,
+        ),
         doseNumber: schedule == null
             ? null
             : ScheduleOccurrenceService.occurrenceNumber(

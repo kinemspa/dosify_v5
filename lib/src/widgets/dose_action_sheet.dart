@@ -162,6 +162,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       strengthOrConcentrationLabel: strengthLabel,
       doseMetrics: metrics,
       isActive: schedule.isActive,
+      medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(med.form),
       doseNumber: ScheduleOccurrenceService.occurrenceNumber(
         schedule,
         widget.dose.scheduledTime,
