@@ -50,42 +50,25 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   String _query = '';
   bool _searchExpanded = false;
 
+  IconData _viewIcon(_MedView v) => switch (v) {
+    _MedView.list => Icons.view_list,
+    _MedView.compact => Icons.view_comfy_alt,
+    _MedView.large => Icons.view_comfortable,
+  };
+
+  void _cycleView() {
+    final idx = _MedView.values.indexOf(_view);
+    final next = _MedView.values[(idx + 1) % _MedView.values.length];
+    _saveView(next);
+  }
+
   Widget _buildLayoutCycleButton(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
-    return SizedBox(
-      height: kStandardButtonHeight,
-      child: SegmentedButton<_MedView>(
-        showSelectedIcon: false,
-        style: ButtonStyle(
-          visualDensity: VisualDensity.compact,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          iconColor: WidgetStateProperty.resolveWith(
-            (states) => states.contains(WidgetState.selected)
-                ? cs.onSecondaryContainer
-                : iconColor,
-          ),
-        ),
-        segments: const <ButtonSegment<_MedView>>[
-          ButtonSegment(
-            value: _MedView.list,
-            icon: Icon(Icons.view_list, size: kIconSizeMedium),
-          ),
-          ButtonSegment(
-            value: _MedView.compact,
-            icon: Icon(Icons.view_comfy_alt, size: kIconSizeMedium),
-          ),
-          ButtonSegment(
-            value: _MedView.large,
-            icon: Icon(Icons.view_comfortable, size: kIconSizeMedium),
-          ),
-        ],
-        selected: <_MedView>{_view},
-        onSelectionChanged: (selection) {
-          if (selection.isEmpty) return;
-          _saveView(selection.first);
-        },
-      ),
+    return IconButton(
+      tooltip: 'Change layout',
+      icon: Icon(_viewIcon(_view), color: iconColor),
+      onPressed: _cycleView,
     );
   }
 
