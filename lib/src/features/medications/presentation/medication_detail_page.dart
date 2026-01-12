@@ -51,6 +51,25 @@ const double _kDetailHeaderExpandedHeight =
     224; // Keep header size consistent (reduced empty space)
 const double _kDetailHeaderCollapsedHeight = 56;
 
+SyringeSizeMl _inferSyringeSizeFromDoseVolumeMl(double volumeMl) {
+  if (volumeMl <= 0.3) return SyringeSizeMl.ml0_3;
+  if (volumeMl <= 0.5) return SyringeSizeMl.ml0_5;
+  if (volumeMl <= 1.0) return SyringeSizeMl.ml1;
+  if (volumeMl <= 3.0) return SyringeSizeMl.ml3;
+  return SyringeSizeMl.ml5;
+}
+
+/// Reconstitution calculator expects a *dose amount* (mass/units), not volume.
+/// If we have a saved concentration (per mL) and dose volume (mL), compute:
+/// doseAmount = concentrationPerMl * doseVolumeMl.
+double? _inferDoseAmountFromSavedRecon(Medication med) {
+  final perMl = med.perMlValue;
+  final doseVolumeMl = med.volumePerDose;
+  if (perMl == null || doseVolumeMl == null) return null;
+  if (perMl <= 0 || doseVolumeMl <= 0) return null;
+  return perMl * doseVolumeMl;
+}
+
 class MedicationDetailPage extends ConsumerStatefulWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
   final String? medicationId;
@@ -2570,9 +2589,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final box = Hive.box<Medication>('medications');
     final latest = box.get(med.id) ?? med;
 
+    final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
+    final initialDoseUnit = med.strengthUnit.name;
+    final initialSyringe = (latest.volumePerDose != null &&
+        latest.volumePerDose! > 0)
+      ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+      : SyringeSizeMl.ml1;
+
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surface.withValues(alpha: 0.0),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.5,
@@ -2580,7 +2609,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         builder: (context, scrollController) => ReconstitutionCalculatorDialog(
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
-          initialSyringeSize: SyringeSizeMl.ml3,
+          initialDoseValue: initialDoseAmount,
+          initialDoseUnit: initialDoseUnit,
+          initialSyringeSize: initialSyringe,
           initialVialSize: latest.containerVolumeMl,
           initialDiluentName: latest.diluentName,
         ),
@@ -2594,6 +2625,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.copyWith(
         perMlValue: result.perMlConcentration,
         containerVolumeMl: result.solventVolumeMl,
+        volumePerDose: result.recommendedUnits / 100,
         diluentName: result.diluentName ?? latest.diluentName,
         activeVialVolume: result.solventVolumeMl,
         reconstitutedAt: DateTime.now(),
@@ -3236,6 +3268,13 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     final box = Hive.box<Medication>('medications');
     final latest = box.get(med.id) ?? med;
 
+    final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
+    final initialDoseUnit = med.strengthUnit.name;
+    final initialSyringe = (latest.volumePerDose != null &&
+            latest.volumePerDose! > 0)
+        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        : SyringeSizeMl.ml1;
+
     Future<void> setRecon({
       required double volumeMl,
       required double perMl,
@@ -3251,6 +3290,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: dialogContext,
       isScrollControlled: true,
+      backgroundColor: Theme.of(
+        dialogContext,
+      ).colorScheme.surface.withValues(alpha: 0.0),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.5,
@@ -3258,7 +3300,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         builder: (context, scrollController) => ReconstitutionCalculatorDialog(
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
-          initialSyringeSize: SyringeSizeMl.ml3,
+          initialDoseValue: initialDoseAmount,
+          initialDoseUnit: initialDoseUnit,
+          initialSyringeSize: initialSyringe,
           initialVialSize:
               selectedReconstitutionVolume ??
               latest.containerVolumeMl ??
