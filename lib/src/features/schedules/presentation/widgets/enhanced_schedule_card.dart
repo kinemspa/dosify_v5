@@ -113,10 +113,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               medication: currentMed,
               delta: delta,
             );
-            await medBox.put(
-              currentMed.id,
-              updated,
-            );
+            await medBox.put(currentMed.id, updated);
             await LowStockNotifier.handleStockChange(
               before: currentMed,
               after: updated,
@@ -439,7 +436,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         borderRadius: BorderRadius.circular(kBorderRadiusSmall),
         child: Container(
           padding: const EdgeInsets.all(kSpacingM),
-          child: Icon(icon, size: kIconSizeMedium, color: colorScheme.onPrimary),
+          child: Icon(
+            icon,
+            size: kIconSizeMedium,
+            color: colorScheme.onPrimary,
+          ),
         ),
       ),
     );

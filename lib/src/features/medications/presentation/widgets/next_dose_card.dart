@@ -793,10 +793,7 @@ class _NextDoseCardState extends State<NextDoseCard>
               medication: currentMed,
               delta: delta,
             );
-            await medBox.put(
-              currentMed.id,
-              updated,
-            );
+            await medBox.put(currentMed.id, updated);
             await LowStockNotifier.handleStockChange(
               before: currentMed,
               after: updated,
