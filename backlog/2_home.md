@@ -14,7 +14,7 @@
 - [x] Vertically stack all doses of the day. 
 
 ### Schedules
-- [x] Should NOT display Dose cards. SHould display all schedules and their status
+- [x] Should NOT display Dose cards. SHould display schedule cards
 
 ### Calendar
 - [x] Will be using the widget that we are yet to finalise from the calendar screen
