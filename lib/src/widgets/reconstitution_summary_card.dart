@@ -270,7 +270,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             // Syringe size text
             if (syringeSizeMl != null)
               Text(
-                '${_formatNoTrailing(syringeSizeMl!)} mL Syringe',
+                '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * 100).round()} U) Syringe',
                 textAlign: TextAlign.center,
                 style: helperTextStyle(context)?.copyWith(
                   color: baseForeground.withValues(alpha: baseTextAlpha),

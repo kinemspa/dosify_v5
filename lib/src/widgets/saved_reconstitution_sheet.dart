@@ -98,7 +98,7 @@ class SavedReconstitutionSheet extends StatelessWidget {
                         '${item.recommendedUnits.toStringAsFixed(0)} units',
                       );
                       subtitleParts.add(
-                        '${item.syringeSizeMl.toStringAsFixed(1)} mL syringe',
+                        '${item.syringeSizeMl.toStringAsFixed(1)} mL (${(item.syringeSizeMl * 100).round()} U) syringe',
                       );
 
                       return InkWell(
