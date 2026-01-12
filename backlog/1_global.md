@@ -35,6 +35,13 @@
 			- 22 (1)
 			- 24 (2)
 			- 32 (3)
-		- [ ] Can we put in a plan to replace all the hardcoded fonts with system design fonts. 
+		- [x] Can we put in a plan to replace all the hardcoded fonts with system design fonts.
+			- Plan (incremental, safe)
+				1) Baseline scan: keep a running list of all `TextStyle(fontSize: ...)`/`fontSize:` occurrences in `lib/` and categorize by UI surface (Home, Medications, Schedules, Dialogs, Charts).
+				2) Fill gaps in `lib/src/core/design_system.dart`: if a repeated typographic need exists (e.g., tiny badge text, dense table text), add a named helper there (e.g., `badgeTextStyle`, `denseLabelStyle`) instead of re-adding `fontSize` in feature code.
+				3) Replace in priority order (highest visibility first): dose card + take dose dialog → headers/toolbars → list tiles/cards → settings/debug screens → charts/edge cases last.
+				4) Enforce the rule: no new `fontSize:` in feature widgets. Any new typography must go through design-system helpers.
+				5) Verification loop per batch: `flutter analyze` clean, then quick visual pass on the touched screens.
+				6) Final cleanup: re-run the scan and confirm remaining `fontSize:` usages are either eliminated or explicitly justified (e.g., 3rd-party widgets/charts that require it).
 
 
