@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/app.dart';
+import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
 import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -34,6 +35,10 @@ Future<void> main() async {
       print('Dosifi: Running App...');
       runApp(const ProviderScope(child: DosifiApp()));
 
+      NotificationService.setNotificationResponseHandler(
+        NotificationDeepLinkHandler.handle,
+      );
+
       // Initialize notifications + reschedule in the background.
       // This must never block app startup (some devices can hang on plugin init).
       // ignore: unawaited_futures
@@ -42,6 +47,8 @@ Future<void> main() async {
           print('Dosifi: Initializing NotificationService (background)...');
           await NotificationService.init().timeout(const Duration(seconds: 4));
           print('Dosifi: NotificationService initialized');
+
+          NotificationDeepLinkHandler.flushPendingIfAny();
 
           await ScheduleScheduler.rescheduleAllActiveIfStale();
         } catch (e) {

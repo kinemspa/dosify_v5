@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/app/shell_scaffold.dart';
 import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
 import 'package:dosifi_v5/src/features/inventory/presentation/inventory_page.dart';
@@ -36,12 +37,10 @@ import 'package:dosifi_v5/src/features/settings/presentation/wide_card_samples_p
 import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart';
 
 // Removed incorrect import
-
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 final router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   // Start at home by default
   initialLocation: '/',
   routes: [

@@ -184,6 +184,8 @@ class ScheduleScheduler {
             dt,
             title: title,
             body: body,
+            payload: 'dose:${s.id}:${dt.millisecondsSinceEpoch}',
+            actions: NotificationService.upcomingDoseActions,
           );
         }
         day = day.add(Duration(days: n));
@@ -224,6 +226,7 @@ class ScheduleScheduler {
                 body: 'Tap to view your doses',
                 groupKey: groupKey,
                 setAsGroupSummary: true,
+                payload: 'dose_group:$groupKey',
               );
               final id = slotIdFor(
                 s.id,
@@ -237,6 +240,8 @@ class ScheduleScheduler {
                 title: title,
                 body: body,
                 groupKey: groupKey,
+                payload: 'dose:${s.id}:${dtLocal.millisecondsSinceEpoch}',
+                actions: NotificationService.upcomingDoseActions,
               );
             }
           }
@@ -261,6 +266,7 @@ class ScheduleScheduler {
                 body: 'Tap to view your doses',
                 groupKey: groupKey,
                 setAsGroupSummary: true,
+                payload: 'dose_group:$groupKey',
               );
               final id = slotIdFor(
                 s.id,
@@ -274,6 +280,8 @@ class ScheduleScheduler {
                 title: title,
                 body: body,
                 groupKey: groupKey,
+                payload: 'dose:${s.id}:${dt.millisecondsSinceEpoch}',
+                actions: NotificationService.upcomingDoseActions,
               );
             }
           }

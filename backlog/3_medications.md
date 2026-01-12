@@ -5,7 +5,7 @@
 - Medications list screen and related entry points.
 
 ## Requests
-- [x] Layout control changed to a dropdown; revert to the tap-to-cycle layout button.
+- [ ] Layout View is still a toggle. Revert to tap to cycle. Exactly the same as scheudles screen.  
 
 ## Notes
 - 

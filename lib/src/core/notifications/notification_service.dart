@@ -27,7 +27,30 @@ class NotificationService {
   static const MethodChannel _platform = MethodChannel('dosifi/notifications');
   static void _log(String msg) => debugPrint('[NotificationService] $msg');
 
+  static void Function(NotificationResponse response)? _responseHandler;
+  static NotificationResponse? _pendingResponse;
+
   static Future<void>? _tzInitFuture;
+
+  static void setNotificationResponseHandler(
+    void Function(NotificationResponse response) handler,
+  ) {
+    _responseHandler = handler;
+    final pending = _pendingResponse;
+    if (pending != null) {
+      _pendingResponse = null;
+      handler(pending);
+    }
+  }
+
+  static void _dispatchNotificationResponse(NotificationResponse response) {
+    final handler = _responseHandler;
+    if (handler == null) {
+      _pendingResponse = response;
+      return;
+    }
+    handler(response);
+  }
 
   static Future<void> _ensureTimeZoneReady() {
     // tz.local is a late-init field; if any scheduling path runs before init
@@ -131,6 +154,7 @@ class NotificationService {
               _log(
                 'NotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
               );
+              _dispatchNotificationResponse(response);
             },
             onDidReceiveBackgroundNotificationResponse:
                 dosifiNotificationTapBackground,
@@ -140,6 +164,20 @@ class NotificationService {
       _log('FlutterLocalNotificationsPlugin.initialize failed/timeout: $e');
       // Do not block app startup if the notifications plugin is unavailable.
       return;
+    }
+
+    try {
+      final launchDetails = await _fln.getNotificationAppLaunchDetails();
+      final launched = launchDetails?.didNotificationLaunchApp ?? false;
+      final response = launchDetails?.notificationResponse;
+      if (launched && response != null) {
+        _log(
+          'App launched from notification: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+        );
+        _dispatchNotificationResponse(response);
+      }
+    } catch (e) {
+      _log('getNotificationAppLaunchDetails failed: $e');
     }
 
     await _ensureTimeZoneReady();
@@ -471,6 +509,24 @@ class NotificationService {
     );
     await _fln.show(id, title, body, details, payload: payload);
   }
+
+  static const List<AndroidNotificationAction> upcomingDoseActions = [
+    AndroidNotificationAction(
+      'take',
+      'Take',
+      showsUserInterface: true,
+    ),
+    AndroidNotificationAction(
+      'snooze',
+      'Snooze',
+      showsUserInterface: true,
+    ),
+    AndroidNotificationAction(
+      'skip',
+      'Skip',
+      showsUserInterface: true,
+    ),
+  ];
 
   // Schedule using a local DateTime (interpreted in the device's current timezone)
   static Future<void> scheduleAt(
@@ -815,6 +871,8 @@ class NotificationService {
     String channelId = 'upcoming_dose',
     String? groupKey,
     bool setAsGroupSummary = false,
+    String? payload,
+    List<AndroidNotificationAction>? actions,
   }) async {
     await _ensureTimeZoneReady();
     if (scheduleAtAlarmClockOverride != null) {
@@ -846,6 +904,7 @@ class NotificationService {
         priority: Priority.high,
         groupKey: groupKey,
         setAsGroupSummary: setAsGroupSummary,
+        actions: actions,
       ),
     );
     try {
@@ -864,6 +923,7 @@ class NotificationService {
         androidScheduleMode: primaryMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
       );
       _log('zonedSchedule call returned successfully (local source)');
     } on PlatformException catch (e) {
@@ -881,6 +941,7 @@ class NotificationService {
             androidScheduleMode: AndroidScheduleMode.inexact,
             uiLocalNotificationDateInterpretation:
                 UILocalNotificationDateInterpretation.absoluteTime,
+            payload: payload,
           );
           _log('Inexact fallback zonedSchedule returned successfully');
           return;
