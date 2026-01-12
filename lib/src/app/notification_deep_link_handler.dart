@@ -199,7 +199,8 @@ class NotificationDeepLinkHandler {
       final utc = localDt.toUtc();
       final daysUtc = schedule.daysOfWeekUtc ?? const <int>[];
       final timesUtc =
-          schedule.timesOfDayUtc ?? [schedule.minutesOfDayUtc ?? schedule.minutesOfDay];
+          schedule.timesOfDayUtc ??
+          [schedule.minutesOfDayUtc ?? schedule.minutesOfDay];
       final utcMinutes = utc.hour * 60 + utc.minute;
       return daysUtc.contains(utc.weekday) && timesUtc.contains(utcMinutes);
     }
@@ -207,7 +208,8 @@ class NotificationDeepLinkHandler {
     final daysLocal = schedule.daysOfWeek;
     final timesLocal = schedule.timesOfDay ?? [schedule.minutesOfDay];
     final minutesLocal = localDt.hour * 60 + localDt.minute;
-    return daysLocal.contains(localDt.weekday) && timesLocal.contains(minutesLocal);
+    return daysLocal.contains(localDt.weekday) &&
+        timesLocal.contains(minutesLocal);
   }
 
   static Future<void> _openDoseGroupPicker(
@@ -221,7 +223,8 @@ class NotificationDeepLinkHandler {
     final medBox = Hive.box<Medication>('medications');
     final logBox = Hive.box<DoseLog>('dose_logs');
 
-    final entries = <({CalculatedDose dose, Schedule schedule, Medication med})>[];
+    final entries =
+        <({CalculatedDose dose, Schedule schedule, Medication med})>[];
 
     for (final schedule in scheduleBox.values) {
       if (!_scheduleMatchesLocalMinute(schedule, dt)) continue;

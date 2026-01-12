@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -924,6 +925,7 @@ class _AddPrefilledSyringeWizardPageState
         SectionFormCard(
           neutral: true,
           title: 'Medication Details',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow('Name', _nameCtrl.text.trim()),
             _reviewRow('Type', 'Pre-filled Syringe'),
@@ -935,23 +937,29 @@ class _AddPrefilledSyringeWizardPageState
         SectionFormCard(
           neutral: true,
           title: 'Strength & Volume',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow(
               'Concentration',
-              '$concentration ${_concentrationUnit.name}',
+              '${fmt2(concentration)} ${_concentrationUnit.name}',
             ),
-            _reviewRow('Volume', '$volume ${_volumeUnit.name}'),
+            _reviewRow('Volume', '${fmt2(volume)} ${_volumeUnit.name}'),
           ],
         ),
         const SizedBox(height: 12),
         SectionFormCard(
           neutral: true,
           title: 'Inventory',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
-            _reviewRow('Current Stock', '$stock syringes'),
+            _reviewRow('Current Stock', '${fmt2(stock)} syringes'),
             _reviewRow(
               'Low Stock Alert',
-              _lowStockEnabled ? 'Enabled at $threshold syringes' : 'Disabled',
+              !_lowStockEnabled
+                  ? 'Disabled'
+                  : (threshold == null
+                        ? 'Enabled'
+                        : 'Enabled at ${fmt2(threshold)} syringes'),
             ),
           ],
         ),
@@ -959,6 +967,7 @@ class _AddPrefilledSyringeWizardPageState
         SectionFormCard(
           neutral: true,
           title: 'Storage',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             if (_expiry != null)
               _reviewRow(
@@ -987,7 +996,7 @@ class _AddPrefilledSyringeWizardPageState
         children: [
           SizedBox(
             width: 120,
-            child: Text(label, style: fieldLabelStyle(context)),
+            child: Text(label, style: reviewRowLabelStyle(context)),
           ),
           const SizedBox(width: 8),
           Expanded(child: Text(value, style: bodyTextStyle(context))),

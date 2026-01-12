@@ -1,6 +1,7 @@
 // Flutter imports:
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -1339,11 +1340,18 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   Widget _buildReviewStep() {
+    String fmtCtrl(TextEditingController controller) {
+      final text = controller.text.trim();
+      final v = double.tryParse(text);
+      return v == null ? text : fmt2(v);
+    }
+
     final name = _nameCtrl.text.trim();
     final manufacturer = _manufacturerCtrl.text.trim();
     final description = _descriptionCtrl.text.trim();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
     final vialVolume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
+    final perMl = double.tryParse(_perMlCtrl.text.trim());
     final backupQty = _hasBackupVials
         ? (int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0)
         : 0;
@@ -1362,6 +1370,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         SectionFormCard(
           title: 'Step 1: Basic Information',
           neutral: true,
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow('Name', name.isEmpty ? '(Not entered)' : name),
             _reviewRow(
@@ -1379,16 +1388,17 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         SectionFormCard(
           title: 'Step 2: Strength & Reconstitution',
           neutral: true,
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow(
               'Strength',
-              '$strength ${_strengthUnit.name}${_perMlCtrl.text.isNotEmpty ? ' (${_perMlCtrl.text} ${_strengthUnit.name}/mL)' : ''}',
+              '${fmt2(strength)} ${_strengthUnit.name}${_perMlCtrl.text.trim().isNotEmpty ? ' (${perMl == null ? _perMlCtrl.text.trim() : fmt2(perMl)} ${_strengthUnit.name}/mL)' : ''}',
             ),
-            _reviewRow('Total Vial Volume', '$vialVolume mL'),
+            _reviewRow('Total Vial Volume', '${fmt2(vialVolume)} mL'),
             _reviewRow(
               'Reconstitution',
               _reconResult != null
-                  ? 'Add ${_reconResult!.solventVolumeMl.toStringAsFixed(1)} mL${_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty ? ' ${_reconResult!.diluentName}' : ' solvent'}'
+                  ? 'Add ${fmt2(_reconResult!.solventVolumeMl)} mL${_reconResult!.diluentName != null && _reconResult!.diluentName!.isNotEmpty ? ' ${_reconResult!.diluentName}' : ' solvent'}'
                   : '(Not calculated)',
             ),
           ],
@@ -1398,11 +1408,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         SectionFormCard(
           title: 'Step 3: Reconstituted Vial Details',
           neutral: true,
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow(
               'Low Stock Alert',
               _activeVialLowStockEnabled
-                  ? 'Alert at ${_activeVialLowStockMlCtrl.text} mL threshold'
+                  ? 'Alert at ${fmtCtrl(_activeVialLowStockMlCtrl)} mL threshold'
                   : '(Disabled)',
             ),
             _reviewRow(
@@ -1438,6 +1449,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         SectionFormCard(
           title: 'Step 4: Sealed Inventory',
           neutral: true,
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow(
               'Sealed Vials',
@@ -1447,7 +1459,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               _reviewRow(
                 'Low Stock Alert',
                 _backupVialsLowStockEnabled
-                    ? 'Alert at ${_backupVialsLowStockCtrl.text} vials threshold'
+                    ? 'Alert at ${fmtCtrl(_backupVialsLowStockCtrl)} vials threshold'
                     : '(Disabled)',
               ),
               _reviewRow(
@@ -1497,16 +1509,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         children: [
           SizedBox(
             width: 140,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: Text(label, style: reviewRowLabelStyle(context)),
           ),
           Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(value, style: bodyTextStyle(context)),
           ),
         ],
       ),

@@ -40,7 +40,8 @@ Future<void> showDoseActionSheetFromModels(
     dose: dose,
     initialStatus: initialStatus,
     onMarkTaken: (request) async {
-      final logId = '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+      final logId =
+          '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
       final log = DoseLog(
         id: logId,
         scheduleId: dose.scheduleId,
@@ -79,14 +80,17 @@ Future<void> showDoseActionSheetFromModels(
             delta: delta,
           );
           await medBox.put(currentMed.id, updated);
-          await LowStockNotifier.handleStockChange(before: currentMed, after: updated);
+          await LowStockNotifier.handleStockChange(
+            before: currentMed,
+            after: updated,
+          );
         }
       }
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Dose marked as taken')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       }
     },
     onSnooze: (request) async {
@@ -121,11 +125,14 @@ Future<void> showDoseActionSheetFromModels(
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(label)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(label)));
       }
     },
     onSkip: (request) async {
-      final logId = '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+      final logId =
+          '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
       final log = DoseLog(
         id: logId,
         scheduleId: dose.scheduleId,
@@ -147,13 +154,15 @@ Future<void> showDoseActionSheetFromModels(
       await cancelNotificationForDose();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Dose skipped')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
       }
     },
     onDelete: (request) async {
       final logBox = Hive.box<DoseLog>('dose_logs');
-      final idToDelete = dose.existingLog?.id ??
+      final idToDelete =
+          dose.existingLog?.id ??
           '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
       final existingLog = logBox.get(idToDelete);
 
@@ -173,7 +182,10 @@ Future<void> showDoseActionSheetFromModels(
           if (delta != null) {
             await medBox.put(
               currentMed.id,
-              MedicationStockAdjustment.restore(medication: currentMed, delta: delta),
+              MedicationStockAdjustment.restore(
+                medication: currentMed,
+                delta: delta,
+              ),
             );
           }
         }
@@ -183,8 +195,9 @@ Future<void> showDoseActionSheetFromModels(
       await repo.delete(idToDelete);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
       }
     },
   );

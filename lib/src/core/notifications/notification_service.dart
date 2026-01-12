@@ -511,21 +511,9 @@ class NotificationService {
   }
 
   static const List<AndroidNotificationAction> upcomingDoseActions = [
-    AndroidNotificationAction(
-      'take',
-      'Take',
-      showsUserInterface: true,
-    ),
-    AndroidNotificationAction(
-      'snooze',
-      'Snooze',
-      showsUserInterface: true,
-    ),
-    AndroidNotificationAction(
-      'skip',
-      'Skip',
-      showsUserInterface: true,
-    ),
+    AndroidNotificationAction('take', 'Take', showsUserInterface: true),
+    AndroidNotificationAction('snooze', 'Snooze', showsUserInterface: true),
+    AndroidNotificationAction('skip', 'Skip', showsUserInterface: true),
   ];
 
   // Schedule using a local DateTime (interpreted in the device's current timezone)

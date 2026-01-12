@@ -38,6 +38,7 @@ class SectionFormCard extends StatelessWidget {
     this.trailing,
     this.neutral = false,
     this.backgroundColor,
+    this.titleStyle,
   });
 
   final String title;
@@ -45,6 +46,7 @@ class SectionFormCard extends StatelessWidget {
   final Widget? trailing;
   final bool neutral;
   final Color? backgroundColor;
+  final TextStyle? titleStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +104,12 @@ class SectionFormCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(title, style: sectionTitleStyle(context))),
+              Expanded(
+                child: Text(
+                  title,
+                  style: titleStyle ?? sectionTitleStyle(context),
+                ),
+              ),
               if (trailing != null) trailing!,
             ],
           ),

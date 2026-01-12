@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -822,6 +823,7 @@ class _AddCapsuleWizardPageState
         SectionFormCard(
           neutral: true,
           title: 'Medication Details',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             _reviewRow('Name', _nameCtrl.text.trim()),
             _reviewRow('Type', 'Capsule'),
@@ -833,19 +835,28 @@ class _AddCapsuleWizardPageState
         SectionFormCard(
           neutral: true,
           title: 'Strength',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
-            _reviewRow('Active Ingredient', '$strength ${_strengthUnit.name}'),
+            _reviewRow(
+              'Active Ingredient',
+              '${fmt2(strength)} ${_strengthUnit.name}',
+            ),
           ],
         ),
         const SizedBox(height: 12),
         SectionFormCard(
           neutral: true,
           title: 'Inventory',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
-            _reviewRow('Current Stock', '$stock capsules'),
+            _reviewRow('Current Stock', '${fmt2(stock)} capsules'),
             _reviewRow(
               'Low Stock Alert',
-              _lowStockEnabled ? 'Enabled at $threshold capsules' : 'Disabled',
+              !_lowStockEnabled
+                  ? 'Disabled'
+                  : (threshold == null
+                        ? 'Enabled'
+                        : 'Enabled at ${fmt2(threshold)} capsules'),
             ),
           ],
         ),
@@ -853,6 +864,7 @@ class _AddCapsuleWizardPageState
         SectionFormCard(
           neutral: true,
           title: 'Storage',
+          titleStyle: reviewCardTitleStyle(context),
           children: [
             if (_expiry != null)
               _reviewRow(
@@ -881,7 +893,7 @@ class _AddCapsuleWizardPageState
         children: [
           SizedBox(
             width: 120,
-            child: Text(label, style: fieldLabelStyle(context)),
+            child: Text(label, style: reviewRowLabelStyle(context)),
           ),
           const SizedBox(width: 8),
           Expanded(child: Text(value, style: bodyTextStyle(context))),
