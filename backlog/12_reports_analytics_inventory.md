@@ -1,4 +1,4 @@
-# Analytics & Inventory
+# Reports (Analytics, Inventory, Export)
 
 ## Analytics
 
