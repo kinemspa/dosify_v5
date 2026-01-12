@@ -51,7 +51,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
 
     final headerActionButtonStyle = OutlinedButton.styleFrom(
       foregroundColor: headerForeground,
-      textStyle: buttonTextStyle(context),
+      textStyle: compactButtonTextStyle(context),
       side: BorderSide(
         color: headerForeground.withValues(alpha: kOpacityMediumLow),
         width: kBorderWidthThin,

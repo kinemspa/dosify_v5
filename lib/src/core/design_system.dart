@@ -1036,6 +1036,11 @@ TextStyle? buttonTextStyle(BuildContext context) {
   );
 }
 
+/// Compact button text (used where space is tight, e.g. app header actions).
+TextStyle? compactButtonTextStyle(BuildContext context) {
+  return buttonTextStyle(context)?.copyWith(fontSize: kFontSizeSmall);
+}
+
 /// Card title style
 TextStyle? cardTitleStyle(BuildContext context) {
   return Theme.of(context).textTheme.titleSmall?.copyWith(
