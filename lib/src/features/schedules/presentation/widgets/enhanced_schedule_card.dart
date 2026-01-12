@@ -262,10 +262,6 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         nextDose != null &&
         strengthLabel.trim().isNotEmpty &&
         metrics.trim().isNotEmpty;
-    final adherenceData = _getAdherenceData();
-    final adherenceRate = (adherenceData['total'] as int) > 0
-        ? adherenceData['rate'] as double
-        : 100.0;
 
     return AnimatedContainer(
       duration: kAnimationNormal,
@@ -317,6 +313,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       strengthOrConcentrationLabel: strengthLabel,
                       doseMetrics: metrics,
                       isActive: widget.schedule.isActive,
+                      compact: true,
                       titleTrailing: ScheduleStatusChip(
                         schedule: widget.schedule,
                       ),
@@ -349,8 +346,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       Text(_getFrequencyText(), style: mutedTextStyle(context)),
                       const SizedBox(width: kSpacingS),
                       // Status on the right
-                      ScheduleStatusChip(schedule: widget.schedule),
-                      const SizedBox(width: kSpacingS),
+                      if (!_isExpanded) ...[
+                        ScheduleStatusChip(schedule: widget.schedule),
+                        const SizedBox(width: kSpacingS),
+                      ],
                       // Expand/collapse control
                       Padding(
                         padding: const EdgeInsets.all(kSpacingXS),
@@ -382,40 +381,6 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Adherence (if data exists)
-                      if ((adherenceData['total'] as int) > 0) ...[
-                        const SizedBox(height: kSpacingM),
-                        Row(
-                          children: [
-                            // Progress bar
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(kSpacingXS),
-                                child: LinearProgressIndicator(
-                                  value: adherenceRate / 100,
-                                  minHeight: kSpacingXS,
-                                  backgroundColor: colorScheme.primary
-                                      .withValues(alpha: kOpacityMinimal),
-                                  valueColor: AlwaysStoppedAnimation(
-                                    _getAdherenceColor(adherenceRate),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: kSpacingM),
-                            Text(
-                              '${adherenceRate.toStringAsFixed(0)}%',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: _getAdherenceColor(adherenceRate),
-                                fontWeight: kFontWeightBold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-
-                      const SizedBox(height: kSpacingL),
-
                       // Schedule Details Section
                       _buildExpandedSection(
                         context,
@@ -442,7 +407,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                       // Action Buttons Row (Schedule-level actions only)
                       Row(
                         children: [
-                          _buildSecondaryAction(
+                          _buildPrimaryIconAction(
                             context,
                             icon: Icons.edit_rounded,
                             onTap: _promptEditSchedule,
@@ -455,6 +420,26 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryIconAction(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.primary,
+      borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+        child: Container(
+          padding: const EdgeInsets.all(kSpacingM),
+          child: Icon(icon, size: kIconSizeMedium, color: colorScheme.onPrimary),
         ),
       ),
     );

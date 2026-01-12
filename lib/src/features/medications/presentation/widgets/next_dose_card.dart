@@ -294,6 +294,7 @@ class _NextDoseCardState extends State<NextDoseCard>
         medicationName: widget.medication.name,
         strengthOrConcentrationLabel: strengthLabel,
         doseMetrics: metrics,
+        compact: true,
         onQuickAction: (status) =>
             _showDoseActionSheet(dose, initialStatus: status),
         onTap: () => _showDoseActionSheet(dose),

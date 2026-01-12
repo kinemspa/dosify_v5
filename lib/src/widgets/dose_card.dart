@@ -18,6 +18,7 @@ class DoseCard extends StatelessWidget {
     required this.doseMetrics,
     required this.onTap,
     this.isActive = true,
+    this.compact = false,
     this.statusOverride,
     this.titleTrailing,
     this.leadingFooter,
@@ -34,6 +35,7 @@ class DoseCard extends StatelessWidget {
   final String doseMetrics;
   final VoidCallback onTap;
   final bool isActive;
+  final bool compact;
   final DoseStatus? statusOverride;
   final Widget? titleTrailing;
   final Widget? leadingFooter;
@@ -45,6 +47,11 @@ class DoseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
+    final radius = compact ? kBorderRadiusSmall : kBorderRadiusMedium;
+    final horizontalPadding = compact ? kSpacingS : kSpacingM;
+    final verticalPadding = compact ? kSpacingXXS : kSpacingXS;
+    final columnGap = compact ? kSpacingS : kSpacingM;
 
     final effectiveStatus = statusOverride ?? dose.status;
     final disabled = !isActive;
@@ -72,16 +79,16 @@ class DoseCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        borderRadius: BorderRadius.circular(radius),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        borderRadius: BorderRadius.circular(radius),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: kSpacingM,
-            vertical: kSpacingXS,
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +125,7 @@ class DoseCard extends StatelessWidget {
                   ],
                 ],
               ),
-              const SizedBox(width: kSpacingM),
+              SizedBox(width: columnGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +178,7 @@ class DoseCard extends StatelessWidget {
                 ),
               ),
               if (showActions) ...[
-                const SizedBox(width: kSpacingM),
+                SizedBox(width: columnGap),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
