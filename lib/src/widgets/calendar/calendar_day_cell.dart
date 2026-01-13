@@ -61,7 +61,8 @@ class CalendarDayCell extends StatelessWidget {
                 kCalendarDayDoseIndicatorPadding.vertical +
                 kCalendarDoseIndicatorSize +
                 overflowTextMinHeight;
-            final canShowIndicators = doses.isNotEmpty &&
+            final canShowIndicators =
+                doses.isNotEmpty &&
                 (constraints.maxHeight - headerHeight) >= indicatorsMinHeight;
 
             return Column(
@@ -79,14 +80,13 @@ class CalendarDayCell extends StatelessWidget {
                           alignment: Alignment.topLeft,
                           child: Text(
                             '${date.day}',
-                            style: calendarDayNumberTextStyle(
-                              context,
-                            )?.copyWith(
-                              color: _getTextColor(colorScheme),
-                              fontWeight: (isToday || isSelected)
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
+                            style: calendarDayNumberTextStyle(context)
+                                ?.copyWith(
+                                  color: _getTextColor(colorScheme),
+                                  fontWeight: (isToday || isSelected)
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
                           ),
                         ),
                       ),
@@ -175,10 +175,10 @@ class CalendarDayCell extends StatelessWidget {
                                                 alpha: kOpacityMediumHigh,
                                               )
                                             : colorScheme.onSurfaceVariant
-                                                .withValues(
-                                                  alpha:
-                                                      kCalendarDayOverflowTextOpacity,
-                                                ),
+                                                  .withValues(
+                                                    alpha:
+                                                        kCalendarDayOverflowTextOpacity,
+                                                  ),
                                       ),
                                 ),
                               ),
