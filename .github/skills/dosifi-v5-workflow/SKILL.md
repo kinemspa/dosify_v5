@@ -24,6 +24,26 @@ Responsive layout expectations (Android-first):
 - Fix overflows at the component level; don’t paper over them with global scroll views
    unless that’s the intended UX.
 
+## Centralization rule (strict)
+
+Everything visual must be centrally defined and reused.
+
+- If any UI element/pattern is coded twice (or is likely to be used in more than one place),
+   it must be moved into the centralized system.
+- Centralize *tokens* (spacing, radii, border widths, opacity, typography, sizes) in
+   `lib/src/core/design_system.dart`.
+- Centralize *patterns/widgets* (cards, rows, icon+label, chips/badges, buttons, form sections,
+   reusable containers) in `lib/src/widgets/`.
+
+This includes (non-exhaustive):
+- Borders (color, width, style)
+- Border radius
+- Typography (font sizes, weights, styles)
+- Font/text colors (use theme colorScheme + helpers; do not hardcode)
+- Buttons
+- Chips/badges
+- Common paddings/margins/layout patterns
+
 ## When to use
 
 - Any request that involves changing Dart/Flutter code in this repository.
@@ -95,6 +115,15 @@ If analysis fails, fix it before pushing.
 
 6. Backlog bookkeeping
    - Check off only completed items.
+
+## Quality gates (before you say “done”)
+
+- No hardcoded visual values in feature code (colors, padding, radii, border widths, text styles).
+- Any repeated visual element/pattern is centralized ("coded twice" rule).
+- No layout overflows in the modified area; layouts are constraint-aware where needed.
+- Diff is minimal and reviewable; unrelated UI remains visually identical.
+- `flutter analyze` is clean.
+- Commit + push completed.
 
 ## Debugging UI overflows (quick playbook)
 
