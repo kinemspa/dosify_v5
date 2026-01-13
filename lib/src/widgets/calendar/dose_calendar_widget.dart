@@ -269,7 +269,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     setState(() {
       // In Week/Month views, tapping a date selects that day.
       // Day view is only entered via explicit view switching.
-      _selectedDate = date;
+      final selected = _selectedDate;
+      final isSameDay = selected != null &&
+          selected.year == date.year &&
+          selected.month == date.month &&
+          selected.day == date.day;
+
+      _selectedDate = isSameDay ? null : date;
       _currentDate = date;
     });
   }
@@ -1179,7 +1185,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with date and close button
+            // Header with date
             Container(
               padding: kCalendarSelectedDayHeaderPadding,
               child: Row(
@@ -1189,11 +1195,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                       _formatSelectedDate(),
                       style: calendarSelectedDayHeaderTextStyle(context),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => setState(() => _selectedDate = null),
-                    tooltip: 'Close',
                   ),
                 ],
               ),

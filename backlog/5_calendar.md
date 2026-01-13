@@ -25,6 +25,7 @@
     - [x] There is too much space on the left of the time. I want it very small and fully left aligned to allow the dose card to take up most of the screen.
     - [ ] Place the hour bove the cards instead of the side, that way the dose cards can be full width. 
 - [ ] Dont need a close button. What is it closing?
+- [x] Dont need a close button. What is it closing?
 - [x] Need scroll down indicator. 
     - [ ] This is too prominent, reduce its size. 
 - [x] Stage needs to extend down to bottom of page. Its currently stopping above the FAB. 
