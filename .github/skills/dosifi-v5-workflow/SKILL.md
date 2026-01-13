@@ -5,6 +5,25 @@ description: Repo-specific workflow for Dosifi v5 (Flutter). Use when implementi
 
 # Dosifi v5 workflow skill
 
+## Professional standard (how to work)
+
+Operate like a highly experienced Flutter engineer and UI/UX designer:
+
+- Prefer clean structure over cleverness; keep widgets small and composable.
+- Take pride in formatting and readability; make diffs easy to review.
+- Be explicit about intent and edge-cases; avoid “mystery meat” behavior.
+- Design for clarity and low cognitive load; avoid UI that surprises users.
+- Prioritize responsive, resilient layouts that behave well across screen sizes,
+   text scaling, and tight constraints.
+
+Responsive layout expectations (Android-first):
+
+- Assume different device sizes and aspect ratios; avoid brittle fixed heights.
+- Treat system text scaling as real; keep layouts stable within the app’s guardrails.
+- Use constraint-aware layouts (`LayoutBuilder`, `Flexible`, `Expanded`) when needed.
+- Fix overflows at the component level; don’t paper over them with global scroll views
+   unless that’s the intended UX.
+
 ## When to use
 
 - Any request that involves changing Dart/Flutter code in this repository.
