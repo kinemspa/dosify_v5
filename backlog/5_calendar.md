@@ -6,17 +6,11 @@
 ### Monthly View
 - [x] There are now bottom overflows on every single day block. 
     - [ ] Still exists. Its a mess. 
-- [x] Reduce the Day bloack rounded corners radius by half. 
-- [x] Reduce the Today button rounder corners by half. 
-- [x] Day numbers need to be top left of each square. Not done properly, there must be padding keeping them in the middle. 
-- [x] Selected Day to fill entire block with primary colour.
-- [x] Today to be filled with the light blue colour as it is with a thn primary collur border. 
-- [x] Dose number indicator has too rounded corners.
-- [x] Dose number indicator is too tall.  
-- [x] Bottom overflow occurring on selected day. 
 - [ ] Why are there numbers and markers? isnt this redundant?
 
 ### Weekly View
+- [x] There is a bunch of overflows on the boxes representing doses.  
+
 - [x] Day objects are too tall. Reduce them. Number is too big. Not completed. 
 - [x] Dose objects on each week are styled in a way we dont see anywhere on this app. Change it. - Nothing was changed. 
     - [ ] still look the same. 

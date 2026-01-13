@@ -406,6 +406,7 @@ class _CompactDoseIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor = _getTextColor(context);
+    final timeText = DateFormat('ha').format(dose.scheduledTime).toLowerCase();
 
     return InkWell(
       onTap: onTap,
@@ -421,28 +422,55 @@ class _CompactDoseIndicator extends StatelessWidget {
             width: kBorderWidthMedium,
           ),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                _getDisplayText(),
-                style: calendarWeekDoseIndicatorValueTextStyle(
-                  context,
-                  color: textColor,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final showTime =
+                constraints.maxWidth >= kCalendarWeekDoseIndicatorMinWidthForTime;
+
+            if (!showTime) {
+              return Center(
+                child: Text(
+                  _getDisplayText(),
+                  style: calendarWeekDoseIndicatorValueTextStyle(
+                    context,
+                    color: textColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: kSpacingXS),
-            Text(
-              DateFormat('h:mm a').format(dose.scheduledTime).toLowerCase(),
-              style: calendarWeekDoseIndicatorTimeTextStyle(
-                context,
-                color: textColor,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              );
+            }
+
+            return Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _getDisplayText(),
+                    style: calendarWeekDoseIndicatorValueTextStyle(
+                      context,
+                      color: textColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: kSpacingXS),
+                Flexible(
+                  child: Text(
+                    timeText,
+                    style: calendarWeekDoseIndicatorTimeTextStyle(
+                      context,
+                      color: textColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

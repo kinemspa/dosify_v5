@@ -197,6 +197,8 @@ const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
 
 /// Week-view compact dose indicator sizing.
 const double kCalendarWeekDoseIndicatorHeight = 28;
+/// Minimum width required to show the time label in week-view dose indicators.
+const double kCalendarWeekDoseIndicatorMinWidthForTime = 52;
 const EdgeInsets kCalendarWeekDoseIndicatorPadding = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: kSpacingXXS,
