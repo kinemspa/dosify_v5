@@ -29,9 +29,9 @@
 - [x] Need scroll down indicator. 
     - [x] This is too prominent, reduce its size. 
 - [x] Stage needs to extend down to bottom of page. Its currently stopping above the FAB. 
-    - [ ] Was not completed. FAB needs to hovering over the top. 
+    - [x] Was not completed. FAB needs to hovering over the top. 
 - [x] Needs some padding between the Calendar, currently huggin the bottom border of calnedar.
-    - [ ] Something is wrong here. WHy cant you fix this, there is a wierd backgorund colour making this look like a card withn a card. WTF?
+    - [x] Something is wrong here. WHy cant you fix this, there is a wierd backgorund colour making this look like a card withn a card. WTF?
     
 
 

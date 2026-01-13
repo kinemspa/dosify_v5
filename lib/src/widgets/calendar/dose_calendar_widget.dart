@@ -867,7 +867,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final hours = dosesByHour.keys.toList()..sort();
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = safeBottom + kSpacingXXL + kSpacingXL;
+    final listBottomPadding = widget.variant == CalendarVariant.full
+      ? safeBottom + kPageBottomPadding
+      : safeBottom + kSpacingXXL + kSpacingXL;
 
     if (dayDoses.isEmpty) {
       final theme = Theme.of(context);
@@ -970,7 +972,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final colorScheme = theme.colorScheme;
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = safeBottom + kSpacingL;
+    final listBottomPadding = widget.variant == CalendarVariant.full
+      ? safeBottom + kPageBottomPadding
+      : safeBottom + kSpacingL;
 
     return Padding(
       padding: const EdgeInsets.only(top: kSpacingS),
@@ -1012,7 +1016,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                       ),
                     )
                   : ListView.builder(
-                      padding: EdgeInsets.only(bottom: listBottomPadding),
+                      padding: calendarStageListPadding(listBottomPadding),
                       itemCount: dayDoses.length,
                       itemBuilder: (context, index) {
                         final dose = dayDoses[index];
@@ -1170,7 +1174,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final colorScheme = theme.colorScheme;
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = safeBottom + kSpacingXXL + kSpacingXL;
+    final listBottomPadding = widget.variant == CalendarVariant.full
+      ? safeBottom + kPageBottomPadding
+      : safeBottom + kSpacingXXL + kSpacingXL;
 
     return Padding(
       padding: const EdgeInsets.only(top: kSpacingS),
