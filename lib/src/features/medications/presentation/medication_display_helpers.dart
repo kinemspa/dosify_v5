@@ -40,8 +40,10 @@ class MedicationDisplayHelpers {
     return '${fmt2(microliter / 1000)} mL';
   }
 
-  static String formatSyringeUnits(double units) {
-    return '${fmt2(units)} U';
+  static String formatSyringeUnits(double units, {bool longLabel = false}) {
+    final value = fmt2(units);
+    if (longLabel) return '$value units';
+    return '$value U';
   }
 
   static String strengthOrConcentrationLabel(
@@ -75,7 +77,7 @@ class MedicationDisplayHelpers {
     };
 
     if (perUnit == null) return '$term: $value $unit';
-    return '$term: $value $unit per $perUnit';
+    return '$term: $value $unit $perUnit';
   }
 
   static String unitLabel(Unit unit) {
@@ -173,7 +175,12 @@ class MedicationDisplayHelpers {
     }
 
     if (syringeUnits != null) {
-      metrics.add(formatSyringeUnits(syringeUnits));
+      metrics.add(
+        formatSyringeUnits(
+          syringeUnits,
+          longLabel: med.form == MedicationForm.multiDoseVial,
+        ),
+      );
     }
 
     if (metrics.isEmpty) return '';

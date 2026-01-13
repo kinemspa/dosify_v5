@@ -202,6 +202,7 @@ class DoseCard extends StatelessWidget {
                               style: baseBody?.copyWith(
                                 color: takeColor,
                                 fontWeight: kFontWeightSemiBold,
+                                fontSize: kFontSizeSmall,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -215,6 +216,7 @@ class DoseCard extends StatelessWidget {
                         style: baseBody?.copyWith(
                           color: takeColor,
                           fontWeight: kFontWeightSemiBold,
+                          fontSize: kFontSizeSmall,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
