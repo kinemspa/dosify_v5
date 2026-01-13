@@ -907,6 +907,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       child: Scrollbar(
         controller: _dayStageScrollController,
         thumbVisibility: true,
+        thickness: kCalendarStageScrollbarThickness,
+        radius: kCalendarStageScrollbarThumbRadius,
         child: ListView.builder(
           controller: _dayStageScrollController,
           padding: calendarStageListPadding(listBottomPadding),
@@ -1215,6 +1217,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                   : Scrollbar(
                       controller: _selectedDayScrollController,
                       thumbVisibility: true,
+                      thickness: kCalendarStageScrollbarThickness,
+                      radius: kCalendarStageScrollbarThumbRadius,
                       child: ListView.builder(
                         controller: _selectedDayScrollController,
                         padding: calendarStageListPadding(listBottomPadding),

@@ -27,7 +27,7 @@
 - [ ] Dont need a close button. What is it closing?
 - [x] Dont need a close button. What is it closing?
 - [x] Need scroll down indicator. 
-    - [ ] This is too prominent, reduce its size. 
+    - [x] This is too prominent, reduce its size. 
 - [x] Stage needs to extend down to bottom of page. Its currently stopping above the FAB. 
     - [ ] Was not completed. FAB needs to hovering over the top. 
 - [x] Needs some padding between the Calendar, currently huggin the bottom border of calnedar.

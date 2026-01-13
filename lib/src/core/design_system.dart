@@ -179,6 +179,12 @@ const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
 const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
   bottom: kSpacingS,
 );
+
+/// Calendar stage scroll indicator (Scrollbar)
+const double kCalendarStageScrollbarThickness = 3;
+const Radius kCalendarStageScrollbarThumbRadius = Radius.circular(
+  kBorderRadiusChipTight,
+);
 const EdgeInsets kCalendarSelectedDayHeaderPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
   vertical: kSpacingXS,
