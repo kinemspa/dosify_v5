@@ -82,8 +82,8 @@ class DoseCard extends StatelessWidget {
 
     final takeText = 'Take $doseMetrics';
     final takeColor = isActive
-      ? statusColor.withValues(alpha: kOpacityFull)
-      : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+        ? statusColor.withValues(alpha: kOpacityFull)
+        : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
 
     return Material(
       color: Colors.transparent,

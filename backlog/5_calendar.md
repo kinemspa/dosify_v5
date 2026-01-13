@@ -14,6 +14,7 @@
 - [x] Dose number indicator has too rounded corners.
 - [x] Dose number indicator is too tall.  
 - [x] Bottom overflow occurring on selected day. 
+- [ ] Why are there numbers and markers? isnt this redundant?
 
 ### Weekly View
 - [x] Day objects are too tall. Reduce them. Number is too big. Not completed. 
@@ -26,15 +27,12 @@
 
 
 ### Dose Card Stage
-- [x] Heading needs to be in OS regional Date format layout. 
 - [x] Need to have the Dose Stage appear like it is the Day view. Place the Hours on the left of the dose cards like the day view. 
     - [ ] There is too much space on the left of the time. I want it very small and fully left aligned to allow the dose card to take up most of the screen.
-- Dont need a close button. What is ti closing?
-- [x] Way too much space and padding surrounding the heading - Nothing has chanhged here. Still way to much space above and below. Reduce the text size. 
-    - Still way too much.
-- [x] Must use the Dose Card widget for all doses. Stack vertically.
+    - [ ] Place the hour bove the cards instead of the side, that way the dose cards can be full width. 
+- [ ] Dont need a close button. What is it closing?
 - [x] Need scroll down indicator. 
-    - [ ] This is too prominent. 
+    - [ ] This is too prominent, reduce its size. 
 - [x] Stage needs to extend down to bottom of page. Its currently stopping above the FAB. 
     - [ ] Was not completed. FAB needs to hovering over the top. 
 - [x] Needs some padding between the Calendar, currently huggin the bottom border of calnedar.

@@ -47,122 +47,149 @@ class CalendarDayCell extends StatelessWidget {
             width: _getBorderWidth(),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: kCalendarDayNumberPadding,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  SizedBox(
-                    width: kCalendarDayNumberSize,
-                    height: kCalendarDayNumberSize,
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        '${date.day}',
-                        style: calendarDayNumberTextStyle(context)?.copyWith(
-                          color: _getTextColor(colorScheme),
-                          fontWeight: (isToday || isSelected)
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (doseCount > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: kCalendarDayCountBadgePadding,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? colorScheme.onPrimary.withValues(
-                                  alpha: kOpacityFaint,
-                                )
-                              : colorScheme.primary.withValues(
-                                  alpha: kOpacityFaint,
-                                ),
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadiusChipTight,
-                          ),
-                          border: Border.all(
-                            color: isSelected
-                                ? colorScheme.onPrimary.withValues(
-                                    alpha: kOpacityMediumLow,
-                                  )
-                                : colorScheme.outlineVariant.withValues(
-                                    alpha: kOpacityMediumLow,
-                                  ),
-                            width: kBorderWidthThin,
-                          ),
-                        ),
-                        child: Text(
-                          doseCountText,
-                          style: calendarDayCountBadgeTextStyle(context)
-                              ?.copyWith(
-                                color: isSelected
-                                    ? colorScheme.onPrimary
-                                    : (isCurrentMonth
-                                          ? colorScheme.primary
-                                          : colorScheme.primary.withValues(
-                                              alpha: kOpacityMedium,
-                                            )),
-                              ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (doses.isNotEmpty)
-              Expanded(
-                child: Padding(
-                  padding: kCalendarDayDoseIndicatorPadding,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final headerHeight =
+                kCalendarDayNumberPadding.vertical + kCalendarDayNumberSize;
+
+            final showOverflowText =
+                doses.length > kCalendarMonthMaxDoseIndicators;
+            final overflowTextMinHeight = showOverflowText
+                ? (kSpacingXS / 2) + (kFontSizeSmall * kLineHeightTight)
+                : 0.0;
+            final indicatorsMinHeight =
+                kCalendarDayDoseIndicatorPadding.vertical +
+                kCalendarDoseIndicatorSize +
+                overflowTextMinHeight;
+            final canShowIndicators = doses.isNotEmpty &&
+                (constraints.maxHeight - headerHeight) >= indicatorsMinHeight;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: kCalendarDayNumberPadding,
+                  child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:
-                            doses
-                                .take(kCalendarMonthMaxDoseIndicators)
-                                .expand(
-                                  (dose) => [
-                                    CalendarDoseIndicator(dose: dose),
-                                    const SizedBox(
-                                      width: kCalendarDoseIndicatorSpacing,
-                                    ),
-                                  ],
-                                )
-                                .toList()
-                              ..removeLast(),
-                      ),
-                      if (doses.length > kCalendarMonthMaxDoseIndicators)
-                        Padding(
-                          padding: const EdgeInsets.only(top: kSpacingXS / 2),
+                      SizedBox(
+                        width: kCalendarDayNumberSize,
+                        height: kCalendarDayNumberSize,
+                        child: Align(
+                          alignment: Alignment.topLeft,
                           child: Text(
-                            '+${doses.length - kCalendarMonthMaxDoseIndicators}',
-                            style: calendarDayOverflowTextStyle(context)
-                                ?.copyWith(
-                                  color: isSelected
-                                      ? colorScheme.onPrimary.withValues(
-                                          alpha: kOpacityMediumHigh,
-                                        )
-                                      : colorScheme.onSurfaceVariant.withValues(
-                                          alpha:
-                                              kCalendarDayOverflowTextOpacity,
-                                        ),
-                                ),
+                            '${date.day}',
+                            style: calendarDayNumberTextStyle(
+                              context,
+                            )?.copyWith(
+                              color: _getTextColor(colorScheme),
+                              fontWeight: (isToday || isSelected)
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (doseCount > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: kCalendarDayCountBadgePadding,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? colorScheme.onPrimary.withValues(
+                                      alpha: kOpacityFaint,
+                                    )
+                                  : colorScheme.primary.withValues(
+                                      alpha: kOpacityFaint,
+                                    ),
+                              borderRadius: BorderRadius.circular(
+                                kBorderRadiusChipTight,
+                              ),
+                              border: Border.all(
+                                color: isSelected
+                                    ? colorScheme.onPrimary.withValues(
+                                        alpha: kOpacityMediumLow,
+                                      )
+                                    : colorScheme.outlineVariant.withValues(
+                                        alpha: kOpacityMediumLow,
+                                      ),
+                                width: kBorderWidthThin,
+                              ),
+                            ),
+                            child: Text(
+                              doseCountText,
+                              style: calendarDayCountBadgeTextStyle(context)
+                                  ?.copyWith(
+                                    color: isSelected
+                                        ? colorScheme.onPrimary
+                                        : (isCurrentMonth
+                                              ? colorScheme.primary
+                                              : colorScheme.primary.withValues(
+                                                  alpha: kOpacityMedium,
+                                                )),
+                                  ),
+                            ),
                           ),
                         ),
                     ],
                   ),
                 ),
-              ),
-          ],
+                if (canShowIndicators)
+                  Expanded(
+                    child: ClipRect(
+                      child: Padding(
+                        padding: kCalendarDayDoseIndicatorPadding,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children:
+                                  doses
+                                      .take(kCalendarMonthMaxDoseIndicators)
+                                      .expand(
+                                        (dose) => [
+                                          CalendarDoseIndicator(dose: dose),
+                                          const SizedBox(
+                                            width:
+                                                kCalendarDoseIndicatorSpacing,
+                                          ),
+                                        ],
+                                      )
+                                      .toList()
+                                    ..removeLast(),
+                            ),
+                            if (doses.length > kCalendarMonthMaxDoseIndicators)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: kSpacingXS / 2,
+                                ),
+                                child: Text(
+                                  '+${doses.length - kCalendarMonthMaxDoseIndicators}',
+                                  style: calendarDayOverflowTextStyle(context)
+                                      ?.copyWith(
+                                        color: isSelected
+                                            ? colorScheme.onPrimary.withValues(
+                                                alpha: kOpacityMediumHigh,
+                                              )
+                                            : colorScheme.onSurfaceVariant
+                                                .withValues(
+                                                  alpha:
+                                                      kCalendarDayOverflowTextOpacity,
+                                                ),
+                                      ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
