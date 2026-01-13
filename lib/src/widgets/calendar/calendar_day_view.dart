@@ -224,20 +224,15 @@ class _HourRow extends StatelessWidget {
         children: [
           // Time label
           SizedBox(
-            width: 60,
+            width: kCalendarStageHourLabelWidth,
             child: Padding(
-              padding: const EdgeInsets.only(
-                top: kListItemSpacing,
-                right: kCardInnerSpacing,
-              ),
+              padding: kCalendarStageHourLabelPadding,
               child: Text(
                 _formatHour(hour),
-                textAlign: TextAlign.right,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-                ),
+                textAlign: TextAlign.left,
+                style: calendarStageHourLabelTextStyle(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -297,7 +292,7 @@ class _CurrentTimeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const SizedBox(width: 60), // Offset for time label
+        const SizedBox(width: kCalendarStageHourLabelWidth),
         Expanded(
           child: Container(
             height: 2,

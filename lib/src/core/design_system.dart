@@ -165,10 +165,10 @@ const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarDoseIndicatorSpacing = 2;
 
 /// Calendar selected-day (Dose Card Stage) layout
-const double kCalendarStageHourLabelWidth = 60;
+const double kCalendarStageHourLabelWidth = 48;
 const EdgeInsets kCalendarStageHourLabelPadding = EdgeInsets.only(
   top: kListItemSpacing,
-  right: kCardInnerSpacing,
+  right: kSpacingXS,
 );
 const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
   kSpacingM,

@@ -920,7 +920,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                       padding: kCalendarStageHourLabelPadding,
                       child: Text(
                         _formatSelectedHour(hour),
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: calendarStageHourLabelTextStyle(context),
                       ),
                     ),
@@ -1233,7 +1233,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                                     padding: kCalendarStageHourLabelPadding,
                                     child: Text(
                                       _formatSelectedHour(hour),
-                                      textAlign: TextAlign.right,
+                                      textAlign: TextAlign.left,
                                       style: calendarStageHourLabelTextStyle(
                                         context,
                                       ),
