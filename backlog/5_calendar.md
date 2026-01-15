@@ -13,7 +13,7 @@
 
 - [x] Day objects are too tall. Reduce them. Number is too big. Not completed. 
 - [x] Dose objects on each week are styled in a way we dont see anywhere on this app. Change it. - Nothing was changed. 
-    - [ ] still look the same. 
+    - [x] still look the same. 
 
 ### Day View
 - [x] Just extends the Dose Card Stage to full screen with the hours seton the left.

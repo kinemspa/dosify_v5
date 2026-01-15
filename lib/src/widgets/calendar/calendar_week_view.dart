@@ -339,51 +339,20 @@ class _CompactDoseIndicator extends StatelessWidget {
   final CalculatedDose dose;
   final VoidCallback? onTap;
 
-  Color _getBackgroundColor(BuildContext context) {
+  Color _statusColor(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     switch (dose.status) {
       case DoseStatus.taken:
-        return cs.primary.withValues(alpha: kOpacityFaint);
+        return kDoseStatusTakenGreen;
       case DoseStatus.skipped:
-        return cs.onSurfaceVariant.withValues(alpha: kOpacityFaint);
-      case DoseStatus.snoozed:
-        return cs.tertiary.withValues(alpha: kOpacityFaint);
-      case DoseStatus.overdue:
-        return cs.error.withValues(alpha: kOpacityFaint);
-      case DoseStatus.pending:
-        return kColorTransparent;
-    }
-  }
-
-  Color _getBorderColor(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    switch (dose.status) {
-      case DoseStatus.taken:
-        return cs.primary.withValues(alpha: kOpacityMediumLow);
-      case DoseStatus.skipped:
-        return cs.outline.withValues(alpha: kOpacityMediumLow);
-      case DoseStatus.snoozed:
-        return cs.tertiary.withValues(alpha: kOpacityMediumLow);
-      case DoseStatus.overdue:
-        return cs.error.withValues(alpha: kOpacityMediumLow);
-      case DoseStatus.pending:
-        return cs.primary.withValues(alpha: kOpacityMediumLow);
-    }
-  }
-
-  Color _getTextColor(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    switch (dose.status) {
-      case DoseStatus.taken:
-        return cs.primary;
-      case DoseStatus.overdue:
         return cs.error;
+      case DoseStatus.snoozed:
+        return kDoseStatusSnoozedOrange;
+      case DoseStatus.overdue:
+        return kDoseStatusMissedDarkRed;
       case DoseStatus.pending:
         return cs.primary;
-      default:
-        return cs.onSurface;
     }
   }
 
@@ -405,7 +374,7 @@ class _CompactDoseIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = _getTextColor(context);
+    final statusColor = _statusColor(context);
     final timeText = DateFormat('ha').format(dose.scheduledTime).toLowerCase();
 
     return InkWell(
@@ -414,13 +383,10 @@ class _CompactDoseIndicator extends StatelessWidget {
       child: Container(
         height: kCalendarWeekDoseIndicatorHeight,
         padding: kCalendarWeekDoseIndicatorPadding,
-        decoration: BoxDecoration(
-          color: _getBackgroundColor(context),
-          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-          border: Border.all(
-            color: _getBorderColor(context),
-            width: kBorderWidthMedium,
-          ),
+        decoration: buildInsetSectionDecoration(
+          context: context,
+          borderRadius: kBorderRadiusSmall,
+          backgroundOpacity: 1.0,
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -429,27 +395,38 @@ class _CompactDoseIndicator extends StatelessWidget {
 
             if (!showTime) {
               return Center(
-                child: Text(
-                  _getDisplayText(),
-                  style: calendarWeekDoseIndicatorValueTextStyle(
-                    context,
-                    color: textColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _StatusDot(color: statusColor),
+                    const SizedBox(width: kSpacingXS),
+                    Flexible(
+                      child: Text(
+                        _getDisplayText(),
+                        style: calendarWeekDoseIndicatorValueTextStyle(
+                          context,
+                          color: statusColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
 
             return Row(
               children: [
+                _StatusDot(color: statusColor),
+                const SizedBox(width: kSpacingXS),
                 Expanded(
                   child: Text(
                     _getDisplayText(),
                     style: calendarWeekDoseIndicatorValueTextStyle(
                       context,
-                      color: textColor,
+                      color: statusColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -461,7 +438,10 @@ class _CompactDoseIndicator extends StatelessWidget {
                     timeText,
                     style: calendarWeekDoseIndicatorTimeTextStyle(
                       context,
-                      color: textColor,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: kOpacityMediumHigh),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -472,6 +452,24 @@ class _CompactDoseIndicator extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _StatusDot extends StatelessWidget {
+  const _StatusDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: kCalendarDoseIndicatorSize,
+      height: kCalendarDoseIndicatorSize,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
