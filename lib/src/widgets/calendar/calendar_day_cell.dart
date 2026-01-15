@@ -30,9 +30,6 @@ class CalendarDayCell extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final doseCount = doses.length;
-    final doseCountText = doseCount > 9 ? '9+' : '$doseCount';
-
     final borderRadius = BorderRadius.circular(kCalendarDayCellBorderRadius);
 
     return InkWell(
@@ -51,16 +48,9 @@ class CalendarDayCell extends StatelessWidget {
           builder: (context, constraints) {
             final headerHeight =
                 kCalendarDayNumberPadding.vertical + kCalendarDayNumberSize;
-
-            final showOverflowText =
-                doses.length > kCalendarMonthMaxDoseIndicators;
-            final overflowTextMinHeight = showOverflowText
-                ? (kSpacingXS / 2) + (kFontSizeSmall * kLineHeightTight)
-                : 0.0;
             final indicatorsMinHeight =
                 kCalendarDayDoseIndicatorPadding.vertical +
-                kCalendarDoseIndicatorSize +
-                overflowTextMinHeight;
+              kCalendarDoseIndicatorSize;
             final canShowIndicators =
                 doses.isNotEmpty &&
                 (constraints.maxHeight - headerHeight) >= indicatorsMinHeight;
@@ -90,49 +80,6 @@ class CalendarDayCell extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (doseCount > 0)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            padding: kCalendarDayCountBadgePadding,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? colorScheme.onPrimary.withValues(
-                                      alpha: kOpacityFaint,
-                                    )
-                                  : colorScheme.primary.withValues(
-                                      alpha: kOpacityFaint,
-                                    ),
-                              borderRadius: BorderRadius.circular(
-                                kBorderRadiusChipTight,
-                              ),
-                              border: Border.all(
-                                color: isSelected
-                                    ? colorScheme.onPrimary.withValues(
-                                        alpha: kOpacityMediumLow,
-                                      )
-                                    : colorScheme.outlineVariant.withValues(
-                                        alpha: kOpacityMediumLow,
-                                      ),
-                                width: kBorderWidthThin,
-                              ),
-                            ),
-                            child: Text(
-                              doseCountText,
-                              style: calendarDayCountBadgeTextStyle(context)
-                                  ?.copyWith(
-                                    color: isSelected
-                                        ? colorScheme.onPrimary
-                                        : (isCurrentMonth
-                                              ? colorScheme.primary
-                                              : colorScheme.primary.withValues(
-                                                  alpha: kOpacityMedium,
-                                                )),
-                                  ),
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -161,27 +108,6 @@ class CalendarDayCell extends StatelessWidget {
                                       .toList()
                                     ..removeLast(),
                             ),
-                            if (doses.length > kCalendarMonthMaxDoseIndicators)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: kSpacingXS / 2,
-                                ),
-                                child: Text(
-                                  '+${doses.length - kCalendarMonthMaxDoseIndicators}',
-                                  style: calendarDayOverflowTextStyle(context)
-                                      ?.copyWith(
-                                        color: isSelected
-                                            ? colorScheme.onPrimary.withValues(
-                                                alpha: kOpacityMediumHigh,
-                                              )
-                                            : colorScheme.onSurfaceVariant
-                                                  .withValues(
-                                                    alpha:
-                                                        kCalendarDayOverflowTextOpacity,
-                                                  ),
-                                      ),
-                                ),
-                              ),
                           ],
                         ),
                       ),

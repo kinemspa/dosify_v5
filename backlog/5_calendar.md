@@ -6,7 +6,7 @@
 ### Monthly View
 - [x] There are now bottom overflows on every single day block. 
     - [ ] Still exists. Its a mess. 
-- [ ] Why are there numbers and markers? isnt this redundant?
+- [x] Why are there numbers and markers? isnt this redundant?
 
 ### Weekly View
 - [x] There is a bunch of overflows on the boxes representing doses.  
