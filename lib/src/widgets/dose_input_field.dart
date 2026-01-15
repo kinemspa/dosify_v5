@@ -647,7 +647,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
               child: _buildTabletStrengthUnitPicker(),
             ),
           ],
-          const SizedBox(height: kFieldGroupSpacing),
+          const SizedBox(height: kSpacingS),
         ],
 
         // MDV mode toggle (3-way: Strength | Volume | Units)
