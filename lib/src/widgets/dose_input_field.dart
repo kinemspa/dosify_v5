@@ -1186,6 +1186,16 @@ class _DoseInputFieldState extends State<DoseInputField> {
     if (_result == null) return const SizedBox.shrink();
 
     final warningTint = cs.tertiary;
+    final baseColor = _result!.hasError
+        ? cs.onErrorContainer
+        : (_result!.hasWarning
+              ? warningTint
+              : cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumLow,
+                ));
+    final numberColor = _result!.hasError || _result!.hasWarning
+        ? baseColor
+        : cs.primary;
 
     return Container(
       width: double.infinity,
@@ -1212,18 +1222,15 @@ class _DoseInputFieldState extends State<DoseInputField> {
           // Main display text
           Align(
             alignment: Alignment.center,
-            child: Text(
+            child: _buildResultRichText(
               _result!.displayText,
-              textAlign: TextAlign.center,
-              style: bodyTextStyle(context)?.copyWith(
+              baseStyle: bodyTextStyle(context)?.copyWith(
                 fontWeight: kFontWeightSemiBold,
-                color: _result!.hasError
-                    ? cs.onErrorContainer
-                    : (_result!.hasWarning
-                          ? warningTint
-                          : cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMediumLow,
-                            )),
+                color: baseColor,
+              ),
+              numberStyle: bodyTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: numberColor,
               ),
             ),
           ),
@@ -1275,6 +1282,42 @@ class _DoseInputFieldState extends State<DoseInputField> {
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildResultRichText(
+    String text, {
+    required TextStyle? baseStyle,
+    required TextStyle? numberStyle,
+  }) {
+    if (text.isEmpty) {
+      return Text('', style: baseStyle, textAlign: TextAlign.center);
+    }
+
+    final pattern = RegExp(r'\d+(?:[\/.]\d+)?');
+    final spans = <TextSpan>[];
+    var lastIndex = 0;
+
+    for (final match in pattern.allMatches(text)) {
+      if (match.start > lastIndex) {
+        spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
+      }
+      spans.add(
+        TextSpan(
+          text: match.group(0),
+          style: numberStyle,
+        ),
+      );
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      spans.add(TextSpan(text: text.substring(lastIndex)));
+    }
+
+    return Text.rich(
+      TextSpan(style: baseStyle, children: spans),
+      textAlign: TextAlign.center,
     );
   }
 }

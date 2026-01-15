@@ -218,7 +218,7 @@ class DoseCalculator {
         doseVolumeMicroliter: volumeMicroliter,
         syringeUnits: syringeUnits,
         displayText:
-            '${formatMass(strengthMcg)} (${formatVolume(volumeMicroliter)} / ${syringeUnits.toStringAsFixed(1)}U)',
+          '${formatMass(strengthMcg)} (${formatVolume(volumeMicroliter)} / ${_trimFixed(syringeUnits.toStringAsFixed(1))}U)',
         warning: '⚠️ High dose - using >80% of vial. Verify calculation.',
       );
     }
@@ -228,7 +228,7 @@ class DoseCalculator {
       doseVolumeMicroliter: volumeMicroliter,
       syringeUnits: syringeUnits,
       displayText:
-          '${formatMass(strengthMcg)} (${formatVolume(volumeMicroliter)} / ${syringeUnits.toStringAsFixed(1)}U)',
+          '${formatMass(strengthMcg)} (${formatVolume(volumeMicroliter)} / ${_trimFixed(syringeUnits.toStringAsFixed(1))}U)',
     );
   }
 
@@ -291,17 +291,22 @@ class DoseCalculator {
   /// Formats mass (mcg/mg/g) with appropriate unit.
   static String formatMass(double mcg) {
     if (mcg >= 1000000) {
-      return '${(mcg / 1000000).toStringAsFixed(1)}g';
+      return '${_trimFixed((mcg / 1000000).toStringAsFixed(1))}g';
     }
     if (mcg >= 1000) {
-      return '${(mcg / 1000).toStringAsFixed(1)}mg';
+      return '${_trimFixed((mcg / 1000).toStringAsFixed(1))}mg';
     }
     return '${mcg.toStringAsFixed(0)}mcg';
   }
 
   /// Formats volume (ml) from microliters.
   static String formatVolume(double microliter) {
-    return '${(microliter / 1000).toStringAsFixed(2)}ml';
+    return '${_trimFixed((microliter / 1000).toStringAsFixed(2))}ml';
+  }
+
+  static String _trimFixed(String value) {
+    if (!value.contains('.')) return value;
+    return value.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
   }
 
   /// Formats tablet count (shows fractions for < 1).
