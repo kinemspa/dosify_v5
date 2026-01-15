@@ -88,27 +88,8 @@ class CalendarDayCell extends StatelessWidget {
                     child: ClipRect(
                       child: Padding(
                         padding: kCalendarDayDoseIndicatorPadding,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:
-                                  doses
-                                      .take(kCalendarMonthMaxDoseIndicators)
-                                      .expand(
-                                        (dose) => [
-                                          CalendarDoseIndicator(dose: dose),
-                                          const SizedBox(
-                                            width:
-                                                kCalendarDoseIndicatorSpacing,
-                                          ),
-                                        ],
-                                      )
-                                      .toList()
-                                    ..removeLast(),
-                            ),
-                          ],
+                        child: Center(
+                          child: CalendarDoseIndicator(dose: doses.first),
                         ),
                       ),
                     ),

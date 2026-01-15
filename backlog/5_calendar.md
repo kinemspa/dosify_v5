@@ -5,7 +5,7 @@
 
 ### Monthly View
 - [x] There are now bottom overflows on every single day block. 
-    - [ ] Still exists. Its a mess. 
+    - [x] Still exists. Its a mess. 
 - [x] Why are there numbers and markers? isnt this redundant?
 
 ### Weekly View
