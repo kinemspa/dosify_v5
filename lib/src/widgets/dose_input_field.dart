@@ -634,9 +634,9 @@ class _DoseInputFieldState extends State<DoseInputField> {
       children: [
         // Mode toggle (tablets/capsules OR MDV)
         if (_supportsModeToggle()) ...[
-          _buildTabletCapsuleHelperText(),
-          const SizedBox(height: kSpacingS),
           _buildModeToggle(cs),
+          const SizedBox(height: kSpacingS),
+          _buildTabletCapsuleHelperText(),
           if (widget.medicationForm == MedicationForm.tablet) ...[
             const SizedBox(height: kSpacingS),
             Visibility(
@@ -652,9 +652,9 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
         // MDV mode toggle (3-way: Strength | Volume | Units)
         if (widget.medicationForm == MedicationForm.multiDoseVial) ...[
-          _buildMdvModeHelperText(),
-          const SizedBox(height: kSpacingS),
           _buildMdvModeToggle(cs),
+          const SizedBox(height: kSpacingS),
+          _buildMdvModeHelperText(),
           if (_mdvMode == MdvInputMode.strength &&
               widget.strengthUnit != 'units') ...[
             const SizedBox(height: kSpacingS),
@@ -708,7 +708,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
         : 'capsule';
 
     return Text(
-      'Select $countLabel to enter how many you take. Select Strength to enter a dose amount — we’ll convert using the strength per $perUnitLabel.',
+      'Select $countLabel to enter quantity. Select Strength to enter a dose amount; the app calculates the equivalent using the strength per $perUnitLabel.',
       style: helperTextStyle(context),
     );
   }
@@ -719,7 +719,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     }
 
     return Text(
-      "Select a dose input mode: Strength, Volume, or Units. We'll calculate the other values automatically.",
+      'Select a dose input mode: Strength, Volume, or Units. The app calculates the other values automatically.',
       style: helperTextStyle(context),
     );
   }

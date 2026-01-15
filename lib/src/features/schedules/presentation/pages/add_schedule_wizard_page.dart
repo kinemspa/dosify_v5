@@ -757,7 +757,7 @@ class _AddScheduleWizardPageState
       children: [
         if (_selectedMed!.form == MedicationForm.multiDoseVial) ...[
           LabelFieldRow(
-            label: 'Syringe',
+            label: 'Syringe Size',
             field: SmallDropdown36<SyringeType>(
               value: _selectedSyringeType ?? _getSyringeType(),
               items: SyringeType.values
@@ -778,7 +778,7 @@ class _AddScheduleWizardPageState
           ),
           const SizedBox(height: kSpacingS),
           _helperBelowLeft(
-            'Choose the syringe size so the unit markings match what you use.',
+            'Select the syringe size used for administration.',
           ),
           const SizedBox(height: kSpacingS),
         ],
@@ -1207,10 +1207,10 @@ class _AddScheduleWizardPageState
   }
 
   String _modeLabel(ScheduleMode m) => switch (m) {
-    ScheduleMode.everyDay => 'Every day',
-    ScheduleMode.daysOfWeek => 'Days of the week',
-    ScheduleMode.daysOnOff => 'Days on / days off',
-    ScheduleMode.daysOfMonth => 'Days of the month',
+    ScheduleMode.everyDay => 'Daily',
+    ScheduleMode.daysOfWeek => 'Weekly',
+    ScheduleMode.daysOnOff => 'Cycle',
+    ScheduleMode.daysOfMonth => 'Monthly',
   };
 
   Widget _buildScheduleModeFields() {
@@ -1251,6 +1251,10 @@ class _AddScheduleWizardPageState
                 );
               }),
             ),
+            const SizedBox(height: kSpacingS),
+            _helperBelowLeft(
+              'Choose the days of the week when doses occur.',
+            ),
           ],
         );
 
@@ -1284,7 +1288,7 @@ class _AddScheduleWizardPageState
             ),
             const SizedBox(height: kSpacingS),
             Text(
-              'Take medication for $daysOnValue days, then pause for $daysOffValue days',
+              'Dose for $daysOnValue days, then pause for $daysOffValue days. This cycle repeats.',
               style: helperTextStyle(context),
             ),
           ],
@@ -1295,10 +1299,6 @@ class _AddScheduleWizardPageState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: kSpacingS),
-            _helperBelowLeft(
-              'Select which days of the month to take this dose (1-31).',
-            ),
             const SizedBox(height: kSpacingS),
             Wrap(
               alignment: WrapAlignment.center,
@@ -1321,6 +1321,10 @@ class _AddScheduleWizardPageState
                   },
                 );
               }),
+            ),
+            const SizedBox(height: kSpacingS),
+            _helperBelowLeft(
+              'Select the day numbers (1–31) when doses occur.',
             ),
             if (showMissingDayOption) ...[
               const SizedBox(height: kSpacingS),
@@ -1823,7 +1827,7 @@ class _AddScheduleWizardPageState
     BuildContext context,
     String title,
     List<Widget> children, {
-    bool titlePrimary = false,
+    bool titlePrimary = true,
   }) {
     final cs = Theme.of(context).colorScheme;
     return Container(
@@ -1836,7 +1840,7 @@ class _AddScheduleWizardPageState
             title,
             style: sectionTitleStyle(
               context,
-            )?.copyWith(color: titlePrimary ? cs.primary : null),
+            )?.copyWith(color: cs.primary),
           ),
           const SizedBox(height: kSpacingM),
           ...children,
