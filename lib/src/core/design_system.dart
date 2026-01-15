@@ -168,7 +168,7 @@ const double kCalendarDoseIndicatorSpacing = 2;
 const double kCalendarStageHourLabelWidth = 48;
 const EdgeInsets kCalendarStageHourLabelPadding = EdgeInsets.only(
   top: kListItemSpacing,
-  right: kSpacingXS,
+  bottom: kSpacingXS,
 );
 const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
   kSpacingM,

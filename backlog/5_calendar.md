@@ -23,7 +23,7 @@
 ### Dose Card Stage
 - [x] Need to have the Dose Stage appear like it is the Day view. Place the Hours on the left of the dose cards like the day view. 
     - [x] There is too much space on the left of the time. I want it very small and fully left aligned to allow the dose card to take up most of the screen.
-    - [ ] Place the hour bove the cards instead of the side, that way the dose cards can be full width. 
+    - [x] Place the hour bove the cards instead of the side, that way the dose cards can be full width. 
 - [ ] Dont need a close button. What is it closing?
 - [x] Dont need a close button. What is it closing?
 - [x] Need scroll down indicator. 

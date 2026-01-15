@@ -919,35 +919,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             final hour = hours[index];
             final hourDoses = dosesByHour[hour] ?? const [];
 
-            return Padding(
-              padding: kCalendarStageHourRowPadding,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: kCalendarStageHourLabelWidth,
-                    child: Padding(
-                      padding: kCalendarStageHourLabelPadding,
-                      child: Text(
-                        _formatSelectedHour(hour),
-                        textAlign: TextAlign.left,
-                        style: calendarStageHourLabelTextStyle(context),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        for (final dose in hourDoses)
-                          Padding(
-                            padding: kCalendarStageDoseCardPadding,
-                            child: _buildDoseCardFor(dose),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            return _buildHourDoseSection(
+              hour: hour,
+              hourDoses: hourDoses,
             );
           },
         ),
@@ -1233,38 +1207,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                           final hour = hours[index];
                           final hourDoses = dosesByHour[hour] ?? const [];
 
-                          return Padding(
-                            padding: kCalendarStageHourRowPadding,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: kCalendarStageHourLabelWidth,
-                                  child: Padding(
-                                    padding: kCalendarStageHourLabelPadding,
-                                    child: Text(
-                                      _formatSelectedHour(hour),
-                                      textAlign: TextAlign.left,
-                                      style: calendarStageHourLabelTextStyle(
-                                        context,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      for (final dose in hourDoses)
-                                        Padding(
-                                          padding:
-                                              kCalendarStageDoseCardPadding,
-                                          child: _buildDoseCardFor(dose),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                          return _buildHourDoseSection(
+                            hour: hour,
+                            hourDoses: hourDoses,
                           );
                         },
                       ),
@@ -1272,6 +1217,33 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHourDoseSection({
+    required int hour,
+    required List<CalculatedDose> hourDoses,
+  }) {
+    return Padding(
+      padding: kCalendarStageHourRowPadding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: kCalendarStageHourLabelPadding,
+            child: Text(
+              _formatSelectedHour(hour),
+              textAlign: TextAlign.left,
+              style: calendarStageHourLabelTextStyle(context),
+            ),
+          ),
+          for (final dose in hourDoses)
+            Padding(
+              padding: kCalendarStageDoseCardPadding,
+              child: _buildDoseCardFor(dose),
+            ),
+        ],
       ),
     );
   }
