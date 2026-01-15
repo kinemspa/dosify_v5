@@ -652,7 +652,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
 
         // MDV mode toggle (3-way: Strength | Volume | Units)
         if (widget.medicationForm == MedicationForm.multiDoseVial) ...[
-          _buildMdvModeToggle(cs),
+          _buildMdvModeDropdown(),
           const SizedBox(height: kSpacingS),
           _buildMdvModeHelperText(),
           if (_mdvMode == MdvInputMode.strength &&
@@ -717,10 +717,25 @@ class _DoseInputFieldState extends State<DoseInputField> {
     if (widget.medicationForm != MedicationForm.multiDoseVial) {
       return const SizedBox.shrink();
     }
+    final detail = switch (_mdvMode) {
+      MdvInputMode.strength =>
+        'Strength mode calculates volume and syringe units using the vial concentration.',
+      MdvInputMode.volume =>
+        'Volume mode calculates strength and syringe units from the entered mL.',
+      MdvInputMode.units =>
+        'Units mode calculates strength and volume using the syringe markings.',
+    };
 
-    return Text(
-      'Select a dose input mode: Strength, Volume, or Units. The app calculates the other values automatically.',
-      style: helperTextStyle(context),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select a dose input method. The app calculates the other values automatically.',
+          style: helperTextStyle(context),
+        ),
+        const SizedBox(height: kSpacingXS),
+        Text(detail, style: helperTextStyle(context)),
+      ],
     );
   }
 
@@ -817,71 +832,29 @@ class _DoseInputFieldState extends State<DoseInputField> {
     }
   }
 
-  Widget _buildMdvModeToggle(ColorScheme cs) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildModeButton(
-            label: 'Strength',
-            isSelected: _mdvMode == MdvInputMode.strength,
-            onTap: () => _toggleMdvMode(MdvInputMode.strength),
-            cs: cs,
+  Widget _buildMdvModeDropdown() {
+    return LabelFieldRow(
+      label: 'Dose Input',
+      field: SmallDropdown36<MdvInputMode>(
+        value: _mdvMode,
+        items: const [
+          DropdownMenuItem(
+            value: MdvInputMode.strength,
+            child: Text('Strength'),
           ),
-        ),
-        const SizedBox(width: kButtonSpacing),
-        Expanded(
-          child: _buildModeButton(
-            label: 'Volume',
-            isSelected: _mdvMode == MdvInputMode.volume,
-            onTap: () => _toggleMdvMode(MdvInputMode.volume),
-            cs: cs,
+          DropdownMenuItem(
+            value: MdvInputMode.volume,
+            child: Text('Volume'),
           ),
-        ),
-        const SizedBox(width: kButtonSpacing),
-        Expanded(
-          child: _buildModeButton(
-            label: 'Units',
-            isSelected: _mdvMode == MdvInputMode.units,
-            onTap: () => _toggleMdvMode(MdvInputMode.units),
-            cs: cs,
+          DropdownMenuItem(
+            value: MdvInputMode.units,
+            child: Text('Units'),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildModeButton({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    required ColorScheme cs,
-  }) {
-    return Material(
-      color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surface,
-      borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        child: Container(
-          height: kStandardFieldHeight,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isSelected
-                  ? cs.primary
-                  : cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
-              width: isSelected ? kBorderWidthMedium : kBorderWidthThin,
-            ),
-            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          ),
-          child: Text(
-            label,
-            style: buttonTextStyle(context)?.copyWith(
-              color: isSelected ? cs.onSurface : cs.onSurfaceVariant,
-              fontWeight: isSelected ? kFontWeightSemiBold : kFontWeightMedium,
-            ),
-          ),
-        ),
+        ],
+        onChanged: (value) {
+          if (value == null) return;
+          _toggleMdvMode(value);
+        },
       ),
     );
   }
