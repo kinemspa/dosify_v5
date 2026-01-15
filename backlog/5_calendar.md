@@ -17,7 +17,7 @@
 
 ### Day View
 - [x] Just extends the Dose Card Stage to full screen with the hours seton the left.
-- [ ] View. It should be full screen and just show the dose card in each hour stacked vertically.
+- [x] View. It should be full screen and just show the dose card in each hour stacked vertically.
 
 
 ### Dose Card Stage

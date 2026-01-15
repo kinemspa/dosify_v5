@@ -55,7 +55,7 @@ class CalendarPage extends StatelessWidget {
           scheduleId: scheduleId,
           medicationId: medicationId,
           showUpNextCard: false,
-          requireHourSelectionInDayView: true,
+          requireHourSelectionInDayView: false,
           // Use default bottom sheet handler (removed onDoseTap override)
         ),
       ),
