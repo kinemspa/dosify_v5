@@ -304,8 +304,8 @@ class _AddScheduleWizardPageState
         Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: kScheduleWizardSummaryIconSize,
+              height: kScheduleWizardSummaryIconSize,
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
@@ -318,7 +318,7 @@ class _AddScheduleWizardPageState
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: kScheduleWizardSummaryIconGap),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,12 +369,17 @@ class _AddScheduleWizardPageState
         ),
         if (_times.isNotEmpty && currentStep >= 1) ...[
           const SizedBox(height: 8),
-          Text(
-            _getPatternSummary(),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onPrimary.withValues(alpha: 0.85),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: kScheduleWizardSummaryIndent,
+            ),
+            child: Text(
+              _getPatternSummary(),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimary.withValues(alpha: 0.85),
+              ),
             ),
           ),
         ],
@@ -470,8 +475,9 @@ class _AddScheduleWizardPageState
     final buffer = StringBuffer();
     switch (_mode) {
       case ScheduleMode.everyDay:
-        buffer.write('Every day');
+        buffer.write(_modeLabel(_mode));
       case ScheduleMode.daysOfWeek:
+        buffer.write('${_modeLabel(_mode)}: ');
         if (_days.isEmpty) {
           buffer.write('Days of week');
         } else {
@@ -481,8 +487,9 @@ class _AddScheduleWizardPageState
       case ScheduleMode.daysOnOff:
         final on = int.tryParse(_daysOn.text) ?? 5;
         final off = int.tryParse(_daysOff.text) ?? 2;
-        buffer.write('$on days on, $off days off');
+        buffer.write('${_modeLabel(_mode)}: $on days on, $off days off');
       case ScheduleMode.daysOfMonth:
+        buffer.write('${_modeLabel(_mode)}: ');
         if (_daysOfMonth.isEmpty) {
           buffer.write('Days of month');
         } else {

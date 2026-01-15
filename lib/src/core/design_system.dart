@@ -272,6 +272,12 @@ const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(16, 16, 16, 16);
 const double kPageHorizontalPadding = 16;
 const double kPageVerticalPadding = 16;
 
+/// Schedule wizard summary header layout
+const double kScheduleWizardSummaryIconSize = 36;
+const double kScheduleWizardSummaryIconGap = kSpacingS;
+const double kScheduleWizardSummaryIndent =
+    kScheduleWizardSummaryIconSize + kScheduleWizardSummaryIconGap;
+
 /// Detail pages - padding for the sections list under the header.
 const EdgeInsets kDetailPageSectionsPadding = EdgeInsets.fromLTRB(
   kPageHorizontalPadding,
