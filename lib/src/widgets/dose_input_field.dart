@@ -1007,18 +1007,22 @@ class _DoseInputFieldState extends State<DoseInputField> {
     return SizedBox(
       width: kStepperButtonSize,
       height: kStepperButtonSize,
-      child: IconButton(
+      child: OutlinedButton(
         onPressed: onPressed,
-        icon: Icon(icon, size: kIconSizeMedium),
-        padding: EdgeInsets.zero,
-        iconSize: kIconSizeMedium,
-        style: IconButton.styleFrom(
-          backgroundColor: cs.surface,
-          foregroundColor: cs.onSurface,
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          minimumSize: const Size(kStepperButtonSize, kStepperButtonSize),
+          side: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+            width: kBorderWidthThin,
+          ),
+          foregroundColor: cs.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusSmall),
           ),
         ),
+        child: Icon(icon, size: kIconSizeMedium),
       ),
     );
   }
