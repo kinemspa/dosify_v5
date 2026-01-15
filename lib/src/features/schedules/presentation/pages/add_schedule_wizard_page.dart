@@ -355,7 +355,7 @@ class _AddScheduleWizardPageState
                       med.form != MedicationForm.multiDoseVial &&
                       _doseValue.text.isNotEmpty)
                     Text(
-                      'Dose: ${_doseMetricsSummaryLabel()}',
+                      'Dose: ${_doseMetricsSummaryLabel(separator: ' = ')}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(
                           context,
@@ -444,7 +444,7 @@ class _AddScheduleWizardPageState
     return '$prettyValue $prettyUnit';
   }
 
-  String _doseMetricsSummaryLabel() {
+  String _doseMetricsSummaryLabel({String separator = ' • '}) {
     final med = _selectedMed;
     final r = _doseResult;
     if (med == null || r == null || r.hasError) {
@@ -460,6 +460,7 @@ class _AddScheduleWizardPageState
       doseMassMcg: r.doseMassMcg,
       doseVolumeMicroliter: r.doseVolumeMicroliter,
       syringeUnits: r.syringeUnits,
+      separator: separator,
     );
     if (summary.isEmpty) return _doseSummaryLabel();
     return summary;
@@ -527,7 +528,7 @@ class _AddScheduleWizardPageState
                 ? 'Tap a medication to select it. Only medications with stock are shown.'
                 : 'Tap the selected medication to change it.',
           ),
-        ]),
+        ], titleSpacing: kSpacingS),
         if (_selectedMed != null) ...[
           const SizedBox(height: 16),
           _buildSection(context, 'Configure Dose', [_buildDoseConfiguration()]),
@@ -1828,6 +1829,7 @@ class _AddScheduleWizardPageState
     String title,
     List<Widget> children, {
     bool titlePrimary = true,
+    double titleSpacing = kSpacingM,
   }) {
     final cs = Theme.of(context).colorScheme;
     return Container(
@@ -1842,7 +1844,7 @@ class _AddScheduleWizardPageState
               context,
             )?.copyWith(color: cs.primary),
           ),
-          const SizedBox(height: kSpacingM),
+          SizedBox(height: titleSpacing),
           ...children,
         ],
       ),
