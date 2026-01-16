@@ -18,6 +18,9 @@ class DetailPageScaffold extends StatelessWidget {
     required this.onDelete,
     this.expandedTitle,
     this.topRightAction,
+    this.expandedHeight,
+    this.collapsedHeight,
+    this.toolbarHeight,
     super.key,
   });
 
@@ -28,6 +31,9 @@ class DetailPageScaffold extends StatelessWidget {
   final VoidCallback onEdit;
   final Future<void> Function() onDelete;
   final Widget? topRightAction;
+  final double? expandedHeight;
+  final double? collapsedHeight;
+  final double? toolbarHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +45,9 @@ class DetailPageScaffold extends StatelessWidget {
         slivers: [
           // Combined AppBar and Stats Banner
           SliverAppBar(
-            toolbarHeight: 48,
-            expandedHeight: 280,
-            collapsedHeight: 48,
+            toolbarHeight: toolbarHeight ?? kDetailHeaderCollapsedHeight,
+            expandedHeight: expandedHeight ?? kDetailHeaderExpandedHeight,
+            collapsedHeight: collapsedHeight ?? kDetailHeaderCollapsedHeight,
             floating: false,
             pinned: true,
             backgroundColor: Colors.transparent,
@@ -121,11 +127,12 @@ class DetailPageScaffold extends StatelessWidget {
             ],
             flexibleSpace: LayoutBuilder(
               builder: (context, constraints) {
+                final expanded = expandedHeight ?? kDetailHeaderExpandedHeight;
+                final collapsed =
+                    collapsedHeight ?? kDetailHeaderCollapsedHeight;
                 final scrollProgress =
-                    ((280 - constraints.maxHeight) / (280 - 48)).clamp(
-                      0.0,
-                      1.0,
-                    );
+                    ((expanded - constraints.maxHeight) / (expanded - collapsed))
+                        .clamp(0.0, 1.0);
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -140,8 +147,13 @@ class DetailPageScaffold extends StatelessWidget {
                     title: LayoutBuilder(
                       builder: (context, constraints) {
                         final appBarHeight = constraints.maxHeight;
-                        final scrollProgress =
-                            ((280 - appBarHeight) / (280 - 48)).clamp(0.0, 1.0);
+                      final expanded =
+                        expandedHeight ?? kDetailHeaderExpandedHeight;
+                      final collapsed =
+                        collapsedHeight ?? kDetailHeaderCollapsedHeight;
+                      final scrollProgress =
+                        ((expanded - appBarHeight) / (expanded - collapsed))
+                          .clamp(0.0, 1.0);
 
                         final textStyle = detailCollapsedTitleTextStyle(
                           context,
@@ -295,27 +307,36 @@ class DetailStatItem extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    this.alignEnd = false,
     super.key,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final bool alignEnd;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final muted = cs.onPrimary.withValues(alpha: kOpacityMedium);
+    final alignment = alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    final rowAlignment =
+        alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start;
+    final textAlign = alignEnd ? TextAlign.right : TextAlign.left;
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: alignment,
       children: [
         Row(
+          mainAxisAlignment: rowAlignment,
           children: [
             Icon(icon, size: kIconSizeSmall, color: muted),
             const SizedBox(width: kSpacingXS),
             Text(
               label,
               style: helperTextStyle(context)?.copyWith(color: muted),
+              textAlign: textAlign,
             ),
           ],
         ),
@@ -325,6 +346,7 @@ class DetailStatItem extends StatelessWidget {
           style: bodyTextStyle(
             context,
           )?.copyWith(color: cs.onPrimary, fontWeight: kFontWeightSemiBold),
+          textAlign: textAlign,
         ),
       ],
     );

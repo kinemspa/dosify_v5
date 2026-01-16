@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -16,7 +15,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
@@ -212,7 +210,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           final mergedTitle = _mergedTitle(s);
 
           return DetailPageScaffold(
-            title: mergedTitle,
+            title: 'Schedule Details',
+            expandedTitle: mergedTitle,
+            expandedHeight: kDetailHeaderExpandedHeightCompact,
             onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
             onDelete: () => _confirmDelete(context, s),
             statsBannerContent: _buildScheduleHeader(
@@ -271,21 +271,23 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Schedule Details',
-                style: sectionTitleStyle(
-                  context,
-                )?.copyWith(color: headerOnPrimary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: kSpacingS),
-            _buildHeaderStatusBadge(context, s),
-          ],
+        Text(
+          'Schedule Details',
+          style: helperTextStyle(
+            context,
+            color: headerOnPrimary.withValues(alpha: kOpacityMediumHigh),
+          )?.copyWith(fontWeight: kFontWeightSemiBold),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingXXS),
+        Text(
+          title,
+          style: detailHeaderBannerTitleTextStyle(
+            context,
+          )?.copyWith(color: headerOnPrimary),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: kSpacingM),
         Row(
@@ -300,10 +302,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             ),
             const SizedBox(width: kPageHorizontalPadding),
             Expanded(
-              child: DetailStatItem(
-                icon: scheduleStatusIcon(s),
-                label: 'Status',
-                value: scheduleStatusLabel(s),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _buildHeaderStatusBadge(context, s),
               ),
             ),
           ],
@@ -325,6 +326,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 icon: Icons.access_time,
                 label: 'Times',
                 value: _timesText(context, s),
+                alignEnd: true,
               ),
             ),
           ],
@@ -339,6 +341,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 isActive: s.isActive,
                 dense: true,
                 showNextLabel: false,
+                activeColor: headerOnPrimary,
               ),
             ),
             const SizedBox(width: kPageHorizontalPadding),
@@ -347,6 +350,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 icon: Icons.timer_outlined,
                 label: 'In',
                 value: nextDose == null ? '—' : _getTimeUntil(nextDose),
+                alignEnd: true,
               ),
             ),
           ],
@@ -433,15 +437,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         child: SectionFormCard(
           neutral: true,
           title: 'Schedule Details',
+          titleStyle: reviewCardTitleStyle(context),
           children: _buildScheduleDetailsCardChildren(context, s),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: SectionFormCard(
-          neutral: true,
-          title: 'Schedules',
-          children: [_buildMedicationSchedulesSection(context, s)],
         ),
       ),
     ];
@@ -1197,17 +1194,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
     if (result == initial) return;
     await onSave(result);
-  }
-
-  Widget _buildMedicationSchedulesSection(BuildContext context, Schedule s) {
-    final medId = s.medicationId;
-    if (medId == null) return const SizedBox.shrink();
-
-    final medBox = Hive.box<Medication>('medications');
-    final med = medBox.get(medId);
-    if (med == null) return const SizedBox.shrink();
-
-    return MedicationSchedulesSection(medication: med);
   }
 
   Future<void> _setScheduleStatus(
