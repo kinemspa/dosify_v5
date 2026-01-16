@@ -74,7 +74,6 @@ class DoseCard extends StatelessWidget {
     )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor);
 
     final baseBody = bodyTextStyle(context);
-    final baseHelper = helperTextStyle(context);
 
     final actionLabel = primaryActionLabel ?? 'Actions';
     final hasQuickActions = onQuickAction != null;
@@ -180,13 +179,6 @@ class DoseCard extends StatelessWidget {
                       Text(
                         medicationName,
                         style: baseBody,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: kSpacingXXS),
-                      Text(
-                        strengthOrConcentrationLabel,
-                        style: baseHelper?.copyWith(fontSize: kFontSizeXSmall),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
