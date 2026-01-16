@@ -88,6 +88,11 @@ After every single logical change (even small ones), you must commit and push im
 
 If analysis fails, fix it before pushing.
 
+### Checkpoint commits before refactors
+
+- Before any significant refactor, UI overhaul, or complex logic change, ask whether to create a checkpoint commit.
+- If confirmed, commit and push the current state before starting the refactor.
+
 ### Terminal rule
 
 - Assume the working directory is already the repo root: `F:\Android Apps\dosifi_v5`.
