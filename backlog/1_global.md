@@ -2,12 +2,7 @@
 
 ## Requests
 
-- [x] Timepicker, The editing field such as hour has a light blue colour with white font. The white font is not readable, should be dark like the other fonts on the screen. 
-- [x] Deleting a Medication.
-	- Warngin Dialog needs to state. Deleting a medication will delete all associated schedules. But will maintain and historical data. 
-	- Deleting Medication must delete schedules, all futere schduled doses and associated notifications. Currently Is not doing this. 
-- [x] I want to number the doses. So Dose 1, 2 3 etc etc. Numbered according to the schedule. Each Schedule starts from 1. 
-- [x] I want to include images for all medicaitons like the syringe. So for Tablets its a tablet image and the number of tablets, capsules the same, pre filled syringe is a syringe graphic, single dose vial can be an ampule or vial icon. 
+- [x] Dose Cards need some sort of background colour. slight difference to backkground. maybe shadow. Also needs to help differentiate from each dose
 
 - Text sizes:
 	- [x] Agent, please put in this file here in this file all the text sizes in use. I feel there is no uniformity of all text sizes across the app.
@@ -38,6 +33,7 @@
 			- 24 (2)
 			- 32 (3)
 		- [x] Can we put in a plan to replace all the hardcoded fonts with system design fonts.
+		- [ ] Proceed with all the below. 
 			- Plan (incremental, safe)
 				1) Baseline scan: keep a running list of all `TextStyle(fontSize: ...)`/`fontSize:` occurrences in `lib/` and categorize by UI surface (Home, Medications, Schedules, Dialogs, Charts).
 				2) Fill gaps in `lib/src/core/design_system.dart`: if a repeated typographic need exists (e.g., tiny badge text, dense table text), add a named helper there (e.g., `badgeTextStyle`, `denseLabelStyle`) instead of re-adding `fontSize` in feature code.

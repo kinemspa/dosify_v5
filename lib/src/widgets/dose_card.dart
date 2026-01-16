@@ -85,53 +85,42 @@ class DoseCard extends StatelessWidget {
         ? statusColor.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
 
-    return Material(
-      color: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius),
+    return Container(
+      decoration: buildDoseCardDecoration(
+        context: context,
+        borderRadius: radius,
       ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(radius),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: verticalPadding,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  NextDoseDateBadge(
-                    nextDose: dose.scheduledTime,
-                    isActive: isActive,
-                    dense: true,
-                    activeColor: statusColor,
-                    showNextLabel: false,
-                    showTodayIcon: true,
-                  ),
-                  const SizedBox(height: kSpacingXS),
-                  Text(
-                    timeText,
-                    style: helperTextStyle(
-                      context,
-                      color: isActive
-                          ? statusColor.withValues(alpha: kOpacityFull)
-                          : cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMediumLow,
-                            ),
-                    )?.copyWith(fontSize: kFontSizeXSmall),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                  if (doseNumber != null) ...[
-                    const SizedBox(height: kSpacingXXS),
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    NextDoseDateBadge(
+                      nextDose: dose.scheduledTime,
+                      isActive: isActive,
+                      dense: true,
+                      activeColor: statusColor,
+                      showNextLabel: false,
+                      showTodayIcon: true,
+                    ),
+                    const SizedBox(height: kSpacingXS),
                     Text(
-                      'Dose $doseNumber',
+                      timeText,
                       style: helperTextStyle(
                         context,
                         color: isActive
@@ -139,149 +128,166 @@ class DoseCard extends StatelessWidget {
                             : cs.onSurfaceVariant.withValues(
                                 alpha: kOpacityMediumLow,
                               ),
-                      )?.copyWith(fontSize: kFontSizeXXSmall),
+                      )?.copyWith(fontSize: kFontSizeXSmall),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                     ),
+                    if (doseNumber != null) ...[
+                      const SizedBox(height: kSpacingXXS),
+                      Text(
+                        'Dose $doseNumber',
+                        style: helperTextStyle(
+                          context,
+                          color: isActive
+                              ? statusColor.withValues(alpha: kOpacityFull)
+                              : cs.onSurfaceVariant.withValues(
+                                  alpha: kOpacityMediumLow,
+                                ),
+                        )?.copyWith(fontSize: kFontSizeXXSmall),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    if (leadingFooter != null) ...[
+                      const SizedBox(height: kSpacingXS),
+                      leadingFooter!,
+                    ],
                   ],
-                  if (leadingFooter != null) ...[
-                    const SizedBox(height: kSpacingXS),
-                    leadingFooter!,
-                  ],
-                ],
-              ),
-              SizedBox(width: columnGap),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
+                ),
+                SizedBox(width: columnGap),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              dose.scheduleName,
+                              style: titleStyle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (titleTrailing != null) ...[
+                            const SizedBox(width: kSpacingS),
+                            titleTrailing!,
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: kSpacingXXS),
+                      Text(
+                        medicationName,
+                        style: baseBody,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: kSpacingXXS),
+                      Text(
+                        strengthOrConcentrationLabel,
+                        style: baseHelper?.copyWith(fontSize: kFontSizeXSmall),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: kSpacingXXS),
+                      if (medicationFormIcon != null)
+                        Row(
+                          children: [
+                            Icon(
+                              medicationFormIcon,
+                              size: kIconSizeSmall,
+                              color: takeColor,
+                            ),
+                            const SizedBox(width: kSpacingXS),
+                            Expanded(
+                              child: Text(
+                                takeText,
+                                style: baseBody?.copyWith(
+                                  color: takeColor,
+                                  fontWeight: kFontWeightSemiBold,
+                                  fontSize: kFontSizeSmall,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          takeText,
+                          style: baseBody?.copyWith(
+                            color: takeColor,
+                            fontWeight: kFontWeightSemiBold,
+                            fontSize: kFontSizeSmall,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                if (showActions) ...[
+                  SizedBox(width: columnGap),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: kSpacingS,
+                          vertical: kSpacingXXS,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: kOpacityMinimal),
+                          borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                          border: Border.all(
+                            color: statusColor.withValues(
+                              alpha: kOpacityMediumLow,
+                            ),
+                            width: kBorderWidthThin,
+                          ),
+                        ),
+                        child: Center(
                           child: Text(
-                            dose.scheduleName,
-                            style: titleStyle,
+                            statusLabel,
+                            style: helperTextStyle(context, color: statusColor)
+                                ?.copyWith(
+                                  fontSize: kFontSizeXXSmall,
+                                  fontWeight: kFontWeightExtraBold,
+                                  height: 1,
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (titleTrailing != null) ...[
-                          const SizedBox(width: kSpacingS),
-                          titleTrailing!,
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: kSpacingXXS),
-                    Text(
-                      medicationName,
-                      style: baseBody,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: kSpacingXXS),
-                    Text(
-                      strengthOrConcentrationLabel,
-                      style: baseHelper?.copyWith(fontSize: kFontSizeXSmall),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: kSpacingXXS),
-                    if (medicationFormIcon != null)
-                      Row(
-                        children: [
-                          Icon(
-                            medicationFormIcon,
-                            size: kIconSizeSmall,
-                            color: takeColor,
+                      ),
+                      const SizedBox(height: kSpacingXS),
+                      if (showEditOnly)
+                        SizedBox(
+                          height: kStandardButtonHeight,
+                          child: OutlinedButton.icon(
+                            onPressed: onPrimaryAction ?? onTap,
+                            icon: const Icon(Icons.edit_rounded),
+                            label: const Text('Edit'),
                           ),
-                          const SizedBox(width: kSpacingXS),
-                          Expanded(
-                            child: Text(
-                              takeText,
-                              style: baseBody?.copyWith(
-                                color: takeColor,
-                                fontWeight: kFontWeightSemiBold,
-                                fontSize: kFontSizeSmall,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                        )
+                      else if (hasQuickActions)
+                        DoseQuickActionRow(onAction: onQuickAction!)
+                      else
+                        SizedBox(
+                          height: kStandardButtonHeight,
+                          child: FilledButton(
+                            onPressed: onPrimaryAction ?? onTap,
+                            child: Text(actionLabel),
                           ),
-                        ],
-                      )
-                    else
-                      Text(
-                        takeText,
-                        style: baseBody?.copyWith(
-                          color: takeColor,
-                          fontWeight: kFontWeightSemiBold,
-                          fontSize: kFontSizeSmall,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              if (showActions) ...[
-                SizedBox(width: columnGap),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: kSpacingS,
-                        vertical: kSpacingXXS,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: kOpacityMinimal),
-                        borderRadius: BorderRadius.circular(kBorderRadiusChip),
-                        border: Border.all(
-                          color: statusColor.withValues(
-                            alpha: kOpacityMediumLow,
-                          ),
-                          width: kBorderWidthThin,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          statusLabel,
-                          style: helperTextStyle(context, color: statusColor)
-                              ?.copyWith(
-                                fontSize: kFontSizeXXSmall,
-                                fontWeight: kFontWeightExtraBold,
-                                height: 1,
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    if (showEditOnly)
-                      SizedBox(
-                        height: kStandardButtonHeight,
-                        child: OutlinedButton.icon(
-                          onPressed: onPrimaryAction ?? onTap,
-                          icon: const Icon(Icons.edit_rounded),
-                          label: const Text('Edit'),
-                        ),
-                      )
-                    else if (hasQuickActions)
-                      DoseQuickActionRow(onAction: onQuickAction!)
-                    else
-                      SizedBox(
-                        height: kStandardButtonHeight,
-                        child: FilledButton(
-                          onPressed: onPrimaryAction ?? onTap,
-                          child: Text(actionLabel),
-                        ),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

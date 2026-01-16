@@ -649,6 +649,29 @@ BoxDecoration buildStandardCardDecoration({
   );
 }
 
+/// Dose card styling for light background separation.
+BoxDecoration buildDoseCardDecoration({
+  required BuildContext context,
+  required double borderRadius,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  return BoxDecoration(
+    color: cs.surfaceVariant.withValues(alpha: kOpacityFaint),
+    borderRadius: BorderRadius.circular(borderRadius),
+    border: Border.all(
+      color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+      width: kBorderWidthThin,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: cs.shadow.withValues(alpha: kCardShadowOpacity * 0.6),
+        blurRadius: kCardShadowBlurRadius * 0.6,
+        offset: kCardShadowOffset,
+      ),
+    ],
+  );
+}
+
 /// Padding used for inset/section surfaces inside larger cards.
 const EdgeInsets kInsetSectionPadding = EdgeInsets.all(kSpacingS);
 
