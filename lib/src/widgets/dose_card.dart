@@ -78,7 +78,6 @@ class DoseCard extends StatelessWidget {
 
     final actionLabel = primaryActionLabel ?? 'Actions';
     final hasQuickActions = onQuickAction != null;
-    final showEditOnly = effectiveStatus != DoseStatus.pending;
 
     final takeText = 'Take $doseMetrics';
     final takeColor = isActive
@@ -264,16 +263,7 @@ class DoseCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: kSpacingXS),
-                      if (showEditOnly)
-                        SizedBox(
-                          height: kStandardButtonHeight,
-                          child: OutlinedButton.icon(
-                            onPressed: onPrimaryAction ?? onTap,
-                            icon: const Icon(Icons.edit_rounded),
-                            label: const Text('Edit'),
-                          ),
-                        )
-                      else if (hasQuickActions)
+                      if (hasQuickActions)
                         DoseQuickActionRow(onAction: onQuickAction!)
                       else
                         SizedBox(

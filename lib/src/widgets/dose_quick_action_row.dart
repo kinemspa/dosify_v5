@@ -15,25 +15,22 @@ class DoseQuickActionRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _QuickIconButton(
-          tooltip: 'Take',
-          icon: Icons.check_rounded,
+        _QuickTextButton(
+          label: 'Take',
           backgroundColor: kDoseStatusTakenGreen,
           foregroundColor: statusColorOnPrimary(context, kDoseStatusTakenGreen),
           onPressed: () => onAction(DoseStatus.taken),
         ),
         const SizedBox(width: kSpacingXS),
-        _QuickIconButton(
-          tooltip: 'Snooze',
-          icon: Icons.snooze_rounded,
+        _QuickTextButton(
+          label: 'Snooze',
           backgroundColor: cs.secondary,
           foregroundColor: cs.onSecondary,
           onPressed: () => onAction(DoseStatus.snoozed),
         ),
         const SizedBox(width: kSpacingXS),
-        _QuickIconButton(
-          tooltip: 'Skip',
-          icon: Icons.block_rounded,
+        _QuickTextButton(
+          label: 'Skip',
           backgroundColor: cs.error,
           foregroundColor: cs.onError,
           onPressed: () => onAction(DoseStatus.skipped),
@@ -43,38 +40,37 @@ class DoseQuickActionRow extends StatelessWidget {
   }
 }
 
-class _QuickIconButton extends StatelessWidget {
-  const _QuickIconButton({
-    required this.tooltip,
-    required this.icon,
+class _QuickTextButton extends StatelessWidget {
+  const _QuickTextButton({
+    required this.label,
     required this.backgroundColor,
     required this.foregroundColor,
     required this.onPressed,
   });
 
-  final String tooltip;
-  final IconData icon;
+  final String label;
   final Color backgroundColor;
   final Color foregroundColor;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      icon: Icon(icon, size: kIconSizeSmall),
-      style: IconButton.styleFrom(
+    return SizedBox(
+      height: kStandardButtonHeight,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
         padding: kCompactButtonPadding,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: const Size(kIconButtonSize, kIconButtonSize),
+        minimumSize: Size(kIconButtonSize, kStandardButtonHeight),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusSmall),
         ),
+        ),
+        child: Text(label),
       ),
-      constraints: kTightIconButtonConstraints,
     );
   }
 }
