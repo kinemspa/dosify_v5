@@ -41,7 +41,7 @@ class MedicationDisplayHelpers {
   }
 
   static String formatSyringeUnits(double units, {bool longLabel = false}) {
-    final value = fmt2(units);
+    final value = units.ceil().toString();
     if (longLabel) return '$value units';
     return '$value U';
   }
