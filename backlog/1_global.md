@@ -3,6 +3,7 @@
 ## Requests
 
 - [x] Dose Cards need some sort of background colour. slight difference to backkground. maybe shadow. Also needs to help differentiate from each dose
+- [x] Status Icons. Need to Globally Uniformed across the entire app. From Schedule cards, Dose Cards, Take Dose Dialogs, Historical Dose. Needs review. 
 
 - Text sizes:
 	- [x] Agent, please put in this file here in this file all the text sizes in use. I feel there is no uniformity of all text sizes across the app.
