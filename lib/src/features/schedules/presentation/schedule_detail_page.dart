@@ -8,13 +8,17 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
+import 'package:dosifi_v5/src/widgets/dose_input_field.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
@@ -426,6 +430,208 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return '${DateFormat('EEE, MMM d, y').format(dt)} • ${TimeOfDay.fromDateTime(dt).format(context)}';
   }
 
+  Medication? _getMedicationForSchedule(Schedule s) {
+    final medId = s.medicationId;
+    final medBox = Hive.box<Medication>('medications');
+    if (medId != null) return medBox.get(medId);
+
+    for (final med in medBox.values) {
+      if (med.name.trim() == s.medicationName.trim()) {
+        return med;
+      }
+    }
+    return null;
+  }
+
+  Widget _helperText(BuildContext context, String text) {
+    return Text(
+      text,
+      style: helperTextStyle(
+        context,
+        color: Theme.of(context)
+            .colorScheme
+            .onSurfaceVariant
+            .withValues(alpha: kOpacityMediumHigh),
+      ),
+    );
+  }
+
+  double? _getStrengthPerUnitMcg(Medication med) {
+    switch (med.form) {
+      case MedicationForm.tablet:
+      case MedicationForm.capsule:
+      case MedicationForm.prefilledSyringe:
+      case MedicationForm.singleDoseVial:
+        return switch (med.strengthUnit) {
+          Unit.mcg || Unit.mcgPerMl => med.strengthValue,
+          Unit.mg || Unit.mgPerMl => med.strengthValue * 1000,
+          Unit.g || Unit.gPerMl => med.strengthValue * 1000000,
+          Unit.units || Unit.unitsPerMl => med.strengthValue,
+        };
+      case MedicationForm.multiDoseVial:
+        return 0;
+    }
+  }
+
+  double? _getVolumePerUnitMicroliter(Medication med) {
+    if (med.volumePerDose == null) return null;
+    return switch (med.volumeUnit) {
+      VolumeUnit.ml => med.volumePerDose! * 1000,
+      VolumeUnit.l => med.volumePerDose! * 1000000,
+      null => med.volumePerDose! * 1000,
+    };
+  }
+
+  String _getStrengthUnit(Medication med) {
+    return switch (med.strengthUnit) {
+      Unit.mcg || Unit.mcgPerMl => 'mcg',
+      Unit.mg || Unit.mgPerMl => 'mg',
+      Unit.g || Unit.gPerMl => 'g',
+      Unit.units || Unit.unitsPerMl => 'units',
+    };
+  }
+
+  double? _getTotalVialStrengthMcg(Medication med) {
+    if (med.form != MedicationForm.multiDoseVial) return null;
+
+    final volumeMl = med.containerVolumeMl ?? 1.0;
+    final strength = med.strengthValue;
+
+    return switch (med.strengthUnit) {
+      Unit.mcg => strength,
+      Unit.mg => strength * 1000,
+      Unit.g => strength * 1000000,
+      Unit.units => strength,
+      Unit.mcgPerMl => strength * volumeMl,
+      Unit.mgPerMl => (strength * 1000) * volumeMl,
+      Unit.gPerMl => (strength * 1000000) * volumeMl,
+      Unit.unitsPerMl => strength * volumeMl,
+    };
+  }
+
+  double? _getTotalVialVolumeMicroliter(Medication med) {
+    if (med.form != MedicationForm.multiDoseVial) return null;
+    final volumeMl = med.containerVolumeMl ?? 1.0;
+    return volumeMl * 1000;
+  }
+
+  SyringeType? _getSyringeType(Medication med, SyringeType? selected) {
+    if (med.form != MedicationForm.multiDoseVial) return null;
+
+    if (selected == SyringeType.ml_10_0) {
+      selected = SyringeType.ml_5_0;
+    }
+
+    if (selected != null) return selected;
+
+    final volumeMl = med.containerVolumeMl ?? 1.0;
+    if (volumeMl <= 0.3) return SyringeType.ml_0_3;
+    if (volumeMl <= 0.5) return SyringeType.ml_0_5;
+    if (volumeMl <= 1.0) return SyringeType.ml_1_0;
+    if (volumeMl <= 3.0) return SyringeType.ml_3_0;
+    if (volumeMl <= 5.0) return SyringeType.ml_5_0;
+    return SyringeType.ml_5_0;
+  }
+
+  (double, String) _deriveLegacyDoseFields(
+    Medication med,
+    DoseCalculationResult result, {
+    String? strengthUnitOverride,
+  }) {
+    if (!result.success) return (med.strengthValue, _getStrengthUnit(med));
+
+    if (med.form == MedicationForm.multiDoseVial) {
+      if (result.syringeUnits != null) {
+        final units = result.syringeUnits!.ceilToDouble();
+        return (units, 'units');
+      }
+      if (result.doseVolumeMicroliter != null) {
+        return (result.doseVolumeMicroliter! / 1000, 'ml');
+      }
+      if (result.doseMassMcg != null) {
+        final unit = (strengthUnitOverride ?? _getStrengthUnit(med))
+            .toLowerCase();
+        final mcg = result.doseMassMcg!;
+        if (unit == 'units') {
+          return (mcg, 'units');
+        }
+        if (unit == 'mg') {
+          return (mcg / 1000, 'mg');
+        }
+        if (unit == 'g') {
+          return (mcg / 1000000, 'g');
+        }
+        return (mcg, 'mcg');
+      }
+    }
+
+    if (result.doseTabletQuarters != null) {
+      return (result.doseTabletQuarters! / 4, 'tablets');
+    }
+    if (result.doseCapsules != null) {
+      return (result.doseCapsules!.toDouble(), 'capsules');
+    }
+    if (result.doseSyringes != null) {
+      return (result.doseSyringes!.toDouble(), 'syringes');
+    }
+    if (result.doseVials != null) {
+      return (result.doseVials!.toDouble(), 'vials');
+    }
+    if (result.doseVolumeMicroliter != null) {
+      return (result.doseVolumeMicroliter! / 1000, 'ml');
+    }
+    if (result.doseMassMcg != null) {
+      final unit = _getStrengthUnit(med).toLowerCase();
+      final mcg = result.doseMassMcg!;
+      if (unit == 'mg') return (mcg / 1000, 'mg');
+      if (unit == 'g') return (mcg / 1000000, 'g');
+      return (mcg, 'mcg');
+    }
+
+    return (med.strengthValue, _getStrengthUnit(med));
+  }
+
+  Schedule _copyScheduleWithDose(
+    Schedule s, {
+    required double legacyValue,
+    required String legacyUnit,
+    required DoseCalculationResult result,
+  }) {
+    return Schedule(
+      id: s.id,
+      name: s.name,
+      medicationName: s.medicationName,
+      doseValue: legacyValue,
+      doseUnit: legacyUnit,
+      minutesOfDay: s.minutesOfDay,
+      daysOfWeek: s.daysOfWeek,
+      minutesOfDayUtc: s.minutesOfDayUtc,
+      daysOfWeekUtc: s.daysOfWeekUtc,
+      medicationId: s.medicationId,
+      active: s.active,
+      pausedUntil: s.pausedUntil,
+      timesOfDay: s.timesOfDay,
+      timesOfDayUtc: s.timesOfDayUtc,
+      cycleEveryNDays: s.cycleEveryNDays,
+      cycleAnchorDate: s.cycleAnchorDate,
+      daysOfMonth: s.daysOfMonth,
+      doseUnitCode: s.doseUnitCode,
+      doseMassMcg: result.doseMassMcg?.round(),
+      doseVolumeMicroliter: result.doseVolumeMicroliter?.round(),
+      doseTabletQuarters: result.doseTabletQuarters,
+      doseCapsules: result.doseCapsules,
+      doseSyringes: result.doseSyringes,
+      doseVials: result.doseVials,
+      doseIU: result.syringeUnits?.ceil(),
+      displayUnitCode: s.displayUnitCode,
+      inputModeCode: s.inputModeCode,
+      startAt: s.startAt,
+      endAt: s.endAt,
+      monthlyMissingDayBehaviorCode: s.monthlyMissingDayBehaviorCode,
+      createdAt: s.createdAt,
+    );
+  }
+
   List<Widget> _buildSections(
     BuildContext context,
     Schedule s,
@@ -570,67 +776,103 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   Future<void> _promptEditDose(BuildContext context, Schedule s) async {
-    final valueController = TextEditingController(
-      text: s.doseValue == s.doseValue.roundToDouble()
-          ? s.doseValue.toStringAsFixed(0)
-          : s.doseValue.toString(),
-    );
+    final med = _getMedicationForSchedule(s);
+    if (med == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to edit dose without a linked medication.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
-    final unitOptions = <String>{
-      s.doseUnit,
-      'mcg',
-      'mg',
-      'g',
-      'ml',
-      'iu',
-      'units',
-      'tablets',
-      'capsules',
-      'syringes',
-      'vials',
-    }.toList()..sort();
+    var selectedSyringeType = _getSyringeType(med, null);
+    var strengthUnit = _getStrengthUnit(med);
 
-    String selectedUnit = s.doseUnit;
-
-    final result = await showDialog<(double, String)>(
+    final result = await showDialog<DoseCalculationResult>(
       context: context,
       builder: (dialogContext) {
+        DoseCalculationResult? doseResult;
+
         return StatefulBuilder(
           builder: (dialogContext, setStateDialog) {
             return AlertDialog(
               titleTextStyle: dialogTitleTextStyle(dialogContext),
               contentTextStyle: dialogContentTextStyle(dialogContext),
               title: const Text('Edit dose'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: valueController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: buildFieldDecoration(
-                      dialogContext,
-                      label: 'Amount',
-                    ),
-                  ),
-                  const SizedBox(height: kSpacingM),
-                  DropdownButtonFormField<String>(
-                    value: selectedUnit,
-                    decoration: buildFieldDecoration(
-                      dialogContext,
-                      label: 'Unit',
-                    ),
-                    items: [
-                      for (final u in unitOptions)
-                        DropdownMenuItem(value: u, child: Text(u)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (med.form == MedicationForm.multiDoseVial) ...[
+                      LabelFieldRow(
+                        label: 'Syringe Size',
+                        field: SmallDropdown36<SyringeType>(
+                          value: selectedSyringeType,
+                          items: SyringeType.values
+                              .where((t) => t != SyringeType.ml_10_0)
+                              .map(
+                                (t) => DropdownMenuItem(
+                                  value: t,
+                                  child: Text(
+                                    t.name,
+                                    style: bodyTextStyle(dialogContext),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              selectedSyringeType = value;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      _helperText(
+                        dialogContext,
+                        'Select the syringe size used for administration.',
+                      ),
+                      const SizedBox(height: kSpacingS),
                     ],
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setStateDialog(() => selectedUnit = value);
-                    },
-                  ),
-                ],
+                    DoseInputField(
+                      medicationForm: med.form,
+                      strengthPerUnitMcg: _getStrengthPerUnitMcg(med) ?? 0,
+                      volumePerUnitMicroliter: _getVolumePerUnitMicroliter(med),
+                      strengthUnit: strengthUnit,
+                      totalVialStrengthMcg: _getTotalVialStrengthMcg(med),
+                      totalVialVolumeMicroliter: _getTotalVialVolumeMicroliter(med),
+                      syringeType: selectedSyringeType,
+                      initialStrengthMcg: s.doseMassMcg?.toDouble(),
+                      initialTabletCount: s.doseTabletQuarters != null
+                          ? s.doseTabletQuarters! / 4
+                          : null,
+                      initialCapsuleCount: s.doseCapsules,
+                      initialInjectionCount: s.doseSyringes,
+                      initialVialCount: s.doseVials,
+                      initialVolumeMicroliter: s.doseVolumeMicroliter?.toDouble(),
+                      initialSyringeUnits: s.doseIU?.toDouble(),
+                      onStrengthUnitChanged: (unit) {
+                        setStateDialog(() {
+                          strengthUnit = unit;
+                        });
+                      },
+                      onDoseChanged: (result) {
+                        setStateDialog(() {
+                          doseResult = result;
+                        });
+                      },
+                    ),
+                    if (med.form == MedicationForm.multiDoseVial) ...[
+                      const SizedBox(height: kSpacingS),
+                      _helperText(
+                        dialogContext,
+                        'Enter the dose by strength, volume (mL), or syringe units. The app will calculate the other values automatically based on the vial concentration and syringe size.',
+                      ),
+                    ],
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -639,9 +881,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 ),
                 FilledButton(
                   onPressed: () {
-                    final parsed = double.tryParse(valueController.text.trim());
-                    if (parsed == null) return;
-                    Navigator.of(dialogContext).pop((parsed, selectedUnit));
+                    if (doseResult == null || doseResult?.success != true) {
+                      return;
+                    }
+                    Navigator.of(dialogContext).pop(doseResult);
                   },
                   child: const Text('Save'),
                 ),
@@ -652,14 +895,25 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       },
     );
 
-    if (result == null) return;
-    final (newValue, newUnit) = result;
-    if (newValue == s.doseValue && newUnit == s.doseUnit) return;
+    if (result == null || !result.success) return;
 
-    await _updateSchedule(
-      context,
-      s.copyWithDetails(doseValue: newValue, doseUnit: newUnit),
+    final legacy = _deriveLegacyDoseFields(
+      med,
+      result,
+      strengthUnitOverride: strengthUnit,
     );
+    final updated = _copyScheduleWithDose(
+      s,
+      legacyValue: legacy.$1,
+      legacyUnit: legacy.$2,
+      result: result,
+    );
+
+    if (updated.doseValue == s.doseValue && updated.doseUnit == s.doseUnit) {
+      return;
+    }
+
+    await _updateSchedule(context, updated);
   }
 
   Future<void> _promptEditTimes(BuildContext context, Schedule s) async {
