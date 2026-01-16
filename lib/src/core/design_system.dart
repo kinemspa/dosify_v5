@@ -162,6 +162,7 @@ const double kCalendarHourHeight = 60; // Height of hour row in day view
 const double kCalendarDoseBlockHeight = 60; // Default dose block height
 const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
+const double kCalendarDoseIndicatorBorderRadius = 2; // Subtle rounding for dot
 const double kCalendarDoseIndicatorSpacing = 2;
 
 /// Calendar selected-day (Dose Card Stage) layout
@@ -312,6 +313,9 @@ const double kLabelFieldGap = 8; // Between label and field
 const double kHelperTextLeftPadding = kLabelColumnWidth + kLabelFieldGap;
 const double kHelperTextTopPadding = 2;
 const double kHelperTextBottomPadding = 6;
+
+/// Dose status badge spacing
+const double kDoseStatusBadgeVerticalPadding = 1;
 
 /// Button spacing
 const double kButtonSpacing = 8;
@@ -1134,6 +1138,28 @@ TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
   return Theme.of(
     context,
   ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightSemiBold);
+}
+
+/// Calendar compact dose-block title style (e.g. schedule name in a block).
+TextStyle? calendarDoseBlockTitleTextStyle(BuildContext context, {Color? color}) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.labelMedium?.copyWith(
+    fontWeight: kFontWeightSemiBold,
+    color: (color ?? cs.onSurface).withValues(alpha: kOpacityHigh),
+  );
+}
+
+/// Calendar compact dose-block subtitle style (e.g. dose description in a block).
+TextStyle? calendarDoseBlockSubtitleTextStyle(
+  BuildContext context, {
+  Color? color,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  final base = color ?? cs.onSurface;
+  return helperTextStyle(
+    context,
+    color: base.withValues(alpha: kOpacityMediumHigh),
+  );
 }
 
 /// Calendar selected-day stage header title style.

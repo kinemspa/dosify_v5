@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 
 class DoseQuickActionRow extends StatelessWidget {
   const DoseQuickActionRow({required this.onAction, super.key});
@@ -10,7 +11,10 @@ class DoseQuickActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final snoozedColor =
+      doseStatusVisual(context, DoseStatus.snoozed, disabled: false).color;
+    final skippedColor =
+      doseStatusVisual(context, DoseStatus.skipped, disabled: false).color;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -24,15 +28,15 @@ class DoseQuickActionRow extends StatelessWidget {
         const SizedBox(width: kSpacingXS),
         _QuickTextButton(
           label: 'Snooze',
-          backgroundColor: cs.secondary,
-          foregroundColor: cs.onSecondary,
+          backgroundColor: snoozedColor,
+          foregroundColor: statusColorOnPrimary(context, snoozedColor),
           onPressed: () => onAction(DoseStatus.snoozed),
         ),
         const SizedBox(width: kSpacingXS),
         _QuickTextButton(
           label: 'Skip',
-          backgroundColor: cs.error,
-          foregroundColor: cs.onError,
+          backgroundColor: skippedColor,
+          foregroundColor: statusColorOnPrimary(context, skippedColor),
           onPressed: () => onAction(DoseStatus.skipped),
         ),
       ],

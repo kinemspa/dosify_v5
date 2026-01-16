@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/medication_displ
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 class DoseDialogDosePreview extends StatelessWidget {
@@ -27,7 +28,9 @@ class DoseDialogDosePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final (statusColor, statusIcon) = _statusPresentation(context, status);
+    final visual = doseStatusVisual(context, status, disabled: false);
+    final statusColor = visual.color;
+    final statusIcon = visual.icon;
 
     final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
       med,
@@ -228,24 +231,7 @@ class DoseDialogDosePreview extends StatelessWidget {
         form == MedicationForm.multiDoseVial;
   }
 
-  (Color, IconData) _statusPresentation(
-    BuildContext context,
-    DoseStatus status,
-  ) {
-    final cs = Theme.of(context).colorScheme;
-    switch (status) {
-      case DoseStatus.taken:
-        return (kDoseStatusTakenGreen, Icons.check_rounded);
-      case DoseStatus.skipped:
-        return (cs.error, Icons.block_rounded);
-      case DoseStatus.snoozed:
-        return (kDoseStatusSnoozedOrange, Icons.snooze_rounded);
-      case DoseStatus.overdue:
-        return (cs.error, Icons.warning_rounded);
-      case DoseStatus.pending:
-        return (cs.primary, Icons.notifications_rounded);
-    }
-  }
+  
 }
 
 class _DoseValueRow {

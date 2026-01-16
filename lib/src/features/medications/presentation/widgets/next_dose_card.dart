@@ -13,6 +13,8 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -476,8 +478,14 @@ class _NextDoseCardState extends State<NextDoseCard>
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 8),
-                        if (dose.status != DoseStatus.pending)
-                          _buildStatusBadge(dose.status),
+                        DoseStatusBadge(
+                          status: dose.status,
+                          disabled:
+                              !(Hive.box<Schedule>('schedules')
+                                      .get(dose.scheduleId)
+                                      ?.isActive ??
+                                  true),
+                        ),
                       ],
                     ),
                   ],
@@ -485,51 +493,6 @@ class _NextDoseCardState extends State<NextDoseCard>
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(DoseStatus status) {
-    Color color;
-    String label;
-
-    switch (status) {
-      case DoseStatus.taken:
-        color = Colors.green;
-        label = 'Taken';
-        break;
-      case DoseStatus.skipped:
-        color = Colors.grey;
-        label = 'Skipped';
-        break;
-      case DoseStatus.snoozed:
-        color = Colors.orange;
-        label = 'Snoozed';
-        break;
-      case DoseStatus.overdue:
-        color = Theme.of(context).colorScheme.error;
-        label = 'Missed';
-        break;
-      case DoseStatus.pending:
-        color = Theme.of(context).colorScheme.primary;
-        label = 'Scheduled';
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 9,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -728,19 +691,7 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   Color _getStatusColor(DoseStatus status) {
-    final cs = Theme.of(context).colorScheme;
-    switch (status) {
-      case DoseStatus.taken:
-        return cs.primary;
-      case DoseStatus.overdue:
-        return cs.error;
-      case DoseStatus.skipped:
-        return cs.onSurfaceVariant;
-      case DoseStatus.snoozed:
-        return cs.tertiary;
-      default:
-        return cs.primary;
-    }
+    return doseStatusVisual(context, status, disabled: false).color;
   }
 
   bool _isToday(DateTime date) {

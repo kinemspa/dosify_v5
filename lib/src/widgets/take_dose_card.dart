@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -104,21 +105,21 @@ class TakeDoseCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       medicationName,
                       style: baseBody,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       strengthOrConcentrationLabel,
                       style: baseHelper,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       doseMetrics,
                       style: baseBody?.copyWith(color: cs.onSurface),
@@ -152,7 +153,7 @@ class TakeDoseCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       statusText,
                       style: baseHelper?.copyWith(
@@ -188,33 +189,28 @@ class TakeDoseCard extends StatelessWidget {
     BuildContext context,
     CalculatedDose dose,
   ) {
-    final cs = Theme.of(context).colorScheme;
-
     final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
-    if (schedule != null && !schedule.isActive) {
-      final disabledColor = cs.onSurfaceVariant.withValues(
-        alpha: kOpacityMediumHigh,
-      );
-      return (disabledColor, Icons.do_not_disturb_on_rounded, 'Disabled');
+    final disabled = schedule != null && !schedule.isActive;
+
+    final visual = doseStatusVisual(context, dose.status, disabled: disabled);
+
+    if (disabled) {
+      return (visual.color, visual.icon, 'Disabled');
     }
 
-    switch (dose.status) {
-      case DoseStatus.taken:
-        final actionTime = dose.existingLog?.actionTime;
-        final label = actionTime != null
-            ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
-            : 'Taken';
-        return (cs.primary, Icons.check_rounded, label);
-      case DoseStatus.skipped:
-        return (cs.onSurfaceVariant, Icons.block_rounded, 'Skipped');
-      case DoseStatus.snoozed:
-        return (cs.tertiary, Icons.snooze_rounded, 'Snoozed');
-      case DoseStatus.overdue:
-        // Time is already shown in the Date/Time row.
-        return (cs.error, Icons.warning_rounded, 'Missed');
-      case DoseStatus.pending:
-        // Time is already shown in the Date/Time row.
-        return (cs.primary, Icons.notifications_rounded, 'Pending');
-    }
+    final label = switch (dose.status) {
+      DoseStatus.taken => () {
+          final actionTime = dose.existingLog?.actionTime;
+          return actionTime != null
+              ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
+              : 'Taken';
+        }(),
+      DoseStatus.skipped => 'Skipped',
+      DoseStatus.snoozed => 'Snoozed',
+      DoseStatus.overdue => 'Missed',
+      DoseStatus.pending => 'Pending',
+    };
+
+    return (visual.color, visual.icon, label);
   }
 }

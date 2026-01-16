@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -27,6 +28,9 @@ class CalendarDoseBlock extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final disabled = schedule != null && !schedule.isActive;
+    final statusVisual = doseStatusVisual(context, dose.status, disabled: disabled);
+    final statusColor = statusVisual.color;
 
     return InkWell(
       onTap: onTap,
@@ -35,11 +39,24 @@ class CalendarDoseBlock extends StatelessWidget {
         height: compact
             ? kCalendarDoseBlockMinHeight
             : kCalendarDoseBlockHeight,
-        padding: compact ? const EdgeInsets.all(6) : const EdgeInsets.all(8),
+        padding: compact
+            ? const EdgeInsets.all(kFieldSpacing)
+            : const EdgeInsets.all(kSpacingS),
         decoration: BoxDecoration(
-          color: _getBackgroundColor(colorScheme),
+          color: _getBackgroundColor(
+            colorScheme,
+            statusColor: statusColor,
+            disabled: disabled,
+          ),
           borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-          border: Border.all(color: _getBorderColor(colorScheme), width: 1),
+          border: Border.all(
+            color: _getBorderColor(
+              colorScheme,
+              statusColor: statusColor,
+              disabled: disabled,
+            ),
+            width: kBorderWidthMedium,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,9 +69,13 @@ class CalendarDoseBlock extends StatelessWidget {
                   Expanded(
                     child: Text(
                       dose.scheduleName,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: _getTextColor(colorScheme),
+                      style: calendarDoseBlockTitleTextStyle(
+                        context,
+                        color: _getTextColor(
+                          colorScheme,
+                          statusColor: statusColor,
+                          disabled: disabled,
+                        ),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -69,13 +90,18 @@ class CalendarDoseBlock extends StatelessWidget {
             ),
 
             if (!compact) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: kSpacingXS),
 
               // Dose description
               Text(
                 dose.doseDescription,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: _getTextColor(colorScheme).withValues(alpha: 0.8),
+                style: calendarDoseBlockSubtitleTextStyle(
+                  context,
+                  color: _getTextColor(
+                    colorScheme,
+                    statusColor: statusColor,
+                    disabled: disabled,
+                  ),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -84,7 +110,11 @@ class CalendarDoseBlock extends StatelessWidget {
               const Spacer(),
 
               // Status badge
-              _buildStatusBadge(context),
+              _buildStatusBadge(
+                context,
+                disabled: disabled,
+                statusVisual: statusVisual,
+              ),
             ],
           ],
         ),
@@ -92,130 +122,96 @@ class CalendarDoseBlock extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
-    if (schedule != null && !schedule.isActive) {
-      final disabledColor = colorScheme.onSurfaceVariant.withValues(
-        alpha: kOpacityMediumHigh,
-      );
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.do_not_disturb_on_rounded, size: 12, color: disabledColor),
-          const SizedBox(width: 4),
-          Text(
-            'DISABLED',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: disabledColor,
-            ),
-          ),
-        ],
-      );
+  Widget _buildStatusBadge(
+    BuildContext context, {
+    required bool disabled,
+    required ({Color color, IconData icon}) statusVisual,
+  }) {
+    if (!disabled && dose.status == DoseStatus.pending) {
+      return const SizedBox.shrink();
     }
 
-    String label;
-    IconData icon;
-
-    switch (dose.status) {
-      case DoseStatus.taken:
-        label = 'TAKEN';
-        icon = Icons.check_circle;
-        break;
-      case DoseStatus.skipped:
-        label = 'SKIPPED';
-        icon = Icons.cancel;
-        break;
-      case DoseStatus.snoozed:
-        label = 'SNOOZED';
-        icon = Icons.snooze;
-        break;
-      case DoseStatus.overdue:
-        label = 'MISSED';
-        icon = Icons.warning;
-        break;
-      case DoseStatus.pending:
-        return const SizedBox.shrink();
-    }
-
+    final label = doseStatusLabel(dose.status, disabled: disabled);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: _getStatusColor(colorScheme)),
-        const SizedBox(width: 4),
+        Icon(
+          statusVisual.icon,
+          size: kIconSizeXXSmall,
+          color: statusVisual.color,
+        ),
+        const SizedBox(width: kSpacingXS),
         Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: _getStatusColor(colorScheme),
-          ),
+          style: microHelperTextStyle(context, color: statusVisual.color)
+              ?.copyWith(fontWeight: kFontWeightSemiBold),
         ),
       ],
     );
   }
 
-  Color _getBackgroundColor(ColorScheme colorScheme) {
+  Color _getBackgroundColor(
+    ColorScheme colorScheme, {
+    required Color statusColor,
+    required bool disabled,
+  }) {
+    if (disabled) {
+      return statusColor.withValues(alpha: kOpacityFaint);
+    }
+
     switch (dose.status) {
       case DoseStatus.taken:
-        return colorScheme.primaryContainer.withValues(alpha: 0.3);
+        return statusColor.withValues(alpha: kOpacitySubtle);
       case DoseStatus.skipped:
-        return colorScheme.errorContainer.withValues(alpha: 0.3);
+        return statusColor.withValues(alpha: kOpacitySubtleLow);
       case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange.withValues(alpha: kOpacitySubtle);
+        return statusColor.withValues(alpha: kOpacitySubtle);
       case DoseStatus.overdue:
-        return colorScheme.errorContainer.withValues(alpha: 0.5);
+        return statusColor.withValues(alpha: kOpacityMinimal);
       case DoseStatus.pending:
-        return colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+        return statusColor.withValues(alpha: kOpacityFaint);
     }
   }
 
-  Color _getBorderColor(ColorScheme colorScheme) {
+  Color _getBorderColor(
+    ColorScheme colorScheme, {
+    required Color statusColor,
+    required bool disabled,
+  }) {
+    if (disabled) {
+      return colorScheme.outline.withValues(alpha: kOpacityVeryLow);
+    }
+
     switch (dose.status) {
       case DoseStatus.taken:
-        return colorScheme.primary.withValues(alpha: 0.5);
+        return statusColor.withValues(alpha: kOpacityMediumLow);
       case DoseStatus.skipped:
-        return colorScheme.error.withValues(alpha: 0.5);
+        return statusColor.withValues(alpha: kOpacityVeryLow);
       case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange.withValues(alpha: kOpacityMediumHigh);
+        return statusColor.withValues(alpha: kOpacityMediumHigh);
       case DoseStatus.overdue:
-        return colorScheme.error;
+        return statusColor.withValues(alpha: kOpacityHigh);
       case DoseStatus.pending:
-        return colorScheme.outline.withValues(alpha: 0.3);
+        return colorScheme.outline.withValues(alpha: kOpacityVeryLow);
     }
   }
 
-  Color _getTextColor(ColorScheme colorScheme) {
-    switch (dose.status) {
-      case DoseStatus.taken:
-        return colorScheme.primary;
-      case DoseStatus.skipped:
-        return colorScheme.error;
-      case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange;
-      case DoseStatus.overdue:
-        return colorScheme.error;
-      case DoseStatus.pending:
-        return colorScheme.onSurface.withValues(alpha: kOpacityHigh);
+  Color _getTextColor(
+    ColorScheme colorScheme, {
+    required Color statusColor,
+    required bool disabled,
+  }) {
+    if (disabled) {
+      return statusColor.withValues(alpha: kOpacityMediumHigh);
     }
-  }
-
-  Color _getStatusColor(ColorScheme colorScheme) {
     switch (dose.status) {
       case DoseStatus.taken:
-        return colorScheme.primary;
       case DoseStatus.skipped:
-        return colorScheme.error;
       case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange;
       case DoseStatus.overdue:
-        return colorScheme.error;
+        return statusColor;
       case DoseStatus.pending:
-        return colorScheme.onSurfaceVariant;
+        return statusColor.withValues(alpha: kOpacityMediumHigh);
     }
   }
 }
@@ -228,35 +224,21 @@ class CalendarDoseIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final disabled = schedule != null && !schedule.isActive;
+
+    final visual = doseStatusVisual(context, dose.status, disabled: disabled);
+    final color = dose.status == DoseStatus.pending
+        ? visual.color.withValues(alpha: kOpacityMediumLow)
+        : visual.color;
 
     return Container(
       width: kCalendarDoseIndicatorSize,
       height: kCalendarDoseIndicatorSize,
       decoration: BoxDecoration(
-        color: _getColor(colorScheme, schedule: schedule),
-        borderRadius: BorderRadius.circular(2),
+        color: color,
+        borderRadius: BorderRadius.circular(kCalendarDoseIndicatorBorderRadius),
       ),
     );
-  }
-
-  Color _getColor(ColorScheme colorScheme, {Schedule? schedule}) {
-    if (schedule != null && !schedule.isActive) {
-      return colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
-    }
-    switch (dose.status) {
-      case DoseStatus.taken:
-        return colorScheme.primary;
-      case DoseStatus.skipped:
-        return colorScheme.error;
-      case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange;
-      case DoseStatus.overdue:
-        return colorScheme.error;
-      case DoseStatus.pending:
-        return colorScheme.primary.withValues(alpha: 0.5);
-    }
   }
 }

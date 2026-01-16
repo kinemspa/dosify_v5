@@ -1,5 +1,8 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -339,23 +342,6 @@ class _CompactDoseIndicator extends StatelessWidget {
   final CalculatedDose dose;
   final VoidCallback? onTap;
 
-  Color _statusColor(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    switch (dose.status) {
-      case DoseStatus.taken:
-        return kDoseStatusTakenGreen;
-      case DoseStatus.skipped:
-        return cs.error;
-      case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange;
-      case DoseStatus.overdue:
-        return kDoseStatusMissedDarkRed;
-      case DoseStatus.pending:
-        return cs.primary;
-    }
-  }
-
   String _getDisplayText() {
     // Try to show dose value (e.g. "10", "0.5") if it's short
     if (dose.doseValue > 0) {
@@ -374,7 +360,13 @@ class _CompactDoseIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _statusColor(context);
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final disabled = schedule != null && !schedule.isActive;
+    final statusColor = doseStatusVisual(
+      context,
+      dose.status,
+      disabled: disabled,
+    ).color;
     final timeText = DateFormat('ha').format(dose.scheduledTime).toLowerCase();
 
     return InkWell(
@@ -438,10 +430,7 @@ class _CompactDoseIndicator extends StatelessWidget {
                     timeText,
                     style: calendarWeekDoseIndicatorTimeTextStyle(
                       context,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: kOpacityMediumHigh),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

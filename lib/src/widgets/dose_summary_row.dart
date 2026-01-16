@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -26,55 +27,33 @@ class DoseSummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
 
-    final isTaken = dose.status == DoseStatus.taken;
-    final isOverdue = dose.status == DoseStatus.overdue;
-    final isSkipped = dose.status == DoseStatus.skipped;
-    final isSnoozed = dose.status == DoseStatus.snoozed;
+    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final disabled = schedule != null && !schedule.isActive;
 
-    Color statusColor;
-    IconData statusIcon;
-    String statusText;
+    final visual = doseStatusVisual(context, dose.status, disabled: disabled);
+    final statusColor = visual.color;
+    final statusIcon = visual.icon;
 
     final timeStr = DateFormat('h:mm a').format(dose.scheduledTime);
 
-    if (isTaken) {
-      statusColor = cs.primary;
-      statusIcon = Icons.check_rounded;
-      final actionTime = dose.existingLog?.actionTime;
-      statusText = actionTime != null
-          ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
-          : 'Taken';
-    } else if (isSkipped) {
-      statusColor = cs.onSurfaceVariant;
-      statusIcon = Icons.block_rounded;
-      statusText = 'Skipped';
-    } else if (isSnoozed) {
-      statusColor = cs.tertiary;
-      statusIcon = Icons.snooze_rounded;
-      statusText = 'Snoozed';
-    } else if (isOverdue) {
-      statusColor = cs.error;
-      statusIcon = Icons.warning_rounded;
-      statusText = 'Missed at $timeStr';
-    } else {
-      statusColor = cs.primary;
-      statusIcon = Icons.notifications_rounded;
-      statusText = 'Take at $timeStr';
-    }
+    final statusText = disabled
+        ? 'Disabled'
+        : switch (dose.status) {
+            DoseStatus.taken => () {
+                final actionTime = dose.existingLog?.actionTime;
+                return actionTime != null
+                    ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
+                    : 'Taken';
+              }(),
+            DoseStatus.skipped => 'Skipped',
+            DoseStatus.snoozed => 'Snoozed',
+            DoseStatus.overdue => 'Missed at $timeStr',
+            DoseStatus.pending => 'Take at $timeStr',
+          };
 
     final doseInfo = '${_formatNumber(dose.doseValue)} ${dose.doseUnit}';
     final dateStr = DateFormat('E, MMM d').format(dose.scheduledTime);
-
-    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
-    final isDisabled = schedule != null && !schedule.isActive;
-
-    if (isDisabled) {
-      statusColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
-      statusIcon = Icons.do_not_disturb_on_rounded;
-      statusText = 'Disabled';
-    }
 
     final line2 = showMedicationName
         ? '${dose.medicationName} • $doseInfo'
@@ -120,7 +99,7 @@ class DoseSummaryRow extends StatelessWidget {
                         Expanded(
                           child: Text(
                             dose.scheduleName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
+                            style: bodyTextStyle(context)?.copyWith(
                               fontWeight: kFontWeightSemiBold,
                               color: cs.primary,
                             ),
@@ -134,12 +113,10 @@ class DoseSummaryRow extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       line2,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurface,
-                      ),
+                      style: bodyTextStyle(context)?.copyWith(color: cs.onSurface),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -147,17 +124,18 @@ class DoseSummaryRow extends StatelessWidget {
                       children: [
                         Text(
                           '$dateStr • ',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: helperTextStyle(
+                            context,
                             color: cs.onSurfaceVariant,
                           ),
                         ),
                         Expanded(
                           child: Text(
                             statusText,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: helperTextStyle(
+                              context,
                               color: statusColor,
-                              fontWeight: kFontWeightMedium,
-                            ),
+                            )?.copyWith(fontWeight: kFontWeightMedium),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_quick_action_row.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
 class DoseCard extends StatelessWidget {
@@ -59,13 +60,10 @@ class DoseCard extends StatelessWidget {
 
     final effectiveStatus = statusOverride ?? dose.status;
     final disabled = !isActive;
-    final (statusColor, statusIcon) = _statusPresentation(
-      context,
-      effectiveStatus,
-      disabled: disabled,
-    );
+    final statusColor =
+        doseStatusVisual(context, effectiveStatus, disabled: disabled).color;
 
-    final statusLabel = _statusLabel(effectiveStatus, disabled: disabled);
+    final statusLabel = doseStatusLabel(effectiveStatus, disabled: disabled);
 
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
@@ -276,46 +274,5 @@ class DoseCard extends StatelessWidget {
     );
   }
 
-  (Color, IconData) _statusPresentation(
-    BuildContext context,
-    DoseStatus status, {
-    required bool disabled,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-
-    if (disabled) {
-      return (
-        cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-        Icons.do_not_disturb_on_rounded,
-      );
-    }
-    switch (status) {
-      case DoseStatus.taken:
-        return (kDoseStatusTakenGreen, Icons.check_rounded);
-      case DoseStatus.skipped:
-        return (cs.error, Icons.block_rounded);
-      case DoseStatus.snoozed:
-        return (kDoseStatusSnoozedOrange, Icons.snooze_rounded);
-      case DoseStatus.overdue:
-        return (kDoseStatusMissedDarkRed, Icons.warning_rounded);
-      case DoseStatus.pending:
-        return (cs.primary, Icons.notifications_rounded);
-    }
-  }
-
-  String _statusLabel(DoseStatus status, {required bool disabled}) {
-    if (disabled) return 'DISABLED';
-    switch (status) {
-      case DoseStatus.taken:
-        return 'TAKEN';
-      case DoseStatus.skipped:
-        return 'SKIPPED';
-      case DoseStatus.snoozed:
-        return 'SNOOZED';
-      case DoseStatus.overdue:
-        return 'MISSED';
-      case DoseStatus.pending:
-        return 'PENDING';
-    }
-  }
+  
 }

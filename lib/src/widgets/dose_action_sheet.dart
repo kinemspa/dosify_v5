@@ -17,6 +17,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
@@ -107,26 +108,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
 
   Color _statusAccentColor(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     final schedule = Hive.box<Schedule>(
       'schedules',
     ).get(widget.dose.scheduleId);
-    if (schedule != null && !schedule.isActive) {
-      return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
-    }
-
-    switch (_selectedStatus) {
-      case DoseStatus.taken:
-        return kDoseStatusTakenGreen;
-      case DoseStatus.snoozed:
-        return kDoseStatusSnoozedOrange;
-      case DoseStatus.skipped:
-        return cs.error;
-      case DoseStatus.pending:
-      case DoseStatus.overdue:
-        return cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
-    }
+    final disabled = schedule != null && !schedule.isActive;
+    return doseStatusVisual(context, _selectedStatus, disabled: disabled).color;
   }
 
   Widget _buildDoseCardPreview(BuildContext context) {
@@ -1364,7 +1350,16 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   Widget _buildStatusChips() {
-    final cs = Theme.of(context).colorScheme;
+    final scheduledColor = doseStatusVisual(
+      context,
+      DoseStatus.pending,
+      disabled: false,
+    ).color;
+    final skippedColor = doseStatusVisual(
+      context,
+      DoseStatus.skipped,
+      disabled: false,
+    ).color;
     return Wrap(
       spacing: kSpacingS,
       runSpacing: kSpacingXS,
@@ -1373,7 +1368,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         if (!_isAdHoc)
           PrimaryChoiceChip(
             label: const Text('Scheduled'),
-            color: cs.primary,
+            color: scheduledColor,
             selected:
                 _selectedStatus == DoseStatus.pending ||
                 _selectedStatus == DoseStatus.overdue,
@@ -1413,7 +1408,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
         PrimaryChoiceChip(
           label: const Text('Skipped'),
-          color: cs.error,
+          color: skippedColor,
           selected: _selectedStatus == DoseStatus.skipped,
           onSelected: (_) {
             setState(() {
