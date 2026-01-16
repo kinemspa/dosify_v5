@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/controllers/schedule_form_controller.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart'; // For ScheduleMode
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
 
 void main() {
   group('ScheduleFormController', () {

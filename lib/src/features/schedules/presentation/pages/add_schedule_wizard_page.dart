@@ -16,12 +16,11 @@ import 'package:dosifi_v5/src/features/medications/presentation/medication_displ
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_wizard_base.dart';
 import 'package:dosifi_v5/src/widgets/dose_input_field.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
-
-enum ScheduleMode { everyDay, daysOfWeek, daysOnOff, daysOfMonth }
 
 enum _StartFromMode { now, date }
 

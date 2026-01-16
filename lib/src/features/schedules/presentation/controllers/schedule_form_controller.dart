@@ -6,7 +6,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/add_edit_schedule_page.dart'; // For ScheduleMode
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart'; // For DoseUnit/Mode enums
 
 part 'schedule_form_controller.freezed.dart';
