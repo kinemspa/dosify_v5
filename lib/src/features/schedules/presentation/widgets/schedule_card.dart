@@ -214,9 +214,11 @@ class ScheduleCard extends StatelessWidget {
                     if (!dense && last != null)
                       Text(
                         'Last: ${_fmtWhen(context, last)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                          fontSize: 11,
+                        style: helperTextStyle(
+                          context,
+                          color: cs.onSurfaceVariant.withValues(
+                            alpha: kOpacityMediumHigh,
+                          ),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
