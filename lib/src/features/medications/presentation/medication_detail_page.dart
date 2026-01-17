@@ -4185,8 +4185,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                             _ =>
                               '${_formatNumber(med.strengthValue)} $strengthUnit',
                           },
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: helperTextStyle(stateContext)?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -4283,8 +4282,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                             minHeight: 32,
                             minWidth: 50,
                           ),
-                          textStyle: TextStyle(
-                            fontSize: 12,
+                          textStyle: medicationDetailToggleTextStyle(
+                            stateContext,
                             color: colorScheme.onSurface,
                           ),
                           children: [
@@ -4421,12 +4420,13 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                         // Syringe size label
                         Text(
                           '${_formatNumber(syringeSize)} mL Syringe',
-                          style: TextStyle(
-                            color: Colors.white.withValues(
-                              alpha: kReconTextMediumOpacity,
-                            ),
-                            fontSize: 11,
-                          ),
+                          style: medicationDetailSyringeLabelTextStyle(
+                            stateContext,
+                            color: Theme.of(stateContext)
+                                .colorScheme
+                                .onPrimary
+                                .withValues(alpha: kReconTextMediumOpacity),
+                          )?.copyWith(fontWeight: kFontWeightNormal),
                         ),
                         const SizedBox(height: 8),
 
@@ -5475,28 +5475,25 @@ Widget _buildStockForecastCard(
       ),
       Text(
         'Expected to last until',
-        style: TextStyle(
+        style: medicationDetailStockForecastLabelTextStyle(
+          context,
           color: color.withValues(alpha: 0.5),
-          fontSize: 10,
-          fontStyle: FontStyle.italic,
-        ),
+        )?.copyWith(fontStyle: FontStyle.italic),
         textAlign: TextAlign.right,
       ),
       Text(
         dateStr,
-        style: TextStyle(
+        style: medicationDetailStockForecastDateTextStyle(
+          context,
           color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
         ),
         textAlign: TextAlign.right,
       ),
       Text(
         '${daysRemaining.floor()} days',
-        style: TextStyle(
+        style: medicationDetailStockForecastDaysTextStyle(
+          context,
           color: color.withValues(alpha: 0.9),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
         ),
         textAlign: TextAlign.right,
       ),
@@ -5515,14 +5512,12 @@ Widget _buildStockForecastCard(
             const SizedBox(width: 4),
             Text(
               'Expires: ${DateFormat('d MMM y').format(expiry)}',
-              style: TextStyle(
+              style: medicationDetailStockForecastExpiryTextStyle(
+                context,
                 color: expiresBeforeStockout
                     ? Theme.of(context).colorScheme.errorContainer
                     : color.withValues(alpha: 0.7),
-                fontSize: 10,
-                fontWeight: expiresBeforeStockout
-                    ? FontWeight.bold
-                    : FontWeight.normal,
+                emphasized: expiresBeforeStockout,
               ),
             ),
           ],

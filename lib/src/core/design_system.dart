@@ -756,6 +756,15 @@ const double kMedicationDetailHeaderNameCollapsedFontSize = kFontSizeXLarge; // 
 const double kMedicationDetailFormChipFontSize = 10;
 const double kMedicationDetailHeaderTileLabelFontSize = 10;
 const double kMedicationDetailHeaderTileValueFontSize = 12;
+const double kMedicationDetailToggleTextFontSize = 12;
+const double kMedicationDetailSyringeLabelFontSize = 11;
+
+/// Medication detail stock forecast typography
+const double kMedicationDetailStockForecastLabelFontSize = 10;
+const double kMedicationDetailStockForecastSubLabelFontSize = kFontSizeXSmall; // 9
+const double kMedicationDetailStockForecastDateFontSize = 14;
+const double kMedicationDetailStockForecastDaysFontSize = 12;
+const double kMedicationDetailStockForecastExpiryFontSize = 10;
 
 /// Next-dose date badge typography (Schedules list)
 const double kNextDoseDateCircleDayFontSizeCompact = 15;
@@ -1093,6 +1102,91 @@ TextStyle? medicationDetailHeaderTileValueTextStyle(
     color: color,
     fontSize: kMedicationDetailHeaderTileValueFontSize,
     fontWeight: kFontWeightBold,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailToggleTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailToggleTextFontSize,
+    fontWeight: kFontWeightMedium,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailSyringeLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailSyringeLabelFontSize,
+    fontWeight: kFontWeightBold,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailStockForecastLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailStockForecastLabelFontSize,
+    fontWeight: kFontWeightNormal,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailStockForecastSubLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailStockForecastSubLabelFontSize,
+    fontWeight: kFontWeightNormal,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailStockForecastDateTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailStockForecastDateFontSize,
+    fontWeight: kFontWeightBold,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailStockForecastDaysTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailStockForecastDaysFontSize,
+    fontWeight: kFontWeightMedium,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailStockForecastExpiryTextStyle(
+  BuildContext context, {
+  required Color color,
+  required bool emphasized,
+}) {
+  return Theme.of(context).textTheme.bodySmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailStockForecastExpiryFontSize,
+    fontWeight: emphasized ? kFontWeightBold : kFontWeightNormal,
     height: kLineHeightTight,
   );
 }
