@@ -115,16 +115,19 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Add Schedule',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontSize: kWizardHeaderTitleFontSize,
+                        fontWeight: kFontWeightSemiBold,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -269,7 +272,7 @@ class _StepCircle extends StatelessWidget {
                   color: isActive
                       ? cs.primary
                       : cs.onPrimary.withValues(alpha: 0.6),
-                  fontSize: 10,
+                  fontSize: kWizardStepNumberFontSize,
                 ),
               ),
       ),
