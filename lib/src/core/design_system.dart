@@ -974,6 +974,80 @@ TextStyle? microHelperTextStyle(BuildContext context, {Color? color}) {
   )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
 }
 
+// ============================================================================
+// SPECIALIZED TYPOGRAPHY
+// ============================================================================
+
+/// White syringe gauge tick label font sizes.
+const double kSyringeGaugeTickFontSizeMajor = 10;
+const double kSyringeGaugeTickFontSizeMinor = kFontSizeXSmall; // 9
+const double kSyringeGaugeTickFontSizeMicro = 7;
+
+TextStyle? syringeGaugeTickLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+  required double fontSize,
+}) {
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: fontSize,
+    height: kLineHeightTight,
+    fontWeight: kFontWeightSemiBold,
+    color: color,
+  );
+}
+
+TextStyle? syringeGaugeValueLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: kFontSizeSmall,
+    height: kLineHeightTight,
+    fontWeight: kFontWeightBold,
+    color: color,
+  );
+}
+
+/// Reconstitution summary emphasis sizes.
+const double kReconSummaryStrengthValueFontSizeCompact = 16;
+const double kReconSummaryStrengthValueFontSize = 20;
+const double kReconSummaryNameFontSizeCompact = 14;
+const double kReconSummaryNameFontSize = 18;
+const double kReconSummaryMetaFontSizeCompact = 11;
+const double kReconSummaryMetaFontSize = 13;
+const double kReconSummaryOfFontSizeCompact = 12;
+const double kReconSummaryOfFontSize = 14;
+const double kReconSummaryTotalVolumeFontSizeCompact = 18;
+const double kReconSummaryTotalVolumeFontSize = 22;
+const double kReconSummaryValueFontSizeCompact = 14;
+const double kReconSummaryValueFontSize = 18;
+const double kReconSummarySyringeLineFontSize = 11;
+
+TextStyle? reconSummaryBaseTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    color: color,
+    fontWeight: kFontWeightSemiBold,
+    height: 1.4,
+  );
+}
+
+TextStyle? reconSummaryEmphasisTextStyle(
+  BuildContext context, {
+  required Color color,
+  required double fontSize,
+  FontWeight fontWeight = kFontWeightBold,
+}) {
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    color: color,
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    height: 1.4,
+  );
+}
+
 /// Week-view compact dose indicator (value/initial) text style.
 TextStyle? calendarWeekDoseIndicatorValueTextStyle(
   BuildContext context, {

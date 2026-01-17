@@ -44,6 +44,8 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
         widget.color ?? Theme.of(context).colorScheme.primary;
     final currentFill = _dragValue ?? widget.fillUnits;
     final labelBackgroundColor = reconBackgroundActiveColor(context);
+    final cs = Theme.of(context).colorScheme;
+    final labelTextColor = cs.onPrimary;
 
     return GestureDetector(
       onHorizontalDragStart: widget.interactive
@@ -122,6 +124,27 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
             fillUnits: currentFill,
             color: effectiveColor,
             labelBackgroundColor: labelBackgroundColor,
+            labelTextColor: labelTextColor,
+            handleCenterColor: cs.surface,
+            majorTickLabelStyle: syringeGaugeTickLabelTextStyle(
+              context,
+              color: effectiveColor,
+              fontSize: kSyringeGaugeTickFontSizeMajor,
+            ),
+            minorTickLabelStyle: syringeGaugeTickLabelTextStyle(
+              context,
+              color: effectiveColor,
+              fontSize: kSyringeGaugeTickFontSizeMinor,
+            ),
+            microTickLabelStyle: syringeGaugeTickLabelTextStyle(
+              context,
+              color: effectiveColor,
+              fontSize: kSyringeGaugeTickFontSizeMicro,
+            ),
+            valueLabelStyle: syringeGaugeValueLabelTextStyle(
+              context,
+              color: labelTextColor,
+            ),
             interactive: widget.interactive,
             isActivelyDragging: _isActivelyDragging,
             showValueLabel: widget.showValueLabel,
@@ -138,6 +161,12 @@ class _WhiteSyringePainter extends CustomPainter {
     required this.fillUnits,
     required this.color,
     required this.labelBackgroundColor,
+    required this.labelTextColor,
+    required this.handleCenterColor,
+    required this.majorTickLabelStyle,
+    required this.minorTickLabelStyle,
+    required this.microTickLabelStyle,
+    required this.valueLabelStyle,
     this.interactive = false,
     this.isActivelyDragging = false,
     this.showValueLabel = false,
@@ -147,6 +176,12 @@ class _WhiteSyringePainter extends CustomPainter {
   final double fillUnits;
   final Color color;
   final Color labelBackgroundColor;
+  final Color labelTextColor;
+  final Color handleCenterColor;
+  final TextStyle? majorTickLabelStyle;
+  final TextStyle? minorTickLabelStyle;
+  final TextStyle? microTickLabelStyle;
+  final TextStyle? valueLabelStyle;
   final bool interactive;
   final bool isActivelyDragging;
   final bool showValueLabel;
@@ -219,15 +254,13 @@ class _WhiteSyringePainter extends CustomPainter {
       final shouldLabel = isMajor || isMinor || (isSmallSyringe && isFiveUnit);
 
       if (shouldLabel) {
+        final tickTextStyle = isMajor
+            ? majorTickLabelStyle
+            : (isMinor ? minorTickLabelStyle : microTickLabelStyle);
         final tp = TextPainter(
           text: TextSpan(
             text: units.toStringAsFixed(0),
-            style: TextStyle(
-              // Smaller font for 5U marks on small syringes
-              fontSize: isMajor ? 10 : (isMinor ? 9 : 7),
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+            style: tickTextStyle,
           ),
           textDirection: TextDirection.ltr,
         )..layout();
@@ -273,7 +306,7 @@ class _WhiteSyringePainter extends CustomPainter {
 
         // Draw white center to make it more visible
         final centerPaint = Paint()
-          ..color = Colors.white
+          ..color = handleCenterColor
           ..style = PaintingStyle.fill;
         canvas.drawCircle(
           Offset(fillEndX, baselineY),
@@ -287,11 +320,7 @@ class _WhiteSyringePainter extends CustomPainter {
           final unitPainter = TextPainter(
             text: TextSpan(
               text: unitsText,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
+              style: valueLabelStyle,
             ),
             textDirection: TextDirection.ltr,
           )..layout();
@@ -326,11 +355,7 @@ class _WhiteSyringePainter extends CustomPainter {
         final unitPainter = TextPainter(
           text: TextSpan(
             text: unitsText,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
+            style: valueLabelStyle,
           ),
           textDirection: TextDirection.ltr,
         )..layout();

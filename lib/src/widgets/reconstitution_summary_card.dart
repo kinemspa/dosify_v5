@@ -52,14 +52,67 @@ class ReconstitutionSummaryCard extends StatelessWidget {
 
     // The recon opacities assume white text on a dark background.
     // When rendering on normal surfaces, cap darkness per design system.
-    final baseTextAlpha = showCardSurface
-      ? kReconTextHighOpacity
-      : kOpacityFull;
+    final baseTextAlpha = showCardSurface ? kReconTextHighOpacity : kOpacityFull;
+
+    final baseTextColor = baseForeground.withValues(alpha: baseTextAlpha);
+    final baseStyle = reconSummaryBaseTextStyle(context, color: baseTextColor);
+
+    final strengthStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: cs.primary,
+      fontSize: compact
+          ? kReconSummaryStrengthValueFontSizeCompact
+          : kReconSummaryStrengthValueFontSize,
+      fontWeight: kFontWeightExtraBold,
+    );
+    final ofStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: baseTextColor,
+      fontSize: compact ? kReconSummaryOfFontSizeCompact : kReconSummaryOfFontSize,
+      fontWeight: kFontWeightNormal,
+    );
+    final medicationNameStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: cs.primary,
+      fontSize: compact ? kReconSummaryNameFontSizeCompact : kReconSummaryNameFontSize,
+      fontWeight: kFontWeightBold,
+    );
+    final metaStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: baseTextColor,
+      fontSize:
+          compact ? kReconSummaryMetaFontSizeCompact : kReconSummaryMetaFontSize,
+      fontWeight: kFontWeightMedium,
+    );
+    final metaPrimaryStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: cs.primary,
+      fontSize:
+          compact ? kReconSummaryMetaFontSizeCompact : kReconSummaryMetaFontSize,
+      fontWeight: kFontWeightSemiBold,
+    );
+    final totalVolumeStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: cs.primary,
+      fontSize: compact
+          ? kReconSummaryTotalVolumeFontSizeCompact
+          : kReconSummaryTotalVolumeFontSize,
+      fontWeight: kFontWeightExtraBold,
+    );
+    final valueStyle = reconSummaryEmphasisTextStyle(
+      context,
+      color: cs.primary,
+      fontSize: compact ? kReconSummaryValueFontSizeCompact : kReconSummaryValueFontSize,
+      fontWeight: kFontWeightBold,
+    );
 
     return Container(
       padding: showCardSurface
           ? (compact
-              ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8)
+              ? const EdgeInsets.symmetric(
+                  horizontal: kSpacingM,
+                  vertical: kSpacingS,
+                )
               : kReconSummaryPadding)
           : EdgeInsets.zero,
       decoration: showCardSurface
@@ -103,67 +156,35 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: baseForeground.withValues(alpha: baseTextAlpha),
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                  ),
+                  style: baseStyle,
                   children: [
                     const TextSpan(text: 'Reconstituted '),
                     TextSpan(
                       text: '${_formatNoTrailing(strengthValue)} $strengthUnit',
-                      style: TextStyle(
-                        fontSize: compact ? 16 : 20,
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: strengthStyle,
                     ),
                     TextSpan(
                       text: ' of ',
-                      style: TextStyle(
-                        fontSize: compact ? 12 : 14,
-                        color: baseForeground.withValues(alpha: baseTextAlpha),
-                        fontWeight: FontWeight.w400,
-                      ),
+                      style: ofStyle,
                     ),
                     TextSpan(
                       text: medicationName,
-                      style: TextStyle(
-                        fontSize: compact ? 14 : 18,
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: medicationNameStyle,
                     ),
                     if (reconFluidName != null &&
                         reconFluidName!.isNotEmpty &&
                         containerVolumeMl != null) ...[
                       TextSpan(
                         text: '\nwith ',
-                        style: TextStyle(
-                          fontSize: compact ? 11 : 13,
-                          color: baseForeground.withValues(
-                            alpha: baseTextAlpha,
-                          ),
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: metaStyle,
                       ),
                       TextSpan(
                         text: '${_formatNoTrailing(containerVolumeMl!)} mL',
-                        style: TextStyle(
-                          fontSize: compact ? 11 : 13,
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: metaPrimaryStyle,
                       ),
                       TextSpan(
                         text: ' of $reconFluidName',
-                        style: TextStyle(
-                          fontSize: compact ? 11 : 13,
-                          color: baseForeground.withValues(
-                            alpha: baseTextAlpha,
-                          ),
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: metaStyle,
                       ),
                     ],
                   ],
@@ -182,11 +203,11 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.transparent,
+                    cs.surface.withValues(alpha: kOpacityTransparent),
                     theme.colorScheme.primary.withValues(
                       alpha: kReconDividerOpacity,
                     ),
-                    Colors.transparent,
+                    cs.surface.withValues(alpha: kOpacityTransparent),
                   ],
                   stops: kReconDividerStops,
                 ),
@@ -197,20 +218,12 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: baseForeground.withValues(alpha: baseTextAlpha),
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
-                ),
+                style: baseStyle,
                 children: [
                   const TextSpan(text: 'Total Volume  '),
                   TextSpan(
                     text: '${_formatNoTrailing(containerVolumeMl!)} mL',
-                    style: TextStyle(
-                      fontSize: compact ? 18 : 22,
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: totalVolumeStyle,
                   ),
                 ],
               ),
@@ -222,21 +235,13 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: baseForeground.withValues(alpha: baseTextAlpha),
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
-                ),
+                style: baseStyle,
                 children: [
                   const TextSpan(text: 'Concentration  '),
                   TextSpan(
                     text:
                         '${_formatNoTrailing(perMlValue!)} ${strengthUnit.replaceAll('/mL', '')}/mL',
-                    style: TextStyle(
-                      fontSize: compact ? 14 : 18,
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: valueStyle,
                   ),
                 ],
               ),
@@ -248,20 +253,12 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: baseForeground.withValues(alpha: baseTextAlpha),
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
-                ),
+                style: baseStyle,
                 children: [
                   const TextSpan(text: 'Volume per Dose  '),
                   TextSpan(
                     text: '${_formatNoTrailing(volumePerDose!)} mL',
-                    style: TextStyle(
-                      fontSize: compact ? 14 : 18,
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: valueStyle,
                   ),
                 ],
               ),
@@ -272,9 +269,11 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               Text(
                 '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * 100).round()} U) Syringe',
                 textAlign: TextAlign.center,
-                style: helperTextStyle(context)?.copyWith(
-                  color: baseForeground.withValues(alpha: baseTextAlpha),
-                  fontSize: 11,
+                style: reconSummaryEmphasisTextStyle(
+                  context,
+                  color: baseTextColor,
+                  fontSize: kReconSummarySyringeLineFontSize,
+                  fontWeight: kFontWeightMedium,
                 ),
               ),
             const SizedBox(height: 6),
