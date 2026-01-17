@@ -439,7 +439,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
@@ -447,10 +450,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       widget.initial == null
                           ? 'Add Multi-Dose Vial'
                           : 'Edit Multi-Dose Vial',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontSize: kWizardHeaderTitleFontSize,
+                        fontWeight: kFontWeightSemiBold,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -1759,7 +1762,7 @@ class _StepCircle extends StatelessWidget {
                   color: isActive
                       ? cs.primary
                       : cs.onPrimary.withValues(alpha: 0.6),
-                  fontSize: 10,
+                  fontSize: kWizardStepNumberFontSize,
                 ),
               ),
       ),
@@ -1829,20 +1832,23 @@ class _ReconstitutionInfoCard extends StatelessWidget {
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: kReconTextHighOpacity),
-                  fontWeight: FontWeight.w600,
-                  height: 1.4,
+                style: reconSummaryBaseTextStyle(
+                  context,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimary
+                      .withValues(alpha: kReconTextHighOpacity),
                 ),
                 children: [
                   const TextSpan(text: 'Reconstitute '),
                   if (medicationName.isNotEmpty) ...[
                     TextSpan(
                       text: medicationName,
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: reconSummaryEmphasisTextStyle(
+                        context,
                         color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w700,
+                        fontSize: kReconSummaryNameFontSize,
+                        fontWeight: kFontWeightBold,
                       ),
                     ),
                     const TextSpan(text: ' '),
@@ -1850,30 +1856,34 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                   const TextSpan(text: 'with '),
                   TextSpan(
                     text: '${_formatNoTrailing(result!.solventVolumeMl)} mL',
-                    style: TextStyle(
-                      fontSize: 32,
+                    style: reconSummaryEmphasisTextStyle(
+                      context,
                       color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w900,
+                      fontSize: kReconSummaryVolumeHugeFontSize,
+                      fontWeight: kFontWeightExtraBold,
                     ),
                   ),
                   if (result!.diluentName != null &&
                       result!.diluentName!.isNotEmpty) ...[
                     TextSpan(
                       text: '  of  ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(
-                          alpha: kReconTextHighOpacity,
-                        ),
-                        fontWeight: FontWeight.w400,
+                      style: reconSummaryEmphasisTextStyle(
+                        context,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimary
+                            .withValues(alpha: kReconTextHighOpacity),
+                        fontSize: kReconSummaryOfFontSize,
+                        fontWeight: kFontWeightNormal,
                       ),
                     ),
                     TextSpan(
                       text: result!.diluentName!,
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: reconSummaryEmphasisTextStyle(
+                        context,
                         color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w600,
+                        fontSize: kReconSummaryNameFontSize,
+                        fontWeight: kFontWeightSemiBold,
                       ),
                     ),
                   ],
@@ -1889,8 +1899,13 @@ class _ReconstitutionInfoCard extends StatelessWidget {
               icon: const Icon(Icons.science),
               label: Text(result == null ? 'Open Calculator' : 'Recalculate'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimary
+                      .withValues(alpha: 0.3),
+                ),
               ),
             ),
           ),
