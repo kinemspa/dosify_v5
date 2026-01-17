@@ -449,7 +449,6 @@ class _NextDoseCardState extends State<NextDoseCard>
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: colorScheme.outline,
-                                  fontSize: 10,
                                 ),
                           ),
                       ],
