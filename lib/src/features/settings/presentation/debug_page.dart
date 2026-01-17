@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -19,9 +20,9 @@ class DebugPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
+          Text(
             'Notification Testing',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: sectionTitleStyle(context),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
@@ -347,9 +348,9 @@ class DebugPage extends StatelessWidget {
             label: const Text('Schedule test in 30s (AlarmClock)'),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'System Settings',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: sectionTitleStyle(context),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
