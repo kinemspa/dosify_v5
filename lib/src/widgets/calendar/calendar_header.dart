@@ -35,13 +35,13 @@ class CalendarHeader extends StatelessWidget {
 
     return Container(
       height: kCalendarHeaderHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: kSpacingM, vertical: kSpacingS),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
+            color: colorScheme.outlineVariant.withValues(alpha: kOpacityVeryLow),
+            width: kBorderWidthMedium,
           ),
         ),
       ),
@@ -86,7 +86,10 @@ class CalendarHeader extends StatelessWidget {
           OutlinedButton(
             onPressed: onToday,
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingS,
+                vertical: kSpacingXS,
+              ),
               minimumSize: const Size(0, 32),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
@@ -95,7 +98,7 @@ class CalendarHeader extends StatelessWidget {
                 ),
               ),
             ),
-            child: const Text('Today', style: TextStyle(fontSize: 12)),
+            child: Text('Today', style: calendarDayOverflowTextStyle(context)),
           ),
 
           if (showViewToggle) ...[
