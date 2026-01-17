@@ -762,6 +762,10 @@ const double kFontSizeHelper = kFontSizeSmall; // 11
 const double kFontSizeLabel = kFontSizeMedium; // 13
 const double kFontSizeTitle = kFontSizeLarge; // 15
 
+/// Wizard typography
+const double kWizardHeaderTitleFontSize = 20;
+const double kWizardStepNumberFontSize = 10;
+
 /// Font weights
 const FontWeight kFontWeightLight = FontWeight.w300;
 const FontWeight kFontWeightNormal = FontWeight.w400;
