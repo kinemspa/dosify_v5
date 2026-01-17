@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
@@ -197,20 +198,19 @@ class ScheduleSummaryCard extends StatelessWidget {
                         med.manufacturer!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: fg.withValues(alpha: 0.9),
-                          fontSize: 11,
+                        style: helperTextStyle(
+                          context,
+                          color: fg.withValues(alpha: kOpacityFull),
                         ),
                       ),
                     const SizedBox(height: 2),
                     // Strength - moved below manufacturer
                     Text(
                       '${_fmt2(med.strengthValue)}$unitLabel ${_getFormLabel(med.form)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: fg.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
+                      style: helperTextStyle(
+                        context,
+                        color: fg.withValues(alpha: kOpacityFull),
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
                     ),
                   ],
                 ),
@@ -224,18 +224,15 @@ class ScheduleSummaryCard extends StatelessWidget {
                   if (expDisplay != null && expDisplay.isNotEmpty)
                     Text(
                       'Exp: $expDisplay',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: fg,
-                        fontSize: 11,
-                      ),
+                      style: helperTextStyle(context, color: fg),
                     ),
                   const SizedBox(height: 4),
                   // Remaining tablets/stock
                   Text(
                     '${_fmt2(med.stockValue)} remaining',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: fg.withValues(alpha: 0.85),
-                      fontSize: 11,
+                    style: helperTextStyle(
+                      context,
+                      color: fg.withValues(alpha: kOpacityFull),
                     ),
                   ),
                 ],
