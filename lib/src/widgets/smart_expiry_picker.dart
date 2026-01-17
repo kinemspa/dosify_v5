@@ -80,7 +80,9 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
 
     return AlertDialog(
       contentPadding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+      ),
       content: SizedBox(
         width: 320,
         child: Column(
@@ -88,11 +90,11 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(kSpacingL),
               decoration: BoxDecoration(
                 color: colorScheme.primary,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
+                  top: Radius.circular(kBorderRadiusLarge),
                 ),
               ),
               width: double.infinity,
@@ -104,15 +106,16 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
                     children: [
                       Text(
                         'Expiry Date',
-                        style: TextStyle(
-                          color: colorScheme.onPrimary.withValues(alpha: 0.8),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: helperTextStyle(
+                          context,
+                          color: colorScheme.onPrimary.withValues(
+                            alpha: kOpacityMediumHigh,
+                          ),
+                        )?.copyWith(fontWeight: kFontWeightMedium),
                       ),
                       // Toggle Mode Button
                       Material(
-                        color: Colors.transparent,
+                        color: colorScheme.surface.withValues(alpha: 0),
                         child: InkWell(
                           onTap: () {
                             setState(() {
@@ -122,17 +125,17 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
                               }
                             });
                           },
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                              horizontal: kSpacingS,
+                              vertical: kSpacingXS,
                             ),
                             decoration: BoxDecoration(
                               color: colorScheme.onPrimary.withValues(
                                 alpha: 0.2,
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(kBorderRadiusMedium),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -141,17 +144,16 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
                                   _isDaysMode
                                       ? Icons.calendar_today
                                       : Icons.edit_calendar,
-                                  size: 12,
+                                  size: kIconSizeXXSmall,
                                   color: colorScheme.onPrimary,
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: kSpacingXS),
                                 Text(
                                   _isDaysMode ? 'Pick Date' : 'Enter Days',
-                                  style: TextStyle(
+                                  style: microHelperTextStyle(
+                                    context,
                                     color: colorScheme.onPrimary,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  )?.copyWith(fontWeight: kFontWeightBold),
                                 ),
                               ],
                             ),
@@ -160,38 +162,36 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: kSpacingS),
                   Text(
                     DateFormat('EEE, MMM d, y').format(_selectedDate),
-                    style: TextStyle(
+                    style: detailCollapsedTitleTextStyle(context)?.copyWith(
                       color: colorScheme.onPrimary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: kFontWeightBold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: kSpacingS),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: kSpacingS,
+                      vertical: kSpacingXS,
                     ),
                     decoration: BoxDecoration(
                       color: isExpired
                           ? colorScheme.errorContainer
                           : colorScheme.onPrimary.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
                     ),
                     child: Text(
                       isExpired
                           ? 'Expired ${daysUntil.abs()} days ago'
                           : '$daysUntil days remaining',
-                      style: TextStyle(
+                      style: helperTextStyle(
+                        context,
                         color: isExpired
                             ? colorScheme.onErrorContainer
                             : colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                      )?.copyWith(fontWeight: kFontWeightBold),
                     ),
                   ),
                 ],
@@ -201,39 +201,39 @@ class _SmartExpiryPickerState extends State<SmartExpiryPicker> {
             // Content
             if (_isDaysMode)
               Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(kSpacingXXL),
                 child: Column(
                   children: [
                     Text(
                       'Enter days until expiry',
-                      style: theme.textTheme.titleSmall,
+                      style: sectionTitleStyle(context),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: kSpacingL),
                     TextField(
                       controller: _daysController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
+                      style: detailHeaderBannerTitleTextStyle(context)?.copyWith(
+                        fontWeight: kFontWeightBold,
                       ),
                       decoration: InputDecoration(
                         suffixText: 'days',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                          vertical: 16,
-                          horizontal: 16,
+                          vertical: kSpacingL,
+                          horizontal: kSpacingL,
                         ),
                       ),
                       onChanged: _updateDateFromDays,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: kSpacingS),
                     Text(
                       'Calculated date will update automatically',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: helperTextStyle(
+                        context,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
