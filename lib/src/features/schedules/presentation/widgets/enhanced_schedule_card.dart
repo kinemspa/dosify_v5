@@ -674,9 +674,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               minimumSize: const Size(0, 0),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text(
+            child: Text(
               'View all history →',
-              style: TextStyle(fontSize: 12),
+              style: compactButtonTextStyle(context),
             ),
           ),
       ],
