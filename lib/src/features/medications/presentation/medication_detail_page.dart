@@ -857,11 +857,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
                       med.description!,
-                      style: TextStyle(
+                      style: helperTextStyle(
+                        context,
                         color: onPrimary.withValues(alpha: 0.9),
-                        fontSize: 11, // Reduced from 12
-                        fontStyle: FontStyle.italic,
-                      ),
+                      )?.copyWith(fontStyle: FontStyle.italic),
                       maxLines: 2, // Reduced from 3
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -872,10 +871,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       med.notes!,
-                      style: TextStyle(
+                      style: hintTextStyle(context)?.copyWith(
                         color: onPrimary.withValues(alpha: 0.6),
                         fontStyle: FontStyle.italic,
-                        fontSize: 10, // Reduced from 11
                       ),
                       maxLines: 1, // Reduced from 2
                       overflow: TextOverflow.ellipsis,
@@ -1056,11 +1054,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                               const SizedBox(width: 6),
                               Text(
                                 'Refill',
-                                style: TextStyle(
+                                style: helperTextStyle(
+                                  context,
                                   color: onPrimary,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                )?.copyWith(fontWeight: kFontWeightBold),
                               ),
                             ],
                           ),
@@ -1100,11 +1097,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 const SizedBox(width: 6),
                                 Text(
                                   'Restock',
-                                  style: TextStyle(
+                                  style: helperTextStyle(
+                                    context,
                                     color: onPrimary,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  )?.copyWith(fontWeight: kFontWeightBold),
                                 ),
                               ],
                             ),
@@ -2833,13 +2829,16 @@ class _HeaderInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = textColor ?? Colors.white;
+    final color = textColor ?? Theme.of(context).colorScheme.onPrimary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10),
+          style: medicationDetailHeaderTileLabelTextStyle(
+            context,
+            color: color.withValues(alpha: 0.7),
+          ),
         ),
         const SizedBox(height: 4),
         Row(
@@ -2851,10 +2850,9 @@ class _HeaderInfoTile extends StatelessWidget {
             ],
             Text(
               value,
-              style: TextStyle(
+              style: medicationDetailHeaderTileValueTextStyle(
+                context,
                 color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
               ),
             ),
             if (trailingIcon != null) ...[
