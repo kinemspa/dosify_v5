@@ -373,11 +373,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                         children: [
                                           Text(
                                             updatedMed.name,
-                                            style: TextStyle(
-                                              color: headerForeground,
-                                              fontSize: lerpDouble(22, 17, t),
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  color: headerForeground,
+                                                  fontSize: lerpDouble(
+                                                    kMedicationDetailHeaderNameExpandedFontSize,
+                                                    kMedicationDetailHeaderNameCollapsedFontSize,
+                                                    t,
+                                                  ),
+                                                  fontWeight:
+                                                      kFontWeightSemiBold,
+                                                ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -404,10 +412,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                               ),
                                               child: Text(
                                                 _formLabel(updatedMed.form),
-                                                style: TextStyle(
+                                                style: medicationDetailFormChipTextStyle(
+                                                  context,
                                                   color: headerForeground,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
                                                 ),
                                               ),
                                             ),
@@ -434,12 +441,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             ),
                                             child: Text(
                                               updatedMed.manufacturer!,
-                                              style: TextStyle(
+                                              style: microHelperTextStyle(
+                                                context,
                                                 color: onPrimary.withValues(
                                                   alpha: 0.7,
                                                 ),
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w400,
+                                              )?.copyWith(
+                                                fontWeight: kFontWeightNormal,
                                                 letterSpacing: 0.2,
                                               ),
                                             ),
@@ -462,11 +470,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                   child: Center(
                                     child: Text(
                                       'Medication Details',
-                                      style: TextStyle(
-                                        color: onPrimary,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: onPrimary,
+                                            fontSize: kFontSizeXLarge,
+                                            fontWeight: kFontWeightSemiBold,
+                                          ),
                                     ),
                                   ),
                                 ),

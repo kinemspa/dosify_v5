@@ -750,6 +750,11 @@ const double kFontSizeXLarge = 17;
 const double kFontSizeDetailCollapsedTitle = 16;
 const double kFontSizeDetailHeaderTitle = 24;
 
+/// Medication detail header typography
+const double kMedicationDetailHeaderNameExpandedFontSize = 22;
+const double kMedicationDetailHeaderNameCollapsedFontSize = kFontSizeXLarge; // 17
+const double kMedicationDetailFormChipFontSize = 10;
+
 /// Next-dose date badge typography (Schedules list)
 const double kNextDoseDateCircleDayFontSizeCompact = 15;
 const double kNextDoseDateCircleDayFontSizeLarge = 18;
@@ -1051,6 +1056,18 @@ TextStyle? headerValueTextStyle(
     fontSize: fontSize,
     letterSpacing: 0.1,
     height: 1.1,
+  );
+}
+
+TextStyle? medicationDetailFormChipTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    color: color,
+    fontSize: kMedicationDetailFormChipFontSize,
+    fontWeight: kFontWeightSemiBold,
+    height: kLineHeightTight,
   );
 }
 
