@@ -739,6 +739,7 @@ const double kTextScaleFactorMax = 1.15;
 
 /// Font sizes
 const double kFontSizeXXSmall = 6;
+const double kFontSizeTiny = 8;
 const double kFontSizeXSmall = 9;
 const double kFontSizeSmall = 11;
 const double kFontSizeMedium = 13;
@@ -768,6 +769,7 @@ const FontWeight kFontWeightMedium = FontWeight.w500;
 const FontWeight kFontWeightSemiBold = FontWeight.w600;
 const FontWeight kFontWeightBold = FontWeight.w700;
 const FontWeight kFontWeightExtraBold = FontWeight.w800;
+const FontWeight kFontWeightBlack = FontWeight.w900;
 
 /// Line heights
 const double kLineHeightTight = 1.2;
@@ -1008,6 +1010,46 @@ TextStyle? syringeGaugeValueLabelTextStyle(
   );
 }
 
+TextStyle? headerMetaLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: kFontSizeXSmall,
+    fontWeight: kFontWeightMedium,
+    letterSpacing: 0.5,
+    height: kLineHeightTight,
+    color: color,
+  );
+}
+
+TextStyle? headerTinyLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    fontSize: kFontSizeTiny,
+    fontWeight: kFontWeightMedium,
+    letterSpacing: 0.0,
+    height: kLineHeightTight,
+    color: color,
+  );
+}
+
+TextStyle? headerValueTextStyle(
+  BuildContext context, {
+  required Color color,
+  double fontSize = kFontSizeMedium,
+}) {
+  return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    color: color,
+    fontWeight: kFontWeightSemiBold,
+    fontSize: fontSize,
+    letterSpacing: 0.1,
+    height: 1.1,
+  );
+}
+
 /// Reconstitution summary emphasis sizes.
 const double kReconSummaryStrengthValueFontSizeCompact = 16;
 const double kReconSummaryStrengthValueFontSize = 20;
@@ -1022,6 +1064,9 @@ const double kReconSummaryTotalVolumeFontSize = 22;
 const double kReconSummaryValueFontSizeCompact = 14;
 const double kReconSummaryValueFontSize = 18;
 const double kReconSummarySyringeLineFontSize = 11;
+const double kReconSummaryVolumeHugeFontSize = 32;
+const double kReconSummaryDrawUnitsFontSize = 22;
+const double kReconCalculatorOptionTitleFontSize = 16;
 
 TextStyle? reconSummaryBaseTextStyle(
   BuildContext context, {
@@ -1045,6 +1090,18 @@ TextStyle? reconSummaryEmphasisTextStyle(
     fontSize: fontSize,
     fontWeight: fontWeight,
     height: 1.4,
+  );
+}
+
+TextStyle? reconCalculatorOptionTitleTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.titleSmall?.copyWith(
+    fontSize: kReconCalculatorOptionTitleFontSize,
+    fontWeight: kFontWeightBold,
+    color: color,
+    height: 1.0,
   );
 }
 

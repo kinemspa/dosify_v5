@@ -430,10 +430,11 @@ class _ReconstitutionCalculatorWidgetState
                     TextSpan(
                       text:
                           '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.primary,
+                      style: reconSummaryEmphasisTextStyle(
+                        context,
+                        color: theme.colorScheme.primary,
+                        fontSize: kReconSummaryStrengthValueFontSizeCompact,
+                        fontWeight: kFontWeightBold,
                       ),
                     ),
                   ],
@@ -443,10 +444,9 @@ class _ReconstitutionCalculatorWidgetState
               Text(
                 'To adjust, go to Strength section above',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: helperTextStyle(context)?.copyWith(
                   color: fg.withValues(alpha: kReconTextMutedOpacity),
                   fontStyle: FontStyle.italic,
-                  fontSize: 10,
                 ),
               ),
             ],
@@ -788,10 +788,9 @@ class _ReconstitutionCalculatorWidgetState
                       right: 0,
                       child: Text(
                         '${_syringe.label} Syringe',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: helperTextStyle(context)?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontStyle: FontStyle.italic,
-                          fontSize: 11,
                         ),
                       ),
                     ),
@@ -907,165 +906,160 @@ class _ReconstitutionCalculatorWidgetState
                   ),
                   const SizedBox(height: 12),
                   // First line: Reconstitute X of MEDNAME
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: fg.withValues(alpha: kReconTextHighOpacity),
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(text: 'Reconstitute '),
-                        TextSpan(
-                          text:
-                              '${_formatNoTrailing(widget.initialStrengthValue)} ${widget.unitLabel}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w800,
+                  Builder(
+                    builder: (context) {
+                      final cs = Theme.of(context).colorScheme;
+                      final baseTextColor = fg.withValues(
+                        alpha: kReconTextHighOpacity,
+                      );
+                      final baseStyle = reconSummaryBaseTextStyle(
+                        context,
+                        color: baseTextColor,
+                      );
+                      final strengthStyle = reconSummaryEmphasisTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontSize: kReconSummaryStrengthValueFontSize,
+                        fontWeight: kFontWeightExtraBold,
+                      );
+                      final ofStyle = reconSummaryEmphasisTextStyle(
+                        context,
+                        color: baseTextColor,
+                        fontSize: kReconSummaryOfFontSize,
+                        fontWeight: kFontWeightNormal,
+                      );
+                      final medicationNameStyle = reconSummaryEmphasisTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontSize: kReconSummaryNameFontSize,
+                        fontWeight: kFontWeightBold,
+                      );
+                      final volumeHugeStyle = reconSummaryEmphasisTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontSize: kReconSummaryVolumeHugeFontSize,
+                        fontWeight: kFontWeightBlack,
+                      );
+                      final valueStyle = reconSummaryEmphasisTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontSize: kReconSummaryValueFontSize,
+                        fontWeight: kFontWeightBold,
+                      );
+                      final drawUnitsStyle = reconSummaryEmphasisTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontSize: kReconSummaryDrawUnitsFontSize,
+                        fontWeight: kFontWeightExtraBold,
+                      );
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'Reconstitute '),
+                                TextSpan(
+                                  text:
+                                      '${_formatNoTrailing(widget.initialStrengthValue)} ${widget.unitLabel}',
+                                  style: strengthStyle,
+                                ),
+                                if (widget.medicationName != null &&
+                                    widget.medicationName!.isNotEmpty) ...[
+                                  TextSpan(text: '  of  ', style: ofStyle),
+                                  TextSpan(
+                                    text: widget.medicationName,
+                                    style: medicationNameStyle,
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
-                        ),
-                        if (widget.medicationName != null &&
-                            widget.medicationName!.isNotEmpty) ...[
-                          TextSpan(
-                            text: '  of  ',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: fg.withValues(
-                                alpha: kReconTextHighOpacity,
+                          const SizedBox(height: 14),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'with '),
+                                TextSpan(
+                                  text: '${_formatNoTrailing(currentV)} mL',
+                                  style: volumeHugeStyle,
+                                ),
+                                TextSpan(text: '  of  ', style: ofStyle),
+                                TextSpan(
+                                  text: _diluentNameCtrl.text.trim().isNotEmpty
+                                      ? _diluentNameCtrl.text.trim()
+                                      : 'diluent',
+                                  style: valueStyle,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            height: kReconDividerHeight,
+                            margin: EdgeInsets.symmetric(
+                              vertical: kReconDividerVerticalMargin,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  cs.surface.withValues(
+                                    alpha: kOpacityTransparent,
+                                  ),
+                                  cs.primary.withValues(
+                                    alpha: kReconDividerOpacity,
+                                  ),
+                                  cs.surface.withValues(
+                                    alpha: kOpacityTransparent,
+                                  ),
+                                ],
+                                stops: kReconDividerStops,
                               ),
-                              fontWeight: FontWeight.w400,
                             ),
                           ),
-                          TextSpan(
-                            text: widget.medicationName,
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w700,
+                          const SizedBox(height: 6),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'Draw '),
+                                TextSpan(
+                                  text:
+                                      '${_selectedUnits.round()} Units  ',
+                                  style: drawUnitsStyle,
+                                ),
+                                TextSpan(
+                                  text:
+                                      '${_formatNoTrailing((_selectedUnits / 100) * _syringe.ml)} mL',
+                                  style: valueStyle,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'into a '),
+                                TextSpan(
+                                  text: _syringe.label,
+                                  style: valueStyle,
+                                ),
+                                const TextSpan(text: ' syringe'),
+                              ],
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  // Second line: with X mL of DILUENT
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: fg.withValues(alpha: kReconTextHighOpacity),
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(text: 'with '),
-                        TextSpan(
-                          text: '${_formatNoTrailing(currentV)} mL',
-                          style: TextStyle(
-                            fontSize: 32,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        TextSpan(
-                          text: '  of  ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: fg.withValues(alpha: kReconTextHighOpacity),
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        TextSpan(
-                          text: _diluentNameCtrl.text.trim().isNotEmpty
-                              ? _diluentNameCtrl.text.trim()
-                              : 'diluent',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Divider line
-                  Container(
-                    height: kReconDividerHeight,
-                    margin: EdgeInsets.symmetric(
-                      vertical: kReconDividerVerticalMargin,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Theme.of(context).colorScheme.primary.withValues(
-                            alpha: kReconDividerOpacity,
-                          ),
-                          Colors.transparent,
-                        ],
-                        stops: kReconDividerStops,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Draw instruction
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: fg.withValues(alpha: kReconTextHighOpacity),
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
-                      children: [
-                        const TextSpan(text: 'Draw '),
-                        TextSpan(
-                          text:
-                              '${_selectedUnits.round()} Units  ', // Show whole units only
-                          style: TextStyle(
-                            fontSize: 22,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                              '${_formatNoTrailing((_selectedUnits / 100) * _syringe.ml)} mL',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Syringe instruction
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: fg.withValues(alpha: kReconTextHighOpacity),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      children: [
-                        const TextSpan(text: 'into a '),
-                        TextSpan(
-                          text: _syringe.label,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const TextSpan(text: ' syringe'),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   // Dose amount on separate line
@@ -1081,10 +1075,11 @@ class _ReconstitutionCalculatorWidgetState
                         const TextSpan(text: 'for a dose of '),
                         TextSpan(
                           text: '${_formatNoTrailing(Draw)} $_doseUnit',
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: reconSummaryEmphasisTextStyle(
+                            context,
                             color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w700,
+                            fontSize: kReconSummaryValueFontSize,
+                            fontWeight: kFontWeightBold,
                           ),
                         ),
                       ],
@@ -1238,9 +1233,8 @@ class _ReconstitutionCalculatorWidgetState
                     children: [
                       Text(
                         label,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                        style: reconCalculatorOptionTitleTextStyle(
+                          context,
                           color: selected
                               ? theme.colorScheme.primary
                               : fg.withValues(alpha: kReconTextHighOpacity),
@@ -1250,10 +1244,9 @@ class _ReconstitutionCalculatorWidgetState
                         const SizedBox(height: 1),
                         Text(
                           explainerText,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: helperTextStyle(context)?.copyWith(
                             color: fg.withValues(alpha: kReconTextMutedOpacity),
                             fontStyle: FontStyle.italic,
-                            fontSize: 11,
                           ),
                         ),
                       ],

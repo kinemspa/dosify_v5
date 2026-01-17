@@ -128,9 +128,8 @@ class MedicationHeaderWidget extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         descriptionTruncated,
-                        style: TextStyle(
+                        style: hintTextStyle(context)?.copyWith(
                           color: headerForeground.withValues(alpha: 0.9),
-                          fontSize: 10,
                           fontStyle: FontStyle.italic,
                         ),
                         maxLines: 2,
@@ -143,11 +142,10 @@ class MedicationHeaderWidget extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 6),
                       child: Text(
                         medication.notes!,
-                        style: TextStyle(
+                        style: microHelperTextStyle(
+                          context,
                           color: headerForeground.withValues(alpha: 0.6),
-                          fontStyle: FontStyle.italic,
-                          fontSize: 9,
-                        ),
+                        )?.copyWith(fontStyle: FontStyle.italic),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -162,7 +160,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                     value:
                         '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
                     textColor: headerForeground,
-                    valueSize: 11,
+                    valueSize: kFontSizeSmall,
                   ),
                   const SizedBox(height: kSpacingS),
 
@@ -444,7 +442,7 @@ class _HeaderInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = textColor ?? Colors.white;
+    final color = textColor ?? Theme.of(context).colorScheme.onPrimary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,12 +455,9 @@ class _HeaderInfoTile extends StatelessWidget {
             ],
             Text(
               label,
-              style: TextStyle(
+              style: headerMetaLabelTextStyle(
+                context,
                 color: color.withValues(alpha: 0.65),
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.5,
-                height: 1.2,
               ),
             ),
           ],
@@ -474,12 +469,10 @@ class _HeaderInfoTile extends StatelessWidget {
             Flexible(
               child: Text(
                 value,
-                style: TextStyle(
+                style: headerValueTextStyle(
+                  context,
                   color: color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: valueSize ?? 13,
-                  letterSpacing: 0.1,
-                  height: 1.1,
+                  fontSize: valueSize ?? kFontSizeMedium,
                 ),
               ),
             ),
@@ -513,11 +506,9 @@ class _AdherenceGraph extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               '7 DAY ADHERENCE',
-              style: TextStyle(
+              style: headerMetaLabelTextStyle(
+                context,
                 color: color.withValues(alpha: 0.65),
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -547,10 +538,9 @@ class _AdherenceGraph extends StatelessWidget {
             ][day.weekday - 1];
             return Text(
               dayName,
-              style: TextStyle(
+              style: headerTinyLabelTextStyle(
+                context,
                 color: color.withValues(alpha: 0.5),
-                fontSize: 8,
-                fontWeight: FontWeight.w500,
               ),
             );
           }),
@@ -782,7 +772,7 @@ class _StockInfoCard extends StatelessWidget {
             child: RichText(
               textAlign: TextAlign.end,
               text: TextSpan(
-                style: TextStyle(color: onPrimary, fontSize: 10),
+                style: hintTextStyle(context)?.copyWith(color: onPrimary),
                 children: [
                   TextSpan(
                     text: _formatNumber(
@@ -794,14 +784,14 @@ class _StockInfoCard extends StatelessWidget {
                           : medication.stockValue,
                     ),
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: kFontWeightBold,
                       color: gaugeLabelColor,
                     ),
                   ),
                   const TextSpan(text: ' / '),
                   TextSpan(
                     text: _formatNumber(initial),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: kFontWeightBold),
                   ),
                   TextSpan(text: ' $unit'),
                 ],
@@ -812,9 +802,8 @@ class _StockInfoCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               helperLabel,
-              style: TextStyle(
+              style: hintTextStyle(context)?.copyWith(
                 color: onPrimary.withValues(alpha: 0.75),
-                fontSize: 10,
                 letterSpacing: 0.2,
               ),
               textAlign: TextAlign.end,
@@ -824,10 +813,9 @@ class _StockInfoCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               extraStockLabel,
-              style: TextStyle(
+              style: hintTextStyle(context)?.copyWith(
                 color: onPrimary.withValues(alpha: 0.95),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+                fontWeight: kFontWeightSemiBold,
                 letterSpacing: 0.1,
               ),
               textAlign: TextAlign.end,
