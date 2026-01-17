@@ -266,6 +266,7 @@ class LabelFieldRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -275,10 +276,8 @@ class LabelFieldRow extends StatelessWidget {
             child: Text(
               label,
               style: lightText
-                  ? theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: kFontSizeMedium,
-                      fontWeight: kFontWeightBold,
-                      color: Colors.white.withValues(
+                  ? fieldLabelStyle(context)?.copyWith(
+                      color: cs.onPrimary.withValues(
                         alpha: kReconTextMediumOpacity,
                       ),
                     )
@@ -561,14 +560,21 @@ class SyringeGauge extends StatelessWidget {
   final double fillUnits;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return CustomPaint(
       size: const Size(double.infinity, 26),
       painter: _SyringePainter(
         totalUnits: totalUnits,
         fillUnits: fillUnits,
-        fillColor: Theme.of(context).colorScheme.primary,
-        tickColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        labelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        fillColor: cs.primary,
+        tickColor: cs.onSurfaceVariant,
+        labelColor: cs.onSurfaceVariant,
+        labelTextStyle: syringeGaugeTickLabelTextStyle(
+          context,
+          color: cs.onSurfaceVariant,
+          fontSize: kFontSizeXSmall,
+        ),
       ),
     );
   }
@@ -581,12 +587,14 @@ class _SyringePainter extends CustomPainter {
     required this.fillColor,
     required this.tickColor,
     required this.labelColor,
+    required this.labelTextStyle,
   });
   final double totalUnits;
   final double fillUnits;
   final Color fillColor;
   final Color tickColor;
   final Color labelColor;
+  final TextStyle? labelTextStyle;
   @override
   void paint(Canvas canvas, Size size) {
     final r = Rect.fromLTWH(0, 6, size.width, 14);
@@ -627,7 +635,7 @@ class _SyringePainter extends CustomPainter {
         final tp = TextPainter(
           text: TextSpan(
             text: units.toStringAsFixed(0),
-            style: TextStyle(fontSize: 9, color: labelColor),
+            style: labelTextStyle,
           ),
           textDirection: TextDirection.ltr,
         )..layout();
@@ -761,10 +769,9 @@ class StepperRow36 extends StatelessWidget {
         onPressed: enabled ? onTap : null,
         child: Text(
           symbol,
-          style: bodyTextStyle(context)?.copyWith(
+          style: detailCollapsedTitleTextStyle(context)?.copyWith(
             color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
+            fontWeight: kFontWeightMedium,
           ),
         ),
       ),
