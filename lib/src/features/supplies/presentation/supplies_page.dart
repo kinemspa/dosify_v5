@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/supplies/data/supply_repository.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
@@ -529,10 +530,9 @@ class _SupplyCard extends StatelessWidget {
                         children: [
                           Text(
                             s.name,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w700,
+                            style: bodyTextStyle(context)?.copyWith(
+                              fontWeight: kFontWeightBold,
                               height: 1,
-                              fontSize: 13,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -543,10 +543,9 @@ class _SupplyCard extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   _stockLine(s, cur),
-                                  style: theme.textTheme.bodySmall?.copyWith(
+                                  style: helperTextStyle(context)?.copyWith(
                                     color: _stockColor(context, s, cur),
                                     height: 1,
-                                    fontSize: 11,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -555,10 +554,9 @@ class _SupplyCard extends StatelessWidget {
                               if (s.expiry != null)
                                 Text(
                                   DateFormat('d/M').format(s.expiry!),
-                                  style: theme.textTheme.bodySmall?.copyWith(
+                                  style: hintTextStyle(context)?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                     height: 1,
-                                    fontSize: 10,
                                   ),
                                 ),
                             ],
