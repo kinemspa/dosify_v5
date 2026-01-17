@@ -5382,7 +5382,9 @@ Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
     children: [
       Text(
         '7 Day Adherence',
-        style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10),
+        style: helperTextStyle(context)?.copyWith(
+          color: color.withValues(alpha: 0.7),
+        ),
       ),
       const SizedBox(height: 8),
       SizedBox(
@@ -5460,17 +5462,19 @@ Widget _buildStockForecastCard(
     children: [
       Text(
         'Stock Forecast',
-        style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 10),
+        style: medicationDetailStockForecastLabelTextStyle(
+          context,
+          color: color.withValues(alpha: 0.7),
+        ),
         textAlign: TextAlign.right,
       ),
       const SizedBox(height: 2),
       Text(
         'Based on current schedule',
-        style: TextStyle(
+        style: medicationDetailStockForecastSubLabelTextStyle(
+          context,
           color: color.withValues(alpha: 0.5),
-          fontSize: 9,
-          fontStyle: FontStyle.italic,
-        ),
+        )?.copyWith(fontStyle: FontStyle.italic),
         textAlign: TextAlign.right,
       ),
       Text(
