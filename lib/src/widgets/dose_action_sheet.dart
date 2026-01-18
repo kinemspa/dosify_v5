@@ -120,12 +120,18 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       'schedules',
     ).get(widget.dose.scheduleId);
     if (schedule == null) {
-      return DoseDialogDoseFallbackSummary(dose: widget.dose);
+      return SizedBox(
+        width: double.infinity,
+        child: DoseDialogDoseFallbackSummary(dose: widget.dose),
+      );
     }
 
     final med = Hive.box<Medication>('medications').get(schedule.medicationId);
     if (med == null) {
-      return DoseDialogDoseFallbackSummary(dose: widget.dose);
+      return SizedBox(
+        width: double.infinity,
+        child: DoseDialogDoseFallbackSummary(dose: widget.dose),
+      );
     }
 
     final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
@@ -142,20 +148,25 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       syringeUnits: schedule.doseIU?.toDouble(),
     );
 
-    return DoseCard(
-      dose: widget.dose,
-      medicationName: med.name,
-      strengthOrConcentrationLabel: strengthLabel,
-      doseMetrics: metrics,
-      isActive: schedule.isActive,
-      medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(med.form),
-      doseNumber: ScheduleOccurrenceService.occurrenceNumber(
-        schedule,
-        widget.dose.scheduledTime,
+    return SizedBox(
+      width: double.infinity,
+      child: DoseCard(
+        dose: widget.dose,
+        medicationName: med.name,
+        strengthOrConcentrationLabel: strengthLabel,
+        doseMetrics: metrics,
+        isActive: schedule.isActive,
+        medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
+          med.form,
+        ),
+        doseNumber: ScheduleOccurrenceService.occurrenceNumber(
+          schedule,
+          widget.dose.scheduledTime,
+        ),
+        statusOverride: _selectedStatus,
+        showActions: false,
+        onTap: () {},
       ),
-      statusOverride: _selectedStatus,
-      showActions: false,
-      onTap: () {},
     );
   }
 
