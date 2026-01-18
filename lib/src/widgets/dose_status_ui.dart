@@ -31,20 +31,26 @@ String doseStatusLabel(DoseStatus status, {required bool disabled}) {
   }
 
   return switch (status) {
-    DoseStatus.taken => (color: kDoseStatusTakenGreen, icon: Icons.check_rounded),
+    DoseStatus.taken => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.check_rounded,
+    ),
     DoseStatus.skipped => (
-        color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-        icon: Icons.block_rounded,
-      ),
+      color: kDoseStatusSkippedRed,
+      icon: Icons.block_rounded,
+    ),
     DoseStatus.snoozed => (
-        color: kDoseStatusSnoozedOrange,
-        icon: Icons.snooze_rounded,
-      ),
+      color: kDoseStatusSnoozedOrange,
+      icon: Icons.snooze_rounded,
+    ),
     DoseStatus.overdue => (
-        color: kDoseStatusMissedDarkRed,
-        icon: Icons.warning_rounded,
-      ),
-    DoseStatus.pending => (color: cs.primary, icon: Icons.notifications_rounded),
+      color: kDoseStatusMissedDarkRed,
+      icon: Icons.warning_rounded,
+    ),
+    DoseStatus.pending => (
+      color: cs.primary,
+      icon: Icons.notifications_rounded,
+    ),
   };
 }
 
@@ -52,17 +58,18 @@ String doseStatusLabel(DoseStatus status, {required bool disabled}) {
   BuildContext context,
   DoseAction action,
 ) {
-  final cs = Theme.of(context).colorScheme;
-
   return switch (action) {
-    DoseAction.taken => (color: kDoseStatusTakenGreen, icon: Icons.check_rounded),
+    DoseAction.taken => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.check_rounded,
+    ),
     DoseAction.skipped => (
-        color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-        icon: Icons.block_rounded,
-      ),
+      color: kDoseStatusSkippedRed,
+      icon: Icons.block_rounded,
+    ),
     DoseAction.snoozed => (
-        color: kDoseStatusSnoozedOrange,
-        icon: Icons.snooze_rounded,
-      ),
+      color: kDoseStatusSnoozedOrange,
+      icon: Icons.snooze_rounded,
+    ),
   };
 }

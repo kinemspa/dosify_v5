@@ -204,6 +204,7 @@ const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
 
 /// Week-view compact dose indicator sizing.
 const double kCalendarWeekDoseIndicatorHeight = 28;
+
 /// Minimum width required to show the time label in week-view dose indicators.
 const double kCalendarWeekDoseIndicatorMinWidthForTime = 52;
 const EdgeInsets kCalendarWeekDoseIndicatorPadding = EdgeInsets.symmetric(
@@ -423,6 +424,7 @@ const double kDetailHeaderCollapsedHeight = 48;
 ///
 /// Use these instead of hardcoding colors in widgets.
 const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
+const Color kDoseStatusSkippedRed = Color(0xFFD32F2F);
 const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
 const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);
 
@@ -752,7 +754,8 @@ const double kFontSizeDetailHeaderTitle = 24;
 
 /// Medication detail header typography
 const double kMedicationDetailHeaderNameExpandedFontSize = 22;
-const double kMedicationDetailHeaderNameCollapsedFontSize = kFontSizeXLarge; // 17
+const double kMedicationDetailHeaderNameCollapsedFontSize =
+    kFontSizeXLarge; // 17
 const double kMedicationDetailFormChipFontSize = 10;
 const double kMedicationDetailHeaderTileLabelFontSize = 10;
 const double kMedicationDetailHeaderTileValueFontSize = 12;
@@ -761,7 +764,8 @@ const double kMedicationDetailSyringeLabelFontSize = 11;
 
 /// Medication detail stock forecast typography
 const double kMedicationDetailStockForecastLabelFontSize = 10;
-const double kMedicationDetailStockForecastSubLabelFontSize = kFontSizeXSmall; // 9
+const double kMedicationDetailStockForecastSubLabelFontSize =
+    kFontSizeXSmall; // 9
 const double kMedicationDetailStockForecastDateFontSize = 14;
 const double kMedicationDetailStockForecastDaysFontSize = 12;
 const double kMedicationDetailStockForecastExpiryFontSize = 10;
@@ -1317,9 +1321,9 @@ TextStyle? fieldLabelStyle(BuildContext context) {
 /// Review-row label style (left column labels on Step 5 review rows).
 TextStyle? reviewRowLabelStyle(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
-  return fieldLabelStyle(context)?.copyWith(
-    color: cs.primary.withValues(alpha: kOpacityMediumHigh),
-  );
+  return fieldLabelStyle(
+    context,
+  )?.copyWith(color: cs.primary.withValues(alpha: kOpacityMediumHigh));
 }
 
 /// Input text style (typed text in fields)
@@ -1413,7 +1417,10 @@ TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
 }
 
 /// Calendar compact dose-block title style (e.g. schedule name in a block).
-TextStyle? calendarDoseBlockTitleTextStyle(BuildContext context, {Color? color}) {
+TextStyle? calendarDoseBlockTitleTextStyle(
+  BuildContext context, {
+  Color? color,
+}) {
   final cs = Theme.of(context).colorScheme;
   return Theme.of(context).textTheme.labelMedium?.copyWith(
     fontWeight: kFontWeightSemiBold,
