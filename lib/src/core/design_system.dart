@@ -318,6 +318,10 @@ const double kHelperTextBottomPadding = 6;
 /// Dose status badge spacing
 const double kDoseStatusBadgeVerticalPadding = 1;
 
+/// DoseCard status icon sizing
+const double kDoseCardStatusIconSize = kIconSizeLarge;
+const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
+
 /// Button spacing
 const double kButtonSpacing = 8;
 const double kStepperButtonSpacing = 4; // Between stepper buttons

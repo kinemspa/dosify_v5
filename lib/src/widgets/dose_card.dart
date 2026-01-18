@@ -60,8 +60,13 @@ class DoseCard extends StatelessWidget {
 
     final effectiveStatus = statusOverride ?? dose.status;
     final disabled = !isActive;
-    final statusColor =
-        doseStatusVisual(context, effectiveStatus, disabled: disabled).color;
+    final statusVisual = doseStatusVisual(
+      context,
+      effectiveStatus,
+      disabled: disabled,
+    );
+    final statusColor = statusVisual.color;
+    final statusIcon = statusVisual.icon;
 
     final statusLabel = doseStatusLabel(effectiveStatus, disabled: disabled);
 
@@ -230,7 +235,9 @@ class DoseCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: kOpacityMinimal),
-                          borderRadius: BorderRadius.circular(kBorderRadiusChip),
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusChip,
+                          ),
                           border: Border.all(
                             color: statusColor.withValues(
                               alpha: kOpacityMediumLow,
@@ -239,16 +246,32 @@ class DoseCard extends StatelessWidget {
                           ),
                         ),
                         child: Center(
-                          child: Text(
-                            statusLabel,
-                            style: helperTextStyle(context, color: statusColor)
-                                ?.copyWith(
-                                  fontSize: kFontSizeXXSmall,
-                                  fontWeight: kFontWeightExtraBold,
-                                  height: 1,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                statusIcon,
+                                size: compact
+                                    ? kDoseCardStatusIconSizeCompact
+                                    : kDoseCardStatusIconSize,
+                                color: statusColor,
+                              ),
+                              const SizedBox(width: kSpacingXXS),
+                              Text(
+                                statusLabel,
+                                style:
+                                    helperTextStyle(
+                                      context,
+                                      color: statusColor,
+                                    )?.copyWith(
+                                      fontSize: kFontSizeXXSmall,
+                                      fontWeight: kFontWeightExtraBold,
+                                      height: 1,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -273,6 +296,4 @@ class DoseCard extends StatelessWidget {
       ),
     );
   }
-
-  
 }
