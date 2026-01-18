@@ -412,10 +412,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                               ),
                                               child: Text(
                                                 _formLabel(updatedMed.form),
-                                                style: medicationDetailFormChipTextStyle(
-                                                  context,
-                                                  color: headerForeground,
-                                                ),
+                                                style:
+                                                    medicationDetailFormChipTextStyle(
+                                                      context,
+                                                      color: headerForeground,
+                                                    ),
                                               ),
                                             ),
                                           ],
@@ -441,15 +442,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             ),
                                             child: Text(
                                               updatedMed.manufacturer!,
-                                              style: microHelperTextStyle(
-                                                context,
-                                                color: onPrimary.withValues(
-                                                  alpha: 0.7,
-                                                ),
-                                              )?.copyWith(
-                                                fontWeight: kFontWeightNormal,
-                                                letterSpacing: 0.2,
-                                              ),
+                                              style:
+                                                  microHelperTextStyle(
+                                                    context,
+                                                    color: onPrimary.withValues(
+                                                      alpha: 0.7,
+                                                    ),
+                                                  )?.copyWith(
+                                                    fontWeight:
+                                                        kFontWeightNormal,
+                                                    letterSpacing: 0.2,
+                                                  ),
                                             ),
                                           ),
                                         ),
@@ -594,9 +597,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                           context,
                         ),
                         onRefill: () {},
+                        onRestock:
+                            updatedMed.form == MedicationForm.multiDoseVial
+                            ? () {}
+                            : null,
                         onAdHocDose: () {},
                         hasSchedules: hasSchedules,
-                        crossAxisAlignment: CrossAxisAlignment.start,
                       ),
                     ),
                   ),
@@ -2598,10 +2604,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
     final initialDoseUnit = med.strengthUnit.name;
-    final initialSyringe = (latest.volumePerDose != null &&
-        latest.volumePerDose! > 0)
-      ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
-      : SyringeSizeMl.ml1;
+    final initialSyringe =
+        (latest.volumePerDose != null && latest.volumePerDose! > 0)
+        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        : SyringeSizeMl.ml1;
 
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: context,
@@ -3297,8 +3303,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   Future<void> pickReconstitution(BuildContext dialogContext) async {
     final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
     final initialDoseUnit = med.strengthUnit.name;
-    final initialSyringe = (latest.volumePerDose != null &&
-            latest.volumePerDose! > 0)
+    final initialSyringe =
+        (latest.volumePerDose != null && latest.volumePerDose! > 0)
         ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
         : SyringeSizeMl.ml1;
 
@@ -3334,10 +3340,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
           initialDoseValue: initialDoseAmount,
           initialDoseUnit: initialDoseUnit,
           initialSyringeSize: initialSyringe,
-          initialVialSize:
-              (double.tryParse(replaceVolumeCtrl.text) ?? 0) > 0
-                  ? (double.tryParse(replaceVolumeCtrl.text) ?? vialSize)
-                  : (latest.containerVolumeMl ?? vialSize),
+          initialVialSize: (double.tryParse(replaceVolumeCtrl.text) ?? 0) > 0
+              ? (double.tryParse(replaceVolumeCtrl.text) ?? vialSize)
+              : (latest.containerVolumeMl ?? vialSize),
           initialDiluentName: selectedDiluentName,
         ),
       ),
@@ -3360,8 +3365,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   Future<void> pickTopUpStrength(BuildContext dialogContext) async {
     final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
     final initialDoseUnit = med.strengthUnit.name;
-    final initialSyringe = (latest.volumePerDose != null &&
-            latest.volumePerDose! > 0)
+    final initialSyringe =
+        (latest.volumePerDose != null && latest.volumePerDose! > 0)
         ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
         : SyringeSizeMl.ml1;
 
@@ -3411,34 +3416,35 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             selectedSource == 'fromStock' && canUseFromStock;
 
         final replaceVolume = (double.tryParse(replaceVolumeCtrl.text) ?? 0)
-          .clamp(0.0, double.infinity);
+            .clamp(0.0, double.infinity);
         final topUpAddVolume = (double.tryParse(topUpVolumeCtrl.text) ?? 0)
-          .clamp(0.0, double.infinity);
+            .clamp(0.0, double.infinity);
 
         final previewVolume = selectedMode == 'replace'
-          ? (replaceVolume > 0 ? replaceVolume : vialSize)
-          : currentVolume + topUpAddVolume;
+            ? (replaceVolume > 0 ? replaceVolume : vialSize)
+            : currentVolume + topUpAddVolume;
 
         final unit = MedicationDisplayHelpers.unitLabel(med.strengthUnit);
         final currentPerMl = med.perMlValue;
         final effectiveTopUpPerMl = topUpPerMl ?? currentPerMl;
         final canPreviewTopUpConc =
-          currentPerMl != null && effectiveTopUpPerMl != null;
-        final previewNewPerMl = canPreviewTopUpConc &&
-            currentVolume > 0 &&
-            topUpAddVolume > 0 &&
-            (currentVolume + topUpAddVolume) > 0
-          ? ((currentPerMl * currentVolume) +
-              (effectiveTopUpPerMl * topUpAddVolume)) /
-            (currentVolume + topUpAddVolume)
-          : null;
+            currentPerMl != null && effectiveTopUpPerMl != null;
+        final previewNewPerMl =
+            canPreviewTopUpConc &&
+                currentVolume > 0 &&
+                topUpAddVolume > 0 &&
+                (currentVolume + topUpAddVolume) > 0
+            ? ((currentPerMl * currentVolume) +
+                      (effectiveTopUpPerMl * topUpAddVolume)) /
+                  (currentVolume + topUpAddVolume)
+            : null;
 
         final canSave = selectedMode == 'replace'
-          ? (selectedPerMl != null &&
-            selectedPerMl! > 0 &&
-            (replaceVolume > 0 || vialSize > 0))
-          : (topUpAddVolume > 0 &&
-            (effectiveTopUpPerMl == null || effectiveTopUpPerMl > 0));
+            ? (selectedPerMl != null &&
+                  selectedPerMl! > 0 &&
+                  (replaceVolume > 0 || vialSize > 0))
+            : (topUpAddVolume > 0 &&
+                  (effectiveTopUpPerMl == null || effectiveTopUpPerMl > 0));
 
         Widget buildHeaderCard() {
           return Container(
@@ -3791,7 +3797,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       final unit = MedicationDisplayHelpers.unitLabel(med.strengthUnit);
       final currentPerMl = med.perMlValue;
       final topPerMl = (result['topUpPerMl'] as double?) ?? currentPerMl;
-      final newPerMl = (currentPerMl != null &&
+      final newPerMl =
+          (currentPerMl != null &&
               topPerMl != null &&
               currentPerMl > 0 &&
               topPerMl > 0 &&
@@ -3799,7 +3806,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
               addVolume > 0 &&
               (currentVolume + addVolume) > 0)
           ? ((currentPerMl * currentVolume) + (topPerMl * addVolume)) /
-              (currentVolume + addVolume)
+                (currentVolume + addVolume)
           : null;
 
       final topUpDiluent = result['topUpDiluentName'] as String?;
@@ -4185,9 +4192,9 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                             _ =>
                               '${_formatNumber(med.strengthValue)} $strengthUnit',
                           },
-                          style: helperTextStyle(stateContext)?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                          style: helperTextStyle(
+                            stateContext,
+                          )?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ],
@@ -4422,9 +4429,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                           '${_formatNumber(syringeSize)} mL Syringe',
                           style: medicationDetailSyringeLabelTextStyle(
                             stateContext,
-                            color: Theme.of(stateContext)
-                                .colorScheme
-                                .onPrimary
+                            color: Theme.of(stateContext).colorScheme.onPrimary
                                 .withValues(alpha: kReconTextMediumOpacity),
                           )?.copyWith(fontWeight: kFontWeightNormal),
                         ),
@@ -5382,9 +5387,9 @@ Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
     children: [
       Text(
         '7 Day Adherence',
-        style: helperTextStyle(context)?.copyWith(
-          color: color.withValues(alpha: 0.7),
-        ),
+        style: helperTextStyle(
+          context,
+        )?.copyWith(color: color.withValues(alpha: 0.7)),
       ),
       const SizedBox(height: 8),
       SizedBox(
