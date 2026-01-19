@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 // import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart'; // unused
 
@@ -137,6 +138,14 @@ class MedicationDisplayHelpers {
 
     final metrics = <String>[];
 
+    final derivedUnits =
+        (med.form == MedicationForm.multiDoseVial &&
+            syringeUnits == null &&
+            doseVolumeMicroliter != null)
+        ? (doseVolumeMicroliter / 1000) * SyringeType.ml_1_0.unitsPerMl
+        : null;
+    final effectiveSyringeUnits = syringeUnits ?? derivedUnits;
+
     switch (med.form) {
       case MedicationForm.tablet:
         if (doseTabletQuarters != null) {
@@ -174,10 +183,10 @@ class MedicationDisplayHelpers {
       metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
     }
 
-    if (syringeUnits != null) {
+    if (effectiveSyringeUnits != null) {
       metrics.add(
         formatSyringeUnits(
-          syringeUnits,
+          effectiveSyringeUnits,
           longLabel: med.form == MedicationForm.multiDoseVial,
         ),
       );
