@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/widgets/dose_quick_action_row.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_action_button.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
@@ -277,7 +277,12 @@ class DoseCard extends StatelessWidget {
                       ),
                       const SizedBox(height: kSpacingXS),
                       if (hasQuickActions)
-                        DoseQuickActionRow(onAction: onQuickAction!)
+                        DoseStatusActionButton(
+                          currentStatus: effectiveStatus,
+                          onSelect: onQuickAction!,
+                          isActive: isActive,
+                          compact: compact,
+                        )
                       else
                         SizedBox(
                           height: kStandardButtonHeight,
