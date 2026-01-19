@@ -80,7 +80,7 @@ const double kDetailCompactCalendarHeight = 400;
 ///
 /// Matches the Reports card header height for consistent collapsed card sizing.
 const EdgeInsets kDetailCardCollapsedHeaderPadding = EdgeInsets.symmetric(
-  horizontal: kSpacingL,
+  horizontal: kCardPadding,
   vertical: kSpacingS,
 );
 
