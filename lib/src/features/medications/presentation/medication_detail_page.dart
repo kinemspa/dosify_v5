@@ -979,33 +979,31 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
-                    style: helperTextStyle(
+                    style: smallHelperTextStyle(
                       context,
                       color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-                    )?.copyWith(fontSize: kFontSizeSmall),
+                    ),
                     children: [
                       TextSpan(
                         text: _formatNumber(med.stockValue),
                         style:
-                            helperTextStyle(
+                            smallHelperTextStyle(
                               context,
                               color: onPrimary.withValues(
                                 alpha: kOpacityMediumHigh,
                               ),
                             )?.copyWith(
-                              fontSize: kFontSizeSmall,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: kFontWeightExtraBold,
                               color: gaugeLabelColor,
                             ),
                       ),
                       const TextSpan(text: ' / '),
                       TextSpan(
                         text: _formatNumber(initial),
-                        style: helperTextStyle(context, color: onPrimary)
-                            ?.copyWith(
-                              fontSize: kFontSizeSmall,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style: smallHelperTextStyle(
+                          context,
+                          color: onPrimary,
+                        )?.copyWith(fontWeight: kFontWeightExtraBold),
                       ),
                       TextSpan(text: ' $unit'),
                     ],
@@ -1013,10 +1011,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 ),
                 Text(
                   helperLabel,
-                  style: helperTextStyle(
+                  style: smallHelperTextStyle(
                     context,
                     color: onPrimary.withValues(alpha: kOpacityMediumLow),
-                  )?.copyWith(fontSize: kFontSizeSmall),
+                  ),
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -1224,10 +1222,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       context,
       stockStatusColorFromPercentage(context, percentage: stockInfo.percentage),
     );
-    final baseStyle = helperTextStyle(
+    final baseStyle = microHelperTextStyle(
       context,
       color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-    )?.copyWith(fontSize: kFontSizeXSmall, fontWeight: FontWeight.w600);
+    )?.copyWith(fontWeight: kFontWeightSemiBold);
 
     return RichText(
       textAlign: TextAlign.right,
@@ -1238,7 +1236,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         children: [
           TextSpan(
             text: fmt2(currentMl),
-            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+            style: baseStyle?.copyWith(
+              fontWeight: kFontWeightExtraBold,
+              color: colored,
+            ),
           ),
           TextSpan(text: '/${fmt2(totalMl)} mL'),
         ],
@@ -1261,10 +1262,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       context,
       stockStatusColorFromPercentage(context, percentage: stockInfo.percentage),
     );
-    final baseStyle = helperTextStyle(
+    final baseStyle = microHelperTextStyle(
       context,
       color: onPrimary.withValues(alpha: kOpacityMediumHigh),
-    )?.copyWith(fontSize: kFontSizeXSmall, fontWeight: FontWeight.w600);
+    )?.copyWith(fontWeight: kFontWeightSemiBold);
 
     final label = count == 1 ? 'vial' : 'vials';
     return RichText(
@@ -1276,7 +1277,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         children: [
           TextSpan(
             text: '$count',
-            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+            style: baseStyle?.copyWith(
+              fontWeight: kFontWeightExtraBold,
+              color: colored,
+            ),
           ),
           TextSpan(text: ' $label'),
         ],
@@ -1732,10 +1736,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final labelStyle = helperTextStyle(
+    final labelStyle = smallHelperTextStyle(
       context,
       color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-    )?.copyWith(fontSize: kFontSizeSmall, fontWeight: kFontWeightSemiBold);
+    )?.copyWith(fontWeight: kFontWeightSemiBold);
 
     final valueBaseStyle = bodyTextStyle(context)?.copyWith(
       fontWeight: emphasized ? kFontWeightSemiBold : kFontWeightNormal,
@@ -1835,10 +1839,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               width: 90,
               child: Text(
                 'Conditions',
-                style: helperTextStyle(
+                style: smallHelperTextStyle(
                   context,
                   color: colorScheme.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeSmall),
+                ),
               ),
             ),
             Wrap(spacing: 6, children: conditions),
@@ -1877,11 +1881,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           ],
           Text(
             label,
-            style: helperTextStyle(context, color: colorScheme.onPrimary)
-                ?.copyWith(
-                  fontSize: kFontSizeSmall,
-                  fontWeight: kFontWeightSemiBold,
-                ),
+            style: smallHelperTextStyle(
+              context,
+              color: colorScheme.onPrimary,
+            )?.copyWith(fontWeight: kFontWeightSemiBold),
           ),
         ],
       ),
