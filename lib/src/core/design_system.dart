@@ -1004,6 +1004,30 @@ TextStyle? microHelperTextStyle(BuildContext context, {Color? color}) {
   )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
 }
 
+/// Small helper/support text style.
+///
+/// Prefer this over `helperTextStyle(...).copyWith(fontSize: kFontSizeSmall)`
+/// in feature widgets.
+TextStyle? smallHelperTextStyle(BuildContext context, {Color? color}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeSmall,
+    height: kLineHeightTight,
+  );
+}
+
+/// Hint-sized helper/support text style.
+///
+/// Use for chart axes, tiny labels, and secondary metadata.
+///
+/// Prefer this over `helperTextStyle(...).copyWith(fontSize: kFontSizeHint)`
+/// in feature widgets.
+TextStyle? hintLabelTextStyle(BuildContext context, {Color? color}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeHint,
+    height: kLineHeightTight,
+  );
+}
+
 /// Dose-card leading time label style.
 TextStyle? doseCardTimeTextStyle(
   BuildContext context, {

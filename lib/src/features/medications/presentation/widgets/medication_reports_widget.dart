@@ -173,8 +173,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   dividerColor: cs.surface.withValues(
                     alpha: kOpacityTransparent,
                   ),
-                  labelStyle: helperTextStyle(context)?.copyWith(
-                    fontSize: kFontSizeSmall,
+                  labelStyle: smallHelperTextStyle(context)?.copyWith(
                     fontWeight: kFontWeightSemiBold,
                   ),
                   tabs: [
@@ -312,9 +311,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 const SizedBox(height: kSpacingXS),
                 Text(
                   'Recorded doses and inventory events will appear here',
-                  style: helperTextStyle(
-                    context,
-                  )?.copyWith(fontSize: kFontSizeSmall),
+                  style: smallHelperTextStyle(context),
                 ),
               ],
             ),
@@ -418,12 +415,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 const SizedBox(height: kSpacingXS / 2),
                 Text(
                   timeFormat.format(log.changeTime),
-                  style: helperTextStyle(
+                  style: smallHelperTextStyle(
                     context,
                     color: cs.onSurfaceVariant.withValues(
                       alpha: kOpacityMediumHigh,
                     ),
-                  )?.copyWith(fontSize: kFontSizeSmall),
+                  ),
                 ),
               ],
             ),
@@ -478,12 +475,12 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   const SizedBox(height: kSpacingXS / 2),
                   Text(
                     timeFormat.format(dose.scheduledTime),
-                    style: helperTextStyle(
+                    style: smallHelperTextStyle(
                       context,
                       color: cs.onSurfaceVariant.withValues(
                         alpha: kOpacityMediumHigh,
                       ),
-                    )?.copyWith(fontSize: kFontSizeSmall),
+                    ),
                   ),
                 ],
               ),
@@ -500,8 +497,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               ),
               child: Text(
                 'Missed',
-                style: helperTextStyle(context, color: cs.error)?.copyWith(
-                  fontSize: kFontSizeHint,
+                style: hintLabelTextStyle(context, color: cs.error)?.copyWith(
                   fontWeight: kFontWeightBold,
                 ),
               ),
@@ -570,32 +566,32 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       const SizedBox(width: kSpacingXS),
                       Text(
                         displayUnit,
-                        style: helperTextStyle(
+                        style: smallHelperTextStyle(
                           context,
                           color: cs.onSurfaceVariant,
-                        )?.copyWith(fontSize: kFontSizeSmall),
+                        ),
                       ),
                       const SizedBox(width: kSpacingS),
                       Text(
                         timeFormat.format(log.actionTime),
-                        style: helperTextStyle(
+                        style: smallHelperTextStyle(
                           context,
                           color: cs.onSurfaceVariant.withValues(
                             alpha: kOpacityMediumHigh,
                           ),
-                        )?.copyWith(fontSize: kFontSizeSmall),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: kSpacingXS / 2),
                   Text(
                     title,
-                    style: helperTextStyle(
+                    style: smallHelperTextStyle(
                       context,
                       color: cs.onSurfaceVariant.withValues(
                         alpha: kOpacityMediumHigh,
                       ),
-                    )?.copyWith(fontSize: kFontSizeSmall),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -614,8 +610,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               ),
               child: Text(
                 log.action.name,
-                style: helperTextStyle(context, color: iconColor)?.copyWith(
-                  fontSize: kFontSizeHint,
+                style: hintLabelTextStyle(context, color: iconColor)?.copyWith(
                   fontWeight: kFontWeightBold,
                 ),
               ),
@@ -1160,9 +1155,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             const SizedBox(height: kSpacingXS),
             Text(
               'Create a schedule to track adherence',
-              style: helperTextStyle(
-                context,
-              )?.copyWith(fontSize: kFontSizeSmall),
+              style: smallHelperTextStyle(context),
             ),
           ],
         ),
@@ -1283,11 +1276,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ][day.weekday - 1];
             return Text(
               dayName,
-              style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                  ?.copyWith(
-                    fontSize: kFontSizeHint,
-                    fontWeight: kFontWeightMedium,
-                  ),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant)
+                  ?.copyWith(fontWeight: kFontWeightMedium),
             );
           }),
         ),
@@ -1329,38 +1319,23 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           children: [
             Text(
               '12a',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
             Text(
               '6a',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
             Text(
               '12p',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
             Text(
               '6p',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
             Text(
               '12a',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -1443,10 +1418,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             const SizedBox(width: kSpacingS),
             Text(
               '30d',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -1506,19 +1478,16 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             const SizedBox(width: kSpacingS),
             Text(
               '30d',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
             if (doseTrend.unit != null) ...[
               const SizedBox(width: kSpacingS),
               Text(
                 doseTrend.unit!,
-                style: helperTextStyle(
+                style: hintLabelTextStyle(
                   context,
                   color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
+                ),
               ),
             ],
           ],
@@ -1600,19 +1569,16 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             const SizedBox(width: kSpacingS),
             Text(
               '30d',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
             if (doseStrengthHistory.unit != null) ...[
               const SizedBox(width: kSpacingS),
               Text(
                 doseStrengthHistory.unit!,
-                style: helperTextStyle(
+                style: hintLabelTextStyle(
                   context,
                   color: cs.onSurfaceVariant,
-                )?.copyWith(fontSize: kFontSizeHint),
+                ),
               ),
             ],
           ],
@@ -1665,10 +1631,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             const SizedBox(width: kSpacingS),
             Text(
               '30d',
-              style: helperTextStyle(
-                context,
-                color: cs.onSurfaceVariant,
-              )?.copyWith(fontSize: kFontSizeHint),
+              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -1756,20 +1719,19 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 const SizedBox(height: kSpacingXS / 2),
                 Text(
                   timeFormat.format(log.timestamp),
-                  style: helperTextStyle(
+                  style: smallHelperTextStyle(
                     context,
                     color: cs.onSurfaceVariant,
-                  )?.copyWith(fontSize: kFontSizeSmall),
+                  ),
                 ),
                 if (log.notes != null && log.notes!.trim().isNotEmpty) ...[
                   const SizedBox(height: kSpacingXS / 2),
                   Text(
                     log.notes!.trim(),
-                    style: helperTextStyle(context, color: cs.onSurfaceVariant)
-                        ?.copyWith(
-                          fontSize: kFontSizeSmall,
-                          fontStyle: FontStyle.italic,
-                        ),
+                    style: smallHelperTextStyle(
+                      context,
+                      color: cs.onSurfaceVariant,
+                    )?.copyWith(fontStyle: FontStyle.italic),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
