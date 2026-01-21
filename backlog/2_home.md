@@ -2,12 +2,16 @@
 # Home
 
 ## Scope
-- [ ] Headings are not styled correctly. Need to be Primary.
-- [ ] Remove the Card within a card feeling. Maybe just remove the outer large card
+- [ ] Headings are not styled correctly. 
 
 ## Requests
+- [x] All cards need to be draggable like medictiona detaiuls screen. 
+- [x] Above item was implemented but not correctly. Cards should be draggable only when all are minimized. 
 
 ### Up Next - Today
+- [x] Change to "Today"
+- [x] Needs to use the Dose Cards. 
+- [x] Vertically stack all doses of the day. 
 
 
 ### Schedules
@@ -18,11 +22,11 @@
 - 
 
 ### Reports
-- [ ] 1 Report card which cumulates ALL mediciaionts. Not 1 for each. History should be showing ALL actions in the app. 
+- [x] Same card from the Medication Details screen but includes all medications data. 
+- [x] Allows for filtering out of medications. 
+- [x] There is mutliple reports cards. Should only be 1
 - [ ] Why are there chips?
 - [ ] Why is there a reports card within a reports card?
-- [ ] All history is to be in one history card, not muiltiple. 
-- [ ] The history list items will need to cinlde the med name. 
 
 ## Notes
 - 
