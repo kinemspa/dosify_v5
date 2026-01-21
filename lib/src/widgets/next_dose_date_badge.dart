@@ -78,10 +78,9 @@ class NextDoseDateBadge extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   'Today',
-                  style: TextStyle(
-                    fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
-                    fontWeight: kFontWeightExtraBold,
-                    height: 1,
+                  style: nextDoseBadgeTodayTextStyle(
+                    context,
+                    dense: dense,
                     color: primaryTextColor,
                   ),
                 ),
@@ -89,24 +88,18 @@ class NextDoseDateBadge extends StatelessWidget {
             else
               Text(
                 dayText,
-                style: TextStyle(
-                  fontSize: dense
-                      ? kNextDoseDateCircleDayFontSizeCompact
-                      : kNextDoseDateCircleDayFontSizeLarge,
-                  fontWeight: kFontWeightExtraBold,
-                  height: 1,
+                style: nextDoseBadgeDayTextStyle(
+                  context,
+                  dense: dense,
                   color: primaryTextColor,
                 ),
               ),
             if (monthText.isNotEmpty)
               Text(
                 monthText,
-                style: TextStyle(
-                  fontSize: dense
-                      ? kFontSizeXSmall
-                      : kNextDoseDateCircleMonthFontSize,
-                  fontWeight: kFontWeightSemiBold,
-                  height: 1,
+                style: nextDoseBadgeMonthTextStyle(
+                  context,
+                  dense: dense,
                   color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
                 ),
               ),
@@ -116,11 +109,8 @@ class NextDoseDateBadge extends StatelessWidget {
     );
 
     final nextLabelPadding = nextLabelStyle == NextDoseBadgeLabelStyle.tall
-        ? const EdgeInsets.symmetric(
-            horizontal: kSpacingXS,
-            vertical: kSpacingXXS,
-          )
-        : const EdgeInsets.symmetric(horizontal: kSpacingXS, vertical: 0);
+        ? kNextDoseBadgeNextLabelPaddingTall
+        : kNextDoseBadgeNextLabelPaddingStandard;
 
     final nextLabelRadius = nextLabelStyle == NextDoseBadgeLabelStyle.tall
         ? kBorderRadiusChipTight
@@ -144,10 +134,8 @@ class NextDoseDateBadge extends StatelessWidget {
                     ),
                     child: Text(
                       'Next',
-                      style: TextStyle(
-                        fontSize: kFontSizeXXSmall,
-                        fontWeight: kFontWeightExtraBold,
-                        height: 1,
+                      style: nextDoseBadgeNextTagTextStyle(
+                        context,
                         color: statusColorOnPrimary(context, accentColor),
                       ),
                     ),
@@ -167,12 +155,12 @@ class NextDoseDateBadge extends StatelessWidget {
         const SizedBox(height: kSpacingXS),
         Text(
           timeText,
-          style: helperTextStyle(
+          style: nextDoseBadgeTimeTextStyle(
             context,
             color: isEnabled
                 ? accentColor.withValues(alpha: kOpacityFull)
                 : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
-          )?.copyWith(fontSize: kFontSizeXSmall),
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,

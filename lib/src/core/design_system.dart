@@ -98,6 +98,14 @@ const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
 const double kNextDoseDateCircleSizeCompact = 34;
 const double kNextDoseDateCircleSizeLarge = 48;
 
+/// Next-dose badge "Next" label padding variants.
+const EdgeInsets kNextDoseBadgeNextLabelPaddingTall = EdgeInsets.symmetric(
+  horizontal: kSpacingXS,
+  vertical: kSpacingXXS,
+);
+const EdgeInsets kNextDoseBadgeNextLabelPaddingStandard =
+    EdgeInsets.symmetric(horizontal: kSpacingXS, vertical: 0);
+
 /// Medication details reports card
 const double kMedicationReportsTabHeight = 160;
 
@@ -1025,6 +1033,87 @@ TextStyle? hintLabelTextStyle(BuildContext context, {Color? color}) {
   return helperTextStyle(context, color: color)?.copyWith(
     fontSize: kFontSizeHint,
     height: kLineHeightTight,
+  );
+}
+
+TextStyle? nextDoseBadgeTodayTextStyle(
+  BuildContext context, {
+  required bool dense,
+  required Color color,
+}) {
+  return bodyTextStyle(context)?.copyWith(
+    fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
+    fontWeight: kFontWeightExtraBold,
+    height: 1,
+    color: color,
+  );
+}
+
+TextStyle? nextDoseBadgeDayTextStyle(
+  BuildContext context, {
+  required bool dense,
+  required Color color,
+}) {
+  return bodyTextStyle(context)?.copyWith(
+    fontSize:
+        dense ? kNextDoseDateCircleDayFontSizeCompact : kNextDoseDateCircleDayFontSizeLarge,
+    fontWeight: kFontWeightExtraBold,
+    height: 1,
+    color: color,
+  );
+}
+
+TextStyle? nextDoseBadgeMonthTextStyle(
+  BuildContext context, {
+  required bool dense,
+  required Color color,
+}) {
+  return bodyTextStyle(context)?.copyWith(
+    fontSize: dense ? kFontSizeXSmall : kNextDoseDateCircleMonthFontSize,
+    fontWeight: kFontWeightSemiBold,
+    height: 1,
+    color: color,
+  );
+}
+
+TextStyle? nextDoseBadgeNextTagTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return bodyTextStyle(context)?.copyWith(
+    fontSize: kFontSizeXXSmall,
+    fontWeight: kFontWeightExtraBold,
+    height: 1,
+    color: color,
+  );
+}
+
+TextStyle? nextDoseBadgeTimeTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeXSmall,
+  );
+}
+
+TextStyle? stockDonutPrimaryLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.titleLarge?.copyWith(
+    fontWeight: kFontWeightExtraBold,
+    color: color,
+  );
+}
+
+TextStyle? stockDonutSecondaryLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeXXSmall,
+    height: 1.0,
   );
 }
 

@@ -72,15 +72,15 @@ class StockDonutGauge extends StatelessWidget {
 
     final effectivePrimaryStyle =
         labelStyle ??
-        Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: kFontWeightExtraBold,
+        stockDonutPrimaryLabelTextStyle(
+          context,
           color: effectiveLabelColor,
         );
 
-    final effectiveSecondaryStyle = helperTextStyle(
+    final effectiveSecondaryStyle = stockDonutSecondaryLabelTextStyle(
       context,
       color: effectiveLabelColor.withValues(alpha: kOpacityMediumLow),
-    )?.copyWith(fontSize: kFontSizeXXSmall, height: 1.0);
+    );
 
     return SizedBox(
       width: gaugeSize,
@@ -220,15 +220,15 @@ class DualStockDonutGauge extends StatelessWidget {
 
     final effectivePrimaryStyle =
         labelStyle ??
-        Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: kFontWeightExtraBold,
+        stockDonutPrimaryLabelTextStyle(
+          context,
           color: effectiveLabelColor,
         );
 
-    final effectiveSecondaryStyle = helperTextStyle(
+    final effectiveSecondaryStyle = stockDonutSecondaryLabelTextStyle(
       context,
       color: effectiveLabelColor.withValues(alpha: kOpacityMediumLow),
-    )?.copyWith(fontSize: kFontSizeXXSmall, height: 1.0);
+    );
 
     return SizedBox(
       width: gaugeSize,
