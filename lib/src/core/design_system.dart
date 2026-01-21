@@ -1004,6 +1004,52 @@ TextStyle? microHelperTextStyle(BuildContext context, {Color? color}) {
   )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
 }
 
+/// Dose-card leading time label style.
+TextStyle? doseCardTimeTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeXSmall,
+    height: kLineHeightTight,
+  );
+}
+
+/// Dose-card leading dose-number label style.
+TextStyle? doseCardDoseNumberTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeXXSmall,
+    height: kLineHeightTight,
+  );
+}
+
+/// Dose-card status-chip label style.
+TextStyle? doseCardStatusChipLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: kFontSizeXXSmall,
+    fontWeight: kFontWeightExtraBold,
+    height: 1,
+  );
+}
+
+/// Dose-card "Take ..." metrics line style.
+TextStyle? doseCardTakeMetricsTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return bodyTextStyle(context)?.copyWith(
+    color: color,
+    fontWeight: kFontWeightSemiBold,
+    fontSize: kFontSizeSmall,
+  );
+}
+
 // ============================================================================
 // SPECIALIZED TYPOGRAPHY
 // ============================================================================

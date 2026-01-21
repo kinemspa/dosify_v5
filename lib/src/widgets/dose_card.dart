@@ -122,14 +122,14 @@ class DoseCard extends StatelessWidget {
                     const SizedBox(height: kSpacingXS),
                     Text(
                       timeText,
-                      style: helperTextStyle(
+                      style: doseCardTimeTextStyle(
                         context,
                         color: isActive
                             ? statusColor.withValues(alpha: kOpacityFull)
                             : cs.onSurfaceVariant.withValues(
                                 alpha: kOpacityMediumLow,
                               ),
-                      )?.copyWith(fontSize: kFontSizeXSmall),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -138,14 +138,14 @@ class DoseCard extends StatelessWidget {
                       const SizedBox(height: kSpacingXXS),
                       Text(
                         'Dose $doseNumber',
-                        style: helperTextStyle(
+                        style: doseCardDoseNumberTextStyle(
                           context,
                           color: isActive
                               ? statusColor.withValues(alpha: kOpacityFull)
                               : cs.onSurfaceVariant.withValues(
                                   alpha: kOpacityMediumLow,
                                 ),
-                        )?.copyWith(fontSize: kFontSizeXXSmall),
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -198,10 +198,9 @@ class DoseCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 takeText,
-                                style: baseBody?.copyWith(
+                                style: doseCardTakeMetricsTextStyle(
+                                  context,
                                   color: takeColor,
-                                  fontWeight: kFontWeightSemiBold,
-                                  fontSize: kFontSizeSmall,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -212,10 +211,9 @@ class DoseCard extends StatelessWidget {
                       else
                         Text(
                           takeText,
-                          style: baseBody?.copyWith(
+                          style: doseCardTakeMetricsTextStyle(
+                            context,
                             color: takeColor,
-                            fontWeight: kFontWeightSemiBold,
-                            fontSize: kFontSizeSmall,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -259,15 +257,10 @@ class DoseCard extends StatelessWidget {
                               const SizedBox(width: kSpacingXXS),
                               Text(
                                 statusLabel,
-                                style:
-                                    helperTextStyle(
-                                      context,
-                                      color: statusColor,
-                                    )?.copyWith(
-                                      fontSize: kFontSizeXXSmall,
-                                      fontWeight: kFontWeightExtraBold,
-                                      height: 1,
-                                    ),
+                                style: doseCardStatusChipLabelTextStyle(
+                                  context,
+                                  color: statusColor,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),

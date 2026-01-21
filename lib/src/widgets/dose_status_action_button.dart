@@ -59,10 +59,9 @@ class DoseStatusActionButton extends StatelessWidget {
             const SizedBox(width: kSpacingXXS),
             Text(
               label,
-              style: helperTextStyle(context, color: visual.color)?.copyWith(
-                fontSize: kFontSizeXXSmall,
-                fontWeight: kFontWeightExtraBold,
-                height: 1,
+              style: doseCardStatusChipLabelTextStyle(
+                context,
+                color: visual.color,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
