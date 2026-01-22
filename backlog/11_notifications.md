@@ -7,7 +7,7 @@
 - [ ] Need to make the notifications more like the dose cards
 - [ ] How can we manage the Take, SNooze, Skip sections. Can we open up an advanced layout? 
 - [ ] Take Dose needs more details. 
-- [ ] Can the Notification show the syringe image?
+- [x] Can the Notification show the syringe image?
 
 ### Take Dose Reminder
 

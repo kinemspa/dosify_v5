@@ -897,11 +897,17 @@ class NotificationService {
       tzTime = now.add(const Duration(seconds: 5));
       _log('Adjusted (alarm clock) time to future: $tzTime');
     }
+    final shouldShowSyringeIcon =
+        Platform.isAndroid && channelId == _upcomingDose.id && !setAsGroupSummary;
+
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
         channelId,
         icon: '@mipmap/ic_launcher',
+        largeIcon: shouldShowSyringeIcon
+            ? const DrawableResourceAndroidBitmap('syringe')
+            : null,
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
