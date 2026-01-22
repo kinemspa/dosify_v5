@@ -48,6 +48,7 @@ class DoseSummaryRow extends StatelessWidget {
               }(),
             DoseStatus.skipped => 'Skipped',
             DoseStatus.snoozed => 'Snoozed',
+            DoseStatus.due => 'Overdue at $timeStr',
             DoseStatus.overdue => 'Missed at $timeStr',
             DoseStatus.pending => 'Take at $timeStr',
           };

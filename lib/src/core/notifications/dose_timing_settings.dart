@@ -1,0 +1,162 @@
+import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+
+@immutable
+class DoseTimingConfig {
+  const DoseTimingConfig({
+    required this.missedGracePercent,
+    required this.overdueReminderPercent,
+  });
+
+  /// Percentage (0..100) of the time until the next scheduled dose
+  /// after which a dose is considered "missed".
+  ///
+  /// Example: if the next dose is in 8 hours and this is 50, the dose becomes
+  /// missed after 4 hours.
+  final int missedGracePercent;
+
+  /// Percentage (0..100) of the time before the dose is considered missed
+  /// at which an "overdue" reminder should fire.
+  ///
+  /// Example: with missedGracePercent=50 and overdueReminderPercent=50,
+  /// reminder fires at 25% of the interval to the next dose.
+  ///
+  /// Set to 0 to disable.
+  final int overdueReminderPercent;
+
+  DoseTimingConfig copyWith({
+    int? missedGracePercent,
+    int? overdueReminderPercent,
+  }) {
+    return DoseTimingConfig(
+      missedGracePercent: missedGracePercent ?? this.missedGracePercent,
+      overdueReminderPercent:
+          overdueReminderPercent ?? this.overdueReminderPercent,
+    );
+  }
+}
+
+class DoseTimingSettings {
+  const DoseTimingSettings._();
+
+  static const String _prefsKeyMissedGracePercent =
+      'dose_timing.missed_grace_percent_v1';
+  static const String _prefsKeyOverdueReminderPercent =
+      'dose_timing.overdue_reminder_percent_v1';
+
+  static const int defaultMissedGracePercent = 50;
+  static const int defaultOverdueReminderPercent = 50;
+
+  /// Used when the schedule cannot be resolved or has no upcoming occurrence.
+  static const Duration fallbackGraceWindow = Duration(minutes: 60);
+
+  static final ValueNotifier<DoseTimingConfig> value = ValueNotifier(
+    const DoseTimingConfig(
+      missedGracePercent: defaultMissedGracePercent,
+      overdueReminderPercent: defaultOverdueReminderPercent,
+    ),
+  );
+
+  static Future<void> load() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final missed =
+          prefs.getInt(_prefsKeyMissedGracePercent) ?? defaultMissedGracePercent;
+      final overdue = prefs.getInt(_prefsKeyOverdueReminderPercent) ??
+          defaultOverdueReminderPercent;
+      value.value = value.value.copyWith(
+        missedGracePercent: _clampPercent(missed),
+        overdueReminderPercent: _clampPercent(overdue),
+      );
+    } catch (_) {
+      // Best-effort; keep defaults.
+    }
+  }
+
+  static int _clampPercent(int raw) => raw.clamp(0, 100);
+
+  static Future<void> setMissedGracePercent(int percent) async {
+    final next = _clampPercent(percent);
+    value.value = value.value.copyWith(missedGracePercent: next);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_prefsKeyMissedGracePercent, next);
+    } catch (_) {
+      // Best-effort.
+    }
+  }
+
+  static Future<void> setOverdueReminderPercent(int percent) async {
+    final next = _clampPercent(percent);
+    value.value = value.value.copyWith(overdueReminderPercent: next);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_prefsKeyOverdueReminderPercent, next);
+    } catch (_) {
+      // Best-effort.
+    }
+  }
+
+  /// Returns the moment at which a dose should be considered "missed".
+  static DateTime missedAt({
+    required Schedule schedule,
+    required DateTime scheduledTime,
+  }) {
+    final next = ScheduleOccurrenceService.nextOccurrence(
+      schedule,
+      from: scheduledTime.add(const Duration(seconds: 1)),
+    );
+
+    final graceWindow = (next != null && next.isAfter(scheduledTime))
+        ? next.difference(scheduledTime)
+        : fallbackGraceWindow;
+
+    final pct = value.value.missedGracePercent;
+
+    // pct=0 => immediately missed; pct=100 => right at the next dose.
+    final seconds = (graceWindow.inSeconds * pct / 100).round();
+    return scheduledTime.add(Duration(seconds: seconds));
+  }
+
+  /// Computes the reminder time for an "overdue" notification.
+  ///
+  /// Returns null when disabled or when a reminder would be nonsensical.
+  static DateTime? overdueReminderAt({
+    required Schedule schedule,
+    required DateTime scheduledTime,
+  }) {
+    final overduePct = value.value.overdueReminderPercent;
+    if (overduePct <= 0) return null;
+
+    final missed = missedAt(schedule: schedule, scheduledTime: scheduledTime);
+    if (!missed.isAfter(scheduledTime)) return null;
+
+    final window = missed.difference(scheduledTime);
+    final seconds = (window.inSeconds * overduePct / 100).round();
+    final reminder = scheduledTime.add(Duration(seconds: seconds));
+
+    if (!reminder.isAfter(scheduledTime)) return null;
+    if (!reminder.isBefore(missed)) return null;
+
+    return reminder;
+  }
+
+  /// Best-effort helper for status computation when you only have a scheduleId.
+  static DateTime missedAtForScheduleId({
+    required String scheduleId,
+    required DateTime scheduledTime,
+  }) {
+    try {
+      final box = Hive.box<Schedule>('schedules');
+      final schedule = box.get(scheduleId);
+      if (schedule == null) return scheduledTime.add(fallbackGraceWindow);
+      return missedAt(schedule: schedule, scheduledTime: scheduledTime);
+    } catch (_) {
+      return scheduledTime.add(fallbackGraceWindow);
+    }
+  }
+}

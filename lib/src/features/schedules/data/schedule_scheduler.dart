@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
@@ -142,8 +143,69 @@ class ScheduleScheduler {
   /// Schedules upcoming alarms for the given schedule (best-effort)
   static Future<void> scheduleFor(Schedule s) async {
     if (!s.isActive) return;
-    final title = s.name;
-    final body = '${s.medicationName} • ${s.doseValue} ${s.doseUnit}';
+
+    String formatHm(DateTime dt) {
+      final h24 = dt.hour;
+      final h = h24 == 0 ? 12 : (h24 > 12 ? h24 - 12 : h24);
+      final mm = dt.minute.toString().padLeft(2, '0');
+      final ap = h24 >= 12 ? 'PM' : 'AM';
+      return '$h:$mm $ap';
+    }
+
+    Future<void> scheduleDoseNotification({
+      required int id,
+      required DateTime when,
+      required String payload,
+      String? groupKey,
+    }) async {
+      final title = s.medicationName;
+      final body = '${s.name} • ${s.doseValue} ${s.doseUnit} • ${formatHm(when)}';
+
+      final missedAt = DoseTimingSettings.missedAt(
+        schedule: s,
+        scheduledTime: when,
+      );
+
+      final timeoutAfterMs = missedAt.isAfter(when)
+          ? missedAt.difference(when).inMilliseconds
+          : null;
+
+      await NotificationService.scheduleAtAlarmClock(
+        id,
+        when,
+        title: title,
+        body: body,
+        groupKey: groupKey,
+        payload: payload,
+        actions: NotificationService.upcomingDoseActions,
+        timeoutAfterMs: timeoutAfterMs,
+      );
+
+      final reminderAt = DoseTimingSettings.overdueReminderAt(
+        schedule: s,
+        scheduledTime: when,
+      );
+      if (reminderAt == null) return;
+      if (!reminderAt.isAfter(DateTime.now())) return;
+
+      final reminderId = _stableHash31(
+        'dose_overdue|${s.id}|${when.millisecondsSinceEpoch}',
+      );
+      final reminderTimeoutMs = missedAt.isAfter(reminderAt)
+          ? missedAt.difference(reminderAt).inMilliseconds
+          : null;
+
+      await NotificationService.scheduleAtAlarmClock(
+        reminderId,
+        reminderAt,
+        title: 'Overdue: ${s.medicationName}',
+        body: '${s.name} • ${s.doseValue} ${s.doseUnit} • due ${formatHm(when)}',
+        groupKey: groupKey,
+        payload: payload,
+        actions: NotificationService.upcomingDoseActions,
+        timeoutAfterMs: reminderTimeoutMs,
+      );
+    }
 
     // Calculate how many days we can afford to schedule for this schedule
     final daysToSchedule = await _calculateScheduleDays(s);
@@ -179,13 +241,10 @@ class ScheduleScheduler {
             minutes: minutes,
             occurrence: i,
           );
-          await NotificationService.scheduleAtAlarmClock(
-            id,
-            dt,
-            title: title,
-            body: body,
+          await scheduleDoseNotification(
+            id: id,
+            when: dt,
             payload: 'dose:${s.id}:${dt.millisecondsSinceEpoch}',
-            actions: NotificationService.upcomingDoseActions,
           );
         }
         day = day.add(Duration(days: n));
@@ -234,14 +293,11 @@ class ScheduleScheduler {
                 minutes: mUtc,
                 occurrence: dayOffset,
               );
-              await NotificationService.scheduleAtAlarmClock(
-                id,
-                dtLocal,
-                title: title,
-                body: body,
+              await scheduleDoseNotification(
+                id: id,
+                when: dtLocal,
                 groupKey: groupKey,
                 payload: 'dose:${s.id}:${dtLocal.millisecondsSinceEpoch}',
-                actions: NotificationService.upcomingDoseActions,
               );
             }
           }
@@ -274,14 +330,11 @@ class ScheduleScheduler {
                 minutes: mLocal,
                 occurrence: dayOffset,
               );
-              await NotificationService.scheduleAtAlarmClock(
-                id,
-                dt,
-                title: title,
-                body: body,
+              await scheduleDoseNotification(
+                id: id,
+                when: dt,
                 groupKey: groupKey,
                 payload: 'dose:${s.id}:${dt.millisecondsSinceEpoch}',
-                actions: NotificationService.upcomingDoseActions,
               );
             }
           }
@@ -328,6 +381,11 @@ class ScheduleScheduler {
               occurrence: i,
             );
             await NotificationService.cancel(id);
+
+            final overdueId = _stableHash31(
+              'dose_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
+            );
+            await NotificationService.cancel(overdueId);
           }
           day = day.add(Duration(days: n));
         }
@@ -354,6 +412,19 @@ class ScheduleScheduler {
                   occurrence: dayOffset,
                 );
                 await NotificationService.cancel(id);
+
+                final dtUtc = DateTime.utc(
+                  date.year,
+                  date.month,
+                  date.day,
+                  mUtc ~/ 60,
+                  mUtc % 60,
+                );
+                final dtLocal = dtUtc.toLocal();
+                final overdueId = _stableHash31(
+                  'dose_overdue|${existing.id}|${dtLocal.millisecondsSinceEpoch}',
+                );
+                await NotificationService.cancel(overdueId);
               }
             }
           } else {
@@ -366,6 +437,18 @@ class ScheduleScheduler {
                   occurrence: dayOffset,
                 );
                 await NotificationService.cancel(id);
+
+                final dt = DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                  mLocal ~/ 60,
+                  mLocal % 60,
+                );
+                final overdueId = _stableHash31(
+                  'dose_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
+                );
+                await NotificationService.cancel(overdueId);
               }
             }
           }

@@ -876,6 +876,7 @@ class NotificationService {
     bool setAsGroupSummary = false,
     String? payload,
     List<AndroidNotificationAction>? actions,
+    int? timeoutAfterMs,
   }) async {
     await _ensureTimeZoneReady();
     if (scheduleAtAlarmClockOverride != null) {
@@ -914,6 +915,7 @@ class NotificationService {
         groupKey: groupKey,
         setAsGroupSummary: setAsGroupSummary,
         actions: actions,
+        timeoutAfter: timeoutAfterMs,
       ),
     );
     try {

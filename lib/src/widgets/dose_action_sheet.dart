@@ -731,6 +731,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             await widget.onSnooze(request);
             break;
           case DoseStatus.pending:
+          case DoseStatus.due:
           case DoseStatus.overdue:
             // Revert to original - delete existing log
             await widget.onDelete(request);

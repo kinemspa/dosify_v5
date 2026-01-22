@@ -446,6 +446,7 @@ const double kDetailHeaderCollapsedHeight = 48;
 const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
 const Color kDoseStatusSkippedRed = Color(0xFFD32F2F);
 const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
+const Color kDoseStatusOverdueAmber = Color(0xFFF9A825);
 const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);
 
 /// Common utility colors.

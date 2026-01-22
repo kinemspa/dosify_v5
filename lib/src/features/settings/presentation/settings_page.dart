@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -19,6 +20,92 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
+
+    Future<void> editPercentSetting({
+      required String title,
+      required String description,
+      required int currentValue,
+      required ValueChanged<int> onSave,
+      int min = 0,
+      int max = 100,
+      int step = 5,
+    }) async {
+      var selected = currentValue.clamp(min, max);
+
+      final nextValue = await showModalBottomSheet<int>(
+        context: context,
+        builder: (context) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(kSpacingM),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  final divisions = ((max - min) / step).round();
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: cardTitleStyle(context)?.copyWith(
+                          fontWeight: kFontWeightBold,
+                        ),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      Text(description),
+                      const SizedBox(height: kSpacingM),
+                      Text(
+                        '$selected%',
+                        style: cardTitleStyle(context)?.copyWith(
+                          color: cs.primary,
+                          fontWeight: kFontWeightBold,
+                        ),
+                      ),
+                      Slider(
+                        value: selected.toDouble(),
+                        min: min.toDouble(),
+                        max: max.toDouble(),
+                        divisions: divisions,
+                        label: '$selected%',
+                        onChanged: (v) {
+                          setState(() {
+                            final snapped =
+                                (v / step).round() * step;
+                            selected = snapped.clamp(min, max);
+                          });
+                        },
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () =>
+                                  Navigator.of(context).pop(selected),
+                              child: const Text('Save'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+
+      if (nextValue == null) return;
+      onSave(nextValue);
+    }
 
     Future<void> runNotificationTest(Future<void> Function() action) async {
       final ok = await NotificationService.ensurePermissionGranted();
@@ -192,6 +279,50 @@ class SettingsPage extends ConsumerWidget {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<DoseTimingConfig>(
+            valueListenable: DoseTimingSettings.value,
+            builder: (context, config, _) {
+              final missedSubtitle =
+                  '${config.missedGracePercent}% of time until next dose';
+              final overdueSubtitle = config.overdueReminderPercent <= 0
+                  ? 'Disabled'
+                  : '${config.overdueReminderPercent}% of grace window';
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.timer_outlined),
+                    title: const Text('Missed dose grace period'),
+                    subtitle: Text(missedSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => editPercentSetting(
+                      title: 'Missed dose grace period',
+                      description:
+                          'How long after the scheduled time a dose stays "Due" before it becomes "Missed" (based on time until the next scheduled dose).',
+                      currentValue: config.missedGracePercent,
+                      onSave: (v) =>
+                          DoseTimingSettings.setMissedGracePercent(v),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.notifications_none_outlined),
+                    title: const Text('Overdue reminder timing'),
+                    subtitle: Text(overdueSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => editPercentSetting(
+                      title: 'Overdue reminder timing',
+                      description:
+                          'Optional reminder after the scheduled time but before a dose is marked missed. Set to 0% to disable.',
+                      currentValue: config.overdueReminderPercent,
+                      onSave: (v) =>
+                          DoseTimingSettings.setOverdueReminderPercent(v),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.notifications_active_outlined),
             title: const Text('Show test dose reminder'),

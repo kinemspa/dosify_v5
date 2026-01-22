@@ -166,6 +166,7 @@ class CalendarDoseBlock extends StatelessWidget {
         return statusColor.withValues(alpha: kOpacitySubtleLow);
       case DoseStatus.snoozed:
         return statusColor.withValues(alpha: kOpacitySubtle);
+      case DoseStatus.due:
       case DoseStatus.overdue:
         return statusColor.withValues(alpha: kOpacityMinimal);
       case DoseStatus.pending:
@@ -189,6 +190,7 @@ class CalendarDoseBlock extends StatelessWidget {
         return statusColor.withValues(alpha: kOpacityVeryLow);
       case DoseStatus.snoozed:
         return statusColor.withValues(alpha: kOpacityMediumHigh);
+      case DoseStatus.due:
       case DoseStatus.overdue:
         return statusColor.withValues(alpha: kOpacityHigh);
       case DoseStatus.pending:
@@ -208,6 +210,7 @@ class CalendarDoseBlock extends StatelessWidget {
       case DoseStatus.taken:
       case DoseStatus.skipped:
       case DoseStatus.snoozed:
+      case DoseStatus.due:
       case DoseStatus.overdue:
         return statusColor;
       case DoseStatus.pending:

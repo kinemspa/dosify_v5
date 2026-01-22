@@ -207,6 +207,7 @@ class TakeDoseCard extends StatelessWidget {
         }(),
       DoseStatus.skipped => 'Skipped',
       DoseStatus.snoozed => 'Snoozed',
+      DoseStatus.due => 'Overdue',
       DoseStatus.overdue => 'Missed',
       DoseStatus.pending => 'Pending',
     };

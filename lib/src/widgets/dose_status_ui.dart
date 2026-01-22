@@ -11,6 +11,7 @@ String doseStatusLabel(DoseStatus status, {required bool disabled}) {
     DoseStatus.taken => 'TAKEN',
     DoseStatus.skipped => 'SKIPPED',
     DoseStatus.snoozed => 'SNOOZED',
+    DoseStatus.due => 'OVERDUE',
     DoseStatus.overdue => 'MISSED',
     DoseStatus.pending => 'PENDING',
   };
@@ -42,6 +43,10 @@ String doseStatusLabel(DoseStatus status, {required bool disabled}) {
     DoseStatus.snoozed => (
       color: kDoseStatusSnoozedOrange,
       icon: Icons.snooze_rounded,
+    ),
+    DoseStatus.due => (
+      color: kDoseStatusOverdueAmber,
+      icon: Icons.schedule_rounded,
     ),
     DoseStatus.overdue => (
       color: kDoseStatusMissedDarkRed,

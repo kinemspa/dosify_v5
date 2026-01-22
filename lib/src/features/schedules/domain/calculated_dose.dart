@@ -1,4 +1,5 @@
 // Project imports:
+import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 
 /// Represents a calculated dose occurrence for calendar display
@@ -26,10 +27,17 @@ class CalculatedDose {
     if (existingLog != null) {
       return DoseStatus.fromAction(existingLog!.action);
     }
-    if (scheduledTime.isBefore(DateTime.now())) {
-      return DoseStatus.overdue;
-    }
-    return DoseStatus.pending;
+
+    final now = DateTime.now();
+    if (scheduledTime.isAfter(now)) return DoseStatus.pending;
+
+    final missedAt = DoseTimingSettings.missedAtForScheduleId(
+      scheduleId: scheduleId,
+      scheduledTime: scheduledTime,
+    );
+
+    if (now.isBefore(missedAt)) return DoseStatus.due;
+    return DoseStatus.overdue;
   }
 
   /// Whether this dose has been taken
@@ -43,6 +51,9 @@ class CalculatedDose {
 
   /// Whether this dose is overdue (past scheduled time and not taken)
   bool get isOverdue => status == DoseStatus.overdue;
+
+  /// Whether this dose is due/overdue but still within the grace window
+  bool get isDue => status == DoseStatus.due;
 
   /// Whether this dose is pending (future and not taken)
   bool get isPending => status == DoseStatus.pending;
@@ -105,6 +116,9 @@ enum DoseStatus {
   /// Dose is in the future and not yet taken
   pending,
 
+  /// Dose time has passed but is still within the grace window
+  due,
+
   /// Dose was taken
   taken,
 
@@ -133,5 +147,5 @@ enum DoseStatus {
   bool get isCompleted => this == taken || this == skipped;
 
   /// Whether this status requires attention (overdue or snoozed)
-  bool get requiresAttention => this == overdue || this == snoozed;
+  bool get requiresAttention => this == overdue || this == due || this == snoozed;
 }
