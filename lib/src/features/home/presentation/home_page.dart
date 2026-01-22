@@ -22,12 +22,12 @@ import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class HomePage extends StatefulWidget {
@@ -335,6 +335,110 @@ class _HomePageState extends State<HomePage> {
   bool _isReportsExpanded = true;
   bool _isCalendarExpanded = true;
 
+  Future<void> _showIncludedMedsSelector(
+    BuildContext context,
+    List<Medication> meds,
+  ) async {
+    final selected = Set<String>.from(_reportIncludedMedicationIds ?? {});
+
+    final updated = await showModalBottomSheet<Set<String>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final cs = Theme.of(context).colorScheme;
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: kSpacingL,
+              right: kSpacingL,
+              top: kSpacingL,
+              bottom: kSpacingL + MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: StatefulBuilder(
+              builder: (context, setModalState) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('Included meds', style: sectionTitleStyle(context)),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      'Choose which medications appear in Reports.',
+                      style: helperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMedium,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: kSpacingM),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 420),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: meds.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: kSpacingXS),
+                        itemBuilder: (context, i) {
+                          final med = meds[i];
+                          final isSelected = selected.contains(med.id);
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: (v) {
+                              setModalState(() {
+                                if (v ?? false) {
+                                  selected.add(med.id);
+                                } else {
+                                  selected.remove(med.id);
+                                }
+                              });
+                            },
+                            dense: true,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              med.name,
+                              style: bodyTextStyle(context),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: kSpacingM),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: kSpacingS),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () =>
+                                Navigator.of(context).pop(selected),
+                            child: const Text('Done'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted) return;
+    if (updated == null) return;
+    setState(() => _reportIncludedMedicationIds = updated);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -525,147 +629,7 @@ class _HomePageState extends State<HomePage> {
                       Text('No schedules', style: mutedTextStyle(context))
                     else
                       for (final schedule in schedules) ...[
-                        Builder(
-                          builder: (context) {
-                            final medId = schedule.medicationId;
-                            if (medId == null) return const SizedBox.shrink();
-
-                            final med = medBox.get(medId);
-                            if (med == null) {
-                              return Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      schedule.name,
-                                      style: mutedTextStyle(context),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: kSpacingS),
-                                  ScheduleStatusChip(
-                                    schedule: schedule,
-                                    dense: true,
-                                  ),
-                                ],
-                              );
-                            }
-
-                            final next =
-                                ScheduleOccurrenceService.nextOccurrence(
-                                  schedule,
-                                );
-                            if (next == null) {
-                              return Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          schedule.name,
-                                          style: bodyTextStyle(context),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: kSpacingXXS),
-                                        Text(
-                                          'No upcoming dose',
-                                          style: mutedTextStyle(context),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: kSpacingS),
-                                  ScheduleStatusChip(
-                                    schedule: schedule,
-                                    dense: true,
-                                  ),
-                                ],
-                              );
-                            }
-
-                            final strengthLabel =
-                                MedicationDisplayHelpers.strengthOrConcentrationLabel(
-                                  med,
-                                );
-                            final metrics =
-                                MedicationDisplayHelpers.doseMetricsSummary(
-                                  med,
-                                  doseTabletQuarters:
-                                      schedule.doseTabletQuarters,
-                                  doseCapsules: schedule.doseCapsules,
-                                  doseSyringes: schedule.doseSyringes,
-                                  doseVials: schedule.doseVials,
-                                  doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                                  doseVolumeMicroliter: schedule
-                                      .doseVolumeMicroliter
-                                      ?.toDouble(),
-                                  syringeUnits: schedule.doseIU?.toDouble(),
-                                );
-
-                            final baseId =
-                                '${schedule.id}_${next.millisecondsSinceEpoch}';
-                            final existingLog =
-                                logBox.get(baseId) ??
-                                logBox.get('${baseId}_snooze');
-                            final dose = CalculatedDose(
-                              scheduleId: schedule.id,
-                              scheduleName: schedule.name,
-                              medicationName: med.name,
-                              scheduledTime: next,
-                              doseValue: schedule.doseValue,
-                              doseUnit: schedule.doseUnit,
-                              existingLog: existingLog,
-                            );
-
-                            return DoseCard(
-                              dose: dose,
-                              medicationName: med.name,
-                              strengthOrConcentrationLabel: strengthLabel,
-                              doseMetrics: metrics,
-                              isActive: schedule.isActive,
-                              showActions: schedule.isActive,
-                              medicationFormIcon:
-                                  MedicationDisplayHelpers.medicationFormIcon(
-                                    med.form,
-                                  ),
-                              doseNumber:
-                                  ScheduleOccurrenceService.occurrenceNumber(
-                                    schedule,
-                                    next,
-                                  ),
-                              titleTrailing: ScheduleStatusChip(
-                                schedule: schedule,
-                                dense: true,
-                              ),
-                              onTap: () => context.pushNamed(
-                                'scheduleDetail',
-                                pathParameters: {'id': schedule.id},
-                              ),
-                              onQuickAction: schedule.isActive
-                                  ? (status) => widget._showDoseActionSheet(
-                                      context,
-                                      dose: dose,
-                                      schedule: schedule,
-                                      medication: med,
-                                      initialStatus: status,
-                                    )
-                                  : null,
-                              onPrimaryAction: () =>
-                                  widget._showDoseActionSheet(
-                                    context,
-                                    dose: dose,
-                                    schedule: schedule,
-                                    medication: med,
-                                  ),
-                            );
-                          },
-                        ),
+                        ScheduleListCard(schedule: schedule, dense: true),
                         const SizedBox(height: kSpacingS),
                       ],
                   ],
@@ -732,24 +696,22 @@ class _HomePageState extends State<HomePage> {
             if (meds.isEmpty)
               Text('No medications', style: mutedTextStyle(context))
             else ...[
-              Wrap(
-                spacing: kSpacingS,
-                runSpacing: kSpacingS,
+              Row(
                 children: [
-                  for (final med in meds)
-                    PrimaryChoiceChip(
-                      label: Text(med.name),
-                      selected: included.contains(med.id),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            included.add(med.id);
-                          } else {
-                            included.remove(med.id);
-                          }
-                        });
-                      },
+                  Expanded(
+                    child: Text(
+                      '${included.length}/${meds.length} meds included',
+                      style: helperTextStyle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  OutlinedButton.icon(
+                    onPressed: () => _showIncludedMedsSelector(context, meds),
+                    icon: const Icon(Icons.tune_rounded, size: kIconSizeSmall),
+                    label: const Text('Included meds'),
+                  ),
                 ],
               ),
               const SizedBox(height: kSpacingM),
@@ -758,7 +720,11 @@ class _HomePageState extends State<HomePage> {
               else
                 for (final med in meds)
                   if (included.contains(med.id)) ...[
-                    MedicationReportsWidget(medication: med),
+                    MedicationReportsWidget(
+                      medication: med,
+                      isExpanded: false,
+                      embedInParentCard: true,
+                    ),
                     const SizedBox(height: kSpacingM),
                   ],
             ],
@@ -859,7 +825,7 @@ class _HomePageState extends State<HomePage> {
         padding: kPagePaddingNoBottom,
         child: ListView(
           children: [
-            Text('Dosifi', style: cardTitleStyle(context)),
+            Text('Dosifi', style: homeHeroTitleStyle(context)),
             const SizedBox(height: kSpacingXS),
             Text(
               'Upcoming doses, schedules, and calendar',

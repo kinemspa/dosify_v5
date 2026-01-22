@@ -4,18 +4,15 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_instruction_text.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
-import 'package:dosifi_v5/src/widgets/large_card.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
 
 enum _SchedView { list, compact, large }
 
@@ -295,14 +292,16 @@ class _SchedulesPageState extends State<SchedulesPage> {
           padding: const EdgeInsets.all(kPageHorizontalPadding),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
-          itemBuilder: (context, i) => _ScheduleCard(s: items[i], dense: true),
+          itemBuilder: (context, i) =>
+              ScheduleListCard(schedule: items[i], dense: true),
         );
       case _SchedView.large:
         return ListView.separated(
           padding: const EdgeInsets.all(kPageHorizontalPadding),
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox(height: kSpacingM),
-          itemBuilder: (context, i) => _ScheduleCard(s: items[i], dense: false),
+          itemBuilder: (context, i) =>
+              ScheduleListCard(schedule: items[i], dense: false),
         );
     }
   }
@@ -388,193 +387,11 @@ class _ScheduleListRow extends StatelessWidget {
   }
 }
 
-class _ScheduleCard extends StatelessWidget {
-  const _ScheduleCard({required this.s, required this.dense});
-  final Schedule s;
-  final bool dense;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final next = ScheduleOccurrenceService.nextOccurrence(s);
-    final medTitle = _ScheduleText.medTitle(s);
-    final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
-    final startedLabel = _ScheduleText.startedLabel(s);
-    final endLabel = _ScheduleText.endLabel(s);
-
-    if (dense) {
-      final medName = s.medicationName.trim();
-      final scheduleName = s.name.trim();
-      final showScheduleName = medName.isNotEmpty && scheduleName.isNotEmpty;
-
-      return GlassCardSurface(
-        onTap: () =>
-            context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
-        useGradient: false,
-        padding: kCompactCardPadding,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    medTitle,
-                    style: cardTitleStyle(
-                      context,
-                    )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (showScheduleName) ...[
-                    const SizedBox(height: kSpacingXXS),
-                    Text(
-                      scheduleName,
-                      style: bodyTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightSemiBold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  const SizedBox(height: kSpacingXS),
-                  Text(
-                    scheduleDoseSummaryLabel(s),
-                    style: microHelperTextStyle(context),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: kSpacingS),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NextDoseDateBadge(
-                  nextDose: next,
-                  isActive: s.isActive,
-                  dense: true,
-                  showNextLabel: true,
-                ),
-                const SizedBox(height: kSpacingXS),
-                SizedBox(
-                  width: kNextDoseDateCircleSizeCompact,
-                  child: Center(
-                    child: ScheduleStatusChip(schedule: s, dense: true),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    return LargeCard(
-      onTap: () =>
-          context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
-      dense: true,
-      leading: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            medTitle,
-            style: cardTitleStyle(
-              context,
-            )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (scheduleSubtitle != null) ...[
-            const SizedBox(height: kSpacingXS),
-            Text(
-              scheduleSubtitle,
-              style: bodyTextStyle(
-                context,
-              )?.copyWith(fontWeight: kFontWeightSemiBold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          const SizedBox(height: kSpacingXS),
-          Text(
-            scheduleTakeInstructionLabel(context, s),
-            style: helperTextStyle(context),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: kSpacingXS),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  startedLabel,
-                  style: helperTextStyle(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: kSpacingS),
-              Expanded(
-                child: Text(
-                  endLabel,
-                  style: helperTextStyle(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: kSpacingXS),
-            child: NextDoseDateBadge(
-              nextDose: next,
-              isActive: s.isActive,
-              dense: false,
-              showNextLabel: true,
-              nextLabelStyle: NextDoseBadgeLabelStyle.tall,
-            ),
-          ),
-          const SizedBox(height: kSpacingXS),
-          Align(
-            alignment: Alignment.center,
-            child: ScheduleStatusChip(schedule: s, dense: true),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ScheduleText {
   static String medTitle(Schedule s) {
     final med = s.medicationName.trim();
     final name = s.name.trim();
     return med.isNotEmpty ? med : name;
-  }
-
-  static String startedLabel(Schedule s) {
-    final start = s.startAt;
-    if (start == null) return 'Start Date: —';
-    return 'Start Date: ${DateFormat('d MMM').format(start)}';
-  }
-
-  static String endLabel(Schedule s) {
-    final end = s.endAt;
-    if (end == null) return 'End Date: No end';
-    return 'End Date: ${DateFormat('d MMM').format(end)}';
   }
 
   static String? scheduleSubtitle(Schedule s) {

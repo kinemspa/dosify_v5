@@ -57,12 +57,14 @@ class MedicationReportsWidget extends StatefulWidget {
     required this.medication,
     this.isExpanded = true,
     this.onExpandedChanged,
+    this.embedInParentCard = false,
     super.key,
   });
 
   final Medication medication;
   final bool isExpanded;
   final ValueChanged<bool>? onExpandedChanged;
+  final bool embedInParentCard;
 
   @override
   State<MedicationReportsWidget> createState() =>
@@ -102,104 +104,100 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         ? widget.isExpanded
         : _isExpandedInternal;
 
-    return GlassCardSurface(
-      useGradient: false,
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Collapsible header
-          InkWell(
-            onTap: () {
-              if (widget.onExpandedChanged != null) {
-                widget.onExpandedChanged?.call(!isExpanded);
-                return;
-              }
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: () {
+            if (widget.onExpandedChanged != null) {
+              widget.onExpandedChanged?.call(!isExpanded);
+              return;
+            }
 
-              setState(() => _isExpandedInternal = !_isExpandedInternal);
-            },
-            child: Padding(
-              padding: kDetailCardCollapsedHeaderPadding,
-              child: Row(
-                children: [
-                  if (!isExpanded)
-                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
-                  Icon(
-                    Icons.bar_chart_rounded,
-                    size: kIconSizeMedium,
-                    color: cs.primary,
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  Text(
-                    'Reports',
-                    style: cardTitleStyle(
-                      context,
-                    )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
-                  ),
-                  const Spacer(),
-                  AnimatedRotation(
-                    turns: isExpanded ? 0 : -0.25,
-                    duration: kAnimationNormal,
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      size: kIconSizeLarge,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Collapsible content
-          AnimatedCrossFade(
-            duration: kAnimationNormal,
-            crossFadeState: isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox.shrink(),
-            secondChild: Column(
-              mainAxisSize: MainAxisSize.min,
+            setState(() => _isExpandedInternal = !_isExpandedInternal);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(kSpacingM),
+            child: Row(
               children: [
-                // Tab bar
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  labelPadding: const EdgeInsets.symmetric(
-                    horizontal: kSpacingM,
-                  ),
-                  labelColor: cs.primary,
-                  unselectedLabelColor: cs.onSurfaceVariant,
-                  indicatorColor: cs.primary,
-                  dividerColor: cs.surface.withValues(
-                    alpha: kOpacityTransparent,
-                  ),
-                  labelStyle: smallHelperTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightSemiBold,
-                  ),
-                  tabs: [
-                    const Tab(text: 'History'),
-                    for (final section in _AdherenceReportSection.values)
-                      Tab(text: section.label),
-                  ],
+                if (!isExpanded)
+                  const SizedBox(width: kDetailCardReorderHandleGutterWidth),
+                Icon(
+                  Icons.bar_chart_rounded,
+                  size: kIconSizeMedium,
+                  color: cs.primary,
                 ),
-                // Tab content
-                SizedBox(
-                  height: kMedicationReportsTabHeight,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildHistoryTab(context),
-                      for (final section in _AdherenceReportSection.values)
-                        _buildReportTab(context, section),
-                    ],
+                const SizedBox(width: kSpacingS),
+                Text(
+                  'Reports',
+                  style: cardTitleStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+                ),
+                const Spacer(),
+                AnimatedRotation(
+                  turns: isExpanded ? 0 : -0.25,
+                  duration: kAnimationNormal,
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: kIconSizeLarge,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+        AnimatedCrossFade(
+          duration: kAnimationNormal,
+          crossFadeState: isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          firstChild: const SizedBox.shrink(),
+          secondChild: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                labelPadding: const EdgeInsets.symmetric(horizontal: kSpacingM),
+                labelColor: cs.primary,
+                unselectedLabelColor: cs.onSurfaceVariant,
+                indicatorColor: cs.primary,
+                dividerColor: cs.surface.withValues(alpha: kOpacityTransparent),
+                labelStyle: smallHelperTextStyle(
+                  context,
+                )?.copyWith(fontWeight: kFontWeightSemiBold),
+                tabs: [
+                  const Tab(text: 'History'),
+                  for (final section in _AdherenceReportSection.values)
+                    Tab(text: section.label),
+                ],
+              ),
+              SizedBox(
+                height: kMedicationReportsTabHeight,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildHistoryTab(context),
+                    for (final section in _AdherenceReportSection.values)
+                      _buildReportTab(context, section),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (widget.embedInParentCard) return content;
+
+    return GlassCardSurface(
+      useGradient: false,
+      padding: EdgeInsets.zero,
+      child: content,
     );
   }
 
@@ -498,9 +496,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               ),
               child: Text(
                 'Missed',
-                style: hintLabelTextStyle(context, color: cs.error)?.copyWith(
-                  fontWeight: kFontWeightBold,
-                ),
+                style: hintLabelTextStyle(
+                  context,
+                  color: cs.error,
+                )?.copyWith(fontWeight: kFontWeightBold),
               ),
             ),
             const SizedBox(width: kSpacingXS),
@@ -611,9 +610,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               ),
               child: Text(
                 log.action.name,
-                style: hintLabelTextStyle(context, color: iconColor)?.copyWith(
-                  fontWeight: kFontWeightBold,
-                ),
+                style: hintLabelTextStyle(
+                  context,
+                  color: iconColor,
+                )?.copyWith(fontWeight: kFontWeightBold),
               ),
             ),
             const SizedBox(width: kSpacingXS),
@@ -843,10 +843,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 medication: currentMed,
                 delta: delta,
               );
-              await medBox.put(
-                currentMed.id,
-                updatedMed,
-              );
+              await medBox.put(currentMed.id, updatedMed);
               await LowStockNotifier.handleStockChange(
                 before: currentMed,
                 after: updatedMed,
@@ -899,10 +896,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 medication: currentMed,
                 delta: delta,
               );
-              await medBox.put(
-                currentMed.id,
-                updatedMed,
-              );
+              await medBox.put(currentMed.id, updatedMed);
               await LowStockNotifier.handleStockChange(
                 before: currentMed,
                 after: updatedMed,
@@ -1277,8 +1271,10 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             ][day.weekday - 1];
             return Text(
               dayName,
-              style: hintLabelTextStyle(context, color: cs.onSurfaceVariant)
-                  ?.copyWith(fontWeight: kFontWeightMedium),
+              style: hintLabelTextStyle(
+                context,
+                color: cs.onSurfaceVariant,
+              )?.copyWith(fontWeight: kFontWeightMedium),
             );
           }),
         ),
@@ -1485,10 +1481,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               const SizedBox(width: kSpacingS),
               Text(
                 doseTrend.unit!,
-                style: hintLabelTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                ),
+                style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
               ),
             ],
           ],
@@ -1576,10 +1569,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               const SizedBox(width: kSpacingS),
               Text(
                 doseStrengthHistory.unit!,
-                style: hintLabelTextStyle(
-                  context,
-                  color: cs.onSurfaceVariant,
-                ),
+                style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
               ),
             ],
           ],

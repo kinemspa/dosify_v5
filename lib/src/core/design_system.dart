@@ -42,7 +42,7 @@ const double kStandardFieldHeight = kFieldHeight; // 36px
 ///
 /// Applies sentence-case by default so the OSK starts with a capital letter.
 const TextCapitalization kTextCapitalizationDefault =
-  TextCapitalization.sentences;
+    TextCapitalization.sentences;
 
 /// Compact control width (date buttons, small dropdowns)
 const double kCompactControlWidth = 120;
@@ -109,8 +109,10 @@ const EdgeInsets kNextDoseBadgeNextLabelPaddingTall = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: kSpacingXXS,
 );
-const EdgeInsets kNextDoseBadgeNextLabelPaddingStandard =
-    EdgeInsets.symmetric(horizontal: kSpacingXS, vertical: 0);
+const EdgeInsets kNextDoseBadgeNextLabelPaddingStandard = EdgeInsets.symmetric(
+  horizontal: kSpacingXS,
+  vertical: 0,
+);
 
 /// Medication details reports card
 const double kMedicationReportsTabHeight = 160;
@@ -905,8 +907,8 @@ InputDecoration buildFieldDecoration(
     prefixIcon: prefixIcon,
     // Suppress error text to keep field height stable
     errorStyle: suppressError
-      ? const TextStyle(fontSize: kFontSizeZero, height: 0)
-      : null,
+        ? const TextStyle(fontSize: kFontSizeZero, height: 0)
+        : null,
     filled: true,
     fillColor: fill,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -972,8 +974,8 @@ InputDecoration buildCompactFieldDecoration({
     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     constraints: const BoxConstraints(minHeight: kFieldHeight),
     errorStyle: suppressError
-      ? const TextStyle(fontSize: kFontSizeZero, height: 0)
-      : null,
+        ? const TextStyle(fontSize: kFontSizeZero, height: 0)
+        : null,
     filled: true,
     fillColor: fill,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -1030,10 +1032,10 @@ TextStyle? microHelperTextStyle(BuildContext context, {Color? color}) {
 /// Prefer this over `helperTextStyle(...).copyWith(fontSize: kFontSizeSmall)`
 /// in feature widgets.
 TextStyle? smallHelperTextStyle(BuildContext context, {Color? color}) {
-  return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeSmall,
-    height: kLineHeightTight,
-  );
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeSmall, height: kLineHeightTight);
 }
 
 /// Hint-sized helper/support text style.
@@ -1043,10 +1045,10 @@ TextStyle? smallHelperTextStyle(BuildContext context, {Color? color}) {
 /// Prefer this over `helperTextStyle(...).copyWith(fontSize: kFontSizeHint)`
 /// in feature widgets.
 TextStyle? hintLabelTextStyle(BuildContext context, {Color? color}) {
-  return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeHint,
-    height: kLineHeightTight,
-  );
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeHint, height: kLineHeightTight);
 }
 
 TextStyle? nextDoseBadgeTodayTextStyle(
@@ -1068,8 +1070,9 @@ TextStyle? nextDoseBadgeDayTextStyle(
   required Color color,
 }) {
   return bodyTextStyle(context)?.copyWith(
-    fontSize:
-        dense ? kNextDoseDateCircleDayFontSizeCompact : kNextDoseDateCircleDayFontSizeLarge,
+    fontSize: dense
+        ? kNextDoseDateCircleDayFontSizeCompact
+        : kNextDoseDateCircleDayFontSizeLarge,
     fontWeight: kFontWeightExtraBold,
     height: 1,
     color: color,
@@ -1105,9 +1108,10 @@ TextStyle? nextDoseBadgeTimeTextStyle(
   BuildContext context, {
   required Color color,
 }) {
-  return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeXSmall,
-  );
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeXSmall);
 }
 
 TextStyle? stockDonutPrimaryLabelTextStyle(
@@ -1124,21 +1128,18 @@ TextStyle? stockDonutSecondaryLabelTextStyle(
   BuildContext context, {
   required Color color,
 }) {
-  return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeXXSmall,
-    height: 1.0,
-  );
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeXXSmall, height: 1.0);
 }
 
 /// Dose-card leading time label style.
-TextStyle? doseCardTimeTextStyle(
-  BuildContext context, {
-  required Color color,
-}) {
-  return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeXSmall,
-    height: kLineHeightTight,
-  );
+TextStyle? doseCardTimeTextStyle(BuildContext context, {required Color color}) {
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
 }
 
 /// Dose-card leading dose-number label style.
@@ -1146,10 +1147,10 @@ TextStyle? doseCardDoseNumberTextStyle(
   BuildContext context, {
   required Color color,
 }) {
-  return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeXXSmall,
-    height: kLineHeightTight,
-  );
+  return helperTextStyle(
+    context,
+    color: color,
+  )?.copyWith(fontSize: kFontSizeXXSmall, height: kLineHeightTight);
 }
 
 /// Dose-card status-chip label style.
@@ -1548,6 +1549,16 @@ TextStyle? cardTitleStyle(BuildContext context) {
   );
 }
 
+/// Home page hero title style.
+TextStyle? homeHeroTitleStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.headlineSmall?.copyWith(
+    fontSize: kFontSizeDetailHeaderTitle,
+    fontWeight: kFontWeightExtraBold,
+    color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
+  );
+}
+
 /// Body text style (general content)
 TextStyle? bodyTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -1782,7 +1793,9 @@ Widget buildStorageConditionChip(
     avatar: Icon(icon, size: 16),
     label: Text(
       label,
-      style: smallHelperTextStyle(context)?.copyWith(fontSize: kFontSizeSmallPlus),
+      style: smallHelperTextStyle(
+        context,
+      )?.copyWith(fontSize: kFontSizeSmallPlus),
     ),
     visualDensity: VisualDensity.compact,
     backgroundColor: backgroundColor,
