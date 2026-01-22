@@ -83,6 +83,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   @override
   void initState() {
     super.initState();
+    _isExpandedInternal = widget.isExpanded;
     final tabCount = 1 + _AdherenceReportSection.values.length;
     _tabController = TabController(length: tabCount, vsync: this);
   }
