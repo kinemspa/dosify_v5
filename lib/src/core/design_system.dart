@@ -758,10 +758,13 @@ const double kTextScaleFactorMin = 1.0;
 const double kTextScaleFactorMax = 1.15;
 
 /// Font sizes
+const double kFontSizeZero = 0;
 const double kFontSizeXXSmall = 6;
 const double kFontSizeTiny = 8;
 const double kFontSizeXSmall = 9;
+const double kFontSizeCaption = 10;
 const double kFontSizeSmall = 11;
+const double kFontSizeSmallPlus = 12;
 const double kFontSizeMedium = 13;
 const double kFontSizeLarge = 15;
 const double kFontSizeXLarge = 17;
@@ -901,7 +904,9 @@ InputDecoration buildFieldDecoration(
     suffixIcon: suffixIcon,
     prefixIcon: prefixIcon,
     // Suppress error text to keep field height stable
-    errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
+    errorStyle: suppressError
+      ? const TextStyle(fontSize: kFontSizeZero, height: 0)
+      : null,
     filled: true,
     fillColor: fill,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -945,7 +950,7 @@ InputDecoration buildCompactFieldDecoration({
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       errorStyle: suppressError
-          ? const TextStyle(fontSize: 0, height: 0)
+          ? const TextStyle(fontSize: kFontSizeZero, height: 0)
           : null,
     );
   }
@@ -966,7 +971,9 @@ InputDecoration buildCompactFieldDecoration({
     isCollapsed: false,
     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     constraints: const BoxConstraints(minHeight: kFieldHeight),
-    errorStyle: suppressError ? const TextStyle(fontSize: 0, height: 0) : null,
+    errorStyle: suppressError
+      ? const TextStyle(fontSize: kFontSizeZero, height: 0)
+      : null,
     filled: true,
     fillColor: fill,
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -1773,7 +1780,10 @@ Widget buildStorageConditionChip(
 }) {
   return Chip(
     avatar: Icon(icon, size: 16),
-    label: Text(label, style: const TextStyle(fontSize: 12)),
+    label: Text(
+      label,
+      style: smallHelperTextStyle(context)?.copyWith(fontSize: kFontSizeSmallPlus),
+    ),
     visualDensity: VisualDensity.compact,
     backgroundColor: backgroundColor,
     side: BorderSide.none,

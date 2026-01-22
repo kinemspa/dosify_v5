@@ -46,8 +46,22 @@
 
 
 ## Recommendations
-- [ ] Split the typography migration into per-screen sub-checklists (so progress can be tracked incrementally).
-- [ ] Add a simple guard (CI/script) to prevent new `fontSize:` usage in `lib/src/`.
-- [ ] Centralize text-field keyboard settings in shared field widgets (e.g., capitalization defaults).
+- [x] Split the typography migration into per-screen sub-checklists (so progress can be tracked incrementally).
+	- [ ] Home
+	- [ ] Medications list
+	- [ ] Medication details
+	- [ ] Add medication flows (all wizards)
+	- [ ] Schedules list
+	- [ ] Schedule details + dose edit dialogs
+	- [ ] Calendar
+	- [ ] Analytics
+	- [ ] Inventory
+	- [ ] Settings
+	- [ ] Reconstitution calculator
+	- [ ] Shared widgets (cards/rows/dialogs)
+- [x] Add a simple guard (CI/script) to prevent new `fontSize:` usage in `lib/src/`.
+	- Added `dart run tool/check_no_literal_fontsize.dart`
+- [x] Centralize text-field keyboard settings in shared field widgets (e.g., capitalization defaults).
+	- Standardized on `kTextCapitalizationDefault`
 
 

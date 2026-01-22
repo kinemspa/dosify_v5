@@ -642,14 +642,14 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     const SizedBox(height: kSpacingXS),
                     Text(
                       _formatDateDdMm(m.expiry!),
-                      style: helperTextStyle(
+                      style: smallHelperTextStyle(
                         context,
                         color: expiryStatusColor(
                           context,
                           createdAt: m.createdAt,
                           expiry: m.expiry!,
                         ),
-                      )?.copyWith(fontSize: kFontSizeSmall),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.right,
@@ -1054,9 +1054,7 @@ class _MedLargeCard extends StatelessWidget {
       m.storageLocation,
     );
 
-    final baseRemainingStyle = helperTextStyle(
-      context,
-    )?.copyWith(fontSize: kFontSizeXSmall);
+    final baseRemainingStyle = microHelperTextStyle(context);
 
     final body = m.form == MedicationForm.multiDoseVial
         ? Column(
@@ -1161,7 +1159,7 @@ class _MedLargeCard extends StatelessWidget {
         if (m.manufacturer != null && m.manufacturer!.isNotEmpty) ...[
           Text(
             m.manufacturer!,
-            style: helperTextStyle(context)?.copyWith(fontSize: kFontSizeSmall),
+            style: smallHelperTextStyle(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -1197,10 +1195,10 @@ class _MedLargeCard extends StatelessWidget {
             Expanded(
               child: Text(
                 scheduleLabel,
-                style: helperTextStyle(
+                style: smallHelperTextStyle(
                   context,
                   color: scheduleTextColor,
-                )?.copyWith(fontSize: kFontSizeSmall),
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

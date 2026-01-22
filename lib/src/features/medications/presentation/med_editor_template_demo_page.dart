@@ -107,7 +107,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         nameField: Field36(
           child: TextFormField(
             controller: _name,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
@@ -120,7 +120,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         manufacturerField: Field36(
           child: TextFormField(
             controller: _manufacturer,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
@@ -133,7 +133,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         descriptionField: Field36(
           child: TextFormField(
             controller: _description,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
@@ -146,7 +146,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         notesField: Field36(
           child: TextFormField(
             controller: _notes,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
@@ -354,7 +354,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         batchField: Field36(
           child: TextFormField(
             controller: _batch,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             decoration: buildFieldDecoration(
               context,
               hint: 'Enter batch number',
@@ -366,7 +366,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         locationField: Field36(
           child: TextFormField(
             controller: _location,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             decoration: buildFieldDecoration(
               context,
               hint: 'eg. Bathroom cabinet',
@@ -421,7 +421,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
         storageInstructionsField: Field36(
           child: TextFormField(
             controller: _storageNotes,
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: kTextCapitalizationDefault,
             decoration: buildFieldDecoration(
               context,
               hint: 'Enter storage instructions',

@@ -442,9 +442,7 @@ class _ScheduleCard extends StatelessWidget {
                   const SizedBox(height: kSpacingXS),
                   Text(
                     scheduleDoseSummaryLabel(s),
-                    style: helperTextStyle(
-                      context,
-                    )?.copyWith(fontSize: kFontSizeXSmall),
+                    style: microHelperTextStyle(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

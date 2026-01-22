@@ -2249,7 +2249,7 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
                 hint: 'Add any notes about this dose...',
               ),
               maxLines: 3,
-              textCapitalization: TextCapitalization.sentences,
+              textCapitalization: kTextCapitalizationDefault,
             ),
 
             // Injection site field (only for injections)
@@ -2262,7 +2262,7 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
                   label: 'Injection Site (optional)',
                   hint: 'e.g., Left arm, Right thigh...',
                 ),
-                textCapitalization: TextCapitalization.sentences,
+                textCapitalization: kTextCapitalizationDefault,
               ),
             ],
           ],

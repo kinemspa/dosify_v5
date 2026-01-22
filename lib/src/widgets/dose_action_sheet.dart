@@ -1215,7 +1215,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 hint: 'Add any notes about this dose…',
               ),
               maxLines: 3,
-              textCapitalization: TextCapitalization.sentences,
+              textCapitalization: kTextCapitalizationDefault,
             ),
           ],
         ),

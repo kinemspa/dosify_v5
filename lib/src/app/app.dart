@@ -38,13 +38,19 @@ class DosifiApp extends ConsumerWidget {
           displayColor: lightOnSurfaceTextColor,
         )
         .copyWith(
-          bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
-          bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
+          bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(
+            fontSize: kFontSizeMedium,
+          ),
+          bodySmall: baseLight.textTheme.bodySmall?.copyWith(
+            fontSize: kFontSizeSmall,
+          ),
           titleSmall: baseLight.textTheme.titleSmall?.copyWith(
-            fontSize: 15,
+            fontSize: kFontSizeLarge,
             fontWeight: FontWeight.w700,
           ),
-          labelLarge: baseLight.textTheme.labelLarge?.copyWith(fontSize: 12),
+          labelLarge: baseLight.textTheme.labelLarge?.copyWith(
+            fontSize: kFontSizeSmallPlus,
+          ),
         );
     final light = baseLight.copyWith(
       textTheme: lightTextTheme,
@@ -110,7 +116,7 @@ class DosifiApp extends ConsumerWidget {
             color: states.contains(WidgetState.selected)
                 ? schemeLight.primary
                 : Colors.white70,
-            fontSize: 10,
+            fontSize: kFontSizeCaption,
           ),
         ),
       ),
@@ -148,7 +154,7 @@ class DosifiApp extends ConsumerWidget {
             width: 2,
           ),
         ),
-        errorStyle: const TextStyle(fontSize: 0, height: 0),
+        errorStyle: const TextStyle(fontSize: kFontSizeZero, height: 0),
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
         hintStyle: lightTextTheme.bodyMedium?.copyWith(
@@ -240,13 +246,19 @@ class DosifiApp extends ConsumerWidget {
           displayColor: schemeDark.onSurface.withValues(alpha: kOpacityHigh),
         )
         .copyWith(
-          bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 13),
-          bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
+          bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(
+            fontSize: kFontSizeMedium,
+          ),
+          bodySmall: baseDark.textTheme.bodySmall?.copyWith(
+            fontSize: kFontSizeSmall,
+          ),
           titleSmall: baseDark.textTheme.titleSmall?.copyWith(
-            fontSize: 15,
+            fontSize: kFontSizeLarge,
             fontWeight: FontWeight.w700,
           ),
-          labelLarge: baseDark.textTheme.labelLarge?.copyWith(fontSize: 12),
+          labelLarge: baseDark.textTheme.labelLarge?.copyWith(
+            fontSize: kFontSizeSmallPlus,
+          ),
         );
     final dark = baseDark.copyWith(
       textTheme: darkTextTheme,
@@ -309,7 +321,7 @@ class DosifiApp extends ConsumerWidget {
             color: states.contains(WidgetState.selected)
                 ? schemeDark.primary
                 : Colors.white70,
-            fontSize: 10,
+            fontSize: kFontSizeCaption,
           ),
         ),
       ),
@@ -341,7 +353,7 @@ class DosifiApp extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: baseDark.colorScheme.primary, width: 2),
         ),
-        errorStyle: const TextStyle(fontSize: 0, height: 0),
+        errorStyle: const TextStyle(fontSize: kFontSizeZero, height: 0),
         filled: true,
         fillColor: baseDark.colorScheme.surfaceContainerHigh,
         hintStyle: darkTextTheme.bodyMedium?.copyWith(
