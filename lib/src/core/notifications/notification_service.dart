@@ -362,17 +362,35 @@ class NotificationService {
 
   static Future<void> showTest() async {
     _log('showTest() called');
+
+    const title = 'Test Medication';
+    const body = 'Morning Dose • 5 mg • 8:00 AM';
+
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
         'upcoming_dose',
         'Upcoming Dose',
         icon: '@mipmap/ic_launcher',
+        largeIcon: DrawableResourceAndroidBitmap('syringe'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
+        actions: upcomingDoseActions,
+        styleInformation: BigTextStyleInformation(
+          body,
+          contentTitle: title,
+          summaryText: 'Take • Snooze • Skip',
+        ),
       ),
     );
-    await _fln.show(1, 'Dosifi v5', 'Notifications initialized', details);
+
+    await _fln.show(
+      1,
+      title,
+      body,
+      details,
+      payload: 'dose:test:${DateTime.now().millisecondsSinceEpoch}',
+    );
     _log('showTest() completed');
   }
 
@@ -417,10 +435,12 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: '@mipmap/ic_launcher',
+        largeIcon: DrawableResourceAndroidBitmap('syringe'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
         groupKey: groupKey,
+        actions: upcomingDoseActions,
       ),
     );
 
@@ -439,15 +459,17 @@ class NotificationService {
 
     await _fln.show(
       item1,
-      'Dose reminder',
-      'Medication A · due soon',
+      'Medication A',
+      'Morning Dose • 5 mg • 8:00 AM',
       itemDetails,
+      payload: 'dose:test_group_a:${DateTime.now().millisecondsSinceEpoch}',
     );
     await _fln.show(
       item2,
-      'Dose reminder',
-      'Medication B · due soon',
+      'Medication B',
+      'Evening Dose • 10 mg • 8:00 PM',
       itemDetails,
+      payload: 'dose:test_group_b:${DateTime.now().millisecondsSinceEpoch}',
     );
     await _fln.show(
       summary,
@@ -900,6 +922,7 @@ class NotificationService {
     }
     final shouldShowSyringeIcon =
         Platform.isAndroid && channelId == _upcomingDose.id && !setAsGroupSummary;
+    final shouldUseExpandedStyle = shouldShowSyringeIcon;
 
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -915,6 +938,13 @@ class NotificationService {
         groupKey: groupKey,
         setAsGroupSummary: setAsGroupSummary,
         actions: actions,
+        styleInformation: shouldUseExpandedStyle
+            ? BigTextStyleInformation(
+                body,
+                contentTitle: title,
+                summaryText: 'Take • Snooze • Skip',
+              )
+            : null,
         timeoutAfter: timeoutAfterMs,
       ),
     );
