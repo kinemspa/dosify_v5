@@ -531,7 +531,7 @@ class _AddScheduleWizardPageState
           const SizedBox(height: kSpacingS),
           _helperBelowLeft(
             _selectedMed == null
-                ? 'Tap a medication to select it. Only medications with stock are shown.'
+                ? 'Tap a medication to select it.'
                 : 'Tap the selected medication to change it.',
           ),
         ], titleSpacing: kSpacingS),
@@ -554,7 +554,15 @@ class _AddScheduleWizardPageState
     return ValueListenableBuilder<Box<Medication>>(
       valueListenable: Hive.box<Medication>('medications').listenable(),
       builder: (context, box, _) {
-        final medications = box.values.where((m) => m.stockValue > 0).toList();
+        final medications = box.values.toList()
+          ..sort((a, b) {
+            final aHasStock = a.stockValue > 0;
+            final bHasStock = b.stockValue > 0;
+            if (aHasStock != bHasStock) {
+              return aHasStock ? -1 : 1;
+            }
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          });
 
         if (_selectedMed != null) {
           return _MedicationListRow(
