@@ -10,3 +10,8 @@
 ## Notes
 - 
 
+
+## Recommendations
+- [ ] Add a deterministic sort option (Name / Next Dose / Most Used) and persist it.
+- [ ] Consider a compact “status badges” row in list items for quick scanning.
+

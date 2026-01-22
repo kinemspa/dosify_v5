@@ -32,6 +32,11 @@
     - [x] Was not completed. FAB needs to hovering over the top. 
 - [x] Needs some padding between the Calendar, currently huggin the bottom border of calnedar.
     - [x] Something is wrong here. WHy cant you fix this, there is a wierd backgorund colour making this look like a card withn a card. WTF?
+
+
+## Recommendations
+- [ ] Add visual regression tests for month/week grids (overflows are easy to reintroduce).
+- [ ] Consider unifying Day View + Dose Stage layout code to avoid divergence.
     
 
 

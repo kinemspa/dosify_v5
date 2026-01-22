@@ -31,3 +31,8 @@
 ## Notes
 - 
 
+
+## Recommendations
+- [ ] Replace Reports chips with a single “Included meds” selector (bottom sheet) to reduce clutter.
+- [ ] Ensure Home Schedules uses the same schedule card widget as the Schedules list for consistency.
+

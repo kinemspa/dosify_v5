@@ -9,3 +9,8 @@ This folder contains user request notes and the split checklist files.
 - [x] Template: `backlog/TEMPLATE.md`
 
 - [x] Note: Some files in this folder may be intentionally untracked (draft notes).
+
+
+## Recommendations
+- [ ] Capture new ideas in a dedicated “Recommendations” section (unchecked) before implementation.
+- [ ] Prefer small, per-screen requests and avoid mixing unrelated items in one checkbox.

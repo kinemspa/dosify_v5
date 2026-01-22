@@ -15,3 +15,8 @@
 ## List
 - [x] Status icon same as above. 
 
+
+## Recommendations
+- [ ] Add a lightweight empty-state with a CTA to create the first schedule.
+- [ ] Consider a “compact by default” option and persist the user preference.
+

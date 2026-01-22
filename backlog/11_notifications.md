@@ -31,3 +31,8 @@
 ## Notes
 - A notification can’t expand into a full Flutter widget UI without launching the app. We can show actions (e.g., Take/Snooze/Skip) and deep-link into the Take Dose dialog inside the app.
     - [x] Ok lets implement that. 
+
+
+## Recommendations
+- [ ] Add a Settings option for “Missed dose grace period” and “Overdue reminder timing”.
+- [ ] Consider an optional Android expanded image (BigPicture) later; keep group summaries compact.
