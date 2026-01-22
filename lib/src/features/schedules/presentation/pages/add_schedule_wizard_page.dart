@@ -1458,6 +1458,7 @@ class _AddScheduleWizardPageState
             child: TextFormField(
               controller: _name,
               style: bodyTextStyle(context),
+              textCapitalization: kTextCapitalizationDefault,
               decoration: buildFieldDecoration(
                 context,
                 hint: 'e.g., 1 Tablet',

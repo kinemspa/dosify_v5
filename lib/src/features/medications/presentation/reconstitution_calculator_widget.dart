@@ -468,6 +468,7 @@ class _ReconstitutionCalculatorWidgetState
           field: Field36(
             child: TextField(
               controller: _diluentNameCtrl,
+              textCapitalization: kTextCapitalizationDefault,
               decoration: _fieldDecoration(
                 context,
                 hint: 'e.g., Sterile Water',

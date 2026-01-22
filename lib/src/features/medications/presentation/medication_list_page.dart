@@ -297,6 +297,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             Expanded(
               child: TextField(
                 autofocus: true,
+                textCapitalization: kTextCapitalizationDefault,
                 decoration: buildFieldDecoration(
                   context,
                   hint: 'Search medications',

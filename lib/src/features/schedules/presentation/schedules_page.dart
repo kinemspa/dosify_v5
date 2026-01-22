@@ -175,6 +175,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
             Expanded(
               child: TextField(
                 autofocus: true,
+                textCapitalization: kTextCapitalizationDefault,
                 decoration: buildFieldDecoration(
                   context,
                   hint: 'Search schedules',

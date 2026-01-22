@@ -181,6 +181,7 @@ class _SuppliesPageState extends State<SuppliesPage> {
             Expanded(
               child: TextField(
                 autofocus: true,
+                textCapitalization: kTextCapitalizationDefault,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
                   hintText: 'Search supplies',
@@ -812,6 +813,7 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _name,
+                    textCapitalization: kTextCapitalizationDefault,
                     decoration: const InputDecoration(labelText: 'Name *'),
                     validator: (v) =>
                         (v == null || v.trim().isEmpty) ? 'Required' : null,
@@ -835,6 +837,7 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _category,
+                    textCapitalization: kTextCapitalizationDefault,
                     decoration: const InputDecoration(
                       labelText: 'Category (optional)',
                     ),
@@ -997,12 +1000,14 @@ class _AddEditSupplyPageState extends State<AddEditSupplyPage> {
                   ),
                   TextFormField(
                     controller: _storage,
+                    textCapitalization: kTextCapitalizationDefault,
                     decoration: const InputDecoration(
                       labelText: 'Storage / Lot (optional)',
                     ),
                   ),
                   TextFormField(
                     controller: _notes,
+                    textCapitalization: kTextCapitalizationDefault,
                     decoration: const InputDecoration(
                       labelText: 'Notes (optional)',
                     ),
@@ -1159,6 +1164,7 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
           const SizedBox(height: 8),
           TextFormField(
             controller: _note,
+            textCapitalization: kTextCapitalizationDefault,
             decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
           const SizedBox(height: 12),

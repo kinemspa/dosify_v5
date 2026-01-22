@@ -152,6 +152,7 @@ class _ReconstitutionCalculatorPageState
           content: TextField(
             controller: ctrl,
             autofocus: true,
+            textCapitalization: kTextCapitalizationDefault,
             decoration: buildCompactFieldDecoration(
               context: context,
               hint: 'Name',
@@ -345,6 +346,7 @@ class _ReconstitutionCalculatorPageState
                     ),
                     onChanged: (_) => setState(() {}),
                     textAlign: TextAlign.center,
+                    textCapitalization: kTextCapitalizationDefault,
                     style: bodyTextStyle(context),
                   ),
                 ),

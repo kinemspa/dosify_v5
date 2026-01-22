@@ -333,6 +333,7 @@ class _AddPrefilledSyringeWizardPageState
               field: Field36(
                 child: TextField(
                   controller: _nameCtrl,
+                  textCapitalization: kTextCapitalizationDefault,
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
@@ -352,6 +353,7 @@ class _AddPrefilledSyringeWizardPageState
               field: Field36(
                 child: TextField(
                   controller: _manufacturerCtrl,
+                  textCapitalization: kTextCapitalizationDefault,
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
@@ -370,6 +372,7 @@ class _AddPrefilledSyringeWizardPageState
               label: 'Description',
               field: TextField(
                 controller: _descriptionCtrl,
+                textCapitalization: kTextCapitalizationDefault,
                 style: Theme.of(context).textTheme.bodyMedium,
                 minLines: 2,
                 maxLines: 3,
@@ -693,6 +696,7 @@ class _AddPrefilledSyringeWizardPageState
               field: Field36(
                 child: TextField(
                   controller: _batchCtrl,
+                  textCapitalization: kTextCapitalizationDefault,
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(context, hint: 'Optional'),
                 ),
@@ -708,6 +712,7 @@ class _AddPrefilledSyringeWizardPageState
               field: Field36(
                 child: TextField(
                   controller: _storageLocationCtrl,
+                  textCapitalization: kTextCapitalizationDefault,
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,

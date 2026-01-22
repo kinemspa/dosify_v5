@@ -4571,6 +4571,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                 TextField(
                   controller: notesController,
                   maxLines: 2,
+                  textCapitalization: kTextCapitalizationDefault,
                   style: bodyTextStyle(stateContext),
                   decoration: buildFieldDecoration(
                     stateContext,
@@ -4828,6 +4829,7 @@ Future<void> _showEditDialog(
         content: TextField(
           controller: controller,
           style: bodyTextStyle(dialogContext),
+          textCapitalization: kTextCapitalizationDefault,
           decoration: buildFieldDecoration(dialogContext, hint: 'Enter $title'),
           maxLines: maxLines,
           keyboardType: keyboardType,

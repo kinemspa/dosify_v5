@@ -874,6 +874,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               const SizedBox(height: 16),
               TextField(
                 controller: notesController,
+                textCapitalization: kTextCapitalizationDefault,
                 decoration: const InputDecoration(
                   labelText: 'Notes (optional)',
                   border: OutlineInputBorder(),
@@ -883,6 +884,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               const SizedBox(height: 12),
               TextField(
                 controller: siteController,
+                textCapitalization: kTextCapitalizationDefault,
                 decoration: const InputDecoration(
                   labelText: 'Injection site (optional)',
                   border: OutlineInputBorder(),

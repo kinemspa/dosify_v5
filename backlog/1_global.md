@@ -4,7 +4,7 @@
 
 - [x] Dose Cards need some sort of background colour. slight difference to backkground. maybe shadow. Also needs to help differentiate from each dose
 - [x] Status Icons. Need to Globally Uniformed across the entire app. From Schedule cards, Dose Cards, Take Dose Dialogs, Historical Dose. Needs review. 
-- [ ] Make all Text fields that take text to set the keyboard to Capital for the first letter. 
+- [x] Make all Text fields that take text to set the keyboard to Capital for the first letter. 
 
 - Text sizes:
 	- [x] Agent, please put in this file here in this file all the text sizes in use. I feel there is no uniformity of all text sizes across the app.

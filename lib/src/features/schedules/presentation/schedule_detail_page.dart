@@ -747,6 +747,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             controller: controller,
             autofocus: true,
             textInputAction: TextInputAction.done,
+            textCapitalization: kTextCapitalizationDefault,
             decoration: buildFieldDecoration(
               dialogContext,
               hint: 'Schedule name',

@@ -38,6 +38,12 @@ import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 /// Standard field height (ALL text fields, dropdowns, buttons)
 const double kStandardFieldHeight = kFieldHeight; // 36px
 
+/// Default capitalization for user-entered text fields.
+///
+/// Applies sentence-case by default so the OSK starts with a capital letter.
+const TextCapitalization kTextCapitalizationDefault =
+  TextCapitalization.sentences;
+
 /// Compact control width (date buttons, small dropdowns)
 const double kCompactControlWidth = 120;
 const double kCompactControlMinWidth = 120;
