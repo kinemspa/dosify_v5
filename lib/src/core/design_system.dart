@@ -26,6 +26,8 @@
 /// ============================================================================
 
 // Flutter imports:
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -1317,6 +1319,33 @@ TextStyle? medicationDetailFormChipTextStyle(
     fontSize: kMedicationDetailFormChipFontSize,
     fontWeight: kFontWeightSemiBold,
     height: kLineHeightTight,
+  );
+}
+
+TextStyle? medicationDetailHeaderNameTextStyle(
+  BuildContext context, {
+  required Color color,
+  required double t,
+}) {
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    color: color,
+    fontSize: lerpDouble(
+      kMedicationDetailHeaderNameExpandedFontSize,
+      kMedicationDetailHeaderNameCollapsedFontSize,
+      t,
+    ),
+    fontWeight: kFontWeightSemiBold,
+  );
+}
+
+TextStyle? medicationDetailCollapsedTitleTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    color: color,
+    fontSize: kFontSizeXLarge,
+    fontWeight: kFontWeightSemiBold,
   );
 }
 

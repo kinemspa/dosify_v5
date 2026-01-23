@@ -373,18 +373,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                         children: [
                                           Text(
                                             updatedMed.name,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
+                                            style:
+                                                medicationDetailHeaderNameTextStyle(
+                                                  context,
                                                   color: headerForeground,
-                                                  fontSize: lerpDouble(
-                                                    kMedicationDetailHeaderNameExpandedFontSize,
-                                                    kMedicationDetailHeaderNameCollapsedFontSize,
-                                                    t,
-                                                  ),
-                                                  fontWeight:
-                                                      kFontWeightSemiBold,
+                                                  t: t,
                                                 ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -473,13 +466,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                   child: Center(
                                     child: Text(
                                       'Medication Details',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
+                                      style:
+                                          medicationDetailCollapsedTitleTextStyle(
+                                            context,
                                             color: onPrimary,
-                                            fontSize: kFontSizeXLarge,
-                                            fontWeight: kFontWeightSemiBold,
                                           ),
                                     ),
                                   ),

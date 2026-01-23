@@ -49,7 +49,7 @@
 - [x] Split the typography migration into per-screen sub-checklists (so progress can be tracked incrementally).
 	- [x] Home
 	- [x] Medications list
-	- [ ] Medication details
+	- [x] Medication details
 	- [ ] Add medication flows (all wizards)
 	- [ ] Schedules list
 	- [ ] Schedule details + dose edit dialogs
