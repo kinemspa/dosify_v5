@@ -25,6 +25,10 @@
 - `lib/main.dart` initializes Hive first, then runs the app; notification init + rescheduling happens **in the background** and must not block startup.
 - Notification deep links are handled via `NotificationService.setNotificationResponseHandler(...)` + `NotificationDeepLinkHandler`.
 
+## Agent tooling (MCP)
+- `lib/main.dart` initializes `mcp_toolkit` (`MCPToolkitBinding.instance.initialize()` + `initializeFlutterToolkit()`) to enable inspector/widget-tree/screenshot tooling for automation/debugging.
+- App init is wrapped in `runZonedGuarded(..., MCPToolkitBinding.instance.handleZoneError)` so runtime errors are surfaced through the MCP bridge.
+
 ## Workflow (commands)
 - Setup: `flutter pub get`
 - Analyze (required before commit): `flutter analyze`
