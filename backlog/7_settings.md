@@ -6,7 +6,7 @@
 
 ## Requests
 - [x] Add a Notifications section for grace period and overdue reminders.
-- [ ] Add an “Experimental” group for UI toggles before they’re finalized.
+- [x] Add an “Experimental” group for UI toggles before they’re finalized.
 - [ ] Ability to backup data to google drive or someother method
 - [ ] Ability to import a backup
 - [ ] Ability to set Time and Date formats which override OS

@@ -1,5 +1,6 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
@@ -709,6 +710,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   Widget? _buildMedicationStatusBadgesRow(BuildContext context, Medication m) {
+    if (!ExperimentalUiSettings.value.value.showMedicationListStatusBadges) {
+      return null;
+    }
+
     final cs = Theme.of(context).colorScheme;
     final pills = <Widget>[];
 

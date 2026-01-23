@@ -12,6 +12,7 @@ import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
 import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 
 import 'package:mcp_toolkit/mcp_toolkit.dart'; // NEW: For MCP bridge to enable inspections/screenshots
@@ -50,6 +51,7 @@ Future<void> main() async {
           print('Dosifi: NotificationService initialized');
 
           await DoseTimingSettings.load();
+          await ExperimentalUiSettings.load();
 
           NotificationDeepLinkHandler.flushPendingIfAny();
 

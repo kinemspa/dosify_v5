@@ -10,6 +10,7 @@ import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -203,12 +204,20 @@ class SettingsPage extends ConsumerWidget {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
-          ListTile(
-            leading: const Icon(Icons.view_carousel_outlined),
-            title: const Text('Wide Card Samples'),
-            subtitle: const Text('Preview large medication card layouts'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/wide-card-samples'),
+          ValueListenableBuilder<ExperimentalUiConfig>(
+            valueListenable: ExperimentalUiSettings.value,
+            builder: (context, config, _) {
+              if (!config.showWideCardSamplesEntry) {
+                return const SizedBox.shrink();
+              }
+              return ListTile(
+                leading: const Icon(Icons.view_carousel_outlined),
+                title: const Text('Wide Card Samples'),
+                subtitle: const Text('Preview large medication card layouts'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () => context.push('/settings/wide-card-samples'),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.verified_outlined),
@@ -216,6 +225,44 @@ class SettingsPage extends ConsumerWidget {
             subtitle: const Text('View locked-in card concepts for launch'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/final-card-decisions'),
+          ),
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Experimental',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<ExperimentalUiConfig>(
+            valueListenable: ExperimentalUiSettings.value,
+            builder: (context, config, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwitchListTile(
+                    secondary: const Icon(Icons.sell_outlined),
+                    title: const Text('Medication list status badges'),
+                    subtitle: const Text(
+                      'Show compact badges like Low stock, Expiring, Fridge, etc.',
+                    ),
+                    value: config.showMedicationListStatusBadges,
+                    onChanged:
+                        ExperimentalUiSettings.setShowMedicationListStatusBadges,
+                  ),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.view_carousel_outlined),
+                    title: const Text('Wide Card Samples entry'),
+                    subtitle: const Text(
+                      'Show the exploratory card mockups page in Settings',
+                    ),
+                    value: config.showWideCardSamplesEntry,
+                    onChanged:
+                        ExperimentalUiSettings.setShowWideCardSamplesEntry,
+                  ),
+                ],
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.science_outlined),
