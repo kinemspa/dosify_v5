@@ -35,7 +35,7 @@
 			- 24 (2)
 			- 32 (3)
 		- [x] Can we put in a plan to replace all the hardcoded fonts with system design fonts.
-		- [ ] Proceed with all the below. 
+		- [x] Proceed with all the below. 
 			- Plan (incremental, safe)
 				1) Baseline scan: keep a running list of all `TextStyle(fontSize: ...)`/`fontSize:` occurrences in `lib/` and categorize by UI surface (Home, Medications, Schedules, Dialogs, Charts).
 				2) Fill gaps in `lib/src/core/design_system.dart`: if a repeated typographic need exists (e.g., tiny badge text, dense table text), add a named helper there (e.g., `badgeTextStyle`, `denseLabelStyle`) instead of re-adding `fontSize` in feature code.
@@ -58,7 +58,7 @@
 	- [x] Inventory
 	- [x] Settings
 	- [x] Reconstitution calculator
-	- [ ] Shared widgets (cards/rows/dialogs)
+	- [x] Shared widgets (cards/rows/dialogs)
 - [x] Add a simple guard (CI/script) to prevent new `fontSize:` usage in `lib/src/`.
 	- Added `dart run tool/check_no_literal_fontsize.dart`
 - [x] Centralize text-field keyboard settings in shared field widgets (e.g., capitalization defaults).
