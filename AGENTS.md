@@ -1,25 +1,7 @@
-<!-- OPENSPEC:START -->
-# OpenSpec Instructions
-
-These instructions are for AI assistants working in this project.
-
-Always open `@/openspec/AGENTS.md` when the request:
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
-
-Use `@/openspec/AGENTS.md` to learn:
-- How to create and apply change proposals
-- Spec format and conventions
-- Project structure and guidelines
-
-Keep this managed block so 'openspec update' can refresh the instructions.
-
-<!-- OPENSPEC:END -->
-
----
+When in agent mode, for multi-step tasks or plans, execute all steps in sequence without pausing to announce next actions or seek confirmation, unless a critical error occurs or user input is explicitly required. Proceed autonomously, apply code edits directly, and only stop if the entire task is complete or blocked. I authorize all non-destructive file changes and tool usages in this session.
 
 # CRITICAL DEVELOPMENT RULE: CENTRALIZED DESIGN SYSTEM (OPTION B)
+
 
 ## **EVERYTHING must be centrally coded from a constant**
 
