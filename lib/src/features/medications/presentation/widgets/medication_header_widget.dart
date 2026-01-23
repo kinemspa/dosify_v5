@@ -160,7 +160,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                     value:
                         '${_formatNumber(medication.strengthValue)} ${_unitLabel(medication.strengthUnit)}',
                     textColor: headerForeground,
-                    valueSize: kFontSizeSmall,
+                    smallValue: true,
                   ),
                   const SizedBox(height: kSpacingS),
 
@@ -430,14 +430,14 @@ class _HeaderInfoTile extends StatelessWidget {
   final String value;
   final IconData? icon;
   final Color? textColor;
-  final double? valueSize;
+  final bool smallValue;
 
   const _HeaderInfoTile({
     required this.label,
     required this.value,
     this.icon,
     this.textColor,
-    this.valueSize,
+    this.smallValue = false,
   });
 
   @override
@@ -469,11 +469,10 @@ class _HeaderInfoTile extends StatelessWidget {
             Flexible(
               child: Text(
                 value,
-                style: headerValueTextStyle(
-                  context,
-                  color: color,
-                  fontSize: valueSize ?? kFontSizeMedium,
-                ),
+                style:
+                    smallValue
+                        ? headerValueSmallTextStyle(context, color: color)
+                        : headerValueTextStyle(context, color: color),
               ),
             ),
           ],

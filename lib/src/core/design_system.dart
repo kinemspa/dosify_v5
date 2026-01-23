@@ -1310,6 +1310,13 @@ TextStyle? headerValueTextStyle(
   );
 }
 
+TextStyle? headerValueSmallTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return headerValueTextStyle(context, color: color, fontSize: kFontSizeSmall);
+}
+
 TextStyle? medicationDetailFormChipTextStyle(
   BuildContext context, {
   required Color color,
