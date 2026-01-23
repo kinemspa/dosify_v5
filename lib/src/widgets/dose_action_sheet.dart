@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
+import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -396,7 +397,17 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   DateTime _defaultSnoozeUntil() {
-    return DateTime.now().add(const Duration(minutes: 15));
+    final now = DateTime.now();
+    final max = _maxSnoozeUntil();
+    if (max == null || !max.isAfter(now)) {
+      return now.add(const Duration(minutes: 15));
+    }
+
+    final pct = SnoozeSettings.value.value.defaultSnoozePercent;
+    final window = max.difference(now);
+    final seconds = (window.inSeconds * pct / 100).round();
+    final target = now.add(Duration(seconds: seconds));
+    return target.isAfter(max) ? max : target;
   }
 
   DateTime? _maxSnoozeUntil() {

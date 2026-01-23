@@ -11,6 +11,7 @@ import 'package:dosifi_v5/src/app/app.dart';
 import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
 import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -52,6 +53,7 @@ Future<void> main() async {
 
           await DoseTimingSettings.load();
           await ExperimentalUiSettings.load();
+          await SnoozeSettings.load();
 
           NotificationDeepLinkHandler.flushPendingIfAny();
 

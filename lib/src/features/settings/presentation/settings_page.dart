@@ -10,6 +10,7 @@ import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -367,6 +368,29 @@ class SettingsPage extends ConsumerWidget {
                     ),
                   ),
                 ],
+              );
+            },
+          ),
+          ValueListenableBuilder<SnoozeConfig>(
+            valueListenable: SnoozeSettings.value,
+            builder: (context, config, _) {
+              final pct = config.defaultSnoozePercent;
+              final subtitle = '$pct% of time until next scheduled dose';
+              return ListTile(
+                leading: const Icon(Icons.snooze_outlined),
+                title: const Text('Snooze timing (default)'),
+                subtitle: Text(subtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => editPercentSetting(
+                  title: 'Snooze timing (default)',
+                  description:
+                      'Sets the default snooze time as a percentage of the window until the next scheduled dose. Snooze will always clamp to before the next dose.',
+                  currentValue: pct,
+                  onSave: (v) => SnoozeSettings.setDefaultSnoozePercent(v),
+                  min: 0,
+                  max: 100,
+                  step: 5,
+                ),
               );
             },
           ),
