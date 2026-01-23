@@ -956,9 +956,8 @@ class _MedLargeCard extends StatelessWidget {
   TextSpan _mdvRemainingMlSpan(BuildContext context) {
     final theme = Theme.of(context);
     final colored = _MedicationStockStatusText.colorFor(context, m);
-    final resolvedBaseStyle = helperTextStyle(context)?.copyWith(
-      fontSize: kFontSizeXSmall,
-      fontWeight: FontWeight.w600,
+    final resolvedBaseStyle = microHelperTextStyle(context)?.copyWith(
+      fontWeight: kFontWeightSemiBold,
       color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
     );
 
@@ -975,7 +974,7 @@ class _MedLargeCard extends StatelessWidget {
       children: [
         TextSpan(
           text: fmt2(currentMl),
-          style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          style: TextStyle(fontWeight: kFontWeightExtraBold, color: colored),
         ),
         TextSpan(text: '/${fmt2(totalMl)} mL'),
       ],
@@ -985,9 +984,8 @@ class _MedLargeCard extends StatelessWidget {
   TextSpan _mdvRemainingVialsSpan(BuildContext context) {
     final theme = Theme.of(context);
     final colored = _MedicationStockStatusText.colorFor(context, m);
-    final resolvedBaseStyle = helperTextStyle(context)?.copyWith(
-      fontSize: kFontSizeXSmall,
-      fontWeight: FontWeight.w600,
+    final resolvedBaseStyle = microHelperTextStyle(context)?.copyWith(
+      fontWeight: kFontWeightSemiBold,
       color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
     );
 
@@ -1003,7 +1001,7 @@ class _MedLargeCard extends StatelessWidget {
       children: [
         TextSpan(
           text: '$count',
-          style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          style: TextStyle(fontWeight: kFontWeightExtraBold, color: colored),
         ),
         TextSpan(text: ' $label'),
       ],
