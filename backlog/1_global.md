@@ -51,8 +51,8 @@
 	- [x] Medications list
 	- [x] Medication details
 	- [x] Add medication flows (all wizards)
-	- [ ] Schedules list
-	- [ ] Schedule details + dose edit dialogs
+	- [x] Schedules list
+	- [x] Schedule details + dose edit dialogs
 	- [ ] Calendar
 	- [ ] Analytics
 	- [ ] Inventory
