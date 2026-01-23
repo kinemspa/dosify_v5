@@ -1579,6 +1579,19 @@ TextStyle? reconSummaryTotalVolumeTextStyle(
   );
 }
 
+TextStyle? reconSummaryHugeVolumeTextStyle(
+  BuildContext context, {
+  required Color color,
+  FontWeight fontWeight = kFontWeightExtraBold,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize: kReconSummaryVolumeHugeFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
 TextStyle? reconSummaryValueTextStyle(
   BuildContext context, {
   required bool compact,

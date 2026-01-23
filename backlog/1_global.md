@@ -50,7 +50,7 @@
 	- [x] Home
 	- [x] Medications list
 	- [x] Medication details
-	- [ ] Add medication flows (all wizards)
+	- [x] Add medication flows (all wizards)
 	- [ ] Schedules list
 	- [ ] Schedule details + dose edit dialogs
 	- [ ] Calendar

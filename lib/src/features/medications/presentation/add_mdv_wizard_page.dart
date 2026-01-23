@@ -1848,10 +1848,10 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                   if (medicationName.isNotEmpty) ...[
                     TextSpan(
                       text: medicationName,
-                      style: reconSummaryEmphasisTextStyle(
+                      style: reconSummaryMedicationNameTextStyle(
                         context,
+                        compact: false,
                         color: Theme.of(context).colorScheme.primary,
-                        fontSize: kReconSummaryNameFontSize,
                         fontWeight: kFontWeightBold,
                       ),
                     ),
@@ -1860,10 +1860,9 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                   const TextSpan(text: 'with '),
                   TextSpan(
                     text: '${_formatNoTrailing(result!.solventVolumeMl)} mL',
-                    style: reconSummaryEmphasisTextStyle(
+                    style: reconSummaryHugeVolumeTextStyle(
                       context,
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: kReconSummaryVolumeHugeFontSize,
                       fontWeight: kFontWeightExtraBold,
                     ),
                   ),
@@ -1871,22 +1870,22 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                       result!.diluentName!.isNotEmpty) ...[
                     TextSpan(
                       text: '  of  ',
-                      style: reconSummaryEmphasisTextStyle(
+                      style: reconSummaryOfTextStyle(
                         context,
+                        compact: false,
                         color: Theme.of(context)
                             .colorScheme
                             .onPrimary
                             .withValues(alpha: kReconTextHighOpacity),
-                        fontSize: kReconSummaryOfFontSize,
                         fontWeight: kFontWeightNormal,
                       ),
                     ),
                     TextSpan(
                       text: result!.diluentName!,
-                      style: reconSummaryEmphasisTextStyle(
+                      style: reconSummaryMedicationNameTextStyle(
                         context,
+                        compact: false,
                         color: Theme.of(context).colorScheme.primary,
-                        fontSize: kReconSummaryNameFontSize,
                         fontWeight: kFontWeightSemiBold,
                       ),
                     ),
