@@ -53,10 +53,10 @@
 	- [x] Add medication flows (all wizards)
 	- [x] Schedules list
 	- [x] Schedule details + dose edit dialogs
-	- [ ] Calendar
-	- [ ] Analytics
-	- [ ] Inventory
-	- [ ] Settings
+	- [x] Calendar
+	- [x] Analytics
+	- [x] Inventory
+	- [x] Settings
 	- [x] Reconstitution calculator
 	- [ ] Shared widgets (cards/rows/dialogs)
 - [x] Add a simple guard (CI/script) to prevent new `fontSize:` usage in `lib/src/`.
