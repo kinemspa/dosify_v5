@@ -57,7 +57,7 @@
 	- [ ] Analytics
 	- [ ] Inventory
 	- [ ] Settings
-	- [ ] Reconstitution calculator
+	- [x] Reconstitution calculator
 	- [ ] Shared widgets (cards/rows/dialogs)
 - [x] Add a simple guard (CI/script) to prevent new `fontSize:` usage in `lib/src/`.
 	- Added `dart run tool/check_no_literal_fontsize.dart`

@@ -430,10 +430,10 @@ class _ReconstitutionCalculatorWidgetState
                     TextSpan(
                       text:
                           '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-                      style: reconSummaryEmphasisTextStyle(
+                      style: reconSummaryStrengthTextStyle(
                         context,
+                        compact: true,
                         color: theme.colorScheme.primary,
-                        fontSize: kReconSummaryStrengthValueFontSizeCompact,
                         fontWeight: kFontWeightBold,
                       ),
                     ),
@@ -917,40 +917,39 @@ class _ReconstitutionCalculatorWidgetState
                         context,
                         color: baseTextColor,
                       );
-                      final strengthStyle = reconSummaryEmphasisTextStyle(
+                      final strengthStyle = reconSummaryStrengthTextStyle(
                         context,
+                        compact: false,
                         color: cs.primary,
-                        fontSize: kReconSummaryStrengthValueFontSize,
                         fontWeight: kFontWeightExtraBold,
                       );
-                      final ofStyle = reconSummaryEmphasisTextStyle(
+                      final ofStyle = reconSummaryOfTextStyle(
                         context,
+                        compact: false,
                         color: baseTextColor,
-                        fontSize: kReconSummaryOfFontSize,
                         fontWeight: kFontWeightNormal,
                       );
-                      final medicationNameStyle = reconSummaryEmphasisTextStyle(
+                      final medicationNameStyle =
+                          reconSummaryMedicationNameTextStyle(
+                            context,
+                            compact: false,
+                            color: cs.primary,
+                            fontWeight: kFontWeightBold,
+                          );
+                      final volumeHugeStyle = reconSummaryHugeVolumeTextStyle(
                         context,
                         color: cs.primary,
-                        fontSize: kReconSummaryNameFontSize,
-                        fontWeight: kFontWeightBold,
-                      );
-                      final volumeHugeStyle = reconSummaryEmphasisTextStyle(
-                        context,
-                        color: cs.primary,
-                        fontSize: kReconSummaryVolumeHugeFontSize,
                         fontWeight: kFontWeightBlack,
                       );
-                      final valueStyle = reconSummaryEmphasisTextStyle(
+                      final valueStyle = reconSummaryValueTextStyle(
                         context,
+                        compact: false,
                         color: cs.primary,
-                        fontSize: kReconSummaryValueFontSize,
                         fontWeight: kFontWeightBold,
                       );
-                      final drawUnitsStyle = reconSummaryEmphasisTextStyle(
+                      final drawUnitsStyle = reconSummaryDrawUnitsTextStyle(
                         context,
                         color: cs.primary,
-                        fontSize: kReconSummaryDrawUnitsFontSize,
                         fontWeight: kFontWeightExtraBold,
                       );
 
@@ -1076,10 +1075,10 @@ class _ReconstitutionCalculatorWidgetState
                         const TextSpan(text: 'for a dose of '),
                         TextSpan(
                           text: '${_formatNoTrailing(Draw)} $_doseUnit',
-                          style: reconSummaryEmphasisTextStyle(
+                          style: reconSummaryValueTextStyle(
                             context,
+                            compact: false,
                             color: Theme.of(context).colorScheme.primary,
-                            fontSize: kReconSummaryValueFontSize,
                             fontWeight: kFontWeightBold,
                           ),
                         ),
