@@ -47,7 +47,7 @@
 
 ## Recommendations
 - [x] Split the typography migration into per-screen sub-checklists (so progress can be tracked incrementally).
-	- [ ] Home
+	- [x] Home
 	- [ ] Medications list
 	- [ ] Medication details
 	- [ ] Add medication flows (all wizards)
