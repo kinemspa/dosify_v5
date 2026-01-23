@@ -5,13 +5,15 @@
 - Medications list screen and related entry points.
 
 ## Requests
-- [x] Layout View is still a toggle. Revert to tap to cycle. Exactly the same as scheudles screen.  
+- [x] Layout tap cycle is cycling wrong order. Large, Compact, List, Large is the order. 
+- [ ] Add a deterministic sort option (Name / Next Dose / Most Used) and persist it.
+- [ ] Consider a compact “status badges” row in list items for quick scanning.
 
 ## Notes
 - 
 
 
 ## Recommendations
-- [ ] Add a deterministic sort option (Name / Next Dose / Most Used) and persist it.
-- [ ] Consider a compact “status badges” row in list items for quick scanning.
+
+
 

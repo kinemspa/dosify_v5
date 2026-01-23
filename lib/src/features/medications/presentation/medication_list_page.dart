@@ -56,8 +56,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   };
 
   void _cycleView() {
-    final idx = _MedView.values.indexOf(_view);
-    final next = _MedView.values[(idx + 1) % _MedView.values.length];
+    final next = switch (_view) {
+      _MedView.large => _MedView.compact,
+      _MedView.compact => _MedView.list,
+      _MedView.list => _MedView.large,
+    };
     _saveView(next);
   }
 
