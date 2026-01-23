@@ -10,6 +10,7 @@ import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
+import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -700,6 +701,112 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
+  DateTime _effectiveCreatedAtForExpiry(Medication m, DateTime expiry) {
+    if (m.reconstitutedVialExpiry == expiry && m.reconstitutedAt != null) {
+      return m.reconstitutedAt!;
+    }
+    return m.createdAt;
+  }
+
+  Widget? _buildMedicationStatusBadgesRow(BuildContext context, Medication m) {
+    final cs = Theme.of(context).colorScheme;
+    final pills = <Widget>[];
+
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    if (stockInfo.current <= 0) {
+      pills.add(
+        StatusPill(
+          label: 'Empty',
+          color: cs.error,
+          icon: Icons.inventory_2_outlined,
+        ),
+      );
+    } else if (stockInfo.percentage <= (kStockWarningRemainingRatio * 100)) {
+      pills.add(
+        StatusPill(
+          label: 'Low stock',
+          color: stockStatusColorFromPercentage(
+            context,
+            percentage: stockInfo.percentage,
+          ),
+          icon: Icons.inventory_2_outlined,
+        ),
+      );
+    }
+
+    final effectiveExpiry = _effectiveExpiry(m);
+    if (effectiveExpiry != null) {
+      final createdAt = _effectiveCreatedAtForExpiry(m, effectiveExpiry);
+      final now = DateTime.now();
+      if (!effectiveExpiry.isAfter(now)) {
+        pills.add(
+          StatusPill(
+            label: 'Expired',
+            color: cs.error,
+            icon: Icons.event_busy,
+          ),
+        );
+      } else {
+        final ratio = expiryRemainingRatio(
+          createdAt: createdAt,
+          expiry: effectiveExpiry,
+          now: now,
+        );
+        if (ratio <= kExpiryWarningRemainingRatio) {
+          pills.add(
+            StatusPill(
+              label: ratio <= kExpiryCriticalRemainingRatio
+                  ? 'Expiring'
+                  : 'Soon',
+              color: expiryStatusColor(
+                context,
+                createdAt: createdAt,
+                expiry: effectiveExpiry,
+                now: now,
+              ),
+              icon: Icons.event,
+            ),
+          );
+        }
+      }
+    }
+
+    if (_isFrozen(m)) {
+      pills.add(
+        StatusPill(
+          label: 'Freezer',
+          color: cs.secondary,
+          icon: Icons.severe_cold,
+        ),
+      );
+    } else if (_isRefrigerated(m)) {
+      pills.add(
+        StatusPill(
+          label: 'Fridge',
+          color: cs.primary,
+          icon: Icons.ac_unit,
+        ),
+      );
+    }
+
+    if (_isLightSensitive(m)) {
+      pills.add(
+        StatusPill(
+          label: 'Light',
+          color: cs.tertiary,
+          icon: Icons.wb_sunny_outlined,
+        ),
+      );
+    }
+
+    if (pills.isEmpty) return null;
+    return Wrap(
+      spacing: kSpacingXXS,
+      runSpacing: kSpacingXXS,
+      children: pills,
+    );
+  }
+
   Widget _buildCompactListRow(BuildContext context, Medication m) {
     final cs = Theme.of(context).colorScheme;
 
@@ -710,6 +817,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final detailLabel = manufacturer.isEmpty
         ? strengthLabel
         : '$manufacturer · $strengthLabel';
+
+    final badges = _buildMedicationStatusBadgesRow(context, m);
 
     return Material(
       color: Colors.transparent,
@@ -744,6 +853,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (badges != null) ...[
+                      const SizedBox(height: kSpacingXXS),
+                      badges,
+                    ],
                   ],
                 ),
               ),
