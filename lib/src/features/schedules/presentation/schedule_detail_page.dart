@@ -1693,12 +1693,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   ),
                   child: Text(
                     'TODAY',
-                    style: helperTextStyle(context, color: cs.onPrimary)
-                        ?.copyWith(
-                          fontSize: kFontSizeXSmall,
-                          fontWeight: kFontWeightExtraBold,
-                          height: kLineHeightTight,
-                        ),
+                    style: microHelperTextStyle(
+                      context,
+                      color: cs.onPrimary,
+                    )?.copyWith(fontWeight: kFontWeightExtraBold),
                   ),
                 ),
               if (isToday) const SizedBox(width: kSpacingS),
@@ -1814,17 +1812,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     child: Text(
                       _getActionLabel(existingLog.action).toUpperCase(),
                       style:
-                          helperTextStyle(
+                          microHelperTextStyle(
                             context,
                             color: statusColorOnPrimary(
                               context,
                               _getActionColor(context, existingLog.action),
                             ),
-                          )?.copyWith(
-                            fontSize: kFontSizeXSmall,
-                            fontWeight: kFontWeightExtraBold,
-                            height: kLineHeightTight,
-                          ),
+                          )?.copyWith(fontWeight: kFontWeightExtraBold),
                     ),
                   ),
               ],
@@ -1900,8 +1894,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.check, size: kIconSizeXSmall),
                         label: Text(
                           existingLog != null ? 'Edit' : 'Take',
-                          style: helperTextStyle(context)?.copyWith(
-                            fontSize: kFontSizeXSmall,
+                          style: microHelperTextStyle(context)?.copyWith(
                             fontWeight: kFontWeightSemiBold,
                           ),
                         ),
@@ -1924,8 +1917,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.snooze, size: kIconSizeXSmall),
                         label: Text(
                           'Snooze',
-                          style: helperTextStyle(context)?.copyWith(
-                            fontSize: kFontSizeXSmall,
+                          style: microHelperTextStyle(context)?.copyWith(
                             fontWeight: kFontWeightSemiBold,
                           ),
                         ),
@@ -1948,8 +1940,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.close, size: kIconSizeXSmall),
                         label: Text(
                           'Skip',
-                          style: helperTextStyle(context)?.copyWith(
-                            fontSize: kFontSizeXSmall,
+                          style: microHelperTextStyle(context)?.copyWith(
                             fontWeight: kFontWeightSemiBold,
                           ),
                         ),
@@ -1972,8 +1963,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.edit, size: kIconSizeXSmall),
                         label: Text(
                           'Edit',
-                          style: helperTextStyle(context)?.copyWith(
-                            fontSize: kFontSizeXSmall,
+                          style: microHelperTextStyle(context)?.copyWith(
                             fontWeight: kFontWeightSemiBold,
                           ),
                         ),
