@@ -570,10 +570,9 @@ class SyringeGauge extends StatelessWidget {
         fillColor: cs.primary,
         tickColor: cs.onSurfaceVariant,
         labelColor: cs.onSurfaceVariant,
-        labelTextStyle: syringeGaugeTickLabelTextStyle(
+        labelTextStyle: syringeGaugeSmallTickLabelTextStyle(
           context,
           color: cs.onSurfaceVariant,
-          fontSize: kFontSizeXSmall,
         ),
       ),
     );

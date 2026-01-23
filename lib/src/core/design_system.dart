@@ -1200,6 +1200,62 @@ TextStyle? syringeGaugeTickLabelTextStyle(
   );
 }
 
+TextStyle? syringeGaugeMajorTickLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return syringeGaugeTickLabelTextStyle(
+    context,
+    color: color,
+    fontSize: kSyringeGaugeTickFontSizeMajor,
+  );
+}
+
+TextStyle? syringeGaugeMinorTickLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return syringeGaugeTickLabelTextStyle(
+    context,
+    color: color,
+    fontSize: kSyringeGaugeTickFontSizeMinor,
+  );
+}
+
+TextStyle? syringeGaugeMicroTickLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return syringeGaugeTickLabelTextStyle(
+    context,
+    color: color,
+    fontSize: kSyringeGaugeTickFontSizeMicro,
+  );
+}
+
+TextStyle? syringeGaugeSmallTickLabelTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return syringeGaugeTickLabelTextStyle(
+    context,
+    color: color,
+    fontSize: kFontSizeXSmall,
+  );
+}
+
+TextStyle? scheduleStatusBadgeTextStyle(
+  BuildContext context, {
+  required bool dense,
+  required Color color,
+}) {
+  return helperTextStyle(context, color: color)?.copyWith(
+    fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
+    fontWeight: kFontWeightMedium,
+    height: kLineHeightTight,
+  );
+}
+
 TextStyle? syringeGaugeValueLabelTextStyle(
   BuildContext context, {
   required Color color,
@@ -1413,6 +1469,112 @@ TextStyle? reconSummaryEmphasisTextStyle(
     fontSize: fontSize,
     fontWeight: fontWeight,
     height: 1.4,
+  );
+}
+
+TextStyle? reconSummaryStrengthTextStyle(
+  BuildContext context, {
+  required bool compact,
+  required Color color,
+  FontWeight fontWeight = kFontWeightExtraBold,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize:
+        compact
+            ? kReconSummaryStrengthValueFontSizeCompact
+            : kReconSummaryStrengthValueFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
+TextStyle? reconSummaryOfTextStyle(
+  BuildContext context, {
+  required bool compact,
+  required Color color,
+  FontWeight fontWeight = kFontWeightNormal,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize: compact ? kReconSummaryOfFontSizeCompact : kReconSummaryOfFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
+TextStyle? reconSummaryMedicationNameTextStyle(
+  BuildContext context, {
+  required bool compact,
+  required Color color,
+  FontWeight fontWeight = kFontWeightBold,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize:
+        compact ? kReconSummaryNameFontSizeCompact : kReconSummaryNameFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
+TextStyle? reconSummaryMetaTextStyle(
+  BuildContext context, {
+  required bool compact,
+  required Color color,
+  FontWeight fontWeight = kFontWeightMedium,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize:
+        compact ? kReconSummaryMetaFontSizeCompact : kReconSummaryMetaFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
+TextStyle? reconSummaryTotalVolumeTextStyle(
+  BuildContext context, {
+  required bool compact,
+  required Color color,
+  FontWeight fontWeight = kFontWeightExtraBold,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize:
+        compact
+            ? kReconSummaryTotalVolumeFontSizeCompact
+            : kReconSummaryTotalVolumeFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
+TextStyle? reconSummaryValueTextStyle(
+  BuildContext context, {
+  required bool compact,
+  required Color color,
+  FontWeight fontWeight = kFontWeightBold,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize:
+        compact ? kReconSummaryValueFontSizeCompact : kReconSummaryValueFontSize,
+    fontWeight: fontWeight,
+  );
+}
+
+TextStyle? reconSummarySyringeLineTextStyle(
+  BuildContext context, {
+  required Color color,
+  FontWeight fontWeight = kFontWeightMedium,
+}) {
+  return reconSummaryEmphasisTextStyle(
+    context,
+    color: color,
+    fontSize: kReconSummarySyringeLineFontSize,
+    fontWeight: fontWeight,
   );
 }
 

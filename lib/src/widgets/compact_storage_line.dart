@@ -43,16 +43,11 @@ class CompactStorageLine extends StatelessWidget {
 
     final resolvedTextColor = textColor ?? cs.onSurface;
     final baseStyle =
-        helperTextStyle(context)?.copyWith(
-          fontSize: kFontSizeXSmall,
-          fontWeight: FontWeight.w600,
+        microHelperTextStyle(
+          context,
           color: resolvedTextColor.withValues(alpha: kOpacityMediumHigh),
-        ) ??
-        TextStyle(
-          fontSize: kFontSizeXSmall,
-          fontWeight: FontWeight.w600,
-          color: resolvedTextColor.withValues(alpha: kOpacityMediumHigh),
-        );
+        )?.copyWith(fontWeight: kFontWeightSemiBold) ??
+        const TextStyle(fontWeight: kFontWeightSemiBold);
 
     final createdAtValue = createdAt;
     final expiryValue = expiry;

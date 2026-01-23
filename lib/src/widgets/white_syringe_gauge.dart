@@ -126,20 +126,17 @@ class _WhiteSyringeGaugeState extends State<WhiteSyringeGauge> {
             labelBackgroundColor: labelBackgroundColor,
             labelTextColor: labelTextColor,
             handleCenterColor: cs.surface,
-            majorTickLabelStyle: syringeGaugeTickLabelTextStyle(
+            majorTickLabelStyle: syringeGaugeMajorTickLabelTextStyle(
               context,
               color: effectiveColor,
-              fontSize: kSyringeGaugeTickFontSizeMajor,
             ),
-            minorTickLabelStyle: syringeGaugeTickLabelTextStyle(
+            minorTickLabelStyle: syringeGaugeMinorTickLabelTextStyle(
               context,
               color: effectiveColor,
-              fontSize: kSyringeGaugeTickFontSizeMinor,
             ),
-            microTickLabelStyle: syringeGaugeTickLabelTextStyle(
+            microTickLabelStyle: syringeGaugeMicroTickLabelTextStyle(
               context,
               color: effectiveColor,
-              fontSize: kSyringeGaugeTickFontSizeMicro,
             ),
             valueLabelStyle: syringeGaugeValueLabelTextStyle(
               context,

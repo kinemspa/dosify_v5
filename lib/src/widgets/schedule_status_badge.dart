@@ -43,9 +43,10 @@ class ScheduleStatusBadge extends StatelessWidget {
         children: [
           Text(
             label,
-            style: helperTextStyle(context, color: textColor)?.copyWith(
-              fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
-              fontWeight: kFontWeightMedium,
+            style: scheduleStatusBadgeTextStyle(
+              context,
+              dense: dense,
+              color: textColor,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

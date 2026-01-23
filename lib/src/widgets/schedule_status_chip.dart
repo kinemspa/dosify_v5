@@ -18,8 +18,6 @@ class ScheduleStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = scheduleStatusLabel(schedule);
     final color = _statusColor(context, schedule);
-
-    final fontSize = dense ? kFontSizeXXSmall : kFontSizeSmall;
     final horizontalPadding = dense ? kSpacingXXS : kSpacingS;
     final verticalPadding = dense ? kSpacingXXS : kSpacingXS;
     final borderRadius = dense ? kBorderRadiusChipTight : kBorderRadiusChip;
@@ -42,10 +40,10 @@ class ScheduleStatusChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: helperTextStyle(
-              context,
-              color: color,
-            )?.copyWith(fontWeight: kFontWeightSemiBold, fontSize: fontSize),
+            style: (dense
+                    ? microHelperTextStyle(context, color: color)
+                    : smallHelperTextStyle(context, color: color))
+                ?.copyWith(fontWeight: kFontWeightSemiBold),
           ),
         ],
       ),

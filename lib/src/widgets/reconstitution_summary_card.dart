@@ -57,53 +57,41 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     final baseTextColor = baseForeground.withValues(alpha: baseTextAlpha);
     final baseStyle = reconSummaryBaseTextStyle(context, color: baseTextColor);
 
-    final strengthStyle = reconSummaryEmphasisTextStyle(
+    final strengthStyle = reconSummaryStrengthTextStyle(
       context,
+      compact: compact,
       color: cs.primary,
-      fontSize: compact
-          ? kReconSummaryStrengthValueFontSizeCompact
-          : kReconSummaryStrengthValueFontSize,
-      fontWeight: kFontWeightExtraBold,
     );
-    final ofStyle = reconSummaryEmphasisTextStyle(
+    final ofStyle = reconSummaryOfTextStyle(
       context,
+      compact: compact,
       color: baseTextColor,
-      fontSize: compact ? kReconSummaryOfFontSizeCompact : kReconSummaryOfFontSize,
-      fontWeight: kFontWeightNormal,
     );
-    final medicationNameStyle = reconSummaryEmphasisTextStyle(
+    final medicationNameStyle = reconSummaryMedicationNameTextStyle(
       context,
+      compact: compact,
       color: cs.primary,
-      fontSize: compact ? kReconSummaryNameFontSizeCompact : kReconSummaryNameFontSize,
-      fontWeight: kFontWeightBold,
     );
-    final metaStyle = reconSummaryEmphasisTextStyle(
+    final metaStyle = reconSummaryMetaTextStyle(
       context,
+      compact: compact,
       color: baseTextColor,
-      fontSize:
-          compact ? kReconSummaryMetaFontSizeCompact : kReconSummaryMetaFontSize,
-      fontWeight: kFontWeightMedium,
     );
-    final metaPrimaryStyle = reconSummaryEmphasisTextStyle(
+    final metaPrimaryStyle = reconSummaryMetaTextStyle(
       context,
+      compact: compact,
       color: cs.primary,
-      fontSize:
-          compact ? kReconSummaryMetaFontSizeCompact : kReconSummaryMetaFontSize,
       fontWeight: kFontWeightSemiBold,
     );
-    final totalVolumeStyle = reconSummaryEmphasisTextStyle(
+    final totalVolumeStyle = reconSummaryTotalVolumeTextStyle(
       context,
+      compact: compact,
       color: cs.primary,
-      fontSize: compact
-          ? kReconSummaryTotalVolumeFontSizeCompact
-          : kReconSummaryTotalVolumeFontSize,
-      fontWeight: kFontWeightExtraBold,
     );
-    final valueStyle = reconSummaryEmphasisTextStyle(
+    final valueStyle = reconSummaryValueTextStyle(
       context,
+      compact: compact,
       color: cs.primary,
-      fontSize: compact ? kReconSummaryValueFontSizeCompact : kReconSummaryValueFontSize,
-      fontWeight: kFontWeightBold,
     );
 
     return Container(
@@ -269,11 +257,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               Text(
                 '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * 100).round()} U) Syringe',
                 textAlign: TextAlign.center,
-                style: reconSummaryEmphasisTextStyle(
+                style: reconSummarySyringeLineTextStyle(
                   context,
                   color: baseTextColor,
-                  fontSize: kReconSummarySyringeLineFontSize,
-                  fontWeight: kFontWeightMedium,
                 ),
               ),
             const SizedBox(height: 6),
