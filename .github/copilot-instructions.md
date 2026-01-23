@@ -41,4 +41,7 @@
 - After each logical change: run analyze, then `git add . && git commit -m "Fix: <description>" && git push`.
 
 ## Task tracking
-- `backlog/` is the source of truth for work requests. Read the relevant `backlog/*.md` before coding and mark completed items by checking `- [x]` only (preserve user edits).
+- `backlog/` is the source of truth for work requests.
+- Before coding: open the relevant `backlog/*.md` and confirm what is unchecked.
+- After shipping a task: **check off the exact completed checkbox(es)** (`- [x]`) in the backlog file **in the same batch/commit** as the code change, and push.
+- Keep edits minimal: preserve user wording/formatting; only change the checkbox state for items you actually completed.
