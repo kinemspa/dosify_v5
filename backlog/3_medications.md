@@ -6,7 +6,7 @@
 
 ## Requests
 - [x] Layout tap cycle is cycling wrong order. Large, Compact, List, Large is the order. 
-- [ ] Add a deterministic sort option (Name / Next Dose / Most Used) and persist it.
+- [x] Add a deterministic sort option (Name / Next Dose / Most Used) and persist it.
 - [ ] Consider a compact “status badges” row in list items for quick scanning.
 
 ## Notes

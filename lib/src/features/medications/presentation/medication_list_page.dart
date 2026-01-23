@@ -4,6 +4,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
@@ -18,7 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum _MedView { list, compact, large }
 
-enum _SortBy { name, manufacturer, form, stock, strength, expiry }
+enum _SortBy { name, nextDose, mostUsed, manufacturer, form, stock, strength, expiry }
 
 enum _FilterBy {
   all,
@@ -48,6 +49,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   _FilterBy _filterBy = _FilterBy.all;
   String _query = '';
   bool _searchExpanded = false;
+
+  static const _kPrefsViewKey = 'medication_list_view';
+  static const _kPrefsSortByKey = 'medication_list_sort_by';
+  static const _kPrefsSortAscKey = 'medication_list_sort_asc';
 
   IconData _viewIcon(_MedView v) => switch (v) {
     _MedView.list => Icons.view_list,
@@ -139,24 +144,44 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   @override
   void initState() {
     super.initState();
-    _loadSavedView();
+    _loadSavedViewAndSort();
   }
 
-  Future<void> _loadSavedView() async {
+  Future<void> _loadSavedViewAndSort() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedView = prefs.getString('medication_list_view') ?? 'large';
+    final savedView = prefs.getString(_kPrefsViewKey) ?? 'large';
+    final savedSortBy = prefs.getString(_kPrefsSortByKey) ?? _SortBy.name.name;
+    final savedSortAsc = prefs.getBool(_kPrefsSortAscKey) ?? true;
     setState(() {
       _view = _MedView.values.firstWhere(
         (v) => v.name == savedView,
         orElse: () => _MedView.large,
       );
+
+      _sortBy = _SortBy.values.firstWhere(
+        (v) => v.name == savedSortBy,
+        orElse: () => _SortBy.name,
+      );
+      _sortAsc = savedSortAsc;
     });
   }
 
   Future<void> _saveView(_MedView view) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('medication_list_view', view.name);
+    await prefs.setString(_kPrefsViewKey, view.name);
     setState(() => _view = view);
+  }
+
+  Future<void> _saveSort({_SortBy? sortBy, bool? sortAsc}) async {
+    final nextSortBy = sortBy ?? _sortBy;
+    final nextSortAsc = sortAsc ?? _sortAsc;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kPrefsSortByKey, nextSortBy.name);
+    await prefs.setBool(_kPrefsSortAscKey, nextSortAsc);
+    setState(() {
+      _sortBy = nextSortBy;
+      _sortAsc = nextSortAsc;
+    });
   }
 
   // Ensure we have an original stock value for count-based units so that we can
@@ -197,17 +222,12 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box<Medication> b, _) {
-          final items = _getFilteredAndSortedMedications(
-            b.values.toList(growable: false),
-          );
-          // Ensure initial stock values so large cards can show current vs
-          // initial amounts.
-          _ensureInitialStockValues(items);
+          final meds = b.values.toList(growable: false);
 
           // Show initial state if no medications exist, or the filtered
           // empty state when search removes everything.
-          if (items.isEmpty) {
-            if (_query.isEmpty && b.values.isEmpty) {
+          if (meds.isEmpty) {
+            if (_query.isEmpty) {
               // No medications at all - show initial state
               return Center(
                 child: Column(
@@ -260,6 +280,44 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             valueListenable: schedulesBox.listenable(),
             builder: (context, Box<Schedule> sb, __) {
               final schedules = sb.values.toList(growable: false);
+              final items = _getFilteredAndSortedMedications(
+                meds,
+                schedules: schedules,
+              );
+
+              // Ensure initial stock values so large cards can show current vs
+              // initial amounts.
+              _ensureInitialStockValues(items);
+
+              if (items.isEmpty) {
+                return Column(
+                  children: [
+                    _buildToolbar(context),
+                    Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: kEmptyStateIconSize,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant
+                                  .withValues(alpha: kOpacityMedium),
+                            ),
+                            const SizedBox(height: kSpacingM),
+                            Text(
+                              'No medications found for "$_query"',
+                              style: mutedTextStyle(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
               return Stack(
                 children: [
                   _buildMedList(context, items, schedules),
@@ -402,18 +460,32 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             PopupMenuButton<Object>(
               icon: Icon(Icons.sort, color: iconColor),
               tooltip: 'Sort medications',
-              onSelected: (value) => setState(() {
+              onSelected: (value) {
                 if (value is _SortBy) {
-                  _sortBy = value;
+                  final nextSortAsc = switch (value) {
+                    _SortBy.mostUsed => false,
+                    _SortBy.nextDose => true,
+                    _ => _sortAsc,
+                  };
+                  _saveSort(sortBy: value, sortAsc: nextSortAsc);
                 } else if (value == 'toggle_dir') {
-                  _sortAsc = !_sortAsc;
+                  _saveSort(sortAsc: !_sortAsc);
                 }
-              }),
+              },
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: _SortBy.name,
                   child: Text('Sort by name'),
                 ),
+                const PopupMenuItem(
+                  value: _SortBy.nextDose,
+                  child: Text('Sort by next dose'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.mostUsed,
+                  child: Text('Sort by most used'),
+                ),
+                const PopupMenuDivider(),
                 const PopupMenuItem(
                   value: _SortBy.manufacturer,
                   child: Text('Sort by manufacturer'),
@@ -456,8 +528,46 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   List<Medication> _getFilteredAndSortedMedications(
     List<Medication> medications,
+    {required List<Schedule> schedules}
   ) {
     var items = List<Medication>.from(medications);
+
+    final nextDoseByMedId = <String, DateTime>{};
+    final scheduledDoses7dByMedId = <String, int>{};
+    if (_sortBy == _SortBy.nextDose || _sortBy == _SortBy.mostUsed) {
+      final now = DateTime.now();
+      final horizonEnd = now.add(const Duration(days: 30));
+      final usageWindowEnd = now.add(const Duration(days: 7));
+
+      for (final s in schedules) {
+        if (!s.isActive) continue;
+        final medId = s.medicationId;
+        if (medId == null) continue;
+
+        final occurrences = ScheduleOccurrenceService.occurrencesInRange(
+          s,
+          now,
+          horizonEnd,
+        );
+        if (occurrences.isEmpty) continue;
+
+        final nextOccurrence = occurrences.first;
+        final existingNext = nextDoseByMedId[medId];
+        if (existingNext == null || nextOccurrence.isBefore(existingNext)) {
+          nextDoseByMedId[medId] = nextOccurrence;
+        }
+
+        var count7d = 0;
+        for (final dt in occurrences) {
+          if (dt.isAfter(usageWindowEnd)) break;
+          count7d++;
+        }
+        if (count7d > 0) {
+          scheduledDoses7dByMedId[medId] =
+              (scheduledDoses7dByMedId[medId] ?? 0) + count7d;
+        }
+      }
+    }
 
     // Apply search filter
     if (_query.isNotEmpty) {
@@ -515,6 +625,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       switch (_sortBy) {
         case _SortBy.name:
           return dir(a.name.compareTo(b.name));
+        case _SortBy.nextDose:
+          final an = nextDoseByMedId[a.id];
+          final bn = nextDoseByMedId[b.id];
+          if (an == null && bn == null) return 0;
+          if (an == null) return dir(1);
+          if (bn == null) return dir(-1);
+          return dir(an.compareTo(bn));
+        case _SortBy.mostUsed:
+          final ac = scheduledDoses7dByMedId[a.id] ?? 0;
+          final bc = scheduledDoses7dByMedId[b.id] ?? 0;
+          return dir(ac.compareTo(bc));
         case _SortBy.manufacturer:
           final am = (a.manufacturer ?? '').trim();
           final bm = (b.manufacturer ?? '').trim();
