@@ -1696,6 +1696,31 @@ TextStyle? buttonTextStyle(BuildContext context) {
   );
 }
 
+TextStyle? wizardHeaderTitleTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    color: color,
+    fontSize: kWizardHeaderTitleFontSize,
+    fontWeight: kFontWeightSemiBold,
+    height: kLineHeightTight,
+  );
+}
+
+TextStyle? wizardStepNumberTextStyle(
+  BuildContext context, {
+  required Color color,
+  FontWeight fontWeight = kFontWeightExtraBold,
+}) {
+  return Theme.of(context).textTheme.labelSmall?.copyWith(
+    color: color,
+    fontSize: kWizardStepNumberFontSize,
+    fontWeight: fontWeight,
+    height: kLineHeightTight,
+  );
+}
+
 /// Compact button text (used where space is tight, e.g. app header actions).
 TextStyle? compactButtonTextStyle(BuildContext context) {
   return buttonTextStyle(context)?.copyWith(fontSize: kFontSizeSmall);

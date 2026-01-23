@@ -450,10 +450,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       widget.initial == null
                           ? 'Add Multi-Dose Vial'
                           : 'Edit Multi-Dose Vial',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: wizardHeaderTitleTextStyle(
+                        context,
                         color: Theme.of(context).colorScheme.onPrimary,
-                        fontSize: kWizardHeaderTitleFontSize,
-                        fontWeight: kFontWeightSemiBold,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -1763,13 +1762,12 @@ class _StepCircle extends StatelessWidget {
             ? Icon(Icons.check, size: 12, color: cs.primary)
             : Text(
                 number.toString(),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                style: wizardStepNumberTextStyle(
+                  context,
                   color: isActive
                       ? cs.primary
                       : cs.onPrimary.withValues(alpha: 0.6),
-                  fontSize: kWizardStepNumberFontSize,
-                ),
+                )?.copyWith(fontWeight: kFontWeightExtraBold),
               ),
       ),
     );
