@@ -147,10 +147,18 @@ class _SchedulesPageState extends State<SchedulesPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/schedules/add'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Schedule'),
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: box.listenable(),
+        builder: (context, Box<Schedule> b, _) {
+          final showFab = b.values.isNotEmpty || _query.isNotEmpty;
+          if (!showFab) return const SizedBox.shrink();
+
+          return FloatingActionButton.extended(
+            onPressed: () => context.push('/schedules/add'),
+            icon: const Icon(Icons.add),
+            label: const Text('Add Schedule'),
+          );
+        },
       ),
     );
   }
