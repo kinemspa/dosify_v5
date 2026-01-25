@@ -11,7 +11,6 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
 
@@ -316,9 +315,14 @@ class _SchedulesPageState extends State<SchedulesPage> {
     switch (_view) {
       case _SchedView.list:
         return ListView.separated(
-          padding: const EdgeInsets.all(kPageHorizontalPadding),
+          padding: const EdgeInsets.fromLTRB(
+            kPageHorizontalPadding,
+            0,
+            kPageHorizontalPadding,
+            kPageBottomPadding,
+          ),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
+          separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, i) => _ScheduleListRow(s: items[i]),
         );
       case _SchedView.compact:
@@ -361,61 +365,69 @@ class _ScheduleListRow extends StatelessWidget {
     final medTitle = _ScheduleText.medTitle(s);
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
 
-    return GlassCardSurface(
-      onTap: () =>
-          context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
-      useGradient: false,
-      padding: const EdgeInsets.symmetric(
-        horizontal: kSpacingS,
-        vertical: kSpacingXS,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  medTitle,
-                  style: cardTitleStyle(
-                    context,
-                  )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: kSpacingXS),
-                Text(
-                  scheduleSubtitle ?? detailLabel,
-                  style: helperTextStyle(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () =>
+            context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingS,
+            vertical: kSpacingXS,
           ),
-          const SizedBox(width: kSpacingS),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              Text(
-                _ScheduleText.nextDayLabel(context, next),
-                style: helperTextStyle(
-                  context,
-                  color: s.isActive && next != null
-                      ? cs.primary
-                      : cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-                )?.copyWith(fontWeight: kFontWeightSemiBold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      medTitle,
+                      style: cardTitleStyle(context)?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      scheduleSubtitle ?? detailLabel,
+                      style: helperTextStyle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: kSpacingXS),
-              ScheduleStatusChip(schedule: s, dense: true),
+              const SizedBox(width: kSpacingS),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _ScheduleText.nextDayLabel(context, next),
+                    style: helperTextStyle(
+                      context,
+                      color: s.isActive && next != null
+                          ? cs.primary
+                          : cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                    )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                  ),
+                  const SizedBox(height: kSpacingXS),
+                  ScheduleStatusChip(schedule: s, dense: true),
+                ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -170,7 +170,7 @@ class ScheduleListCard extends StatelessWidget {
         ],
       ),
       trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
@@ -184,10 +184,7 @@ class ScheduleListCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: kSpacingXS),
-          Align(
-            alignment: Alignment.center,
-            child: ScheduleStatusChip(schedule: schedule, dense: true),
-          ),
+          ScheduleStatusChip(schedule: schedule, dense: true),
         ],
       ),
     );

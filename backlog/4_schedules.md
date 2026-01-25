@@ -1,19 +1,15 @@
 # Schedules List
 
-- [x] Reduce status card size by 30%. rerduce border radius. 
-- [x] Centre align Status Icon with above objects. 
-- [x] Remeve Icons from status icon. 
-- [x] Opening a Schedule to Schedule Details presents a blank white screen. 
 
 ## Large Cards
+- [x] Active Badge to be centred horizontally with above objects. 
 
 
 ## Compact Card
-- [x] Dose text needs to include Scheudle type, not in brackets. Make the text smaller. 
 - 
 
 ## List
-- [x] Status icon same as above. 
+- [x] List itmes are not tlist, they look like compact cards. Make them look like th liest items on the medicaiotn screen. 
 
 
 ## Recommendations
