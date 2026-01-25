@@ -32,6 +32,8 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 
 // ============================================================================
 // SIZING CONSTANTS
@@ -450,6 +452,57 @@ const Color kDoseStatusSkippedRed = Color(0xFFD32F2F);
 const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
 const Color kDoseStatusOverdueAmber = Color(0xFFF9A825);
 const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);
+
+/// Single source of truth for dose status labels.
+String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
+  if (disabled) return 'DISABLED';
+
+  return switch (status) {
+    DoseStatus.taken => 'TAKEN',
+    DoseStatus.skipped => 'SKIPPED',
+    DoseStatus.snoozed => 'SNOOZED',
+    DoseStatus.due => 'OVERDUE',
+    DoseStatus.overdue => 'MISSED',
+    DoseStatus.pending => 'PENDING',
+  };
+}
+
+/// Single source of truth for dose status visuals.
+({Color color, IconData icon}) doseStatusVisualSpec(
+  BuildContext context,
+  DoseStatus status, {
+  required bool disabled,
+}) {
+  final cs = Theme.of(context).colorScheme;
+
+  if (disabled) {
+    return (
+      color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+      icon: Icons.do_not_disturb_on_rounded,
+    );
+  }
+
+  return switch (status) {
+    DoseStatus.taken => (color: kDoseStatusTakenGreen, icon: Icons.check_rounded),
+    DoseStatus.skipped => (color: kDoseStatusSkippedRed, icon: Icons.block_rounded),
+    DoseStatus.snoozed => (color: kDoseStatusSnoozedOrange, icon: Icons.snooze_rounded),
+    DoseStatus.due => (color: kDoseStatusOverdueAmber, icon: Icons.schedule_rounded),
+    DoseStatus.overdue => (color: kDoseStatusMissedDarkRed, icon: Icons.warning_rounded),
+    DoseStatus.pending => (color: cs.primary, icon: Icons.notifications_rounded),
+  };
+}
+
+/// Single source of truth for dose action visuals.
+({Color color, IconData icon}) doseActionVisualSpec(
+  BuildContext context,
+  DoseAction action,
+) {
+  return switch (action) {
+    DoseAction.taken => (color: kDoseStatusTakenGreen, icon: Icons.check_rounded),
+    DoseAction.skipped => (color: kDoseStatusSkippedRed, icon: Icons.block_rounded),
+    DoseAction.snoozed => (color: kDoseStatusSnoozedOrange, icon: Icons.snooze_rounded),
+  };
+}
 
 /// Common utility colors.
 ///
