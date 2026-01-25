@@ -533,6 +533,7 @@ class _HomePageState extends State<HomePage> {
 
                 return CollapsibleSectionFormCard(
                   neutral: true,
+                  frameless: true,
                   title: 'Today',
                   isExpanded: _isTodayExpanded,
                   reserveReorderHandleGutterWhenCollapsed: true,
@@ -617,6 +618,7 @@ class _HomePageState extends State<HomePage> {
 
                 return CollapsibleSectionFormCard(
                   neutral: true,
+                  frameless: true,
                   title: 'Schedules',
                   isExpanded: _isSchedulesExpanded,
                   reserveReorderHandleGutterWhenCollapsed: true,
@@ -643,6 +645,7 @@ class _HomePageState extends State<HomePage> {
 
     final calendarCard = CollapsibleSectionFormCard(
       neutral: true,
+      frameless: true,
       title: 'Calendar',
       isExpanded: _isCalendarExpanded,
       reserveReorderHandleGutterWhenCollapsed: true,
@@ -685,6 +688,7 @@ class _HomePageState extends State<HomePage> {
 
         return CollapsibleSectionFormCard(
           neutral: true,
+          frameless: true,
           title: 'Reports',
           isExpanded: _isReportsExpanded,
           reserveReorderHandleGutterWhenCollapsed: true,

@@ -37,6 +37,7 @@ class SectionFormCard extends StatelessWidget {
     super.key,
     this.trailing,
     this.neutral = false,
+    this.frameless = false,
     this.backgroundColor,
     this.titleStyle,
   });
@@ -45,6 +46,7 @@ class SectionFormCard extends StatelessWidget {
   final List<Widget> children;
   final Widget? trailing;
   final bool neutral;
+  final bool frameless;
   final Color? backgroundColor;
   final TextStyle? titleStyle;
 
@@ -52,6 +54,31 @@ class SectionFormCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final content = Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: titleStyle ?? sectionTitleStyle(context),
+                ),
+              ),
+              if (trailing != null) trailing!,
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...children,
+        ],
+      ),
+    );
+
+    if (frameless) return content;
+
     return Container(
       decoration: BoxDecoration(
         color:
@@ -98,25 +125,7 @@ class SectionFormCard extends StatelessWidget {
                 ),
               ],
       ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: titleStyle ?? sectionTitleStyle(context),
-                ),
-              ),
-              if (trailing != null) trailing!,
-            ],
-          ),
-          const SizedBox(height: 8),
-          ...children,
-        ],
-      ),
+      child: content,
     );
   }
 }
@@ -135,6 +144,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
     this.leading,
     this.trailing,
     this.neutral = false,
+    this.frameless = false,
     this.backgroundColor,
     this.reserveReorderHandleGutterWhenCollapsed = false,
   });
@@ -146,6 +156,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final bool neutral;
+  final bool frameless;
   final Color? backgroundColor;
   final bool reserveReorderHandleGutterWhenCollapsed;
 
@@ -153,6 +164,57 @@ class CollapsibleSectionFormCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () => onExpandedChanged(!isExpanded),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                if (!isExpanded && reserveReorderHandleGutterWhenCollapsed)
+                  const SizedBox(width: kDetailCardReorderHandleGutterWidth),
+                if (leading != null) ...[
+                  leading!,
+                  const SizedBox(width: kSpacingS),
+                ],
+                Expanded(
+                  child: Text(title, style: sectionTitleStyle(context)),
+                ),
+                if (trailing != null) trailing!,
+                AnimatedRotation(
+                  turns: isExpanded ? 0 : -0.25,
+                  duration: kAnimationNormal,
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: kIconSizeLarge,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          duration: kAnimationNormal,
+          crossFadeState: isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (frameless) return content;
 
     return Container(
       decoration: BoxDecoration(
@@ -196,54 +258,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                 ),
               ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => onExpandedChanged(!isExpanded),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  if (!isExpanded && reserveReorderHandleGutterWhenCollapsed)
-                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
-                  if (leading != null) ...[
-                    leading!,
-                    const SizedBox(width: kSpacingS),
-                  ],
-                  Expanded(
-                    child: Text(title, style: sectionTitleStyle(context)),
-                  ),
-                  if (trailing != null) trailing!,
-                  AnimatedRotation(
-                    turns: isExpanded ? 0 : -0.25,
-                    duration: kAnimationNormal,
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      size: kIconSizeLarge,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            duration: kAnimationNormal,
-            crossFadeState: isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [const SizedBox(height: 8), ...children],
-              ),
-            ),
-          ),
-        ],
-      ),
+      child: content,
     );
   }
 }
