@@ -120,7 +120,11 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Space for the animated Name + form chip (rendered above in the SliverAppBar)
-                  const SizedBox(height: 68),
+                  SizedBox(
+                    height: MediaQuery.textScalerOf(context).scale(
+                      kMedicationDetailHeaderOverlayReservedHeight,
+                    ),
+                  ),
 
                   // Description & Notes
                   if (descriptionTruncated.isNotEmpty)

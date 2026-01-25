@@ -175,6 +175,21 @@ const double kMedicationDetailDonutInnerStrokeWidth = 7.0;
 /// Medication header text limits
 const int kMedicationHeaderDescriptionMaxChars = 90;
 
+/// Medication details header layout
+///
+/// Reserved vertical space inside [MedicationHeaderWidget] so the
+/// SliverAppBar's animated name/form/manufacturer overlay never overlaps
+/// the header content on smaller screens.
+const double kMedicationDetailHeaderOverlayReservedHeight = 96;
+
+/// Medication details form-chip layout
+const double kMedicationDetailFormChipPaddingHorizontal = 6;
+const double kMedicationDetailFormChipPaddingVertical = 1;
+const EdgeInsets kMedicationDetailFormChipPadding = EdgeInsets.symmetric(
+  horizontal: kMedicationDetailFormChipPaddingHorizontal,
+  vertical: kMedicationDetailFormChipPaddingVertical,
+);
+
 /// Calendar component sizing
 const double kCalendarDayHeight =
     60; // Height of day cell in month view (reduced from 80)

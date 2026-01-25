@@ -386,21 +386,20 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             const SizedBox(height: kSpacingXS),
                                             Container(
                                               padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 1,
-                                                  ),
+                                                  kMedicationDetailFormChipPadding,
                                               decoration: BoxDecoration(
                                                 color: onPrimary.withValues(
                                                   alpha: 0.2,
                                                 ),
                                                 borderRadius:
-                                                    BorderRadius.circular(4),
+                                                    BorderRadius.circular(
+                                                      kBorderRadiusChipTight,
+                                                    ),
                                                 border: Border.all(
                                                   color: onPrimary.withValues(
                                                     alpha: 0.3,
                                                   ),
-                                                  width: 0.5,
+                                                  width: kBorderWidthThin,
                                                 ),
                                               ),
                                               child: Text(
