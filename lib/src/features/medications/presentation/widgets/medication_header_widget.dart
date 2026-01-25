@@ -111,7 +111,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
-          crossAxisAlignment: effectiveRowCrossAxisAlignment,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: 6,
@@ -267,7 +267,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: kStandardButtonHeight),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (onAdHocDose != null) ...[
                 Flexible(
@@ -745,6 +745,7 @@ class _StockInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min, // Only take space needed
         children: [

@@ -347,18 +347,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 top + (_kDetailHeaderCollapsedHeight - 26) / 2,
                                 t,
                               ),
-                              left: lerpDouble(kPageHorizontalPadding, 0, t),
+                              left: kPageHorizontalPadding,
                               right: lerpDouble(
-                                120,
+                                // Reserve space for the right-side stock gauge/card when expanded.
+                                (constraints.maxWidth * 0.42) < 140
+                                    ? 140
+                                    : (constraints.maxWidth * 0.42),
                                 0,
                                 t,
-                              ), // Constrain width when expanded
+                              ),
                               child: Align(
-                                alignment: Alignment.lerp(
-                                  Alignment.centerLeft,
-                                  Alignment.center,
-                                  t,
-                                )!,
+                                alignment: Alignment.topLeft,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
