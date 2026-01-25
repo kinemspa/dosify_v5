@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -27,11 +28,34 @@ class SchedulesPage extends StatefulWidget {
 }
 
 class _SchedulesPageState extends State<SchedulesPage> {
-  _SchedView _view = _SchedView.large;
+  static const _prefsKeyView = 'schedules.view';
+
+  _SchedView _view = _SchedView.compact;
   _SchedSort _sort = _SchedSort.next;
   _SchedFilter _filter = _SchedFilter.all;
   String _query = '';
   bool _searchExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idx = prefs.getInt(_prefsKeyView);
+    if (idx == null) return;
+
+    final v = _SchedView.values[idx.clamp(0, _SchedView.values.length - 1)];
+    if (!mounted) return;
+    setState(() => _view = v);
+  }
+
+  Future<void> _persistView(_SchedView view) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefsKeyView, view.index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +307,9 @@ class _SchedulesPageState extends State<SchedulesPage> {
   Future<void> _cycleView() async {
     final order = [_SchedView.large, _SchedView.compact, _SchedView.list];
     final idx = order.indexOf(_view);
-    setState(() => _view = order[(idx + 1) % order.length]);
+    final next = order[(idx + 1) % order.length];
+    setState(() => _view = next);
+    await _persistView(next);
   }
 
   Widget _buildView(BuildContext context, List<Schedule> items) {

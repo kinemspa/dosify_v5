@@ -18,5 +18,5 @@
 
 ## Recommendations
 - [x] Add a lightweight empty-state with a CTA to create the first schedule.
-- [ ] Consider a “compact by default” option and persist the user preference.
+- [x] Consider a “compact by default” option and persist the user preference.
 
