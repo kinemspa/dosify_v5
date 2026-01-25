@@ -34,6 +34,9 @@ class AddScheduleWizardPage extends ScheduleWizardBase {
   final Schedule? initial;
 
   @override
+  String get wizardTitle => initial == null ? 'Add Schedule' : 'Edit Schedule';
+
+  @override
   int get stepCount => 3;
 
   @override

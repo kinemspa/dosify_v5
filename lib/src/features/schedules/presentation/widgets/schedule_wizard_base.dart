@@ -11,6 +11,11 @@ import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
 abstract class ScheduleWizardBase extends StatefulWidget {
   const ScheduleWizardBase({super.key});
 
+  /// Title shown in the wizard header.
+  ///
+  /// Override to distinguish add vs edit flows.
+  String get wizardTitle => 'Add Schedule';
+
   /// Number of steps in this wizard
   int get stepCount;
 
@@ -123,7 +128,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
                   ),
                   Expanded(
                     child: Text(
-                      'Add Schedule',
+                      widget.wizardTitle,
                       style: wizardHeaderTitleTextStyle(
                         context,
                         color: Theme.of(context).colorScheme.onPrimary,
