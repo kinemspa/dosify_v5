@@ -724,32 +724,20 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           _selectedDate != null &&
           _currentView != CalendarView.day;
 
+      final stageInitialRatio = switch (_currentView) {
+        CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
+        CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
+        CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
+      };
+
       Widget buildCalendarArea() {
         if (_isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-
-        // Full variant: selected-day panel becomes a draggable stage that hugs
-        // the bottom and can expand to full screen.
-        if (widget.variant == CalendarVariant.full && showSelectedDayStage) {
-          return Stack(
-            children: [
-              Positioned.fill(child: _buildCurrentView()),
-              _buildSelectedDayStageSheet(
-                initialRatio: switch (_currentView) {
-                  CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
-                  CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
-                  CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
-                },
-              ),
-            ],
-          );
-        }
-
         return _buildCurrentView();
       }
 
-      return Column(
+      final bodyColumn = Column(
         children: [
           if (showHeader)
             CalendarHeader(
@@ -816,6 +804,19 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               Expanded(child: _buildSelectedDayPanel()),
         ],
       );
+
+      // Full variant: selected-day panel becomes a draggable stage that hugs
+      // the bottom and can expand to full screen (covering header + calendar).
+      if (widget.variant == CalendarVariant.full && showSelectedDayStage) {
+        return Stack(
+          children: [
+            Positioned.fill(child: bodyColumn),
+            _buildSelectedDayStageSheet(initialRatio: stageInitialRatio),
+          ],
+        );
+      }
+
+      return bodyColumn;
     }
 
     return LayoutBuilder(

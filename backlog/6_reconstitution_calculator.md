@@ -20,6 +20,7 @@
 - [x] All reconstitutions that are saved via Add med need to have All settigns saved and stored. 
 - [x] It should be easy to cycle through the loaded recons via the dropdown. 
 - [x] The summary card in the calculator at the bottom is not including the Med Name. Reconstitute {MEDSTRENGTH} of {MEDNAME}. It only states Med Strenght. 
+    - [ ] FUCK ME. Not the literal word "Medication". the fuckign medicatkions name. This is english instuction envirment wording.  
 
 
 ## Recommendations

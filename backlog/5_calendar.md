@@ -2,7 +2,7 @@
 
 ## Requests
 - [x] Allow dragging the Dose stage up so it becomes full screen. 
-    -[ ] This does not work. 
+    -[x] This does not work. 
 - [x] There is a little bit of space underneath the monthly view and the dose stage, waste of space, make the dose stage always hug and touch the bottom of the monthly, weekly view. 
 
 ### Monthly View
