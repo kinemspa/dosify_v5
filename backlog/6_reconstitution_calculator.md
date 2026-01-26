@@ -40,7 +40,7 @@
 ## Request
 - [x] Remove the recaluculate and use saved buttons. 
 - [x] Selecting the card should open the calculator. 
-- [ ] Where are the units of the sysringe and syrionge size on this card. 
+- [x] Where are the units of the sysringe and syrionge size on this card. 
 
 # Reconstitution Calculator - Stand Alone - Main Menu
 ## Requests

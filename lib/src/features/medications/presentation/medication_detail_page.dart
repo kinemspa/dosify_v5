@@ -2513,6 +2513,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final cs = Theme.of(context).colorScheme;
 
+    final savedRecon = SavedReconstitutionRepository().ownedForMedication(
+      med.id,
+    );
+    final syringeSizeMl = (savedRecon != null && savedRecon.syringeSizeMl > 0)
+        ? savedRecon.syringeSizeMl
+        : 3.0;
+    final diluentName = savedRecon?.diluentName ?? med.diluentName;
+
     return GlassCardSurface(
       useGradient: false,
       padding: EdgeInsets.zero,
@@ -2581,8 +2589,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   containerVolumeMl: med.containerVolumeMl,
                   perMlValue: med.perMlValue,
                   volumePerDose: med.volumePerDose,
-                  reconFluidName: med.diluentName ?? 'Bacteriostatic Water',
-                  syringeSizeMl: 3.0,
+                  reconFluidName: diluentName ?? 'Bacteriostatic Water',
+                  syringeSizeMl: syringeSizeMl,
                   compact: true,
                   showCardSurface: false,
                 ),

@@ -94,6 +94,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
       color: cs.primary,
     );
 
+    final hasVolumePerDose = volumePerDose != null && volumePerDose! > 0;
+    final hasSyringeSize = syringeSizeMl != null && syringeSizeMl! > 0;
+
     return Container(
       padding: showCardSurface
           ? (compact
@@ -235,7 +238,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               ),
             ),
           ],
-          if (volumePerDose != null && volumePerDose! > 0) ...[
+          if (hasVolumePerDose) ...[
             SizedBox(height: compact ? 8 : 14),
             // Volume per dose line
             RichText(
@@ -251,17 +254,21 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+
+          if (hasSyringeSize) ...[
             SizedBox(height: compact ? 8 : 12),
-            // Syringe size text
-            if (syringeSizeMl != null)
-              Text(
-                '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * 100).round()} U) Syringe',
-                textAlign: TextAlign.center,
-                style: reconSummarySyringeLineTextStyle(
-                  context,
-                  color: baseTextColor,
-                ),
+            Text(
+              '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * 100).round()} U) Syringe',
+              textAlign: TextAlign.center,
+              style: reconSummarySyringeLineTextStyle(
+                context,
+                color: baseTextColor,
               ),
+            ),
+          ],
+
+          if (hasVolumePerDose) ...[
             const SizedBox(height: 6),
             // Syringe gauge showing target dose
             WhiteSyringeGauge(
