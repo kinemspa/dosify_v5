@@ -88,18 +88,18 @@ class ScheduleListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                NextDoseDateBadge(
-                  nextDose: next,
-                  isActive: schedule.isActive,
-                  dense: true,
-                  showNextLabel: true,
+                Padding(
+                  padding: const EdgeInsets.only(right: kSpacingXS),
+                  child: NextDoseDateBadge(
+                    nextDose: next,
+                    isActive: schedule.isActive,
+                    dense: true,
+                    showNextLabel: true,
+                  ),
                 ),
                 const SizedBox(height: kSpacingXS),
-                SizedBox(
-                  width: kNextDoseDateCircleSizeCompact,
-                  child: Center(
-                    child: ScheduleStatusChip(schedule: schedule, dense: true),
-                  ),
+                Center(
+                  child: ScheduleStatusChip(schedule: schedule, dense: true),
                 ),
               ],
             ),

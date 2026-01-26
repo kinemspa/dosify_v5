@@ -14,6 +14,7 @@
 
 
 ### Schedules
+- [x] There is an overflow on my screen on the right. Must be the status badge cropping off the card. 
 
 ### Calendar
 - [x] Calendar is only showing the day view, needs month and week.
