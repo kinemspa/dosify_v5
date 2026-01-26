@@ -772,7 +772,7 @@ BoxDecoration buildDoseCardDecoration({
 }) {
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
-    color: kColorTransparent,
+    color: cs.surface,
     borderRadius: BorderRadius.circular(borderRadius),
     border: Border.all(
       color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
