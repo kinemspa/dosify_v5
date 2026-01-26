@@ -3507,6 +3507,11 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                   (currentVolume + topUpAddVolume)
             : null;
 
+        String fmtPerMl(double? value) {
+          if (value == null) return '(Not set)';
+          return '${fmt2(value)} $unit/mL';
+        }
+
         final canSave = selectedMode == 'replace'
             ? (selectedPerMl != null &&
                   selectedPerMl! > 0 &&
@@ -3760,25 +3765,84 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Current: ${fmt2(currentPerMl)} $unit/mL',
-                        style: helperTextStyle(context),
+                        'Concentration change',
+                        style: helperTextStyle(
+                          context,
+                          color: cs.primary,
+                        )?.copyWith(fontWeight: kFontWeightSemiBold),
                       ),
-                      Text(
-                        'Top-up: ${fmt2(effectiveTopUpPerMl)} $unit/mL',
-                        style: helperTextStyle(context),
+                      const SizedBox(height: kSpacingXS),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Current', style: helperTextStyle(context)),
+                          Text(
+                            fmtPerMl(currentPerMl),
+                            style: helperTextStyle(context),
+                          ),
+                        ],
                       ),
-                      if (previewNewPerMl != null)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('New', style: helperTextStyle(context)),
+                          Text(
+                            fmtPerMl(previewNewPerMl),
+                            style: helperTextStyle(
+                              context,
+                              color: cs.primary,
+                            )?.copyWith(fontWeight: kFontWeightSemiBold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: kSpacingS),
+            ],
+            if (selectedMode == 'replace') ...[
+              const SizedBox(height: kSpacingXS),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(kSpacingM),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Concentration change',
+                      style: helperTextStyle(
+                        context,
+                        color: cs.primary,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Current', style: helperTextStyle(context)),
                         Text(
-                          'New: ${fmt2(previewNewPerMl)} $unit/mL',
+                          fmtPerMl(currentPerMl),
+                          style: helperTextStyle(context),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('New', style: helperTextStyle(context)),
+                        Text(
+                          fmtPerMl(selectedPerMl),
                           style: helperTextStyle(
                             context,
                             color: cs.primary,
                           )?.copyWith(fontWeight: kFontWeightSemiBold),
                         ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
               const SizedBox(height: kSpacingS),
             ],
             Container(
