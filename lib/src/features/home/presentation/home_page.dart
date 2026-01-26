@@ -831,8 +831,6 @@ class _HomePageState extends State<HomePage> {
         padding: kPagePaddingNoBottom,
         child: ListView(
           children: [
-            Text('Home', style: homeHeroTitleStyle(context)),
-            const SizedBox(height: kSpacingXS),
             Text(
               'Upcoming doses, schedules, and calendar',
               style: helperTextStyle(context),
