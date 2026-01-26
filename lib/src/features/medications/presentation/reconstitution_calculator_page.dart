@@ -549,66 +549,114 @@ class _ReconstitutionCalculatorPageState
                       ),
                     ),
                     helper('Enter a medication name to save.'),
-                    const SizedBox(height: 6),
-                    LabelFieldRow(
-                      label: 'Unit',
-                      lightText: true,
-                      field: SmallDropdown36<String>(
-                        value: _selectedUnit,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'mcg',
-                            child: Center(child: Text('mcg')),
+                    const SizedBox(height: kSpacingS),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: kSpacingXS,
+                                  bottom: kSpacingXS,
+                                ),
+                                child: Text(
+                                  'Unit',
+                                  style: fieldLabelStyle(context)?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withValues(
+                                          alpha: kReconTextMediumOpacity,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              SmallDropdown36<String>(
+                                value: _selectedUnit,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'mcg',
+                                    child: Center(child: Text('mcg')),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'mg',
+                                    child: Center(child: Text('mg')),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'g',
+                                    child: Center(child: Text('g')),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'units',
+                                    child: Center(child: Text('units')),
+                                  ),
+                                ],
+                                onChanged: (v) =>
+                                    setState(() => _selectedUnit = v ?? 'mg'),
+                              ),
+                            ],
                           ),
-                          DropdownMenuItem(
-                            value: 'mg',
-                            child: Center(child: Text('mg')),
-                          ),
-                          DropdownMenuItem(
-                            value: 'g',
-                            child: Center(child: Text('g')),
-                          ),
-                          DropdownMenuItem(
-                            value: 'units',
-                            child: Center(child: Text('units')),
-                          ),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _selectedUnit = v ?? 'mg'),
-                      ),
-                    ),
-                    helper('Select the unit for vial strength.'),
-                    const SizedBox(height: 6),
-                    LabelFieldRow(
-                      label: 'Strength',
-                      lightText: true,
-                      field: StepperRow36(
-                        controller: _strengthCtrl,
-                        onDec: () {
-                          final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                          final nv = (v - 1).clamp(0, 10000);
-                          setState(() {
-                            _strengthCtrl.text = nv == nv.roundToDouble()
-                                ? nv.toInt().toString()
-                                : nv.toStringAsFixed(2);
-                          });
-                        },
-                        onInc: () {
-                          final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                          final nv = (v + 1).clamp(0, 10000);
-                          setState(() {
-                            _strengthCtrl.text = nv == nv.roundToDouble()
-                                ? nv.toInt().toString()
-                                : nv.toStringAsFixed(2);
-                          });
-                        },
-                        decoration: buildCompactFieldDecoration(
-                          context: context,
-                          hint: '0',
                         ),
-                      ),
+                        const SizedBox(width: kSpacingM),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: kSpacingXS,
+                                  bottom: kSpacingXS,
+                                ),
+                                child: Text(
+                                  'Strength',
+                                  style: fieldLabelStyle(context)?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withValues(
+                                          alpha: kReconTextMediumOpacity,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                              StepperRow36(
+                                controller: _strengthCtrl,
+                                onDec: () {
+                                  final v =
+                                      double.tryParse(_strengthCtrl.text) ?? 0;
+                                  final nv = (v - 1).clamp(0, 10000);
+                                  setState(() {
+                                    _strengthCtrl.text = nv == nv.roundToDouble()
+                                        ? nv.toInt().toString()
+                                        : nv.toStringAsFixed(2);
+                                  });
+                                },
+                                onInc: () {
+                                  final v =
+                                      double.tryParse(_strengthCtrl.text) ?? 0;
+                                  final nv = (v + 1).clamp(0, 10000);
+                                  setState(() {
+                                    _strengthCtrl.text = nv == nv.roundToDouble()
+                                        ? nv.toInt().toString()
+                                        : nv.toStringAsFixed(2);
+                                  });
+                                },
+                                decoration: buildCompactFieldDecoration(
+                                  context: context,
+                                  hint: '0',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    helper('Total drug amount in the vial (before reconstitution).'),
+                    helper(
+                      'Select the unit and enter vial strength (before reconstitution).',
+                    ),
                   ],
                 ),
               ),
