@@ -38,7 +38,6 @@ class WizardNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLastStep = currentStep >= stepCount - 1;
-    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return AnimatedBuilder(
       animation: FocusManager.instance,
@@ -51,21 +50,21 @@ class WizardNavigationBar extends StatelessWidget {
         final hasMoreFieldToFocus =
             focusedIndex >= 0 && focusedIndex < focusables.length - 1;
 
-        // While the keyboard is open, never show "Continue".
-        // The primary action should move through fields and only advance the
-        // wizard step when there are no more focusable fields.
-        final showKeyboardNext = keyboardOpen && !isLastStep;
+        // When a field is focused, use the primary action to move through
+        // fields first (Next), and only advance the wizard when there are no
+        // more focusable fields.
+        final showFieldNext = focusedIndex >= 0 && !isLastStep;
 
         final primaryLabel = isLastStep
             ? saveLabel
-            : (showKeyboardNext
+          : (showFieldNext
                   ? (hasMoreFieldToFocus ? nextLabel : nextPageLabel)
                   : continueLabel);
 
         final VoidCallback? primaryAction;
         if (isLastStep) {
           primaryAction = canProceed ? onSave : null;
-        } else if (showKeyboardNext) {
+        } else if (showFieldNext) {
           primaryAction = () {
             final moved = scope.nextFocus();
             if (moved) return;
