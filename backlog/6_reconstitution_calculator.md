@@ -44,7 +44,7 @@
 
 # Reconstitution Calculator - Stand Alone - Main Menu
 ## Requests
-- [ ] Heading in App Header is cropped, lets reduce text size and make it 2 lines. 
+- [x] Heading in App Header is cropped, lets reduce text size and make it 2 lines. 
 - [x] This does not exist, it is currently navigating to an old Rec Calculator. I want this to look exactly the same as the Add med wizard one. 
 - [x] Saved Name should have Med Name, and Dose size and Volume as a default. 
 - [x] Can we compact the Load unit and Strenght fields. 

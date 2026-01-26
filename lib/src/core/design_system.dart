@@ -587,6 +587,12 @@ const double kReconDividerOpacity = 0.7;
 const double kReconDividerVerticalMargin = 12.0;
 const List<double> kReconDividerStops = [0.0, 0.5, 1.0];
 
+/// Reconstitution compact inline label padding (for two-column inputs)
+const EdgeInsets kReconInlineFieldLabelPadding = EdgeInsets.only(
+  left: kSpacingXS,
+  bottom: kSpacingXS,
+);
+
 /// Reconstitution summary card styling
 const double kReconSummaryBorderWidth = 0.5;
 const double kReconSummaryBorderRadius = 20.0;

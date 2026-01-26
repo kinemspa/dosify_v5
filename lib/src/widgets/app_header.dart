@@ -17,11 +17,15 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.actions,
     this.forceBackButton = false,
+    this.titleMaxLines = 1,
+    this.compactTitle = false,
   });
 
   final String title;
   final List<Widget>? actions;
   final bool forceBackButton;
+  final int titleMaxLines;
+  final bool compactTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -102,10 +106,15 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
           : null,
       title: Text(
         title,
-        style: const TextStyle(
+        maxLines: titleMaxLines,
+        softWrap: titleMaxLines > 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.w600,
+          fontWeight: kFontWeightSemiBold,
           letterSpacing: 0.5,
+          fontSize: compactTitle ? kFontSizeLarge : null,
+          height: compactTitle ? kLineHeightTight : null,
         ),
       ),
       actions: effectiveActions,

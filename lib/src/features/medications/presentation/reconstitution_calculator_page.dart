@@ -389,7 +389,9 @@ class _ReconstitutionCalculatorPageState
 
     return Scaffold(
       appBar: GradientAppBar(
-        title: 'Reconstitution Calculator',
+        title: 'Reconstitution\nCalculator',
+        titleMaxLines: 2,
+        compactTitle: true,
       ),
       body: ColoredBox(
         color: reconBackgroundDarkColor(context),
@@ -558,10 +560,7 @@ class _ReconstitutionCalculatorPageState
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  left: kSpacingXS,
-                                  bottom: kSpacingXS,
-                                ),
+                                padding: kReconInlineFieldLabelPadding,
                                 child: Text(
                                   'Unit',
                                   style: fieldLabelStyle(context)?.copyWith(
@@ -606,10 +605,7 @@ class _ReconstitutionCalculatorPageState
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  left: kSpacingXS,
-                                  bottom: kSpacingXS,
-                                ),
+                                padding: kReconInlineFieldLabelPadding,
                                 child: Text(
                                   'Strength',
                                   style: fieldLabelStyle(context)?.copyWith(
