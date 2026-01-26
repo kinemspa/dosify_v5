@@ -363,13 +363,36 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final badge = ScheduleStatusChip(schedule: s, dense: true);
     if (s.isCompleted) return badge;
 
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () => _promptPauseFromHeader(context, s),
-        borderRadius: BorderRadius.circular(kBorderRadiusChip),
-        child: badge,
-      ),
+    final isActive = s.isActive;
+    final cs = Theme.of(context).colorScheme;
+    final label = isActive ? 'Pause' : 'Resume';
+    final icon = isActive ? Icons.pause_rounded : Icons.play_arrow_rounded;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () => _promptPauseFromHeader(context, s),
+            borderRadius: BorderRadius.circular(kBorderRadiusChip),
+            child: badge,
+          ),
+        ),
+        const SizedBox(height: kSpacingXS),
+        TextButton.icon(
+          onPressed: () => _promptPauseFromHeader(context, s),
+          style: TextButton.styleFrom(
+            padding: kCompactButtonPadding,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            foregroundColor: cs.onPrimary.withValues(alpha: kOpacityMedium),
+          ),
+          icon: Icon(icon, size: kIconSizeSmall),
+          label: Text(label, style: helperTextStyle(context)),
+        ),
+      ],
     );
   }
 
