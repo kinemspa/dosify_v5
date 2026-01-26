@@ -6,7 +6,7 @@
 - [x] There is a little bit of space underneath the monthly view and the dose stage, waste of space, make the dose stage always hug and touch the bottom of the monthly, weekly view. 
 
 ### Monthly View
-- [ ] Days boxes are now way to big vertically. 
+- [x] Days boxes are now way to big vertically. 
 - [ ] There are no markings fo the doses on the days. 
 
 ### Weekly View

@@ -116,10 +116,12 @@ class CalendarMonthView extends StatelessWidget {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Always show a full 6-week grid without clipping.
-                // When the selected-day panel is visible, available height can be small;
-                // using a width-driven aspect ratio would clip the last row.
-                final cellHeight = constraints.maxHeight / 6;
+                // Keep month-view cells from growing too tall on large screens,
+                // while still shrinking when vertical space is constrained.
+                final cellHeight =
+                    (constraints.maxHeight / 6)
+                        .clamp(0.0, kCalendarDayHeight)
+                        .toDouble();
 
                 return GridView.builder(
                   physics: const NeverScrollableScrollPhysics(),
