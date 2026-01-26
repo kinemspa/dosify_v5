@@ -64,7 +64,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   bool _hasBackupVials = false;
   final _backupVialsQtyCtrl = TextEditingController(text: '0');
   bool _backupVialsLowStockEnabled = false;
-  final _backupVialsLowStockCtrl = TextEditingController(text: '0');
+  final _backupVialsLowStockCtrl = TextEditingController(text: '2');
   DateTime? _backupVialsExpiry;
   final _backupVialsBatchCtrl = TextEditingController();
   final _backupVialsStorageCtrl = TextEditingController();
@@ -1128,19 +1128,41 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   onDec: () {
                     final v =
                         int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0;
+                    final nextQty = (v - 1).clamp(0, 1000000);
                     setState(
-                      () => _backupVialsQtyCtrl.text = (v - 1)
-                          .clamp(0, 1000000)
-                          .toString(),
+                      () {
+                        _backupVialsQtyCtrl.text = nextQty.toString();
+                        if (_backupVialsLowStockEnabled) {
+                          final threshold =
+                              int.tryParse(
+                                _backupVialsLowStockCtrl.text.trim(),
+                              ) ??
+                              0;
+                          if (threshold > nextQty) {
+                            _backupVialsLowStockCtrl.text = nextQty.toString();
+                          }
+                        }
+                      },
                     );
                   },
                   onInc: () {
                     final v =
                         int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0;
+                    final nextQty = (v + 1).clamp(0, 1000000);
                     setState(
-                      () => _backupVialsQtyCtrl.text = (v + 1)
-                          .clamp(0, 1000000)
-                          .toString(),
+                      () {
+                        _backupVialsQtyCtrl.text = nextQty.toString();
+                        if (_backupVialsLowStockEnabled) {
+                          final threshold =
+                              int.tryParse(
+                                _backupVialsLowStockCtrl.text.trim(),
+                              ) ??
+                              0;
+                          if (threshold > nextQty) {
+                            _backupVialsLowStockCtrl.text = nextQty.toString();
+                          }
+                        }
+                      },
                     );
                   },
                   decoration: buildCompactFieldDecoration(
@@ -1160,9 +1182,38 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   children: [
                     Checkbox(
                       value: _backupVialsLowStockEnabled,
-                      onChanged: (v) => setState(
-                        () => _backupVialsLowStockEnabled = v ?? false,
-                      ),
+                      onChanged: (v) {
+                        final enabled = v ?? false;
+                        setState(() {
+                          _backupVialsLowStockEnabled = enabled;
+
+                          if (!enabled) return;
+
+                          final qty =
+                              int.tryParse(_backupVialsQtyCtrl.text.trim()) ??
+                              0;
+                          final current =
+                              int.tryParse(
+                                _backupVialsLowStockCtrl.text.trim(),
+                              ) ??
+                              0;
+
+                          if (qty <= 0) {
+                            _backupVialsLowStockCtrl.text = '0';
+                            return;
+                          }
+
+                          if (current <= 0) {
+                            _backupVialsLowStockCtrl.text =
+                                (qty < 2 ? qty : 2).toString();
+                            return;
+                          }
+
+                          if (current > qty) {
+                            _backupVialsLowStockCtrl.text = qty.toString();
+                          }
+                        });
+                      },
                     ),
                     Expanded(
                       child: Text(
