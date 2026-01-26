@@ -351,8 +351,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // Frequency (secondary info) - no time in saved schedule rows
-                      Text(_getFrequencyText(), style: mutedTextStyle(context)),
+                      // Frequency (secondary info) - no time/day in saved schedule rows
+                      Text(
+                        _getFrequencyLabelShort(),
+                        style: mutedTextStyle(context),
+                      ),
                       const SizedBox(width: kSpacingS),
                       // Status on the right
                       if (!_isExpanded) ...[
@@ -798,6 +801,19 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           .join(', ');
       return days;
     }
+  }
+
+  String _getFrequencyLabelShort() {
+    if (widget.schedule.hasCycle) {
+      return 'Every ${widget.schedule.cycleEveryNDays} days';
+    }
+    if (widget.schedule.hasDaysOfMonth) {
+      return 'Monthly';
+    }
+    if (widget.schedule.daysOfWeek.length == 7) {
+      return 'Every day';
+    }
+    return 'Weekly';
   }
 
   String _getTimesText() {
