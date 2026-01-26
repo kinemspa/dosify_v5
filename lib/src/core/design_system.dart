@@ -1779,8 +1779,7 @@ TextStyle? sectionTitleStyle(BuildContext context) {
 
 /// Review-card heading style (e.g. wizard Step 5 review sections).
 TextStyle? reviewCardTitleStyle(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
-  return sectionTitleStyle(context)?.copyWith(color: cs.primary);
+  return sectionTitleStyle(context);
 }
 
 /// Field label style (in LabelFieldRow)
@@ -1797,9 +1796,10 @@ TextStyle? fieldLabelStyle(BuildContext context) {
 /// Review-row label style (left column labels on Step 5 review rows).
 TextStyle? reviewRowLabelStyle(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
-  return fieldLabelStyle(
+  return smallHelperTextStyle(
     context,
-  )?.copyWith(color: cs.primary.withValues(alpha: kOpacityMediumHigh));
+    color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+  )?.copyWith(fontWeight: kFontWeightSemiBold);
 }
 
 /// Input text style (typed text in fields)
