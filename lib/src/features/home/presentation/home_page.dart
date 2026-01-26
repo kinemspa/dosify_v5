@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -823,13 +822,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const GradientAppBar(title: 'Dosifi v5'),
+      appBar: const GradientAppBar(title: 'Home'),
       // Logo moved to body header to avoid duplicate appBar
       body: Padding(
         padding: kPagePaddingNoBottom,
         child: ListView(
           children: [
-            Text('Dosifi', style: homeHeroTitleStyle(context)),
+            Text('Home', style: homeHeroTitleStyle(context)),
             const SizedBox(height: kSpacingXS),
             Text(
               'Upcoming doses, schedules, and calendar',
@@ -838,27 +837,6 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: kSpacingL),
             _buildHomeCards(context),
             const SizedBox(height: kSpacingXL),
-            Wrap(
-              spacing: kSpacingM,
-              runSpacing: kSpacingM,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/medications'),
-                  icon: const Icon(Icons.medication),
-                  label: const Text('Medications'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/schedules'),
-                  icon: const Icon(Icons.schedule),
-                  label: const Text('Schedules'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/calendar'),
-                  icon: const Icon(Icons.calendar_month),
-                  label: const Text('Calendar'),
-                ),
-              ],
-            ),
           ],
         ),
       ),
