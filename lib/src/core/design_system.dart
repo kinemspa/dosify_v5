@@ -762,7 +762,7 @@ BoxDecoration buildDoseCardDecoration({
 }) {
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
-    color: cs.surfaceVariant.withValues(alpha: kOpacityFaint),
+    color: kColorTransparent,
     borderRadius: BorderRadius.circular(borderRadius),
     border: Border.all(
       color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
@@ -871,7 +871,7 @@ const double kMedicationDetailStockForecastDaysFontSize = 12;
 const double kMedicationDetailStockForecastExpiryFontSize = 10;
 
 /// Next-dose date badge typography (Schedules list)
-const double kNextDoseDateCircleDayFontSizeCompact = 15;
+const double kNextDoseDateCircleDayFontSizeCompact = 16;
 const double kNextDoseDateCircleDayFontSizeLarge = 18;
 const double kNextDoseDateCircleMonthFontSize = kFontSizeSmall;
 

@@ -54,8 +54,8 @@ class DoseCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final radius = compact ? kBorderRadiusSmall : kBorderRadiusMedium;
-    final horizontalPadding = compact ? kSpacingS : kSpacingM;
-    final verticalPadding = compact ? kSpacingXXS : kSpacingXS;
+    final horizontalPadding = compact ? kSpacingM : kSpacingL;
+    final verticalPadding = compact ? kSpacingXS : kSpacingS;
     final columnGap = compact ? kSpacingS : kSpacingM;
 
     final effectiveStatus = statusOverride ?? dose.status;
@@ -106,7 +106,7 @@ class DoseCard extends StatelessWidget {
               vertical: verticalPadding,
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Column(
                   mainAxisSize: MainAxisSize.min,
