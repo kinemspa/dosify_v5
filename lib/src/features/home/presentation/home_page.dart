@@ -14,7 +14,6 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -25,6 +24,7 @@ import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_l
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/combined_reports_history_widget.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -724,15 +724,10 @@ class _HomePageState extends State<HomePage> {
               if (included.isEmpty)
                 Text('No medications selected', style: mutedTextStyle(context))
               else
-                for (final med in meds)
-                  if (included.contains(med.id)) ...[
-                    MedicationReportsWidget(
-                      medication: med,
-                      isExpanded: false,
-                      embedInParentCard: true,
-                    ),
-                    const SizedBox(height: kSpacingM),
-                  ],
+                CombinedReportsHistoryWidget(
+                  includedMedicationIds: included,
+                  embedInParentCard: true,
+                ),
             ],
           ],
         );

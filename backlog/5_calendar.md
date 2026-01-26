@@ -2,14 +2,15 @@
 
 ## Requests
 - [x] Allow dragging the Dose stage up so it becomes full screen. 
+    -[ ] This does not work. 
 - [x] There is a little bit of space underneath the monthly view and the dose stage, waste of space, make the dose stage always hug and touch the bottom of the monthly, weekly view. 
 
 ### Monthly View
-
+- [ ] Days boxes are now way to big vertically. 
+- [ ] There are no markings fo the doses on the days. 
 
 ### Weekly View
 
-- [ ]
 
 ### Day View
 - [x] Lets put very light dividers between each day. 
