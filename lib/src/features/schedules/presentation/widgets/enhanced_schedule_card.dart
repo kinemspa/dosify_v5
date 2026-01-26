@@ -424,6 +424,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                               'MMM d, yyyy',
                             ).format(widget.schedule.createdAt),
                           ),
+                          _buildDetailRow(
+                            context,
+                            'Ends',
+                            _getEndDateText(),
+                          ),
                         ],
                       ),
                       const SizedBox(height: kSpacingL),
@@ -826,6 +831,12 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     if (widget.schedule.hasDaysOfMonth) return 'Monthly';
     if (widget.schedule.daysOfWeek.length == 7) return 'Daily';
     return 'Weekly';
+  }
+
+  String _getEndDateText() {
+    final endAt = widget.schedule.endAt;
+    if (endAt == null) return '—';
+    return DateFormat('MMM d, yyyy').format(endAt);
   }
 
   String _getTimesText() {
