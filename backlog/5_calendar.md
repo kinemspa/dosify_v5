@@ -7,7 +7,7 @@
 
 ### Monthly View
 - [x] Days boxes are now way to big vertically. 
-- [ ] There are no markings fo the doses on the days. 
+- [x] There are no markings fo the doses on the days. 
 
 ### Weekly View
 

@@ -55,6 +55,11 @@ class CalendarDayCell extends StatelessWidget {
                 doses.isNotEmpty &&
                 (constraints.maxHeight - headerHeight) >= indicatorsMinHeight;
 
+            final indicatorCount = doses.length > kCalendarMonthMaxDoseIndicators
+                ? kCalendarMonthMaxDoseIndicators
+                : doses.length;
+            final overflowCount = doses.length - indicatorCount;
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -88,8 +93,28 @@ class CalendarDayCell extends StatelessWidget {
                     child: ClipRect(
                       child: Padding(
                         padding: kCalendarDayDoseIndicatorPadding,
-                        child: Center(
-                          child: CalendarDoseIndicator(dose: doses.first),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: kCalendarDoseIndicatorSpacing,
+                            runSpacing: kCalendarDoseIndicatorSpacing,
+                            children: [
+                              for (final dose in doses.take(indicatorCount))
+                                CalendarDoseIndicator(dose: dose),
+                              if (overflowCount > 0)
+                                Text(
+                                  '+$overflowCount',
+                                  style: microHelperTextStyle(
+                                    context,
+                                    color: colorScheme.onSurfaceVariant
+                                        .withValues(
+                                          alpha: kCalendarDayOverflowTextOpacity,
+                                        ),
+                                  )?.copyWith(fontWeight: kFontWeightSemiBold),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
