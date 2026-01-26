@@ -775,7 +775,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         controller: scrollController,
         child: ListView(
           controller: scrollController,
-          padding: kBottomSheetContentPadding,
+          padding: kBottomSheetContentPadding.copyWith(top: kSpacingM),
           children: [
             _buildDoseCardPreview(context),
             const SizedBox(height: kSpacingS),
@@ -1264,7 +1264,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   ),
                 ),
                 Padding(
-                  padding: kBottomSheetHeaderPadding,
+                  padding: kBottomSheetHeaderPadding.copyWith(
+                    bottom: kSpacingM,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -1349,7 +1351,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 'Confirm status, adjust timing if needed, add notes, and save.',
                 style: helperTextStyle(context),
               ),
-              const SizedBox(height: kSpacingM),
+              const SizedBox(height: kSpacingS),
               Expanded(child: formContent(context, dialogScrollController)),
             ],
           ),
@@ -1457,8 +1459,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         Expanded(
           child: Text(
             _hasChanged
-                ? 'Press Save & Close to apply changes.'
-                : 'Select a status, add notes, then press Save & Close.',
+                ? 'Tap Save & Close to apply changes.'
+                : 'Select a status, add notes, then tap Save & Close.',
             style: helperTextStyle(context),
           ),
         ),
