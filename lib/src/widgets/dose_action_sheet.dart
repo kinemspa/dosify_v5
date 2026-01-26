@@ -1334,6 +1334,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final maxHeight = MediaQuery.of(context).size.height * 0.70;
 
     return AlertDialog(
+      insetPadding: kDoseActionSheetDialogInsetPadding,
       titleTextStyle: cardTitleStyle(
         context,
       )?.copyWith(color: colorScheme.primary),

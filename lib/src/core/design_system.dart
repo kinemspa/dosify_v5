@@ -257,6 +257,10 @@ const double kCalendarHeaderHeight = 56; // Calendar header with navigation
 const double kBottomSheetHandleWidth = 40;
 const double kBottomSheetHandleHeight = 4;
 const double kBottomSheetHandleRadius = 2;
+const EdgeInsets kDoseActionSheetDialogInsetPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingM,
+);
 const EdgeInsets kBottomSheetHeaderPadding = EdgeInsets.fromLTRB(
   kSpacingL,
   kSpacingS,
