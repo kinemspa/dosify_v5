@@ -439,6 +439,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
                       // Action Buttons Row (Schedule-level actions only)
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _buildPrimaryIconAction(
                             context,
@@ -466,12 +467,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     final colorScheme = Theme.of(context).colorScheme;
     return Material(
       color: colorScheme.primary,
-      borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-        child: Container(
-          padding: const EdgeInsets.all(kSpacingM),
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: kLargeButtonHeight,
+          height: kLargeButtonHeight,
           child: Icon(
             icon,
             size: kIconSizeMedium,
