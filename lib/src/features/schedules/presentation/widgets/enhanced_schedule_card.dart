@@ -260,6 +260,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         strengthLabel.trim().isNotEmpty &&
         metrics.trim().isNotEmpty;
 
+    final showDoseCard = widget.showDoseCardWhenPossible && canShowDoseCard;
+
     return AnimatedContainer(
       duration: kAnimationNormal,
       curve: kCurveEmphasized,
@@ -269,7 +271,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         child: AnimatedContainer(
           duration: kAnimationNormal,
           curve: kCurveEmphasized,
-          padding: EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
+          padding: showDoseCard
+              ? EdgeInsets.zero
+              : EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
           decoration: BoxDecoration(
             color: _isExpanded ? colorScheme.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
@@ -285,7 +289,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.showDoseCardWhenPossible && canShowDoseCard)
+              if (showDoseCard)
                 ValueListenableBuilder(
                   valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
                   builder: (context, Box<DoseLog> logBox, _) {
@@ -382,7 +386,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     : CrossFadeState.showFirst,
                 firstChild: const SizedBox.shrink(),
                 secondChild: Padding(
-                  padding: const EdgeInsets.only(top: kSpacingL),
+                  padding: showDoseCard
+                      ? const EdgeInsets.fromLTRB(
+                          kCardPadding,
+                          kSpacingL,
+                          kCardPadding,
+                          kCardPadding,
+                        )
+                      : const EdgeInsets.only(top: kSpacingL),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
