@@ -13,9 +13,9 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
 
 /// Wizard-style Pre-filled Syringe add/edit screen with step-by-step flow
 class AddPrefilledSyringeWizardPage extends MedicationWizardBase {
@@ -330,17 +330,10 @@ class _AddPrefilledSyringeWizardPageState
           children: [
             LabelFieldRow(
               label: 'Name *',
-              field: Field36(
-                child: TextField(
-                  controller: _nameCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(
-                    context,
-                    hint: 'e.g., Growth Hormone',
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
+              field: WizardTextField36(
+                controller: _nameCtrl,
+                hint: 'e.g., Growth Hormone',
+                onChanged: (_) => setState(() {}),
               ),
             ),
             buildHelperText(
@@ -350,17 +343,10 @@ class _AddPrefilledSyringeWizardPageState
             ),
             LabelFieldRow(
               label: 'Manufacturer',
-              field: Field36(
-                child: TextField(
-                  controller: _manufacturerCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(
-                    context,
-                    hint: 'e.g., MedCo',
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
+              field: WizardTextField36(
+                controller: _manufacturerCtrl,
+                hint: 'e.g., MedCo',
+                onChanged: (_) => setState(() {}),
               ),
             ),
             buildHelperText(
@@ -370,16 +356,12 @@ class _AddPrefilledSyringeWizardPageState
             ),
             LabelFieldRow(
               label: 'Description',
-              field: TextField(
+              field: WizardTextField36(
                 controller: _descriptionCtrl,
-                textCapitalization: kTextCapitalizationDefault,
-                style: Theme.of(context).textTheme.bodyMedium,
+                hint: 'Notes or description',
                 minLines: 2,
                 maxLines: 3,
-                decoration: buildFieldDecoration(
-                  context,
-                  hint: 'Notes or description',
-                ),
+                textInputAction: TextInputAction.newline,
               ),
             ),
             buildHelperText(
@@ -693,13 +675,9 @@ class _AddPrefilledSyringeWizardPageState
             ),
             LabelFieldRow(
               label: 'Batch No.',
-              field: Field36(
-                child: TextField(
-                  controller: _batchCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(context, hint: 'Optional'),
-                ),
+              field: WizardTextField36(
+                controller: _batchCtrl,
+                hint: 'Optional',
               ),
             ),
             buildHelperText(
@@ -709,16 +687,9 @@ class _AddPrefilledSyringeWizardPageState
             ),
             LabelFieldRow(
               label: 'Storage location',
-              field: Field36(
-                child: TextField(
-                  controller: _storageLocationCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(
-                    context,
-                    hint: 'e.g., Refrigerator',
-                  ),
-                ),
+              field: WizardTextField36(
+                controller: _storageLocationCtrl,
+                hint: 'e.g., Refrigerator',
               ),
             ),
             buildHelperText(

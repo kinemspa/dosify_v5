@@ -8,10 +8,10 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
+import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter/services.dart';
@@ -602,17 +602,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           children: [
             LabelFieldRow(
               label: 'Name *',
-              field: Field36(
-                child: TextField(
-                  controller: _nameCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(
-                    context,
-                    hint: 'e.g., Peptide',
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
+              field: WizardTextField36(
+                controller: _nameCtrl,
+                hint: 'e.g., Peptide',
+                onChanged: (_) => setState(() {}),
               ),
             ),
             buildHelperText(
@@ -622,17 +615,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             LabelFieldRow(
               label: 'Manufacturer',
-              field: Field36(
-                child: TextField(
-                  controller: _manufacturerCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(
-                    context,
-                    hint: 'e.g., BioTech',
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
+              field: WizardTextField36(
+                controller: _manufacturerCtrl,
+                hint: 'e.g., BioTech',
+                onChanged: (_) => setState(() {}),
               ),
             ),
             buildHelperText(
@@ -642,16 +628,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             LabelFieldRow(
               label: 'Description',
-              field: TextField(
+              field: WizardTextField36(
                 controller: _descriptionCtrl,
-                textCapitalization: kTextCapitalizationDefault,
-                style: Theme.of(context).textTheme.bodyMedium,
+                hint: 'Notes or description',
                 minLines: 2,
                 maxLines: 3,
-                decoration: buildFieldDecoration(
-                  context,
-                  hint: 'Notes or description',
-                ),
+                textInputAction: TextInputAction.newline,
               ),
             ),
             buildHelperText(
@@ -981,16 +963,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             LabelFieldRow(
               label: 'Storage location',
-              field: Field36(
-                child: TextField(
-                  controller: _activeVialStorageCtrl,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: buildFieldDecoration(
-                    context,
-                    hint: 'e.g., Fridge',
-                  ),
-                ),
+              field: WizardTextField36(
+                controller: _activeVialStorageCtrl,
+                hint: 'e.g., Fridge',
               ),
             ),
             buildHelperText(
@@ -1249,13 +1224,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               ),
               LabelFieldRow(
                 label: 'Batch No.',
-                field: Field36(
-                  child: TextField(
-                    controller: _backupVialsBatchCtrl,
-                    textCapitalization: kTextCapitalizationDefault,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: buildFieldDecoration(context, hint: 'Optional'),
-                  ),
+                field: WizardTextField36(
+                  controller: _backupVialsBatchCtrl,
+                  hint: 'Optional',
                 ),
               ),
             ],
@@ -1267,16 +1238,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             children: [
               LabelFieldRow(
                 label: 'Location',
-                field: Field36(
-                  child: TextField(
-                    controller: _backupVialsStorageCtrl,
-                    textCapitalization: kTextCapitalizationDefault,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    decoration: buildFieldDecoration(
-                      context,
-                      hint: 'e.g., Freezer, Medicine cabinet',
-                    ),
-                  ),
+                field: WizardTextField36(
+                  controller: _backupVialsStorageCtrl,
+                  hint: 'e.g., Freezer, Medicine cabinet',
                 ),
               ),
               buildHelperText(
