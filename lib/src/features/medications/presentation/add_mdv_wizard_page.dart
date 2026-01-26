@@ -172,6 +172,26 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _perMlCtrl.text = m.perMlValue?.toString() ?? '';
       _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
 
+      // Prefer the medication-owned saved reconstitution (if present) so the
+      // calculator opens with the same prior dose/diluent/syringe defaults.
+      if (m.form == MedicationForm.multiDoseVial) {
+        final owned = _savedReconRepo.ownedForMedication(m.id);
+        if (owned != null) {
+          _reconResult = ReconstitutionResult(
+            perMlConcentration: owned.perMlConcentration,
+            solventVolumeMl: owned.solventVolumeMl,
+            recommendedUnits: owned.recommendedUnits,
+            syringeSizeMl: owned.syringeSizeMl,
+            diluentName: owned.diluentName,
+            recommendedDose: owned.recommendedDose,
+            doseUnit: owned.doseUnit,
+            maxVialSizeMl: owned.maxVialSizeMl,
+          );
+          _vialVolumeCtrl.text = owned.solventVolumeMl.toString();
+          _perMlCtrl.text = owned.perMlConcentration.toString();
+        }
+      }
+
       // Reconstituted Vial
       _activeVialVolumeMlCtrl.text = m.containerVolumeMl?.toString() ?? '0';
       _activeVialLowStockMlCtrl.text =
@@ -809,8 +829,13 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     ReconstitutionCalculatorDialog(
                       initialStrengthValue: strength,
                       unitLabel: _strengthUnit.name,
+                      initialDiluentName: _reconResult?.diluentName,
+                      initialDoseValue: _reconResult?.recommendedDose,
+                      initialDoseUnit: _reconResult?.doseUnit,
                       initialSyringeSize: initialSyringe,
-                      initialVialSize: _reconResult?.solventVolumeMl,
+                      initialVialSize:
+                          _reconResult?.solventVolumeMl ??
+                          double.tryParse(_vialVolumeCtrl.text.trim()),
                     ),
               ),
             );

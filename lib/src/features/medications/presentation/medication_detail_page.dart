@@ -2595,12 +2595,29 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final box = Hive.box<Medication>('medications');
     final latest = box.get(med.id) ?? med;
 
-    final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
-    final initialDoseUnit = med.strengthUnit.name;
-    final initialSyringe =
-        (latest.volumePerDose != null && latest.volumePerDose! > 0)
-        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
-        : SyringeSizeMl.ml1;
+    final savedRecon = SavedReconstitutionRepository().ownedForMedication(
+      latest.id,
+    );
+
+    final initialDoseAmount =
+        (savedRecon?.recommendedDose != null && (savedRecon?.recommendedDose ?? 0) > 0)
+        ? savedRecon!.recommendedDose
+        : _inferDoseAmountFromSavedRecon(latest);
+    final initialDoseUnit =
+        (savedRecon?.doseUnit != null && savedRecon!.doseUnit!.trim().isNotEmpty)
+        ? savedRecon.doseUnit!.trim()
+        : med.strengthUnit.name;
+
+    SyringeSizeMl initialSyringe;
+    if (savedRecon != null && savedRecon.syringeSizeMl > 0) {
+      initialSyringe = _inferSyringeSizeFromDoseVolumeMl(
+        savedRecon.syringeSizeMl,
+      );
+    } else if (latest.volumePerDose != null && latest.volumePerDose! > 0) {
+      initialSyringe = _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!);
+    } else {
+      initialSyringe = SyringeSizeMl.ml1;
+    }
 
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: context,
@@ -2618,8 +2635,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           initialDoseValue: initialDoseAmount,
           initialDoseUnit: initialDoseUnit,
           initialSyringeSize: initialSyringe,
-          initialVialSize: latest.containerVolumeMl,
-          initialDiluentName: latest.diluentName,
+          initialVialSize: savedRecon?.solventVolumeMl ?? latest.containerVolumeMl,
+          initialDiluentName: savedRecon?.diluentName ?? latest.diluentName,
         ),
       ),
     );

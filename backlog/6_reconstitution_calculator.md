@@ -29,7 +29,7 @@
 
 # Reconstitution Calculator - In Edit Med
 ## Requests
-- [ ] Saved Recon needs to be the defauklt settings for doses.
+- [x] Saved Recon needs to be the defauklt settings for doses.
 - [ ] Saved
 
 
