@@ -1,6 +1,7 @@
 # Reconstitution Calculator
 ## Requests
 - [x] The Saving and Loading of Reconstitutions should be within the calcualtor. Should be able to select a saved recon from the top via drop down or create new. 
+ - [ ] You have made this on the Card, not within the calculator screen. 
 - [x] I would think of 2 types of recons to save. One that is perforemd by the stand alone calculator, and one that is done within a Add Med or Edit Med. 
     - [x] If saving from Add med, the medicaiton name is already set from the medicaiont parent Med. 
     - [x] If saving via the Stand Alone Calculator, the Med Name needs to be entered. 
@@ -8,6 +9,7 @@
 - [x] Recons that are saved to a medication need to be deleted when the parent medicaiont is deleted. 
 - [x] Recons thata re saved via stand alone and linked to a medication are not to be deleted when deleting paired medicaiotn. 
 - [x] On stand alone recon calcualtor provide an option to delete saved recons. 
+- [ ] The stand alone calcualtor is some other fucking bullshit screen. It is not to be used I want the dark blue one accessible from add med or from the main menu. How hard ius this to FUCKING IMPEKMEENT YOU FUCKING PEICE OF SHIT. I HAVE EXPLAINED THIS 4000 times and you have not fixed it FFUCCCCKKKKKKQ!!!!!!
 
 # Reconstitution Calculator - In Add Med Wizard
 
@@ -31,11 +33,14 @@
 # Reconstitution Calculator - In Edit Med
 ## Requests
 - [x] Saved Recon needs to be the defauklt settings for doses.
-- [ ] Saved
+
 
 
 # Reconstitution Calculator - Med Details Card
-## Requests
+## Request
+- [ ] Remove the recaluculate and use saved buttons. 
+- [ ] Selecting the card should open the calculator. 
+- [ ] Where are the units of the sysringe and syrionge size on this card. 
 
 # Reconstitution Calculator - Stand Alone - Main Menu
 ## Requests
