@@ -32,7 +32,7 @@
 
 ## Recommendations
 - [ ] Add visual regression tests for month/week grids (overflows are easy to reintroduce).
-- [ ] Consider unifying Day View + Dose Stage layout code to avoid divergence.
+- [x] Consider unifying Day View + Dose Stage layout code to avoid divergence.
     
 
 

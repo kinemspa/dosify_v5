@@ -199,6 +199,7 @@ const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
 const double kCalendarDoseIndicatorBorderRadius = 2; // Subtle rounding for dot
 const double kCalendarDoseIndicatorSpacing = 2;
+const double kCalendarEmptyStateIconSize = 64;
 
 /// Calendar selected-day (Dose Card Stage) layout
 const double kCalendarStageHourLabelWidth = 48;

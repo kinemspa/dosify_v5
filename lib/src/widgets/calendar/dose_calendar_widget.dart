@@ -21,6 +21,7 @@ import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
 import 'package:dosifi_v5/src/widgets/up_next_dose_card.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -951,18 +952,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
     final hours = dosesByHour.keys.toList()..sort();
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     if (dayDoses.isEmpty) {
-      return Center(
-        child: Text(
-          'No doses scheduled',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withValues(alpha: kOpacityLow),
-          ),
-        ),
-      );
+      return const CalendarNoDosesState(showIcon: false, compact: true);
     }
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
@@ -1071,27 +1062,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       : safeBottom + kSpacingXXL + kSpacingXL;
 
     if (dayDoses.isEmpty) {
-      final theme = Theme.of(context);
-      final cs = theme.colorScheme;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_available,
-              size: 64,
-              color: cs.primary.withAlpha((0.3 * 255).round()),
-            ),
-            const SizedBox(height: kSectionSpacing),
-            Text(
-              'No doses scheduled',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: cs.onSurface.withAlpha((0.6 * 255).round()),
-              ),
-            ),
-          ],
-        ),
-      );
+      return const CalendarNoDosesState();
     }
 
     return GestureDetector(
@@ -1179,7 +1150,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                 vertical: kSpacingM,
               ),
               child: Text(
-                'Hour: ${_formatSelectedHour(selectedHour)}',
+                'Hour: ${formatCalendarHour(selectedHour)}',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -1187,16 +1158,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ),
             Expanded(
               child: dayDoses.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No doses scheduled',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(
-                            alpha: kOpacityLow,
-                          ),
-                        ),
-                      ),
-                    )
+                  ? const CalendarNoDosesState(showIcon: false, compact: true)
                   : ListView.builder(
                       padding: calendarStageListPadding(listBottomPadding),
                       itemCount: dayDoses.length,
@@ -1276,13 +1238,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         ),
       ),
     );
-  }
-
-  String _formatSelectedHour(int hour) {
-    if (hour == 0) return '12 AM';
-    if (hour < 12) return '$hour AM';
-    if (hour == 12) return '12 PM';
-    return '${hour - 12} PM';
   }
 
   Widget _buildDoseCardFor(CalculatedDose dose) {
@@ -1392,16 +1347,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             // Dose list
             Expanded(
               child: dayDoses.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No doses scheduled',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(
-                            alpha: kOpacityLow,
-                          ),
-                        ),
-                      ),
-                    )
+                  ? const CalendarNoDosesState(showIcon: false, compact: true)
                   : Scrollbar(
                       controller: _selectedDayScrollController,
                       thumbVisibility: true,
@@ -1441,7 +1387,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           Padding(
             padding: kCalendarStageHourLabelPadding,
             child: Text(
-              _formatSelectedHour(hour),
+              formatCalendarHour(hour),
               textAlign: TextAlign.left,
               style: calendarStageHourLabelTextStyle(context),
             ),

@@ -1,8 +1,8 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_dose_block.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 /// A day view showing an hourly timeline with dose blocks.
 ///
@@ -107,38 +107,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     final hasDoses = widget.doses.isNotEmpty;
 
     if (!hasDoses) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_available,
-              size: 64,
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withAlpha((0.3 * 255).round()),
-            ),
-            const SizedBox(height: kSectionSpacing),
-            Text(
-              'No doses scheduled',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withAlpha((0.6 * 255).round()),
-              ),
-            ),
-            const SizedBox(height: kCardInnerSpacing),
-            Text(
-              DateFormat.yMMMMd().format(widget.date),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withAlpha((0.4 * 255).round()),
-              ),
-            ),
-          ],
-        ),
-      );
+      return CalendarNoDosesState(date: widget.date, showDate: true);
     }
 
     return GestureDetector(
@@ -204,13 +173,6 @@ class _HourRow extends StatelessWidget {
   final bool isSelected;
   final void Function(int hour)? onHourTap;
 
-  String _formatHour(int hour) {
-    if (hour == 0) return '12 AM';
-    if (hour < 12) return '$hour AM';
-    if (hour == 12) return '12 PM';
-    return '${hour - 12} PM';
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -223,19 +185,7 @@ class _HourRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Time label
-          SizedBox(
-            width: kCalendarStageHourLabelWidth,
-            child: Padding(
-              padding: kCalendarStageHourLabelPadding,
-              child: Text(
-                _formatHour(hour),
-                textAlign: TextAlign.left,
-                style: calendarStageHourLabelTextStyle(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
+          CalendarHourLabel(hour: hour, width: kCalendarStageHourLabelWidth),
           // Hour content area
           Expanded(
             child: Container(
