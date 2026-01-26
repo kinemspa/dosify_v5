@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
 import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -117,10 +118,18 @@ class _AddTabletWizardPageState
       case 3: // Storage
         return true;
       case 4: // Review
-        return true;
+        return _missingRequiredForSave().isEmpty;
       default:
         return false;
     }
+  }
+
+  List<String> _missingRequiredForSave() {
+    final missing = <String>[];
+    if (_nameCtrl.text.trim().isEmpty) missing.add('Name');
+    final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+    if (strength <= 0) missing.add('Strength');
+    return missing;
   }
 
   @override
@@ -792,6 +801,7 @@ class _AddTabletWizardPageState
   String _newId() => DateTime.now().millisecondsSinceEpoch.toString();
 
   Widget _buildReviewStep() {
+    final missing = _missingRequiredForSave();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
     final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
     final threshold = _lowStockEnabled
@@ -808,6 +818,14 @@ class _AddTabletWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
+        if (missing.isNotEmpty) ...[
+          MissingRequiredFieldsCard(
+            fields: missing,
+            title: 'Required info missing',
+            message: 'Go back and fill the required fields (*) before saving.',
+          ),
+          const SizedBox(height: kSpacingM),
+        ],
         SectionFormCard(
           neutral: true,
           title: 'Medication Details',

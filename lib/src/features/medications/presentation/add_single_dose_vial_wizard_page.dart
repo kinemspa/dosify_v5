@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
+import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
@@ -122,10 +123,20 @@ class _AddSingleDoseVialWizardPageState
       case 3: // Storage
         return true;
       case 4: // Review
-        return true;
+        return _missingRequiredForSave().isEmpty;
       default:
         return false;
     }
+  }
+
+  List<String> _missingRequiredForSave() {
+    final missing = <String>[];
+    if (_nameCtrl.text.trim().isEmpty) missing.add('Name');
+    final conc = double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
+    if (conc <= 0) missing.add('Concentration');
+    final vol = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
+    if (vol <= 0) missing.add('Volume');
+    return missing;
   }
 
   @override
@@ -880,6 +891,7 @@ class _AddSingleDoseVialWizardPageState
   String _newId() => DateTime.now().millisecondsSinceEpoch.toString();
 
   Widget _buildReviewStep() {
+    final missing = _missingRequiredForSave();
     final concentration =
         double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
     final volume = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
@@ -898,6 +910,14 @@ class _AddSingleDoseVialWizardPageState
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
+        if (missing.isNotEmpty) ...[
+          MissingRequiredFieldsCard(
+            fields: missing,
+            title: 'Required info missing',
+            message: 'Go back and fill the required fields (*) before saving.',
+          ),
+          const SizedBox(height: kSpacingM),
+        ],
         SectionFormCard(
           neutral: true,
           title: 'Medication Details',

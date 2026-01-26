@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
@@ -202,10 +203,20 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       case 3: // Sealed Inventory
         return true; // Optional
       case 4: // Review
-        return true;
+        return _missingRequiredForSave().isEmpty;
       default:
         return false;
     }
+  }
+
+  List<String> _missingRequiredForSave() {
+    final missing = <String>[];
+    if (_nameCtrl.text.trim().isEmpty) missing.add('Name');
+    final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+    if (strength <= 0) missing.add('Strength');
+    final volume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
+    if (volume <= 0) missing.add('Total vial volume');
+    return missing;
   }
 
   void _nextStep() {
@@ -1323,6 +1334,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   Widget _buildReviewStep() {
+    final missing = _missingRequiredForSave();
     String fmtCtrl(TextEditingController controller) {
       final text = controller.text.trim();
       final v = double.tryParse(text);
@@ -1349,6 +1361,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
+        if (missing.isNotEmpty) ...[
+          MissingRequiredFieldsCard(
+            fields: missing,
+            title: 'Required info missing',
+            message: 'Go back and fill the required fields (*) before saving.',
+          ),
+          const SizedBox(height: kSpacingM),
+        ],
         // Basic Info
         SectionFormCard(
           title: 'Step 1: Basic Information',
