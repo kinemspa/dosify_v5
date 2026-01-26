@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 /// Centralized reconstitution summary card widget
@@ -96,6 +97,8 @@ class ReconstitutionSummaryCard extends StatelessWidget {
 
     final hasVolumePerDose = volumePerDose != null && volumePerDose! > 0;
     final hasSyringeSize = syringeSizeMl != null && syringeSizeMl! > 0;
+    final unitsPerMl = SyringeType.ml_1_0.unitsPerMl;
+    final doseUnits = hasVolumePerDose ? (volumePerDose! * unitsPerMl) : null;
 
     return Container(
       padding: showCardSurface
@@ -256,10 +259,27 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ),
           ],
 
+          if (hasVolumePerDose && doseUnits != null) ...[
+            const SizedBox(height: 6),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: baseStyle,
+                children: [
+                  const TextSpan(text: 'Syringe Units  '),
+                  TextSpan(
+                    text: '${doseUnits.round()} U',
+                    style: valueStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           if (hasSyringeSize) ...[
             SizedBox(height: compact ? 8 : 12),
             Text(
-              '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * 100).round()} U) Syringe',
+              '${_formatNoTrailing(syringeSizeMl!)} mL (${(syringeSizeMl! * unitsPerMl).round()} U) Syringe',
               textAlign: TextAlign.center,
               style: reconSummarySyringeLineTextStyle(
                 context,
@@ -272,8 +292,8 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             const SizedBox(height: 6),
             // Syringe gauge showing target dose
             WhiteSyringeGauge(
-              totalUnits: (syringeSizeMl ?? 3.0) * 100,
-              fillUnits: volumePerDose! * 100,
+              totalUnits: (syringeSizeMl ?? 3.0) * unitsPerMl,
+              fillUnits: volumePerDose! * unitsPerMl,
               showValueLabel: true,
             ),
             const SizedBox(height: 8), // Extra padding to prevent cropping
