@@ -38,7 +38,7 @@
 
 # Reconstitution Calculator - Med Details Card
 ## Request
-- [ ] Remove the recaluculate and use saved buttons. 
+- [x] Remove the recaluculate and use saved buttons. 
 - [x] Selecting the card should open the calculator. 
 - [ ] Where are the units of the sysringe and syrionge size on this card. 
 

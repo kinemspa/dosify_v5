@@ -9,7 +9,6 @@ import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
@@ -108,58 +107,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     }
   }
 
-  Unit _unitFromName(String name) {
-    for (final unit in Unit.values) {
-      if (unit.name == name) return unit;
-    }
-    return Unit.mg;
-  }
-
-  Future<void> _useSavedReconstitution() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        final height = MediaQuery.of(context).size.height;
-        return SizedBox(
-          height: height * 0.8,
-          child: SavedReconstitutionSheet(
-            repo: _savedReconRepo,
-            onSelect: (item) {
-              final result = ReconstitutionResult(
-                perMlConcentration: item.perMlConcentration,
-                solventVolumeMl: item.solventVolumeMl,
-                recommendedUnits: item.recommendedUnits,
-                syringeSizeMl: item.syringeSizeMl,
-                diluentName: item.diluentName,
-                recommendedDose: item.recommendedDose,
-                doseUnit: item.doseUnit,
-                maxVialSizeMl: item.maxVialSizeMl,
-              );
-
-              setState(() {
-                _strengthValueCtrl.text =
-                    item.strengthValue == item.strengthValue.roundToDouble()
-                    ? item.strengthValue.toInt().toString()
-                    : item.strengthValue.toStringAsFixed(2);
-                _strengthUnit = _unitFromName(item.strengthUnit);
-
-                _reconResult = result;
-                _vialVolumeCtrl.text = result.solventVolumeMl.toStringAsFixed(
-                  2,
-                );
-                _perMlCtrl.text = result.perMlConcentration.toString();
-                _activeVialVolumeMlCtrl.text = result.solventVolumeMl
-                    .toStringAsFixed(2);
-              });
-
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      },
-    );
-  }
+  // Saved reconstitution selection happens inside the calculator UI.
 
   void _loadInitialData() {
     final m = widget.initial;
@@ -852,7 +800,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               });
             }
           },
-          onUseSaved: _useSavedReconstitution,
           result: _reconResult,
         ),
         const SizedBox(height: 16),
@@ -1843,11 +1790,9 @@ class _ReconstitutionInfoCard extends StatelessWidget {
     required this.onCalculate,
     required this.medicationName,
     this.result,
-    this.onUseSaved,
   });
 
   final VoidCallback onCalculate;
-  final VoidCallback? onUseSaved;
   final String medicationName;
   final ReconstitutionResult? result;
 
@@ -1861,137 +1806,118 @@ class _ReconstitutionInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: reconBackgroundDarkColor(context),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onCalculate,
         borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.calculate,
-                color: Colors.white.withValues(alpha: 0.9),
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Reconstitution Calculator',
-                style: bodyTextStyle(context)?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontWeight: kFontWeightBold,
-                ),
-              ),
-            ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: reconBackgroundDarkColor(context),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(height: 12),
-          if (result == null)
-            Text(
-              'Multi-dose vials need to be mixed with liquid (reconstituted). Use the calculator to determine the correct volume.',
-              style: mutedTextStyle(
-                context,
-              )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
-            )
-          else ...[
-            // "Reconstitute [MEDNAME] with [AMOUNT] of [RECONNAME]"
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: reconSummaryBaseTextStyle(
-                  context,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onPrimary
-                      .withValues(alpha: kReconTextHighOpacity),
-                ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  const TextSpan(text: 'Reconstitute '),
-                  if (medicationName.isNotEmpty) ...[
-                    TextSpan(
-                      text: medicationName,
-                      style: reconSummaryMedicationNameTextStyle(
-                        context,
-                        compact: false,
-                        color: Theme.of(context).colorScheme.primary,
+                  Icon(
+                    Icons.calculate,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Reconstitution Calculator',
+                      style: bodyTextStyle(context)?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: kFontWeightBold,
                       ),
                     ),
-                    const TextSpan(text: ' '),
-                  ],
-                  const TextSpan(text: 'with '),
-                  TextSpan(
-                    text: '${_formatNoTrailing(result!.solventVolumeMl)} mL',
-                    style: reconSummaryHugeVolumeTextStyle(
-                      context,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: kFontWeightExtraBold,
-                    ),
                   ),
-                  if (result!.diluentName != null &&
-                      result!.diluentName!.isNotEmpty) ...[
-                    TextSpan(
-                      text: '  of  ',
-                      style: reconSummaryOfTextStyle(
-                        context,
-                        compact: false,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withValues(alpha: kReconTextHighOpacity),
-                        fontWeight: kFontWeightNormal,
-                      ),
-                    ),
-                    TextSpan(
-                      text: result!.diluentName!,
-                      style: reconSummaryMedicationNameTextStyle(
-                        context,
-                        compact: false,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: kFontWeightSemiBold,
-                      ),
-                    ),
-                  ],
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withValues(alpha: 0.8),
+                  ),
                 ],
               ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: onCalculate,
-              icon: const Icon(Icons.science),
-              label: Text(result == null ? 'Open Calculator' : 'Recalculate'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                side: BorderSide(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onPrimary
-                      .withValues(alpha: 0.3),
+              const SizedBox(height: 12),
+              if (result == null)
+                Text(
+                  'Multi-dose vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
+                  style: mutedTextStyle(
+                    context,
+                  )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
+                )
+              else ...[
+                // "Reconstitute [MEDNAME] with [AMOUNT] of [RECONNAME]"
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: reconSummaryBaseTextStyle(
+                      context,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withValues(alpha: kReconTextHighOpacity),
+                    ),
+                    children: [
+                      const TextSpan(text: 'Reconstitute '),
+                      if (medicationName.isNotEmpty) ...[
+                        TextSpan(
+                          text: medicationName,
+                          style: reconSummaryMedicationNameTextStyle(
+                            context,
+                            compact: false,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: kFontWeightBold,
+                          ),
+                        ),
+                        const TextSpan(text: ' '),
+                      ],
+                      const TextSpan(text: 'with '),
+                      TextSpan(
+                        text:
+                            '${_formatNoTrailing(result!.solventVolumeMl)} mL',
+                        style: reconSummaryHugeVolumeTextStyle(
+                          context,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: kFontWeightExtraBold,
+                        ),
+                      ),
+                      if (result!.diluentName != null &&
+                          result!.diluentName!.isNotEmpty) ...[
+                        TextSpan(
+                          text: '  of  ',
+                          style: reconSummaryOfTextStyle(
+                            context,
+                            compact: false,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withValues(alpha: kReconTextHighOpacity),
+                            fontWeight: kFontWeightNormal,
+                          ),
+                        ),
+                        TextSpan(
+                          text: result!.diluentName!,
+                          style: reconSummaryMedicationNameTextStyle(
+                            context,
+                            compact: false,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: kFontWeightSemiBold,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              ],
+            ],
           ),
-          if (onUseSaved != null) ...[
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: onUseSaved,
-                icon: const Icon(Icons.bookmarks),
-                label: const Text('Use Saved'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
-                ),
-              ),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
