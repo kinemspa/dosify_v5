@@ -5,6 +5,9 @@
 
 ## Requests
 - [x] Can we remove the card outline and colour for the large cards? I would just like the headings and the objects within to be defined. 
+- [ ] Remove the shortcut buttons on this page. Medicaitons, Schedules, Calendar. 
+- [ ] Heading is not to be Dosifi v5. Maybe Home or Dashboard. 
+
 
 ### Up Next - Today
 
