@@ -1,12 +1,12 @@
 # Reconstitution Calculator
 ## Requests
 - [x] The Saving and Loading of Reconstitutions should be within the calcualtor. Should be able to select a saved recon from the top via drop down or create new. 
-- [ ] I would think of 2 types of recons to save. One that is perforemd by the stand alone calculator, and one that is done within a Add Med or Edit Med. 
-    - [ ] If saving from Add med, the medicaiton name is already set from the medicaiont parent Med. 
+- [x] I would think of 2 types of recons to save. One that is perforemd by the stand alone calculator, and one that is done within a Add Med or Edit Med. 
+    - [x] If saving from Add med, the medicaiton name is already set from the medicaiont parent Med. 
     - [x] If saving via the Stand Alone Calculator, the Med Name needs to be entered. 
-    - [ ] I am not sure how to name them. Maybe Med Name - then strength, dose and volume. Up for recommendations here. 
-- [ ] Recons that are saved to a medication need to be deleted when the parent medicaiont is deleted. 
-- [ ] Recons thata re saved via stand alone and linked to a medication are not to be deleted when deleting paired medicaiotn. 
+    - [x] I am not sure how to name them. Maybe Med Name - then strength, dose and volume. Up for recommendations here. 
+- [x] Recons that are saved to a medication need to be deleted when the parent medicaiont is deleted. 
+- [x] Recons thata re saved via stand alone and linked to a medication are not to be deleted when deleting paired medicaiotn. 
 - [x] On stand alone recon calcualtor provide an option to delete saved recons. 
 
 # Reconstitution Calculator - In Add Med Wizard
@@ -17,8 +17,9 @@
     - [x] This was not done. WHy do you lie to me?
     - [x] Still not Done. 
 - [x] Add a “Load saved reconstitution” entry point on the main page for faster access.
-- [ ] All reconstitutions that are saved via Add med need to have All settigns saved and stored. 
+- [x] All reconstitutions that are saved via Add med need to have All settigns saved and stored. 
 - [x] It should be easy to cycle through the loaded recons via the dropdown. 
+- [x] The summary card in the calculator at the bottom is not including the Med Name. Reconstitute {MEDSTRENGTH} of {MEDNAME}. It only states Med Strenght. 
 
 
 ## Recommendations

@@ -16,6 +16,7 @@ class SavedReconstitutionSheet extends StatelessWidget {
     required this.onSelect,
     super.key,
     this.allowManage = false,
+    this.includeMedicationOwned = false,
     this.onRename,
     this.onDelete,
   });
@@ -23,6 +24,7 @@ class SavedReconstitutionSheet extends StatelessWidget {
   final SavedReconstitutionRepository repo;
   final ValueChanged<SavedReconstitutionCalculation> onSelect;
   final bool allowManage;
+  final bool includeMedicationOwned;
   final Future<void> Function(SavedReconstitutionCalculation item)? onRename;
   final Future<void> Function(SavedReconstitutionCalculation item)? onDelete;
 
@@ -64,7 +66,9 @@ class SavedReconstitutionSheet extends StatelessWidget {
               child: ValueListenableBuilder<Box<SavedReconstitutionCalculation>>(
                 valueListenable: repo.listenable(),
                 builder: (context, box, _) {
-                  final items = repo.allSorted();
+                  final items = repo.allSorted(
+                    includeOwned: includeMedicationOwned,
+                  );
                   if (items.isEmpty) {
                     return Padding(
                       padding: const EdgeInsets.all(kSpacingL),

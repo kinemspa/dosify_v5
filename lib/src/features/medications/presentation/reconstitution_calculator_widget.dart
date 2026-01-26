@@ -953,6 +953,13 @@ class _ReconstitutionCalculatorWidgetState
                         fontWeight: kFontWeightExtraBold,
                       );
 
+                      // Always show a medication name in the summary line.
+                      // Some entry points (e.g. standalone calculator) may not provide one.
+                      final summaryMedicationName =
+                          (widget.medicationName ?? '').trim().isNotEmpty
+                              ? widget.medicationName!.trim()
+                              : 'Medication';
+
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -967,14 +974,11 @@ class _ReconstitutionCalculatorWidgetState
                                       '${_formatNoTrailing(widget.initialStrengthValue)} ${widget.unitLabel}',
                                   style: strengthStyle,
                                 ),
-                                if (widget.medicationName != null &&
-                                    widget.medicationName!.isNotEmpty) ...[
-                                  TextSpan(text: '  of  ', style: ofStyle),
-                                  TextSpan(
-                                    text: widget.medicationName,
-                                    style: medicationNameStyle,
-                                  ),
-                                ],
+                                TextSpan(text: '  of  ', style: ofStyle),
+                                TextSpan(
+                                  text: summaryMedicationName,
+                                  style: medicationNameStyle,
+                                ),
                               ],
                             ),
                           ),

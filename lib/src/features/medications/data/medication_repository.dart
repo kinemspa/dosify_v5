@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 
@@ -46,6 +47,16 @@ class MedicationRepository {
         }
       }
       await scheduleBox.delete(s.id);
+    }
+
+    // Delete medication-owned saved reconstitutions.
+    // Standalone saved recons are preserved (ownerMedicationId == null).
+    try {
+      await SavedReconstitutionRepository().deleteForMedication(id);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Failed to delete owned saved reconstitution for med $id: $e');
+      }
     }
 
     await _box.delete(id);

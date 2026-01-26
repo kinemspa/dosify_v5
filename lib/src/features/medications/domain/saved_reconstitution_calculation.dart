@@ -14,6 +14,7 @@ class SavedReconstitutionCalculation {
     required this.syringeSizeMl,
     DateTime? createdAt,
     DateTime? updatedAt,
+    this.ownerMedicationId,
     this.medicationName,
     this.diluentName,
     this.recommendedDose,
@@ -27,6 +28,14 @@ class SavedReconstitutionCalculation {
 
   @HiveField(1)
   final String name;
+
+  /// When set, this saved reconstitution is owned by a specific medication and
+  /// should be deleted when the parent medication is deleted.
+  ///
+  /// Standalone saved reconstitutions should leave this null even if they set
+  /// [medicationName] for display/search purposes.
+  @HiveField(15)
+  final String? ownerMedicationId;
 
   @HiveField(2)
   final String? medicationName;
@@ -79,6 +88,7 @@ class SavedReconstitutionCalculation {
   SavedReconstitutionCalculation copyWith({
     String? id,
     String? name,
+    String? ownerMedicationId,
     String? medicationName,
     double? strengthValue,
     String? strengthUnit,
@@ -96,6 +106,7 @@ class SavedReconstitutionCalculation {
     return SavedReconstitutionCalculation(
       id: id ?? this.id,
       name: name ?? this.name,
+      ownerMedicationId: ownerMedicationId ?? this.ownerMedicationId,
       medicationName: medicationName ?? this.medicationName,
       strengthValue: strengthValue ?? this.strengthValue,
       strengthUnit: strengthUnit ?? this.strengthUnit,
@@ -129,6 +140,7 @@ class SavedReconstitutionCalculationAdapter
     return SavedReconstitutionCalculation(
       id: fields[0] as String,
       name: fields[1] as String,
+      ownerMedicationId: fields[15] as String?,
       medicationName: fields[2] as String?,
       strengthValue: fields[3] as double,
       strengthUnit: fields[4] as String,
@@ -148,7 +160,7 @@ class SavedReconstitutionCalculationAdapter
   @override
   void write(BinaryWriter writer, SavedReconstitutionCalculation obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -178,6 +190,8 @@ class SavedReconstitutionCalculationAdapter
       ..writeByte(13)
       ..write(obj.createdAt)
       ..writeByte(14)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(15)
+      ..write(obj.ownerMedicationId);
   }
 }

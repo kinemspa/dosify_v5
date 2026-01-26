@@ -5,6 +5,7 @@ import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
@@ -372,6 +373,44 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     );
 
     await repo.upsert(med);
+
+    // Also persist the medication's current reconstitution settings as an
+    // owned saved reconstitution. This is used for defaults (e.g. dose) and
+    // is deleted automatically when the medication is deleted.
+    if (med.form == MedicationForm.multiDoseVial && _reconResult != null) {
+      final ownedId = SavedReconstitutionRepository.ownedIdForMedication(med.id);
+      final existing = _savedReconRepo.get(ownedId);
+      final ownedName = _savedReconRepo.buildOwnedDisplayName(
+        medicationName: med.name,
+        strengthValue: med.strengthValue,
+        strengthUnit: med.strengthUnit.name,
+        solventVolumeMl: _reconResult!.solventVolumeMl,
+        recommendedDose: _reconResult!.recommendedDose,
+        doseUnit: _reconResult!.doseUnit,
+      );
+
+      final owned = SavedReconstitutionCalculation(
+        id: ownedId,
+        name: ownedName,
+        ownerMedicationId: med.id,
+        medicationName: med.name,
+        strengthValue: med.strengthValue,
+        strengthUnit: med.strengthUnit.name,
+        solventVolumeMl: _reconResult!.solventVolumeMl,
+        perMlConcentration: _reconResult!.perMlConcentration,
+        recommendedUnits: _reconResult!.recommendedUnits,
+        syringeSizeMl: _reconResult!.syringeSizeMl,
+        diluentName: _reconResult!.diluentName,
+        recommendedDose: _reconResult!.recommendedDose,
+        doseUnit: _reconResult!.doseUnit,
+        maxVialSizeMl: _reconResult!.maxVialSizeMl,
+        createdAt: existing?.createdAt,
+        updatedAt: DateTime.now(),
+      );
+
+      await _savedReconRepo.upsert(owned);
+    }
+
     if (!mounted) return;
     if (widget.initial != null) {
       context.pop();

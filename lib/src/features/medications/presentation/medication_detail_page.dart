@@ -20,9 +20,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
@@ -2624,6 +2626,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     if (result == null) return;
 
+    final savedReconRepo = SavedReconstitutionRepository();
+
     await box.put(
       latest.id,
       latest.copyWith(
@@ -2635,6 +2639,46 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         reconstitutedAt: DateTime.now(),
       ),
     );
+
+    // Persist/update the medication-owned saved reconstitution so other flows
+    // (like schedule defaults) can reuse it.
+    try {
+      final ownedId = SavedReconstitutionRepository.ownedIdForMedication(
+        latest.id,
+      );
+      final existing = savedReconRepo.get(ownedId);
+      final ownedName = savedReconRepo.buildOwnedDisplayName(
+        medicationName: latest.name,
+        strengthValue: latest.strengthValue,
+        strengthUnit: latest.strengthUnit.name,
+        solventVolumeMl: result.solventVolumeMl,
+        recommendedDose: result.recommendedDose,
+        doseUnit: result.doseUnit,
+      );
+
+      await savedReconRepo.upsert(
+        SavedReconstitutionCalculation(
+          id: ownedId,
+          name: ownedName,
+          ownerMedicationId: latest.id,
+          medicationName: latest.name,
+          strengthValue: latest.strengthValue,
+          strengthUnit: latest.strengthUnit.name,
+          solventVolumeMl: result.solventVolumeMl,
+          perMlConcentration: result.perMlConcentration,
+          recommendedUnits: result.recommendedUnits,
+          syringeSizeMl: result.syringeSizeMl,
+          diluentName: result.diluentName,
+          recommendedDose: result.recommendedDose,
+          doseUnit: result.doseUnit,
+          maxVialSizeMl: result.maxVialSizeMl,
+          createdAt: existing?.createdAt,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    } catch (_) {
+      // Best-effort; editing the medication should still succeed.
+    }
 
     if (!mounted) return;
     ScaffoldMessenger.of(context)

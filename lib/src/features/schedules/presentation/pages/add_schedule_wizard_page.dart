@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
@@ -654,25 +655,54 @@ class _AddScheduleWizardPageState
           _doseUnit.text = 'vials';
           if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
         case MedicationForm.multiDoseVial:
-          final u = med.strengthUnit;
-          _doseUnit.text = u == Unit.unitsPerMl ? 'units' : 'mg';
+          final savedRecon = SavedReconstitutionRepository().ownedForMedication(
+            med.id,
+          );
+
           if (_doseValue.text.trim().isEmpty) {
-            if (u == Unit.mcgPerMl) {
-              _doseValue.text = fmt2(med.strengthValue);
-              _doseUnit.text = 'mcg';
-            } else if (u == Unit.mgPerMl) {
-              _doseValue.text = fmt2(med.strengthValue);
-              _doseUnit.text = 'mg';
-            } else if (u == Unit.gPerMl) {
-              _doseValue.text = fmt2(med.strengthValue);
-              _doseUnit.text = 'g';
-            } else if (u == Unit.unitsPerMl) {
-              _doseValue.text = fmt2(med.strengthValue);
-              _doseUnit.text = 'units';
-            } else {
-              _doseValue.text = '1';
+            final dose = savedRecon?.recommendedDose;
+            final unit = savedRecon?.doseUnit;
+            if (dose != null && dose > 0 && unit != null && unit.trim().isNotEmpty) {
+              _doseValue.text = fmt2(dose);
+              _doseUnit.text = unit.trim();
+              break;
+            }
+
+            // Fallback: infer dose amount from saved concentration + dose volume.
+            final perMl = med.perMlValue;
+            final volumeMl = med.volumePerDose;
+            if (perMl != null && volumeMl != null && perMl > 0 && volumeMl > 0) {
+              _doseValue.text = fmt2(perMl * volumeMl);
+              final u = med.strengthUnit;
+              if (u == Unit.mcg) {
+                _doseUnit.text = 'mcg';
+              } else if (u == Unit.mg) {
+                _doseUnit.text = 'mg';
+              } else if (u == Unit.g) {
+                _doseUnit.text = 'g';
+              } else if (u == Unit.units) {
+                _doseUnit.text = 'units';
+              } else {
+                _doseUnit.text = 'mg';
+              }
+              break;
             }
           }
+
+          if (_doseUnit.text.trim().isEmpty) {
+            final u = med.strengthUnit;
+            if (u == Unit.units) {
+              _doseUnit.text = 'units';
+            } else if (u == Unit.mcg) {
+              _doseUnit.text = 'mcg';
+            } else if (u == Unit.g) {
+              _doseUnit.text = 'g';
+            } else {
+              _doseUnit.text = 'mg';
+            }
+          }
+
+          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
       }
       _maybeAutoName();
     });

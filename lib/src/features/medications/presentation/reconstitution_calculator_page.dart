@@ -319,6 +319,7 @@ class _ReconstitutionCalculatorPageState
           child: SavedReconstitutionSheet(
             repo: _savedRepo,
             allowManage: true,
+            includeMedicationOwned: false,
             onRename: _renameSaved,
             onDelete: _deleteSaved,
             onSelect: (item) {
@@ -360,7 +361,7 @@ class _ReconstitutionCalculatorPageState
           ValueListenableBuilder(
             valueListenable: _savedRepo.listenable(),
             builder: (context, box, _) {
-              final saved = _savedRepo.allSorted();
+                  final saved = _savedRepo.allSorted(includeOwned: false);
               final hasSaved = saved.isNotEmpty;
 
               return SectionFormCard(
