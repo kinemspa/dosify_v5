@@ -73,6 +73,36 @@ double? _inferDoseAmountFromSavedRecon(Medication med) {
   return perMl * doseVolumeMl;
 }
 
+double? _inferDoseAmountFromReconCalc(SavedReconstitutionCalculation recon) {
+  if (recon.perMlConcentration <= 0) return null;
+  if (recon.recommendedUnits <= 0) return null;
+
+  final unitsPerMl = SyringeType.ml_1_0.unitsPerMl;
+  if (unitsPerMl <= 0) return null;
+
+  final doseVolumeMl = recon.recommendedUnits / unitsPerMl;
+  if (doseVolumeMl <= 0) return null;
+
+  return recon.perMlConcentration * doseVolumeMl;
+}
+
+double? _inferInitialDesiredDoseAmount(Medication med) {
+  final savedRecon = SavedReconstitutionRepository().ownedForMedication(med.id);
+  final savedDose = savedRecon?.recommendedDose;
+  if (savedDose != null && savedDose > 0) return savedDose;
+
+  final inferredFromSaved =
+      savedRecon != null ? _inferDoseAmountFromReconCalc(savedRecon) : null;
+  return inferredFromSaved ?? _inferDoseAmountFromSavedRecon(med);
+}
+
+String _inferInitialDesiredDoseUnit(Medication med) {
+  final savedRecon = SavedReconstitutionRepository().ownedForMedication(med.id);
+  final unit = savedRecon?.doseUnit?.trim();
+  if (unit != null && unit.isNotEmpty) return unit;
+  return med.strengthUnit.name;
+}
+
 class MedicationDetailPage extends ConsumerStatefulWidget {
   const MedicationDetailPage({super.key, this.medicationId, this.initial});
   final String? medicationId;
@@ -2614,14 +2644,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.id,
     );
 
-    final initialDoseAmount =
-        (savedRecon?.recommendedDose != null && (savedRecon?.recommendedDose ?? 0) > 0)
-        ? savedRecon!.recommendedDose
-        : _inferDoseAmountFromSavedRecon(latest);
-    final initialDoseUnit =
-        (savedRecon?.doseUnit != null && savedRecon!.doseUnit!.trim().isNotEmpty)
-        ? savedRecon.doseUnit!.trim()
-        : med.strengthUnit.name;
+    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
+    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
 
     SyringeSizeMl initialSyringe;
     if (savedRecon != null && savedRecon.syringeSizeMl > 0) {
@@ -3369,8 +3393,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   String? topUpReconLabel;
 
   Future<void> pickReconstitution(BuildContext dialogContext) async {
-    final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
-    final initialDoseUnit = med.strengthUnit.name;
+    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
+    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
     final initialSyringe =
         (latest.volumePerDose != null && latest.volumePerDose! > 0)
         ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
@@ -3431,8 +3455,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   }
 
   Future<void> pickTopUpStrength(BuildContext dialogContext) async {
-    final initialDoseAmount = _inferDoseAmountFromSavedRecon(latest);
-    final initialDoseUnit = med.strengthUnit.name;
+    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
+    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
     final initialSyringe =
         (latest.volumePerDose != null && latest.volumePerDose! > 0)
         ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
