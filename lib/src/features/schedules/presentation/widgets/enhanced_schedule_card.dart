@@ -413,7 +413,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           _buildDetailRow(
                             context,
                             'Dose',
-                            '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                            _formatExpandedDoseDetails(
+                              metrics: metrics,
+                              strengthOrConcentrationLabel: strengthLabel,
+                              fallbackDose: '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                            ),
                           ),
                           _buildDetailRow(context, 'Times', _getTimesText()),
                           _buildDetailRow(context, 'Days', _getDaysText()),
@@ -837,6 +841,19 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     final endAt = widget.schedule.endAt;
     if (endAt == null) return '—';
     return DateFormat('MMM d, yyyy').format(endAt);
+  }
+
+  String _formatExpandedDoseDetails({
+    required String metrics,
+    required String strengthOrConcentrationLabel,
+    required String fallbackDose,
+  }) {
+    final m = metrics.trim();
+    final s = strengthOrConcentrationLabel.trim();
+
+    final base = m.isNotEmpty ? m : fallbackDose;
+    if (s.isEmpty) return base;
+    return '$base • $s';
   }
 
   String _getTimesText() {
