@@ -183,6 +183,14 @@ class _ReconstitutionCalculatorPageState
     return null;
   }
 
+  String _formatNoTrailing(double value) {
+    final str = value.toStringAsFixed(2);
+    if (str.contains('.')) {
+      return str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return str;
+  }
+
   Future<String?> _promptForName(
     BuildContext context, {
     String? initial,
@@ -232,9 +240,22 @@ class _ReconstitutionCalculatorPageState
       return;
     }
 
-    final defaultName = _medNameCtrl.text.trim().isNotEmpty
-        ? _medNameCtrl.text.trim()
-        : 'Reconstitution';
+    final baseName = _medNameCtrl.text.trim().isNotEmpty
+      ? _medNameCtrl.text.trim()
+      : 'Reconstitution';
+
+    final parts = <String>[baseName];
+    final dose = _lastResult!.recommendedDose;
+    final doseUnit = _lastResult!.doseUnit;
+    if (dose != null &&
+      dose > 0 &&
+      doseUnit != null &&
+      doseUnit.trim().isNotEmpty) {
+      parts.add('${_formatNoTrailing(dose)} ${doseUnit.trim()}');
+    }
+    parts.add('${_formatNoTrailing(_lastResult!.solventVolumeMl)} mL');
+
+    final defaultName = parts.join(' - ');
 
     final name = await _promptForName(context, initial: defaultName);
     if (name == null) return;
