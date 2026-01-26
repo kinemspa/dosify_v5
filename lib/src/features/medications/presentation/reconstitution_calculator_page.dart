@@ -9,7 +9,6 @@ import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -335,238 +334,289 @@ class _ReconstitutionCalculatorPageState
   @override
   Widget build(BuildContext context) {
     final strengthValue = double.tryParse(_strengthCtrl.text) ?? 0;
-    final medName = _medNameCtrl.text.trim().isNotEmpty
-        ? _medNameCtrl.text.trim()
-        : 'Medication';
+    final medName = _medNameCtrl.text.trim();
+    final fg = reconForegroundColor(context);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    Widget helper(String text) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(
+          text,
+          style: helperTextStyle(
+            context,
+          )?.copyWith(
+            color: fg.withValues(alpha: kReconTextMutedOpacity),
+            fontStyle: FontStyle.italic,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    BoxDecoration panelDecoration() {
+      return BoxDecoration(
+        color: reconBackgroundActiveColor(context),
+        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+        border: Border.all(
+          color: cs.primary.withValues(alpha: 0.18),
+          width: kBorderWidthThin,
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: GradientAppBar(
         title: 'Reconstitution Calculator',
-        actions: [
-          IconButton(
-            onPressed: _openSavedSheet,
-            icon: const Icon(Icons.bookmarks),
-            tooltip: 'Saved',
-          ),
-          IconButton(
-            onPressed: _canSave ? _saveCurrent : null,
-            icon: const Icon(Icons.save),
-            tooltip: 'Save',
-          ),
-        ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(kSpacingL),
-        children: [
-          ValueListenableBuilder(
-            valueListenable: _savedRepo.listenable(),
-            builder: (context, box, _) {
-                  final saved = _savedRepo.allSorted(includeOwned: false);
-              final hasSaved = saved.isNotEmpty;
-
-              return SectionFormCard(
-                title: 'Saved Reconstitutions',
-                neutral: true,
-                children: [
-                  LabelFieldRow(
-                    label: 'Load',
-                    field: SmallDropdown36<String>(
-                      value: _loadedSavedId ?? 'new',
-                      width: kSmallControlWidth * 2,
-                      items: [
-                        const DropdownMenuItem(
-                          value: 'new',
-                          child: Center(child: Text('New')),
-                        ),
-                        ...saved.map(
-                          (item) => DropdownMenuItem(
-                            value: item.id,
-                            child: Center(
-                              child: Text(
-                                item.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value == null || value == 'new') {
-                          _startNewReconstitution();
-                          return;
-                        }
-                        final selected = saved.where((s) => s.id == value);
-                        if (selected.isEmpty) return;
-                        _loadSavedCalculation(selected.first);
-                      },
-                    ),
-                  ),
-                  if (hasSaved)
-                    buildHelperText(
-                      context,
-                      'Select a saved reconstitution or start a new one.',
-                    )
-                  else
-                    buildHelperText(
-                      context,
-                      'No saved reconstitutions yet.',
-                    ),
-                  const SizedBox(height: kSpacingS),
-                  SizedBox(
-                    height: kStandardButtonHeight,
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: hasSaved ? _openSavedSheet : null,
-                      icon: const Icon(Icons.bookmarks_outlined),
-                      label: const Text('Manage saved'),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          sectionSpacing,
-          SectionFormCard(
-            title: 'Medication (Optional)',
-            neutral: true,
+      body: ColoredBox(
+        color: reconBackgroundDarkColor(context),
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(kSpacingL),
             children: [
-              LabelFieldRow(
-                label: 'Name',
-                field: Field36(
-                  child: TextField(
-                    controller: _medNameCtrl,
-                    decoration: buildCompactFieldDecoration(
-                      context: context,
-                      hint: 'Optional',
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calculate,
+                      color: fg.withValues(alpha: 0.9),
+                      size: 24,
                     ),
-                    onChanged: (_) => setState(() {}),
-                    textAlign: TextAlign.center,
-                    textCapitalization: kTextCapitalizationDefault,
-                    style: bodyTextStyle(context),
-                  ),
-                ),
-              ),
-              buildHelperText(
-                context,
-                'Enter the medication name (optional, for context)',
-              ),
-            ],
-          ),
-          sectionSpacing,
-          SectionFormCard(
-            title: 'Vial Strength',
-            neutral: true,
-            children: [
-              LabelFieldRow(
-                label: 'Unit',
-                field: SmallDropdown36<String>(
-                  value: _selectedUnit,
-                  width: kSmallControlWidth,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'mcg',
-                      child: Center(child: Text('mcg')),
-                    ),
-                    DropdownMenuItem(
-                      value: 'mg',
-                      child: Center(child: Text('mg')),
-                    ),
-                    DropdownMenuItem(
-                      value: 'g',
-                      child: Center(child: Text('g')),
-                    ),
-                    DropdownMenuItem(
-                      value: 'units',
-                      child: Center(child: Text('units')),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Reconstitution Calculator',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: fg,
+                          fontWeight: kFontWeightBold,
+                        ),
+                      ),
                     ),
                   ],
-                  onChanged: (v) => setState(() => _selectedUnit = v ?? 'mg'),
                 ),
               ),
-              buildHelperText(context, 'Select the unit for vial strength'),
-              LabelFieldRow(
-                label: 'Strength',
-                field: StepperRow36(
-                  controller: _strengthCtrl,
-                  onDec: () {
-                    final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                    final nv = (v - 1).clamp(0, 10000);
-                    setState(() {
-                      _strengthCtrl.text = nv == nv.roundToDouble()
-                          ? nv.toInt().toString()
-                          : nv.toStringAsFixed(2);
-                    });
-                  },
-                  onInc: () {
-                    final v = double.tryParse(_strengthCtrl.text) ?? 0;
-                    final nv = (v + 1).clamp(0, 10000);
-                    setState(() {
-                      _strengthCtrl.text = nv == nv.roundToDouble()
-                          ? nv.toInt().toString()
-                          : nv.toStringAsFixed(2);
-                    });
-                  },
-                  decoration: buildCompactFieldDecoration(
-                    context: context,
-                    hint: '0',
-                  ),
+              Text(
+                'Select a reconstitution option below or fine-tune the values',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: fg.withValues(alpha: kReconTextMutedOpacity),
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Divider(
+                color: theme.brightness == Brightness.dark
+                    ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
+                    : fg.withValues(alpha: 0.12),
+                height: 1,
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: panelDecoration(),
+                padding: const EdgeInsets.all(kSpacingL),
+                child: Column(
+                  children: [
+                    ValueListenableBuilder(
+                      valueListenable: _savedRepo.listenable(),
+                      builder: (context, box, _) {
+                        final saved = _savedRepo.allSorted(
+                          includeOwned: false,
+                        );
+                        final hasSaved = saved.isNotEmpty;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            LabelFieldRow(
+                              label: 'Load',
+                              lightText: true,
+                              field: SmallDropdown36<String>(
+                                value: _loadedSavedId ?? 'new',
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: 'new',
+                                    child: Center(child: Text('New')),
+                                  ),
+                                  ...saved.map(
+                                    (item) => DropdownMenuItem(
+                                      value: item.id,
+                                      child: Center(
+                                        child: Text(
+                                          item.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  if (value == null || value == 'new') {
+                                    _startNewReconstitution();
+                                    return;
+                                  }
+                                  final selected = saved.where(
+                                    (s) => s.id == value,
+                                  );
+                                  if (selected.isEmpty) return;
+                                  _loadSavedCalculation(selected.first);
+                                },
+                              ),
+                            ),
+                            helper(
+                              hasSaved
+                                  ? 'Select a saved reconstitution or start a new one.'
+                                  : 'No saved reconstitutions yet.',
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: hasSaved ? _openSavedSheet : null,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: fg.withValues(
+                                        alpha: 0.92,
+                                      ),
+                                      side: BorderSide(
+                                        color: fg.withValues(alpha: 0.25),
+                                        width: kBorderWidthThin,
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.bookmarks_outlined),
+                                    label: const Text('Manage saved'),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                FilledButton.icon(
+                                  onPressed: _canSave ? _saveCurrent : null,
+                                  icon: const Icon(Icons.save),
+                                  label: const Text('Save'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Divider(
+                      color: theme.brightness == Brightness.dark
+                          ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
+                          : fg.withValues(alpha: 0.12),
+                      height: 1,
+                    ),
+                    const SizedBox(height: 12),
+                    LabelFieldRow(
+                      label: 'Name',
+                      lightText: true,
+                      field: Field36(
+                        child: TextField(
+                          controller: _medNameCtrl,
+                          decoration: buildCompactFieldDecoration(
+                            context: context,
+                            hint: 'Medication name',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                          textAlign: TextAlign.center,
+                          textCapitalization: kTextCapitalizationDefault,
+                          style: bodyTextStyle(context),
+                        ),
+                      ),
+                    ),
+                    helper('Enter a medication name to save.'),
+                    const SizedBox(height: 6),
+                    LabelFieldRow(
+                      label: 'Unit',
+                      lightText: true,
+                      field: SmallDropdown36<String>(
+                        value: _selectedUnit,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'mcg',
+                            child: Center(child: Text('mcg')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'mg',
+                            child: Center(child: Text('mg')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'g',
+                            child: Center(child: Text('g')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'units',
+                            child: Center(child: Text('units')),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _selectedUnit = v ?? 'mg'),
+                      ),
+                    ),
+                    helper('Select the unit for vial strength.'),
+                    const SizedBox(height: 6),
+                    LabelFieldRow(
+                      label: 'Strength',
+                      lightText: true,
+                      field: StepperRow36(
+                        controller: _strengthCtrl,
+                        onDec: () {
+                          final v = double.tryParse(_strengthCtrl.text) ?? 0;
+                          final nv = (v - 1).clamp(0, 10000);
+                          setState(() {
+                            _strengthCtrl.text = nv == nv.roundToDouble()
+                                ? nv.toInt().toString()
+                                : nv.toStringAsFixed(2);
+                          });
+                        },
+                        onInc: () {
+                          final v = double.tryParse(_strengthCtrl.text) ?? 0;
+                          final nv = (v + 1).clamp(0, 10000);
+                          setState(() {
+                            _strengthCtrl.text = nv == nv.roundToDouble()
+                                ? nv.toInt().toString()
+                                : nv.toStringAsFixed(2);
+                          });
+                        },
+                        decoration: buildCompactFieldDecoration(
+                          context: context,
+                          hint: '0',
+                        ),
+                      ),
+                    ),
+                    helper('Total drug amount in the vial (before reconstitution).'),
+                  ],
                 ),
               ),
-              buildHelperText(
-                context,
-                'Total drug amount in the vial (before reconstitution)',
-              ),
-            ],
-          ),
-          sectionSpacing,
-          SectionFormCard(
-            title: 'Calculator',
-            neutral: true,
-            children: [
+              const SizedBox(height: 12),
               if (strengthValue <= 0)
                 Text(
                   'Enter the vial strength above to use the calculator',
-                  style: helperTextStyle(context),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: fg.withValues(alpha: kReconTextMutedOpacity),
+                    fontStyle: FontStyle.italic,
+                  ),
                   textAlign: TextAlign.center,
                 )
-              else ...[
-                if (_lastResult != null)
-                  ReconstitutionSummaryCard(
-                    strengthValue: strengthValue,
-                    strengthUnit: _selectedUnit,
-                    medicationName: medName,
-                    containerVolumeMl: _lastResult!.solventVolumeMl,
-                    perMlValue: _lastResult!.perMlConcentration,
-                    reconFluidName: _lastResult!.diluentName,
-                    syringeSizeMl: _lastResult!.syringeSizeMl,
-                    compact: false,
-                    showCardSurface: true,
-                  ),
-                const SizedBox(height: kSpacingM),
-                Container(
-                  decoration: BoxDecoration(
-                    color: reconBackgroundDarkColor(context),
-                    borderRadius: BorderRadius.circular(kBorderRadiusLarge),
-                  ),
-                  padding: const EdgeInsets.all(kSpacingL),
-                  child: ReconstitutionCalculatorWidget(
-                    key: ValueKey(_loadedSavedId ?? 'new'),
-                    initialStrengthValue: strengthValue,
-                    unitLabel: _selectedUnit,
-                    medicationName: medName,
-                    initialDiluentName: _initialDiluentName,
-                    initialDoseValue: _initialDoseValue,
-                    initialDoseUnit: _initialDoseUnit,
-                    initialSyringeSize: _initialSyringeSize,
-                    initialVialSize: _initialVialSize,
-                    onCalculate: _onCalculation,
-                  ),
+              else
+                ReconstitutionCalculatorWidget(
+                  key: ValueKey(_loadedSavedId ?? 'new'),
+                  initialStrengthValue: strengthValue,
+                  unitLabel: _selectedUnit,
+                  medicationName: medName.isNotEmpty ? medName : null,
+                  initialDiluentName: _initialDiluentName,
+                  initialDoseValue: _initialDoseValue,
+                  initialDoseUnit: _initialDoseUnit,
+                  initialSyringeSize: _initialSyringeSize,
+                  initialVialSize: _initialVialSize,
+                  onCalculate: _onCalculation,
                 ),
-              ],
             ],
           ),
-        ],
+        ),
       ),
     );
   }
