@@ -28,6 +28,7 @@ import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
@@ -2664,7 +2665,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.copyWith(
         perMlValue: result.perMlConcentration,
         containerVolumeMl: result.solventVolumeMl,
-        volumePerDose: result.recommendedUnits / 100,
+        volumePerDose:
+            result.recommendedUnits / SyringeType.ml_1_0.unitsPerMl,
         diluentName: result.diluentName ?? latest.diluentName,
         activeVialVolume: result.solventVolumeMl,
         reconstitutedAt: DateTime.now(),
@@ -3934,7 +3936,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         containerVolumeMl: reconVolume,
         perMlValue: perMl,
         volumePerDose: recommendedUnits != null && recommendedUnits > 0
-            ? (recommendedUnits / 100)
+            ? (recommendedUnits / SyringeType.ml_1_0.unitsPerMl)
             : med.volumePerDose,
         diluentName: diluentName,
         activeVialVolume: reconVolume,
@@ -4173,7 +4175,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
             return;
           }
           if (selectedUnit == 'units') {
-            volumeController.text = (clamped * 100).round().toString();
+            volumeController.text =
+                (clamped * SyringeType.ml_1_0.unitsPerMl).round().toString();
             return;
           }
 
@@ -4200,8 +4203,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
               ? inputValue / concentration
               : 0;
         } else {
-          // Input is in units (IU) - assume 1 unit = 0.01mL or use concentration
-          volumeInMl = inputValue / 100; // 100 units = 1 mL
+          // Input is in syringe units.
+          volumeInMl = inputValue / SyringeType.ml_1_0.unitsPerMl;
           doseInStrengthUnit = concentration != null
               ? volumeInMl * concentration
               : 0;
@@ -4397,7 +4400,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
 
                             if (selectedUnit == 'units') {
                               final maxUnits =
-                                  (syringeSize.clamp(0.0, maxVolume) * 100)
+                                (syringeSize.clamp(0.0, maxVolume) *
+                                    SyringeType.ml_1_0.unitsPerMl)
                                       .round();
                               final nv = (v - 1)
                                   .clamp(0, maxUnits)
@@ -4433,7 +4437,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
 
                             if (selectedUnit == 'units') {
                               final maxUnits =
-                                  (syringeSize.clamp(0.0, maxVolume) * 100)
+                                (syringeSize.clamp(0.0, maxVolume) *
+                                    SyringeType.ml_1_0.unitsPerMl)
                                       .round();
                               final nv = (v + 1)
                                   .clamp(0, maxUnits)
@@ -4451,7 +4456,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                                       concentration != null
                                 ? syringeSize.clamp(0.0, maxVolume) *
                                       concentration
-                                : syringeSize * 100;
+                              : syringeSize * SyringeType.ml_1_0.unitsPerMl;
 
                             if (v < maxInputValue) {
                               volumeController.text = fmt2(v + 0.1);
@@ -4503,14 +4508,19 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
 
                         // Syringe gauge (single label only)
                         WhiteSyringeGauge(
-                          totalUnits: syringeSize * 100,
-                          fillUnits: clampedVolume * 100,
+                          totalUnits:
+                              syringeSize * SyringeType.ml_1_0.unitsPerMl,
+                          fillUnits:
+                              clampedVolume * SyringeType.ml_1_0.unitsPerMl,
                           color: colorScheme.primary,
                           interactive: true,
-                          maxConstraint: maxVolume * 100,
+                          maxConstraint:
+                              maxVolume * SyringeType.ml_1_0.unitsPerMl,
                           showValueLabel: false, // Remove double label
                           onChanged: (newValue) {
-                            final newVolumeMl = (newValue / 100).clamp(
+                            final newVolumeMl =
+                                (newValue / SyringeType.ml_1_0.unitsPerMl)
+                                    .clamp(
                               0.0,
                               maxVolume,
                             );
@@ -4550,7 +4560,8 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
                         ),
                         const TextSpan(text: ' is equal to '),
                         TextSpan(
-                          text: '${_formatNumber(clampedVolume * 100)} units',
+                          text:
+                              '${_formatNumber(clampedVolume * SyringeType.ml_1_0.unitsPerMl)} units',
                           style: TextStyle(
                             color: colorScheme.primary,
                             fontWeight: FontWeight.bold,
