@@ -407,6 +407,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                         children: [
                           _buildDetailRow(
                             context,
+                            'Type',
+                            _getScheduleTypeText(),
+                          ),
+                          _buildDetailRow(
+                            context,
                             'Dose',
                             '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
                           ),
@@ -813,6 +818,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     if (widget.schedule.daysOfWeek.length == 7) {
       return 'Every day';
     }
+    return 'Weekly';
+  }
+
+  String _getScheduleTypeText() {
+    if (widget.schedule.hasCycle) return 'Cycle';
+    if (widget.schedule.hasDaysOfMonth) return 'Monthly';
+    if (widget.schedule.daysOfWeek.length == 7) return 'Daily';
     return 'Weekly';
   }
 
