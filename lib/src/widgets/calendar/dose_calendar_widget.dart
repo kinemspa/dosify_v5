@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
@@ -60,6 +63,9 @@ class DoseCalendarWidget extends StatefulWidget {
     this.showSelectedDayPanel = true,
     this.showUpNextCard = true,
     this.requireHourSelectionInDayView = false,
+    this.showHeaderOverride,
+    this.showViewToggleOverride,
+    this.embedInParentCard = false,
     super.key,
   });
 
@@ -73,6 +79,19 @@ class DoseCalendarWidget extends StatefulWidget {
   final bool showSelectedDayPanel;
   final bool showUpNextCard;
   final bool requireHourSelectionInDayView;
+
+  /// Overrides the default header visibility derived from [variant].
+  ///
+  /// Useful for embedded contexts like Home where [variant] is [CalendarVariant.mini]
+  /// but Month/Week switching is still desired.
+  final bool? showHeaderOverride;
+
+  /// Overrides the default view-toggle visibility derived from [variant].
+  final bool? showViewToggleOverride;
+
+  /// When true, the widget avoids drawing its own card/border background.
+  /// Intended for embedding inside parent cards/sections.
+  final bool embedInParentCard;
 
   @override
   State<DoseCalendarWidget> createState() => _DoseCalendarWidgetState();
@@ -89,6 +108,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   final ScrollController _dayStageScrollController = ScrollController();
   final ScrollController _selectedDayScrollController = ScrollController();
 
+  ValueListenable<Box<DoseLog>>? _doseLogsListenable;
+  ValueListenable<Box<Schedule>>? _schedulesListenable;
+  Timer? _reloadDebounce;
+
   @override
   void initState() {
     super.initState();
@@ -101,6 +124,14 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       _selectedHour = DateTime.now().hour;
     }
     _loadDoses();
+
+    // Auto-refresh calendar when schedules or dose logs change.
+    // This keeps the calendar up-to-date when a dose is marked taken/skipped/etc.
+    _doseLogsListenable = Hive.box<DoseLog>('dose_logs').listenable();
+    _doseLogsListenable!.addListener(_scheduleReload);
+
+    _schedulesListenable = Hive.box<Schedule>('schedules').listenable();
+    _schedulesListenable!.addListener(_scheduleReload);
   }
 
   @override
@@ -114,9 +145,20 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   @override
   void dispose() {
+    _reloadDebounce?.cancel();
+    _doseLogsListenable?.removeListener(_scheduleReload);
+    _schedulesListenable?.removeListener(_scheduleReload);
     _dayStageScrollController.dispose();
     _selectedDayScrollController.dispose();
     super.dispose();
+  }
+
+  void _scheduleReload() {
+    _reloadDebounce?.cancel();
+    _reloadDebounce = Timer(const Duration(milliseconds: 120), () {
+      if (!mounted) return;
+      _loadDoses();
+    });
   }
 
   Future<void> _loadDoses() async {
@@ -621,8 +663,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final showHeader = widget.variant != CalendarVariant.mini;
-    final showViewToggle = widget.variant == CalendarVariant.full;
+    final showHeader =
+      widget.showHeaderOverride ?? (widget.variant != CalendarVariant.mini);
+    final showViewToggle = widget.showViewToggleOverride ??
+      (widget.variant == CalendarVariant.full);
 
     CalculatedDose? nextDose;
     if (_doses.isNotEmpty) {
@@ -675,6 +719,36 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
 
     Widget buildBody({double? panelHeight}) {
+      final showSelectedDayStage =
+          widget.showSelectedDayPanel &&
+          _selectedDate != null &&
+          _currentView != CalendarView.day;
+
+      Widget buildCalendarArea() {
+        if (_isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // Full variant: selected-day panel becomes a draggable stage that hugs
+        // the bottom and can expand to full screen.
+        if (widget.variant == CalendarVariant.full && showSelectedDayStage) {
+          return Stack(
+            children: [
+              Positioned.fill(child: _buildCurrentView()),
+              _buildSelectedDayStageSheet(
+                initialRatio: switch (_currentView) {
+                  CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
+                  CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
+                  CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
+                },
+              ),
+            ],
+          );
+        }
+
+        return _buildCurrentView();
+      }
+
       return Column(
         children: [
           if (showHeader)
@@ -719,33 +793,24 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                       ),
               ),
             ),
-          // Calendar view
-          if (_isLoading)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else if (widget.variant == CalendarVariant.full)
-            Expanded(child: _buildCurrentView())
+          if (widget.variant == CalendarVariant.full)
+            Expanded(child: buildCalendarArea())
           else if (_currentView == CalendarView.day)
-            Expanded(child: _buildCurrentView())
+            Expanded(child: buildCalendarArea())
           else
-            Flexible(fit: FlexFit.loose, child: _buildCurrentView()),
+            Flexible(fit: FlexFit.loose, child: buildCalendarArea()),
           if (widget.requireHourSelectionInDayView &&
               _currentView == CalendarView.day)
             if (widget.variant == CalendarVariant.full && panelHeight != null)
               SizedBox(height: panelHeight, child: _buildSelectedHourPanel())
             else
               Expanded(child: _buildSelectedHourPanel()),
-          // Selected date schedules (if date selected, only for week/month views)
-          if (_selectedDate != null &&
-              _currentView != CalendarView.day &&
-              widget.showSelectedDayPanel)
+          if (showSelectedDayStage && widget.variant != CalendarVariant.full)
             const SizedBox(height: kSpacingS),
-          if (_selectedDate != null &&
-              _currentView != CalendarView.day &&
-              widget.showSelectedDayPanel)
+          if (showSelectedDayStage && widget.variant != CalendarVariant.full)
             if (widget.variant == CalendarVariant.compact)
               Flexible(fit: FlexFit.loose, child: _buildSelectedDayPanel())
-            else if (widget.variant == CalendarVariant.full &&
-                panelHeight != null)
+            else if (panelHeight != null)
               SizedBox(height: panelHeight, child: _buildSelectedDayPanel())
             else
               Expanded(child: _buildSelectedDayPanel()),
@@ -777,6 +842,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ? effectiveHeight * selectedDayPanelRatio
             : null;
 
+        final body = buildBody(panelHeight: panelHeight);
+
+        if (widget.embedInParentCard) {
+          return SizedBox(height: effectiveHeight, child: body);
+        }
+
         return SizedBox(
           height: effectiveHeight,
           child: Container(
@@ -793,10 +864,137 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                     )
                   : null,
             ),
-            child: buildBody(panelHeight: panelHeight),
+            child: body,
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSelectedDayStageSheet({required double initialRatio}) {
+    final selectedDate = _selectedDate;
+    if (selectedDate == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return DraggableScrollableSheet(
+      initialChildSize: initialRatio,
+      minChildSize: initialRatio,
+      maxChildSize: 1.0,
+      snap: true,
+      snapSizes: [initialRatio, 1.0],
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border(
+              top: BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                width: kBorderWidthMedium,
+              ),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: kBottomSheetHandleWidth,
+                  height: kBottomSheetHandleHeight,
+                  margin: kBottomSheetHandleMargin,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurface.withValues(
+                      alpha: kOpacityVeryLow,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      kBottomSheetHandleRadius,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: kCalendarSelectedDayHeaderPadding,
+                child: Text(
+                  _formatSelectedDate(),
+                  style: calendarSelectedDayHeaderTextStyle(context),
+                ),
+              ),
+              Expanded(
+                child: _buildSelectedDayStageList(
+                  selectedDate: selectedDate,
+                  scrollController: scrollController,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSelectedDayStageList({
+    required DateTime selectedDate,
+    required ScrollController scrollController,
+  }) {
+    final dayDoses = _doses.where((dose) {
+      return dose.scheduledTime.year == selectedDate.year &&
+          dose.scheduledTime.month == selectedDate.month &&
+          dose.scheduledTime.day == selectedDate.day;
+    }).toList()
+      ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
+    final dosesByHour = <int, List<CalculatedDose>>{};
+    for (final dose in dayDoses) {
+      dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
+    }
+    final hours = dosesByHour.keys.toList()..sort();
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    if (dayDoses.isEmpty) {
+      return Center(
+        child: Text(
+          'No doses scheduled',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withValues(alpha: kOpacityLow),
+          ),
+        ),
+      );
+    }
+
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final listBottomPadding = safeBottom + kPageBottomPadding;
+
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      thickness: kCalendarStageScrollbarThickness,
+      radius: kCalendarStageScrollbarThumbRadius,
+      child: ListView.builder(
+        controller: scrollController,
+        padding: calendarStageListPadding(listBottomPadding),
+        itemCount: hours.length,
+        itemBuilder: (context, index) {
+          final hour = hours[index];
+          final hourDoses = dosesByHour[hour] ?? const [];
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (index != 0)
+                Divider(
+                  height: kSpacingM,
+                  thickness: kBorderWidthThin,
+                  color: Theme.of(context).colorScheme.outlineVariant
+                      .withValues(alpha: kOpacityVeryLow),
+                ),
+              _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -919,10 +1117,19 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             final hour = hours[index];
             final hourDoses = dosesByHour[hour] ?? const [];
 
-            return _buildHourDoseSection(
-              hour: hour,
-              hourDoses: hourDoses,
-            );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (index != 0)
+                    Divider(
+                      height: kSpacingM,
+                      thickness: kBorderWidthThin,
+                      color: Theme.of(context).colorScheme.outlineVariant
+                          .withValues(alpha: kOpacityVeryLow),
+                    ),
+                  _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+                ],
+              );
           },
         ),
       ),

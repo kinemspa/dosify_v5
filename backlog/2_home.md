@@ -15,8 +15,8 @@
 ### Schedules
 
 ### Calendar
-- [ ] Calendar is only showing the day view, needs month and week.
-- [ ] Isnty updating on status changes. 
+- [x] Calendar is only showing the day view, needs month and week.
+- [x] Isnty updating on status changes. 
 
 ### Reports
 - [ ] For reports on the home screen, the history should be 1 onject that has ALL entries in it, not multiple reports instances. 

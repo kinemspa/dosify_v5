@@ -1,24 +1,19 @@
 # Calendar
 
 ## Requests
-
+- [x] Allow dragging the Dose stage up so it becomes full screen. 
+- [x] There is a little bit of space underneath the monthly view and the dose stage, waste of space, make the dose stage always hug and touch the bottom of the monthly, weekly view. 
 
 ### Monthly View
-- [x] There are now bottom overflows on every single day block. 
-    - [x] Still exists. Its a mess. 
-- [x] Why are there numbers and markers? isnt this redundant?
+
 
 ### Weekly View
-- [x] There is a bunch of overflows on the boxes representing doses.  
 
-- [x] Day objects are too tall. Reduce them. Number is too big. Not completed. 
-- [x] Dose objects on each week are styled in a way we dont see anywhere on this app. Change it. - Nothing was changed. 
-    - [x] still look the same. 
+- [ ]
 
 ### Day View
-- [x] Just extends the Dose Card Stage to full screen with the hours seton the left.
-- [x] View. It should be full screen and just show the dose card in each hour stacked vertically.
-
+- [x] Lets put very light dividers between each day. 
+ 
 
 ### Dose Card Stage
 - [x] Need to have the Dose Stage appear like it is the Day view. Place the Hours on the left of the dose cards like the day view. 

@@ -657,8 +657,11 @@ class _HomePageState extends State<HomePage> {
           height: kHomeMiniCalendarHeight,
           child: const DoseCalendarWidget(
             variant: CalendarVariant.mini,
-            defaultView: CalendarView.day,
+            defaultView: CalendarView.month,
             showSelectedDayPanel: false,
+            showHeaderOverride: true,
+            showViewToggleOverride: true,
+            embedInParentCard: true,
           ),
         ),
       ],
