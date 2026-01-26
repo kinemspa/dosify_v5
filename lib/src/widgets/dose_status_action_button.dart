@@ -33,40 +33,48 @@ class DoseStatusActionButton extends StatelessWidget {
         _buildItem(context, DoseStatus.snoozed, enabled: !disabled),
         _buildItem(context, DoseStatus.skipped, enabled: !disabled),
       ],
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kSpacingS,
-          vertical: kSpacingXXS,
-        ),
-        decoration: BoxDecoration(
-          color: visual.color.withValues(alpha: kOpacityMinimal),
-          borderRadius: BorderRadius.circular(kBorderRadiusChip),
-          border: Border.all(
-            color: visual.color.withValues(alpha: kOpacityMediumLow),
-            width: kBorderWidthThin,
+      child: SizedBox(
+        width: compact ? kDoseCardStatusChipWidthCompact : kDoseCardStatusChipWidth,
+        height: compact
+            ? kDoseCardStatusChipHeightCompact
+            : kDoseCardStatusChipHeight,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingS,
+            vertical: kSpacingXXS,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              visual.icon,
-              size: compact
-                  ? kDoseCardStatusIconSizeCompact
-                  : kDoseCardStatusIconSize,
-              color: visual.color,
+          decoration: BoxDecoration(
+            color: visual.color.withValues(alpha: kOpacityMinimal),
+            borderRadius: BorderRadius.circular(kBorderRadiusChip),
+            border: Border.all(
+              color: visual.color.withValues(alpha: kOpacityMediumLow),
+              width: kBorderWidthThin,
             ),
-            const SizedBox(width: kSpacingXXS),
-            Text(
-              label,
-              style: doseCardStatusChipLabelTextStyle(
-                context,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                visual.icon,
+                size: compact
+                    ? kDoseCardStatusIconSizeCompact
+                    : kDoseCardStatusIconSize,
                 color: visual.color,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              const SizedBox(width: kSpacingXXS),
+              Flexible(
+                child: Text(
+                  label,
+                  style: doseCardStatusChipLabelTextStyle(
+                    context,
+                    color: visual.color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

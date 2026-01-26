@@ -234,28 +234,34 @@ class DoseCard extends StatelessWidget {
                           compact: compact,
                         )
                       else ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: kSpacingS,
-                            vertical: kSpacingXXS,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(
-                              alpha: kOpacityMinimal,
+                        SizedBox(
+                          width: compact
+                              ? kDoseCardStatusChipWidthCompact
+                              : kDoseCardStatusChipWidth,
+                          height: compact
+                              ? kDoseCardStatusChipHeightCompact
+                              : kDoseCardStatusChipHeight,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: kSpacingS,
+                              vertical: kSpacingXXS,
                             ),
-                            borderRadius: BorderRadius.circular(
-                              kBorderRadiusChip,
-                            ),
-                            border: Border.all(
+                            decoration: BoxDecoration(
                               color: statusColor.withValues(
-                                alpha: kOpacityMediumLow,
+                                alpha: kOpacityMinimal,
                               ),
-                              width: kBorderWidthThin,
+                              borderRadius: BorderRadius.circular(
+                                kBorderRadiusChip,
+                              ),
+                              border: Border.all(
+                                color: statusColor.withValues(
+                                  alpha: kOpacityMediumLow,
+                                ),
+                                width: kBorderWidthThin,
+                              ),
                             ),
-                          ),
-                          child: Center(
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   statusIcon,
@@ -265,14 +271,16 @@ class DoseCard extends StatelessWidget {
                                   color: statusColor,
                                 ),
                                 const SizedBox(width: kSpacingXXS),
-                                Text(
-                                  statusLabel,
-                                  style: doseCardStatusChipLabelTextStyle(
-                                    context,
-                                    color: statusColor,
+                                Flexible(
+                                  child: Text(
+                                    statusLabel,
+                                    style: doseCardStatusChipLabelTextStyle(
+                                      context,
+                                      color: statusColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),

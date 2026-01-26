@@ -357,6 +357,12 @@ const double kDoseStatusBadgeVerticalPadding = 1;
 const double kDoseCardStatusIconSize = kIconSizeLarge;
 const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
 
+/// DoseCard status chip sizing
+const double kDoseCardStatusChipHeight = 24;
+const double kDoseCardStatusChipHeightCompact = 22;
+const double kDoseCardStatusChipWidth = 104;
+const double kDoseCardStatusChipWidthCompact = 96;
+
 /// Button spacing
 const double kButtonSpacing = 8;
 const double kStepperButtonSpacing = 4; // Between stepper buttons
