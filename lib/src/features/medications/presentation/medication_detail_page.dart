@@ -2520,9 +2520,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () => setState(
-              () => _isReconstitutionExpanded = !_isReconstitutionExpanded,
-            ),
+            onTap: () => _editReconstitution(context, med),
             child: Padding(
               padding: kDetailCardCollapsedHeaderPadding,
               child: Row(
@@ -2543,10 +2541,18 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   AnimatedRotation(
                     turns: _isReconstitutionExpanded ? 0 : -0.25,
                     duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      size: kIconSizeLarge,
-                      color: cs.onSurfaceVariant,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        size: kIconSizeLarge,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      onPressed: () {
+                        setState(
+                          () => _isReconstitutionExpanded =
+                              !_isReconstitutionExpanded,
+                        );
+                      },
                     ),
                   ),
                 ],

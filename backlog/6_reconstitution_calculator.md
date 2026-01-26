@@ -39,9 +39,18 @@
 # Reconstitution Calculator - Med Details Card
 ## Request
 - [ ] Remove the recaluculate and use saved buttons. 
-- [ ] Selecting the card should open the calculator. 
+- [x] Selecting the card should open the calculator. 
 - [ ] Where are the units of the sysringe and syrionge size on this card. 
 
 # Reconstitution Calculator - Stand Alone - Main Menu
 ## Requests
 - [x] This does not exist, it is currently navigating to an old Rec Calculator. I want this to look exactly the same as the Add med wizard one. 
+- [ ] Saved Name should have Med Name, and Dose size and Volume as a default. 
+- [ ] Can we compact the Load unit and Strenght fields. 
+- [ ] Dont want to force users to have to save or add a med name to proceed to create a calculation. users may want to quickly jump in and have all the fields avaiable. 
+- [ ]  These new fields you added, they need to have better helpwer text as this is going to confuse users, as the calculation values are already confusing. 
+    - [ ] Name, UNit and Strenght need to be included in the below section, not as part of the manage saved section.
+    - [ ] Medicaiton Name optional and not needed but required if saving. 
+    - [ ] Strenght Unit and Strenght need to be mandatory of course. Unit doesnt look like it belongs to strenght. These 2 fields should come under a heading of Strenght.
+ 
+
