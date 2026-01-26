@@ -70,6 +70,18 @@ class _ReconstitutionCalculatorWidgetState
   late Animation<double> _unitsAnimation;
   double _targetUnits = 50;
 
+  String _normalizeDoseUnit({required String? unit, required String unitLabel}) {
+    if (unitLabel == 'units') return 'units';
+    switch ((unit ?? '').trim().toLowerCase()) {
+      case 'mcg':
+      case 'mg':
+      case 'g':
+        return unit!.trim().toLowerCase();
+      default:
+        return 'mcg';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -81,9 +93,10 @@ class _ReconstitutionCalculatorWidgetState
           : defaultDose.toStringAsFixed(2),
     );
     // Set dose unit to match vial unit for units-based medications, otherwise default to mcg
-    _doseUnit =
-        widget.initialDoseUnit ??
-        (widget.unitLabel == 'units' ? 'units' : 'mcg');
+    _doseUnit = _normalizeDoseUnit(
+      unit: widget.initialDoseUnit,
+      unitLabel: widget.unitLabel,
+    );
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
@@ -111,6 +124,22 @@ class _ReconstitutionCalculatorWidgetState
             _selectedUnits = _unitsAnimation.value;
           });
         });
+  }
+
+  @override
+  void didUpdateWidget(covariant ReconstitutionCalculatorWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.unitLabel != widget.unitLabel) {
+      final normalized = _normalizeDoseUnit(
+        unit: _doseUnit,
+        unitLabel: widget.unitLabel,
+      );
+      if (normalized != _doseUnit && mounted) {
+        setState(() {
+          _doseUnit = normalized;
+        });
+      }
+    }
   }
 
   @override
@@ -330,21 +359,18 @@ class _ReconstitutionCalculatorWidgetState
     final cs = theme.colorScheme;
     final fg = reconForegroundColor(context);
 
-    // Sync dose unit with vial unit when vial changes to/from 'units'
-    // This handles the case where user changes medication strength unit
-    if (widget.unitLabel == 'units' && _doseUnit != 'units') {
+    // Keep dose unit valid for the dropdown options.
+    // This avoids a common Flutter assertion when the current value is not
+    // present in the items list.
+    final normalizedDoseUnit = _normalizeDoseUnit(
+      unit: _doseUnit,
+      unitLabel: widget.unitLabel,
+    );
+    if (normalizedDoseUnit != _doseUnit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
-            _doseUnit = 'units';
-          });
-        }
-      });
-    } else if (widget.unitLabel != 'units' && _doseUnit == 'units') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _doseUnit = 'mcg'; // Default back to mcg for mass-based units
+            _doseUnit = normalizedDoseUnit;
           });
         }
       });
