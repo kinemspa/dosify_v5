@@ -54,6 +54,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   final _activeVialLowStockMlCtrl = TextEditingController(text: '1.0');
   bool _activeVialLowStockEnabled = false; // Default OFF
   DateTime? _activeVialExpiry;
+  final _activeVialBatchCtrl = TextEditingController();
   final _activeVialStorageCtrl = TextEditingController();
   bool _activeVialRequiresFridge = false;
   bool _activeVialRequiresFreezer = false;
@@ -147,6 +148,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           m.activeVialLowStockMl?.toString() ?? '1.0';
       _activeVialLowStockEnabled = m.activeVialLowStockMl != null;
       _activeVialExpiry = m.reconstitutedVialExpiry;
+      _activeVialBatchCtrl.text = m.activeVialBatchNumber ?? '';
       _activeVialStorageCtrl.text = m.activeVialStorageLocation ?? '';
       _activeVialRequiresFridge = m.activeVialRequiresRefrigeration;
       _activeVialRequiresFreezer = m.activeVialRequiresFreezer;
@@ -181,6 +183,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     _vialVolumeCtrl.dispose();
     _activeVialVolumeMlCtrl.dispose();
     _activeVialLowStockMlCtrl.dispose();
+    _activeVialBatchCtrl.dispose();
     _activeVialStorageCtrl.dispose();
     _backupVialsQtyCtrl.dispose();
     _backupVialsLowStockCtrl.dispose();
@@ -326,6 +329,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               _activeVialLowStockMlCtrl.text.isNotEmpty
           ? double.tryParse(_activeVialLowStockMlCtrl.text.trim())
           : null,
+        activeVialBatchNumber: _activeVialBatchCtrl.text.trim().isEmpty
+          ? null
+          : _activeVialBatchCtrl.text.trim(),
       activeVialStorageLocation: _activeVialStorageCtrl.text.trim().isEmpty
           ? null
           : _activeVialStorageCtrl.text.trim(),
@@ -973,6 +979,18 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               fullWidth: true,
             ),
             LabelFieldRow(
+              label: 'Batch number',
+              field: WizardTextField36(
+                controller: _activeVialBatchCtrl,
+                hint: 'e.g., 1234',
+              ),
+            ),
+            buildHelperText(
+              context,
+              'Batch/lot number for the active (reconstituted) vial',
+              fullWidth: true,
+            ),
+            LabelFieldRow(
               label: 'Storage location',
               field: WizardTextField36(
                 controller: _activeVialStorageCtrl,
@@ -1426,6 +1444,12 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       context,
                     ).formatCompactDate(_activeVialExpiry!)
                   : '(Not set)',
+            ),
+            _reviewRow(
+              'Batch Number',
+              _activeVialBatchCtrl.text.trim().isEmpty
+                  ? '(Not set)'
+                  : _activeVialBatchCtrl.text.trim(),
             ),
             _reviewRow(
               'Storage Location',
