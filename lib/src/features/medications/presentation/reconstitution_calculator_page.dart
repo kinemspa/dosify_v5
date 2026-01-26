@@ -228,16 +228,51 @@ class _ReconstitutionCalculatorPageState
     return trimmed;
   }
 
+  Future<String?> _promptForMedicationName(BuildContext context) async {
+    final ctrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Medication name required'),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            textCapitalization: kTextCapitalizationDefault,
+            decoration: buildCompactFieldDecoration(
+              context: context,
+              hint: 'Medication name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop<String>(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(ctrl.text.trim()),
+              child: const Text('Continue'),
+            ),
+          ],
+        );
+      },
+    );
+    final trimmed = result?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
   Future<void> _saveCurrent() async {
     final strengthValue = double.tryParse(_strengthCtrl.text.trim()) ?? 0;
     if (!_canSave || _lastResult == null || strengthValue <= 0) return;
 
     // Standalone calculator: require medication name before saving.
     if (_medNameCtrl.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a medication name to save')),
-      );
-      return;
+      final entered = await _promptForMedicationName(context);
+      if (entered == null) return;
+      setState(() {
+        _medNameCtrl.text = entered;
+      });
     }
 
     final baseName = _medNameCtrl.text.trim().isNotEmpty
@@ -534,14 +569,14 @@ class _ReconstitutionCalculatorPageState
                     ),
                     const SizedBox(height: 12),
                     LabelFieldRow(
-                      label: 'Name',
+                      label: 'Medication',
                       lightText: true,
                       field: Field36(
                         child: TextField(
                           controller: _medNameCtrl,
                           decoration: buildCompactFieldDecoration(
                             context: context,
-                            hint: 'Medication name',
+                            hint: 'Optional for calculation',
                           ),
                           onChanged: (_) => setState(() {}),
                           textAlign: TextAlign.center,
@@ -550,7 +585,9 @@ class _ReconstitutionCalculatorPageState
                         ),
                       ),
                     ),
-                    helper('Enter a medication name to save.'),
+                    helper(
+                      'Optional for calculations. You will be prompted for this when saving.',
+                    ),
                     const SizedBox(height: kSpacingS),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,

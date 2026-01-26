@@ -48,7 +48,7 @@
 - [x] This does not exist, it is currently navigating to an old Rec Calculator. I want this to look exactly the same as the Add med wizard one. 
 - [x] Saved Name should have Med Name, and Dose size and Volume as a default. 
 - [x] Can we compact the Load unit and Strenght fields. 
-- [ ] Dont want to force users to have to save or add a med name to proceed to create a calculation. users may want to quickly jump in and have all the fields avaiable. 
+- [x] Dont want to force users to have to save or add a med name to proceed to create a calculation. users may want to quickly jump in and have all the fields avaiable. 
 - [ ]  These new fields you added, they need to have better helpwer text as this is going to confuse users, as the calculation values are already confusing. 
     - [ ] Name, UNit and Strenght need to be included in the below section, not as part of the manage saved section.
     - [ ] Medicaiton Name optional and not needed but required if saving. 
