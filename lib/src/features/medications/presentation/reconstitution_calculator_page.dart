@@ -130,6 +130,51 @@ class _ReconstitutionCalculatorPageState
 
   String _newId() => DateTime.now().microsecondsSinceEpoch.toString();
 
+  void _loadSavedCalculation(SavedReconstitutionCalculation item) {
+    setState(() {
+      _loadedSavedId = item.id;
+
+      _medNameCtrl.text = item.medicationName ?? '';
+      _selectedUnit = item.strengthUnit;
+      _strengthCtrl.text =
+          item.strengthValue == item.strengthValue.roundToDouble()
+              ? item.strengthValue.toInt().toString()
+              : item.strengthValue.toStringAsFixed(2);
+
+      _initialDoseValue = item.recommendedDose;
+      _initialDoseUnit = item.doseUnit;
+      _initialSyringeSize = _syringeFromMl(item.syringeSizeMl);
+      _initialVialSize = item.solventVolumeMl;
+      _initialDiluentName = item.diluentName;
+
+      _lastResult = ReconstitutionResult(
+        perMlConcentration: item.perMlConcentration,
+        solventVolumeMl: item.solventVolumeMl,
+        recommendedUnits: item.recommendedUnits,
+        syringeSizeMl: item.syringeSizeMl,
+        diluentName: item.diluentName,
+        recommendedDose: item.recommendedDose,
+        doseUnit: item.doseUnit,
+        maxVialSizeMl: item.maxVialSizeMl,
+      );
+      _canSave = true;
+    });
+  }
+
+  void _startNewReconstitution() {
+    setState(() {
+      _loadedSavedId = null;
+      _lastResult = null;
+      _canSave = false;
+
+      _initialDoseValue = widget.initialDoseValue;
+      _initialDoseUnit = widget.initialDoseUnit;
+      _initialSyringeSize = widget.initialSyringeSize;
+      _initialVialSize = widget.initialVialSize;
+      _initialDiluentName = null;
+    });
+  }
+
   SyringeSizeMl? _syringeFromMl(double ml) {
     if (ml == 0.3) return SyringeSizeMl.ml0_3;
     if (ml == 0.5) return SyringeSizeMl.ml0_5;
@@ -179,6 +224,14 @@ class _ReconstitutionCalculatorPageState
   Future<void> _saveCurrent() async {
     final strengthValue = double.tryParse(_strengthCtrl.text.trim()) ?? 0;
     if (!_canSave || _lastResult == null || strengthValue <= 0) return;
+
+    // Standalone calculator: require medication name before saving.
+    if (_medNameCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a medication name to save')),
+      );
+      return;
+    }
 
     final defaultName = _medNameCtrl.text.trim().isNotEmpty
         ? _medNameCtrl.text.trim()
@@ -269,34 +322,7 @@ class _ReconstitutionCalculatorPageState
             onRename: _renameSaved,
             onDelete: _deleteSaved,
             onSelect: (item) {
-              setState(() {
-                _loadedSavedId = item.id;
-
-                _medNameCtrl.text = item.medicationName ?? '';
-                _selectedUnit = item.strengthUnit;
-                _strengthCtrl.text =
-                    item.strengthValue == item.strengthValue.roundToDouble()
-                    ? item.strengthValue.toInt().toString()
-                    : item.strengthValue.toStringAsFixed(2);
-
-                _initialDoseValue = item.recommendedDose;
-                _initialDoseUnit = item.doseUnit;
-                _initialSyringeSize = _syringeFromMl(item.syringeSizeMl);
-                _initialVialSize = item.solventVolumeMl;
-                _initialDiluentName = item.diluentName;
-
-                _lastResult = ReconstitutionResult(
-                  perMlConcentration: item.perMlConcentration,
-                  solventVolumeMl: item.solventVolumeMl,
-                  recommendedUnits: item.recommendedUnits,
-                  syringeSizeMl: item.syringeSizeMl,
-                  diluentName: item.diluentName,
-                  recommendedDose: item.recommendedDose,
-                  doseUnit: item.doseUnit,
-                  maxVialSizeMl: item.maxVialSizeMl,
-                );
-                _canSave = true;
-              });
+              _loadSavedCalculation(item);
               Navigator.of(context).pop();
             },
           ),
@@ -331,6 +357,75 @@ class _ReconstitutionCalculatorPageState
       body: ListView(
         padding: const EdgeInsets.all(kSpacingL),
         children: [
+          ValueListenableBuilder(
+            valueListenable: _savedRepo.listenable(),
+            builder: (context, box, _) {
+              final saved = _savedRepo.allSorted();
+              final hasSaved = saved.isNotEmpty;
+
+              return SectionFormCard(
+                title: 'Saved Reconstitutions',
+                neutral: true,
+                children: [
+                  LabelFieldRow(
+                    label: 'Load',
+                    field: SmallDropdown36<String>(
+                      value: _loadedSavedId ?? 'new',
+                      width: kSmallControlWidth * 2,
+                      items: [
+                        const DropdownMenuItem(
+                          value: 'new',
+                          child: Center(child: Text('New')),
+                        ),
+                        ...saved.map(
+                          (item) => DropdownMenuItem(
+                            value: item.id,
+                            child: Center(
+                              child: Text(
+                                item.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value == null || value == 'new') {
+                          _startNewReconstitution();
+                          return;
+                        }
+                        final selected = saved.where((s) => s.id == value);
+                        if (selected.isEmpty) return;
+                        _loadSavedCalculation(selected.first);
+                      },
+                    ),
+                  ),
+                  if (hasSaved)
+                    buildHelperText(
+                      context,
+                      'Select a saved reconstitution or start a new one.',
+                    )
+                  else
+                    buildHelperText(
+                      context,
+                      'No saved reconstitutions yet.',
+                    ),
+                  const SizedBox(height: kSpacingS),
+                  SizedBox(
+                    height: kStandardButtonHeight,
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: hasSaved ? _openSavedSheet : null,
+                      icon: const Icon(Icons.bookmarks_outlined),
+                      label: const Text('Manage saved'),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          sectionSpacing,
           SectionFormCard(
             title: 'Medication (Optional)',
             neutral: true,
