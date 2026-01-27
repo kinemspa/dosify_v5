@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
@@ -30,6 +31,26 @@ class ScheduleDetailPage extends StatefulWidget {
 
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   late final DoseLogRepository _doseLogRepo;
+
+  Future<void> _openEditScheduleDialog(Schedule schedule) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(kBorderRadiusLarge),
+        ),
+      ),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.95,
+          child: AddScheduleWizardPage(initial: schedule),
+        );
+      },
+    );
+  }
 
   String _mergedTitle(Schedule s) {
     final med = s.medicationName.trim();
@@ -213,7 +234,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             title: 'Schedule Details',
             expandedTitle: mergedTitle,
             expandedHeight: kDetailHeaderExpandedHeightCompact,
-            onEdit: () => context.push('/schedules/edit/${widget.scheduleId}'),
+            onEdit: () => _openEditScheduleDialog(s),
             onDelete: () => _confirmDelete(context, s),
             statsBannerContent: _buildScheduleHeader(
               context,
