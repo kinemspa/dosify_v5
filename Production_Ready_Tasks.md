@@ -58,3 +58,8 @@ Finalize administrative and technical requirements for launch.
 - Perform a dry-run submission to the Google Play Console to identify any store-specific issues.
 
 By systematically addressing these areas, you can enhance the application's quality and reduce the likelihood of post-deployment problems. It is advisable to document all test results and involve cross-functional teams for comprehensive coverage. If your app incorporates specialized features (e.g., media playback or payments), tailor additional tests accordingly.
+
+---
+
+## Deferred (do later)
+- Add visual regression (golden) tests for Calendar month/week grids to catch layout overflows/regressions.
