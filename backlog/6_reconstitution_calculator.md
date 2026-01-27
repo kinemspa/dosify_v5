@@ -27,6 +27,10 @@
 
 ## Recommendations
 
+- [x] Improve helper text for the new fields so users understand what each value means (keep wording consistent with `docs/technical.md`).
+- [ ] Regroup fields so Strength Unit + Strength Value live under a “Strength” heading, and Medication Name is optional unless saving.
+- [ ] Add validation rules that match the written requirements (mandatory strength fields, optional med name until save).
+
 
 
 

@@ -586,7 +586,7 @@ class _ReconstitutionCalculatorPageState
                       ),
                     ),
                     helper(
-                      'Optional for calculations. You will be prompted for this when saving.',
+                      'Optional. Not used in calculations — only used for naming/searching saved reconstitutions.',
                     ),
                     const SizedBox(height: kSpacingS),
                     Row(
@@ -688,7 +688,7 @@ class _ReconstitutionCalculatorPageState
                       ],
                     ),
                     helper(
-                      'Select the unit and enter vial strength (before reconstitution).',
+                      'Strength (S): total drug amount in the vial BEFORE mixing with liquid. Use the unit shown on the vial label.',
                     ),
                   ],
                 ),

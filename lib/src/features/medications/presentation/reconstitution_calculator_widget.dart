@@ -482,7 +482,7 @@ class _ReconstitutionCalculatorWidgetState
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
+            'The calculator determines how much diluent to add for correct doses. Enter diluent name (optional), desired dose (D), syringe size, and optional max vial size. Then pick an option below or fine-tune with the slider.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: fg.withValues(alpha: kReconTextMediumOpacity),
             ),
@@ -505,7 +505,7 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         ),
-        _helperText('Reconstitution fluid name'),
+        _helperText('Optional label for the mixing liquid (e.g., Sterile Water)'),
         _rowLabelField(
           context,
           label: 'Desired Dose',
@@ -565,7 +565,7 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Enter the amount per dose and select its unit'),
+        _helperText('Desired dose (D): amount per injection. Choose the unit that matches your dose.'),
         _rowLabelField(
           context,
           label: 'Syringe Size',
@@ -590,7 +590,7 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Select the syringe capacity'),
+        _helperText('Sets the syringe markings (100 units = 1.0 mL) and limits the maximum volume.'),
         _rowLabelField(
           context,
           label: 'Max Vial Size',
@@ -617,7 +617,7 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context, hint: 'mL'),
           ),
         ),
-        _helperText('Maximum capacity in mL of the vial (optional constraint)'),
+        _helperText('Optional. If set, options requiring more than this vial capacity are disabled.'),
         _gradientDivider(context),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
           Padding(
