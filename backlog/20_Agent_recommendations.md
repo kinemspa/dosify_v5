@@ -1,5 +1,15 @@
 Recommendation Plan (for recommendation.md)
 
+Path Map (so agents don’t chase dead folders)
+
+- Analytics screen + CSV export currently lives here: `lib/src/features/analytics/presentation/analytics_page.dart`
+- “Reports” widgets are primarily here:
+	- Medication reports widget: `lib/src/features/medications/presentation/widgets/medication_reports_widget.dart`
+	- Combined reports history: `lib/src/widgets/combined_reports_history_widget.dart`
+- Inventory screen lives here: `lib/src/features/inventory/presentation/inventory_page.dart`
+- Supplies feature lives here: `lib/src/features/supplies/**`
+- There is no `lib/src/features/reports/**` folder in this repo (use the paths above instead).
+
 Scope & Goals
 
 Improve correctness (UTC/time, notifications, logs), maintainability (clear data boundaries, consistent state), UI consistency (design system compliance), and backlog-deliverables (inventory/reports/take-dose/notifications) without introducing regressions.

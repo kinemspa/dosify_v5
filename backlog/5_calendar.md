@@ -33,6 +33,9 @@
 ## Recommendations
 - [ ] Add visual regression tests for month/week grids (overflows are easy to reintroduce).
 - [x] Consider unifying Day View + Dose Stage layout code to avoid divergence.
+
+- [ ] Ensure calendar goldens actually exist and run in CI (restore/replace any removed tests so regressions get caught early).
+- [ ] Add a small golden set specifically for “compact phones” widths (overflow risk is highest there).
     
 
 

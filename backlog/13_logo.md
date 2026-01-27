@@ -8,3 +8,6 @@
 - [ ] Place the logo in all the places I need it. 
 
 ## Recommmendations
+
+- [ ] Add a checklist of logo placements: launcher icon, in-app header, splash, About/settings, and notification large icon (where supported).
+- [ ] Ensure generated assets cover Android densities and adaptive icon requirements.

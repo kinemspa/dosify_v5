@@ -31,3 +31,7 @@
 - [x] Replace Reports chips with a single “Included meds” selector (bottom sheet) to reduce clutter.
 - [x] Ensure Home Schedules uses the same schedule card widget as the Schedules list for consistency.
 
+- [ ] Unify Home section card styling by exclusively using the shared card primitives (no per-section containers/decoration).
+- [ ] Ensure all paddings/margins on Home come from `lib/src/core/design_system.dart` tokens (no ad-hoc `EdgeInsets.*`).
+- [ ] Replace any “empty state” blocks with a single shared empty-state widget for consistent typography, spacing, and CTA placement.
+

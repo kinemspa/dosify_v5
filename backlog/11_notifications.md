@@ -36,3 +36,7 @@
 ## Recommendations
 - [x] Add a Settings option for “Missed dose grace period” and “Overdue reminder timing”.
 - [ ] Consider an optional Android expanded image (BigPicture) later; keep group summaries compact.
+
+- [ ] Define snooze behavior precisely (log-only vs reschedule notification) and implement consistently (there are TODOs referencing snooze rescheduling).
+- [ ] Standardize “existing dose log” lookup/dedupe so notification actions and in-app Take Dose cannot create duplicates for the same occurrence.
+- [ ] Add regression tests for grouping/dedupe and for missed/overdue thresholds across DST/day-boundary scenarios.
