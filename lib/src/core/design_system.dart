@@ -363,10 +363,10 @@ const double kDoseCardStatusIconSize = kIconSizeLarge;
 const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
 
 /// DoseCard status chip sizing
-const double kDoseCardStatusChipHeight = 24;
-const double kDoseCardStatusChipHeightCompact = 22;
-const double kDoseCardStatusChipWidth = 104;
-const double kDoseCardStatusChipWidthCompact = 96;
+const double kDoseCardStatusChipHeight = 28;
+const double kDoseCardStatusChipHeightCompact = 26;
+const double kDoseCardStatusChipWidth = 96;
+const double kDoseCardStatusChipWidthCompact = 88;
 
 /// Button spacing
 const double kButtonSpacing = 8;
@@ -1189,7 +1189,7 @@ TextStyle? nextDoseBadgeTimeTextStyle(
   return helperTextStyle(
     context,
     color: color,
-  )?.copyWith(fontSize: kFontSizeXSmall);
+  )?.copyWith(fontSize: kFontSizeXSmall, fontWeight: kFontWeightBold);
 }
 
 TextStyle? stockDonutPrimaryLabelTextStyle(
@@ -1217,7 +1217,11 @@ TextStyle? doseCardTimeTextStyle(BuildContext context, {required Color color}) {
   return helperTextStyle(
     context,
     color: color,
-  )?.copyWith(fontSize: kFontSizeXSmall, height: kLineHeightTight);
+  )?.copyWith(
+    fontSize: kFontSizeXSmall,
+    fontWeight: kFontWeightBold,
+    height: kLineHeightTight,
+  );
 }
 
 /// Dose-card leading dose-number label style.
@@ -1251,8 +1255,20 @@ TextStyle? doseCardTakeMetricsTextStyle(
   return bodyTextStyle(context)?.copyWith(
     color: color,
     fontWeight: kFontWeightSemiBold,
-    fontSize: kFontSizeSmall,
+    fontSize: kFontSizeXSmall,
   );
+}
+
+/// Centralized DoseCard content padding.
+EdgeInsets doseCardContentPadding({required bool compact}) {
+  return EdgeInsets.symmetric(
+    horizontal: compact ? kSpacingL : kSpacingXL,
+    vertical: compact ? kSpacingS : kSpacingS,
+  );
+}
+
+double doseCardColumnGap({required bool compact}) {
+  return compact ? kSpacingS : kSpacingM;
 }
 
 // ============================================================================

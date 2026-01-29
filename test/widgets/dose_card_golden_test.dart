@@ -204,5 +204,33 @@ void main() {
         matchesGoldenFile('goldens/dose_card_compact_pending.png'),
       );
     });
+
+    testWidgets('compact (long metrics)', (tester) async {
+      final dose = _dose(
+        scheduledTime: DateTime(2026, 1, 26, 9),
+      );
+
+      await tester.pumpWidget(
+        _wrapForGolden(
+          DoseCard(
+            dose: dose,
+            medicationName: 'Very Long Medication Name That Should Ellipsize',
+            strengthOrConcentrationLabel: '250 mcg/mL',
+            doseMetrics: '0.75 mL (75 units) • 1.25 mg equiv',
+            onTap: () {},
+            isActive: true,
+            compact: true,
+            showActions: true,
+            statusOverride: DoseStatus.pending,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byKey(const ValueKey<String>('golden')),
+        matchesGoldenFile('goldens/dose_card_compact_long.png'),
+      );
+    });
   });
 }

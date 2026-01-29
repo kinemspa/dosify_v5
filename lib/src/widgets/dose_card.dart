@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_action_button.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
@@ -54,9 +55,8 @@ class DoseCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final radius = compact ? kBorderRadiusSmall : kBorderRadiusMedium;
-    final horizontalPadding = compact ? kSpacingL : kSpacingXL;
-    final verticalPadding = compact ? kSpacingM : kSpacingM;
-    final columnGap = compact ? kSpacingS : kSpacingM;
+    final contentPadding = doseCardContentPadding(compact: compact);
+    final columnGap = doseCardColumnGap(compact: compact);
 
     final effectiveStatus = statusOverride ?? dose.status;
     final disabled = !isActive;
@@ -66,9 +66,8 @@ class DoseCard extends StatelessWidget {
       disabled: disabled,
     );
     final statusColor = statusVisual.color;
-    final statusIcon = statusVisual.icon;
 
-    final statusLabel = doseStatusLabel(effectiveStatus, disabled: disabled);
+    // Note: label/icon are rendered via the status chip/action button widgets.
 
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
@@ -92,7 +91,7 @@ class DoseCard extends StatelessWidget {
         borderRadius: radius,
       ),
       child: Material(
-        color: Colors.transparent,
+        color: cs.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius),
         ),
@@ -101,10 +100,7 @@ class DoseCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(radius),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: verticalPadding,
-            ),
+            padding: contentPadding,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -178,14 +174,12 @@ class DoseCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: kSpacingXXS),
                       Text(
                         medicationName,
                         style: baseBody,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: kSpacingXXS),
                       if (medicationFormIcon != null)
                         Row(
                           children: [
@@ -202,7 +196,7 @@ class DoseCard extends StatelessWidget {
                                   context,
                                   color: takeColor,
                                 ),
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -215,7 +209,7 @@ class DoseCard extends StatelessWidget {
                             context,
                             color: takeColor,
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                     ],
@@ -234,57 +228,10 @@ class DoseCard extends StatelessWidget {
                           compact: compact,
                         )
                       else ...[
-                        SizedBox(
-                          width: compact
-                              ? kDoseCardStatusChipWidthCompact
-                              : kDoseCardStatusChipWidth,
-                          height: compact
-                              ? kDoseCardStatusChipHeightCompact
-                              : kDoseCardStatusChipHeight,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: kSpacingS,
-                              vertical: kSpacingXXS,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(
-                                alpha: kOpacityMinimal,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                kBorderRadiusChip,
-                              ),
-                              border: Border.all(
-                                color: statusColor.withValues(
-                                  alpha: kOpacityMediumLow,
-                                ),
-                                width: kBorderWidthThin,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  statusIcon,
-                                  size: compact
-                                      ? kDoseCardStatusIconSizeCompact
-                                      : kDoseCardStatusIconSize,
-                                  color: statusColor,
-                                ),
-                                const SizedBox(width: kSpacingXXS),
-                                Flexible(
-                                  child: Text(
-                                    statusLabel,
-                                    style: doseCardStatusChipLabelTextStyle(
-                                      context,
-                                      color: statusColor,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        DoseCardStatusChip(
+                          status: effectiveStatus,
+                          disabled: disabled,
+                          compact: compact,
                         ),
                         const SizedBox(height: kSpacingXS),
                         SizedBox(

@@ -59,3 +59,78 @@ class DoseStatusBadge extends StatelessWidget {
     );
   }
 }
+
+/// Fixed-size status chip used by [DoseCard] when quick-actions are disabled.
+///
+/// This keeps all states visually consistent (same width/height/padding) and
+/// prevents off-center rendering when labels differ.
+class DoseCardStatusChip extends StatelessWidget {
+  const DoseCardStatusChip({
+    super.key,
+    required this.status,
+    required this.disabled,
+    required this.compact,
+  });
+
+  final DoseStatus status;
+  final bool disabled;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = doseStatusVisual(context, status, disabled: disabled);
+    final label = doseStatusLabel(status, disabled: disabled);
+
+    final width = compact
+        ? kDoseCardStatusChipWidthCompact
+        : kDoseCardStatusChipWidth;
+    final height = compact
+        ? kDoseCardStatusChipHeightCompact
+        : kDoseCardStatusChipHeight;
+    final iconSize = compact
+        ? kDoseCardStatusIconSizeCompact
+        : kDoseCardStatusIconSize;
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: visual.color.withValues(alpha: kOpacityMinimal),
+          borderRadius: BorderRadius.circular(kBorderRadiusChip),
+          border: Border.all(
+            color: visual.color.withValues(alpha: kOpacityMediumLow),
+            width: kBorderWidthThin,
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? kSpacingXS : kSpacingS,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(visual.icon, size: iconSize, color: visual.color),
+                const SizedBox(width: kSpacingXXS),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: doseCardStatusChipLabelTextStyle(
+                      context,
+                      color: visual.color,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

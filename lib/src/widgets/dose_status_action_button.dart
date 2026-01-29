@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 
 class DoseStatusActionButton extends StatelessWidget {
@@ -22,9 +23,6 @@ class DoseStatusActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final disabled = !isActive;
 
-    final visual = doseStatusVisual(context, currentStatus, disabled: disabled);
-    final label = doseStatusLabel(currentStatus, disabled: disabled);
-
     return PopupMenuButton<DoseStatus>(
       tooltip: 'Change status',
       onSelected: onSelect,
@@ -33,49 +31,10 @@ class DoseStatusActionButton extends StatelessWidget {
         _buildItem(context, DoseStatus.snoozed, enabled: !disabled),
         _buildItem(context, DoseStatus.skipped, enabled: !disabled),
       ],
-      child: SizedBox(
-        width: compact ? kDoseCardStatusChipWidthCompact : kDoseCardStatusChipWidth,
-        height: compact
-            ? kDoseCardStatusChipHeightCompact
-            : kDoseCardStatusChipHeight,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: kSpacingS,
-            vertical: kSpacingXXS,
-          ),
-          decoration: BoxDecoration(
-            color: visual.color.withValues(alpha: kOpacityMinimal),
-            borderRadius: BorderRadius.circular(kBorderRadiusChip),
-            border: Border.all(
-              color: visual.color.withValues(alpha: kOpacityMediumLow),
-              width: kBorderWidthThin,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                visual.icon,
-                size: compact
-                    ? kDoseCardStatusIconSizeCompact
-                    : kDoseCardStatusIconSize,
-                color: visual.color,
-              ),
-              const SizedBox(width: kSpacingXXS),
-              Flexible(
-                child: Text(
-                  label,
-                  style: doseCardStatusChipLabelTextStyle(
-                    context,
-                    color: visual.color,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: DoseCardStatusChip(
+        status: currentStatus,
+        disabled: disabled,
+        compact: compact,
       ),
     );
   }
