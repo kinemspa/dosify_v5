@@ -262,6 +262,12 @@ const EdgeInsets kDoseActionSheetDialogInsetPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
   vertical: kSpacingM,
 );
+
+/// DoseActionSheet scroll indicator (Scrollbar)
+const double kDoseActionSheetScrollbarThickness = 3;
+const Radius kDoseActionSheetScrollbarThumbRadius = Radius.circular(
+  kBorderRadiusChipTight,
+);
 const EdgeInsets kBottomSheetHeaderPadding = EdgeInsets.fromLTRB(
   kSpacingL,
   kSpacingS,

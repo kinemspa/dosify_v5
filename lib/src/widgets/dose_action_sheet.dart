@@ -773,6 +773,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     ) {
       return Scrollbar(
         controller: scrollController,
+        thumbVisibility: true,
+        thickness: kDoseActionSheetScrollbarThickness,
+        radius: kDoseActionSheetScrollbarThumbRadius,
         child: ListView(
           controller: scrollController,
           padding: kBottomSheetContentPadding.copyWith(top: kSpacingM),
