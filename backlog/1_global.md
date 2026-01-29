@@ -10,7 +10,7 @@
 
 ## Recommendations
 
-- [ ] Add a short “Path Map” so backlog/docs refer to real feature folders (e.g., Analytics lives under `lib/src/features/analytics/`, and “Reports” widgets are in medications/widgets + shared widgets).
+- [x] Add a short “Path Map” so backlog/docs refer to real feature folders (e.g., Analytics lives under `lib/src/features/analytics/`, and “Reports” widgets are in medications/widgets + shared widgets).
 - [x] Remove `.bak` files from `lib/` (delete or move to docs) so they don’t ship and don’t confuse navigation.
 - [ ] Enforce design-system compliance via an automated check for `Colors.*`, `EdgeInsets.*`, `BorderRadius.circular(...)` in `lib/src/features/**` (similar to the existing font-size checker).
 - [ ] Introduce an injectable “clock/now” helper for time-sensitive logic (scheduling, reports ranges, expiry) to improve testability and reduce DST bugs.

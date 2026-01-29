@@ -12,6 +12,17 @@ This folder is the canonical home for project documentation.
 - Forms: `UNIFIED-FORMS.md`
 - UI standards: `ui_standards.md`
 
+## Path Map
+- App entry + startup: `lib/main.dart`
+- Routing: `lib/src/app/router.dart`
+- Design system (tokens/helpers): `lib/src/core/design_system.dart`
+- Shared widgets: `lib/src/widgets/`
+- Features (feature-first): `lib/src/features/`
+	- Medications: `lib/src/features/medications/`
+	- Schedules: `lib/src/features/schedules/`
+	- Calendar widgets: `lib/src/widgets/calendar/`
+	- Reports/Analytics/Inventory UI: `lib/src/features/reports/`
+
 ## Engineering
 - Toolchain: `engineering/toolchain.md`
 - Quality workflow: `engineering/quality-workflow.md`
