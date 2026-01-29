@@ -569,7 +569,7 @@ class _ReconstitutionCalculatorPageState
                     ),
                     const SizedBox(height: 12),
                     LabelFieldRow(
-                      label: 'Medication',
+                      label: 'Medication Name',
                       lightText: true,
                       field: Field36(
                         child: TextField(
@@ -589,6 +589,18 @@ class _ReconstitutionCalculatorPageState
                       'Optional. Not used in calculations — only used for naming/searching saved reconstitutions.',
                     ),
                     const SizedBox(height: kSpacingS),
+                    Padding(
+                      padding: kReconInlineFieldLabelPadding,
+                      child: Text(
+                        'Strength',
+                        style: fieldLabelStyle(context)?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withValues(alpha: kReconTextHighOpacity),
+                        ),
+                      ),
+                    ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -644,7 +656,7 @@ class _ReconstitutionCalculatorPageState
                               Padding(
                                 padding: kReconInlineFieldLabelPadding,
                                 child: Text(
-                                  'Strength',
+                                  'Amount',
                                   style: fieldLabelStyle(context)?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
