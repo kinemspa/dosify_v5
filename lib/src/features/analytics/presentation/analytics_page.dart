@@ -10,156 +10,25 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
+import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
+import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
+import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
-class AnalyticsPage extends StatelessWidget {
+class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
 
-  String _csvEscape(String value) {
-    final needsQuotes = value.contains(',') ||
-        value.contains('"') ||
-        value.contains('\n') ||
-        value.contains('\r');
-    if (!needsQuotes) return value;
-    final escaped = value.replaceAll('"', '""');
-    return '"$escaped"';
-  }
+  @override
+  State<AnalyticsPage> createState() => _AnalyticsPageState();
+}
 
-  String _doseLogsToCsv(List<DoseLog> logs) {
-    final header = [
-      'id',
-      'medicationName',
-      'scheduleName',
-      'scheduledTimeUtc',
-      'actionTimeUtc',
-      'action',
-      'doseValue',
-      'doseUnit',
-      'actualDoseValue',
-      'actualDoseUnit',
-      'notes',
-    ].join(',');
-
-    final rows = logs.map((l) {
-      return [
-        _csvEscape(l.id),
-        _csvEscape(l.medicationName),
-        _csvEscape(l.scheduleName),
-        _csvEscape(l.scheduledTime.toUtc().toIso8601String()),
-        _csvEscape(l.actionTime.toUtc().toIso8601String()),
-        _csvEscape(l.action.name),
-        _csvEscape(l.doseValue.toString()),
-        _csvEscape(l.doseUnit),
-        _csvEscape(l.actualDoseValue?.toString() ?? ''),
-        _csvEscape(l.actualDoseUnit ?? ''),
-        _csvEscape(l.notes ?? ''),
-      ].join(',');
-    }).join('\n');
-
-    return '$header\n$rows\n';
-  }
-
-  String _inventoryLogsToCsv(List<InventoryLog> logs) {
-    final header = [
-      'id',
-      'medicationId',
-      'medicationName',
-      'timestampUtc',
-      'changeType',
-      'previousStock',
-      'newStock',
-      'changeAmount',
-      'notes',
-    ].join(',');
-
-    final rows = logs.map((l) {
-      return [
-        _csvEscape(l.id),
-        _csvEscape(l.medicationId),
-        _csvEscape(l.medicationName),
-        _csvEscape(l.timestamp.toUtc().toIso8601String()),
-        _csvEscape(l.changeType.name),
-        _csvEscape(l.previousStock.toString()),
-        _csvEscape(l.newStock.toString()),
-        _csvEscape(l.changeAmount.toString()),
-        _csvEscape(l.notes ?? ''),
-      ].join(',');
-    }).join('\n');
-
-    return '$header\n$rows\n';
-  }
-
-  String _medicationsToCsv(List<Medication> meds) {
-    final header = [
-      'id',
-      'name',
-      'form',
-      'manufacturer',
-      'strengthValue',
-      'strengthUnit',
-      'stockValue',
-      'stockUnit',
-      'createdAtUtc',
-      'updatedAtUtc',
-    ].join(',');
-
-    final rows = meds.map((m) {
-      return [
-        _csvEscape(m.id),
-        _csvEscape(m.name),
-        _csvEscape(m.form.name),
-        _csvEscape(m.manufacturer ?? ''),
-        _csvEscape(m.strengthValue.toString()),
-        _csvEscape(m.strengthUnit.name),
-        _csvEscape(m.stockValue.toString()),
-        _csvEscape(m.stockUnit.name),
-        _csvEscape(m.createdAt.toUtc().toIso8601String()),
-        _csvEscape(m.updatedAt.toUtc().toIso8601String()),
-      ].join(',');
-    }).join('\n');
-
-    return '$header\n$rows\n';
-  }
-
-  String _schedulesToCsv(List<Schedule> schedules) {
-    final header = [
-      'id',
-      'name',
-      'medicationId',
-      'medicationName',
-      'active',
-      'startAtUtc',
-      'endAtUtc',
-      'doseValue',
-      'doseUnit',
-      'daysOfWeek',
-      'timesOfDay',
-      'createdAtUtc',
-    ].join(',');
-
-    final rows = schedules.map((s) {
-      return [
-        _csvEscape(s.id),
-        _csvEscape(s.name),
-        _csvEscape(s.medicationId ?? ''),
-        _csvEscape(s.medicationName),
-        _csvEscape(s.active.toString()),
-        _csvEscape(s.startAt?.toUtc().toIso8601String() ?? ''),
-        _csvEscape(s.endAt?.toUtc().toIso8601String() ?? ''),
-        _csvEscape(s.doseValue.toString()),
-        _csvEscape(s.doseUnit),
-        _csvEscape(s.daysOfWeek.join('|')),
-        _csvEscape((s.timesOfDay ?? const <int>[]).join('|')),
-        _csvEscape(s.createdAt.toUtc().toIso8601String()),
-      ].join(',');
-    }).join('\n');
-
-    return '$header\n$rows\n';
-  }
+class _AnalyticsPageState extends State<AnalyticsPage> {
+  final _csv = const CsvExportService();
+  ReportTimeRangePreset _rangePreset = ReportTimeRangePreset.allTime;
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +36,8 @@ class AnalyticsPage extends StatelessWidget {
     final schedulesBox = Hive.box<Schedule>('schedules');
     final doseLogsBox = Hive.box<DoseLog>('dose_logs');
     final inventoryLogsBox = Hive.box<InventoryLog>('inventory_logs');
+
+    final range = ReportTimeRange(_rangePreset).toUtcTimeRange();
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Analytics', forceBackButton: true),
@@ -191,13 +62,23 @@ class AnalyticsPage extends StatelessWidget {
                       )..sort((a, b) => a.name
                           .toLowerCase()
                           .compareTo(b.name.toLowerCase()));
-                      final logItems = doseLogs.values.toList(growable: false)
+                      final allLogItems =
+                          doseLogs.values.toList(growable: false);
+                      final allInventoryItems =
+                          inventoryLogs.values.toList(growable: false);
+
+                      final logItems = (range == null
+                              ? allLogItems
+                              : allLogItems
+                                  .where((l) => range.contains(l.actionTime))
+                                  .toList(growable: false))
                         ..sort((a, b) => b.actionTime.compareTo(a.actionTime));
-                      final inventoryItems =
-                          inventoryLogs.values.toList(growable: false)
-                            ..sort(
-                              (a, b) => b.timestamp.compareTo(a.timestamp),
-                            );
+                      final inventoryItems = (range == null
+                              ? allInventoryItems
+                              : allInventoryItems
+                                  .where((l) => range.contains(l.timestamp))
+                                  .toList(growable: false))
+                        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
                       final taken = logItems
                         .where((l) => l.action == DoseAction.taken)
@@ -216,6 +97,13 @@ class AnalyticsPage extends StatelessWidget {
                         title: 'Overview',
                         neutral: true,
                         children: [
+                          ReportTimeRangeSelectorRow(
+                            value: _rangePreset,
+                            onChanged: (next) {
+                              setState(() => _rangePreset = next);
+                            },
+                          ),
+                          const SizedBox(height: kSpacingS),
                           buildDetailInfoRow(
                             context,
                             label: 'Medications',
@@ -260,7 +148,7 @@ class AnalyticsPage extends StatelessWidget {
                         children: [
                           buildHelperText(
                             context,
-                            'Copy your data as CSV for spreadsheets or backups.',
+                            'Copy your data as CSV for spreadsheets or backups. Dose/Inventory exports follow the selected time range.',
                           ),
                           const SizedBox(height: kSpacingS),
                           Wrap(
@@ -272,7 +160,9 @@ class AnalyticsPage extends StatelessWidget {
                                 onPressed: medItems.isEmpty
                                     ? null
                                     : () async {
-                                        final csv = _medicationsToCsv(medItems);
+                                        final csv = _csv.medicationsToCsv(
+                                          medItems,
+                                        );
                                         await Clipboard.setData(
                                           ClipboardData(text: csv),
                                         );
@@ -292,8 +182,9 @@ class AnalyticsPage extends StatelessWidget {
                                 onPressed: scheduleItems.isEmpty
                                     ? null
                                     : () async {
-                                        final csv =
-                                            _schedulesToCsv(scheduleItems);
+                                        final csv = _csv.schedulesToCsv(
+                                          scheduleItems,
+                                        );
                                         await Clipboard.setData(
                                           ClipboardData(text: csv),
                                         );
@@ -313,7 +204,10 @@ class AnalyticsPage extends StatelessWidget {
                                 onPressed: logItems.isEmpty
                                     ? null
                                     : () async {
-                                        final csv = _doseLogsToCsv(logItems);
+                                        final csv = _csv.doseLogsToCsv(
+                                          logItems,
+                                          range: range,
+                                        );
                                         await Clipboard.setData(
                                           ClipboardData(text: csv),
                                         );
@@ -333,8 +227,9 @@ class AnalyticsPage extends StatelessWidget {
                                 onPressed: inventoryItems.isEmpty
                                     ? null
                                     : () async {
-                                        final csv = _inventoryLogsToCsv(
+                                        final csv = _csv.inventoryLogsToCsv(
                                           inventoryItems,
+                                          range: range,
                                         );
                                         await Clipboard.setData(
                                           ClipboardData(text: csv),

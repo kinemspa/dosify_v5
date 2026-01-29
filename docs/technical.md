@@ -133,6 +133,13 @@ Notifications (architecture and delivery)
   - low_stock, expiry (Default)
   - test_alarm (Max) for diagnostics with short delays
 
+Reports & export (CSV)
+- Exports are intended to be spreadsheet-friendly backups and audits.
+- Timestamps are exported in ISO-8601 **UTC**.
+- Dose logs export includes both `scheduledTimeUtc` and `actionTimeUtc` on every row.
+- Inventory logs export includes `timestampUtc`.
+- Time range filtering (when enabled): include rows where the relevant timestamp is within the range **start inclusive** and **end exclusive**.
+
 Schedules Module Enhancements
 - Schedule dose entry rules (high-level)
   - Schedule names should be auto-generated from dose + medication name, but user-editable.
