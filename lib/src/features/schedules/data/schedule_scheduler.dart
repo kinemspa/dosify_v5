@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_dose_metrics.dart';
 
 /// Schedules notifications for registered [Schedule] entries and exposes helpers
 /// for deterministic stable slot ID generation used across the app.
@@ -159,7 +160,10 @@ class ScheduleScheduler {
       String? groupKey,
     }) async {
       final title = s.medicationName;
-      final body = '${s.name} • ${s.doseValue} ${s.doseUnit} • ${formatHm(when)}';
+      final metrics = ScheduleDoseMetrics.format(s);
+      final dueAt = formatHm(when);
+      final body = '${s.name} • $metrics • $dueAt';
+      final expandedLines = <String>[s.name, metrics, 'Due $dueAt'];
 
       final missedAt = DoseTimingSettings.missedAt(
         schedule: s,
@@ -178,6 +182,7 @@ class ScheduleScheduler {
         groupKey: groupKey,
         payload: payload,
         actions: NotificationService.upcomingDoseActions,
+        expandedLines: expandedLines,
         timeoutAfterMs: timeoutAfterMs,
       );
 
@@ -199,10 +204,11 @@ class ScheduleScheduler {
         reminderId,
         reminderAt,
         title: 'Overdue: ${s.medicationName}',
-        body: '${s.name} • ${s.doseValue} ${s.doseUnit} • due ${formatHm(when)}',
+        body: '${s.name} • $metrics • due $dueAt',
         groupKey: groupKey,
         payload: payload,
         actions: NotificationService.upcomingDoseActions,
+        expandedLines: <String>[s.name, metrics, 'Due $dueAt'],
         timeoutAfterMs: reminderTimeoutMs,
       );
     }

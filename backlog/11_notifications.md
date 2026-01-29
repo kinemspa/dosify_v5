@@ -5,8 +5,8 @@
 - [x] There are cumulating notifications. So the Notificaiton from the previous days dose is appearing on the next days along with the next days. 
 - [x] We should put in a grace period for when a dose is marked missed. Maybe its a percentage towards the next dose. (Should be added to the settings as an option to tweak.)
 - [x] Need to make the notifications more like the dose cards
-- [ ] How can we manage the Take, SNooze, Skip sections. Can we open up an advanced layout? 
-- [ ] Take Dose needs more details. 
+- [x] How can we manage the Take, SNooze, Skip sections. Can we open up an advanced layout? 
+- [x] Take Dose needs more details. 
 - [x] Can the Notification show the syringe image?
 
 ### Take Dose Reminder

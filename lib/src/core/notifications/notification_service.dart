@@ -898,6 +898,7 @@ class NotificationService {
     bool setAsGroupSummary = false,
     String? payload,
     List<AndroidNotificationAction>? actions,
+    List<String>? expandedLines,
     int? timeoutAfterMs,
   }) async {
     await _ensureTimeZoneReady();
@@ -939,11 +940,17 @@ class NotificationService {
         setAsGroupSummary: setAsGroupSummary,
         actions: actions,
         styleInformation: shouldUseExpandedStyle
-            ? BigTextStyleInformation(
-                body,
-                contentTitle: title,
-                summaryText: 'Take • Snooze • Skip',
-              )
+            ? (expandedLines != null && expandedLines.isNotEmpty
+                ? InboxStyleInformation(
+                    expandedLines,
+                    contentTitle: title,
+                    summaryText: 'Take • Snooze • Skip',
+                  )
+                : BigTextStyleInformation(
+                    body,
+                    contentTitle: title,
+                    summaryText: 'Take • Snooze • Skip',
+                  ))
             : null,
         timeoutAfter: timeoutAfterMs,
       ),
