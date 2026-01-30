@@ -3,10 +3,29 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 
 class DoseLogRepository {
   DoseLogRepository(this._box);
   final Box<DoseLog> _box;
+
+  static String occurrenceId({
+    required String scheduleId,
+    required DateTime scheduledTime,
+  }) {
+    return DoseLogIds.occurrenceId(
+      scheduleId: scheduleId,
+      scheduledTime: scheduledTime,
+    );
+  }
+
+  DoseLog? getForOccurrence({
+    required String scheduleId,
+    required DateTime scheduledTime,
+  }) {
+    final baseId = occurrenceId(scheduleId: scheduleId, scheduledTime: scheduledTime);
+    return _box.get(baseId) ?? _box.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
+  }
 
   /// Get all dose logs
   List<DoseLog> getAll() => _box.values.toList(growable: false);
@@ -45,6 +64,28 @@ class DoseLogRepository {
 
   /// Save or update a dose log
   Future<void> upsert(DoseLog log) => _box.put(log.id, log);
+
+  /// Save/update the log for a specific occurrence while preventing legacy
+  /// duplicate snooze logs.
+  Future<void> upsertOccurrence(DoseLog log) async {
+    await _box.put(log.id, log);
+
+    // Migration cleanup: older builds wrote snooze logs under "${baseId}_snooze".
+    // If we just wrote the base id, remove the legacy snooze id.
+    final legacySnoozeId = DoseLogIds.legacySnoozeIdFromBase(log.id);
+    if (legacySnoozeId != log.id && _box.containsKey(legacySnoozeId)) {
+      await _box.delete(legacySnoozeId);
+    }
+  }
+
+  Future<void> deleteOccurrence({
+    required String scheduleId,
+    required DateTime scheduledTime,
+  }) async {
+    final baseId = occurrenceId(scheduleId: scheduleId, scheduledTime: scheduledTime);
+    await _box.delete(baseId);
+    await _box.delete(DoseLogIds.legacySnoozeIdFromBase(baseId));
+  }
 
   /// Delete a dose log (rarely used - logs should persist for reporting)
   Future<void> delete(String id) => _box.delete(id);

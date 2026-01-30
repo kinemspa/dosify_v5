@@ -9,7 +9,9 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_dose_metrics.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 
 Future<void> showDoseActionSheetFromModels(
@@ -21,15 +23,19 @@ Future<void> showDoseActionSheetFromModels(
 }) {
   Future<void> cancelNotificationForDose() async {
     try {
-      final weekday = dose.scheduledTime.weekday;
-      final minutes = dose.scheduledTime.hour * 60 + dose.scheduledTime.minute;
-      final notificationId = ScheduleScheduler.slotIdFor(
-        dose.scheduleId,
-        weekday: weekday,
-        minutes: minutes,
-        occurrence: 0,
+      await NotificationService.cancel(
+        ScheduleScheduler.doseNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
       );
-      await NotificationService.cancel(notificationId);
+
+      await NotificationService.cancel(
+        ScheduleScheduler.overdueNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
+      );
     } catch (_) {
       // Best-effort cancellation only.
     }
@@ -40,8 +46,10 @@ Future<void> showDoseActionSheetFromModels(
     dose: dose,
     initialStatus: initialStatus,
     onMarkTaken: (request) async {
-      final logId =
-          '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+      final logId = DoseLogIds.occurrenceId(
+        scheduleId: dose.scheduleId,
+        scheduledTime: dose.scheduledTime,
+      );
       final log = DoseLog(
         id: logId,
         scheduleId: dose.scheduleId,
@@ -59,7 +67,7 @@ Future<void> showDoseActionSheetFromModels(
       );
 
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
       await cancelNotificationForDose();
 
       final medBox = Hive.box<Medication>('medications');
@@ -94,8 +102,10 @@ Future<void> showDoseActionSheetFromModels(
       }
     },
     onSnooze: (request) async {
-      final logId =
-          '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+      final logId = DoseLogIds.occurrenceId(
+        scheduleId: dose.scheduleId,
+        scheduledTime: dose.scheduledTime,
+      );
       final log = DoseLog(
         id: logId,
         scheduleId: dose.scheduleId,
@@ -113,7 +123,29 @@ Future<void> showDoseActionSheetFromModels(
       );
 
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
+
+      // Reschedule a reminder at the snooze-until time (best-effort).
+      await cancelNotificationForDose();
+      final when = request.actionTime;
+      if (when.isAfter(DateTime.now())) {
+        final metrics = ScheduleDoseMetrics.format(schedule);
+        final time = TimeOfDay.fromDateTime(when).format(context);
+        final body = '${schedule.name} • $metrics • Snoozed until $time';
+        await NotificationService.scheduleAtAlarmClock(
+          ScheduleScheduler.doseNotificationIdFor(
+            dose.scheduleId,
+            dose.scheduledTime,
+          ),
+          when,
+          title: medication.name,
+          body: body,
+          payload:
+              'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
+          actions: NotificationService.upcomingDoseActions,
+          expandedLines: <String>[schedule.name, metrics, 'Snoozed until $time'],
+        );
+      }
 
       if (context.mounted) {
         final now = DateTime.now();
@@ -131,8 +163,10 @@ Future<void> showDoseActionSheetFromModels(
       }
     },
     onSkip: (request) async {
-      final logId =
-          '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+      final logId = DoseLogIds.occurrenceId(
+        scheduleId: dose.scheduleId,
+        scheduledTime: dose.scheduledTime,
+      );
       final log = DoseLog(
         id: logId,
         scheduleId: dose.scheduleId,
@@ -150,7 +184,7 @@ Future<void> showDoseActionSheetFromModels(
       );
 
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
       await cancelNotificationForDose();
 
       if (context.mounted) {
@@ -161,10 +195,13 @@ Future<void> showDoseActionSheetFromModels(
     },
     onDelete: (request) async {
       final logBox = Hive.box<DoseLog>('dose_logs');
-      final idToDelete =
-          dose.existingLog?.id ??
-          '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
-      final existingLog = logBox.get(idToDelete);
+      final baseId = DoseLogIds.occurrenceId(
+        scheduleId: dose.scheduleId,
+        scheduledTime: dose.scheduledTime,
+      );
+      final existingLog =
+          logBox.get(baseId) ??
+          logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
       if (existingLog != null && existingLog.action == DoseAction.taken) {
         final medBox = Hive.box<Medication>('medications');
@@ -192,7 +229,11 @@ Future<void> showDoseActionSheetFromModels(
       }
 
       final repo = DoseLogRepository(logBox);
-      await repo.delete(idToDelete);
+      await repo.deleteOccurrence(
+        scheduleId: dose.scheduleId,
+        scheduledTime: dose.scheduledTime,
+      );
+      await cancelNotificationForDose();
 
       if (context.mounted) {
         ScaffoldMessenger.of(

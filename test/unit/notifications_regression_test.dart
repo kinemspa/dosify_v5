@@ -1,0 +1,103 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+
+void main() {
+  test('DoseLogIds prefers base id over legacy snooze', () {
+    final scheduled = DateTime.utc(2026, 1, 1, 12);
+    final baseId = DoseLogIds.occurrenceId(scheduleId: 's1', scheduledTime: scheduled);
+    final snoozeId = DoseLogIds.legacySnoozeIdFromBase(baseId);
+
+    final base = DoseLog(
+      id: baseId,
+      scheduleId: 's1',
+      scheduleName: 'Sched',
+      medicationId: 'm1',
+      medicationName: 'Med',
+      scheduledTime: scheduled,
+      actionTime: scheduled,
+      doseValue: 1,
+      doseUnit: 'mg',
+      action: DoseAction.taken,
+    );
+
+    final snooze = DoseLog(
+      id: snoozeId,
+      scheduleId: 's1',
+      scheduleName: 'Sched',
+      medicationId: 'm1',
+      medicationName: 'Med',
+      scheduledTime: scheduled,
+      actionTime: scheduled.add(const Duration(minutes: 10)),
+      doseValue: 1,
+      doseUnit: 'mg',
+      action: DoseAction.snoozed,
+    );
+
+    final picked = DoseLogIds.pickExistingFromMap(
+      {snoozeId: snooze, baseId: base},
+      scheduleId: 's1',
+      scheduledTime: scheduled,
+    );
+
+    expect(picked?.id, equals(baseId));
+  });
+
+  test('DoseTimingSettings window respects next occurrence', () {
+    DoseTimingSettings.value.value = const DoseTimingConfig(
+      missedGracePercent: 50,
+      overdueReminderPercent: 50,
+    );
+
+    // Daily schedule at 00:30 (minutesOfDay) with multiple times per day.
+    final schedule = Schedule(
+      id: 's1',
+      name: 'Dose',
+      medicationName: 'Med',
+      doseValue: 1,
+      doseUnit: 'mg',
+      minutesOfDay: 30,
+      timesOfDay: const [30],
+      daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
+    );
+
+    final scheduledTime = DateTime(2026, 1, 1, 23, 30);
+    final next = ScheduleOccurrenceService.nextOccurrence(
+      schedule,
+      from: scheduledTime.add(const Duration(seconds: 1)),
+    );
+    expect(next, isNotNull);
+
+    final missedAt = DoseTimingSettings.missedAt(
+      schedule: schedule,
+      scheduledTime: scheduledTime,
+    );
+
+    // With 50% grace, missedAt should be halfway to the next dose.
+    final grace = next!.difference(scheduledTime);
+    final expected = scheduledTime.add(Duration(seconds: (grace.inSeconds * 0.5).round()));
+    expect(missedAt, equals(expected));
+
+    final overdueAt = DoseTimingSettings.overdueReminderAt(
+      schedule: schedule,
+      scheduledTime: scheduledTime,
+    );
+    expect(overdueAt, isNotNull);
+    expect(overdueAt!.isAfter(scheduledTime), isTrue);
+    expect(overdueAt.isBefore(missedAt), isTrue);
+  });
+
+  test('ScheduleScheduler dose notification id is stable', () {
+    final t = DateTime.utc(2026, 1, 1, 12);
+    final a = ScheduleScheduler.doseNotificationIdFor('s1', t);
+    final b = ScheduleScheduler.doseNotificationIdFor('s1', t);
+    final c = ScheduleScheduler.doseNotificationIdFor('s1', t.add(const Duration(minutes: 1)));
+    expect(a, equals(b));
+    expect(a, isNot(equals(c)));
+  });
+}

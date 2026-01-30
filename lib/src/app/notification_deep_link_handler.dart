@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/show_dose_action_sheet.dart';
 
@@ -104,8 +105,11 @@ class NotificationDeepLinkHandler {
     required String scheduleId,
     required DateTime scheduledTime,
   }) {
-    final baseId = '${scheduleId}_${scheduledTime.millisecondsSinceEpoch}';
-    return logBox.get(baseId) ?? logBox.get('${baseId}_snooze');
+    final baseId = DoseLogIds.occurrenceId(
+      scheduleId: scheduleId,
+      scheduledTime: scheduledTime,
+    );
+    return logBox.get(baseId) ?? logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
   }
 
   static Future<void> _openDoseActionSheet(

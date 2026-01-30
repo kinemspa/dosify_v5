@@ -74,6 +74,22 @@ class ScheduleScheduler {
     return _stableHash31(key);
   }
 
+  /// Public API: deterministic id for a single dose occurrence by scheduled time.
+  ///
+  /// This is used by the UI and snooze behavior to reliably cancel/reschedule
+  /// the exact notification instance for an occurrence.
+  static int doseNotificationIdFor(String scheduleId, DateTime scheduledTime) {
+    return _stableHash31(
+      'dose|$scheduleId|${scheduledTime.millisecondsSinceEpoch}',
+    );
+  }
+
+  static int overdueNotificationIdFor(String scheduleId, DateTime scheduledTime) {
+    return _stableHash31(
+      'dose_overdue|$scheduleId|${scheduledTime.millisecondsSinceEpoch}',
+    );
+  }
+
   /// Public API: legacy id for day-based notification cancellation (safe within 32-bit)
   static int idForDay(String scheduleId, int weekday) {
     final key = '$scheduleId|d:$weekday';
@@ -193,9 +209,7 @@ class ScheduleScheduler {
       if (reminderAt == null) return;
       if (!reminderAt.isAfter(DateTime.now())) return;
 
-      final reminderId = _stableHash31(
-        'dose_overdue|${s.id}|${when.millisecondsSinceEpoch}',
-      );
+      final reminderId = overdueNotificationIdFor(s.id, when);
       final reminderTimeoutMs = missedAt.isAfter(reminderAt)
           ? missedAt.difference(reminderAt).inMilliseconds
           : null;
@@ -241,12 +255,7 @@ class ScheduleScheduler {
           );
           if (!dt.isAfter(now)) continue;
           if (!_withinBounds(s, dt)) continue;
-          final id = slotIdFor(
-            s.id,
-            weekday: dt.weekday,
-            minutes: minutes,
-            occurrence: i,
-          );
+          final id = doseNotificationIdFor(s.id, dt);
           await scheduleDoseNotification(
             id: id,
             when: dt,
@@ -293,12 +302,7 @@ class ScheduleScheduler {
                 setAsGroupSummary: true,
                 payload: 'dose_group:$groupKey',
               );
-              final id = slotIdFor(
-                s.id,
-                weekday: date.weekday,
-                minutes: mUtc,
-                occurrence: dayOffset,
-              );
+              final id = doseNotificationIdFor(s.id, dtLocal);
               await scheduleDoseNotification(
                 id: id,
                 when: dtLocal,
@@ -330,12 +334,7 @@ class ScheduleScheduler {
                 setAsGroupSummary: true,
                 payload: 'dose_group:$groupKey',
               );
-              final id = slotIdFor(
-                s.id,
-                weekday: date.weekday,
-                minutes: mLocal,
-                occurrence: dayOffset,
-              );
+              final id = doseNotificationIdFor(s.id, dt);
               await scheduleDoseNotification(
                 id: id,
                 when: dt,
@@ -380,18 +379,27 @@ class ScheduleScheduler {
               minutes ~/ 60,
               minutes % 60,
             );
-            final id = slotIdFor(
+            // New scheme
+            await NotificationService.cancel(
+              doseNotificationIdFor(existing.id, dt),
+            );
+            await NotificationService.cancel(
+              overdueNotificationIdFor(existing.id, dt),
+            );
+
+            // Legacy scheme (migration cleanup)
+            final legacyId = slotIdFor(
               existing.id,
               weekday: dt.weekday,
               minutes: minutes,
               occurrence: i,
             );
-            await NotificationService.cancel(id);
+            await NotificationService.cancel(legacyId);
 
-            final overdueId = _stableHash31(
+            final legacyOverdueId = _stableHash31(
               'dose_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
             );
-            await NotificationService.cancel(overdueId);
+            await NotificationService.cancel(legacyOverdueId);
           }
           day = day.add(Duration(days: n));
         }
@@ -411,14 +419,6 @@ class ScheduleScheduler {
             final utcWeekday = date.toUtc().weekday;
             if (daysUtc.contains(utcWeekday)) {
               for (final mUtc in timesUtc) {
-                final id = slotIdFor(
-                  existing.id,
-                  weekday: date.weekday,
-                  minutes: mUtc,
-                  occurrence: dayOffset,
-                );
-                await NotificationService.cancel(id);
-
                 final dtUtc = DateTime.utc(
                   date.year,
                   date.month,
@@ -427,23 +427,33 @@ class ScheduleScheduler {
                   mUtc % 60,
                 );
                 final dtLocal = dtUtc.toLocal();
-                final overdueId = _stableHash31(
+
+                // New scheme
+                await NotificationService.cancel(
+                  doseNotificationIdFor(existing.id, dtLocal),
+                );
+                await NotificationService.cancel(
+                  overdueNotificationIdFor(existing.id, dtLocal),
+                );
+
+                // Legacy scheme (migration cleanup)
+                final legacyId = slotIdFor(
+                  existing.id,
+                  weekday: date.weekday,
+                  minutes: mUtc,
+                  occurrence: dayOffset,
+                );
+                await NotificationService.cancel(legacyId);
+
+                final legacyOverdueId = _stableHash31(
                   'dose_overdue|${existing.id}|${dtLocal.millisecondsSinceEpoch}',
                 );
-                await NotificationService.cancel(overdueId);
+                await NotificationService.cancel(legacyOverdueId);
               }
             }
           } else {
             if (daysLocal.contains(date.weekday)) {
               for (final mLocal in timesLocal) {
-                final id = slotIdFor(
-                  existing.id,
-                  weekday: date.weekday,
-                  minutes: mLocal,
-                  occurrence: dayOffset,
-                );
-                await NotificationService.cancel(id);
-
                 final dt = DateTime(
                   date.year,
                   date.month,
@@ -451,10 +461,28 @@ class ScheduleScheduler {
                   mLocal ~/ 60,
                   mLocal % 60,
                 );
-                final overdueId = _stableHash31(
+
+                // New scheme
+                await NotificationService.cancel(
+                  doseNotificationIdFor(existing.id, dt),
+                );
+                await NotificationService.cancel(
+                  overdueNotificationIdFor(existing.id, dt),
+                );
+
+                // Legacy scheme (migration cleanup)
+                final legacyId = slotIdFor(
+                  existing.id,
+                  weekday: date.weekday,
+                  minutes: mLocal,
+                  occurrence: dayOffset,
+                );
+                await NotificationService.cancel(legacyId);
+
+                final legacyOverdueId = _stableHash31(
                   'dose_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
                 );
-                await NotificationService.cancel(overdueId);
+                await NotificationService.cancel(legacyOverdueId);
               }
             }
           }
