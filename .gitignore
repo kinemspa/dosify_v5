@@ -168,3 +168,6 @@ app.*.symbols
 .gclient_previous_sync_commits
 
 # Project docs (do not track request checklists)
+
+# Backlog checklists are a local collaboration scratchpad.
+backlog/
