@@ -100,4 +100,28 @@ void main() {
     expect(a, equals(b));
     expect(a, isNot(equals(c)));
   });
+
+  test('ScheduleScheduler overdue notification id is stable and distinct', () {
+    final t = DateTime.utc(2026, 1, 1, 12);
+    final dose = ScheduleScheduler.doseNotificationIdFor('s1', t);
+    final overdueA = ScheduleScheduler.overdueNotificationIdFor('s1', t);
+    final overdueB = ScheduleScheduler.overdueNotificationIdFor('s1', t);
+    expect(overdueA, equals(overdueB));
+    expect(overdueA, isNot(equals(dose)));
+  });
+
+  test('ScheduleScheduler group key is stable per local minute', () {
+    final dt = DateTime(2026, 1, 2, 3, 4);
+    expect(ScheduleScheduler.doseGroupKeyFor(dt), equals('upcoming_dose|20260102|0304'));
+
+    // Same minute should group; different minute should not.
+    expect(
+      ScheduleScheduler.doseGroupKeyFor(DateTime(2026, 1, 2, 3, 4, 59)),
+      equals('upcoming_dose|20260102|0304'),
+    );
+    expect(
+      ScheduleScheduler.doseGroupKeyFor(DateTime(2026, 1, 2, 3, 5)),
+      equals('upcoming_dose|20260102|0305'),
+    );
+  });
 }

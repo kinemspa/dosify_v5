@@ -357,6 +357,10 @@ class ScheduleScheduler {
     return 'upcoming_dose|$y$m$d|$hh$mm';
   }
 
+  /// Public wrapper for group key generation (used for regression tests).
+  static String doseGroupKeyFor(DateTime localDateTime) =>
+      _doseGroupKey(localDateTime);
+
   /// Cancel scheduled notifications for a schedule (best-effort)
   static Future<void> cancelFor(
     String scheduleId, {

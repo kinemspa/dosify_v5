@@ -39,4 +39,4 @@
 
 - [x] Define snooze behavior precisely (log-only vs reschedule notification) and implement consistently (there are TODOs referencing snooze rescheduling).
 - [x] Standardize “existing dose log” lookup/dedupe so notification actions and in-app Take Dose cannot create duplicates for the same occurrence.
-- [ ] Add regression tests for grouping/dedupe and for missed/overdue thresholds across DST/day-boundary scenarios.
+- [x] Add regression tests for grouping/dedupe and for missed/overdue thresholds across DST/day-boundary scenarios.
