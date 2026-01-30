@@ -334,6 +334,17 @@ const EdgeInsets kDetailPageSectionsPadding = EdgeInsets.fromLTRB(
   kPageBottomPadding,
 );
 
+/// Shared widget paddings
+const EdgeInsets kUnifiedEmptyStatePadding = EdgeInsets.symmetric(
+  horizontal: kSpacingL,
+  vertical: kSpacingM,
+);
+
+const EdgeInsets kSectionHeaderRowPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingS,
+);
+
 /// Generic spacing scale (apply everywhere before creating new values)
 const double kSpacingXXS = 2;
 const double kSpacingXS = 4;

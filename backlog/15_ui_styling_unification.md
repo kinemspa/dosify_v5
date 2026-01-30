@@ -20,8 +20,8 @@
 - [ ] Add/standardize shared UI building blocks in `lib/src/widgets/` (only when a pattern repeats):
 	- [ ] Unified card surface(s) (standard + compact + outlined/flat variants).
 	- [ ] Unified status chip/badge (Active/Paused/Taken/Skipped/etc) with one sizing model.
-	- [ ] Unified empty state widget (icon + title + subtitle + CTA).
-	- [ ] Unified “section header row” (title + trailing action).
+	- [x] Unified empty state widget (icon + title + subtitle + CTA).
+	- [x] Unified “section header row” (title + trailing action).
 
 ### Phase 2 — Migrate Feature Screens (highest impact first)
 - [ ] Migrate Supplies UI first (known-heavy literal usage) to use only design tokens and shared widgets.
