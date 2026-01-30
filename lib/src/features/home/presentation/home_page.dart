@@ -18,6 +18,7 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
@@ -95,8 +96,12 @@ class HomePage extends StatefulWidget {
       );
 
       for (final dt in times) {
-        final baseId = '${schedule.id}_${dt.millisecondsSinceEpoch}';
-        final existingLog = logs.get(baseId) ?? logs.get('${baseId}_snooze');
+        final baseId = DoseLogIds.occurrenceId(
+          scheduleId: schedule.id,
+          scheduledTime: dt,
+        );
+        final existingLog =
+            logs.get(baseId) ?? logs.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
         final dose = CalculatedDose(
           scheduleId: schedule.id,
           scheduleName: schedule.name,
@@ -123,15 +128,18 @@ class HomePage extends StatefulWidget {
 
   Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
     try {
-      final weekday = dose.scheduledTime.weekday;
-      final minutes = dose.scheduledTime.hour * 60 + dose.scheduledTime.minute;
-      final notificationId = ScheduleScheduler.slotIdFor(
-        dose.scheduleId,
-        weekday: weekday,
-        minutes: minutes,
-        occurrence: 0,
+      await NotificationService.cancel(
+        ScheduleScheduler.doseNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
       );
-      await NotificationService.cancel(notificationId);
+      await NotificationService.cancel(
+        ScheduleScheduler.overdueNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
+      );
     } catch (_) {
       // Best-effort cancellation only.
     }
@@ -149,8 +157,10 @@ class HomePage extends StatefulWidget {
       dose: dose,
       initialStatus: initialStatus,
       onMarkTaken: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -168,7 +178,7 @@ class HomePage extends StatefulWidget {
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
         await _cancelNotificationForDose(dose);
 
         final medBox = Hive.box<Medication>('medications');
@@ -203,8 +213,10 @@ class HomePage extends StatefulWidget {
         }
       },
       onSnooze: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -222,7 +234,26 @@ class HomePage extends StatefulWidget {
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
+
+        await _cancelNotificationForDose(dose);
+        final when = request.actionTime;
+        if (when.isAfter(DateTime.now())) {
+          final time = TimeOfDay.fromDateTime(when).format(context);
+          await NotificationService.scheduleAtAlarmClock(
+            ScheduleScheduler.doseNotificationIdFor(
+              dose.scheduleId,
+              dose.scheduledTime,
+            ),
+            when,
+            title: medication.name,
+            body: '${schedule.name} • Snoozed until $time',
+            payload:
+                'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
+            actions: NotificationService.upcomingDoseActions,
+            expandedLines: <String>[schedule.name, 'Snoozed until $time'],
+          );
+        }
 
         if (context.mounted) {
           final now = DateTime.now();
@@ -242,8 +273,10 @@ class HomePage extends StatefulWidget {
         }
       },
       onSkip: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -261,7 +294,7 @@ class HomePage extends StatefulWidget {
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
         await _cancelNotificationForDose(dose);
 
         if (context.mounted) {
@@ -271,14 +304,17 @@ class HomePage extends StatefulWidget {
         }
       },
       onDelete: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
-        final snoozeId = '${logId}_snooze';
+        final baseId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
 
         final logBox = Hive.box<DoseLog>('dose_logs');
         final repo = DoseLogRepository(logBox);
 
-        final existingLog = logBox.get(logId);
+        final existingLog =
+            logBox.get(baseId) ??
+            logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
         if (existingLog != null && existingLog.action == DoseAction.taken) {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(medication.id);
@@ -307,8 +343,11 @@ class HomePage extends StatefulWidget {
           }
         }
 
-        await repo.delete(logId);
-        await repo.delete(snoozeId);
+        await repo.deleteOccurrence(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
+        await _cancelNotificationForDose(dose);
 
         if (context.mounted) {
           ScaffoldMessenger.of(
