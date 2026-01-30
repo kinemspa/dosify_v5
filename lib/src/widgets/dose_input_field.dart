@@ -95,6 +95,71 @@ class _DoseInputFieldState extends State<DoseInputField> {
   late String _strengthUnit;
   DoseCalculationResult? _result;
 
+  bool _isMdvReadyForUnitsConversion() {
+    return widget.medicationForm == MedicationForm.multiDoseVial &&
+        widget.totalVialStrengthMcg != null &&
+        widget.totalVialVolumeMicroliter != null &&
+        widget.syringeType != null;
+  }
+
+  void _bumpMdvByWholeUnits(int deltaUnits) {
+    if (!_isMdvReadyForUnitsConversion()) return;
+    if (deltaUnits == 0) return;
+
+    final totalUnits = widget.syringeType!.maxUnits.toDouble();
+    final currentText = _controller.text.trim();
+
+    // Prefer the latest calculated syringe units if available; otherwise
+    // compute from the current text.
+    final baseResult = _result ??
+        (currentText.isEmpty
+            ? null
+            : _computeResult(currentText));
+
+    final rawUnits = (baseResult?.syringeUnits ?? 0).toDouble();
+    final isWhole = (rawUnits - rawUnits.roundToDouble()).abs() < 0.0001;
+
+    final double snappedBase;
+    if (isWhole) {
+      snappedBase = rawUnits;
+    } else {
+      snappedBase = deltaUnits > 0 ? rawUnits.ceilToDouble() : rawUnits.floorToDouble();
+    }
+
+    final nextUnits =
+        (snappedBase + deltaUnits).clamp(0, totalUnits).toDouble();
+
+    final result = DoseCalculator.calculateFromUnitsMDV(
+      syringeUnits: nextUnits,
+      totalVialStrengthMcg: widget.totalVialStrengthMcg!,
+      totalVialVolumeMicroliter: widget.totalVialVolumeMicroliter!,
+      syringeType: widget.syringeType!,
+    );
+
+    setState(() {
+      _result = result;
+
+      // Update the visible input in the current mode to match the stepped
+      // syringe units.
+      switch (_mdvMode) {
+        case MdvInputMode.units:
+          _controller.text = _formatUnits(nextUnits);
+          break;
+        case MdvInputMode.volume:
+          final ml = (result.doseVolumeMicroliter ?? 0) / 1000;
+          _controller.text = fmt2(ml);
+          break;
+        case MdvInputMode.strength:
+          final mcg = result.doseMassMcg ?? 0;
+          final display = _convertMcgToDisplayUnit(mcg);
+          _controller.text = fmt2(display);
+          break;
+      }
+    });
+
+    widget.onDoseChanged(result);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -442,6 +507,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   void _increment({double? customStep}) {
+    if (widget.medicationForm == MedicationForm.multiDoseVial &&
+        _mdvMode != MdvInputMode.units &&
+        customStep == null) {
+      _bumpMdvByWholeUnits(1);
+      return;
+    }
+
     final current = double.tryParse(_controller.text) ?? 0;
     final step = _defaultStepperStep(customStep: customStep);
     if (widget.medicationForm == MedicationForm.multiDoseVial &&
@@ -459,6 +531,13 @@ class _DoseInputFieldState extends State<DoseInputField> {
   }
 
   void _decrement({double? customStep}) {
+    if (widget.medicationForm == MedicationForm.multiDoseVial &&
+        _mdvMode != MdvInputMode.units &&
+        customStep == null) {
+      _bumpMdvByWholeUnits(-1);
+      return;
+    }
+
     final current = double.tryParse(_controller.text) ?? 0;
     final step = _defaultStepperStep(customStep: customStep);
     if (widget.medicationForm == MedicationForm.multiDoseVial &&
@@ -675,13 +754,6 @@ class _DoseInputFieldState extends State<DoseInputField> {
         ],
 
         // MDV 3-value display (always visible when result available)
-        if (widget.medicationForm == MedicationForm.multiDoseVial &&
-            _result != null &&
-            !_result!.hasError) ...[
-          _buildMdvThreeValueDisplay(cs),
-          const SizedBox(height: kCardInnerSpacing),
-        ],
-
         // Live calculation display
         if (_result != null) _buildResultDisplay(cs),
       ],
@@ -1105,74 +1177,6 @@ class _DoseInputFieldState extends State<DoseInputField> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildMdvThreeValueDisplay(ColorScheme cs) {
-    if (_result == null) return const SizedBox.shrink();
-
-    final strengthMcg = _result!.doseMassMcg ?? 0;
-    final volumeMl = (_result!.doseVolumeMicroliter ?? 0) / 1000;
-    final units = _result!.syringeUnits ?? 0;
-
-    // Format values
-    String strengthStr;
-    if (strengthMcg >= 1000) {
-      strengthStr = '${fmt3(strengthMcg / 1000)}mg';
-    } else {
-      strengthStr = '${strengthMcg.toStringAsFixed(0)}mcg';
-    }
-
-    final volumeStr = '${fmt2(volumeMl)}ml';
-    final unitsStr = '${fmt2(units)} Units';
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(kCardPadding),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
-          width: kBorderWidthThin,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildMdvValueChip(
-            value: strengthStr,
-            isActive: _mdvMode == MdvInputMode.strength,
-            cs: cs,
-          ),
-          Text('•', style: bodyTextStyle(context)),
-          _buildMdvValueChip(
-            value: volumeStr,
-            isActive: _mdvMode == MdvInputMode.volume,
-            cs: cs,
-          ),
-          Text('•', style: bodyTextStyle(context)),
-          _buildMdvValueChip(
-            value: unitsStr,
-            isActive: _mdvMode == MdvInputMode.units,
-            cs: cs,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMdvValueChip({
-    required String value,
-    required bool isActive,
-    required ColorScheme cs,
-  }) {
-    return Text(
-      value,
-      style: bodyTextStyle(context)?.copyWith(
-        fontWeight: isActive ? kFontWeightBold : kFontWeightMedium,
-        color: isActive ? cs.primary : cs.onSurfaceVariant,
-      ),
     );
   }
 

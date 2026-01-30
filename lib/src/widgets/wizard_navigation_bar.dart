@@ -38,6 +38,61 @@ class WizardNavigationBar extends StatelessWidget {
         .toList(growable: false);
   }
 
+  void _flashFocusRect(BuildContext context, BuildContext? targetContext) {
+    if (targetContext == null) return;
+
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) return;
+
+    final renderObject = targetContext.findRenderObject();
+    if (renderObject is! RenderBox || !renderObject.hasSize) return;
+
+    final topLeft = renderObject.localToGlobal(Offset.zero);
+    final rect = topLeft & renderObject.size;
+
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (context) {
+        final cs = Theme.of(context).colorScheme;
+        return IgnorePointer(
+          child: Stack(
+            children: [
+              Positioned(
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 180),
+                  builder: (context, t, child) {
+                    // Quick pulse: fade in then out.
+                    final alpha = (t <= 0.5) ? (t * 2) : ((1 - t) * 2);
+                    return Opacity(opacity: alpha, child: child);
+                  },
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                      border: Border.all(
+                        color: cs.primary.withValues(alpha: 0.85),
+                        width: kBorderWidthThin,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    overlay.insert(entry);
+    Future<void>.delayed(const Duration(milliseconds: 220), () {
+      entry.remove();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLastStep = currentStep >= stepCount - 1;
@@ -69,12 +124,22 @@ class WizardNavigationBar extends StatelessWidget {
           primaryAction = canProceed ? onSave : null;
         } else if (showFieldNext) {
           primaryAction = () {
-            final moved = scope.nextFocus();
-            if (moved) return;
+            // Move through fields first, but only when we *know* there is
+            // another field to focus. Avoid `nextFocus()` wrapping and
+            // preventing step navigation.
+            if (hasMoreFieldToFocus && focusedIndex >= 0) {
+              final nextNode = focusables[focusedIndex + 1];
+              nextNode.requestFocus();
+              _flashFocusRect(context, nextNode.context);
+              return;
+            }
+
             if (canProceed) {
+              scope.unfocus();
               onContinue();
               return;
             }
+
             scope.unfocus();
           };
         } else {
