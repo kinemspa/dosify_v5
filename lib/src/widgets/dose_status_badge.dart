@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
+import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
 
 class DoseStatusBadge extends StatelessWidget {
   const DoseStatusBadge({
@@ -27,35 +28,11 @@ class DoseStatusBadge extends StatelessWidget {
     final visual = doseStatusVisual(context, status, disabled: disabled);
     final label = doseStatusLabel(status, disabled: disabled);
 
-    final horizontalPadding = dense ? kFieldSpacing : kSpacingS;
-    final verticalPadding = dense ? kDoseStatusBadgeVerticalPadding : kSpacingXXS;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      decoration: BoxDecoration(
-        color: visual.color.withValues(alpha: kOpacitySubtleLow),
-        borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
-        border: Border.all(
-          color: visual.color.withValues(alpha: kOpacityVeryLow),
-          width: kBorderWidthThin,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(visual.icon, size: kIconSizeXXSmall, color: visual.color),
-          const SizedBox(width: kSpacingXS),
-          Text(
-            label,
-            style: microHelperTextStyle(context, color: visual.color)?.copyWith(
-              fontWeight: kFontWeightBold,
-            ),
-          ),
-        ],
-      ),
+    return UnifiedStatusBadge(
+      label: label,
+      icon: visual.icon,
+      color: visual.color,
+      dense: dense,
     );
   }
 }
@@ -87,9 +64,6 @@ class DoseCardStatusChip extends StatelessWidget {
     final height = compact
         ? kDoseCardStatusChipHeightCompact
         : kDoseCardStatusChipHeight;
-    final iconSize = compact
-        ? kDoseCardStatusIconSizeCompact
-        : kDoseCardStatusIconSize;
 
     return SizedBox(
       width: width,
@@ -108,25 +82,14 @@ class DoseCardStatusChip extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: compact ? kSpacingXS : kSpacingS,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(visual.icon, size: iconSize, color: visual.color),
-                const SizedBox(width: kSpacingXXS),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: doseCardStatusChipLabelTextStyle(
-                      context,
-                      color: visual.color,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+            child: UnifiedStatusBadge(
+              label: label,
+              icon: visual.icon,
+              color: visual.color,
+              dense: true,
+              decorate: false,
+              textStyle: (context, color) =>
+                  doseCardStatusChipLabelTextStyle(context, color: color),
             ),
           ),
         ),

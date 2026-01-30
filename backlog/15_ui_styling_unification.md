@@ -18,8 +18,8 @@
 ### Phase 1 — Fill Design-System Gaps (central-first)
 - [ ] Add missing tokens/helpers to `lib/src/core/design_system.dart` for any recurring padding/radius/text sizes found during scan.
 - [ ] Add/standardize shared UI building blocks in `lib/src/widgets/` (only when a pattern repeats):
-	- [ ] Unified card surface(s) (standard + compact + outlined/flat variants).
-	- [ ] Unified status chip/badge (Active/Paused/Taken/Skipped/etc) with one sizing model.
+	- [x] Unified card surface(s) (standard + compact + outlined/flat variants).
+	- [x] Unified status chip/badge (Active/Paused/Taken/Skipped/etc) with one sizing model.
 	- [x] Unified empty state widget (icon + title + subtitle + CTA).
 	- [x] Unified “section header row” (title + trailing action).
 
