@@ -452,6 +452,7 @@ const EdgeInsets kCompactButtonPadding = EdgeInsets.zero;
 /// Border widths
 const double kBorderWidthThin = kOutlineWidth; // 0.75px
 const double kBorderWidthMedium = 1.0;
+const double kBorderWidthEmphasis = 1.5;
 const double kBorderWidthThick = kFocusedOutlineWidth; // 2px
 
 /// Border radius

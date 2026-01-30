@@ -15,10 +15,11 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
+import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
+import 'package:dosifi_v5/src/widgets/unified_tinted_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class ScheduleDetailPage extends StatefulWidget {
@@ -236,11 +237,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             expandedHeight: kDetailHeaderExpandedHeightCompact,
             onEdit: () => _openEditScheduleDialog(s),
             onDelete: () => _confirmDelete(context, s),
-            statsBannerContent: _buildScheduleHeader(
-              context,
-              s,
-              nextDose,
+            statsBannerContent: ScheduleDetailHeaderBanner(
+              schedule: s,
+              nextDose: nextDose,
               title: mergedTitle,
+              onPauseResumePressed: () => _promptPauseFromHeader(context, s),
             ),
             sections: _buildSections(context, s, nextDose),
           );
@@ -277,143 +278,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           );
         }
       },
-    );
-  }
-
-  Widget _buildScheduleHeader(
-    BuildContext context,
-    Schedule s,
-    DateTime? nextDose, {
-    required String title,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    final headerOnPrimary = cs.onPrimary;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Schedule Details',
-          style: helperTextStyle(
-            context,
-            color: headerOnPrimary.withValues(alpha: kOpacityMediumHigh),
-          )?.copyWith(fontWeight: kFontWeightSemiBold),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: kSpacingXXS),
-        Text(
-          title,
-          style: detailHeaderBannerTitleTextStyle(
-            context,
-          )?.copyWith(color: headerOnPrimary),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: kSpacingM),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: DetailStatItem(
-                icon: Icons.medication_outlined,
-                label: 'Dose',
-                value: _getDoseDisplay(s),
-              ),
-            ),
-            const SizedBox(width: kPageHorizontalPadding),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: _buildHeaderStatusBadge(context, s),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: kCardInnerSpacing),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: DetailStatItem(
-                icon: Icons.repeat,
-                label: 'Type',
-                value: _scheduleTypeText(s),
-              ),
-            ),
-            const SizedBox(width: kPageHorizontalPadding),
-            Expanded(
-              child: DetailStatItem(
-                icon: Icons.access_time,
-                label: 'Times',
-                value: _timesText(context, s),
-                alignEnd: true,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: kCardInnerSpacing),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: NextDoseDateBadge(
-                nextDose: nextDose,
-                isActive: s.isActive,
-                dense: true,
-                showNextLabel: false,
-                activeColor: headerOnPrimary,
-              ),
-            ),
-            const SizedBox(width: kPageHorizontalPadding),
-            Expanded(
-              child: DetailStatItem(
-                icon: Icons.timer_outlined,
-                label: 'In',
-                value: nextDose == null ? '—' : _getTimeUntil(nextDose),
-                alignEnd: true,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeaderStatusBadge(BuildContext context, Schedule s) {
-    final badge = ScheduleStatusChip(schedule: s, dense: true);
-    if (s.isCompleted) return badge;
-
-    final isActive = s.isActive;
-    final cs = Theme.of(context).colorScheme;
-    final label = isActive ? 'Pause' : 'Resume';
-    final icon = isActive ? Icons.pause_rounded : Icons.play_arrow_rounded;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: () => _promptPauseFromHeader(context, s),
-            borderRadius: BorderRadius.circular(kBorderRadiusChip),
-            child: badge,
-          ),
-        ),
-        const SizedBox(height: kSpacingXS),
-        TextButton.icon(
-          onPressed: () => _promptPauseFromHeader(context, s),
-          style: TextButton.styleFrom(
-            padding: kCompactButtonPadding,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
-            foregroundColor: cs.onPrimary.withValues(alpha: kOpacityMedium),
-          ),
-          icon: Icon(icon, size: kIconSizeSmall),
-          label: Text(label, style: helperTextStyle(context)),
-        ),
-      ],
     );
   }
 
@@ -774,22 +638,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           Row(
             children: [
               if (isToday)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: kSpacingS,
-                    vertical: kSpacingXS,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
-                  ),
-                  child: Text(
-                    'TODAY',
-                    style: microHelperTextStyle(
-                      context,
-                      color: cs.onPrimary,
-                    )?.copyWith(fontWeight: kFontWeightExtraBold),
-                  ),
+                UnifiedStatusBadge(
+                  label: 'TODAY',
+                  icon: Icons.today_rounded,
+                  color: cs.primary,
+                  dense: true,
                 ),
               if (isToday) const SizedBox(width: kSpacingS),
               Text(
@@ -830,32 +683,14 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final cs = Theme.of(context).colorScheme;
     final isTaken = existingLog?.action == DoseAction.taken;
     final hasLog = existingLog != null;
+    final accentColor = hasLog
+        ? _getActionColor(context, existingLog.action)
+        : (isToday ? cs.primary : null);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: kSpacingS),
-      child: Container(
-        padding: const EdgeInsets.all(kSpacingM),
-        decoration: BoxDecoration(
-          color: hasLog
-              ? _getActionColor(
-                  context,
-                  existingLog.action,
-                ).withValues(alpha: 0.1)
-              : (isToday
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.08)
-                    : cs.surfaceContainerHighest.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-          border: hasLog
-              ? Border.all(
-                  color: _getActionColor(context, existingLog.action),
-                  width: 1.5,
-                )
-              : (isToday
-                    ? Border.all(color: cs.primary, width: 1.5)
-                    : Border.all(color: cs.outline.withValues(alpha: 0.2))),
-        ),
+      child: UnifiedTintedCardSurface(
+        accentColor: accentColor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -890,28 +725,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   ),
                 ),
                 if (hasLog)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: kSpacingS,
-                      vertical: kSpacingXS,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getActionColor(context, existingLog.action),
-                      borderRadius: BorderRadius.circular(
-                        kBorderRadiusChipTight,
-                      ),
-                    ),
-                    child: Text(
-                      _getActionLabel(existingLog.action).toUpperCase(),
-                      style:
-                          microHelperTextStyle(
-                            context,
-                            color: statusColorOnPrimary(
-                              context,
-                              _getActionColor(context, existingLog.action),
-                            ),
-                          )?.copyWith(fontWeight: kFontWeightExtraBold),
-                    ),
+                  UnifiedStatusBadge(
+                    label: _getActionLabel(existingLog.action).toUpperCase(),
+                    icon: _getActionIcon(existingLog.action),
+                    color: _getActionColor(context, existingLog.action),
+                    dense: true,
                   ),
               ],
             ),
@@ -986,9 +804,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.check, size: kIconSizeXSmall),
                         label: Text(
                           existingLog != null ? 'Edit' : 'Take',
-                          style: microHelperTextStyle(context)?.copyWith(
-                            fontWeight: kFontWeightSemiBold,
-                          ),
+                          style: microHelperTextStyle(
+                            context,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: kDenseButtonContentPadding,
@@ -1009,9 +827,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.snooze, size: kIconSizeXSmall),
                         label: Text(
                           'Snooze',
-                          style: microHelperTextStyle(context)?.copyWith(
-                            fontWeight: kFontWeightSemiBold,
-                          ),
+                          style: microHelperTextStyle(
+                            context,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: kDenseButtonContentPadding,
@@ -1032,9 +850,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.close, size: kIconSizeXSmall),
                         label: Text(
                           'Skip',
-                          style: microHelperTextStyle(context)?.copyWith(
-                            fontWeight: kFontWeightSemiBold,
-                          ),
+                          style: microHelperTextStyle(
+                            context,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: kDenseButtonContentPadding,
@@ -1055,9 +873,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         icon: const Icon(Icons.edit, size: kIconSizeXSmall),
                         label: Text(
                           'Edit',
-                          style: microHelperTextStyle(context)?.copyWith(
-                            fontWeight: kFontWeightSemiBold,
-                          ),
+                          style: microHelperTextStyle(
+                            context,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: kDenseButtonContentPadding,
