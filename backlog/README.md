@@ -12,5 +12,5 @@ This folder contains user request notes and the split checklist files.
 
 
 ## Recommendations
-- [ ] Capture new ideas in a dedicated “Recommendations” section (unchecked) before implementation.
-- [ ] Prefer small, per-screen requests and avoid mixing unrelated items in one checkbox.
+- [x] Capture new ideas in a dedicated “Recommendations” section (unchecked) before implementation.
+- [x] Prefer small, per-screen requests and avoid mixing unrelated items in one checkbox.

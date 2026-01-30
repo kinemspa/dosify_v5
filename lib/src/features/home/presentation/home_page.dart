@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/clock.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -50,7 +51,7 @@ class HomePage extends StatefulWidget {
     Box<Medication> meds,
     Box<DoseLog> logs,
   ) {
-    final now = DateTime.now();
+    final now = AppClock.now();
     final start = DateTime(now.year, now.month, now.day);
     final end = start
         .add(const Duration(days: 1))
@@ -101,7 +102,8 @@ class HomePage extends StatefulWidget {
           scheduledTime: dt,
         );
         final existingLog =
-            logs.get(baseId) ?? logs.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
+            logs.get(baseId) ??
+            logs.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
         final dose = CalculatedDose(
           scheduleId: schedule.id,
           scheduleName: schedule.name,

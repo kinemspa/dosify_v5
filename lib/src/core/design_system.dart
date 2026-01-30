@@ -29,11 +29,13 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
-
 // Project imports:
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+
+/// Assets
+const String kPrimaryLogoAssetPath = 'assets/logo/logo_001_primary.png';
 
 // ============================================================================
 // SIZING CONSTANTS

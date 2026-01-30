@@ -31,7 +31,10 @@ class WizardNavigationBar extends StatelessWidget {
 
   List<FocusNode> _focusableFields(FocusScopeNode scope) {
     return scope.traversalDescendants
-        .where((node) => node.canRequestFocus && !node.skipTraversal)
+        // Some editable fields use focus nodes that are marked skipTraversal.
+        // We still want to treat them as “a field is focused” for the
+        // Next/Continue label logic.
+        .where((node) => node.canRequestFocus)
         .toList(growable: false);
   }
 
@@ -45,7 +48,7 @@ class WizardNavigationBar extends StatelessWidget {
         final scope = fieldFocusScope ?? FocusScope.of(context);
 
         final focusables = _focusableFields(scope);
-        final focused = scope.focusedChild;
+        final focused = FocusManager.instance.primaryFocus;
         final focusedIndex = focused == null ? -1 : focusables.indexOf(focused);
         final hasMoreFieldToFocus =
             focusedIndex >= 0 && focusedIndex < focusables.length - 1;
@@ -57,7 +60,7 @@ class WizardNavigationBar extends StatelessWidget {
 
         final primaryLabel = isLastStep
             ? saveLabel
-          : (showFieldNext
+            : (showFieldNext
                   ? (hasMoreFieldToFocus ? nextLabel : nextPageLabel)
                   : continueLabel);
 

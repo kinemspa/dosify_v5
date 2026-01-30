@@ -6,6 +6,9 @@
 ## Requests
 - [ ] <new request>
 
+## Recommendations
+- [ ] <optional suggestion to consider later>
+
 ## Subsections (optional)
 
 ### <Area>
@@ -18,5 +21,6 @@
 - <route/file references>
 
 
-## Recommendations
-- [ ] <optional suggestion to consider later>
+## Recommendations Notes
+- Keep recommendations unchecked until implemented.
+- Prefer small, per-screen requests; split unrelated items into separate checkboxes/files.
