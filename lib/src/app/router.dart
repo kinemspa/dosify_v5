@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/app_navigator.dart';
@@ -12,7 +11,6 @@ import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dar
 import 'package:dosifi_v5/src/features/inventory/presentation/inventory_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/calendar_page.dart';
 import 'package:dosifi_v5/src/features/home/presentation/home_page.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/med_editor_template_demo_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_detail_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_list_page.dart';
@@ -25,7 +23,6 @@ import 'package:dosifi_v5/src/features/medications/presentation/add_tablet_wizar
 import 'package:dosifi_v5/src/features/medications/presentation/add_capsule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_syringe_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_single_dose_vial_wizard_page.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_detail_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
@@ -112,9 +109,7 @@ final router = GoRouter(
           builder: (context, state) {
             final id = state.pathParameters['id'];
             if (id == null) return const AddScheduleWizardPage();
-            final box = Hive.box<Schedule>('schedules');
-            final initial = box.get(id);
-            return AddScheduleWizardPage(initial: initial);
+            return AddScheduleWizardPage(initialScheduleId: id);
           },
         ),
         GoRoute(
@@ -190,9 +185,7 @@ final router = GoRouter(
           name: 'editTablet',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return AddTabletWizardPage(initial: med);
+            return AddTabletWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -200,9 +193,7 @@ final router = GoRouter(
           name: 'editCapsule',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return AddCapsuleWizardPage(initial: med);
+            return AddCapsuleWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -210,9 +201,7 @@ final router = GoRouter(
           name: 'editInjectionPfs',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return AddPrefilledSyringeWizardPage(initial: med);
+            return AddPrefilledSyringeWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -220,9 +209,7 @@ final router = GoRouter(
           name: 'editInjectionSingle',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return AddSingleDoseVialWizardPage(initial: med);
+            return AddSingleDoseVialWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -230,9 +217,7 @@ final router = GoRouter(
           name: 'editInjectionMulti',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return AddMdvWizardPage(initial: med);
+            return AddMdvWizardPage(initialMedicationId: id);
           },
         ),
         // Reconstitution calculator must be above the dynamic '/medications/:id' route
@@ -257,9 +242,7 @@ final router = GoRouter(
           name: 'medicationDetail',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return MedicationDetailPage(medicationId: id, initial: med);
+            return MedicationDetailPage(medicationId: id);
           },
         ),
       ],

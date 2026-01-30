@@ -18,18 +18,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 /// Wizard-style MDV add screen with clear step-by-step flow
 class AddMdvWizardPage extends ConsumerStatefulWidget {
-  const AddMdvWizardPage({super.key, this.initial});
+  const AddMdvWizardPage({super.key, this.initial, this.initialMedicationId});
 
   final Medication? initial;
+  final String? initialMedicationId;
+
+  bool get isEditing => initial != null || initialMedicationId != null;
 
   @override
   ConsumerState<AddMdvWizardPage> createState() => _AddMdvWizardPageState();
 }
 
 class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
+  Medication? _resolvedInitial;
+
+  Medication? _effectiveInitial() {
+    if (widget.initial != null) return widget.initial;
+    final id = widget.initialMedicationId;
+    if (id == null) return null;
+    _resolvedInitial ??= Hive.box<Medication>('medications').get(id);
+    return _resolvedInitial;
+  }
+
   int _currentStep = 0;
   final _scrollController = ScrollController();
   final _stepFocusScope = FocusScopeNode();
@@ -112,7 +126,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   // Saved reconstitution selection happens inside the calculator UI.
 
   void _loadInitialData() {
-    final m = widget.initial;
+    final m = _effectiveInitial();
     if (m != null) {
       _nameCtrl.text = m.name;
       _manufacturerCtrl.text = m.manufacturer ?? '';
@@ -247,7 +261,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       builder: (context) => AlertDialog(
         title: const Text('Confirm Save'),
         content: Text(
-          widget.initial == null
+          !widget.isEditing
               ? 'Save this medication to your inventory?'
               : 'Update this medication?',
         ),
@@ -266,12 +280,13 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
     if (confirmed != true) return;
     final repo = ref.read(medicationRepositoryProvider);
-    final id = widget.initial?.id ?? _newId();
+    final initial = _effectiveInitial();
+    final id = initial?.id ?? _newId();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
     final backupStock = _hasBackupVials
         ? (double.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0.0)
         : 0.0;
-    final previous = widget.initial;
+    final previous = initial;
     final initialStock = previous == null
         ? backupStock
         : (backupStock > previous.stockValue
@@ -329,7 +344,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               _activeVialLowStockMlCtrl.text.isNotEmpty
           ? double.tryParse(_activeVialLowStockMlCtrl.text.trim())
           : null,
-        activeVialBatchNumber: _activeVialBatchCtrl.text.trim().isEmpty
+      activeVialBatchNumber: _activeVialBatchCtrl.text.trim().isEmpty
           ? null
           : _activeVialBatchCtrl.text.trim(),
       activeVialStorageLocation: _activeVialStorageCtrl.text.trim().isEmpty
@@ -363,7 +378,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     // owned saved reconstitution. This is used for defaults (e.g. dose) and
     // is deleted automatically when the medication is deleted.
     if (med.form == MedicationForm.multiDoseVial && _reconResult != null) {
-      final ownedId = SavedReconstitutionRepository.ownedIdForMedication(med.id);
+      final ownedId = SavedReconstitutionRepository.ownedIdForMedication(
+        med.id,
+      );
       final existing = _savedReconRepo.get(ownedId);
       final ownedName = _savedReconRepo.buildOwnedDisplayName(
         medicationName: med.name,
@@ -397,7 +414,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     }
 
     if (!mounted) return;
-    if (widget.initial != null) {
+    if (widget.isEditing) {
       context.pop();
     } else {
       context.go('/medications');
@@ -471,9 +488,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   ),
                   Expanded(
                     child: Text(
-                      widget.initial == null
-                          ? 'Add Multi-Dose Vial'
-                          : 'Edit Multi-Dose Vial',
+                      widget.isEditing
+                          ? 'Edit Multi-Dose Vial'
+                          : 'Add Multi-Dose Vial',
                       style: wizardHeaderTitleTextStyle(
                         context,
                         color: Theme.of(context).colorScheme.onPrimary,
@@ -1129,41 +1146,37 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     final v =
                         int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0;
                     final nextQty = (v - 1).clamp(0, 1000000);
-                    setState(
-                      () {
-                        _backupVialsQtyCtrl.text = nextQty.toString();
-                        if (_backupVialsLowStockEnabled) {
-                          final threshold =
-                              int.tryParse(
-                                _backupVialsLowStockCtrl.text.trim(),
-                              ) ??
-                              0;
-                          if (threshold > nextQty) {
-                            _backupVialsLowStockCtrl.text = nextQty.toString();
-                          }
+                    setState(() {
+                      _backupVialsQtyCtrl.text = nextQty.toString();
+                      if (_backupVialsLowStockEnabled) {
+                        final threshold =
+                            int.tryParse(
+                              _backupVialsLowStockCtrl.text.trim(),
+                            ) ??
+                            0;
+                        if (threshold > nextQty) {
+                          _backupVialsLowStockCtrl.text = nextQty.toString();
                         }
-                      },
-                    );
+                      }
+                    });
                   },
                   onInc: () {
                     final v =
                         int.tryParse(_backupVialsQtyCtrl.text.trim()) ?? 0;
                     final nextQty = (v + 1).clamp(0, 1000000);
-                    setState(
-                      () {
-                        _backupVialsQtyCtrl.text = nextQty.toString();
-                        if (_backupVialsLowStockEnabled) {
-                          final threshold =
-                              int.tryParse(
-                                _backupVialsLowStockCtrl.text.trim(),
-                              ) ??
-                              0;
-                          if (threshold > nextQty) {
-                            _backupVialsLowStockCtrl.text = nextQty.toString();
-                          }
+                    setState(() {
+                      _backupVialsQtyCtrl.text = nextQty.toString();
+                      if (_backupVialsLowStockEnabled) {
+                        final threshold =
+                            int.tryParse(
+                              _backupVialsLowStockCtrl.text.trim(),
+                            ) ??
+                            0;
+                        if (threshold > nextQty) {
+                          _backupVialsLowStockCtrl.text = nextQty.toString();
                         }
-                      },
-                    );
+                      }
+                    });
                   },
                   decoration: buildCompactFieldDecoration(
                     context: context,
@@ -1204,8 +1217,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                           }
 
                           if (current <= 0) {
-                            _backupVialsLowStockCtrl.text =
-                                (qty < 2 ? qty : 2).toString();
+                            _backupVialsLowStockCtrl.text = (qty < 2 ? qty : 2)
+                                .toString();
                             return;
                           }
 
@@ -1589,9 +1602,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             width: 140,
             child: Text(label, style: reviewRowLabelStyle(context)),
           ),
-          Expanded(
-            child: Text(value, style: bodyTextStyle(context)),
-          ),
+          Expanded(child: Text(value, style: bodyTextStyle(context))),
         ],
       ),
     );
@@ -1917,10 +1928,9 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                   text: TextSpan(
                     style: reconSummaryBaseTextStyle(
                       context,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onPrimary
-                          .withValues(alpha: kReconTextHighOpacity),
+                      color: Theme.of(context).colorScheme.onPrimary.withValues(
+                        alpha: kReconTextHighOpacity,
+                      ),
                     ),
                     children: [
                       const TextSpan(text: 'Reconstitute '),
@@ -1953,9 +1963,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
                           style: reconSummaryOfTextStyle(
                             context,
                             compact: false,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimary
+                            color: Theme.of(context).colorScheme.onPrimary
                                 .withValues(alpha: kReconTextHighOpacity),
                             fontWeight: kFontWeightNormal,
                           ),

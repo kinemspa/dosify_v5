@@ -330,14 +330,33 @@ const EdgeInsets kPagePadding = EdgeInsets.fromLTRB(
   kPageBottomPadding,
 );
 const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(16, 16, 16, 16);
+const EdgeInsets kNoPadding = EdgeInsets.zero;
 const double kPageHorizontalPadding = 16;
 const double kPageVerticalPadding = 16;
+
+/// Standard padding for bottom sheets that should respect the on-screen
+/// keyboard.
+///
+/// Use this instead of ad-hoc `EdgeInsets.only/fromLTRB` in feature code.
+EdgeInsets buildBottomSheetPagePadding(BuildContext context) {
+  final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+  return EdgeInsets.fromLTRB(
+    kSpacingL,
+    kSpacingL,
+    kSpacingL,
+    kSpacingL + bottomInset,
+  );
+}
 
 /// Schedule wizard summary header layout
 const double kScheduleWizardSummaryIconSize = 36;
 const double kScheduleWizardSummaryIconGap = kSpacingS;
 const double kScheduleWizardSummaryIndent =
     kScheduleWizardSummaryIconSize + kScheduleWizardSummaryIconGap;
+
+const EdgeInsets kScheduleWizardSummaryPatternPadding = EdgeInsets.only(
+  left: kScheduleWizardSummaryIndent,
+);
 
 /// Detail pages - padding for the sections list under the header.
 const EdgeInsets kDetailPageSectionsPadding = EdgeInsets.fromLTRB(

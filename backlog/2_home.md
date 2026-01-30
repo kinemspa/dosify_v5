@@ -4,34 +4,24 @@
 ## Scope
 
 ## Requests
-- [x] Can we remove the card outline and colour for the large cards? I would just like the headings and the objects within to be defined. 
-- [x] Remove the shortcut buttons on this page. Medicaitons, Schedules, Calendar. 
-- [x] Heading is not to be Dosifi v5. Maybe Home or Dashboard. 
-- [x] Why do we have Home up the top and then Home top Left? 
 
 
 ### Up Next - Today
 
 
 ### Schedules
-- [x] There is an overflow on my screen on the right. Must be the status badge cropping off the card. 
 
 ### Calendar
-- [x] Calendar is only showing the day view, needs month and week.
-- [x] Isnty updating on status changes. 
 
 ### Reports
-- [x] For reports on the home screen, the history should be 1 onject that has ALL entries in it, not multiple reports instances. 
 
 ## Notes
 - 
 
 
 ## Recommendations
-- [x] Replace Reports chips with a single “Included meds” selector (bottom sheet) to reduce clutter.
-- [x] Ensure Home Schedules uses the same schedule card widget as the Schedules list for consistency.
 
-- [ ] Unify Home section card styling by exclusively using the shared card primitives (no per-section containers/decoration).
-- [ ] Ensure all paddings/margins on Home come from `lib/src/core/design_system.dart` tokens (no ad-hoc `EdgeInsets.*`).
-- [ ] Replace any “empty state” blocks with a single shared empty-state widget for consistent typography, spacing, and CTA placement.
+- [x] Unify Home section card styling by exclusively using the shared card primitives (no per-section containers/decoration).
+- [x] Ensure all paddings/margins on Home come from `lib/src/core/design_system.dart` tokens (no ad-hoc `EdgeInsets.*`).
+- [x] Replace any “empty state” blocks with a single shared empty-state widget for consistent typography, spacing, and CTA placement.
 

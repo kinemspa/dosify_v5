@@ -12,9 +12,16 @@ import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
 /// Base class for medication wizard pages.
 /// Provides common wizard functionality: step indicator, navigation, validation.
 abstract class MedicationWizardBase extends ConsumerStatefulWidget {
-  const MedicationWizardBase({super.key, this.initial});
+  const MedicationWizardBase({
+    super.key,
+    this.initial,
+    this.initialMedicationId,
+  });
 
   final Medication? initial;
+  final String? initialMedicationId;
+
+  bool get isEditing => initial != null || initialMedicationId != null;
 
   /// Number of steps in this wizard
   int get stepCount;
@@ -116,7 +123,6 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Row(
                 children: [
-                  
                   IconButton(
                     icon: Icon(
                       Icons.arrow_back,
@@ -126,9 +132,7 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
                   ),
                   Expanded(
                     child: Text(
-                      widget.initial == null
-                          ? 'Add Medication'
-                          : 'Edit Medication',
+                      widget.isEditing ? 'Edit Medication' : 'Add Medication',
                       style: wizardHeaderTitleTextStyle(
                         context,
                         color: Theme.of(context).colorScheme.onPrimary,

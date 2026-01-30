@@ -30,12 +30,19 @@ enum _EndMode { none, date }
 enum _MonthlyMissingDayMode { skip, lastDay }
 
 class AddScheduleWizardPage extends ScheduleWizardBase {
-  const AddScheduleWizardPage({super.key, this.initial});
+  const AddScheduleWizardPage({
+    super.key,
+    this.initial,
+    this.initialScheduleId,
+  });
 
   final Schedule? initial;
+  final String? initialScheduleId;
+
+  bool get isEditing => initial != null || initialScheduleId != null;
 
   @override
-  String get wizardTitle => initial == null ? 'Add Schedule' : 'Edit Schedule';
+  String get wizardTitle => isEditing ? 'Edit Schedule' : 'Add Schedule';
 
   @override
   int get stepCount => 3;
@@ -53,6 +60,10 @@ class AddScheduleWizardPage extends ScheduleWizardBase {
 
 class _AddScheduleWizardPageState
     extends ScheduleWizardState<AddScheduleWizardPage> {
+  Schedule? _resolvedInitial;
+
+  Schedule? get _initial => widget.initial ?? _resolvedInitial;
+
   // Step 1: Medication & Dose
   Medication? _selectedMed;
   String? _medicationId;
@@ -124,8 +135,14 @@ class _AddScheduleWizardPageState
   void initState() {
     super.initState();
     _name.addListener(_onNameChanged);
-    if (widget.initial != null) {
-      _loadInitialData(widget.initial!);
+    final schedule =
+        widget.initial ??
+        (widget.initialScheduleId == null
+            ? null
+            : Hive.box<Schedule>('schedules').get(widget.initialScheduleId));
+    if (schedule != null) {
+      _resolvedInitial = schedule;
+      _loadInitialData(schedule);
     }
   }
 
@@ -373,9 +390,7 @@ class _AddScheduleWizardPageState
         if (_times.isNotEmpty && currentStep >= 1) ...[
           const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.only(
-              left: kScheduleWizardSummaryIndent,
-            ),
+            padding: kScheduleWizardSummaryPatternPadding,
             child: Text(
               _getPatternSummary(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -662,7 +677,10 @@ class _AddScheduleWizardPageState
           if (_doseValue.text.trim().isEmpty) {
             final dose = savedRecon?.recommendedDose;
             final unit = savedRecon?.doseUnit;
-            if (dose != null && dose > 0 && unit != null && unit.trim().isNotEmpty) {
+            if (dose != null &&
+                dose > 0 &&
+                unit != null &&
+                unit.trim().isNotEmpty) {
               _doseValue.text = fmt2(dose);
               _doseUnit.text = unit.trim();
               break;
@@ -671,7 +689,10 @@ class _AddScheduleWizardPageState
             // Fallback: infer dose amount from saved concentration + dose volume.
             final perMl = med.perMlValue;
             final volumeMl = med.volumePerDose;
-            if (perMl != null && volumeMl != null && perMl > 0 && volumeMl > 0) {
+            if (perMl != null &&
+                volumeMl != null &&
+                perMl > 0 &&
+                volumeMl > 0) {
               _doseValue.text = fmt2(perMl * volumeMl);
               final u = med.strengthUnit;
               if (u == Unit.mcg) {
@@ -825,9 +846,7 @@ class _AddScheduleWizardPageState
             ),
           ),
           const SizedBox(height: kSpacingS),
-          _helperBelowLeft(
-            'Select the syringe size used for administration.',
-          ),
+          _helperBelowLeft('Select the syringe size used for administration.'),
           const SizedBox(height: kSpacingS),
         ],
         DoseInputField(
@@ -1065,7 +1084,7 @@ class _AddScheduleWizardPageState
 
                   if (!wasDaysOnOff &&
                       _mode == ScheduleMode.daysOnOff &&
-                      widget.initial?.cycleAnchorDate == null) {
+                      _initial?.cycleAnchorDate == null) {
                     final startAt = _effectiveStartAt();
                     _cycleAnchor = DateTime(
                       startAt.year,
@@ -1232,26 +1251,26 @@ class _AddScheduleWizardPageState
   }
 
   double? _getInitialStrengthMcg() {
-    if (widget.initial == null) return null;
-    return widget.initial!.doseMassMcg?.toDouble();
+    if (_initial == null) return null;
+    return _initial!.doseMassMcg?.toDouble();
   }
 
   double? _getInitialTabletCount() {
-    if (widget.initial == null) return null;
-    if (widget.initial!.doseTabletQuarters != null) {
-      return widget.initial!.doseTabletQuarters! / 4.0;
+    if (_initial == null) return null;
+    if (_initial!.doseTabletQuarters != null) {
+      return _initial!.doseTabletQuarters! / 4.0;
     }
     return null;
   }
 
   int? _getInitialCapsuleCount() {
-    if (widget.initial == null) return null;
-    return widget.initial!.doseCapsules;
+    if (_initial == null) return null;
+    return _initial!.doseCapsules;
   }
 
   int? _getInitialInjectionCount() {
-    if (widget.initial == null) return null;
-    return widget.initial!.doseSyringes;
+    if (_initial == null) return null;
+    return _initial!.doseSyringes;
   }
 
   String _modeLabel(ScheduleMode m) => switch (m) {
@@ -1300,9 +1319,7 @@ class _AddScheduleWizardPageState
               }),
             ),
             const SizedBox(height: kSpacingS),
-            _helperBelowLeft(
-              'Choose the days of the week when doses occur.',
-            ),
+            _helperBelowLeft('Choose the days of the week when doses occur.'),
           ],
         );
 
@@ -1371,9 +1388,7 @@ class _AddScheduleWizardPageState
               }),
             ),
             const SizedBox(height: kSpacingS),
-            _helperBelowLeft(
-              'Select the day numbers (1–31) when doses occur.',
-            ),
+            _helperBelowLeft('Select the day numbers (1–31) when doses occur.'),
             if (showMissingDayOption) ...[
               const SizedBox(height: kSpacingS),
               LabelFieldRow(
@@ -1698,8 +1713,7 @@ class _AddScheduleWizardPageState
       );
     }
 
-    final id =
-        widget.initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
+    final id = _initial?.id ?? DateTime.now().microsecondsSinceEpoch.toString();
     final minutesList = _times.map((t) => t.hour * 60 + t.minute).toList();
 
     // Compute UTC times and days
@@ -1888,9 +1902,7 @@ class _AddScheduleWizardPageState
         children: [
           Text(
             title,
-            style: sectionTitleStyle(
-              context,
-            )?.copyWith(color: cs.primary),
+            style: sectionTitleStyle(context)?.copyWith(color: cs.primary),
           ),
           SizedBox(height: titleSpacing),
           ...children,

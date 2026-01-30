@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -21,7 +22,11 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 /// Wizard-style Capsule add/edit screen with step-by-step flow
 class AddCapsuleWizardPage extends MedicationWizardBase {
-  const AddCapsuleWizardPage({super.key, super.initial});
+  const AddCapsuleWizardPage({
+    super.key,
+    super.initial,
+    super.initialMedicationId,
+  });
 
   @override
   int get stepCount => 5;
@@ -42,6 +47,16 @@ class AddCapsuleWizardPage extends MedicationWizardBase {
 
 class _AddCapsuleWizardPageState
     extends MedicationWizardState<AddCapsuleWizardPage> {
+  Medication? _resolvedInitial;
+
+  Medication? _effectiveInitial() {
+    if (widget.initial != null) return widget.initial;
+    final id = widget.initialMedicationId;
+    if (id == null) return null;
+    _resolvedInitial ??= Hive.box<Medication>('medications').get(id);
+    return _resolvedInitial;
+  }
+
   // Step 1: Basic Info
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();
@@ -71,7 +86,7 @@ class _AddCapsuleWizardPageState
   }
 
   void _loadInitialData() {
-    final m = widget.initial;
+    final m = _effectiveInitial();
     if (m != null) {
       _nameCtrl.text = m.name;
       _manufacturerCtrl.text = m.manufacturer ?? '';
@@ -723,7 +738,7 @@ class _AddCapsuleWizardPageState
       builder: (context) => AlertDialog(
         title: const Text('Confirm Save'),
         content: Text(
-          widget.initial == null
+          !widget.isEditing
               ? 'Save this medication to your inventory?'
               : 'Update this medication?',
         ),
@@ -743,10 +758,11 @@ class _AddCapsuleWizardPageState
     if (confirmed != true) return;
 
     final repo = ref.read(medicationRepositoryProvider);
-    final id = widget.initial?.id ?? _newId();
+    final initial = _effectiveInitial();
+    final id = initial?.id ?? _newId();
     final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
     final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-    final previous = widget.initial;
+    final previous = initial;
     final initialStock = previous == null
         ? stock
         : (stock > previous.stockValue

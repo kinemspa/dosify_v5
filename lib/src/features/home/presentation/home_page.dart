@@ -29,6 +29,7 @@ import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/combined_reports_history_widget.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class HomePage extends StatefulWidget {
@@ -388,12 +389,7 @@ class _HomePageState extends State<HomePage> {
         final cs = Theme.of(context).colorScheme;
         return SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(
-              left: kSpacingL,
-              right: kSpacingL,
-              top: kSpacingL,
-              bottom: kSpacingL + MediaQuery.of(context).viewInsets.bottom,
-            ),
+            padding: buildBottomSheetPagePadding(context),
             child: StatefulBuilder(
               builder: (context, setModalState) {
                 return Column(
@@ -435,7 +431,7 @@ class _HomePageState extends State<HomePage> {
                             },
                             dense: true,
                             controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.zero,
+                            contentPadding: kNoPadding,
                             title: Text(
                               med.name,
                               style: bodyTextStyle(context),
@@ -583,7 +579,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   children: [
                     if (items.isEmpty)
-                      Text('No doses today', style: mutedTextStyle(context))
+                      const UnifiedEmptyState(title: 'No doses today')
                     else
                       for (final item in items) ...[
                         DoseCard(
@@ -668,7 +664,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   children: [
                     if (schedules.isEmpty)
-                      Text('No schedules', style: mutedTextStyle(context))
+                      const UnifiedEmptyState(title: 'No schedules')
                     else
                       for (final schedule in schedules) ...[
                         ScheduleListCard(schedule: schedule, dense: true),
@@ -741,7 +737,7 @@ class _HomePageState extends State<HomePage> {
           },
           children: [
             if (meds.isEmpty)
-              Text('No medications', style: mutedTextStyle(context))
+              const UnifiedEmptyState(title: 'No medications')
             else ...[
               Row(
                 children: [
@@ -763,7 +759,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: kSpacingM),
               if (included.isEmpty)
-                Text('No medications selected', style: mutedTextStyle(context))
+                const UnifiedEmptyState(title: 'No medications selected')
               else
                 CombinedReportsHistoryWidget(
                   includedMedicationIds: included,
@@ -791,51 +787,53 @@ class _HomePageState extends State<HomePage> {
 
     final children = <Widget>[
       for (final entry in orderedIds.asMap().entries)
-        Padding(
+        Column(
           key: ValueKey<String>('home_card_${entry.value}'),
-          padding: EdgeInsets.only(
-            bottom: entry.key == orderedIds.length - 1 ? 0 : kSpacingL,
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              cards[entry.value]!,
-              if (!(entry.value == _kCardToday && _isTodayExpanded) &&
-                  !(entry.value == _kCardSchedules && _isSchedulesExpanded) &&
-                  !(entry.value == _kCardReports && _isReportsExpanded) &&
-                  !(entry.value == _kCardCalendar && _isCalendarExpanded))
-                Positioned(
-                  left: kSpacingS,
-                  top: 0,
-                  bottom: 0,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: allCardsCollapsed
-                        ? ReorderableDelayedDragStartListener(
-                            index: entry.key,
-                            child: Icon(
-                              Icons.drag_indicator_rounded,
-                              size: kIconSizeMedium,
-                              color: cs.onSurfaceVariant.withValues(
-                                alpha: kOpacityMedium,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                cards[entry.value]!,
+                if (!(entry.value == _kCardToday && _isTodayExpanded) &&
+                    !(entry.value == _kCardSchedules && _isSchedulesExpanded) &&
+                    !(entry.value == _kCardReports && _isReportsExpanded) &&
+                    !(entry.value == _kCardCalendar && _isCalendarExpanded))
+                  Positioned(
+                    left: kSpacingS,
+                    top: 0,
+                    bottom: 0,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: allCardsCollapsed
+                          ? ReorderableDelayedDragStartListener(
+                              index: entry.key,
+                              child: Icon(
+                                Icons.drag_indicator_rounded,
+                                size: kIconSizeMedium,
+                                color: cs.onSurfaceVariant.withValues(
+                                  alpha: kOpacityMedium,
+                                ),
+                              ),
+                            )
+                          : GestureDetector(
+                              onLongPress: showCollapseAllInstruction,
+                              onTap: showCollapseAllInstruction,
+                              child: Icon(
+                                Icons.drag_indicator_rounded,
+                                size: kIconSizeMedium,
+                                color: cs.onSurfaceVariant.withValues(
+                                  alpha: kOpacityMedium,
+                                ),
                               ),
                             ),
-                          )
-                        : GestureDetector(
-                            onLongPress: showCollapseAllInstruction,
-                            onTap: showCollapseAllInstruction,
-                            child: Icon(
-                              Icons.drag_indicator_rounded,
-                              size: kIconSizeMedium,
-                              color: cs.onSurfaceVariant.withValues(
-                                alpha: kOpacityMedium,
-                              ),
-                            ),
-                          ),
+                    ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
+            if (entry.key != orderedIds.length - 1)
+              const SizedBox(height: kSpacingL),
+          ],
         ),
     ];
 

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -20,7 +21,11 @@ import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
 
 /// Wizard-style Single Dose Vial add/edit screen with step-by-step flow
 class AddSingleDoseVialWizardPage extends MedicationWizardBase {
-  const AddSingleDoseVialWizardPage({super.key, super.initial});
+  const AddSingleDoseVialWizardPage({
+    super.key,
+    super.initial,
+    super.initialMedicationId,
+  });
 
   @override
   int get stepCount => 5;
@@ -41,6 +46,16 @@ class AddSingleDoseVialWizardPage extends MedicationWizardBase {
 
 class _AddSingleDoseVialWizardPageState
     extends MedicationWizardState<AddSingleDoseVialWizardPage> {
+  Medication? _resolvedInitial;
+
+  Medication? _effectiveInitial() {
+    if (widget.initial != null) return widget.initial;
+    final id = widget.initialMedicationId;
+    if (id == null) return null;
+    _resolvedInitial ??= Hive.box<Medication>('medications').get(id);
+    return _resolvedInitial;
+  }
+
   // Step 1: Basic Info
   final _nameCtrl = TextEditingController();
   final _manufacturerCtrl = TextEditingController();
@@ -72,7 +87,7 @@ class _AddSingleDoseVialWizardPageState
   }
 
   void _loadInitialData() {
-    final m = widget.initial;
+    final m = _effectiveInitial();
     if (m != null) {
       _nameCtrl.text = m.name;
       _manufacturerCtrl.text = m.manufacturer ?? '';
@@ -785,7 +800,7 @@ class _AddSingleDoseVialWizardPageState
       builder: (context) => AlertDialog(
         title: const Text('Confirm Save'),
         content: Text(
-          widget.initial == null
+          !widget.isEditing
               ? 'Save this medication to your inventory?'
               : 'Update this medication?',
         ),
@@ -807,12 +822,13 @@ class _AddSingleDoseVialWizardPageState
 
     try {
       final repo = ref.read(medicationRepositoryProvider);
-      final id = widget.initial?.id ?? _newId();
+      final initial = _effectiveInitial();
+      final id = initial?.id ?? _newId();
       final concentration =
           double.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
       final volume = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
       final stock = double.tryParse(_stockValueCtrl.text.trim()) ?? 0;
-      final previous = widget.initial;
+      final previous = initial;
       final initialStock = previous == null
           ? stock
           : (stock > previous.stockValue
