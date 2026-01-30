@@ -17,6 +17,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjus
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -51,15 +52,18 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
     try {
-      final weekday = dose.scheduledTime.weekday;
-      final minutes = dose.scheduledTime.hour * 60 + dose.scheduledTime.minute;
-      final notificationId = ScheduleScheduler.slotIdFor(
-        dose.scheduleId,
-        weekday: weekday,
-        minutes: minutes,
-        occurrence: 0,
+      await NotificationService.cancel(
+        ScheduleScheduler.doseNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
       );
-      await NotificationService.cancel(notificationId);
+      await NotificationService.cancel(
+        ScheduleScheduler.overdueNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
+      );
     } catch (_) {
       // Best-effort cancellation only.
     }
@@ -74,8 +78,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       dose: dose,
       initialStatus: initialStatus,
       onMarkTaken: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -93,7 +99,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
         await _cancelNotificationForDose(dose);
 
         final medBox = Hive.box<Medication>('medications');
@@ -128,8 +134,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       },
       onSnooze: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -147,7 +155,26 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
+
+        await _cancelNotificationForDose(dose);
+        final when = request.actionTime;
+        if (when.isAfter(DateTime.now())) {
+          final time = TimeOfDay.fromDateTime(when).format(context);
+          await NotificationService.scheduleAtAlarmClock(
+            ScheduleScheduler.doseNotificationIdFor(
+              dose.scheduleId,
+              dose.scheduledTime,
+            ),
+            when,
+            title: widget.medication.name,
+            body: '${widget.schedule.name} • Snoozed until $time',
+            payload:
+                'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
+            actions: NotificationService.upcomingDoseActions,
+            expandedLines: <String>[widget.schedule.name, 'Snoozed until $time'],
+          );
+        }
 
         if (!mounted) return;
         setState(() {});
@@ -156,8 +183,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         ).showSnackBar(const SnackBar(content: Text('Dose snoozed')));
       },
       onSkip: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -175,7 +204,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
         await _cancelNotificationForDose(dose);
 
         if (!mounted) return;
@@ -186,10 +215,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       },
       onDelete: (request) async {
         final logBox = Hive.box<DoseLog>('dose_logs');
-        final idToDelete =
-            dose.existingLog?.id ??
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
-        final existingLog = logBox.get(idToDelete);
+        final baseId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
+        final existingLog =
+            logBox.get(baseId) ??
+            logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
         if (existingLog != null && existingLog.action == DoseAction.taken) {
           final medBox = Hive.box<Medication>('medications');
@@ -218,7 +250,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         }
 
         final repo = DoseLogRepository(logBox);
-        await repo.delete(idToDelete);
+        await repo.deleteOccurrence(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
+        await _cancelNotificationForDose(dose);
 
         if (!mounted) return;
         setState(() {});
@@ -293,10 +329,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                 ValueListenableBuilder(
                   valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
                   builder: (context, Box<DoseLog> logBox, _) {
-                    final baseId =
-                        '${widget.schedule.id}_${nextDose.millisecondsSinceEpoch}';
+                    final baseId = DoseLogIds.occurrenceId(
+                      scheduleId: widget.schedule.id,
+                      scheduledTime: nextDose,
+                    );
                     final existingLog =
-                        logBox.get(baseId) ?? logBox.get('${baseId}_snooze');
+                        logBox.get(baseId) ??
+                        logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
                     final dose = CalculatedDose(
                       scheduleId: widget.schedule.id,

@@ -9,8 +9,10 @@ import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjus
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_calculation_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_day_view.dart';
@@ -350,8 +352,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     CalculatedDose dose,
     DoseActionSheetSaveRequest request,
   ) async {
-    final logId =
-        '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+    final logId = DoseLogIds.occurrenceId(
+      scheduleId: dose.scheduleId,
+      scheduledTime: dose.scheduledTime,
+    );
     final medicationId = dose.existingLog?.medicationId ?? 'unknown';
     final log = DoseLog(
       id: logId,
@@ -371,7 +375,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
 
       // Deduct medication stock
       await _deductStock(
@@ -403,33 +407,31 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
     try {
-      // Calculate notification ID using the same pattern as schedule_scheduler.dart
-      final weekday = dose.scheduledTime.weekday;
-      final minutes = dose.scheduledTime.hour * 60 + dose.scheduledTime.minute;
-      final key = '${dose.scheduleId}|w:$weekday|m:$minutes|o:0';
-      final notificationId = _stableHash32(key);
-
-      await NotificationService.cancel(notificationId);
+      await NotificationService.cancel(
+        ScheduleScheduler.doseNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
+      );
+      await NotificationService.cancel(
+        ScheduleScheduler.overdueNotificationIdFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        ),
+      );
     } catch (e) {
       debugPrint('[DoseCalendar] Failed to cancel notification: $e');
     }
-  }
-
-  // Stable 32-bit hash (matches schedule_scheduler.dart)
-  static int _stableHash32(String str) {
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash + str.codeUnitAt(i)) & 0x7FFFFFFF;
-    }
-    return hash;
   }
 
   Future<void> _snoozeDose(
     CalculatedDose dose,
     DoseActionSheetSaveRequest request,
   ) async {
-    final logId =
-        '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+    final logId = DoseLogIds.occurrenceId(
+      scheduleId: dose.scheduleId,
+      scheduledTime: dose.scheduledTime,
+    );
     final medicationId = dose.existingLog?.medicationId ?? 'unknown';
     final log = DoseLog(
       id: logId,
@@ -449,9 +451,26 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
 
-      // TODO: Reschedule notification for 15 minutes later
+      await _cancelNotificationForDose(dose);
+      final when = request.actionTime;
+      if (when.isAfter(DateTime.now())) {
+        final time = TimeOfDay.fromDateTime(when).format(context);
+        await NotificationService.scheduleAtAlarmClock(
+          ScheduleScheduler.doseNotificationIdFor(
+            dose.scheduleId,
+            dose.scheduledTime,
+          ),
+          when,
+          title: dose.medicationName,
+          body: '${dose.scheduleName} • Snoozed until $time',
+          payload:
+              'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
+          actions: NotificationService.upcomingDoseActions,
+          expandedLines: <String>[dose.scheduleName, 'Snoozed until $time'],
+        );
+      }
 
       await _loadDoses();
 
@@ -482,8 +501,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     CalculatedDose dose,
     DoseActionSheetSaveRequest request,
   ) async {
-    final logId =
-        '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+    final logId = DoseLogIds.occurrenceId(
+      scheduleId: dose.scheduleId,
+      scheduledTime: dose.scheduledTime,
+    );
     final medicationId = dose.existingLog?.medicationId ?? 'unknown';
     final log = DoseLog(
       id: logId,
@@ -503,7 +524,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
 
       // Cancel the notification for this dose
       await _cancelNotificationForDose(dose);
@@ -529,7 +550,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.delete(dose.existingLog!.id);
+      await repo.deleteOccurrence(
+        scheduleId: dose.scheduleId,
+        scheduledTime: dose.scheduledTime,
+      );
+
+      // Cancel any scheduled reminder for this occurrence (best-effort).
+      await _cancelNotificationForDose(dose);
 
       // Restore stock if the dose was previously taken
       if (dose.existingLog!.action == DoseAction.taken) {

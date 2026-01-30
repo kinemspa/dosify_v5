@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/medication_displ
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -423,7 +424,7 @@ class ScheduleCard extends StatelessWidget {
     final next = occ?.dt;
     if (next == null) return;
 
-    final logId = '${s.id}_${next.millisecondsSinceEpoch}';
+    final logId = DoseLogIds.occurrenceId(scheduleId: s.id, scheduledTime: next);
     final log = DoseLog(
       id: logId,
       scheduleId: s.id,
@@ -439,19 +440,27 @@ class ScheduleCard extends StatelessWidget {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
 
       // Cancel notification for this slot
       try {
+        await NotificationService.cancel(
+          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+        );
+        await NotificationService.cancel(
+          ScheduleScheduler.overdueNotificationIdFor(s.id, next),
+        );
+
+        // Best-effort cleanup for legacy slot-based IDs.
         final minutes = next.hour * 60 + next.minute;
         final occurrence = occ?.occurrence ?? 0;
-        final id = ScheduleScheduler.slotIdFor(
+        final legacyId = ScheduleScheduler.slotIdFor(
           s.id,
           weekday: next.weekday,
           minutes: minutes,
           occurrence: occurrence,
         );
-        await NotificationService.cancel(id);
+        await NotificationService.cancel(legacyId);
       } catch (_) {}
     } catch (e) {
       debugPrint('Error logging dose: $e');
@@ -473,7 +482,7 @@ class ScheduleCard extends StatelessWidget {
 
     final snoozeUntil = next.add(const Duration(minutes: 15));
 
-    final logId = '${s.id}_${next.millisecondsSinceEpoch}_snooze';
+    final logId = DoseLogIds.occurrenceId(scheduleId: s.id, scheduledTime: next);
     final log = DoseLog(
       id: logId,
       scheduleId: s.id,
@@ -489,23 +498,38 @@ class ScheduleCard extends StatelessWidget {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
 
-      // Reschedule notification for 15 minutes later as a one-off snooze alarm.
+      // Cancel any existing reminder for this occurrence (best-effort).
       try {
-        final minutes = snoozeUntil.hour * 60 + snoozeUntil.minute;
+        await NotificationService.cancel(
+          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+        );
+        await NotificationService.cancel(
+          ScheduleScheduler.overdueNotificationIdFor(s.id, next),
+        );
+
+        final minutes = next.hour * 60 + next.minute;
         final occurrence = occ?.occurrence ?? 0;
-        final id = ScheduleScheduler.slotIdFor(
+        final legacyId = ScheduleScheduler.slotIdFor(
           s.id,
-          weekday: snoozeUntil.weekday,
+          weekday: next.weekday,
           minutes: minutes,
           occurrence: occurrence,
         );
+        await NotificationService.cancel(legacyId);
+      } catch (_) {}
+
+      // Reschedule notification for 15 minutes later as a one-off snooze alarm.
+      try {
         await NotificationService.scheduleAtAlarmClock(
-          id,
+          ScheduleScheduler.doseNotificationIdFor(s.id, next),
           snoozeUntil,
-          title: s.name,
-          body: '${s.medicationName} • ${s.doseValue} ${s.doseUnit}',
+          title: s.medicationName,
+          body: '${s.name} • Snoozed',
+          payload: 'dose:${s.id}:${next.millisecondsSinceEpoch}',
+          actions: NotificationService.upcomingDoseActions,
+          expandedLines: <String>[s.name, 'Snoozed'],
         );
       } catch (e) {
         // ignore scheduling failure - best effort
@@ -546,7 +570,7 @@ class ScheduleCard extends StatelessWidget {
       return;
     }
 
-    final logId = '${s.id}_${next.millisecondsSinceEpoch}';
+    final logId = DoseLogIds.occurrenceId(scheduleId: s.id, scheduledTime: next);
     final log = DoseLog(
       id: logId,
       scheduleId: s.id,
@@ -561,24 +585,27 @@ class ScheduleCard extends StatelessWidget {
 
     try {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-      await repo.upsert(log);
+      await repo.upsertOccurrence(log);
 
       // Attempt to cancel scheduled notification for the day (best-effort)
       try {
-        // Try to cancel the exact slot scheduled for this time using its occurrence index.
+        await NotificationService.cancel(
+          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+        );
+        await NotificationService.cancel(
+          ScheduleScheduler.overdueNotificationIdFor(s.id, next),
+        );
+
+        // Best-effort cleanup for legacy slot-based IDs.
         final minutes = next.hour * 60 + next.minute;
         final occurrence = occ?.occurrence ?? 0;
-        try {
-          final id = ScheduleScheduler.slotIdFor(
-            s.id,
-            weekday: next.weekday,
-            minutes: minutes,
-            occurrence: occurrence,
-          );
-          await NotificationService.cancel(id);
-        } catch (_) {}
-        // Also fallback to cancelFor to ensure best-effort removal
-        await ScheduleScheduler.cancelFor(s.id, days: [next.weekday]);
+        final legacyId = ScheduleScheduler.slotIdFor(
+          s.id,
+          weekday: next.weekday,
+          minutes: minutes,
+          occurrence: occurrence,
+        );
+        await NotificationService.cancel(legacyId);
       } catch (_) {
         // ignore - best effort cancel
       }

@@ -2,11 +2,14 @@
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -708,13 +711,34 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   void _showDoseActionSheet(CalculatedDose dose, {DoseStatus? initialStatus}) {
+    Future<void> cancelNotificationForDose() async {
+      try {
+        await NotificationService.cancel(
+          ScheduleScheduler.doseNotificationIdFor(
+            dose.scheduleId,
+            dose.scheduledTime,
+          ),
+        );
+        await NotificationService.cancel(
+          ScheduleScheduler.overdueNotificationIdFor(
+            dose.scheduleId,
+            dose.scheduledTime,
+          ),
+        );
+      } catch (_) {
+        // Best-effort cancellation only.
+      }
+    }
+
     DoseActionSheet.show(
       context,
       dose: dose,
       initialStatus: initialStatus,
       onMarkTaken: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -732,7 +756,8 @@ class _NextDoseCardState extends State<NextDoseCard>
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
+        await cancelNotificationForDose();
 
         // Deduct stock when dose is taken
         final medBox = Hive.box<Medication>('medications');
@@ -771,8 +796,10 @@ class _NextDoseCardState extends State<NextDoseCard>
         ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
       },
       onSnooze: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}_snooze';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -790,7 +817,26 @@ class _NextDoseCardState extends State<NextDoseCard>
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
+
+        await cancelNotificationForDose();
+        final when = request.actionTime;
+        if (when.isAfter(DateTime.now())) {
+          final time = TimeOfDay.fromDateTime(when).format(context);
+          await NotificationService.scheduleAtAlarmClock(
+            ScheduleScheduler.doseNotificationIdFor(
+              dose.scheduleId,
+              dose.scheduledTime,
+            ),
+            when,
+            title: widget.medication.name,
+            body: '${dose.scheduleName} • Snoozed until $time',
+            payload:
+                'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
+            actions: NotificationService.upcomingDoseActions,
+            expandedLines: <String>[dose.scheduleName, 'Snoozed until $time'],
+          );
+        }
 
         if (!mounted) return;
         setState(() {
@@ -812,8 +858,10 @@ class _NextDoseCardState extends State<NextDoseCard>
         ).showSnackBar(SnackBar(content: Text(label)));
       },
       onSkip: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final log = DoseLog(
           id: logId,
           scheduleId: dose.scheduleId,
@@ -831,7 +879,8 @@ class _NextDoseCardState extends State<NextDoseCard>
         );
 
         final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-        await repo.upsert(log);
+        await repo.upsertOccurrence(log);
+        await cancelNotificationForDose();
 
         if (!mounted) return;
         setState(() {
@@ -843,10 +892,14 @@ class _NextDoseCardState extends State<NextDoseCard>
         ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
       },
       onDelete: (request) async {
-        final logId =
-            '${dose.scheduleId}_${dose.scheduledTime.millisecondsSinceEpoch}';
+        final baseId = DoseLogIds.occurrenceId(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
         final logBox = Hive.box<DoseLog>('dose_logs');
-        final existingLog = logBox.get(logId);
+        final existingLog =
+            logBox.get(baseId) ??
+            logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
         // When deleting/undoing a dose, restore the stock if it was taken
         if (existingLog != null && existingLog.action == DoseAction.taken) {
@@ -879,7 +932,11 @@ class _NextDoseCardState extends State<NextDoseCard>
         }
 
         final repo = DoseLogRepository(logBox);
-        await repo.delete(logId);
+        await repo.deleteOccurrence(
+          scheduleId: dose.scheduleId,
+          scheduledTime: dose.scheduledTime,
+        );
+        await cancelNotificationForDose();
 
         if (!mounted) return;
         setState(() {
