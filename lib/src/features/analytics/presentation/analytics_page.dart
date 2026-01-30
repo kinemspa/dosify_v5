@@ -267,6 +267,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           MedicationReportsWidget(
                             medication: med,
                             isExpanded: false,
+                            rangePreset: _rangePreset,
+                            onRangePresetChanged: (next) {
+                              setState(() => _rangePreset = next);
+                            },
+                            showTimeRangeControl: false,
                           ),
                           const SizedBox(height: kSpacingL),
                         ],

@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -27,8 +28,10 @@ import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/combined_reports_history_widget.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_legend_row.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -375,6 +378,8 @@ class _HomePageState extends State<HomePage> {
   bool _isSchedulesExpanded = true;
   bool _isReportsExpanded = true;
   bool _isCalendarExpanded = true;
+
+  ReportTimeRangePreset _reportsRangePreset = ReportTimeRangePreset.allTime;
 
   Future<void> _showIncludedMedsSelector(
     BuildContext context,
@@ -757,6 +762,16 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+              const SizedBox(height: kSpacingS),
+              ReportTimeRangeSelectorRow(
+                value: _reportsRangePreset,
+                onChanged: (next) {
+                  if (!mounted) return;
+                  setState(() => _reportsRangePreset = next);
+                },
+              ),
+              const SizedBox(height: kSpacingS),
+              const DoseActionLegendRow(includeInventory: true),
               const SizedBox(height: kSpacingM),
               if (included.isEmpty)
                 const UnifiedEmptyState(title: 'No medications selected')
@@ -764,6 +779,7 @@ class _HomePageState extends State<HomePage> {
                 CombinedReportsHistoryWidget(
                   includedMedicationIds: included,
                   embedInParentCard: true,
+                  rangePreset: _reportsRangePreset,
                 ),
             ],
           ],

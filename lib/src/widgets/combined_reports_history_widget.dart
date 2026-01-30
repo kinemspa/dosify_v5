@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
+import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
@@ -18,8 +19,7 @@ sealed class _CombinedHistoryItem {
 
   Widget buildTitle(BuildContext context);
 
-  IconData get icon;
-  Color iconColor(ColorScheme cs);
+  ({IconData icon, Color color}) visualSpec(BuildContext context);
 }
 
 class _DoseHistoryItem extends _CombinedHistoryItem {
@@ -29,27 +29,9 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
   final DoseLog log;
 
   @override
-  IconData get icon {
-    switch (log.action) {
-      case DoseAction.taken:
-        return Icons.check_circle_rounded;
-      case DoseAction.skipped:
-        return Icons.cancel_rounded;
-      case DoseAction.snoozed:
-        return Icons.snooze_rounded;
-    }
-  }
-
-  @override
-  Color iconColor(ColorScheme cs) {
-    switch (log.action) {
-      case DoseAction.taken:
-        return cs.primary;
-      case DoseAction.skipped:
-        return cs.tertiary;
-      case DoseAction.snoozed:
-        return cs.secondary;
-    }
+  ({IconData icon, Color color}) visualSpec(BuildContext context) {
+    final spec = doseActionVisualSpec(context, log.action);
+    return (icon: spec.icon, color: spec.color);
   }
 
   String _effectiveScheduleName() {
@@ -125,10 +107,10 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
   final InventoryLog log;
 
   @override
-  IconData get icon => Icons.inventory_2_rounded;
-
-  @override
-  Color iconColor(ColorScheme cs) => cs.onSurfaceVariant;
+  ({IconData icon, Color color}) visualSpec(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return (icon: Icons.inventory_2_rounded, color: cs.onSurfaceVariant);
+  }
 
   @override
   Widget buildTitle(BuildContext context) {
@@ -165,12 +147,14 @@ class CombinedReportsHistoryWidget extends StatefulWidget {
     required this.includedMedicationIds,
     this.embedInParentCard = false,
     this.initialMaxItems = 25,
+    this.rangePreset = ReportTimeRangePreset.allTime,
     super.key,
   });
 
   final Set<String> includedMedicationIds;
   final bool embedInParentCard;
   final int initialMaxItems;
+  final ReportTimeRangePreset rangePreset;
 
   @override
   State<CombinedReportsHistoryWidget> createState() =>
@@ -199,6 +183,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final range = ReportTimeRange(widget.rangePreset).toUtcTimeRange();
 
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
@@ -213,12 +198,14 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
 
             final doseLogs = doseLogBox.values
                 .where((l) => included.contains(l.medicationId))
+              .where((l) => range == null || range.contains(l.actionTime))
                 .toList(growable: false);
 
             final doseLogIds = doseLogs.map((l) => l.id).toSet();
 
             final inventoryLogs = inventoryLogBox.values
                 .where((l) => included.contains(l.medicationId))
+              .where((l) => range == null || range.contains(l.timestamp))
                 // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
                 // Prefer the DoseLog entry since it supports edits.
                 .where(
@@ -280,7 +267,8 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                     ),
                     itemBuilder: (context, index) {
                       final item = displayItems[index];
-                      final iconColor = item.iconColor(cs);
+                      final spec = item.visualSpec(context);
+                      final iconColor = spec.color;
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(
@@ -307,7 +295,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                item.icon,
+                                spec.icon,
                                 size: kIconSizeSmall,
                                 color: iconColor,
                               ),

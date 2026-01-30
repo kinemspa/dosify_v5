@@ -18,9 +18,12 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
+import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_legend_row.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
+import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
 
 class _HistoryItem {
   const _HistoryItem._({
@@ -58,6 +61,9 @@ class MedicationReportsWidget extends StatefulWidget {
     this.isExpanded = true,
     this.onExpandedChanged,
     this.embedInParentCard = false,
+    this.rangePreset,
+    this.onRangePresetChanged,
+    this.showTimeRangeControl = true,
     super.key,
   });
 
@@ -65,6 +71,11 @@ class MedicationReportsWidget extends StatefulWidget {
   final bool isExpanded;
   final ValueChanged<bool>? onExpandedChanged;
   final bool embedInParentCard;
+
+  /// Optional external control for time range (useful for Analytics).
+  final ReportTimeRangePreset? rangePreset;
+  final ValueChanged<ReportTimeRangePreset>? onRangePresetChanged;
+  final bool showTimeRangeControl;
 
   @override
   State<MedicationReportsWidget> createState() =>
@@ -76,6 +87,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   late TabController _tabController;
   bool _isExpandedInternal = true; // Collapsible state (uncontrolled mode)
 
+  ReportTimeRangePreset _rangePresetInternal = ReportTimeRangePreset.allTime;
+
   static const int _historyPageStep = 25;
   int _historyMaxItems = _historyPageStep;
 
@@ -86,8 +99,29 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
   void initState() {
     super.initState();
     _isExpandedInternal = widget.isExpanded;
+    _rangePresetInternal = widget.rangePreset ?? ReportTimeRangePreset.allTime;
     final tabCount = 1 + _AdherenceReportSection.values.length;
     _tabController = TabController(length: tabCount, vsync: this);
+  }
+
+  @override
+  void didUpdateWidget(covariant MedicationReportsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.rangePreset != null && widget.rangePreset != oldWidget.rangePreset) {
+      _rangePresetInternal = widget.rangePreset!;
+      _historyMaxItems = _historyPageStep;
+    }
+  }
+
+  ReportTimeRangePreset get _rangePreset => widget.rangePreset ?? _rangePresetInternal;
+
+  void _setRangePreset(ReportTimeRangePreset next) {
+    widget.onRangePresetChanged?.call(next);
+    if (widget.rangePreset != null) return;
+    setState(() {
+      _rangePresetInternal = next;
+      _historyMaxItems = _historyPageStep;
+    });
   }
 
   @override
@@ -158,6 +192,22 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           secondChild: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (widget.showTimeRangeControl) ...[
+                Padding(
+                  padding: kStandardCardPadding,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ReportTimeRangeSelectorRow(
+                        value: _rangePreset,
+                        onChanged: _setRangePreset,
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      const DoseActionLegendRow(),
+                    ],
+                  ),
+                ),
+              ],
               TabBar(
                 controller: _tabController,
                 isScrollable: true,
@@ -234,6 +284,8 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       'dose_status_change_logs',
     );
 
+    final range = ReportTimeRange(_rangePreset).toUtcTimeRange();
+
     final now = DateTime.now();
     final missedStart = now.subtract(
       const Duration(days: _historyMissedLookbackDays),
@@ -248,6 +300,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     // Dose logs for this medication
     final doseLogs = doseLogBox.values
         .where((log) => log.medicationId == widget.medication.id)
+      .where((log) => range == null || range.contains(log.actionTime))
         .toList(growable: false);
 
     final adHocDoseLogIds = doseLogs
@@ -258,6 +311,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     // Inventory events for this medication (refills, deductions, adjustments, etc)
     final inventoryLogs = inventoryLogBox.values
         .where((l) => l.medicationId == widget.medication.id)
+      .where((l) => range == null || range.contains(l.timestamp))
         // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
         // In History, show the editable DoseLog and suppress the duplicate inventory entry.
         .where(
@@ -270,6 +324,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     // Status change events for this medication
     final statusChanges = statusChangeBox.values
         .where((l) => l.medicationId == widget.medication.id)
+      .where((l) => range == null || range.contains(l.changeTime))
         .toList(growable: false);
 
     return FutureBuilder<List<CalculatedDose>>(
@@ -279,6 +334,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             .where(
               (d) => d.status == DoseStatus.overdue && d.existingLog == null,
             )
+            .where((d) => range == null || range.contains(d.scheduledTime))
             .toList(growable: false);
 
         final allItems = <_HistoryItem>[
@@ -319,6 +375,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
         return Column(
           children: [
+            if (widget.showTimeRangeControl) const SizedBox(height: kSpacingXS),
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(
