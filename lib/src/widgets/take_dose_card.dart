@@ -130,7 +130,9 @@ class TakeDoseCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.event,
+                          dose.status == DoseStatus.taken
+                              ? Icons.check_circle_rounded
+                              : Icons.event,
                           size: kIconSizeSmall,
                           color: cs.onSurfaceVariant,
                         ),

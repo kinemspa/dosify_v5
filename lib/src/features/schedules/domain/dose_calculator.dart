@@ -353,6 +353,17 @@ enum SyringeType {
 
 /// Centralized lookup helpers for syringe sizing.
 class SyringeTypeLookup {
+  /// Common syringe size presets intended for UI quick-pick controls.
+  ///
+  /// Excludes 10ml by default because it tends to be rare/noisy in everyday use.
+  static const List<SyringeType> commonPresets = <SyringeType>[
+    SyringeType.ml_0_3,
+    SyringeType.ml_0_5,
+    SyringeType.ml_1_0,
+    SyringeType.ml_3_0,
+    SyringeType.ml_5_0,
+  ];
+
   static SyringeType forVolumeMl(double volumeMl) {
     if (volumeMl <= 0.3) return SyringeType.ml_0_3;
     if (volumeMl <= 0.5) return SyringeType.ml_0_5;

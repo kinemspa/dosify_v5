@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_value_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
@@ -71,16 +72,19 @@ class DoseActionSheet extends StatefulWidget {
     required Future<void> Function(DoseActionSheetSaveRequest request) onDelete,
     DoseStatus? initialStatus,
   }) {
-    return showDialog<void>(
+    final cs = Theme.of(context).colorScheme;
+    return showModalBottomSheet<void>(
       context: context,
-      useRootNavigator: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: cs.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DoseActionSheet(
         dose: dose,
         onMarkTaken: onMarkTaken,
         onSnooze: onSnooze,
         onSkip: onSkip,
         onDelete: onDelete,
-        presentation: DoseActionSheetPresentation.dialog,
+        presentation: DoseActionSheetPresentation.bottomSheet,
         initialStatus: initialStatus,
       ),
     );
@@ -392,8 +396,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   String _formatAmount(double value) {
-    if (value == value.roundToDouble()) return value.toInt().toString();
-    return value.toStringAsFixed(2);
+    final unit = _doseOverrideUnit ?? widget.dose.doseUnit;
+    return DoseValueFormatter.format(value, unit);
   }
 
   DateTime _defaultSnoozeUntil() {
@@ -454,15 +458,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   double _adHocStepSize(String unit) {
-    final normalized = unit.trim().toLowerCase();
-    if (normalized == 'ml' || normalized.contains('ml')) return 0.1;
-    return 1.0;
+    return DoseValueFormatter.stepSizeForUnit(unit);
   }
 
   double _doseOverrideStepSize(String unit) {
-    final normalized = unit.trim().toLowerCase();
-    if (normalized == 'ml' || normalized.contains('ml')) return 0.1;
-    return 1.0;
+    return DoseValueFormatter.stepSizeForUnit(unit);
   }
 
   (double?, String?) _resolvedActualDoseOverride() {
@@ -470,7 +470,13 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     if (controller == null) return (null, null);
 
     final unit = _doseOverrideUnit;
-    final parsed = double.tryParse(controller.text);
+    final effectiveUnit = unit ?? widget.dose.doseUnit;
+    final parsed = DoseValueFormatter.tryParseAndClamp(
+      controller.text,
+      effectiveUnit,
+      min: 0.0,
+      max: double.infinity,
+    );
     if (parsed == null) return (null, unit);
 
     final baselineValue =
@@ -484,7 +490,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       return (null, null);
     }
 
-    return (parsed.clamp(0.0, double.infinity), unit);
+    return (parsed, unit);
   }
 
   Future<void> _saveAdHocAmountAndNotesIfNeeded() async {
@@ -494,9 +500,21 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final controller = _amountController;
     if (controller == null) return;
 
-    final parsedAmount = double.tryParse(controller.text) ?? 0;
+    final parsedAmount =
+        DoseValueFormatter.tryParseAndClamp(
+          controller.text,
+          existingLog.doseUnit,
+          min: 0.0,
+          max: double.infinity,
+        ) ??
+        0;
     final maxAmount = _maxAdHocAmount ?? double.infinity;
-    final newAmount = parsedAmount.clamp(0.0, maxAmount);
+    final newAmount = DoseValueFormatter.clampAndQuantize(
+      parsedAmount,
+      existingLog.doseUnit,
+      min: 0.0,
+      max: maxAmount,
+    );
     final oldAmount = _originalAdHocAmount ?? existingLog.doseValue;
     final trimmedNotes = _notesController.text.trim();
     final newNotes = trimmedNotes.isEmpty ? null : trimmedNotes;
@@ -781,6 +799,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           padding: kBottomSheetContentPadding.copyWith(top: kSpacingM),
           children: [
             _buildDoseCardPreview(context),
+            _buildMdvGaugePreviewIfNeeded(context),
             const SizedBox(height: kSpacingS),
             _buildStatusChips(),
             const SizedBox(height: kSpacingXS),
@@ -818,7 +837,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                         });
                       },
                       icon: Icon(
-                        Icons.calendar_today,
+                        _selectedStatus == DoseStatus.taken
+                            ? Icons.check_circle_rounded
+                            : Icons.calendar_today,
                         size: kIconSizeSmall,
                         color: _statusAccentColor(context),
                       ),
@@ -994,16 +1015,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     _mdvStrengthUnit,
                   );
 
-                  final result = _mdvDoseChangeResult(
-                    med: med,
-                    rawText: _doseOverrideController!.text,
-                  );
-
-                  final gaugeFillUnits = (result?.syringeUnits ?? 0).clamp(
-                    0.0,
-                    syringe.maxUnits.toDouble(),
-                  );
-
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1043,26 +1054,51 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                       const SizedBox(height: kSpacingS),
                       LabelFieldRow(
                         label: 'Syringe',
-                        field: SmallDropdown36<SyringeType>(
-                          value: syringe,
-                          items: SyringeType.values
-                              .where((t) => t != SyringeType.ml_10_0)
-                              .map(
-                                (t) => DropdownMenuItem<SyringeType>(
-                                  value: t,
-                                  child: Text(t.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value == null || value == _mdvSyringeType) {
-                              return;
-                            }
-                            setState(() {
-                              _mdvSyringeType = value;
-                              _hasChanged = true;
-                            });
-                          },
+                        field: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              spacing: kSpacingS,
+                              runSpacing: kSpacingXS,
+                              children: SyringeTypeLookup.commonPresets
+                                  .map(
+                                    (t) => PrimaryChoiceChip(
+                                      label: Text(t.name),
+                                      selected: t == syringe,
+                                      onSelected: (_) {
+                                        if (t == _mdvSyringeType) return;
+                                        setState(() {
+                                          _mdvSyringeType = t;
+                                          _hasChanged = true;
+                                        });
+                                      },
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const SizedBox(height: kSpacingS),
+                            SmallDropdown36<SyringeType>(
+                              value: syringe,
+                              items: SyringeType.values
+                                  .where((t) => t != SyringeType.ml_10_0)
+                                  .map(
+                                    (t) => DropdownMenuItem<SyringeType>(
+                                      value: t,
+                                      child: Text(t.name),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value == null || value == _mdvSyringeType) {
+                                  return;
+                                }
+                                setState(() {
+                                  _mdvSyringeType = value;
+                                  _hasChanged = true;
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: kSpacingS),
@@ -1110,17 +1146,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                         ],
                       ),
                       const SizedBox(height: kSpacingS),
-                      Center(
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: WhiteSyringeGauge(
-                            totalUnits: syringe.maxUnits.toDouble(),
-                            fillUnits: gaugeFillUnits,
-                            interactive: false,
-                            showValueLabel: false,
-                          ),
-                        ),
-                      ),
+                      // Gauge is rendered directly under the dose card preview.
                     ],
                   );
                 },
@@ -1378,6 +1404,47 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     );
   }
 
+  Widget _buildMdvGaugePreviewIfNeeded(BuildContext context) {
+    if (_isAdHoc) return const SizedBox.shrink();
+
+    final schedule = Hive.box<Schedule>('schedules').get(widget.dose.scheduleId);
+    final medId = schedule?.medicationId;
+    final med = medId == null ? null : Hive.box<Medication>('medications').get(medId);
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
+      return const SizedBox.shrink();
+    }
+
+    final syringe = _mdvSyringeType ?? SyringeType.ml_1_0;
+    final result = _doseOverrideController == null
+        ? null
+        : _mdvDoseChangeResult(med: med, rawText: _doseOverrideController!.text);
+
+    final fallbackVolumeMl = med.volumePerDose;
+    final fallbackUnits = fallbackVolumeMl == null
+        ? 0.0
+        : (fallbackVolumeMl * SyringeType.ml_1_0.unitsPerMl);
+
+    final fillUnits = (result?.syringeUnits ?? fallbackUnits).clamp(
+      0.0,
+      syringe.maxUnits.toDouble(),
+    );
+
+    return Column(
+      children: [
+        const SizedBox(height: kSpacingS),
+        SizedBox(
+          width: double.infinity,
+          child: WhiteSyringeGauge(
+            totalUnits: syringe.maxUnits.toDouble(),
+            fillUnits: fillUnits,
+            interactive: false,
+            showValueLabel: false,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildStatusChips() {
     final scheduledColor = doseStatusVisual(
       context,
@@ -1389,64 +1456,86 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       DoseStatus.skipped,
       disabled: false,
     ).color;
-    return Wrap(
-      spacing: kSpacingS,
-      runSpacing: kSpacingXS,
-      alignment: WrapAlignment.center,
-      children: [
-        if (!_isAdHoc)
-          PrimaryChoiceChip(
-            label: const Text('Scheduled'),
-            color: scheduledColor,
-            selected:
-                _selectedStatus == DoseStatus.pending ||
-                _selectedStatus == DoseStatus.overdue,
-            onSelected: (_) {
-              setState(() {
-                _selectedStatus = DoseStatus.pending;
-                _hasChanged = true;
-              });
-            },
-          ),
+    final chips = <Widget>[];
+    if (!_isAdHoc) {
+      chips.add(
         PrimaryChoiceChip(
-          label: const Text('Taken'),
-          color: kDoseStatusTakenGreen,
-          selected: _selectedStatus == DoseStatus.taken,
+          label: const Text('Scheduled'),
+          color: scheduledColor,
+          selected:
+              _selectedStatus == DoseStatus.pending ||
+              _selectedStatus == DoseStatus.overdue,
           onSelected: (_) {
             setState(() {
-              _selectedStatus = DoseStatus.taken;
+              _selectedStatus = DoseStatus.pending;
               _hasChanged = true;
             });
           },
         ),
-        PrimaryChoiceChip(
-          label: const Text('Snoozed'),
-          color: kDoseStatusSnoozedOrange,
-          selected: _selectedStatus == DoseStatus.snoozed,
-          onSelected: (_) {
-            setState(() {
-              _selectedStatus = DoseStatus.snoozed;
-              final until = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-              final max = _maxSnoozeUntil();
-              final clamped = max != null && until.isAfter(max) ? max : until;
-              _selectedSnoozeUntil = clamped;
-              _selectedActionTime = clamped;
-              _hasChanged = true;
-            });
-          },
-        ),
-        PrimaryChoiceChip(
-          label: const Text('Skipped'),
-          color: skippedColor,
-          selected: _selectedStatus == DoseStatus.skipped,
-          onSelected: (_) {
-            setState(() {
-              _selectedStatus = DoseStatus.skipped;
-              _hasChanged = true;
-            });
-          },
-        ),
-      ],
+      );
+    }
+
+    chips.addAll([
+      PrimaryChoiceChip(
+        label: const Text('Taken'),
+        color: kDoseStatusTakenGreen,
+        selected: _selectedStatus == DoseStatus.taken,
+        onSelected: (_) {
+          setState(() {
+            _selectedStatus = DoseStatus.taken;
+            _hasChanged = true;
+          });
+        },
+      ),
+      PrimaryChoiceChip(
+        label: const Text('Snoozed'),
+        color: kDoseStatusSnoozedOrange,
+        selected: _selectedStatus == DoseStatus.snoozed,
+        onSelected: (_) {
+          setState(() {
+            _selectedStatus = DoseStatus.snoozed;
+            final until = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+            final max = _maxSnoozeUntil();
+            final clamped = max != null && until.isAfter(max) ? max : until;
+            _selectedSnoozeUntil = clamped;
+            _selectedActionTime = clamped;
+            _hasChanged = true;
+          });
+        },
+      ),
+      PrimaryChoiceChip(
+        label: const Text('Skipped'),
+        color: skippedColor,
+        selected: _selectedStatus == DoseStatus.skipped,
+        onSelected: (_) {
+          setState(() {
+            _selectedStatus = DoseStatus.skipped;
+            _hasChanged = true;
+          });
+        },
+      ),
+    ]);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColWidth =
+            (constraints.maxWidth - kSpacingS) / 2;
+        final sized = <Widget>[];
+        for (var i = 0; i < chips.length; i++) {
+          final isLast = i == chips.length - 1;
+          final width = chips.length == 3 && isLast
+              ? constraints.maxWidth
+              : twoColWidth;
+          sized.add(SizedBox(width: width, child: chips[i]));
+        }
+
+        return Wrap(
+          spacing: kSpacingS,
+          runSpacing: kSpacingXS,
+          alignment: WrapAlignment.center,
+          children: sized,
+        );
+      },
     );
   }
 
