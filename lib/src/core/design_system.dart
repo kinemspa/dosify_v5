@@ -275,6 +275,17 @@ const EdgeInsets kBottomSheetHeaderPadding = EdgeInsets.fromLTRB(
   kSpacingL,
 );
 const EdgeInsets kBottomSheetContentPadding = EdgeInsets.all(kSpacingL);
+
+/// Dose action sheet (Take/Snooze/Skip) content padding.
+///
+/// Slightly tighter than the generic bottom-sheet padding to avoid
+/// compressing full-width preview cards.
+const EdgeInsets kDoseActionSheetContentPadding = EdgeInsets.fromLTRB(
+  kSpacingM,
+  kSpacingM,
+  kSpacingM,
+  kSpacingL,
+);
 const EdgeInsets kBottomSheetHandleMargin = EdgeInsets.symmetric(
   vertical: kSpacingL,
 );

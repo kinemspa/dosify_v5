@@ -796,7 +796,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         radius: kDoseActionSheetScrollbarThumbRadius,
         child: ListView(
           controller: scrollController,
-          padding: kBottomSheetContentPadding.copyWith(top: kSpacingM),
+          padding: kDoseActionSheetContentPadding,
           children: [
             _buildDoseCardPreview(context),
             _buildMdvGaugePreviewIfNeeded(context),
