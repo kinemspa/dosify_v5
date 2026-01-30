@@ -370,6 +370,9 @@ const double kSectionSpacing = kSpacingM;
 const double kCardPadding = kSpacingM;
 const double kCardInnerSpacing = kSpacingS;
 
+/// Standard card padding
+const EdgeInsets kStandardCardPadding = EdgeInsets.all(kCardPadding);
+
 /// Compact card spacing
 const EdgeInsets kCompactCardPadding = EdgeInsets.all(kSpacingS);
 
@@ -537,12 +540,30 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
   }
 
   return switch (status) {
-    DoseStatus.taken => (color: kDoseStatusTakenGreen, icon: Icons.check_rounded),
-    DoseStatus.skipped => (color: kDoseStatusSkippedRed, icon: Icons.block_rounded),
-    DoseStatus.snoozed => (color: kDoseStatusSnoozedOrange, icon: Icons.snooze_rounded),
-    DoseStatus.due => (color: kDoseStatusOverdueAmber, icon: Icons.schedule_rounded),
-    DoseStatus.overdue => (color: kDoseStatusMissedDarkRed, icon: Icons.warning_rounded),
-    DoseStatus.pending => (color: cs.primary, icon: Icons.notifications_rounded),
+    DoseStatus.taken => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.check_rounded,
+    ),
+    DoseStatus.skipped => (
+      color: kDoseStatusSkippedRed,
+      icon: Icons.block_rounded,
+    ),
+    DoseStatus.snoozed => (
+      color: kDoseStatusSnoozedOrange,
+      icon: Icons.snooze_rounded,
+    ),
+    DoseStatus.due => (
+      color: kDoseStatusOverdueAmber,
+      icon: Icons.schedule_rounded,
+    ),
+    DoseStatus.overdue => (
+      color: kDoseStatusMissedDarkRed,
+      icon: Icons.warning_rounded,
+    ),
+    DoseStatus.pending => (
+      color: cs.primary,
+      icon: Icons.notifications_rounded,
+    ),
   };
 }
 
@@ -552,9 +573,18 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
   DoseAction action,
 ) {
   return switch (action) {
-    DoseAction.taken => (color: kDoseStatusTakenGreen, icon: Icons.check_rounded),
-    DoseAction.skipped => (color: kDoseStatusSkippedRed, icon: Icons.block_rounded),
-    DoseAction.snoozed => (color: kDoseStatusSnoozedOrange, icon: Icons.snooze_rounded),
+    DoseAction.taken => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.check_rounded,
+    ),
+    DoseAction.skipped => (
+      color: kDoseStatusSkippedRed,
+      icon: Icons.block_rounded,
+    ),
+    DoseAction.snoozed => (
+      color: kDoseStatusSnoozedOrange,
+      icon: Icons.snooze_rounded,
+    ),
   };
 }
 
@@ -1242,10 +1272,7 @@ TextStyle? stockDonutSecondaryLabelTextStyle(
 
 /// Dose-card leading time label style.
 TextStyle? doseCardTimeTextStyle(BuildContext context, {required Color color}) {
-  return helperTextStyle(
-    context,
-    color: color,
-  )?.copyWith(
+  return helperTextStyle(context, color: color)?.copyWith(
     fontSize: kFontSizeXSmall,
     fontWeight: kFontWeightBold,
     height: kLineHeightTight,
@@ -1636,10 +1663,9 @@ TextStyle? reconSummaryStrengthTextStyle(
   return reconSummaryEmphasisTextStyle(
     context,
     color: color,
-    fontSize:
-        compact
-            ? kReconSummaryStrengthValueFontSizeCompact
-            : kReconSummaryStrengthValueFontSize,
+    fontSize: compact
+        ? kReconSummaryStrengthValueFontSizeCompact
+        : kReconSummaryStrengthValueFontSize,
     fontWeight: fontWeight,
   );
 }
@@ -1653,7 +1679,9 @@ TextStyle? reconSummaryOfTextStyle(
   return reconSummaryEmphasisTextStyle(
     context,
     color: color,
-    fontSize: compact ? kReconSummaryOfFontSizeCompact : kReconSummaryOfFontSize,
+    fontSize: compact
+        ? kReconSummaryOfFontSizeCompact
+        : kReconSummaryOfFontSize,
     fontWeight: fontWeight,
   );
 }
@@ -1667,8 +1695,9 @@ TextStyle? reconSummaryMedicationNameTextStyle(
   return reconSummaryEmphasisTextStyle(
     context,
     color: color,
-    fontSize:
-        compact ? kReconSummaryNameFontSizeCompact : kReconSummaryNameFontSize,
+    fontSize: compact
+        ? kReconSummaryNameFontSizeCompact
+        : kReconSummaryNameFontSize,
     fontWeight: fontWeight,
   );
 }
@@ -1682,8 +1711,9 @@ TextStyle? reconSummaryMetaTextStyle(
   return reconSummaryEmphasisTextStyle(
     context,
     color: color,
-    fontSize:
-        compact ? kReconSummaryMetaFontSizeCompact : kReconSummaryMetaFontSize,
+    fontSize: compact
+        ? kReconSummaryMetaFontSizeCompact
+        : kReconSummaryMetaFontSize,
     fontWeight: fontWeight,
   );
 }
@@ -1697,10 +1727,9 @@ TextStyle? reconSummaryTotalVolumeTextStyle(
   return reconSummaryEmphasisTextStyle(
     context,
     color: color,
-    fontSize:
-        compact
-            ? kReconSummaryTotalVolumeFontSizeCompact
-            : kReconSummaryTotalVolumeFontSize,
+    fontSize: compact
+        ? kReconSummaryTotalVolumeFontSizeCompact
+        : kReconSummaryTotalVolumeFontSize,
     fontWeight: fontWeight,
   );
 }
@@ -1740,8 +1769,9 @@ TextStyle? reconSummaryValueTextStyle(
   return reconSummaryEmphasisTextStyle(
     context,
     color: color,
-    fontSize:
-        compact ? kReconSummaryValueFontSizeCompact : kReconSummaryValueFontSize,
+    fontSize: compact
+        ? kReconSummaryValueFontSizeCompact
+        : kReconSummaryValueFontSize,
     fontWeight: fontWeight,
   );
 }

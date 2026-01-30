@@ -47,4 +47,14 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "✅ Analyzer passed" -ForegroundColor Green
 Write-Host ""
 
+# Enforce no-literal-styling rule in feature code (baseline-based)
+Write-Host "🎨 Checking for forbidden styling literals in feature code..." -ForegroundColor Yellow
+dart run tool/check_no_literal_styling.dart --baseline tool/analysis/literal_styling.baseline.txt
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Styling literal check failed" -ForegroundColor Red
+    exit 1
+}
+Write-Host "✅ Styling literal check passed" -ForegroundColor Green
+Write-Host ""
+
 Write-Host "🎉 All quality checks passed!" -ForegroundColor Green

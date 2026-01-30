@@ -34,7 +34,7 @@ class UnifiedCardSurface extends StatelessWidget {
         padding ??
         (variant == UnifiedCardVariant.compact
             ? kCompactCardPadding
-            : const EdgeInsets.all(kCardPadding));
+            : kStandardCardPadding);
 
     final decoration = switch (variant) {
       UnifiedCardVariant.standard => buildStandardCardDecoration(
