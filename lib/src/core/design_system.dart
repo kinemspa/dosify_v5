@@ -417,8 +417,8 @@ const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
 /// DoseCard status chip sizing
 const double kDoseCardStatusChipHeight = 28;
 const double kDoseCardStatusChipHeightCompact = 26;
-const double kDoseCardStatusChipWidth = 96;
-const double kDoseCardStatusChipWidthCompact = 88;
+const double kDoseCardStatusChipWidth = 88;
+const double kDoseCardStatusChipWidthCompact = 80;
 
 /// Button spacing
 const double kButtonSpacing = 8;
@@ -1215,7 +1215,7 @@ TextStyle? nextDoseBadgeTodayTextStyle(
   required Color color,
 }) {
   return bodyTextStyle(context)?.copyWith(
-    fontSize: dense ? kFontSizeXXSmall : kFontSizeXSmall,
+    fontSize: kFontSizeXSmall,
     fontWeight: kFontWeightExtraBold,
     height: 1,
     color: color,
@@ -1298,6 +1298,32 @@ TextStyle? doseCardTimeTextStyle(BuildContext context, {required Color color}) {
     fontSize: kFontSizeXSmall,
     fontWeight: kFontWeightBold,
     height: kLineHeightTight,
+  );
+}
+
+/// Dose-card primary title style (med name).
+TextStyle? doseCardPrimaryTitleTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return cardTitleStyle(context)?.copyWith(
+    fontSize: kFontSizeMedium,
+    fontWeight: kFontWeightSemiBold,
+    height: kLineHeightTight,
+    color: color,
+  );
+}
+
+/// Dose-card secondary title style (schedule/dose name).
+TextStyle? doseCardSecondaryTitleTextStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return bodyTextStyle(context)?.copyWith(
+    fontSize: kFontSizeSmall,
+    fontWeight: kFontWeightSemiBold,
+    height: kLineHeightTight,
+    color: color,
   );
 }
 

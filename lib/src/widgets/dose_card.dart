@@ -71,11 +71,17 @@ class DoseCard extends StatelessWidget {
 
     final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
 
-    final titleStyle = cardTitleStyle(
+    final primaryTitleStyle = doseCardPrimaryTitleTextStyle(
       context,
-    )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor);
+      color: statusColor,
+    );
 
-    final baseBody = bodyTextStyle(context);
+    final secondaryTitleStyle = doseCardSecondaryTitleTextStyle(
+      context,
+      color: isActive
+          ? cs.onSurface.withValues(alpha: kOpacityMediumHigh)
+          : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+    );
 
     final actionLabel = primaryActionLabel ?? 'Actions';
     final hasQuickActions = onQuickAction != null;
@@ -162,8 +168,8 @@ class DoseCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              dose.scheduleName,
-                              style: titleStyle,
+                              medicationName,
+                              style: primaryTitleStyle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -175,8 +181,8 @@ class DoseCard extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        medicationName,
-                        style: baseBody,
+                        dose.scheduleName,
+                        style: secondaryTitleStyle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -228,6 +234,7 @@ class DoseCard extends StatelessWidget {
                           compact: compact,
                         )
                       else ...[
+                        
                         DoseCardStatusChip(
                           status: effectiveStatus,
                           disabled: disabled,
@@ -235,6 +242,9 @@ class DoseCard extends StatelessWidget {
                         ),
                         const SizedBox(height: kSpacingXS),
                         SizedBox(
+                          width: compact
+                              ? kDoseCardStatusChipWidthCompact
+                              : kDoseCardStatusChipWidth,
                           height: kStandardButtonHeight,
                           child: FilledButton(
                             onPressed: onPrimaryAction ?? onTap,
