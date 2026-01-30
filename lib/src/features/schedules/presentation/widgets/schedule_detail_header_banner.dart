@@ -130,12 +130,11 @@ class _HeaderPauseResumeAction extends StatelessWidget {
 
     final foreground = cs.onPrimary.withValues(alpha: kOpacityMedium);
 
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         badge,
-        const SizedBox(height: kSpacingXS),
+        const SizedBox(width: kSpacingXS),
         TextButton.icon(
           onPressed: onPressed,
           style: TextButton.styleFrom(
