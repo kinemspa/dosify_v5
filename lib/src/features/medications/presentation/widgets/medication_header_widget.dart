@@ -129,7 +129,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                   // Description & Notes
                   if (descriptionTruncated.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
+                      padding: kMedicationHeaderDescriptionPadding,
                       child: Text(
                         descriptionTruncated,
                         style: hintTextStyle(context)?.copyWith(
@@ -143,7 +143,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
 
                   if (medication.notes != null && medication.notes!.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
+                      padding: kMedicationHeaderNotesPadding,
                       child: Text(
                         medication.notes!,
                         style: microHelperTextStyle(
@@ -155,7 +155,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                       ),
                     ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: kSpacingXXS),
 
                   // Strength with Icon
                   _HeaderInfoTile(
