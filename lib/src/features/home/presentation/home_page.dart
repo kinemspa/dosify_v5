@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -16,6 +17,7 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -24,6 +26,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
@@ -37,11 +40,11 @@ import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 
   List<
     ({
@@ -367,7 +370,7 @@ class HomePage extends StatefulWidget {
   }
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   static const _kCardToday = 'today';
   static const _kCardActivity = 'activity';
   static const _kCardSchedules = 'schedules';
@@ -578,6 +581,14 @@ class _HomePageState extends State<HomePage> {
   Widget _buildHomeCards(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
+    // Rebuild this section whenever any relevant Hive box changes.
+    ref.watch(schedulesBoxChangesProvider);
+    ref.watch(medicationsBoxChangesProvider);
+    ref.watch(doseLogsBoxChangesProvider);
+    final scheduleBox = ref.watch(schedulesBoxProvider);
+    final medBox = ref.watch(medicationsBoxProvider);
+    final logBox = ref.watch(doseLogsBoxProvider);
+
     final allCardsCollapsed =
         !_isTodayExpanded &&
       !_isActivityExpanded &&
@@ -596,227 +607,191 @@ class _HomePageState extends State<HomePage> {
         );
     }
 
-    final todayCard = ValueListenableBuilder(
-      valueListenable: Hive.box<Schedule>('schedules').listenable(),
-      builder: (context, Box<Schedule> scheduleBox, _) {
-        return ValueListenableBuilder(
-          valueListenable: Hive.box<Medication>('medications').listenable(),
-          builder: (context, Box<Medication> medBox, _) {
-            return ValueListenableBuilder(
-              valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
-              builder: (context, Box<DoseLog> logBox, _) {
-                final items = widget._resolveTodayDoses(
-                  scheduleBox.values,
-                  medBox,
-                  logBox,
-                );
+    final todayCard = Builder(
+      builder: (context) {
+        final items = widget._resolveTodayDoses(
+          scheduleBox.values,
+          medBox,
+          logBox,
+        );
 
-                final visibleItems =
-                    items.where((item) {
-                      final id = DoseLogIds.occurrenceId(
-                        scheduleId: item.dose.scheduleId,
-                        scheduledTime: item.dose.scheduledTime,
-                      );
-                      return !_dismissedTodayDoseOccurrenceIds.contains(id);
-                    }).toList(growable: false);
+        final visibleItems =
+            items.where((item) {
+              final id = DoseLogIds.occurrenceId(
+                scheduleId: item.dose.scheduleId,
+                scheduledTime: item.dose.scheduledTime,
+              );
+              return !_dismissedTodayDoseOccurrenceIds.contains(id);
+            }).toList(growable: false);
 
-                final hiddenCount = items.length - visibleItems.length;
+        final hiddenCount = items.length - visibleItems.length;
 
-                return CollapsibleSectionFormCard(
-                  neutral: true,
-                  frameless: true,
-                  title: 'Today',
-                  isExpanded: _isTodayExpanded,
-                  trailing: hiddenCount <= 0
-                      ? null
-                      : IconButton(
-                          onPressed: _restoreAllDismissedTodayDoses,
-                          tooltip: 'Restore hidden doses',
-                          constraints: kTightIconButtonConstraints,
-                          padding: kNoPadding,
-                          icon: const Icon(
-                            Icons.restore_rounded,
-                            size: kIconSizeMedium,
+        return CollapsibleSectionFormCard(
+          neutral: true,
+          frameless: true,
+          title: 'Today',
+          isExpanded: _isTodayExpanded,
+          trailing: hiddenCount <= 0
+              ? null
+              : IconButton(
+                  onPressed: _restoreAllDismissedTodayDoses,
+                  tooltip: 'Restore hidden doses',
+                  constraints: kTightIconButtonConstraints,
+                  padding: kNoPadding,
+                  icon: const Icon(
+                    Icons.restore_rounded,
+                    size: kIconSizeMedium,
+                  ),
+                ),
+          reserveReorderHandleGutterWhenCollapsed: true,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isTodayExpanded = expanded);
+          },
+          children: [
+            if (items.isEmpty)
+              const UnifiedEmptyState(title: 'No doses today')
+            else if (visibleItems.isEmpty)
+              const UnifiedEmptyState(title: 'All doses hidden')
+            else
+              for (final item in visibleItems) ...[
+                Builder(
+                  builder: (context) {
+                    final cs = Theme.of(context).colorScheme;
+                    final occurrenceId = DoseLogIds.occurrenceId(
+                      scheduleId: item.dose.scheduleId,
+                      scheduledTime: item.dose.scheduledTime,
+                    );
+
+                    return Dismissible(
+                      key: ValueKey<String>('home_today_dose_$occurrenceId'),
+                      direction: DismissDirection.endToStart,
+                      background: const SizedBox.shrink(),
+                      secondaryBackground: Container(
+                        alignment: Alignment.centerRight,
+                        padding: kStandardCardPadding,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusLarge,
                           ),
                         ),
-                  reserveReorderHandleGutterWhenCollapsed: true,
-                  onExpandedChanged: (expanded) {
-                    if (!mounted) return;
-                    setState(() => _isTodayExpanded = expanded);
-                  },
-                  children: [
-                    if (items.isEmpty)
-                      const UnifiedEmptyState(title: 'No doses today')
-                    else if (visibleItems.isEmpty)
-                      const UnifiedEmptyState(title: 'All doses hidden')
-                    else
-                      for (final item in visibleItems) ...[
-                        Builder(
-                          builder: (context) {
-                            final cs = Theme.of(context).colorScheme;
-                            final occurrenceId = DoseLogIds.occurrenceId(
-                              scheduleId: item.dose.scheduleId,
-                              scheduledTime: item.dose.scheduledTime,
-                            );
-
-                            return Dismissible(
-                              key: ValueKey<String>(
-                                'home_today_dose_$occurrenceId',
-                              ),
-                              direction: DismissDirection.endToStart,
-                              background: const SizedBox.shrink(),
-                              secondaryBackground: Container(
-                                alignment: Alignment.centerRight,
-                                padding: kStandardCardPadding,
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(
-                                    kBorderRadiusLarge,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.visibility_off_rounded,
-                                      size: kIconSizeMedium,
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                    const SizedBox(width: kSpacingS),
-                                    Text(
-                                      'Hide',
-                                      style: helperTextStyle(context),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              onDismissed: (_) {
-                                setState(
-                                  () => _dismissedTodayDoseOccurrenceIds.add(
-                                    occurrenceId,
-                                  ),
-                                );
-                                unawaited(_persistDismissedTodayDoses());
-
-                                ScaffoldMessenger.of(context)
-                                  ..clearSnackBars()
-                                  ..showSnackBar(
-                                    SnackBar(
-                                      content: const Text('Dose hidden'),
-                                      action: SnackBarAction(
-                                        label: 'Undo',
-                                        onPressed: () {
-                                          if (!mounted) return;
-                                          setState(
-                                            () => _dismissedTodayDoseOccurrenceIds
-                                                .remove(occurrenceId),
-                                          );
-                                          unawaited(
-                                            _persistDismissedTodayDoses(),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  );
-                              },
-                              child: DoseCard(
-                                dose: item.dose,
-                                medicationName: item.medication.name,
-                                strengthOrConcentrationLabel:
-                                    item.strengthLabel,
-                                doseMetrics: item.metrics,
-                                isActive: item.schedule.isActive,
-                                medicationFormIcon:
-                                    MedicationDisplayHelpers.medicationFormIcon(
-                                      item.medication.form,
-                                    ),
-                                doseNumber:
-                                    ScheduleOccurrenceService.occurrenceNumber(
-                                      item.schedule,
-                                      item.dose.scheduledTime,
-                                    ),
-                                onTap: () => widget._showDoseActionSheet(
-                                  context,
-                                  dose: item.dose,
-                                  schedule: item.schedule,
-                                  medication: item.medication,
-                                ),
-                                onQuickAction: (status) =>
-                                    widget._showDoseActionSheet(
-                                      context,
-                                      dose: item.dose,
-                                      schedule: item.schedule,
-                                      medication: item.medication,
-                                      initialStatus: status,
-                                    ),
-                                onPrimaryAction: () =>
-                                    widget._showDoseActionSheet(
-                                      context,
-                                      dose: item.dose,
-                                      schedule: item.schedule,
-                                      medication: item.medication,
-                                    ),
-                              ),
-                            );
-                          },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.visibility_off_rounded,
+                              size: kIconSizeMedium,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: kSpacingS),
+                            Text('Hide', style: helperTextStyle(context)),
+                          ],
                         ),
-                        const SizedBox(height: kSpacingS),
-                      ],
-                  ],
-                );
-              },
-            );
-          },
+                      ),
+                      onDismissed: (_) {
+                        setState(
+                          () => _dismissedTodayDoseOccurrenceIds.add(
+                            occurrenceId,
+                          ),
+                        );
+                        unawaited(_persistDismissedTodayDoses());
+
+                        ScaffoldMessenger.of(context)
+                          ..clearSnackBars()
+                          ..showSnackBar(
+                            SnackBar(
+                              content: const Text('Dose hidden'),
+                              action: SnackBarAction(
+                                label: 'Undo',
+                                onPressed: () {
+                                  if (!mounted) return;
+                                  setState(
+                                    () => _dismissedTodayDoseOccurrenceIds
+                                        .remove(occurrenceId),
+                                  );
+                                  unawaited(_persistDismissedTodayDoses());
+                                },
+                              ),
+                            ),
+                          );
+                      },
+                      child: DoseCard(
+                        dose: item.dose,
+                        medicationName: item.medication.name,
+                        strengthOrConcentrationLabel: item.strengthLabel,
+                        doseMetrics: item.metrics,
+                        isActive: item.schedule.isActive,
+                        medicationFormIcon:
+                            MedicationDisplayHelpers.medicationFormIcon(
+                              item.medication.form,
+                            ),
+                        doseNumber:
+                            ScheduleOccurrenceService.occurrenceNumber(
+                              item.schedule,
+                              item.dose.scheduledTime,
+                            ),
+                        onTap: () => widget._showDoseActionSheet(
+                          context,
+                          dose: item.dose,
+                          schedule: item.schedule,
+                          medication: item.medication,
+                        ),
+                        onQuickAction: (status) => widget._showDoseActionSheet(
+                          context,
+                          dose: item.dose,
+                          schedule: item.schedule,
+                          medication: item.medication,
+                          initialStatus: status,
+                        ),
+                        onPrimaryAction: () => widget._showDoseActionSheet(
+                          context,
+                          dose: item.dose,
+                          schedule: item.schedule,
+                          medication: item.medication,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: kSpacingS),
+              ],
+          ],
         );
       },
     );
 
-    final schedulesCard = ValueListenableBuilder(
-      valueListenable: Hive.box<Schedule>('schedules').listenable(),
-      builder: (context, Box<Schedule> scheduleBox, _) {
-        return ValueListenableBuilder(
-          valueListenable: Hive.box<Medication>('medications').listenable(),
-          builder: (context, Box<Medication> medBox, _) {
-            return ValueListenableBuilder(
-              valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
-              builder: (context, Box<DoseLog> logBox, _) {
-                final schedules = scheduleBox.values
-                    .where((s) => s.medicationId != null)
-                    .toList();
+    final schedulesCard = Builder(
+      builder: (context) {
+        final schedules = scheduleBox.values
+            .where((s) => s.medicationId != null)
+            .toList();
 
-                schedules.sort((a, b) {
-                  final an =
-                      ScheduleOccurrenceService.nextOccurrence(a) ??
-                      DateTime(9999);
-                  final bn =
-                      ScheduleOccurrenceService.nextOccurrence(b) ??
-                      DateTime(9999);
-                  return an.compareTo(bn);
-                });
+        schedules.sort((a, b) {
+          final an = ScheduleOccurrenceService.nextOccurrence(a) ?? DateTime(9999);
+          final bn = ScheduleOccurrenceService.nextOccurrence(b) ?? DateTime(9999);
+          return an.compareTo(bn);
+        });
 
-                return CollapsibleSectionFormCard(
-                  neutral: true,
-                  frameless: true,
-                  title: 'Schedules',
-                  isExpanded: _isSchedulesExpanded,
-                  reserveReorderHandleGutterWhenCollapsed: true,
-                  onExpandedChanged: (expanded) {
-                    if (!mounted) return;
-                    setState(() => _isSchedulesExpanded = expanded);
-                  },
-                  children: [
-                    if (schedules.isEmpty)
-                      const UnifiedEmptyState(title: 'No schedules')
-                    else
-                      for (final schedule in schedules) ...[
-                        ScheduleListCard(schedule: schedule, dense: true),
-                        const SizedBox(height: kSpacingS),
-                      ],
-                  ],
-                );
-              },
-            );
+        return CollapsibleSectionFormCard(
+          neutral: true,
+          frameless: true,
+          title: 'Schedules',
+          isExpanded: _isSchedulesExpanded,
+          reserveReorderHandleGutterWhenCollapsed: true,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isSchedulesExpanded = expanded);
           },
+          children: [
+            if (schedules.isEmpty)
+              const UnifiedEmptyState(title: 'No schedules')
+            else
+              for (final schedule in schedules) ...[
+                ScheduleListCard(schedule: schedule, dense: true),
+                const SizedBox(height: kSpacingS),
+              ],
+          ],
         );
       },
     );

@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_serv
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 
 enum _SchedView { list, compact, large }
 
@@ -20,13 +21,13 @@ enum _SchedSort { next, name, med, created }
 
 enum _SchedFilter { all, activeOnly, linkedOnly }
 
-class SchedulesPage extends StatefulWidget {
+class SchedulesPage extends ConsumerStatefulWidget {
   const SchedulesPage({super.key});
   @override
-  State<SchedulesPage> createState() => _SchedulesPageState();
+  ConsumerState<SchedulesPage> createState() => _SchedulesPageState();
 }
 
-class _SchedulesPageState extends State<SchedulesPage> {
+class _SchedulesPageState extends ConsumerState<SchedulesPage> {
   static const _prefsKeyView = 'schedules.view';
 
   _SchedView _view = _SchedView.compact;
@@ -58,13 +59,13 @@ class _SchedulesPageState extends State<SchedulesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<Schedule>('schedules');
+    ref.watch(schedulesBoxChangesProvider);
+    final box = ref.watch(schedulesBoxProvider);
     return Scaffold(
       appBar: const GradientAppBar(title: 'Schedules', forceBackButton: true),
-      body: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<Schedule> b, _) {
-          var items = b.values.toList(growable: false);
+      body: Builder(
+        builder: (context) {
+          var items = box.values.toList(growable: false);
           // Filter
           items = switch (_filter) {
             _SchedFilter.all => items,
@@ -102,7 +103,7 @@ class _SchedulesPageState extends State<SchedulesPage> {
           });
 
           if (items.isEmpty) {
-            if (_query.isEmpty && b.values.isEmpty) {
+            if (_query.isEmpty && box.values.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -170,19 +171,14 @@ class _SchedulesPageState extends State<SchedulesPage> {
           );
         },
       ),
-      floatingActionButton: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<Schedule> b, _) {
-          final showFab = b.values.isNotEmpty || _query.isNotEmpty;
-          if (!showFab) return const SizedBox.shrink();
-
-          return FloatingActionButton.extended(
-            onPressed: () => context.push('/schedules/add'),
-            icon: const Icon(Icons.add),
-            label: const Text('Add Schedule'),
-          );
-        },
-      ),
+      floatingActionButton:
+          (box.values.isNotEmpty || _query.isNotEmpty)
+              ? FloatingActionButton.extended(
+                  onPressed: () => context.push('/schedules/add'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Schedule'),
+                )
+              : const SizedBox.shrink(),
     );
   }
 

@@ -15,9 +15,11 @@ import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 
 enum _MedView { list, compact, large }
 
@@ -190,7 +192,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   // display Remaining / Original correctly. This sets it lazily to the first
   // observed value and updates it when the current stock increases (restock).
   void _ensureInitialStockValues(List<Medication> items) {
-    final box = Hive.box<Medication>('medications');
+    final box = ref.read(medicationsBoxProvider);
     for (final m in items) {
       final isCountUnit =
           m.stockUnit == StockUnit.preFilledSyringes ||
@@ -216,15 +218,17 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<Medication>('medications');
-    final schedulesBox = Hive.box<Schedule>('schedules');
+    ref.watch(medicationsBoxChangesProvider);
+    ref.watch(schedulesBoxChangesProvider);
+
+    final box = ref.watch(medicationsBoxProvider);
+    final schedulesBox = ref.watch(schedulesBoxProvider);
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Medications', forceBackButton: true),
-      body: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<Medication> b, _) {
-          final meds = b.values.toList(growable: false);
+      body: Builder(
+        builder: (context) {
+          final meds = box.values.toList(growable: false);
 
           // Show initial state if no medications exist, or the filtered
           // empty state when search removes everything.
@@ -278,60 +282,56 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             }
           }
 
-          return ValueListenableBuilder(
-            valueListenable: schedulesBox.listenable(),
-            builder: (context, Box<Schedule> sb, __) {
-              final schedules = sb.values.toList(growable: false);
-              final items = _getFilteredAndSortedMedications(
-                meds,
-                schedules: schedules,
-              );
+          final schedules = schedulesBox.values.toList(growable: false);
+          final items = _getFilteredAndSortedMedications(
+            meds,
+            schedules: schedules,
+          );
 
               // Ensure initial stock values so large cards can show current vs
               // initial amounts.
               _ensureInitialStockValues(items);
 
-              if (items.isEmpty) {
-                return Column(
-                  children: [
-                    _buildToolbar(context),
-                    Expanded(
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.search_off,
-                              size: kEmptyStateIconSize,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant
-                                  .withValues(alpha: kOpacityMedium),
-                            ),
-                            const SizedBox(height: kSpacingM),
-                            Text(
-                              'No medications found for "$_query"',
-                              style: mutedTextStyle(context),
-                            ),
-                          ],
+          if (items.isEmpty) {
+            return Column(
+              children: [
+                _buildToolbar(context),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: kEmptyStateIconSize,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: kOpacityMedium),
                         ),
-                      ),
+                        const SizedBox(height: kSpacingM),
+                        Text(
+                          'No medications found for "$_query"',
+                          style: mutedTextStyle(context),
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              }
-              return Stack(
-                children: [
-                  _buildMedList(context, items, schedules),
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: _buildToolbar(context),
                   ),
-                ],
-              );
-            },
+                ),
+              ],
+            );
+          }
+
+          return Stack(
+            children: [
+              _buildMedList(context, items, schedules),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _buildToolbar(context),
+              ),
+            ],
           );
         },
       ),
