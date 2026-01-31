@@ -152,7 +152,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             setState(() => _isExpandedInternal = !_isExpandedInternal);
           },
           child: Padding(
-            padding: const EdgeInsets.all(kSpacingM),
+            padding: kDetailCardCollapsedHeaderPadding,
             child: Row(
               children: [
                 if (!isExpanded)
@@ -1215,7 +1215,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     }
 
     return ListView(
-      padding: const EdgeInsets.all(kSpacingM),
+      padding: kStandardCardPadding,
       children: [
         switch (section) {
           _AdherenceReportSection.adherence => _buildAdherenceLineSection(
