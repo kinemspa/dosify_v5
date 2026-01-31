@@ -852,7 +852,7 @@ class _DoseInputFieldState extends State<DoseInputField> {
     final value = _isCountMode ? 'count' : 'strength';
 
     return LabelFieldRow(
-      label: 'Dose Type',
+      label: 'Dose Input',
       field: SmallDropdown36<String>(
         value: value,
         items: [
