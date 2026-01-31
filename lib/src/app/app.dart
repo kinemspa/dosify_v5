@@ -227,6 +227,9 @@ class DosifiApp extends ConsumerWidget {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseLight.colorScheme.primary,
         foregroundColor: baseLight.colorScheme.onPrimary,
+        sizeConstraints: kFabSizeConstraints,
+        extendedSizeConstraints: kFabExtendedSizeConstraints,
+        extendedPadding: kFabExtendedPadding,
       ),
     );
 
@@ -426,6 +429,9 @@ class DosifiApp extends ConsumerWidget {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseDark.colorScheme.primary,
         foregroundColor: baseDark.colorScheme.onPrimary,
+        sizeConstraints: kFabSizeConstraints,
+        extendedSizeConstraints: kFabExtendedSizeConstraints,
+        extendedPadding: kFabExtendedPadding,
       ),
     );
 

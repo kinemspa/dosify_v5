@@ -64,6 +64,28 @@ const double kIconButtonSize = 24;
 const double kStandardButtonHeight = 36;
 const double kLargeButtonHeight = 44;
 
+/// Floating Action Button sizing
+///
+/// Default Material FABs can feel oversized in this UI; we standardize them
+/// here so all screens stay consistent.
+const double kFabSize = 48;
+
+/// Size constraints for circular (non-extended) FABs.
+const BoxConstraints kFabSizeConstraints = BoxConstraints.tightFor(
+  width: kFabSize,
+  height: kFabSize,
+);
+
+/// Size constraints for extended FABs (height is fixed, width is flexible).
+const BoxConstraints kFabExtendedSizeConstraints = BoxConstraints.tightFor(
+  height: kFabSize,
+);
+
+/// Horizontal padding for extended FABs.
+const EdgeInsets kFabExtendedPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+);
+
 /// Icon sizes
 const double kIconSizeXXSmall = 12;
 const double kIconSizeXSmall = 14;
