@@ -371,7 +371,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: '@mipmap/ic_launcher',
-        largeIcon: DrawableResourceAndroidBitmap('syringe'),
+        largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -435,7 +435,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: '@mipmap/ic_launcher',
-        largeIcon: DrawableResourceAndroidBitmap('syringe'),
+        largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,

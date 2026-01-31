@@ -118,3 +118,12 @@ flutter_launcher_icons:
   image_path_android: assets/logo/logo_001_android_icon.png
   adaptive_icon_background: "#09A8BD"
   adaptive_icon_foreground: assets/logo/logo_001_white.png
+
+flutter_native_splash:
+  android: true
+  ios: false
+  color: "#09A8BD"
+  image: assets/logo/logo_001_white.png
+  android_12:
+    color: "#09A8BD"
+    image: assets/logo/logo_001_white.png

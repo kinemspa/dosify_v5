@@ -104,18 +104,34 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
             )
           : null,
-      title: Text(
-        title,
-        maxLines: titleMaxLines,
-        softWrap: titleMaxLines > 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: kFontWeightSemiBold,
-          letterSpacing: 0.5,
-          fontSize: compactTitle ? kFontSizeLarge : null,
-          height: compactTitle ? kLineHeightTight : null,
-        ),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!showBack) ...[
+            Image.asset(
+              kWhiteLogoAssetPath,
+              height: kAppBarLogoHeight,
+              width: kAppBarLogoWidth,
+              filterQuality: FilterQuality.high,
+            ),
+            const SizedBox(width: kSpacingS),
+          ],
+          Flexible(
+            child: Text(
+              title,
+              maxLines: titleMaxLines,
+              softWrap: titleMaxLines > 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: kFontWeightSemiBold,
+                letterSpacing: 0.5,
+                fontSize: compactTitle ? kFontSizeLarge : null,
+                height: compactTitle ? kLineHeightTight : null,
+              ),
+            ),
+          ),
+        ],
       ),
       actions: effectiveActions,
     );

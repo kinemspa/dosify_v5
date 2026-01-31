@@ -36,6 +36,15 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 
 /// Assets
 const String kPrimaryLogoAssetPath = 'assets/logo/logo_001_primary.png';
+const String kWhiteLogoAssetPath = 'assets/logo/logo_001_white.png';
+const String kAndroidLegacyIconAssetPath = 'assets/logo/logo_001_android_icon.png';
+
+/// Logo sizing (in-app)
+const double kAppBarLogoHeight = 22;
+const double kAppBarLogoWidth = 22;
+
+const double kAboutDialogLogoSize = 48;
+const double kSettingsAboutTileLogoSize = 28;
 
 // ============================================================================
 // SIZING CONSTANTS

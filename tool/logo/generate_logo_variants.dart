@@ -5,6 +5,8 @@ import 'package:image/image.dart' as img;
 const String _primaryLogoPath = 'assets/logo/logo_001_primary.png';
 const String _whiteLogoPath = 'assets/logo/logo_001_white.png';
 const String _androidIconPath = 'assets/logo/logo_001_android_icon.png';
+const String _androidNotificationLargeIconPath =
+  'android/app/src/main/res/drawable/ic_notification_large.png';
 
 // App brand seed (matches lib/src/app/app.dart)
 const int _brandFillArgb = 0xFF09A8BD;
@@ -38,6 +40,17 @@ Future<void> main() async {
 
   stdout.writeln('Wrote: $_whiteLogoPath');
   stdout.writeln('Wrote: $_androidIconPath');
+
+  final notificationIcon = img.copyResize(
+    primary,
+    width: 256,
+    height: 256,
+    interpolation: img.Interpolation.cubic,
+  );
+  File(_androidNotificationLargeIconPath)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(img.encodePng(notificationIcon));
+  stdout.writeln('Wrote: $_androidNotificationLargeIconPath');
 }
 
 img.Image _makeWhite(img.Image source) {

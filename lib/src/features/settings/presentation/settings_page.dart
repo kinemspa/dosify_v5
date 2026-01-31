@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
@@ -123,6 +124,27 @@ class SettingsPage extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Test notification sent')));
+    }
+
+    Future<void> showAbout() async {
+      final info = await PackageInfo.fromPlatform();
+      if (!context.mounted) return;
+
+      final versionText = info.buildNumber.trim().isEmpty
+          ? info.version
+          : '${info.version} (${info.buildNumber})';
+
+      showAboutDialog(
+        context: context,
+        applicationName: info.appName,
+        applicationVersion: versionText,
+        applicationIcon: Image.asset(
+          kPrimaryLogoAssetPath,
+          height: kAboutDialogLogoSize,
+          width: kAboutDialogLogoSize,
+          filterQuality: FilterQuality.high,
+        ),
+      );
     }
 
     return Scaffold(
@@ -433,6 +455,27 @@ class SettingsPage extends ConsumerWidget {
             subtitle: const Text('Notification testing and system diagnostics'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/settings/debug'),
+          ),
+
+          const SizedBox(height: kSpacingL),
+          Text(
+            'About',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: Image.asset(
+              kPrimaryLogoAssetPath,
+              height: kSettingsAboutTileLogoSize,
+              width: kSettingsAboutTileLogoSize,
+              filterQuality: FilterQuality.high,
+            ),
+            title: const Text('About Dosifi'),
+            subtitle: const Text('App version and licenses'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: showAbout,
           ),
         ],
       ),
