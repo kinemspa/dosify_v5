@@ -2,6 +2,7 @@
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -424,10 +425,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     ).showSnackBar(const SnackBar(content: Text('Medication saved')));
   }
 
-  String _newId() {
-    final ms = DateTime.now().millisecondsSinceEpoch;
-    return 'med_$ms';
-  }
+  String _newId() => IdGen.newId(prefix: 'med');
 
   @override
   Widget build(BuildContext context) {

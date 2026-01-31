@@ -1025,7 +1025,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
     if (result != null && mounted) {
       // Create dose log
-      final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      final logId = DoseLogIds.occurrenceId(
+        scheduleId: widget.schedule.id,
+        scheduledTime: now,
+      );
 
       // Combine notes and injection site
       String? combinedNotes = result['notes'];
@@ -1111,7 +1114,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
 
     if (confirmed == true && mounted) {
-      final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      final logId = DoseLogIds.occurrenceId(
+        scheduleId: widget.schedule.id,
+        scheduledTime: now,
+      );
       final log = DoseLog(
         id: logId,
         scheduleId: widget.schedule.id,
@@ -1173,7 +1179,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
 
     if (snoozeDuration != null && mounted) {
-      final logId = '${widget.schedule.id}_${now.millisecondsSinceEpoch}';
+      final logId = DoseLogIds.occurrenceId(
+        scheduleId: widget.schedule.id,
+        scheduledTime: now,
+      );
       final log = DoseLog(
         id: logId,
         scheduleId: widget.schedule.id,

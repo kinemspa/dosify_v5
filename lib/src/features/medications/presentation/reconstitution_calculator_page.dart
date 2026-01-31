@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
@@ -127,7 +128,7 @@ class _ReconstitutionCalculatorPageState
     super.dispose();
   }
 
-  String _newId() => DateTime.now().microsecondsSinceEpoch.toString();
+  String _newId() => IdGen.newId(prefix: 'recon');
 
   void _loadSavedCalculation(SavedReconstitutionCalculation item) {
     setState(() {

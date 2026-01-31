@@ -20,6 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -33,6 +34,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/widgets/medicati
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -3102,7 +3104,10 @@ ScheduledDose? _nextDoseForMedication(String medId) {
         }
 
         // Check if this specific slot is taken
-        final logId = '${schedule.id}_${candidate.millisecondsSinceEpoch}';
+        final logId = DoseLogIds.occurrenceId(
+          scheduleId: schedule.id,
+          scheduledTime: candidate,
+        );
         final isTaken = doseLogBox.containsKey(logId);
 
         if (schedule.daysOfWeek.contains(candidate.weekday) && !isTaken) {
@@ -3346,7 +3351,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
 
     // Log the refill for reporting
     final inventoryLog = InventoryLog(
-      id: 'refill_${med.id}_${now.millisecondsSinceEpoch}',
+      id: IdGen.newId(prefix: 'inv_refill'),
       medicationId: med.id,
       medicationName: med.name,
       changeType: changeType,
@@ -3986,7 +3991,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       );
 
       final inventoryLog = InventoryLog(
-        id: 'vial_${med.id}_${now.millisecondsSinceEpoch}',
+        id: IdGen.newId(prefix: 'inv_vial'),
         medicationId: med.id,
         medicationName: med.name,
         changeType: InventoryChangeType.vialOpened,
@@ -4041,7 +4046,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     );
 
     final inventoryLog = InventoryLog(
-      id: 'vial_${med.id}_${now.millisecondsSinceEpoch}',
+      id: IdGen.newId(prefix: 'inv_vial'),
       medicationId: med.id,
       medicationName: med.name,
       changeType: InventoryChangeType.vialOpened,
@@ -4198,7 +4203,7 @@ Future<void> _showRestockSealedVialsDialog(
 
     // Log the restock for reporting
     final inventoryLog = InventoryLog(
-      id: 'restock_${med.id}_${now.millisecondsSinceEpoch}',
+      id: IdGen.newId(prefix: 'inv_restock'),
       medicationId: med.id,
       medicationName: med.name,
       changeType: InventoryChangeType.vialRestocked,
@@ -4226,7 +4231,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
   final doseUnit = isMdv ? 'mL' : _stockUnitLabel(med.stockUnit);
   final defaultAmount = isMdv ? 0.5 : 1.0;
 
-  final id = 'adhoc_${med.id}_${now.millisecondsSinceEpoch}';
+  final id = IdGen.newId(prefix: 'dose_adhoc');
   final draftLog = DoseLog(
     id: id,
     scheduleId: 'ad_hoc',

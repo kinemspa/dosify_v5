@@ -11,6 +11,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
@@ -71,13 +72,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   void initState() {
     super.initState();
     _doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-  }
-
-  /// Generate unique ID using timestamp + random suffix
-  String _generateId() {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final random = (timestamp % 10000).toString().padLeft(4, '0');
-    return 'dose_$timestamp$random';
   }
 
   /// Check if there's already a log for this scheduled time
@@ -144,7 +138,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     ].join('\n');
 
     final log = DoseLog(
-      id: existingLog?.id ?? _generateId(),
+      id: existingLog?.id ??
+          DoseLogIds.occurrenceId(
+            scheduleId: schedule.id,
+            scheduledTime: scheduledTime,
+          ),
       scheduleId: schedule.id,
       scheduleName: schedule.name,
       medicationId: schedule.medicationId ?? '',

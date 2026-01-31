@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -814,7 +815,7 @@ class _AddCapsuleWizardPageState
     }
   }
 
-  String _newId() => DateTime.now().millisecondsSinceEpoch.toString();
+  String _newId() => IdGen.newId(prefix: 'med');
 
   Widget _buildReviewStep() {
     final missing = _missingRequiredForSave();
