@@ -211,7 +211,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
               TabBar(
                 controller: _tabController,
                 isScrollable: true,
-                labelPadding: const EdgeInsets.symmetric(horizontal: kSpacingM),
+                labelPadding: kMedicationReportsTabLabelPadding,
                 labelColor: cs.primary,
                 unselectedLabelColor: cs.onSurfaceVariant,
                 indicatorColor: cs.primary,
@@ -373,66 +373,54 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
           );
         }
 
-        return Column(
-          children: [
-            if (widget.showTimeRangeControl) const SizedBox(height: kSpacingXS),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(
-                  kSpacingS,
-                  0,
-                  kSpacingS,
-                  kSpacingS,
+        return ListView.separated(
+          padding: kMedicationReportsHistoryListPadding,
+          itemCount: displayItems.length + (hasMore ? 1 : 0),
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
+          ),
+          itemBuilder: (context, index) {
+            if (hasMore && index == displayItems.length) {
+              return Padding(
+                padding: kMedicationReportsLoadMorePadding,
+                child: Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _historyMaxItems += _historyPageStep;
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.expand_more,
+                      size: kIconSizeSmall,
+                    ),
+                    label: Text(
+                      'Load more',
+                      style: helperTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    ),
+                  ),
                 ),
-                itemCount: displayItems.length + (hasMore ? 1 : 0),
-                separatorBuilder: (context, index) => Divider(
-                  height: 1,
-                  color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
-                ),
-                itemBuilder: (context, index) {
-                  if (hasMore && index == displayItems.length) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: kSpacingS),
-                      child: Center(
-                        child: TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _historyMaxItems += _historyPageStep;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.expand_more,
-                            size: kIconSizeSmall,
-                          ),
-                          label: Text(
-                            'Load more',
-                            style: helperTextStyle(
-                              context,
-                            )?.copyWith(fontWeight: kFontWeightSemiBold),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
+              );
+            }
 
-                  final item = displayItems[index];
-                  if (item.doseLog != null) {
-                    return _buildDoseLogItem(context, item.doseLog!);
-                  }
-                  if (item.inventoryLog != null) {
-                    return _buildInventoryEventRow(context, item.inventoryLog!);
-                  }
-                  if (item.statusChange != null) {
-                    return _buildDoseStatusChangeRow(
-                      context,
-                      item.statusChange!,
-                    );
-                  }
-                  return _buildMissedDoseRow(context, item.missedDose!);
-                },
-              ),
-            ),
-          ],
+            final item = displayItems[index];
+            if (item.doseLog != null) {
+              return _buildDoseLogItem(context, item.doseLog!);
+            }
+            if (item.inventoryLog != null) {
+              return _buildInventoryEventRow(context, item.inventoryLog!);
+            }
+            if (item.statusChange != null) {
+              return _buildDoseStatusChangeRow(
+                context,
+                item.statusChange!,
+              );
+            }
+            return _buildMissedDoseRow(context, item.missedDose!);
+          },
         );
       },
     );
@@ -446,7 +434,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     final timeFormat = DateFormat('h:mm a');
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -468,7 +456,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     color: cs.onSurfaceVariant,
                   )?.copyWith(fontWeight: kFontWeightSemiBold),
                 ),
-                const SizedBox(height: kSpacingXS / 2),
+                  const SizedBox(height: kSpacingXXS),
                 Text(
                   timeFormat.format(log.changeTime),
                   style: smallHelperTextStyle(
@@ -504,7 +492,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return InkWell(
       onTap: () => _showUniversalDoseActionSheetForMissedDose(context, dose),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -528,7 +516,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       ),
                     ),
                   ),
-                  const SizedBox(height: kSpacingXS / 2),
+                  const SizedBox(height: kSpacingXXS),
                   Text(
                     timeFormat.format(dose.scheduledTime),
                     style: smallHelperTextStyle(
@@ -545,7 +533,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingXS,
-                vertical: kSpacingXS / 2,
+                vertical: kSpacingXXS,
               ),
               decoration: BoxDecoration(
                 color: cs.error.withValues(alpha: kOpacitySubtle),
@@ -596,7 +584,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     return InkWell(
       onTap: () => _showUniversalDoseActionSheetForLog(context, log),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
+        padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -640,7 +628,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       ),
                     ],
                   ),
-                  const SizedBox(height: kSpacingXS / 2),
+                  const SizedBox(height: kSpacingXXS),
                   Text(
                     title,
                     style: smallHelperTextStyle(
@@ -659,7 +647,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingXS,
-                vertical: kSpacingXS / 2,
+                vertical: kSpacingXXS,
               ),
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: kOpacitySubtle),
@@ -1743,7 +1731,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
         : log.description;
 
     final row = Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS / 2),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1764,7 +1752,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     context,
                   )?.copyWith(fontWeight: kFontWeightSemiBold),
                 ),
-                const SizedBox(height: kSpacingXS / 2),
+                const SizedBox(height: kSpacingXXS),
                 Text(
                   timeFormat.format(log.timestamp),
                   style: smallHelperTextStyle(
@@ -1773,7 +1761,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   ),
                 ),
                 if (log.notes != null && log.notes!.trim().isNotEmpty) ...[
-                  const SizedBox(height: kSpacingXS / 2),
+                  const SizedBox(height: kSpacingXXS),
                   Text(
                     log.notes!.trim(),
                     style: smallHelperTextStyle(

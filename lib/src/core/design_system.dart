@@ -145,6 +145,20 @@ const EdgeInsets kNextDoseBadgeNextLabelPaddingStandard = EdgeInsets.symmetric(
 /// Medication details reports card
 const double kMedicationReportsTabHeight = 160;
 
+/// Medication Reports card padding/layout
+const EdgeInsets kMedicationReportsTabLabelPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+);
+const EdgeInsets kMedicationReportsHistoryListPadding = EdgeInsets.fromLTRB(
+  kCardPadding,
+  0,
+  kCardPadding,
+  kCardPadding,
+);
+const EdgeInsets kMedicationReportsLoadMorePadding = EdgeInsets.symmetric(
+  vertical: kSpacingS,
+);
+
 /// Adherence chart (reports)
 const double kAdherenceChartHeight = 96;
 const double kAdherenceChartLineStrokeWidth = 2.5;
