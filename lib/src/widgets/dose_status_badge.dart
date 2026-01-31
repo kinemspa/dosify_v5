@@ -70,12 +70,8 @@ class DoseCardStatusChip extends StatelessWidget {
       height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: visual.color.withValues(alpha: kOpacityMinimal),
+          color: visual.color,
           borderRadius: BorderRadius.circular(kBorderRadiusChip),
-          border: Border.all(
-            color: visual.color.withValues(alpha: kOpacityMediumLow),
-            width: kBorderWidthThin,
-          ),
         ),
         child: Center(
           child: Padding(
@@ -85,7 +81,7 @@ class DoseCardStatusChip extends StatelessWidget {
             child: UnifiedStatusBadge(
               label: label,
               icon: visual.icon,
-              color: visual.color,
+              color: kColorOnFilledStatus,
               dense: true,
               decorate: false,
               textStyle: (context, color) =>
