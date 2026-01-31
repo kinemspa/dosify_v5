@@ -213,10 +213,18 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         final currentStock = isMdv
             ? (med.activeVialVolume ?? med.containerVolumeMl ?? 0)
             : med.stockValue;
-        _maxAdHocAmount = (currentStock + log.doseValue).clamp(
-          0.0,
-          double.infinity,
-        );
+
+        // For existing ad-hoc logs, stock has already been deducted, so allow
+        // increasing up to (currentStock + loggedAmount). For brand-new ad-hoc
+        // entries (not yet persisted), cap at currentStock.
+        final alreadyLogged = Hive.box<DoseLog>('dose_logs').containsKey(log.id);
+        final max = alreadyLogged ? (currentStock + log.doseValue) : currentStock;
+        _maxAdHocAmount = max.clamp(0.0, double.infinity);
+
+        final clampedInitial = log.doseValue.clamp(0.0, _maxAdHocAmount!);
+        if ((clampedInitial - log.doseValue).abs() > 0.000001) {
+          _amountController!.text = _formatAmount(clampedInitial);
+        }
       } else {
         _maxAdHocAmount = double.infinity;
       }
@@ -521,42 +529,71 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     final amountChanged = (newAmount - oldAmount).abs() > 0.000001;
     final notesChanged = (existingLog.notes ?? '') != (newNotes ?? '');
-    if (!amountChanged && !notesChanged) return;
 
-    final doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final isNew = !doseLogBox.containsKey(existingLog.id);
+    if (!isNew && !amountChanged && !notesChanged) return;
+
+    final doseLogRepo = DoseLogRepository(doseLogBox);
     final inventoryBox = Hive.box<InventoryLog>('inventory_logs');
     final medBox = Hive.box<Medication>('medications');
     final med = medBox.get(existingLog.medicationId);
 
-    if (amountChanged && med != null) {
+    if (med != null && (isNew || amountChanged)) {
       final isMdv = med.form == MedicationForm.multiDoseVial;
       final latestStock = isMdv
           ? (med.activeVialVolume ?? med.containerVolumeMl ?? 0)
           : med.stockValue;
 
-      // We want net change to match "-newAmount" instead of "-oldAmount".
-      // Delta to apply to current stock is: oldAmount - newAmount.
-      final adjustment = oldAmount - newAmount;
-      final updatedStock = (latestStock + adjustment).clamp(
-        0.0,
-        double.infinity,
-      );
+      final double updatedStock;
+      final double changeAmount;
+      final double previousStock;
+      if (isNew) {
+        previousStock = latestStock;
+        changeAmount = -newAmount;
+        updatedStock = (latestStock - newAmount).clamp(0.0, double.infinity);
+      } else {
+        // We want net change to match "-newAmount" instead of "-oldAmount".
+        // Delta to apply to current stock is: oldAmount - newAmount.
+        final adjustment = oldAmount - newAmount;
+        changeAmount = -newAmount;
+        previousStock = latestStock + oldAmount;
+        updatedStock = (latestStock + adjustment).clamp(0.0, double.infinity);
+      }
 
+      final Medication updatedMedication;
       if (isMdv) {
         final max =
             (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
             ? med.containerVolumeMl!
             : double.infinity;
-        await medBox.put(
-          med.id,
-          med.copyWith(activeVialVolume: updatedStock.clamp(0.0, max)),
+        updatedMedication = med.copyWith(
+          activeVialVolume: updatedStock.clamp(0.0, max),
         );
       } else {
-        await medBox.put(med.id, med.copyWith(stockValue: updatedStock));
+        updatedMedication = med.copyWith(stockValue: updatedStock);
       }
 
+      await medBox.put(med.id, updatedMedication);
+      await LowStockNotifier.handleStockChange(before: med, after: updatedMedication);
+
       final inv = inventoryBox.get(existingLog.id);
-      if (inv != null && inv.changeType == InventoryChangeType.adHocDose) {
+      if (inv == null) {
+        inventoryBox.put(
+          existingLog.id,
+          InventoryLog(
+            id: existingLog.id,
+            medicationId: existingLog.medicationId,
+            medicationName: existingLog.medicationName,
+            changeType: InventoryChangeType.adHocDose,
+            previousStock: previousStock,
+            newStock: updatedStock,
+            changeAmount: changeAmount,
+            notes: newNotes ?? 'Ad-hoc dose',
+            timestamp: _selectedActionTime,
+          ),
+        );
+      } else if (inv.changeType == InventoryChangeType.adHocDose) {
         inventoryBox.put(
           inv.id,
           InventoryLog(
@@ -582,7 +619,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       medicationName: existingLog.medicationName,
       scheduledTime: existingLog.scheduledTime,
       actionTime: _selectedActionTime,
-      doseValue: amountChanged ? newAmount : existingLog.doseValue,
+      doseValue: (isNew || amountChanged) ? newAmount : existingLog.doseValue,
       doseUnit: existingLog.doseUnit,
       action: existingLog.action,
       actualDoseValue: existingLog.actualDoseValue,
@@ -1475,7 +1512,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       );
     }
 
-    chips.addAll([
+    chips.add(
       PrimaryChoiceChip(
         label: const Text('Taken'),
         color: kDoseStatusTakenGreen,
@@ -1487,34 +1524,56 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           });
         },
       ),
-      PrimaryChoiceChip(
-        label: const Text('Snoozed'),
-        color: kDoseStatusSnoozedOrange,
-        selected: _selectedStatus == DoseStatus.snoozed,
-        onSelected: (_) {
-          setState(() {
-            _selectedStatus = DoseStatus.snoozed;
-            final until = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-            final max = _maxSnoozeUntil();
-            final clamped = max != null && until.isAfter(max) ? max : until;
-            _selectedSnoozeUntil = clamped;
-            _selectedActionTime = clamped;
-            _hasChanged = true;
-          });
-        },
-      ),
-      PrimaryChoiceChip(
-        label: const Text('Skipped'),
-        color: skippedColor,
-        selected: _selectedStatus == DoseStatus.skipped,
-        onSelected: (_) {
-          setState(() {
-            _selectedStatus = DoseStatus.skipped;
-            _hasChanged = true;
-          });
-        },
-      ),
-    ]);
+    );
+
+    if (_isAdHoc) {
+      chips.add(
+        PrimaryChoiceChip(
+          label: const Text('Delete'),
+          color: skippedColor,
+          selected:
+              _selectedStatus == DoseStatus.pending ||
+              _selectedStatus == DoseStatus.overdue ||
+              _selectedStatus == DoseStatus.due,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.pending;
+              _hasChanged = true;
+            });
+          },
+        ),
+      );
+    } else {
+      chips.addAll([
+        PrimaryChoiceChip(
+          label: const Text('Snoozed'),
+          color: kDoseStatusSnoozedOrange,
+          selected: _selectedStatus == DoseStatus.snoozed,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.snoozed;
+              final until = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+              final max = _maxSnoozeUntil();
+              final clamped = max != null && until.isAfter(max) ? max : until;
+              _selectedSnoozeUntil = clamped;
+              _selectedActionTime = clamped;
+              _hasChanged = true;
+            });
+          },
+        ),
+        PrimaryChoiceChip(
+          label: const Text('Skipped'),
+          color: skippedColor,
+          selected: _selectedStatus == DoseStatus.skipped,
+          onSelected: (_) {
+            setState(() {
+              _selectedStatus = DoseStatus.skipped;
+              _hasChanged = true;
+            });
+          },
+        ),
+      ]);
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

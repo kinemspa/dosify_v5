@@ -18,21 +18,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/selection_cards.dart';
@@ -41,7 +45,6 @@ import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
 /// Modern, revolutionized medication detail screen with:
@@ -4218,668 +4221,90 @@ Future<void> _showRestockSealedVialsDialog(
 }
 
 void _showAdHocDoseDialog(BuildContext context, Medication med) async {
+  final now = DateTime.now();
   final isMdv = med.form == MedicationForm.multiDoseVial;
+  final doseUnit = isMdv ? 'mL' : _stockUnitLabel(med.stockUnit);
+  final defaultAmount = isMdv ? 0.5 : 1.0;
 
-  // For MDV, use mL; for others, use stock unit
-  final String unit = isMdv ? 'mL' : _stockUnitLabel(med.stockUnit);
-  double syringeSize = 1.0; // Default to 1mL syringe
-  String selectedUnit = 'mL'; // Default to mL for input
-  final double maxVolume = med.activeVialVolume ?? med.containerVolumeMl ?? 3.0;
-
-  // Calculate concentration for strength-to-volume conversion
-  // concentration = mg per mL (or mcg per mL depending on strengthUnit)
-  final double? concentration = switch (med.strengthUnit) {
-    Unit.mcgPerMl ||
-    Unit.mgPerMl ||
-    Unit.gPerMl ||
-    Unit.unitsPerMl => (med.perMlValue ?? med.strengthValue),
-    _ =>
-      (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
-          ? (med.strengthValue / med.containerVolumeMl!)
-          : null,
-  };
-  final Unit strengthDoseUnit = switch (med.strengthUnit) {
-    Unit.mcgPerMl => Unit.mcg,
-    Unit.mgPerMl => Unit.mg,
-    Unit.gPerMl => Unit.g,
-    Unit.unitsPerMl => Unit.units,
-    _ => med.strengthUnit,
-  };
-  final String strengthUnit = _unitLabel(med.strengthUnit);
-  final String strengthDoseUnitLabel = _unitLabel(strengthDoseUnit);
-
-  final volumeController = TextEditingController(text: isMdv ? '0.5' : '1');
-  final strengthController = TextEditingController();
-  final notesController = TextEditingController();
-
-  final result = await showDialog<Map<String, dynamic>>(
-    context: context,
-    useRootNavigator: true,
-    builder: (dialogContext) => StatefulBuilder(
-      builder: (stateContext, setState) {
-        final theme = Theme.of(stateContext);
-        final colorScheme = theme.colorScheme;
-
-        void setInputFromVolumeMl(double volumeMl) {
-          final clamped = volumeMl.clamp(0.0, maxVolume);
-          if (selectedUnit == 'mL') {
-            volumeController.text = fmt2(clamped);
-            return;
-          }
-          if (selectedUnit == 'units') {
-            volumeController.text =
-                (clamped * SyringeType.ml_1_0.unitsPerMl).round().toString();
-            return;
-          }
-
-          // Strength input (mg/mcg)
-          final strength = concentration != null ? clamped * concentration : 0;
-          volumeController.text = fmt2(strength);
-        }
-
-        // Get input value and convert to mL based on selected unit
-        final inputValue = double.tryParse(volumeController.text) ?? 0;
-        double volumeInMl;
-        double doseInStrengthUnit;
-
-        if (selectedUnit == 'mL') {
-          // Input is in mL
-          volumeInMl = inputValue;
-          doseInStrengthUnit = concentration != null
-              ? volumeInMl * concentration
-              : 0;
-        } else if (selectedUnit == 'mg' || selectedUnit == 'mcg') {
-          // Input is in mg/mcg - convert to mL
-          doseInStrengthUnit = inputValue;
-          volumeInMl = concentration != null && concentration > 0
-              ? inputValue / concentration
-              : 0;
-        } else {
-          // Input is in syringe units.
-          volumeInMl = inputValue / SyringeType.ml_1_0.unitsPerMl;
-          doseInStrengthUnit = concentration != null
-              ? volumeInMl * concentration
-              : 0;
-        }
-
-        final clampedVolume = volumeInMl.clamp(0.0, maxVolume);
-        final displayStrength = doseInStrengthUnit;
-
-        return AlertDialog(
-          titleTextStyle: cardTitleStyle(
-            stateContext,
-          )?.copyWith(color: colorScheme.primary),
-          contentTextStyle: bodyTextStyle(stateContext),
-          title: const Text('Record Ad-Hoc Dose'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Helper text
-                Text(
-                  'Record an adhoc (unscheduled) dose — an extra dose taken outside your regular schedule.',
-                  style: helperTextStyle(stateContext),
-                ),
-                const SizedBox(height: 12),
-
-                // Medication info card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(kSpacingM),
-                  decoration: buildInsetSectionDecoration(
-                    context: stateContext,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        med.name,
-                        style: cardTitleStyle(
-                          stateContext,
-                        )?.copyWith(fontWeight: kFontWeightExtraBold),
-                      ),
-                      if (isMdv && concentration != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          switch (med.strengthUnit) {
-                            Unit.mcgPerMl ||
-                            Unit.mgPerMl ||
-                            Unit.gPerMl ||
-                            Unit.unitsPerMl =>
-                              '${_formatNumber(med.perMlValue ?? med.strengthValue)} $strengthUnit',
-                            _ when med.containerVolumeMl != null =>
-                              '${_formatNumber(med.strengthValue)} $strengthUnit / ${_formatNumber(med.containerVolumeMl!)} mL',
-                            _ =>
-                              '${_formatNumber(med.strengthValue)} $strengthUnit',
-                          },
-                          style: helperTextStyle(
-                            stateContext,
-                          )?.copyWith(color: colorScheme.onSurfaceVariant),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // MDV: Enhanced syringe input with size and unit selection
-                if (isMdv) ...[
-                  // Syringe size selection (compact)
-                  Row(
-                    children: [
-                      Text(
-                        'Syringe:',
-                        style: helperTextStyle(
-                          stateContext,
-                        )?.copyWith(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerLowest,
-                          border: Border.all(
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: kCardBorderOpacity,
-                            ),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<double>(
-                            value: syringeSize,
-                            isDense: true,
-                            style: inputTextStyle(stateContext),
-                            items: [0.3, 0.5, 1.0, 3.0, 5.0].map((size) {
-                              return DropdownMenuItem<double>(
-                                value: size,
-                                child: Text('$size mL'),
-                              );
-                            }).toList(),
-                            onChanged: (newSize) {
-                              if (newSize != null) {
-                                syringeSize = newSize;
-                                setState(() {});
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Dose unit selection toggle buttons
-                  Row(
-                    children: [
-                      Text(
-                        'Input As:',
-                        style: helperTextStyle(
-                          stateContext,
-                        )?.copyWith(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ToggleButtons(
-                          isSelected: [
-                            selectedUnit == 'mL',
-                            selectedUnit == 'mcg' || selectedUnit == 'mg',
-                            selectedUnit == 'units',
-                          ],
-                          onPressed: (index) {
-                            final previousVolumeMl = clampedVolume.toDouble();
-                            setState(() {
-                              if (index == 0) {
-                                selectedUnit = 'mL';
-                              } else if (index == 1) {
-                                selectedUnit = strengthUnit.contains('mcg')
-                                    ? 'mcg'
-                                    : 'mg';
-                              } else {
-                                selectedUnit = 'units';
-                              }
-                              setInputFromVolumeMl(previousVolumeMl);
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(8),
-                          constraints: const BoxConstraints(
-                            minHeight: 32,
-                            minWidth: 50,
-                          ),
-                          textStyle: medicationDetailToggleTextStyle(
-                            stateContext,
-                            color: colorScheme.onSurface,
-                          ),
-                          children: [
-                            const Text('mL'),
-                            Text(strengthUnit.contains('mcg') ? 'mcg' : 'mg'),
-                            const Text('units'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Usage helper text
-                  Text(
-                    'Enter dose value or drag the syringe indicator.',
-                    style: helperTextStyle(stateContext),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Incremental input field (ABOVE syringe)
-                  Row(
-                    children: [
-                      Text(
-                        '$selectedUnit:',
-                        style: helperTextStyle(
-                          stateContext,
-                        )?.copyWith(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: StepperRow36(
-                          controller: volumeController,
-                          fixedFieldWidth: 80,
-                          onDec: () {
-                            final v =
-                                double.tryParse(volumeController.text) ?? 0;
-
-                            if (selectedUnit == 'units') {
-                              final maxUnits =
-                                (syringeSize.clamp(0.0, maxVolume) *
-                                    SyringeType.ml_1_0.unitsPerMl)
-                                      .round();
-                              final nv = (v - 1)
-                                  .clamp(0, maxUnits)
-                                  .round()
-                                  .toString();
-                              volumeController.text = nv;
-                              setState(() {});
-                              return;
-                            }
-
-                            if (selectedUnit == 'mL') {
-                              final maxMl = syringeSize.clamp(0.0, maxVolume);
-                              volumeController.text = fmt2(
-                                (v - 0.1).clamp(0.0, maxMl),
-                              );
-                              setState(() {});
-                              return;
-                            }
-
-                            // Strength mode
-                            final maxStrength = concentration != null
-                                ? syringeSize.clamp(0.0, maxVolume) *
-                                      concentration
-                                : 0.0;
-                            volumeController.text = fmt2(
-                              (v - 0.1).clamp(0.0, maxStrength),
-                            );
-                            setState(() {});
-                          },
-                          onInc: () {
-                            final v =
-                                double.tryParse(volumeController.text) ?? 0;
-
-                            if (selectedUnit == 'units') {
-                              final maxUnits =
-                                (syringeSize.clamp(0.0, maxVolume) *
-                                    SyringeType.ml_1_0.unitsPerMl)
-                                      .round();
-                              final nv = (v + 1)
-                                  .clamp(0, maxUnits)
-                                  .round()
-                                  .toString();
-                              volumeController.text = nv;
-                              setState(() {});
-                              return;
-                            }
-
-                            final maxInputValue = selectedUnit == 'mL'
-                                ? syringeSize.clamp(0.0, maxVolume)
-                                : (selectedUnit == 'mg' ||
-                                          selectedUnit == 'mcg') &&
-                                      concentration != null
-                                ? syringeSize.clamp(0.0, maxVolume) *
-                                      concentration
-                              : syringeSize * SyringeType.ml_1_0.unitsPerMl;
-
-                            if (v < maxInputValue) {
-                              volumeController.text = fmt2(v + 0.1);
-                              setState(() {});
-                            }
-                          },
-                          decoration: buildCompactFieldDecoration(
-                            context: stateContext,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // Show empty vial warning if applicable
-                  if (maxVolume <= 0)
-                    Text(
-                      '⚠️ Vial appears empty. You can still record doses to account for measurement variance.',
-                      style: helperTextStyle(
-                        stateContext,
-                      )?.copyWith(color: Colors.orange),
-                    )
-                  else
-                    Text(
-                      'Available: ${_formatNumber(maxVolume)} mL in active vial',
-                      style: helperTextStyle(stateContext),
-                    ),
-                  const SizedBox(height: 16),
-
-                  // Syringe visualization (clean - no text overlay)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: kReconBackgroundActive,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        // Syringe size label
-                        Text(
-                          '${_formatNumber(syringeSize)} mL Syringe',
-                          style: medicationDetailSyringeLabelTextStyle(
-                            stateContext,
-                            color: Theme.of(stateContext).colorScheme.onPrimary
-                                .withValues(alpha: kReconTextMediumOpacity),
-                          )?.copyWith(fontWeight: kFontWeightNormal),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Syringe gauge (single label only)
-                        WhiteSyringeGauge(
-                          totalUnits:
-                              syringeSize * SyringeType.ml_1_0.unitsPerMl,
-                          fillUnits:
-                              clampedVolume * SyringeType.ml_1_0.unitsPerMl,
-                          color: colorScheme.primary,
-                          interactive: true,
-                          maxConstraint:
-                              maxVolume * SyringeType.ml_1_0.unitsPerMl,
-                          showValueLabel: false, // Remove double label
-                          onChanged: (newValue) {
-                            final newVolumeMl =
-                                (newValue / SyringeType.ml_1_0.unitsPerMl)
-                                    .clamp(
-                              0.0,
-                              maxVolume,
-                            );
-                            if (selectedUnit == 'units') {
-                              volumeController.text = newValue
-                                  .round()
-                                  .toString();
-                            } else if (selectedUnit == 'mL') {
-                              volumeController.text = fmt2(newVolumeMl);
-                            } else {
-                              final strength = concentration != null
-                                  ? newVolumeMl * concentration
-                                  : 0;
-                              volumeController.text = fmt2(strength);
-                            }
-                            setState(() {});
-                          },
-                          onMaxConstraintHit: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Dose summary sentence
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: helperTextStyle(stateContext),
-                      children: [
-                        TextSpan(
-                          text: '${_formatNumber(clampedVolume)} mL',
-                          style: TextStyle(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const TextSpan(text: ' is equal to '),
-                        TextSpan(
-                          text:
-                              '${_formatNumber(clampedVolume * SyringeType.ml_1_0.unitsPerMl)} units',
-                          style: TextStyle(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                              ' on a ${_formatNumber(syringeSize)} mL syringe',
-                        ),
-                        if (concentration != null) ...[
-                          const TextSpan(text: ' for a dose of '),
-                          TextSpan(
-                            text:
-                                '${_formatNumber(displayStrength)} $strengthDoseUnitLabel',
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                        TextSpan(text: ' of ${med.name}.'),
-                      ],
-                    ),
-                  ),
-                ] else ...[
-                  // Non-MDV: Standard stepper input - in same row as unit
-                  Row(
-                    children: [
-                      Text(
-                        'Dose:',
-                        style: helperTextStyle(
-                          stateContext,
-                        )?.copyWith(fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: StepperRow36(
-                          controller: volumeController,
-                          fixedFieldWidth: 80,
-                          onDec: () {
-                            final v =
-                                double.tryParse(volumeController.text) ?? 0;
-                            if (v > 0) {
-                              volumeController.text = (v - 1).toStringAsFixed(
-                                0,
-                              );
-                              setState(() {});
-                            }
-                          },
-                          onInc: () {
-                            final v =
-                                double.tryParse(volumeController.text) ?? 0;
-                            volumeController.text = (v + 1).toStringAsFixed(0);
-                            setState(() {});
-                          },
-                          decoration: buildCompactFieldDecoration(
-                            context: stateContext,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        unit,
-                        style: helperTextStyle(
-                          stateContext,
-                        )?.copyWith(fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 16),
-
-                // Notes section
-                Text(
-                  'Notes (optional):',
-                  style: helperTextStyle(
-                    stateContext,
-                  )?.copyWith(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: notesController,
-                  maxLines: 2,
-                  textCapitalization: kTextCapitalizationDefault,
-                  style: bodyTextStyle(stateContext),
-                  decoration: buildFieldDecoration(
-                    stateContext,
-                    hint: 'e.g., Taken for breakthrough pain',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (isMdv) {
-                  final amountMl = clampedVolume.toDouble();
-                  if (amountMl > 0) {
-                    Navigator.pop(dialogContext, {
-                      'amount': amountMl,
-                      'unit': 'mL',
-                      'notes': notesController.text.trim(),
-                    });
-                  }
-                  return;
-                }
-
-                final val = double.tryParse(volumeController.text);
-                if (val != null && val > 0) {
-                  Navigator.pop(dialogContext, {
-                    'amount': val,
-                    'unit': unit,
-                    'notes': notesController.text.trim(),
-                  });
-                }
-              },
-              child: const Text('Record Dose'),
-            ),
-          ],
-        );
-      },
-    ),
+  final id = 'adhoc_${med.id}_${now.millisecondsSinceEpoch}';
+  final draftLog = DoseLog(
+    id: id,
+    scheduleId: 'ad_hoc',
+    scheduleName: 'Ad-hoc Dose',
+    medicationId: med.id,
+    medicationName: med.name,
+    scheduledTime: now.toUtc(),
+    actionTime: now,
+    doseValue: defaultAmount,
+    doseUnit: doseUnit,
+    action: DoseAction.taken,
   );
 
-  if (result != null && context.mounted) {
-    final now = DateTime.now();
-    final amount = result['amount'] as double;
-    final doseUnit = result['unit'] as String;
-    final notes = result['notes'] as String?;
+  final dose = CalculatedDose(
+    scheduleId: 'ad_hoc',
+    scheduleName: 'Ad-hoc Dose',
+    medicationName: med.name,
+    scheduledTime: draftLog.scheduledTime,
+    doseValue: defaultAmount,
+    doseUnit: doseUnit,
+    existingLog: draftLog,
+  );
 
-    if (isMdv) {
-      // For MDV: deduct from active vial volume
-      final previousVolume = med.activeVialVolume ?? med.containerVolumeMl ?? 0;
-      final newVolume = (previousVolume - amount).clamp(0.0, double.infinity);
+  await DoseActionSheet.show(
+    context,
+    dose: dose,
+    initialStatus: DoseStatus.taken,
+    onMarkTaken: (_) async {
+      // Ad-hoc persistence is handled inside DoseActionSheet.
+    },
+    onSnooze: (_) async {
+      // Not applicable for ad-hoc entries.
+    },
+    onSkip: (_) async {
+      // Not applicable for ad-hoc entries.
+    },
+    onDelete: (_) async {
+      final logBox = Hive.box<DoseLog>('dose_logs');
+      final existing = logBox.get(draftLog.id);
+      if (existing == null) return;
 
-      // Create DoseLog
-      final doseLog = DoseLog(
-        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
-        scheduleId: 'ad_hoc',
-        scheduleName: 'Ad-hoc Dose',
-        medicationId: med.id,
-        medicationName: med.name,
-        scheduledTime: now,
-        actionTime: now,
-        doseValue: amount,
-        doseUnit: doseUnit,
-        action: DoseAction.taken,
-        notes: notes?.isNotEmpty == true ? notes : null,
-      );
-      Hive.box<DoseLog>('dose_logs').put(doseLog.id, doseLog);
+      if (existing.action == DoseAction.taken) {
+        final medBox = Hive.box<Medication>('medications');
+        final currentMed = medBox.get(existing.medicationId);
+        if (currentMed != null) {
+          final value = existing.actualDoseValue ?? existing.doseValue;
+          final unit = existing.actualDoseUnit ?? existing.doseUnit;
+          final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+            medication: currentMed,
+            schedule: null,
+            doseValue: value,
+            doseUnit: unit,
+            preferDoseValue: true,
+          );
+          if (delta != null && delta > 0) {
+            final restored = MedicationStockAdjustment.restore(
+              medication: currentMed,
+              delta: delta,
+            );
+            await medBox.put(currentMed.id, restored);
+            await LowStockNotifier.handleStockChange(
+              before: currentMed,
+              after: restored,
+            );
+          }
+        }
+      }
 
-      // Log inventory change
-      final inventoryLog = InventoryLog(
-        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
-        medicationId: med.id,
-        medicationName: med.name,
-        changeType: InventoryChangeType.adHocDose,
-        previousStock: previousVolume,
-        newStock: newVolume,
-        changeAmount: -amount,
-        notes: notes?.isNotEmpty == true ? notes : 'Ad-hoc dose',
-        timestamp: now,
-      );
-      Hive.box<InventoryLog>(
-        'inventory_logs',
-      ).put(inventoryLog.id, inventoryLog);
+      await Hive.box<InventoryLog>('inventory_logs').delete(existing.id);
+      await logBox.delete(existing.id);
 
-      // Update medication - deduct from activeVialVolume
-      Hive.box<Medication>(
-        'medications',
-      ).put(med.id, med.copyWith(activeVialVolume: newVolume));
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Recorded ${_formatNumber(amount)} mL dose')),
-      );
-    } else {
-      // Non-MDV: deduct from stockValue
-      final previousStock = med.stockValue;
-      final newStock = (previousStock - amount).clamp(0.0, double.infinity);
-
-      final doseLog = DoseLog(
-        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
-        scheduleId: 'ad_hoc',
-        scheduleName: 'Ad-hoc Dose',
-        medicationId: med.id,
-        medicationName: med.name,
-        scheduledTime: now,
-        actionTime: now,
-        doseValue: amount,
-        doseUnit: doseUnit,
-        action: DoseAction.taken,
-        notes: notes?.isNotEmpty == true ? notes : null,
-      );
-      Hive.box<DoseLog>('dose_logs').put(doseLog.id, doseLog);
-
-      final inventoryLog = InventoryLog(
-        id: 'adhoc_${med.id}_${now.millisecondsSinceEpoch}',
-        medicationId: med.id,
-        medicationName: med.name,
-        changeType: InventoryChangeType.adHocDose,
-        previousStock: previousStock,
-        newStock: newStock,
-        changeAmount: -amount,
-        notes: notes?.isNotEmpty == true ? notes : 'Ad-hoc dose',
-        timestamp: now,
-      );
-      Hive.box<InventoryLog>(
-        'inventory_logs',
-      ).put(inventoryLog.id, inventoryLog);
-
-      Hive.box<Medication>(
-        'medications',
-      ).put(med.id, med.copyWith(stockValue: newStock));
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Recorded ${_formatNumber(amount)} $doseUnit dose'),
-        ),
-      );
-    }
-  }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ad-hoc dose deleted')),
+        );
+      }
+    },
+  );
 }
 
 Future<void> _showStepperEditDialog(
