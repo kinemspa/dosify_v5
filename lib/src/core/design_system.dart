@@ -37,7 +37,8 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 /// Assets
 const String kPrimaryLogoAssetPath = 'assets/logo/logo_001_primary.png';
 const String kWhiteLogoAssetPath = 'assets/logo/logo_001_white.png';
-const String kAndroidLegacyIconAssetPath = 'assets/logo/logo_001_android_icon.png';
+const String kAndroidLegacyIconAssetPath =
+    'assets/logo/logo_001_android_icon.png';
 
 /// Logo sizing (in-app)
 const double kAppBarLogoHeight = 22;
@@ -455,6 +456,12 @@ const double kFieldSpacing = 6; // Between label-field rows
 const double kFieldGroupSpacing = 12; // Between field groups
 const double kLabelFieldGap = 8; // Between label and field
 
+/// Compact toolbar padding (e.g. search/sort/filter rows).
+const EdgeInsets kCompactToolbarPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingS,
+  vertical: kFieldSpacing,
+);
+
 /// Helper text spacing
 const double kHelperTextLeftPadding = kLabelColumnWidth + kLabelFieldGap;
 const double kHelperTextTopPadding = 2;
@@ -498,6 +505,12 @@ const EdgeInsets kDenseButtonContentPadding = EdgeInsets.symmetric(
 );
 const EdgeInsets kCompactButtonPadding = EdgeInsets.zero;
 
+/// Tight padding for inline text buttons (e.g. small in-card actions).
+const EdgeInsets kTightTextButtonPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingS,
+  vertical: kSpacingXXS,
+);
+
 // ============================================================================
 // BORDER CONSTANTS
 // ============================================================================
@@ -521,6 +534,10 @@ const double kBorderRadiusChipTight = 4; // Even less rounded for small badges
 /// Standard border radius for fields, buttons, cards
 const Radius kStandardRadius = Radius.circular(kBorderRadiusMedium);
 const BorderRadius kStandardBorderRadius = BorderRadius.all(kStandardRadius);
+
+/// Small border radius (used for compact cards/badges).
+const Radius kSmallRadius = Radius.circular(kBorderRadiusSmall);
+const BorderRadius kSmallBorderRadius = BorderRadius.all(kSmallRadius);
 
 // ============================================================================
 // COLOR & OPACITY CONSTANTS
@@ -2080,6 +2097,12 @@ TextStyle? mutedTextStyle(BuildContext context) {
       context,
     ).colorScheme.onSurface.withValues(alpha: kDisabledOpacity),
   );
+}
+
+/// Muted icon color (e.g. inactive toolbar icons).
+Color mutedIconColor(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return cs.onSurfaceVariant.withValues(alpha: kOpacityLow);
 }
 
 /// Calendar month-view day number style
