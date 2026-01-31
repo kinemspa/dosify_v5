@@ -67,6 +67,8 @@ dev_dependencies:
   json_serializable: ^6.8.0
   very_good_analysis: ^5.1.0
   import_sorter: ^4.6.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -108,3 +110,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/logo/logo_001_primary.png
+  adaptive_icon_background: "#09A8BD"
+  adaptive_icon_foreground: assets/logo/logo_001_primary.png
