@@ -40,6 +40,7 @@ class ScheduleListCard extends StatelessWidget {
       final showScheduleName = medName.isNotEmpty && scheduleName.isNotEmpty;
 
       return GlassCardSurface(
+        key: ValueKey<String>('schedule_list_card_${schedule.id}'),
         onTap: () => context.pushNamed(
           'scheduleDetail',
           pathParameters: {'id': schedule.id},
@@ -109,6 +110,7 @@ class ScheduleListCard extends StatelessWidget {
     }
 
     return LargeCard(
+      key: ValueKey<String>('schedule_list_card_${schedule.id}'),
       onTap: () => context.pushNamed(
         'scheduleDetail',
         pathParameters: {'id': schedule.id},

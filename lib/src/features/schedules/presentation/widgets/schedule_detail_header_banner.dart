@@ -147,6 +147,8 @@ class _HeaderPauseResumeAction extends StatelessWidget {
           label: Text(
             label,
             style: helperTextStyle(context, color: foreground),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

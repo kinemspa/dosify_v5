@@ -147,13 +147,13 @@ class DetailPageScaffold extends StatelessWidget {
                     title: LayoutBuilder(
                       builder: (context, constraints) {
                         final appBarHeight = constraints.maxHeight;
-                      final expanded =
-                        expandedHeight ?? kDetailHeaderExpandedHeight;
-                      final collapsed =
-                        collapsedHeight ?? kDetailHeaderCollapsedHeight;
-                      final scrollProgress =
-                        ((expanded - appBarHeight) / (expanded - collapsed))
-                          .clamp(0.0, 1.0);
+                        final expanded =
+                            expandedHeight ?? kDetailHeaderExpandedHeight;
+                        final collapsed =
+                            collapsedHeight ?? kDetailHeaderCollapsedHeight;
+                        final scrollProgress =
+                            ((expanded - appBarHeight) / (expanded - collapsed))
+                                .clamp(0.0, 1.0);
 
                         final textStyle = detailCollapsedTitleTextStyle(
                           context,
@@ -162,29 +162,10 @@ class DetailPageScaffold extends StatelessWidget {
                         if (expandedTitle == null || expandedTitle!.isEmpty) {
                           return Opacity(
                             opacity: scrollProgress,
-                            child: Text(
-                              title,
-                              style: textStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }
-
-                        return Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Opacity(
-                              opacity: 1 - scrollProgress,
-                              child: Text(
-                                expandedTitle!,
-                                style: textStyle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: kToolbarHeight,
                               ),
-                            ),
-                            Opacity(
-                              opacity: scrollProgress,
                               child: Text(
                                 title,
                                 style: textStyle,
@@ -192,7 +173,36 @@ class DetailPageScaffold extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          ],
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: kToolbarHeight,
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Opacity(
+                                opacity: 1 - scrollProgress,
+                                child: Text(
+                                  expandedTitle!,
+                                  style: textStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Opacity(
+                                opacity: scrollProgress,
+                                child: Text(
+                                  title,
+                                  style: textStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -347,6 +357,8 @@ class DetailStatItem extends StatelessWidget {
             context,
           )?.copyWith(color: cs.onPrimary, fontWeight: kFontWeightSemiBold),
           textAlign: textAlign,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
