@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 
 class ScheduleDetailHeaderBanner extends StatelessWidget {
@@ -45,11 +44,10 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
         value: _timesText(context, schedule),
         alignEnd: true,
       ),
-      row3Left: NextDoseDateBadge(
-        nextDose: nextDose,
-        isActive: schedule.isActive,
-        dense: true,
-        showNextLabel: false,
+      row3Left: DetailStatItem(
+        icon: Icons.event_outlined,
+        label: 'Next',
+        value: nextDose == null ? '—' : _nextDateText(context, nextDose!),
       ),
       row3Right: DetailStatItem(
         icon: Icons.timer_outlined,
@@ -58,6 +56,15 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
         alignEnd: true,
       ),
     );
+  }
+
+  String _nextDateText(BuildContext context, DateTime dt) {
+    final local = dt.toLocal();
+    final now = DateTime.now();
+    final isToday =
+        local.year == now.year && local.month == now.month && local.day == now.day;
+    if (isToday) return 'Today';
+    return MaterialLocalizations.of(context).formatShortMonthDay(local);
   }
 
   String _doseDisplay(Schedule s) {
@@ -117,41 +124,13 @@ class _HeaderPauseResumeAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     final badge = ScheduleStatusChip(schedule: schedule, dense: true);
-    if (schedule.isCompleted) {
-      return badge;
-    }
+    if (schedule.isCompleted) return badge;
 
-    final isActive = schedule.isActive;
-    final label = isActive ? 'Pause' : 'Resume';
-    final icon = isActive ? Icons.pause_rounded : Icons.play_arrow_rounded;
-
-    final foreground = cs.onPrimary.withValues(alpha: kOpacityMedium);
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        badge,
-        const SizedBox(width: kSpacingXS),
-        TextButton.icon(
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            padding: kCompactButtonPadding,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
-            foregroundColor: foreground,
-          ),
-          icon: Icon(icon, size: kIconSizeSmall),
-          label: Text(
-            label,
-            style: helperTextStyle(context, color: foreground),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
+      child: badge,
     );
   }
 }
