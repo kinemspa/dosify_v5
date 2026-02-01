@@ -449,6 +449,137 @@ class SmallDropdown36<T> extends StatelessWidget {
   }
 }
 
+class MultiSelectItem<T> {
+  const MultiSelectItem({required this.value, required this.label});
+
+  final T value;
+  final String label;
+}
+
+/// A compact multi-select dropdown-like control.
+///
+/// Uses a Material menu with checkmarks and keeps the menu open while toggling.
+class MultiSelectDropdown36<T> extends StatefulWidget {
+  const MultiSelectDropdown36({
+    super.key,
+    required this.items,
+    required this.selectedValues,
+    required this.onChanged,
+    required this.buttonLabel,
+    this.icon = Icons.tune_rounded,
+  });
+
+  final List<MultiSelectItem<T>> items;
+  final Set<T> selectedValues;
+  final ValueChanged<Set<T>> onChanged;
+  final String buttonLabel;
+  final IconData icon;
+
+  @override
+  State<MultiSelectDropdown36<T>> createState() =>
+      _MultiSelectDropdown36State<T>();
+}
+
+class _MultiSelectDropdown36State<T> extends State<MultiSelectDropdown36<T>> {
+  late Set<T> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set<T>.from(widget.selectedValues);
+  }
+
+  @override
+  void didUpdateWidget(covariant MultiSelectDropdown36<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedValues != widget.selectedValues) {
+      _selected = Set<T>.from(widget.selectedValues);
+    }
+  }
+
+  void _toggle(T value) {
+    final next = Set<T>.from(_selected);
+    if (next.contains(value)) {
+      next.remove(value);
+    } else {
+      next.add(value);
+    }
+
+    setState(() => _selected = next);
+    widget.onChanged(next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return MenuAnchor(
+      builder: (context, controller, child) {
+        return SizedBox(
+          height: kFieldHeight,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            icon: Icon(widget.icon, size: kIconSizeSmall),
+            label: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  widget.buttonLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      menuChildren: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 420),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final item in widget.items)
+                  MenuItemButton(
+                    closeOnActivate: false,
+                    onPressed: () => _toggle(item.value),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.label,
+                            style: bodyTextStyle(context),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (_selected.contains(item.value))
+                          Icon(
+                            Icons.check_rounded,
+                            size: kIconSizeSmall,
+                            color: cs.primary,
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Primary-styled choice chip (selected = primary bg + white text)
 class PrimaryChoiceChip extends StatelessWidget {
   const PrimaryChoiceChip({

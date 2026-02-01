@@ -14,7 +14,7 @@ class ActivityCard extends StatefulWidget {
     this.title = 'Activity',
     required this.medications,
     required this.includedMedicationIds,
-    this.onTapSelectIncludedMeds,
+    this.onIncludedMedicationIdsChanged,
     required this.rangePreset,
     required this.onRangePresetChanged,
     this.isExpanded,
@@ -29,7 +29,7 @@ class ActivityCard extends StatefulWidget {
   final Set<String> includedMedicationIds;
 
   /// When null, the card displays a non-interactive included-meds label.
-  final VoidCallback? onTapSelectIncludedMeds;
+  final ValueChanged<Set<String>>? onIncludedMedicationIdsChanged;
 
   final ReportTimeRangePreset rangePreset;
   final ValueChanged<ReportTimeRangePreset> onRangePresetChanged;
@@ -81,28 +81,26 @@ class _ActivityCardState extends State<ActivityCard> {
             children: [
               Expanded(
                 child:
-                    widget.onTapSelectIncludedMeds == null
+                    widget.onIncludedMedicationIdsChanged == null
                         ? Text(
                             '${widget.includedMedicationIds.length}/${meds.length} meds',
                             style: helperTextStyle(context),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           )
-                        : OutlinedButton.icon(
-                            onPressed: widget.onTapSelectIncludedMeds,
-                            icon: const Icon(
-                              Icons.tune_rounded,
-                              size: kIconSizeSmall,
-                            ),
-                            label: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
+                        : MultiSelectDropdown36<String>(
+                            items: meds
+                                .map(
+                                  (m) => MultiSelectItem<String>(
+                                    value: m.id,
+                                    label: m.name,
+                                  ),
+                                )
+                                .toList(growable: false),
+                            selectedValues: widget.includedMedicationIds,
+                            onChanged: widget.onIncludedMedicationIdsChanged!,
+                            buttonLabel:
                                 '${widget.includedMedicationIds.length}/${meds.length} meds',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
                           ),
               ),
               const SizedBox(width: kSpacingS),

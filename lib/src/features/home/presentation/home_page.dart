@@ -294,8 +294,10 @@ class _HomePageState extends ConsumerState<HomePage> {
         return ActivityCard(
           medications: meds,
           includedMedicationIds: included,
-          onTapSelectIncludedMeds: () =>
-              _showIncludedMedsSelector(context, meds),
+          onIncludedMedicationIdsChanged: (next) {
+            if (!mounted) return;
+            setState(() => _reportIncludedMedicationIds = next);
+          },
           rangePreset: _reportsRangePreset,
           onRangePresetChanged: (next) {
             if (!mounted) return;
