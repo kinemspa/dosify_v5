@@ -8,7 +8,7 @@
 - [x] What is the purpose of the Taken, Skipped, Snoozed, inventory?
 - [x] Activity items arent colour coded correctly. 
 - [x] Lets remove the datae icon fomr each activity icon. Put the Time in there instead. 
-- [ ] Place a date number on the left outside of the items. So Date line, then each itme for the date is cololectively in there. 
+- [x] Place a date number on the left outside of the items. So Date line, then each itme for the date is cololectively in there. 
 - [ ] Supposed to be able to edit each avtivity item. Thats the whole point of it. 
 
 

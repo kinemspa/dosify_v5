@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -185,6 +186,45 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
     final cs = Theme.of(context).colorScheme;
     final range = ReportTimeRange(widget.rangePreset).toUtcTimeRange();
 
+    int dayKey(DateTime timeLocal) {
+      return timeLocal.year * 10000 + timeLocal.month * 100 + timeLocal.day;
+    }
+
+    Widget buildDayGutter(DateTime timeLocal, {required bool showLabel}) {
+      final labelColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+
+      final dayText = DateFormat('d').format(timeLocal);
+      final monthText = DateFormat('MMM').format(timeLocal).toUpperCase();
+
+      return SizedBox(
+        width: kNextDoseDateCircleSizeCompact,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showLabel) ...[
+              Text(
+                dayText,
+                style: nextDoseBadgeDayTextStyle(
+                  context,
+                  dense: true,
+                  color: labelColor,
+                ),
+              ),
+              Text(
+                monthText,
+                style: nextDoseBadgeMonthTextStyle(
+                  context,
+                  dense: true,
+                  color: labelColor,
+                ),
+              ),
+            ] else
+              const SizedBox(height: kNextDoseDateCircleSizeCompact),
+          ],
+        ),
+      );
+    }
+
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
 
@@ -270,6 +310,13 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                       final spec = item.visualSpec(context);
                       final iconColor = spec.color;
 
+                      final localTime = item.time.toLocal();
+                      final currentDay = dayKey(localTime);
+                      final previousDay = index == 0
+                          ? null
+                          : dayKey(displayItems[index - 1].time.toLocal());
+                      final showDayLabel = previousDay != currentDay;
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: kSpacingXS / 2,
@@ -277,28 +324,40 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            NextDoseDateBadge(
-                              nextDose: item.time,
-                              isActive: true,
-                              dense: true,
-                              denseContent: NextDoseBadgeDenseContent.time,
-                              showNextLabel: false,
-                              showTodayIcon: true,
-                            ),
+                            buildDayGutter(localTime, showLabel: showDayLabel),
                             const SizedBox(width: kSpacingS),
-                            Expanded(child: item.buildTitle(context)),
-                            const SizedBox(width: kSpacingS),
-                            Container(
-                              width: kStepperButtonSize,
-                              height: kStepperButtonSize,
-                              decoration: BoxDecoration(
-                                color: iconColor.withValues(alpha: kOpacitySubtle),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                spec.icon,
-                                size: kIconSizeSmall,
-                                color: iconColor,
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  NextDoseDateBadge(
+                                    nextDose: item.time,
+                                    isActive: true,
+                                    dense: true,
+                                    denseContent:
+                                        NextDoseBadgeDenseContent.time,
+                                    showNextLabel: false,
+                                    showTodayIcon: true,
+                                  ),
+                                  const SizedBox(width: kSpacingS),
+                                  Expanded(child: item.buildTitle(context)),
+                                  const SizedBox(width: kSpacingS),
+                                  Container(
+                                    width: kStepperButtonSize,
+                                    height: kStepperButtonSize,
+                                    decoration: BoxDecoration(
+                                      color: iconColor.withValues(
+                                        alpha: kOpacitySubtle,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      spec.icon,
+                                      size: kIconSizeSmall,
+                                      color: iconColor,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
