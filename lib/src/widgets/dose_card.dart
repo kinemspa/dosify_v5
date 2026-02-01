@@ -82,8 +82,6 @@ class DoseCard extends StatelessWidget {
           : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
     );
 
-    final actionLabel = primaryActionLabel ?? 'Actions';
-
     final takeText = 'Take $doseMetrics';
     final takeColor = isActive
         ? statusColor.withValues(alpha: kOpacityFull)
@@ -205,17 +203,6 @@ class DoseCard extends StatelessWidget {
                         status: effectiveStatus,
                         disabled: disabled,
                         compact: compact,
-                      ),
-                      const SizedBox(height: kSpacingXS),
-                      SizedBox(
-                        width: compact
-                            ? kDoseCardStatusChipWidthCompact
-                            : kDoseCardStatusChipWidth,
-                        height: kStandardButtonHeight,
-                        child: FilledButton(
-                          onPressed: onPrimaryAction ?? onTap,
-                          child: Text(actionLabel),
-                        ),
                       ),
                     ],
                   ),

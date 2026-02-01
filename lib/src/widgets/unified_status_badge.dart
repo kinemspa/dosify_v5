@@ -28,7 +28,7 @@ class UnifiedStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPadding = dense ? kFieldSpacing : kSpacingS;
+    final baseHorizontalPadding = dense ? kFieldSpacing : kSpacingS;
     final verticalPadding = dense
         ? kDoseStatusBadgeVerticalPadding
         : kSpacingXXS;
@@ -37,30 +37,33 @@ class UnifiedStatusBadge extends StatelessWidget {
         textStyle?.call(context, color) ??
         microHelperTextStyle(context, color: color);
 
-    final hasWidthConstraint = fixedWidth != null;
+    final hasExplicitWidth = fixedWidth != null;
 
-    final row = Row(
-      mainAxisSize: hasWidthConstraint ? MainAxisSize.max : MainAxisSize.min,
-      children: [
-        Icon(icon, size: kIconSizeXXSmall, color: color),
-        const SizedBox(width: kSpacingXS),
-        if (hasWidthConstraint)
-          Expanded(
-            child: Text(
-              label,
-              style: resolvedTextStyle?.copyWith(fontWeight: kFontWeightBold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+    // When we're inside a fixed-width chip (e.g., DoseCard status), keep padding
+    // tight so the icon + label can always fit without overflow.
+    final horizontalPadding = hasExplicitWidth
+        ? kSpacingXXS
+        : baseHorizontalPadding;
+
+    final row = LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.hasBoundedWidth;
+        return Row(
+          mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            Icon(icon, size: kIconSizeXXSmall, color: color),
+            const SizedBox(width: kSpacingXS),
+            Flexible(
+              child: Text(
+                label,
+                style: resolvedTextStyle?.copyWith(fontWeight: kFontWeightBold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          )
-        else
-          Text(
-            label,
-            style: resolvedTextStyle?.copyWith(fontWeight: kFontWeightBold),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-      ],
+          ],
+        );
+      },
     );
 
     final widget = decorate
