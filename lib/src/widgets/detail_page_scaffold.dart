@@ -17,6 +17,8 @@ class DetailPageScaffold extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.expandedTitle,
+    this.showBackButton = true,
+    this.onBack,
     this.topRightAction,
     this.expandedHeight,
     this.collapsedHeight,
@@ -32,6 +34,8 @@ class DetailPageScaffold extends StatelessWidget {
   final List<Widget> sections;
   final VoidCallback onEdit;
   final Future<void> Function() onDelete;
+  final bool showBackButton;
+  final VoidCallback? onBack;
   final Widget? topRightAction;
   final double? expandedHeight;
   final double? collapsedHeight;
@@ -57,6 +61,12 @@ class DetailPageScaffold extends StatelessWidget {
             backgroundColor: Colors.transparent,
             foregroundColor: headerForeground,
             elevation: 0,
+            leading: showBackButton
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: onBack ?? () => context.pop(),
+                  )
+                : null,
             title: const SizedBox.shrink(),
             centerTitle: true,
             actions: [
@@ -146,6 +156,9 @@ class DetailPageScaffold extends StatelessWidget {
                     ((expanded - constraints.maxHeight) / (expanded - collapsed))
                         .clamp(0.0, 1.0);
 
+                // Match Medication Details: title is only visible when near-collapsed.
+                final titleOpacity = (3 * scrollProgress - 2).clamp(0.0, 1.0);
+
                 final top = MediaQuery.of(context).padding.top;
                 final barHeight = toolbarHeight ?? kDetailHeaderCollapsedHeight;
 
@@ -163,42 +176,14 @@ class DetailPageScaffold extends StatelessWidget {
                         height: barHeight,
                         child: IgnorePointer(
                           child: Opacity(
-                            opacity: scrollProgress,
+                            opacity: titleOpacity,
                             child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: kToolbarHeight,
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    if (expandedTitle != null &&
-                                        expandedTitle!.trim().isNotEmpty)
-                                      Opacity(
-                                        opacity: 1 - scrollProgress,
-                                        child: Text(
-                                          expandedTitle!,
-                                          style:
-                                              detailCollapsedTitleTextStyle(context),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    Opacity(
-                                      opacity: scrollProgress,
-                                      child: Text(
-                                        title,
-                                        style: detailCollapsedTitleTextStyle(
-                                          context,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              child: Text(
+                                title,
+                                style: detailCollapsedTitleTextStyle(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ),
