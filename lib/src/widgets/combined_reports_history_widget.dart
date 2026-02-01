@@ -18,6 +18,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
+import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 
 sealed class _CombinedHistoryItem {
   const _CombinedHistoryItem({required this.time, required this.medicationName});
@@ -578,33 +579,14 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
             final displayItems = items.take(_maxItems).toList(growable: false);
             final hasMore = displayItems.length < items.length;
 
-            Widget buildEmpty() {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: kSpacingL),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.history_outlined,
-                        size: kEmptyStateIconSize,
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMediumLow,
-                        ),
-                      ),
-                      const SizedBox(height: kSpacingM),
-                      Text('No history yet', style: helperTextStyle(context)),
-                    ],
-                  ),
-                ),
-              );
-            }
-
             final content = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (displayItems.isEmpty)
-                  buildEmpty()
+                  const UnifiedEmptyState(
+                    title: 'No history yet',
+                    icon: Icons.history_outlined,
+                  )
                 else ...[
                   ListView.separated(
                     shrinkWrap: true,
