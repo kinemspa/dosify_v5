@@ -7,9 +7,16 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
+import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
 sealed class _CombinedHistoryItem {
@@ -181,6 +188,314 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
     }
   }
 
+  Future<void> _showDoseLogEditor(BuildContext context, DoseLog log) {
+    final logBox = Hive.box<DoseLog>('dose_logs');
+    final doseLogRepo = DoseLogRepository(logBox);
+
+    final dose = CalculatedDose(
+      scheduleId: log.scheduleId,
+      scheduleName: log.scheduleName,
+      medicationName: log.medicationName,
+      scheduledTime: log.scheduledTime,
+      doseValue: log.doseValue,
+      doseUnit: log.doseUnit,
+      existingLog: log,
+    );
+
+    if (log.scheduleId == 'ad_hoc') {
+      return DoseActionSheet.show(
+        context,
+        dose: dose,
+        initialStatus: DoseStatus.taken,
+        onMarkTaken: (_) async {
+          // Ad-hoc persistence is handled inside DoseActionSheet.
+        },
+        onSnooze: (_) async {
+          // Not applicable for ad-hoc entries.
+        },
+        onSkip: (_) async {
+          // Not applicable for ad-hoc entries.
+        },
+        onDelete: (_) async {
+          final latest = logBox.get(log.id);
+          if (latest == null) return;
+
+          if (latest.action == DoseAction.taken) {
+            final medBox = Hive.box<Medication>('medications');
+            final currentMed = medBox.get(latest.medicationId);
+            if (currentMed != null) {
+              final value = latest.actualDoseValue ?? latest.doseValue;
+              final unit = latest.actualDoseUnit ?? latest.doseUnit;
+              final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+                medication: currentMed,
+                schedule: null,
+                doseValue: value,
+                doseUnit: unit,
+                preferDoseValue: true,
+              );
+              if (delta != null && delta > 0) {
+                final restored = MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                );
+                await medBox.put(currentMed.id, restored);
+                await LowStockNotifier.handleStockChange(
+                  before: currentMed,
+                  after: restored,
+                );
+              }
+            }
+          }
+
+          await Hive.box<InventoryLog>('inventory_logs').delete(latest.id);
+          await doseLogRepo.delete(latest.id);
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Dose log removed')));
+          }
+        },
+      );
+    }
+
+    return DoseActionSheet.show(
+      context,
+      dose: dose,
+      onMarkTaken: (request) async {
+        final trimmed = request.notes?.trim();
+        final latest = logBox.get(log.id) ?? log;
+
+        if (latest.action != DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final effectiveDoseValue =
+                request.actualDoseValue ??
+                latest.actualDoseValue ??
+                latest.doseValue;
+            final effectiveDoseUnit =
+                request.actualDoseUnit ??
+                latest.actualDoseUnit ??
+                latest.doseUnit;
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: effectiveDoseValue,
+              doseUnit: effectiveDoseUnit,
+              preferDoseValue:
+                  request.actualDoseValue != null ||
+                  latest.actualDoseValue != null,
+            );
+            if (delta != null) {
+              final updatedMed = MedicationStockAdjustment.deduct(
+                medication: currentMed,
+                delta: delta,
+              );
+              await medBox.put(currentMed.id, updatedMed);
+              await LowStockNotifier.handleStockChange(
+                before: currentMed,
+                after: updatedMed,
+              );
+            }
+          }
+        }
+
+        final updated = DoseLog(
+          id: log.id,
+          scheduleId: log.scheduleId,
+          scheduleName: log.scheduleName,
+          medicationId: log.medicationId,
+          medicationName: log.medicationName,
+          scheduledTime: log.scheduledTime,
+          actionTime: request.actionTime,
+          doseValue: latest.doseValue,
+          doseUnit: latest.doseUnit,
+          action: DoseAction.taken,
+          actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
+          notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
+        );
+
+        await doseLogRepo.upsert(updated);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+        }
+      },
+      onSnooze: (request) async {
+        final trimmed = request.notes?.trim();
+        final latest = logBox.get(log.id) ?? log;
+
+        if (latest.action == DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final oldDoseValue = latest.actualDoseValue ?? latest.doseValue;
+            final oldDoseUnit = latest.actualDoseUnit ?? latest.doseUnit;
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: oldDoseValue,
+              doseUnit: oldDoseUnit,
+              preferDoseValue: latest.actualDoseValue != null,
+            );
+            if (delta != null) {
+              final updatedMed = MedicationStockAdjustment.restore(
+                medication: currentMed,
+                delta: delta,
+              );
+              await medBox.put(currentMed.id, updatedMed);
+              await LowStockNotifier.handleStockChange(
+                before: currentMed,
+                after: updatedMed,
+              );
+            }
+          }
+        }
+
+        final updated = DoseLog(
+          id: log.id,
+          scheduleId: log.scheduleId,
+          scheduleName: log.scheduleName,
+          medicationId: log.medicationId,
+          medicationName: log.medicationName,
+          scheduledTime: log.scheduledTime,
+          actionTime: request.actionTime,
+          doseValue: latest.doseValue,
+          doseUnit: latest.doseUnit,
+          action: DoseAction.snoozed,
+          actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
+          notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
+        );
+
+        await doseLogRepo.upsert(updated);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+        }
+      },
+      onSkip: (request) async {
+        final trimmed = request.notes?.trim();
+        final latest = logBox.get(log.id) ?? log;
+
+        if (latest.action == DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final oldDoseValue = latest.actualDoseValue ?? latest.doseValue;
+            final oldDoseUnit = latest.actualDoseUnit ?? latest.doseUnit;
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: oldDoseValue,
+              doseUnit: oldDoseUnit,
+              preferDoseValue: latest.actualDoseValue != null,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
+
+        final updated = DoseLog(
+          id: log.id,
+          scheduleId: log.scheduleId,
+          scheduleName: log.scheduleName,
+          medicationId: log.medicationId,
+          medicationName: log.medicationName,
+          scheduledTime: log.scheduledTime,
+          actionTime: request.actionTime,
+          doseValue: latest.doseValue,
+          doseUnit: latest.doseUnit,
+          action: DoseAction.skipped,
+          actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
+          actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
+          notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
+        );
+
+        await doseLogRepo.upsert(updated);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+        }
+      },
+      onDelete: (_) async {
+        final latest = logBox.get(log.id) ?? log;
+        if (latest.action == DoseAction.taken) {
+          final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
+          final medBox = Hive.box<Medication>('medications');
+          final currentMed = medBox.get(log.medicationId);
+          if (currentMed != null) {
+            final oldDoseValue = latest.actualDoseValue ?? latest.doseValue;
+            final oldDoseUnit = latest.actualDoseUnit ?? latest.doseUnit;
+            final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+              medication: currentMed,
+              schedule: schedule,
+              doseValue: oldDoseValue,
+              doseUnit: oldDoseUnit,
+              preferDoseValue: latest.actualDoseValue != null,
+            );
+            if (delta != null) {
+              await medBox.put(
+                currentMed.id,
+                MedicationStockAdjustment.restore(
+                  medication: currentMed,
+                  delta: delta,
+                ),
+              );
+            }
+          }
+        }
+
+        await doseLogRepo.delete(log.id);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Dose log removed')));
+        }
+      },
+    );
+  }
+
+  void _showInventoryInfo(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Inventory log', style: dialogTitleTextStyle(context)),
+          content: Text(
+            "Inventory items are system stock-change logs. Editing them isn't supported here yet.\n\nTo change stock, use the medication's stock actions (refill/restock/adjust).",
+            style: dialogContentTextStyle(context),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -317,50 +632,71 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                           : dayKey(displayItems[index - 1].time.toLocal());
                       final showDayLabel = previousDay != currentDay;
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: kSpacingXS / 2,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildDayGutter(localTime, showLabel: showDayLabel),
-                            const SizedBox(width: kSpacingS),
-                            Expanded(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  NextDoseDateBadge(
-                                    nextDose: item.time,
-                                    isActive: true,
-                                    dense: true,
-                                    denseContent:
-                                        NextDoseBadgeDenseContent.time,
-                                    showNextLabel: false,
-                                    showTodayIcon: true,
-                                  ),
-                                  const SizedBox(width: kSpacingS),
-                                  Expanded(child: item.buildTitle(context)),
-                                  const SizedBox(width: kSpacingS),
-                                  Container(
-                                    width: kStepperButtonSize,
-                                    height: kStepperButtonSize,
-                                    decoration: BoxDecoration(
-                                      color: iconColor.withValues(
-                                        alpha: kOpacitySubtle,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      spec.icon,
-                                      size: kIconSizeSmall,
-                                      color: iconColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                      Future<void> onTap() {
+                        if (item is _DoseHistoryItem) {
+                          return _showDoseLogEditor(context, item.log);
+                        }
+
+                        _showInventoryInfo(context);
+                        return Future.value();
+                      }
+
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: InkWell(
+                          onTap: onTap,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: kSpacingXS / 2,
                             ),
-                          ],
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                buildDayGutter(
+                                  localTime,
+                                  showLabel: showDayLabel,
+                                ),
+                                const SizedBox(width: kSpacingS),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      NextDoseDateBadge(
+                                        nextDose: item.time,
+                                        isActive: true,
+                                        dense: true,
+                                        denseContent:
+                                            NextDoseBadgeDenseContent.time,
+                                        showNextLabel: false,
+                                        showTodayIcon: true,
+                                      ),
+                                      const SizedBox(width: kSpacingS),
+                                      Expanded(
+                                        child: item.buildTitle(context),
+                                      ),
+                                      const SizedBox(width: kSpacingS),
+                                      Container(
+                                        width: kStepperButtonSize,
+                                        height: kStepperButtonSize,
+                                        decoration: BoxDecoration(
+                                          color: iconColor.withValues(
+                                            alpha: kOpacitySubtle,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          spec.icon,
+                                          size: kIconSizeSmall,
+                                          color: iconColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     },
