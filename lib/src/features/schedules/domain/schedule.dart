@@ -206,8 +206,20 @@ class Schedule {
     String? medicationName,
     double? doseValue,
     String? doseUnit,
+    Object? doseUnitCode = _noChange,
+    Object? doseMassMcg = _noChange,
+    Object? doseVolumeMicroliter = _noChange,
+    Object? doseTabletQuarters = _noChange,
+    Object? doseCapsules = _noChange,
+    Object? doseSyringes = _noChange,
+    Object? doseVials = _noChange,
+    Object? doseIU = _noChange,
+    Object? displayUnitCode = _noChange,
+    Object? inputModeCode = _noChange,
     int? minutesOfDay,
     List<int>? daysOfWeek,
+    Object? minutesOfDayUtc = _noChange,
+    Object? daysOfWeekUtc = _noChange,
     Object? timesOfDay = _noChange,
     Object? timesOfDayUtc = _noChange,
     Object? cycleEveryNDays = _noChange,
@@ -227,8 +239,12 @@ class Schedule {
       doseUnit: doseUnit ?? this.doseUnit,
       minutesOfDay: minutesOfDay ?? this.minutesOfDay,
       daysOfWeek: daysOfWeek ?? this.daysOfWeek,
-      minutesOfDayUtc: minutesOfDayUtc,
-      daysOfWeekUtc: daysOfWeekUtc,
+      minutesOfDayUtc: minutesOfDayUtc == _noChange
+        ? this.minutesOfDayUtc
+        : minutesOfDayUtc as int?,
+      daysOfWeekUtc: daysOfWeekUtc == _noChange
+        ? this.daysOfWeekUtc
+        : daysOfWeekUtc as List<int>?,
       medicationId: medicationId,
       active: active ?? this.active,
       pausedUntil: pausedUntil == _noChange
@@ -249,16 +265,32 @@ class Schedule {
       daysOfMonth: daysOfMonth == _noChange
           ? this.daysOfMonth
           : daysOfMonth as List<int>?,
-      doseUnitCode: doseUnitCode,
-      doseMassMcg: doseMassMcg,
-      doseVolumeMicroliter: doseVolumeMicroliter,
-      doseTabletQuarters: doseTabletQuarters,
-      doseCapsules: doseCapsules,
-      doseSyringes: doseSyringes,
-      doseVials: doseVials,
-      doseIU: doseIU,
-      displayUnitCode: displayUnitCode,
-      inputModeCode: inputModeCode,
+      doseUnitCode: doseUnitCode == _noChange
+        ? this.doseUnitCode
+        : doseUnitCode as int?,
+      doseMassMcg: doseMassMcg == _noChange
+        ? this.doseMassMcg
+        : doseMassMcg as int?,
+      doseVolumeMicroliter: doseVolumeMicroliter == _noChange
+        ? this.doseVolumeMicroliter
+        : doseVolumeMicroliter as int?,
+      doseTabletQuarters: doseTabletQuarters == _noChange
+        ? this.doseTabletQuarters
+        : doseTabletQuarters as int?,
+      doseCapsules: doseCapsules == _noChange
+        ? this.doseCapsules
+        : doseCapsules as int?,
+      doseSyringes: doseSyringes == _noChange
+        ? this.doseSyringes
+        : doseSyringes as int?,
+      doseVials: doseVials == _noChange ? this.doseVials : doseVials as int?,
+      doseIU: doseIU == _noChange ? this.doseIU : doseIU as int?,
+      displayUnitCode: displayUnitCode == _noChange
+        ? this.displayUnitCode
+        : displayUnitCode as int?,
+      inputModeCode: inputModeCode == _noChange
+        ? this.inputModeCode
+        : inputModeCode as int?,
       startAt: startAt == _noChange ? this.startAt : startAt as DateTime?,
       endAt: endAt == _noChange ? this.endAt : endAt as DateTime?,
       monthlyMissingDayBehaviorCode: monthlyMissingDayBehaviorCode == _noChange

@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
@@ -47,6 +48,889 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   bool _isCalendarExpanded = true;
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
+
+  int _computeUtcMinutes(int localMinutes, DateTime now) {
+    final localToday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      localMinutes ~/ 60,
+      localMinutes % 60,
+    );
+    final utc = localToday.toUtc();
+    return utc.hour * 60 + utc.minute;
+  }
+
+  List<int> _computeUtcDays(Set<int> localDays, int localMinutes, DateTime now) {
+    final utcDays = <int>[];
+    for (final d in localDays) {
+      final delta = (d - now.weekday) % 7;
+      final candidate = DateTime(
+        now.year,
+        now.month,
+        now.day + delta,
+        localMinutes ~/ 60,
+        localMinutes % 60,
+      );
+      final utc = candidate.toUtc();
+      utcDays.add(utc.weekday);
+    }
+    utcDays.sort();
+    return utcDays;
+  }
+
+  Future<void> _upsertSchedule(
+    BuildContext context,
+    Schedule updated, {
+    String? successMessage,
+  }) async {
+    try {
+      final scheduleBox = Hive.box<Schedule>('schedules');
+
+      await ScheduleScheduler.cancelFor(updated.id);
+      await scheduleBox.put(updated.id, updated);
+
+      if (updated.isActive) {
+        await ScheduleScheduler.scheduleFor(updated);
+      }
+
+      if (!mounted) return;
+      if (successMessage != null && successMessage.trim().isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(successMessage),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update schedule: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _editScheduleName(BuildContext context, Schedule s) async {
+    final controller = TextEditingController(text: s.name);
+    final next = await showDialog<String>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        return AlertDialog(
+          titleTextStyle: dialogTitleTextStyle(dialogContext),
+          contentTextStyle: dialogContentTextStyle(dialogContext),
+          title: const Text('Schedule Name'),
+          content: TextField(
+            controller: controller,
+            style: bodyTextStyle(dialogContext),
+            textCapitalization: kTextCapitalizationDefault,
+            decoration: buildFieldDecoration(dialogContext, hint: 'Name'),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final trimmed = controller.text.trim();
+                if (trimmed.isEmpty) return;
+                Navigator.of(dialogContext).pop(trimmed);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+    final trimmed = next?.trim();
+    if (trimmed == null || trimmed.isEmpty) return;
+    if (trimmed == s.name) return;
+
+    await _upsertSchedule(
+      context,
+      s.copyWithDetails(name: trimmed),
+      successMessage: 'Schedule name updated',
+    );
+  }
+
+  Future<void> _editScheduleDose(BuildContext context, Schedule s) async {
+    final controller = TextEditingController(text: _formatNumber(s.doseValue));
+    final originalUnit = s.doseUnit.trim().isEmpty ? 'mg' : s.doseUnit;
+    final units = <String>[
+      'mcg',
+      'mg',
+      'g',
+      'mL',
+      'IU',
+      'units',
+      'tablets',
+      'capsules',
+      'syringes',
+      'vials',
+    ];
+
+    final normalizedOriginalUnit = units.firstWhere(
+      (u) => u.toLowerCase() == originalUnit.toLowerCase(),
+      orElse: () => originalUnit,
+    );
+
+    final result = await showDialog<Map<String, Object?>>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        var selectedUnit = normalizedOriginalUnit;
+
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
+              title: const Text('Dose'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('Value', style: helperTextStyle(dialogContext)),
+                  const SizedBox(height: kSpacingS),
+                  TextField(
+                    controller: controller,
+                    style: bodyTextStyle(dialogContext),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: false,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d*\.?\d*'),
+                      ),
+                    ],
+                    decoration: buildFieldDecoration(dialogContext, hint: '0'),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: kSpacingM),
+                  Text('Unit', style: helperTextStyle(dialogContext)),
+                  const SizedBox(height: kSpacingS),
+                  DropdownButtonFormField<String>(
+                    value: selectedUnit,
+                    decoration: buildFieldDecoration(dialogContext),
+                    items: units
+                        .map(
+                          (u) => DropdownMenuItem(value: u, child: Text(u)),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setDialogState(() => selectedUnit = v);
+                    },
+                  ),
+                  const SizedBox(height: kSpacingS),
+                  Text(
+                    'Tip: for tablets/capsules, enter a count (e.g. 1, 0.5, 2).',
+                    style: helperTextStyle(dialogContext),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final v = double.tryParse(controller.text.trim());
+                    if (v == null || v <= 0) return;
+                    Navigator.of(dialogContext).pop(<String, Object?>{
+                      'value': v,
+                      'unit': selectedUnit,
+                    });
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    controller.dispose();
+    if (result == null) return;
+
+    final value = result['value'] as double?;
+    final unit = (result['unit'] as String?)?.trim();
+    if (value == null || unit == null || unit.isEmpty) return;
+    if (value == s.doseValue && unit.toLowerCase() == s.doseUnit.toLowerCase()) {
+      return;
+    }
+
+    int? doseMassMcg;
+    int? doseVolumeMicroliter;
+    int? doseTabletQuarters;
+    int? doseCapsules;
+    int? doseSyringes;
+    int? doseVials;
+    int? doseIU;
+    int? doseUnitCode;
+    int? displayUnitCode;
+    int? inputModeCode;
+
+    final unitLower = unit.toLowerCase();
+    if (unitLower == 'mcg' || unitLower == 'mg' || unitLower == 'g') {
+      final mcg = switch (unitLower) {
+        'mcg' => value,
+        'mg' => value * 1000,
+        'g' => value * 1000000,
+        _ => value,
+      };
+      doseMassMcg = mcg.round();
+      doseUnitCode = switch (unitLower) {
+        'mcg' => DoseUnit.mcg.index,
+        'mg' => DoseUnit.mg.index,
+        'g' => DoseUnit.g.index,
+        _ => null,
+      };
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.mass.index;
+    } else if (unitLower == 'ml' || unitLower == 'mL'.toLowerCase()) {
+      doseVolumeMicroliter = (value * 1000).round();
+      doseUnitCode = DoseUnit.ml.index;
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.volume.index;
+    } else if (unitLower == 'iu' || unitLower == 'units') {
+      doseIU = value.round();
+      doseUnitCode = DoseUnit.iu.index;
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.iuUnits.index;
+    } else if (unitLower == 'tablets') {
+      doseTabletQuarters = (value * 4).round();
+      doseUnitCode = DoseUnit.tablets.index;
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.tablets.index;
+    } else if (unitLower == 'capsules') {
+      doseCapsules = value.round();
+      doseUnitCode = DoseUnit.capsules.index;
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.capsules.index;
+    } else if (unitLower == 'syringes') {
+      doseSyringes = value.round();
+      doseUnitCode = DoseUnit.syringes.index;
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.count.index;
+    } else if (unitLower == 'vials') {
+      doseVials = value.round();
+      doseUnitCode = DoseUnit.vials.index;
+      displayUnitCode = doseUnitCode;
+      inputModeCode = DoseInputMode.count.index;
+    }
+
+    await _upsertSchedule(
+      context,
+      s.copyWithDetails(
+        doseValue: value,
+        doseUnit: unit,
+        doseUnitCode: doseUnitCode,
+        doseMassMcg: doseMassMcg,
+        doseVolumeMicroliter: doseVolumeMicroliter,
+        doseTabletQuarters: doseTabletQuarters,
+        doseCapsules: doseCapsules,
+        doseSyringes: doseSyringes,
+        doseVials: doseVials,
+        doseIU: doseIU,
+        displayUnitCode: displayUnitCode,
+        inputModeCode: inputModeCode,
+      ),
+      successMessage: 'Dose updated',
+    );
+  }
+
+  Future<void> _editScheduleTimes(BuildContext context, Schedule s) async {
+    final initial = (s.timesOfDay ?? [s.minutesOfDay]).toList()..sort();
+    final result = await showDialog<List<int>>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        var times = initial.toList();
+
+        Future<void> addTime() async {
+          final picked = await showTimePicker(
+            context: dialogContext,
+            initialTime: times.isEmpty
+                ? const TimeOfDay(hour: 8, minute: 0)
+                : TimeOfDay(
+                    hour: times.last ~/ 60,
+                    minute: times.last % 60,
+                  ),
+          );
+          if (picked == null) return;
+          final minutes = picked.hour * 60 + picked.minute;
+          if (times.contains(minutes)) return;
+          times = (times..add(minutes))..sort();
+        }
+
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            final formatted = times
+                .map(
+                  (m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(
+                    dialogContext,
+                  ),
+                )
+                .toList();
+
+            return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
+              title: const Text('Times'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (formatted.isEmpty)
+                    Text('No times set', style: helperTextStyle(dialogContext))
+                  else
+                    ...List.generate(formatted.length, (i) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: kSpacingS),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text(formatted[i])),
+                            IconButton(
+                              tooltip: 'Remove',
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                setDialogState(() {
+                                  times.removeAt(i);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  const SizedBox(height: kSpacingS),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await addTime();
+                      setDialogState(() {});
+                    },
+                    icon: const Icon(Icons.add, size: kIconSizeSmall),
+                    label: const Text('Add time'),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    if (times.isEmpty) return;
+                    Navigator.of(dialogContext).pop(times);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null || result.isEmpty) return;
+    final nextTimes = result.toList()..sort();
+    final nextMinutes = nextTimes.first;
+    final nextTimesField = nextTimes.length > 1 ? nextTimes : null;
+
+    final now = DateTime.now();
+    final minutesUtc = _computeUtcMinutes(nextMinutes, now);
+    final timesUtc = nextTimes.map((m) => _computeUtcMinutes(m, now)).toList();
+    final daysUtc = _computeUtcDays(s.daysOfWeek.toSet(), nextMinutes, now);
+
+    await _upsertSchedule(
+      context,
+      s.copyWithDetails(
+        minutesOfDay: nextMinutes,
+        timesOfDay: nextTimesField,
+        minutesOfDayUtc: minutesUtc,
+        timesOfDayUtc: timesUtc,
+        daysOfWeekUtc: daysUtc,
+      ),
+      successMessage: 'Times updated',
+    );
+  }
+
+  Future<void> _editScheduleType(BuildContext context, Schedule s) async {
+    final initialMode = s.hasDaysOfMonth
+        ? _ScheduleEditMode.daysOfMonth
+        : (s.hasCycle ? _ScheduleEditMode.cycle : _ScheduleEditMode.daysOfWeek);
+    final initialDays = s.daysOfWeek.toSet();
+    final initialCycleN = s.cycleEveryNDays ?? 2;
+    final initialAnchor = s.cycleAnchorDate ?? DateTime.now();
+    final initialDom = (s.daysOfMonth ?? const <int>[]).toSet();
+    final initialMissing = s.monthlyMissingDayBehavior;
+
+    final result = await showDialog<_ScheduleTypeEditResult>(
+      context: context,
+      useRootNavigator: true,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        var mode = initialMode;
+        var days = initialDays.toSet();
+        var cycleN = initialCycleN;
+        var anchor = DateTime(initialAnchor.year, initialAnchor.month, initialAnchor.day);
+        var daysOfMonth = initialDom.toSet();
+        var missing = initialMissing;
+
+        final cycleCtrl = TextEditingController(text: cycleN.toString());
+
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            Future<void> pickAnchor() async {
+              final picked = await showDatePicker(
+                context: dialogContext,
+                initialDate: anchor,
+                firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+                lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+              );
+              if (picked == null) return;
+              anchor = DateTime(picked.year, picked.month, picked.day);
+            }
+
+            return AlertDialog(
+              titleTextStyle: dialogTitleTextStyle(dialogContext),
+              contentTextStyle: dialogContentTextStyle(dialogContext),
+              title: const Text('Type'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    RadioListTile<_ScheduleEditMode>(
+                      value: _ScheduleEditMode.daysOfWeek,
+                      groupValue: mode,
+                      title: const Text('Days of week / Daily'),
+                      onChanged: (v) => setDialogState(() => mode = v!),
+                    ),
+                    RadioListTile<_ScheduleEditMode>(
+                      value: _ScheduleEditMode.cycle,
+                      groupValue: mode,
+                      title: const Text('Every N days'),
+                      onChanged: (v) => setDialogState(() => mode = v!),
+                    ),
+                    RadioListTile<_ScheduleEditMode>(
+                      value: _ScheduleEditMode.daysOfMonth,
+                      groupValue: mode,
+                      title: const Text('Days of month'),
+                      onChanged: (v) => setDialogState(() => mode = v!),
+                    ),
+                    const SizedBox(height: kSpacingS),
+                    if (mode == _ScheduleEditMode.daysOfWeek) ...[
+                      Text('Days', style: helperTextStyle(dialogContext)),
+                      const SizedBox(height: kSpacingS),
+                      Wrap(
+                        spacing: kSpacingS,
+                        runSpacing: kSpacingS,
+                        children: const <int, String>{
+                          1: 'Mon',
+                          2: 'Tue',
+                          3: 'Wed',
+                          4: 'Thu',
+                          5: 'Fri',
+                          6: 'Sat',
+                          7: 'Sun',
+                        }.entries.map((e) {
+                          return FilterChip(
+                            label: Text(e.value),
+                            selected: days.contains(e.key),
+                            onSelected: (selected) {
+                              setDialogState(() {
+                                if (selected) {
+                                  days.add(e.key);
+                                } else {
+                                  days.remove(e.key);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      OutlinedButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            days = {1, 2, 3, 4, 5, 6, 7};
+                          });
+                        },
+                        child: const Text('Set to daily'),
+                      ),
+                    ],
+                    if (mode == _ScheduleEditMode.cycle) ...[
+                      Text('Every', style: helperTextStyle(dialogContext)),
+                      const SizedBox(height: kSpacingS),
+                      StepperRow36(
+                        controller: cycleCtrl,
+                        fixedFieldWidth: 120,
+                        decoration: buildFieldDecoration(
+                          dialogContext,
+                          hint: 'Days',
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        onDec: () {
+                          final v = int.tryParse(cycleCtrl.text) ?? cycleN;
+                          final next = (v - 1).clamp(1, 365);
+                          cycleCtrl.text = next.toString();
+                          setDialogState(() => cycleN = next);
+                        },
+                        onInc: () {
+                          final v = int.tryParse(cycleCtrl.text) ?? cycleN;
+                          final next = (v + 1).clamp(1, 365);
+                          cycleCtrl.text = next.toString();
+                          setDialogState(() => cycleN = next);
+                        },
+                        onChanged: (v) {
+                          final parsed = int.tryParse(v);
+                          if (parsed == null) return;
+                          setDialogState(() => cycleN = parsed.clamp(1, 365));
+                        },
+                      ),
+                      const SizedBox(height: kSpacingM),
+                      Text('Anchor date', style: helperTextStyle(dialogContext)),
+                      const SizedBox(height: kSpacingS),
+                      DateButton36(
+                        label: DateFormat('EEE, MMM d, y').format(anchor),
+                        onPressed: () async {
+                          await pickAnchor();
+                          setDialogState(() {});
+                        },
+                      ),
+                    ],
+                    if (mode == _ScheduleEditMode.daysOfMonth) ...[
+                      Text('Days', style: helperTextStyle(dialogContext)),
+                      const SizedBox(height: kSpacingS),
+                      Wrap(
+                        spacing: kSpacingS,
+                        runSpacing: kSpacingS,
+                        children: List.generate(31, (i) {
+                          final day = i + 1;
+                          return FilterChip(
+                            label: Text(day.toString()),
+                            selected: daysOfMonth.contains(day),
+                            onSelected: (selected) {
+                              setDialogState(() {
+                                if (selected) {
+                                  daysOfMonth.add(day);
+                                } else {
+                                  daysOfMonth.remove(day);
+                                }
+                              });
+                            },
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: kSpacingM),
+                      Text(
+                        'If a selected day does not exist in a month',
+                        style: helperTextStyle(dialogContext),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      DropdownButtonFormField<MonthlyMissingDayBehavior>(
+                        value: missing,
+                        decoration: buildFieldDecoration(dialogContext),
+                        items: MonthlyMissingDayBehavior.values
+                            .map(
+                              (b) => DropdownMenuItem(
+                                value: b,
+                                child: Text(
+                                  b == MonthlyMissingDayBehavior.skip
+                                      ? 'Skip'
+                                      : 'Move to last day',
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          if (v == null) return;
+                          setDialogState(() => missing = v);
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    cycleCtrl.dispose();
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    if (mode == _ScheduleEditMode.daysOfWeek && days.isEmpty) {
+                      return;
+                    }
+                    if (mode == _ScheduleEditMode.daysOfMonth &&
+                        daysOfMonth.isEmpty) {
+                      return;
+                    }
+                    cycleCtrl.dispose();
+                    Navigator.of(dialogContext).pop(
+                      _ScheduleTypeEditResult(
+                        mode: mode,
+                        daysOfWeek: days.toList()..sort(),
+                        cycleEvery: cycleN,
+                        cycleAnchor: anchor,
+                        daysOfMonth: daysOfMonth.toList()..sort(),
+                        missingDayBehavior: missing,
+                      ),
+                    );
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null) return;
+
+    final now = DateTime.now();
+    final firstLocalMinutes = (s.timesOfDay ?? [s.minutesOfDay]).first;
+    final minutesUtc = _computeUtcMinutes(firstLocalMinutes, now);
+    final timesUtc = (s.timesOfDay ?? [s.minutesOfDay])
+        .map((m) => _computeUtcMinutes(m, now))
+        .toList();
+
+    switch (result.mode) {
+      case _ScheduleEditMode.daysOfWeek:
+        final days = result.daysOfWeek.toList()..sort();
+        final daysUtc = _computeUtcDays(days.toSet(), firstLocalMinutes, now);
+        await _upsertSchedule(
+          context,
+          s.copyWithDetails(
+            daysOfWeek: days,
+            cycleEveryNDays: null,
+            cycleAnchorDate: null,
+            daysOfMonth: null,
+            monthlyMissingDayBehaviorCode: null,
+            minutesOfDayUtc: minutesUtc,
+            timesOfDayUtc: timesUtc,
+            daysOfWeekUtc: daysUtc,
+          ),
+          successMessage: 'Type updated',
+        );
+        return;
+      case _ScheduleEditMode.cycle:
+        await _upsertSchedule(
+          context,
+          s.copyWithDetails(
+            cycleEveryNDays: result.cycleEvery,
+            cycleAnchorDate: DateTime(
+              result.cycleAnchor.year,
+              result.cycleAnchor.month,
+              result.cycleAnchor.day,
+            ),
+            daysOfMonth: null,
+            monthlyMissingDayBehaviorCode: null,
+          ),
+          successMessage: 'Type updated',
+        );
+        return;
+      case _ScheduleEditMode.daysOfMonth:
+        await _upsertSchedule(
+          context,
+          s.copyWithDetails(
+            daysOfMonth: result.daysOfMonth,
+            monthlyMissingDayBehaviorCode:
+                result.missingDayBehavior.index,
+            cycleEveryNDays: null,
+            cycleAnchorDate: null,
+          ),
+          successMessage: 'Type updated',
+        );
+        return;
+    }
+  }
+
+  Future<void> _editScheduleStart(BuildContext context, Schedule s) async {
+    final picked = await showDialog<_DateEditResult>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        final current = s.startAt;
+        final currentLabel = current == null
+            ? 'Not set'
+            : DateFormat('EEE, MMM d, y').format(current);
+
+        return AlertDialog(
+          titleTextStyle: dialogTitleTextStyle(dialogContext),
+          contentTextStyle: dialogContentTextStyle(dialogContext),
+          title: const Text('Start'),
+          content: Text('Current: $currentLabel'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(
+                const _DateEditResult.cancel(),
+              ),
+              child: const Text('Cancel'),
+            ),
+            if (current != null)
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(
+                  const _DateEditResult.clear(),
+                ),
+                child: const Text('Clear'),
+              ),
+            FilledButton(
+              onPressed: () async {
+                final initialDate = current ?? DateTime.now();
+                final d = await showDatePicker(
+                  context: dialogContext,
+                  initialDate: DateTime(
+                    initialDate.year,
+                    initialDate.month,
+                    initialDate.day,
+                  ),
+                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                );
+                if (d == null) return;
+                if (!dialogContext.mounted) return;
+                Navigator.of(dialogContext).pop(_DateEditResult.set(d));
+              },
+              child: const Text('Set date'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (picked == null || picked.action == _DateEditAction.cancel) return;
+    if (picked.action == _DateEditAction.clear) {
+      if (s.startAt == null) return;
+      await _upsertSchedule(
+        context,
+        s.copyWithDetails(startAt: null),
+        successMessage: 'Start cleared',
+      );
+      return;
+    }
+
+    final date = picked.date;
+    if (date == null) return;
+
+    final now = DateTime.now();
+    final selectedDay = DateTime(date.year, date.month, date.day);
+    final today = DateTime(now.year, now.month, now.day);
+    final nextStart = selectedDay.isAtSameMomentAs(today)
+        ? now
+      : DateTime(date.year, date.month, date.day);
+
+    if (s.startAt != null && s.startAt!.isAtSameMomentAs(nextStart)) return;
+    await _upsertSchedule(
+      context,
+      s.copyWithDetails(startAt: nextStart),
+      successMessage: 'Start updated',
+    );
+  }
+
+  Future<void> _editScheduleEnd(BuildContext context, Schedule s) async {
+    final picked = await showDialog<_DateEditResult>(
+      context: context,
+      useRootNavigator: true,
+      builder: (dialogContext) {
+        final current = s.endAt;
+        final currentLabel = current == null
+            ? 'Not set'
+            : DateFormat('EEE, MMM d, y').format(current);
+
+        return AlertDialog(
+          titleTextStyle: dialogTitleTextStyle(dialogContext),
+          contentTextStyle: dialogContentTextStyle(dialogContext),
+          title: const Text('End'),
+          content: Text('Current: $currentLabel'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(
+                const _DateEditResult.cancel(),
+              ),
+              child: const Text('Cancel'),
+            ),
+            if (current != null)
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(
+                  const _DateEditResult.clear(),
+                ),
+                child: const Text('Clear'),
+              ),
+            FilledButton(
+              onPressed: () async {
+                final initialDate = current ?? DateTime.now();
+                final d = await showDatePicker(
+                  context: dialogContext,
+                  initialDate: DateTime(
+                    initialDate.year,
+                    initialDate.month,
+                    initialDate.day,
+                  ),
+                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                );
+                if (d == null) return;
+                if (!dialogContext.mounted) return;
+                Navigator.of(dialogContext).pop(_DateEditResult.set(d));
+              },
+              child: const Text('Set date'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (picked == null || picked.action == _DateEditAction.cancel) return;
+    if (picked.action == _DateEditAction.clear) {
+      if (s.endAt == null) return;
+      await _upsertSchedule(
+        context,
+        s.copyWithDetails(endAt: null),
+        successMessage: 'End cleared',
+      );
+      return;
+    }
+
+    final date = picked.date;
+    if (date == null) return;
+
+    final nextEnd = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      23,
+      59,
+      59,
+      999,
+    );
+    if (s.endAt != null && s.endAt!.isAtSameMomentAs(nextEnd)) return;
+
+    await _upsertSchedule(
+      context,
+      s.copyWithDetails(endAt: nextEnd),
+      successMessage: 'End updated',
+    );
+  }
 
   Future<void> _openEditScheduleDialog(Schedule schedule) async {
     await showModalBottomSheet<void>(
@@ -449,40 +1333,40 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         context,
         label: 'Name',
         value: s.name.trim().isEmpty ? '—' : s.name,
-        onTap: () => context.push('/schedules/edit/${s.id}'),
+        onTap: () => _editScheduleName(context, s),
       ),
       buildDetailInfoRow(
         context,
         label: 'Dose',
         value: _getDoseDisplay(s),
-        onTap: () => context.push('/schedules/edit/${s.id}'),
+        onTap: () => _editScheduleDose(context, s),
       ),
       buildDetailInfoRow(
         context,
         label: 'Type',
         value: _scheduleTypeText(s),
-        onTap: () => context.push('/schedules/edit/${s.id}'),
+        onTap: () => _editScheduleType(context, s),
         maxLines: 2,
       ),
       buildDetailInfoRow(
         context,
         label: 'Times',
         value: _timesText(context, s),
-        onTap: () => context.push('/schedules/edit/${s.id}'),
+        onTap: () => _editScheduleTimes(context, s),
         maxLines: 2,
       ),
       buildDetailInfoRow(
         context,
         label: 'Start',
         value: startAtLabel,
-        onTap: () => context.push('/schedules/edit/${s.id}'),
+        onTap: () => _editScheduleStart(context, s),
         maxLines: 2,
       ),
       buildDetailInfoRow(
         context,
         label: 'End',
         value: endAtLabel,
-        onTap: () => context.push('/schedules/edit/${s.id}'),
+        onTap: () => _editScheduleEnd(context, s),
         maxLines: 2,
       ),
       const SizedBox(height: kSpacingL),
@@ -1173,6 +2057,39 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       );
     }
   }
+}
+
+enum _ScheduleEditMode { daysOfWeek, cycle, daysOfMonth }
+
+class _ScheduleTypeEditResult {
+  _ScheduleTypeEditResult({
+    required this.mode,
+    required this.daysOfWeek,
+    required this.cycleEvery,
+    required this.cycleAnchor,
+    required this.daysOfMonth,
+    required this.missingDayBehavior,
+  });
+
+  final _ScheduleEditMode mode;
+  final List<int> daysOfWeek;
+  final int cycleEvery;
+  final DateTime cycleAnchor;
+  final List<int> daysOfMonth;
+  final MonthlyMissingDayBehavior missingDayBehavior;
+}
+
+enum _DateEditAction { cancel, clear, set }
+
+class _DateEditResult {
+  const _DateEditResult._(this.action, this.date);
+
+  const _DateEditResult.cancel() : this._(_DateEditAction.cancel, null);
+  const _DateEditResult.clear() : this._(_DateEditAction.clear, null);
+  const _DateEditResult.set(DateTime date) : this._(_DateEditAction.set, date);
+
+  final _DateEditAction action;
+  final DateTime? date;
 }
 
 /// Dialog for recording a dose with notes and optional injection site
