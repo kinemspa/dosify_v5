@@ -859,28 +859,45 @@ class _HomePageState extends ConsumerState<HomePage> {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      '${included.length}/${meds.length} meds included',
-                      style: helperTextStyle(context),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          _showIncludedMedsSelector(context, meds),
+                      icon: const Icon(
+                        Icons.tune_rounded,
+                        size: kIconSizeSmall,
+                      ),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${included.length}/${meds.length} meds',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: kSpacingS),
-                  OutlinedButton.icon(
-                    onPressed: () => _showIncludedMedsSelector(context, meds),
-                    icon: const Icon(Icons.tune_rounded, size: kIconSizeSmall),
-                    label: const Text('Included meds'),
+                  SizedBox(
+                    width: kCompactControlMaxWidth,
+                    child: SmallDropdown36<ReportTimeRangePreset>(
+                      value: _reportsRangePreset,
+                      items: ReportTimeRangePreset.values
+                          .map(
+                            (p) => DropdownMenuItem(
+                              value: p,
+                              child: Text(ReportTimeRange(p).label),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: (next) {
+                        if (next == null) return;
+                        if (!mounted) return;
+                        setState(() => _reportsRangePreset = next);
+                      },
+                    ),
                   ),
                 ],
-              ),
-              const SizedBox(height: kSpacingS),
-              ReportTimeRangeSelectorRow(
-                value: _reportsRangePreset,
-                onChanged: (next) {
-                  if (!mounted) return;
-                  setState(() => _reportsRangePreset = next);
-                },
               ),
               const SizedBox(height: kSpacingS),
               const DoseActionLegendRow(includeInventory: true),
