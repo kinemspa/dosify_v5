@@ -138,8 +138,8 @@ class _ReconstitutionCalculatorPageState
       _selectedUnit = item.strengthUnit;
       _strengthCtrl.text =
           item.strengthValue == item.strengthValue.roundToDouble()
-              ? item.strengthValue.toInt().toString()
-              : item.strengthValue.toStringAsFixed(2);
+          ? item.strengthValue.toInt().toString()
+          : item.strengthValue.toStringAsFixed(2);
 
       _initialDoseValue = item.recommendedDose;
       _initialDoseUnit = item.doseUnit;
@@ -277,16 +277,16 @@ class _ReconstitutionCalculatorPageState
     }
 
     final baseName = _medNameCtrl.text.trim().isNotEmpty
-      ? _medNameCtrl.text.trim()
-      : 'Reconstitution';
+        ? _medNameCtrl.text.trim()
+        : 'Reconstitution';
 
     final parts = <String>[baseName];
     final dose = _lastResult!.recommendedDose;
     final doseUnit = _lastResult!.doseUnit;
     if (dose != null &&
-      dose > 0 &&
-      doseUnit != null &&
-      doseUnit.trim().isNotEmpty) {
+        dose > 0 &&
+        doseUnit != null &&
+        doseUnit.trim().isNotEmpty) {
       parts.add('${_formatNoTrailing(dose)} ${doseUnit.trim()}');
     }
     parts.add('${_formatNoTrailing(_lastResult!.solventVolumeMl)} mL');
@@ -401,9 +401,7 @@ class _ReconstitutionCalculatorPageState
         padding: const EdgeInsets.only(top: 4),
         child: Text(
           text,
-          style: helperTextStyle(
-            context,
-          )?.copyWith(
+          style: helperTextStyle(context)?.copyWith(
             color: fg.withValues(alpha: kReconTextMutedOpacity),
             fontStyle: FontStyle.italic,
           ),
@@ -478,97 +476,6 @@ class _ReconstitutionCalculatorPageState
                 padding: const EdgeInsets.all(kSpacingL),
                 child: Column(
                   children: [
-                    ValueListenableBuilder(
-                      valueListenable: _savedRepo.listenable(),
-                      builder: (context, box, _) {
-                        final saved = _savedRepo.allSorted(
-                          includeOwned: false,
-                        );
-                        final hasSaved = saved.isNotEmpty;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            LabelFieldRow(
-                              label: 'Load',
-                              lightText: true,
-                              field: SmallDropdown36<String>(
-                                value: _loadedSavedId ?? 'new',
-                                items: [
-                                  const DropdownMenuItem(
-                                    value: 'new',
-                                    child: Center(child: Text('New')),
-                                  ),
-                                  ...saved.map(
-                                    (item) => DropdownMenuItem(
-                                      value: item.id,
-                                      child: Center(
-                                        child: Text(
-                                          item.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  if (value == null || value == 'new') {
-                                    _startNewReconstitution();
-                                    return;
-                                  }
-                                  final selected = saved.where(
-                                    (s) => s.id == value,
-                                  );
-                                  if (selected.isEmpty) return;
-                                  _loadSavedCalculation(selected.first);
-                                },
-                              ),
-                            ),
-                            helper(
-                              hasSaved
-                                  ? 'Select a saved reconstitution or start a new one.'
-                                  : 'No saved reconstitutions yet.',
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: hasSaved ? _openSavedSheet : null,
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: fg.withValues(
-                                        alpha: 0.92,
-                                      ),
-                                      side: BorderSide(
-                                        color: fg.withValues(alpha: 0.25),
-                                        width: kBorderWidthThin,
-                                      ),
-                                    ),
-                                    icon: const Icon(Icons.bookmarks_outlined),
-                                    label: const Text('Manage saved'),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                FilledButton.icon(
-                                  onPressed: _canSave ? _saveCurrent : null,
-                                  icon: const Icon(Icons.save),
-                                  label: const Text('Save'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Divider(
-                      color: theme.brightness == Brightness.dark
-                          ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
-                          : fg.withValues(alpha: 0.12),
-                      height: 1,
-                    ),
-                    const SizedBox(height: 12),
                     LabelFieldRow(
                       label: 'Medication Name',
                       lightText: true,
@@ -577,7 +484,7 @@ class _ReconstitutionCalculatorPageState
                           controller: _medNameCtrl,
                           decoration: buildCompactFieldDecoration(
                             context: context,
-                            hint: 'Optional for calculation',
+                            hint: 'Optional (required to save)',
                           ),
                           onChanged: (_) => setState(() {}),
                           textAlign: TextAlign.center,
@@ -587,7 +494,7 @@ class _ReconstitutionCalculatorPageState
                       ),
                     ),
                     helper(
-                      'Optional. Not used in calculations — only used for naming/searching saved reconstitutions.',
+                      'Optional. Not used in calculations — only used when saving or searching.',
                     ),
                     const SizedBox(height: kSpacingS),
                     Padding(
@@ -595,9 +502,7 @@ class _ReconstitutionCalculatorPageState
                       child: Text(
                         'Strength',
                         style: fieldLabelStyle(context)?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimary
+                          color: Theme.of(context).colorScheme.onPrimary
                               .withValues(alpha: kReconTextHighOpacity),
                         ),
                       ),
@@ -675,7 +580,8 @@ class _ReconstitutionCalculatorPageState
                                       double.tryParse(_strengthCtrl.text) ?? 0;
                                   final nv = (v - 1).clamp(0, 10000);
                                   setState(() {
-                                    _strengthCtrl.text = nv == nv.roundToDouble()
+                                    _strengthCtrl.text =
+                                        nv == nv.roundToDouble()
                                         ? nv.toInt().toString()
                                         : nv.toStringAsFixed(2);
                                   });
@@ -685,7 +591,8 @@ class _ReconstitutionCalculatorPageState
                                       double.tryParse(_strengthCtrl.text) ?? 0;
                                   final nv = (v + 1).clamp(0, 10000);
                                   setState(() {
-                                    _strengthCtrl.text = nv == nv.roundToDouble()
+                                    _strengthCtrl.text =
+                                        nv == nv.roundToDouble()
                                         ? nv.toInt().toString()
                                         : nv.toStringAsFixed(2);
                                   });
@@ -701,7 +608,105 @@ class _ReconstitutionCalculatorPageState
                       ],
                     ),
                     helper(
-                      'Strength (S): total drug amount in the vial BEFORE mixing with liquid. Use the unit shown on the vial label.',
+                      'Required. Strength (S) is the total drug amount in the vial (before mixing). Use the unit from the vial label.',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: panelDecoration(),
+                padding: const EdgeInsets.all(kSpacingL),
+                child: Column(
+                  children: [
+                    ValueListenableBuilder(
+                      valueListenable: _savedRepo.listenable(),
+                      builder: (context, box, _) {
+                        final saved = _savedRepo.allSorted(includeOwned: false);
+                        final hasSaved = saved.isNotEmpty;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            LabelFieldRow(
+                              label: 'Load',
+                              lightText: true,
+                              field: SmallDropdown36<String>(
+                                value: _loadedSavedId ?? 'new',
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: 'new',
+                                    child: Center(child: Text('New')),
+                                  ),
+                                  ...saved.map(
+                                    (item) => DropdownMenuItem(
+                                      value: item.id,
+                                      child: Center(
+                                        child: Text(
+                                          item.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  if (value == null || value == 'new') {
+                                    _startNewReconstitution();
+                                    return;
+                                  }
+                                  final selected = saved.where(
+                                    (s) => s.id == value,
+                                  );
+                                  if (selected.isEmpty) return;
+                                  _loadSavedCalculation(selected.first);
+                                },
+                              ),
+                            ),
+                            helper(
+                              hasSaved
+                                  ? 'Select a saved reconstitution or start a new one.'
+                                  : 'No saved reconstitutions yet.',
+                            ),
+                            if (_medNameCtrl.text.trim().isEmpty) ...[
+                              const SizedBox(height: kSpacingXS),
+                              helper(
+                                'Saving will prompt you for a medication name if left blank.',
+                              ),
+                            ],
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: hasSaved
+                                        ? _openSavedSheet
+                                        : null,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: fg.withValues(
+                                        alpha: 0.92,
+                                      ),
+                                      side: BorderSide(
+                                        color: fg.withValues(alpha: 0.25),
+                                        width: kBorderWidthThin,
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.bookmarks_outlined),
+                                    label: const Text('Manage saved'),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                FilledButton.icon(
+                                  onPressed: _canSave ? _saveCurrent : null,
+                                  icon: const Icon(Icons.save),
+                                  label: const Text('Save'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
