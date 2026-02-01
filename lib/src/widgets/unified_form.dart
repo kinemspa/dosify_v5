@@ -162,10 +162,23 @@ class CollapsibleSectionFormCard extends StatelessWidget {
   final Color? backgroundColor;
   final bool reserveReorderHandleGutterWhenCollapsed;
 
+  Widget? _normalizeTrailing(Widget? trailing) {
+    if (trailing == null) return null;
+    if (trailing is IconButton) {
+      return ConstrainedBox(
+        constraints: kTightIconButtonConstraints,
+        child: Center(child: trailing),
+      );
+    }
+    return trailing;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final normalizedTrailing = _normalizeTrailing(trailing);
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +186,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
         InkWell(
           onTap: () => onExpandedChanged(!isExpanded),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(kSpacingM),
             child: Row(
               children: [
                 if (!isExpanded && reserveReorderHandleGutterWhenCollapsed)
@@ -188,7 +201,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                     style: titleStyle ?? sectionTitleStyle(context),
                   ),
                 ),
-                if (trailing != null) trailing!,
+                if (normalizedTrailing != null) normalizedTrailing,
                 AnimatedRotation(
                   turns: isExpanded ? 0 : -0.25,
                   duration: kAnimationNormal,
@@ -209,7 +222,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
               : CrossFadeState.showFirst,
           firstChild: const SizedBox.shrink(),
           secondChild: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            padding: const EdgeInsets.fromLTRB(kSpacingM, 0, kSpacingM, kSpacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,
@@ -233,7 +246,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                         )
                       : cs.surfaceContainerLowest)
                 : cs.primary.withValues(alpha: isDark ? kOpacityFaint : 0.03)),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         border: neutral
             ? Border.all(
                 color: cs.outlineVariant.withValues(
@@ -264,6 +277,43 @@ class CollapsibleSectionFormCard extends StatelessWidget {
               ],
       ),
       child: content,
+    );
+  }
+}
+
+/// Standard hint for scrollable/overflowing card content.
+///
+/// Used to communicate that a preview list can be scrolled for more items.
+class MoreContentIndicator extends StatelessWidget {
+  const MoreContentIndicator({
+    super.key,
+    this.label = 'Scroll for more',
+    this.icon = Icons.keyboard_arrow_down_rounded,
+  });
+
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final fg = cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: kSpacingXS),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: helperTextStyle(context)?.copyWith(color: fg),
+            ),
+            const SizedBox(width: kSpacingXS),
+            Icon(icon, size: kIconSizeLarge, color: fg),
+          ],
+        ),
+      ),
     );
   }
 }
