@@ -2,9 +2,28 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Service for calculating schedule occurrences
 class ScheduleOccurrenceService {
+  static const int _minutesPerDay = 24 * 60;
+
   static int _lastDayOfMonth(DateTime date) {
     final last = DateTime(date.year, date.month + 1, 0);
     return last.day;
+  }
+
+  static List<int> _normalizedTimesOfDay(Schedule schedule) {
+    final raw =
+        (schedule.timesOfDay == null || schedule.timesOfDay!.isEmpty)
+            ? <int>[schedule.minutesOfDay]
+            : schedule.timesOfDay!;
+
+    final normalized =
+        raw.where((m) => m >= 0 && m < _minutesPerDay).toSet().toList()
+          ..sort();
+
+    if (normalized.isNotEmpty) return normalized;
+
+    // Fall back to legacy single-time field, clamped for safety.
+    final fallback = schedule.minutesOfDay.clamp(0, _minutesPerDay - 1);
+    return <int>[fallback];
   }
 
   static bool _isMonthlyScheduledOnDay(Schedule schedule, DateTime date) {
@@ -46,7 +65,7 @@ class ScheduleOccurrenceService {
   /// - Multiple times per day
   static DateTime? nextOccurrence(Schedule schedule, {DateTime? from}) {
     final now = from ?? DateTime.now();
-    final times = schedule.timesOfDay ?? [schedule.minutesOfDay];
+    final times = _normalizedTimesOfDay(schedule);
 
     // Look ahead up to 60 days
     for (var d = 0; d < 60; d++) {
@@ -124,7 +143,7 @@ class ScheduleOccurrenceService {
     required DateTime referenceNow,
   }) {
     final occurrences = <DateTime>[];
-    final times = schedule.timesOfDay ?? [schedule.minutesOfDay];
+    final times = _normalizedTimesOfDay(schedule);
 
     var current = DateTime(start.year, start.month, start.day);
     final endDate = DateTime(end.year, end.month, end.day);
