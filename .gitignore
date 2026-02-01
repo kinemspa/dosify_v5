@@ -172,3 +172,6 @@ app.*.symbols
 
 # Backlog checklists are a local collaboration scratchpad.
 backlog/
+
+# Local editor settings (do not track)
+.vscode/settings.json
