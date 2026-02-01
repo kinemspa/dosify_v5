@@ -21,6 +21,8 @@ class DetailPageScaffold extends StatelessWidget {
     this.expandedHeight,
     this.collapsedHeight,
     this.toolbarHeight,
+    this.showEditInMenu = true,
+    this.showDeleteInMenu = true,
     super.key,
   });
 
@@ -34,6 +36,8 @@ class DetailPageScaffold extends StatelessWidget {
   final double? expandedHeight;
   final double? collapsedHeight;
   final double? toolbarHeight;
+  final bool showEditInMenu;
+  final bool showDeleteInMenu;
 
   @override
   Widget build(BuildContext context) {
@@ -81,47 +85,53 @@ class DetailPageScaffold extends StatelessWidget {
                     case 'settings':
                       context.go('/settings');
                     case 'edit':
+                      if (!showEditInMenu) return;
                       onEdit();
                     case 'delete':
+                      if (!showDeleteInMenu) return;
                       await onDelete();
                   }
                 },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'home', child: Text('Home')),
-                  PopupMenuItem(
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'home', child: Text('Home')),
+                  const PopupMenuItem(
                     value: 'medications',
                     child: Text('Medications'),
                   ),
-                  PopupMenuItem(value: 'supplies', child: Text('Supplies')),
-                  PopupMenuItem(value: 'schedules', child: Text('Schedules')),
-                  PopupMenuItem(value: 'calendar', child: Text('Calendar')),
-                  PopupMenuItem(
+                  const PopupMenuItem(value: 'supplies', child: Text('Supplies')),
+                  const PopupMenuItem(value: 'schedules', child: Text('Schedules')),
+                  const PopupMenuItem(value: 'calendar', child: Text('Calendar')),
+                  const PopupMenuItem(
                     value: 'reconstitution',
                     child: Text('Reconstitution Calculator'),
                   ),
-                  PopupMenuItem(value: 'analytics', child: Text('Analytics')),
-                  PopupMenuItem(value: 'settings', child: Text('Settings')),
-                  PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit),
-                        SizedBox(width: 12),
-                        Text('Edit'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete_outline),
-                        SizedBox(width: 12),
-                        Text('Delete'),
-                      ],
-                    ),
-                  ),
+                  const PopupMenuItem(value: 'analytics', child: Text('Analytics')),
+                  const PopupMenuItem(value: 'settings', child: Text('Settings')),
+                  if (showEditInMenu || showDeleteInMenu) ...[
+                    const PopupMenuDivider(),
+                    if (showEditInMenu)
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit),
+                            SizedBox(width: 12),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                    if (showDeleteInMenu)
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline),
+                            SizedBox(width: 12),
+                            Text('Delete'),
+                          ],
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ],

@@ -234,6 +234,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             expandedHeight: kDetailHeaderExpandedHeightCompact,
             onEdit: () => _openEditScheduleDialog(s),
             onDelete: () => _confirmDelete(context, s),
+            showEditInMenu: false,
+            showDeleteInMenu: false,
             statsBannerContent: ScheduleDetailHeaderBanner(
               schedule: s,
               nextDose: nextDose,
