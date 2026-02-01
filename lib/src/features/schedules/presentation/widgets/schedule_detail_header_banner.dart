@@ -23,6 +23,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return DetailStatsBanner(
       title: title,
+      centerTitle: false,
       headerChips: null,
       row1Left: DetailStatItem(
         icon: Icons.medication_outlined,

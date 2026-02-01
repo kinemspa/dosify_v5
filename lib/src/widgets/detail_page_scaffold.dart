@@ -57,6 +57,8 @@ class DetailPageScaffold extends StatelessWidget {
             backgroundColor: Colors.transparent,
             foregroundColor: headerForeground,
             elevation: 0,
+            title: const SizedBox.shrink(),
+            centerTitle: true,
             actions: [
               if (topRightAction != null)
                 Padding(
@@ -144,89 +146,78 @@ class DetailPageScaffold extends StatelessWidget {
                     ((expanded - constraints.maxHeight) / (expanded - collapsed))
                         .clamp(0.0, 1.0);
 
+                final top = MediaQuery.of(context).padding.top;
+                final barHeight = toolbarHeight ?? kDetailHeaderCollapsedHeight;
+
                 return Container(
                   decoration: const BoxDecoration(
                     gradient: kDetailHeaderGradient,
                   ),
-                  child: FlexibleSpaceBar(
-                    titlePadding: EdgeInsets.only(
-                      left: scrollProgress > 0.5 ? 0 : kToolbarHeight,
-                      bottom: kSpacingL,
-                    ),
-                    centerTitle: scrollProgress > 0.5,
-                    title: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final appBarHeight = constraints.maxHeight;
-                        final expanded =
-                            expandedHeight ?? kDetailHeaderExpandedHeight;
-                        final collapsed =
-                            collapsedHeight ?? kDetailHeaderCollapsedHeight;
-                        final scrollProgress =
-                            ((expanded - appBarHeight) / (expanded - collapsed))
-                                .clamp(0.0, 1.0);
-
-                        final textStyle = detailCollapsedTitleTextStyle(
-                          context,
-                        );
-
-                        if (expandedTitle == null || expandedTitle!.isEmpty) {
-                          return Opacity(
+                  child: Stack(
+                    children: [
+                      // Collapsed title in the top bar (matches Medication Details)
+                      Positioned(
+                        top: top,
+                        left: 0,
+                        right: 0,
+                        height: barHeight,
+                        child: IgnorePointer(
+                          child: Opacity(
                             opacity: scrollProgress,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: kToolbarHeight,
-                              ),
-                              child: Text(
-                                title,
-                                style: textStyle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: kToolbarHeight,
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    if (expandedTitle != null &&
+                                        expandedTitle!.trim().isNotEmpty)
+                                      Opacity(
+                                        opacity: 1 - scrollProgress,
+                                        child: Text(
+                                          expandedTitle!,
+                                          style:
+                                              detailCollapsedTitleTextStyle(context),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    Opacity(
+                                      opacity: scrollProgress,
+                                      child: Text(
+                                        title,
+                                        style: detailCollapsedTitleTextStyle(
+                                          context,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          );
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: kToolbarHeight,
                           ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Opacity(
-                                opacity: 1 - scrollProgress,
-                                child: Text(
-                                  expandedTitle!,
-                                  style: textStyle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Opacity(
-                                opacity: scrollProgress,
-                                child: Text(
-                                  title,
-                                  style: textStyle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    background: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          kPageHorizontalPadding,
-                          56,
-                          kPageHorizontalPadding,
-                          kPageHorizontalPadding,
                         ),
-                        child: statsBannerContent,
                       ),
-                    ),
+
+                      // Banner content
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            kPageHorizontalPadding,
+                            56,
+                            kPageHorizontalPadding,
+                            kPageHorizontalPadding,
+                          ),
+                          child: statsBannerContent,
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -255,6 +246,7 @@ class DetailStatsBanner extends StatelessWidget {
     required this.row3Left,
     required this.row3Right,
     this.headerChips,
+    this.centerTitle = true,
     super.key,
   });
 
@@ -266,22 +258,25 @@ class DetailStatsBanner extends StatelessWidget {
   final Widget row3Left;
   final Widget row3Right;
   final Widget? headerChips;
+  final bool centerTitle;
 
   @override
   Widget build(BuildContext context) {
+    final titleWidget = Text(
+      title,
+      style: detailHeaderBannerTitleTextStyle(context),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      textAlign: centerTitle ? TextAlign.center : TextAlign.left,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title - centered
-        Center(
-          child: Text(
-            title,
-            style: detailHeaderBannerTitleTextStyle(context),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
+        // Title
+        centerTitle
+            ? Center(child: titleWidget)
+            : Align(alignment: Alignment.centerLeft, child: titleWidget),
         if (headerChips != null) ...[
           const SizedBox(height: kSpacingS),
           headerChips!,
