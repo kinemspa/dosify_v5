@@ -436,6 +436,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     BuildContext context,
     Schedule s,
   ) {
+    final cs = Theme.of(context).colorScheme;
     final startAtLabel = s.startAt == null
         ? 'Not set'
         : _formatDateTime(context, s.startAt!);
@@ -483,6 +484,17 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         value: endAtLabel,
         onTap: () => context.push('/schedules/edit/${s.id}'),
         maxLines: 2,
+      ),
+      const SizedBox(height: kSpacingL),
+      Center(
+        child: TextButton.icon(
+          onPressed: () => _confirmDelete(context, s),
+          icon: Icon(Icons.delete_outline, color: cs.error),
+          label: Text(
+            'Delete Schedule',
+            style: helperTextStyle(context, color: cs.error),
+          ),
+        ),
       ),
     ];
   }
