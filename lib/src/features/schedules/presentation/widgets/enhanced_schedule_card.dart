@@ -25,6 +25,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_serv
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/next_dose_row.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
@@ -172,7 +173,10 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             payload:
                 'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
             actions: NotificationService.upcomingDoseActions,
-            expandedLines: <String>[widget.schedule.name, 'Snoozed until $time'],
+            expandedLines: <String>[
+              widget.schedule.name,
+              'Snoozed until $time',
+            ],
           );
         }
 
@@ -377,44 +381,56 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                 InkWell(
                   onTap: () => setState(() => _isExpanded = !_isExpanded),
                   borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Schedule name (primary info)
-                      Expanded(
-                        child: Text(
-                          widget.schedule.name,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: kFontWeightMedium,
-                            color: colorScheme.onSurface,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      // Frequency (secondary info) - no time/day in saved schedule rows
-                      Text(
-                        _getFrequencyLabelShort(),
-                        style: mutedTextStyle(context),
-                      ),
-                      const SizedBox(width: kSpacingS),
-                      // Status on the right
-                      if (!_isExpanded) ...[
-                        ScheduleStatusChip(schedule: widget.schedule),
-                        const SizedBox(width: kSpacingS),
-                      ],
-                      // Expand/collapse control
-                      Padding(
-                        padding: const EdgeInsets.all(kSpacingXS),
-                        child: AnimatedRotation(
-                          turns: _isExpanded ? 0.5 : 0,
-                          duration: kAnimationFast,
-                          child: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            size: kIconSizeMedium,
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: kOpacityMedium,
+                      Row(
+                        children: [
+                          // Schedule name (primary info)
+                          Expanded(
+                            child: Text(
+                              widget.schedule.name,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: kFontWeightMedium,
+                                color: colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
+                          // Frequency (secondary info) - no time/day in saved schedule rows
+                          Text(
+                            _getFrequencyLabelShort(),
+                            style: mutedTextStyle(context),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          // Status on the right
+                          if (!_isExpanded) ...[
+                            ScheduleStatusChip(schedule: widget.schedule),
+                            const SizedBox(width: kSpacingS),
+                          ],
+                          // Expand/collapse control
+                          Padding(
+                            padding: const EdgeInsets.all(kSpacingXS),
+                            child: AnimatedRotation(
+                              turns: _isExpanded ? 0.5 : 0,
+                              duration: kAnimationFast,
+                              child: Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: kIconSizeMedium,
+                                color: colorScheme.onSurfaceVariant.withValues(
+                                  alpha: kOpacityMedium,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: kSpacingXS),
+                      NextDoseRow(
+                        schedule: widget.schedule,
+                        nextDose: nextDose,
+                        dense: true,
                       ),
                     ],
                   ),
@@ -455,7 +471,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                             _formatExpandedDoseDetails(
                               metrics: metrics,
                               strengthOrConcentrationLabel: strengthLabel,
-                              fallbackDose: '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                              fallbackDose:
+                                  '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
                             ),
                           ),
                           _buildDetailRow(context, 'Times', _getTimesText()),
@@ -467,11 +484,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                               'MMM d, yyyy',
                             ).format(widget.schedule.createdAt),
                           ),
-                          _buildDetailRow(
-                            context,
-                            'Ends',
-                            _getEndDateText(),
-                          ),
+                          _buildDetailRow(context, 'Ends', _getEndDateText()),
                         ],
                       ),
                       const SizedBox(height: kSpacingL),

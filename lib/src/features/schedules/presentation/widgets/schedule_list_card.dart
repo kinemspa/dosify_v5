@@ -12,7 +12,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_serv
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_instruction_text.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
+import 'package:dosifi_v5/src/widgets/next_dose_row.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 
 class ScheduleListCard extends StatelessWidget {
@@ -81,6 +81,8 @@ class ScheduleListCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: kSpacingXS),
+                  NextDoseRow(schedule: schedule, nextDose: next, dense: true),
                 ],
               ),
             ),
@@ -89,16 +91,6 @@ class ScheduleListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: kSpacingXS),
-                  child: NextDoseDateBadge(
-                    nextDose: next,
-                    isActive: schedule.isActive,
-                    dense: true,
-                    showNextLabel: true,
-                  ),
-                ),
-                const SizedBox(height: kSpacingXS),
                 Center(
                   child: ScheduleStatusChip(schedule: schedule, dense: true),
                 ),
@@ -147,6 +139,8 @@ class ScheduleListCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: kSpacingXS),
+          NextDoseRow(schedule: schedule, nextDose: next, dense: true),
+          const SizedBox(height: kSpacingXS),
           Row(
             children: [
               Expanded(
@@ -174,20 +168,7 @@ class ScheduleListCard extends StatelessWidget {
       trailing: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: kSpacingXS),
-            child: NextDoseDateBadge(
-              nextDose: next,
-              isActive: schedule.isActive,
-              dense: false,
-              showNextLabel: true,
-              nextLabelStyle: NextDoseBadgeLabelStyle.tall,
-            ),
-          ),
-          const SizedBox(height: kSpacingXS),
-          ScheduleStatusChip(schedule: schedule, dense: true),
-        ],
+        children: [ScheduleStatusChip(schedule: schedule, dense: true)],
       ),
     );
   }

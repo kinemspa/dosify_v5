@@ -497,6 +497,9 @@ const double kHelperTextBottomPadding = 6;
 /// Dose status badge spacing
 const double kDoseStatusBadgeVerticalPadding = 1;
 
+/// NextDoseRow layout
+const double kNextDoseRowSecondaryIndent = kIconSizeSmall + kSpacingXS;
+
 /// DoseCard status icon sizing
 const double kDoseCardStatusIconSize = kIconSizeLarge;
 const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
