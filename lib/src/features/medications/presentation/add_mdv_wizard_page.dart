@@ -210,7 +210,9 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   bool get _canProceed {
     switch (_currentStep) {
       case 0: // Basic Info
-        return _nameCtrl.text.trim().isNotEmpty;
+        // Medication name is required to save, but allow progressing through
+        // the wizard so users can run calculations first.
+        return true;
       case 1: // Strength & Reconstitution
         final strength = double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
         final volume = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
@@ -633,7 +635,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           neutral: true,
           children: [
             LabelFieldRow(
-              label: 'Name *',
+              label: 'Name',
               field: WizardTextField36(
                 controller: _nameCtrl,
                 hint: 'e.g., Peptide',
@@ -642,7 +644,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             buildHelperText(
               context,
-              'Enter the medication name',
+              'Optional for now. Required to save.',
               fullWidth: true,
             ),
             LabelFieldRow(
@@ -751,15 +753,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         const SizedBox(height: 16),
         _ReconstitutionInfoCard(
           medicationName: _nameCtrl.text.trim(),
+          enabled: (double.tryParse(_strengthValueCtrl.text.trim()) ?? 0) > 0,
           onCalculate: () async {
             final strength =
                 double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
             if (strength <= 0) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please enter medication strength first'),
-                ),
-              );
               return;
             }
             // Determine initial syringe size from saved result
@@ -1857,11 +1855,13 @@ class _ReconstitutionInfoCard extends StatelessWidget {
   const _ReconstitutionInfoCard({
     required this.onCalculate,
     required this.medicationName,
+    this.enabled = true,
     this.result,
   });
 
   final VoidCallback onCalculate;
   final String medicationName;
+  final bool enabled;
   final ReconstitutionResult? result;
 
   String _formatNoTrailing(double value) {
@@ -1874,109 +1874,125 @@ class _ReconstitutionInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = reconForegroundColor(context);
+
+    final onTap = enabled ? onCalculate : null;
+    final textAlpha = enabled ? kReconTextHighOpacity : kOpacityLow;
+
+    final headerFg = fg.withValues(alpha: textAlpha);
+    final chevronFg = fg.withValues(
+      alpha: enabled ? kReconTextNormalOpacity : kOpacityLow,
+    );
+    final bodyFg = fg.withValues(
+      alpha: enabled ? kReconTextNormalOpacity : kOpacityLow,
+    );
+    final highlight = enabled ? cs.primary : cs.primary.withValues(alpha: 0.35);
+
+    final Widget content;
+    if (result == null) {
+      content = Text(
+        'Multi-dose vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
+        style: mutedTextStyle(context)?.copyWith(color: bodyFg),
+      );
+    } else {
+      content = RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: reconSummaryBaseTextStyle(
+            context,
+            color: fg.withValues(alpha: textAlpha),
+          ),
+          children: [
+            const TextSpan(text: 'Reconstitute '),
+            if (medicationName.isNotEmpty) ...[
+              TextSpan(
+                text: medicationName,
+                style: reconSummaryMedicationNameTextStyle(
+                  context,
+                  compact: false,
+                  color: highlight,
+                  fontWeight: kFontWeightBold,
+                ),
+              ),
+              const TextSpan(text: ' '),
+            ],
+            const TextSpan(text: 'with '),
+            TextSpan(
+              text: '${_formatNoTrailing(result!.solventVolumeMl)} mL',
+              style: reconSummaryHugeVolumeTextStyle(
+                context,
+                color: highlight,
+                fontWeight: kFontWeightExtraBold,
+              ),
+            ),
+            if (result!.diluentName != null &&
+                result!.diluentName!.isNotEmpty) ...[
+              TextSpan(
+                text: ' of ',
+                style: reconSummaryOfTextStyle(
+                  context,
+                  compact: false,
+                  color: fg.withValues(
+                    alpha: enabled ? kReconTextMediumOpacity : kOpacityLow,
+                  ),
+                  fontWeight: kFontWeightNormal,
+                ),
+              ),
+              TextSpan(
+                text: result!.diluentName!,
+                style: reconSummaryMedicationNameTextStyle(
+                  context,
+                  compact: false,
+                  color: highlight,
+                  fontWeight: kFontWeightSemiBold,
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
     return Material(
-      color: Colors.transparent,
+      color: kColorTransparent,
       child: InkWell(
-        onTap: onCalculate,
-        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         child: Container(
           decoration: BoxDecoration(
             color: reconBackgroundDarkColor(context),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(kSpacingL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.calculate,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
+                  Icon(Icons.calculate, color: headerFg, size: kIconSizeMedium),
+                  const SizedBox(width: kSpacingS),
                   Expanded(
                     child: Text(
                       'Reconstitution Calculator',
-                      style: bodyTextStyle(context)?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontWeight: kFontWeightBold,
-                      ),
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(color: headerFg, fontWeight: kFontWeightBold),
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: Colors.white.withValues(alpha: 0.8),
-                  ),
+                  Icon(Icons.chevron_right, color: chevronFg),
                 ],
               ),
-              const SizedBox(height: 12),
-              if (result == null)
+              const SizedBox(height: kSpacingM),
+              content,
+              if (!enabled) ...[
+                const SizedBox(height: kSpacingS),
                 Text(
-                  'Multi-dose vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
-                  style: mutedTextStyle(
-                    context,
-                  )?.copyWith(color: Colors.white.withValues(alpha: 0.75)),
-                )
-              else ...[
-                // "Reconstitute [MEDNAME] with [AMOUNT] of [RECONNAME]"
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: reconSummaryBaseTextStyle(
-                      context,
-                      color: Theme.of(context).colorScheme.onPrimary.withValues(
-                        alpha: kReconTextHighOpacity,
-                      ),
-                    ),
-                    children: [
-                      const TextSpan(text: 'Reconstitute '),
-                      if (medicationName.isNotEmpty) ...[
-                        TextSpan(
-                          text: medicationName,
-                          style: reconSummaryMedicationNameTextStyle(
-                            context,
-                            compact: false,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: kFontWeightBold,
-                          ),
-                        ),
-                        const TextSpan(text: ' '),
-                      ],
-                      const TextSpan(text: 'with '),
-                      TextSpan(
-                        text:
-                            '${_formatNoTrailing(result!.solventVolumeMl)} mL',
-                        style: reconSummaryHugeVolumeTextStyle(
-                          context,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: kFontWeightExtraBold,
-                        ),
-                      ),
-                      if (result!.diluentName != null &&
-                          result!.diluentName!.isNotEmpty) ...[
-                        TextSpan(
-                          text: '  of  ',
-                          style: reconSummaryOfTextStyle(
-                            context,
-                            compact: false,
-                            color: Theme.of(context).colorScheme.onPrimary
-                                .withValues(alpha: kReconTextHighOpacity),
-                            fontWeight: kFontWeightNormal,
-                          ),
-                        ),
-                        TextSpan(
-                          text: result!.diluentName!,
-                          style: reconSummaryMedicationNameTextStyle(
-                            context,
-                            compact: false,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: kFontWeightSemiBold,
-                          ),
-                        ),
-                      ],
-                    ],
+                  'Please enter the vial strength above before using the reconstitution calculator.',
+                  style: helperTextStyle(context)?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: kFontWeightBold,
                   ),
                 ),
               ],
