@@ -129,7 +129,7 @@ class CalendarDayCell extends StatelessWidget {
 
   Color _getBackgroundColor(ColorScheme colorScheme) {
     if (isSelected) {
-      return colorScheme.primary;
+      return colorScheme.primary.withValues(alpha: kOpacitySubtle);
     }
     if (isToday) {
       return colorScheme.primary.withValues(alpha: kOpacityFaint);
@@ -142,7 +142,7 @@ class CalendarDayCell extends StatelessWidget {
 
   Color _getBorderColor(ColorScheme colorScheme) {
     if (isSelected) {
-      return colorScheme.primary.withValues(alpha: kOpacityTransparent);
+      return colorScheme.primary;
     }
     if (isToday) {
       return colorScheme.primary;
@@ -152,7 +152,7 @@ class CalendarDayCell extends StatelessWidget {
 
   double _getBorderWidth() {
     if (isSelected) {
-      return kBorderWidthThin;
+      return kBorderWidthThick;
     }
     if (isToday) {
       return kBorderWidthThin;
@@ -161,7 +161,7 @@ class CalendarDayCell extends StatelessWidget {
   }
 
   Color _getTextColor(ColorScheme colorScheme) {
-    if (isSelected) return colorScheme.onPrimary;
+    if (isSelected) return colorScheme.primary;
     if (isToday) return colorScheme.primary;
     if (!isCurrentMonth) {
       return colorScheme.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
