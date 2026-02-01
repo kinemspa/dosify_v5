@@ -1596,7 +1596,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       return Row(
         children: [
           Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 8),
+          const SizedBox(width: kSpacingS),
           Text(title, style: sectionTitleStyle(context)),
         ],
       );
@@ -1605,13 +1605,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   }
 
   Widget divvyIcon(IconData icon, {Color? color, double? size}) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: (color ?? Colors.blue).withValues(alpha: 0.1),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: color, size: size),
+    return Builder(
+      builder: (context) {
+        final cs = Theme.of(context).colorScheme;
+        final base = color ?? cs.primary;
+        return Container(
+          padding: const EdgeInsets.all(kSpacingS),
+          decoration: BoxDecoration(
+            color: base.withValues(alpha: kOpacityVeryLow),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: base, size: size),
+        );
+      },
     );
   }
 
