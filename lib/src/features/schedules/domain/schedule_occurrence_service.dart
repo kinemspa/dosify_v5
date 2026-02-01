@@ -4,6 +4,15 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 class ScheduleOccurrenceService {
   static const int _minutesPerDay = 24 * 60;
 
+  /// Returns a safe, non-empty, sorted list of minutes-from-midnight values.
+  ///
+  /// Intended for both UI formatting and scheduling logic to guard against
+  /// legacy schedules or corrupted data containing empty/out-of-range time
+  /// lists.
+  static List<int> normalizedTimesOfDay(Schedule schedule) {
+    return _normalizedTimesOfDay(schedule);
+  }
+
   static int _lastDayOfMonth(DateTime date) {
     final last = DateTime(date.year, date.month + 1, 0);
     return last.day;

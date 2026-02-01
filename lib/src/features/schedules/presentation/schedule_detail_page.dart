@@ -352,7 +352,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   Future<void> _editScheduleTimes(BuildContext context, Schedule s) async {
-    final initial = (s.timesOfDay ?? [s.minutesOfDay]).toList()..sort();
+    final initial =
+        ScheduleOccurrenceService.normalizedTimesOfDay(s).toList()..sort();
     final result = await showDialog<List<int>>(
       context: context,
       useRootNavigator: true,
@@ -708,11 +709,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     if (result == null) return;
 
     final now = DateTime.now();
-    final firstLocalMinutes = (s.timesOfDay ?? [s.minutesOfDay]).first;
+    final firstLocalMinutes =
+      ScheduleOccurrenceService.normalizedTimesOfDay(s).first;
     final minutesUtc = _computeUtcMinutes(firstLocalMinutes, now);
-    final timesUtc = (s.timesOfDay ?? [s.minutesOfDay])
-        .map((m) => _computeUtcMinutes(m, now))
-        .toList();
+    final timesUtc = ScheduleOccurrenceService.normalizedTimesOfDay(s)
+      .map((m) => _computeUtcMinutes(m, now))
+      .toList();
 
     switch (result.mode) {
       case _ScheduleEditMode.daysOfWeek:
@@ -1968,7 +1970,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final onDay = _hasDosesOnDate(date, s);
 
     if (onDay) {
-      final times = s.timesOfDay ?? [s.minutesOfDay];
+      final times = ScheduleOccurrenceService.normalizedTimesOfDay(s);
       for (final minutes in times) {
         final dt = DateTime(
           date.year,
@@ -2003,7 +2005,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   String _timesText(BuildContext context, Schedule schedule) {
-    final ts = schedule.timesOfDay ?? [schedule.minutesOfDay];
+    final ts = ScheduleOccurrenceService.normalizedTimesOfDay(schedule);
     return ts
         .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
         .join('\n');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 
 String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
   final dose = _doseLabel(schedule);
@@ -53,7 +54,8 @@ String _scheduleTypeLabel(Schedule s) {
 }
 
 String _timesLabel(BuildContext context, Schedule s) {
-  final times = (s.timesOfDay ?? [s.minutesOfDay]).toList()..sort();
+  final times =
+      ScheduleOccurrenceService.normalizedTimesOfDay(s).toList()..sort();
   if (times.isEmpty) return '—';
 
   final labels = times

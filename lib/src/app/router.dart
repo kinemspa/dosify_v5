@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/app/shell_scaffold.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
 import 'package:dosifi_v5/src/features/inventory/presentation/inventory_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/calendar_page.dart';
@@ -101,7 +102,40 @@ final router = GoRouter(
           path: '/schedules/detail/:id',
           name: 'scheduleDetail',
           builder: (context, state) {
-            final id = state.pathParameters['id']!;
+            final id = state.pathParameters['id'];
+            if (id == null || id.trim().isEmpty) {
+              return Scaffold(
+                body: SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(kSpacingXXL),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: kEmptyStateIconSize,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: kSpacingM),
+                          Text(
+                            'Invalid schedule link',
+                            style: sectionTitleStyle(context),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: kSpacingM),
+                          FilledButton(
+                            onPressed: () => context.pop(),
+                            child: const Text('Back'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
             return ScheduleDetailPage(scheduleId: id);
           },
         ),

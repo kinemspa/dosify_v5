@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 
@@ -86,17 +87,11 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
   }
 
   String _timesText(BuildContext context, Schedule s) {
-    final times = s.timesOfDay;
-    if (times != null && times.isNotEmpty) {
-      return times
-          .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
-          .map((t) => t.format(context))
-          .join(', ');
-    }
-
-    // Legacy single time.
-    final m = s.minutesOfDay;
-    return TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context);
+    final times = ScheduleOccurrenceService.normalizedTimesOfDay(s);
+    return times
+        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
+        .map((t) => t.format(context))
+        .join(', ');
   }
 
   String _timeUntil(DateTime dt) {

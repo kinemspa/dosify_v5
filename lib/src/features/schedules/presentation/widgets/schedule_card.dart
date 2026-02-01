@@ -35,15 +35,12 @@ class ScheduleCard extends StatelessWidget {
 
     if (dense) {
       // Compact Card (Concept 9)
-      final timeLabel = s.timesOfDay != null && s.timesOfDay!.isNotEmpty
-          ? TimeOfDay(
-              hour: s.timesOfDay!.first ~/ 60,
-              minute: s.timesOfDay!.first % 60,
-            ).format(context)
-          : TimeOfDay(
-              hour: s.minutesOfDay ~/ 60,
-              minute: s.minutesOfDay % 60,
-            ).format(context);
+      final firstMinutes =
+          ScheduleOccurrenceService.normalizedTimesOfDay(s).first;
+      final timeLabel = TimeOfDay(
+        hour: firstMinutes ~/ 60,
+        minute: firstMinutes % 60,
+      ).format(context);
 
       return GlassCardSurface(
         onTap: () =>
@@ -285,7 +282,7 @@ class ScheduleCard extends StatelessWidget {
   }
 
   String _timesLine(BuildContext context, Schedule s) {
-    final ts = s.timesOfDay ?? [s.minutesOfDay];
+    final ts = ScheduleOccurrenceService.normalizedTimesOfDay(s);
     final label = ts
         .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
         .join(', ');
@@ -329,7 +326,7 @@ class ScheduleCard extends StatelessWidget {
   /// For weekly schedules, occurrence is the day offset from today (0..).
   _OccurrenceResult? _nextOccurrenceAndIndex(Schedule s) {
     final now = DateTime.now();
-    final times = s.timesOfDay ?? [s.minutesOfDay];
+    final times = ScheduleOccurrenceService.normalizedTimesOfDay(s);
     // Weekly schedule: compute day offset as occurrence index
     final start = DateTime(now.year, now.month, now.day);
 
@@ -385,7 +382,7 @@ class ScheduleCard extends StatelessWidget {
 
   DateTime? _lastOccurrence(Schedule s) {
     final now = DateTime.now();
-    final times = s.timesOfDay ?? [s.minutesOfDay];
+    final times = ScheduleOccurrenceService.normalizedTimesOfDay(s);
     for (var d = 0; d < 60; d++) {
       final date = DateTime(
         now.year,
