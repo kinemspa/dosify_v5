@@ -21,7 +21,6 @@ import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/schedules_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -37,7 +36,6 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   static const _kCardToday = 'today';
   static const _kCardActivity = 'activity';
-  static const _kCardSchedules = 'schedules';
   static const _kCardReports = 'reports';
   static const _kCardCalendar = 'calendar';
 
@@ -46,7 +44,6 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   bool _isTodayExpanded = true;
   bool _isActivityExpanded = true;
-  bool _isSchedulesExpanded = true;
   bool _isReportsExpanded = true;
   bool _isCalendarExpanded = true;
 
@@ -157,7 +154,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     _cardOrder = <String>[
       _kCardToday,
       _kCardActivity,
-      _kCardSchedules,
       _kCardReports,
       _kCardCalendar,
     ];
@@ -183,7 +179,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final allowed = <String>{
       _kCardToday,
       _kCardActivity,
-      _kCardSchedules,
       _kCardReports,
       _kCardCalendar,
     };
@@ -221,7 +216,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final allCardsCollapsed =
         !_isTodayExpanded &&
       !_isActivityExpanded &&
-        !_isSchedulesExpanded &&
         !_isReportsExpanded &&
         !_isCalendarExpanded;
 
@@ -247,16 +241,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           },
           reserveReorderHandleGutterWhenCollapsed: true,
         );
-      },
-    );
-
-    final schedulesCard = SchedulesCard(
-      scope: const SchedulesCardScope.all(),
-      isExpanded: _isSchedulesExpanded,
-      reserveReorderHandleGutterWhenCollapsed: true,
-      onExpandedChanged: (expanded) {
-        if (!mounted) return;
-        setState(() => _isSchedulesExpanded = expanded);
       },
     );
 
@@ -436,7 +420,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final cards = <String, Widget>{
       _kCardToday: todayCard,
       _kCardActivity: activityCard,
-      _kCardSchedules: schedulesCard,
       _kCardReports: reportsCard,
       _kCardCalendar: calendarCard,
     };
@@ -460,7 +443,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                 cards[entry.value]!,
                 if (!(entry.value == _kCardToday && _isTodayExpanded) &&
                     !(entry.value == _kCardActivity && _isActivityExpanded) &&
-                    !(entry.value == _kCardSchedules && _isSchedulesExpanded) &&
                     !(entry.value == _kCardReports && _isReportsExpanded) &&
                     !(entry.value == _kCardCalendar && _isCalendarExpanded))
                   Positioned(

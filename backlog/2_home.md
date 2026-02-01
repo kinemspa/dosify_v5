@@ -20,7 +20,7 @@
 
 
 ### Schedules
-- [ ] This is not required. Remove this card
+- [x] This is not required. Remove this card
 
 ### Calendar
 - [ ] Needs to display the dose cards when a day is selected.
