@@ -5,7 +5,7 @@
 
 - [x] The med included seciton. It sucks. Can we fit the meds and date range on 1 row?
 - [x] Make the meds selection a dropdown with check marks. 
-- [ ] What is the purpose of the Taken, Skipped, Snoozed, inventory?
+- [x] What is the purpose of the Taken, Skipped, Snoozed, inventory?
 - [x] Activity items arent colour coded correctly. 
 - [x] Lets remove the datae icon fomr each activity icon. Put the Time in there instead. 
 - [ ] Place a date number on the left outside of the items. So Date line, then each itme for the date is cololectively in there. 

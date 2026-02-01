@@ -125,7 +125,7 @@ class _ActivityCardState extends State<ActivityCard> {
             ],
           ),
           const SizedBox(height: kSpacingS),
-          const DoseActionLegendRow(includeInventory: true),
+          const DoseActionLegendRow(includeInventory: true, showHelp: true),
           const SizedBox(height: kSpacingM),
           if (widget.includedMedicationIds.isEmpty)
             const UnifiedEmptyState(title: 'No medications selected')
