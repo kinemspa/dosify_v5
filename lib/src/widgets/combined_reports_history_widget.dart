@@ -108,8 +108,8 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
 
   @override
   ({IconData icon, Color color}) visualSpec(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return (icon: Icons.inventory_2_rounded, color: cs.onSurfaceVariant);
+    final spec = inventoryChangeVisualSpec(context, log.changeType);
+    return (icon: spec.icon, color: spec.color);
   }
 
   @override

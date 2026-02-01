@@ -31,6 +31,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 // Project imports:
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 
@@ -702,6 +703,49 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
     DoseAction.snoozed => (
       color: kDoseStatusSnoozedOrange,
       icon: Icons.snooze_rounded,
+    ),
+  };
+}
+
+/// Single source of truth for inventory change visuals.
+({Color color, IconData icon}) inventoryChangeVisualSpec(
+  BuildContext context,
+  InventoryChangeType changeType,
+) {
+  final cs = Theme.of(context).colorScheme;
+
+  return switch (changeType) {
+    InventoryChangeType.refillAdd => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.add_circle_rounded,
+    ),
+    InventoryChangeType.refillToMax => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.trending_up_rounded,
+    ),
+    InventoryChangeType.doseDeducted => (
+      color: kDoseStatusSnoozedOrange,
+      icon: Icons.remove_circle_rounded,
+    ),
+    InventoryChangeType.adHocDose => (
+      color: kDoseStatusSnoozedOrange,
+      icon: Icons.remove_circle_outline_rounded,
+    ),
+    InventoryChangeType.manualAdjustment => (
+      color: cs.primary,
+      icon: Icons.tune_rounded,
+    ),
+    InventoryChangeType.vialOpened => (
+      color: cs.primary,
+      icon: Icons.science_rounded,
+    ),
+    InventoryChangeType.vialRestocked => (
+      color: kDoseStatusTakenGreen,
+      icon: Icons.inventory_2_rounded,
+    ),
+    InventoryChangeType.expired => (
+      color: kDoseStatusSkippedRed,
+      icon: Icons.delete_forever_rounded,
     ),
   };
 }
