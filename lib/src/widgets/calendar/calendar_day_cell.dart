@@ -46,8 +46,19 @@ class CalendarDayCell extends StatelessWidget {
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final headerHeight =
-                kCalendarDayNumberPadding.vertical + kCalendarDayNumberSize;
+          final effectiveNumberPadding =
+            constraints.maxHeight <
+                (kCalendarDayNumberPadding.vertical +
+                  kCalendarDayNumberSize)
+              ? kNoPadding
+              : kCalendarDayNumberPadding;
+
+          final effectiveDayNumberSize =
+            (constraints.maxHeight - effectiveNumberPadding.vertical)
+              .clamp(0.0, kCalendarDayNumberSize);
+
+          final headerHeight =
+            effectiveNumberPadding.vertical + effectiveDayNumberSize;
             final indicatorsMinHeight =
                 kCalendarDayDoseIndicatorPadding.vertical +
               kCalendarDoseIndicatorSize;
@@ -64,24 +75,24 @@ class CalendarDayCell extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: kCalendarDayNumberPadding,
+                  padding: effectiveNumberPadding,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
                       SizedBox(
-                        width: kCalendarDayNumberSize,
-                        height: kCalendarDayNumberSize,
-                        child: Align(
+                        width: effectiveDayNumberSize,
+                        height: effectiveDayNumberSize,
+                        child: FittedBox(
                           alignment: Alignment.topLeft,
+                          fit: BoxFit.scaleDown,
                           child: Text(
                             '${date.day}',
-                            style: calendarDayNumberTextStyle(context)
-                                ?.copyWith(
-                                  color: _getTextColor(colorScheme),
-                                  fontWeight: (isToday || isSelected)
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
+                            style: calendarDayNumberTextStyle(context)?.copyWith(
+                              color: _getTextColor(colorScheme),
+                              fontWeight: (isToday || isSelected)
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
                           ),
                         ),
                       ),
