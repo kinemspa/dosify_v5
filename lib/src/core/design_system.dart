@@ -504,8 +504,8 @@ const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
 /// DoseCard status chip sizing
 const double kDoseCardStatusChipHeight = 28;
 const double kDoseCardStatusChipHeightCompact = 26;
-const double kDoseCardStatusChipWidth = 88;
-const double kDoseCardStatusChipWidthCompact = 80;
+const double kDoseCardStatusChipWidth = 80;
+const double kDoseCardStatusChipWidthCompact = 72;
 
 /// Button spacing
 const double kButtonSpacing = 8;
@@ -1484,9 +1484,9 @@ TextStyle? doseCardStatusChipLabelTextStyle(
   required Color color,
 }) {
   return helperTextStyle(context, color: color)?.copyWith(
-    fontSize: kFontSizeXXSmall,
-    fontWeight: kFontWeightExtraBold,
-    height: 1,
+    fontSize: kFontSizeXSmall,
+    fontWeight: kFontWeightBold,
+    height: kLineHeightTight,
   );
 }
 
