@@ -115,6 +115,17 @@ const double kCardMaxWidth = 800;
 /// Used for the embedded [DoseCalendarWidget] when shown on Home.
 const double kHomeMiniCalendarHeight = 420;
 
+/// Home page - Today (Up Next) preview.
+///
+/// Limit the visible portion of the Today list so the card stays compact,
+/// while still allowing users to scroll for more upcoming items.
+const int kHomeTodayMaxPreviewItems = 3;
+
+/// Max height for the scrollable Today preview list.
+///
+/// Tuned so ~3 [DoseCard] rows are visible before scrolling.
+const double kHomeTodayDosePreviewListMaxHeight = 280;
+
 /// Detail pages - compact calendar height.
 ///
 /// Used for embedded [DoseCalendarWidget] on detail screens.

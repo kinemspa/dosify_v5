@@ -625,6 +625,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             }).toList(growable: false);
 
         final hiddenCount = items.length - visibleItems.length;
+        final hasMoreThanPreview =
+            visibleItems.length > kHomeTodayMaxPreviewItems;
 
         return CollapsibleSectionFormCard(
           neutral: true,
@@ -653,7 +655,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               const UnifiedEmptyState(title: 'No doses today')
             else if (visibleItems.isEmpty)
               const UnifiedEmptyState(title: 'All doses hidden')
-            else
+            else if (!hasMoreThanPreview)
               for (final item in visibleItems) ...[
                 Builder(
                   builder: (context) {
@@ -755,7 +757,131 @@ class _HomePageState extends ConsumerState<HomePage> {
                   },
                 ),
                 const SizedBox(height: kSpacingS),
-              ],
+              ]
+            else ...[
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: kHomeTodayDosePreviewListMaxHeight,
+                ),
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.separated(
+                    padding: kNoPadding,
+                    itemCount: visibleItems.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: kSpacingS),
+                    itemBuilder: (context, i) {
+                      final item = visibleItems[i];
+                      final cs = Theme.of(context).colorScheme;
+                      final occurrenceId = DoseLogIds.occurrenceId(
+                        scheduleId: item.dose.scheduleId,
+                        scheduledTime: item.dose.scheduledTime,
+                      );
+
+                      return Dismissible(
+                        key: ValueKey<String>('home_today_dose_$occurrenceId'),
+                        direction: DismissDirection.endToStart,
+                        background: const SizedBox.shrink(),
+                        secondaryBackground: Container(
+                          alignment: Alignment.centerRight,
+                          padding: kStandardCardPadding,
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(
+                              kBorderRadiusLarge,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.visibility_off_rounded,
+                                size: kIconSizeMedium,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: kSpacingS),
+                              Text('Hide', style: helperTextStyle(context)),
+                            ],
+                          ),
+                        ),
+                        onDismissed: (_) {
+                          setState(
+                            () => _dismissedTodayDoseOccurrenceIds.add(
+                              occurrenceId,
+                            ),
+                          );
+                          unawaited(_persistDismissedTodayDoses());
+
+                          ScaffoldMessenger.of(context)
+                            ..clearSnackBars()
+                            ..showSnackBar(
+                              SnackBar(
+                                content: const Text('Dose hidden'),
+                                action: SnackBarAction(
+                                  label: 'Undo',
+                                  onPressed: () {
+                                    if (!mounted) return;
+                                    setState(
+                                      () => _dismissedTodayDoseOccurrenceIds
+                                          .remove(occurrenceId),
+                                    );
+                                    unawaited(_persistDismissedTodayDoses());
+                                  },
+                                ),
+                              ),
+                            );
+                        },
+                        child: DoseCard(
+                          dose: item.dose,
+                          medicationName: item.medication.name,
+                          strengthOrConcentrationLabel: item.strengthLabel,
+                          doseMetrics: item.metrics,
+                          isActive: item.schedule.isActive,
+                          medicationFormIcon:
+                              MedicationDisplayHelpers.medicationFormIcon(
+                                item.medication.form,
+                              ),
+                          doseNumber:
+                              ScheduleOccurrenceService.occurrenceNumber(
+                                item.schedule,
+                                item.dose.scheduledTime,
+                              ),
+                          onTap: () => widget._showDoseActionSheet(
+                            context,
+                            dose: item.dose,
+                            schedule: item.schedule,
+                            medication: item.medication,
+                          ),
+                          onQuickAction: (status) =>
+                              widget._showDoseActionSheet(
+                                context,
+                                dose: item.dose,
+                                schedule: item.schedule,
+                                medication: item.medication,
+                                initialStatus: status,
+                              ),
+                          onPrimaryAction: () => widget._showDoseActionSheet(
+                            context,
+                            dose: item.dose,
+                            schedule: item.schedule,
+                            medication: item.medication,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: kSpacingXS),
+              Center(
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: kIconSizeLarge,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant
+                      .withValues(alpha: kOpacityMediumLow),
+                ),
+              ),
+            ],
           ],
         );
       },

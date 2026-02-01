@@ -16,7 +16,7 @@
 
 
 ### Up Next - Today
-- [ ] Upnext should only display 3 items. Should show an indicator arrow that there are more items belwo and allow for scrolling. 
+- [x] Upnext should only display 3 items. Should show an indicator arrow that there are more items belwo and allow for scrolling. 
 
 
 ### Schedules
