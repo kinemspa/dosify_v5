@@ -110,6 +110,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   final ScrollController _dayStageScrollController = ScrollController();
   final ScrollController _selectedDayScrollController = ScrollController();
+  final DraggableScrollableController _selectedDayStageController =
+      DraggableScrollableController();
 
   ValueListenable<Box<DoseLog>>? _doseLogsListenable;
   ValueListenable<Box<Schedule>>? _schedulesListenable;
@@ -153,7 +155,29 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     _schedulesListenable?.removeListener(_scheduleReload);
     _dayStageScrollController.dispose();
     _selectedDayScrollController.dispose();
+    _selectedDayStageController.dispose();
     super.dispose();
+  }
+
+  double _selectedDayStageInitialRatio() {
+    return switch (_currentView) {
+      CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
+      CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
+      CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
+    };
+  }
+
+  void _snapSelectedDayStageToInitial() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_selectedDayStageController.isAttached) return;
+      final initial = _selectedDayStageInitialRatio();
+      _selectedDayStageController.animateTo(
+        initial,
+        duration: kAnimationNormal,
+        curve: kCurveEmphasized,
+      );
+    });
   }
 
   void _scheduleReload() {
@@ -254,6 +278,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       }
     });
     _loadDoses();
+
+    // When returning to week/month, ensure the stage snaps back to its
+    // initial "hug the calendar" position.
+    if (view != CalendarView.day && widget.variant == CalendarVariant.full) {
+      _snapSelectedDayStageToInitial();
+    }
   }
 
   void _onPreviousPressed() {
@@ -301,6 +331,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       }
     });
     _loadDoses();
+
+    if (_currentView != CalendarView.day && widget.variant == CalendarVariant.full) {
+      _snapSelectedDayStageToInitial();
+    }
   }
 
   void _onDateChanged(DateTime date) {
@@ -311,6 +345,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   void _onDayTap(DateTime date) {
+    DateTime? nextSelected;
     setState(() {
       // In Week/Month views, tapping a date selects that day.
       // Day view is only entered via explicit view switching.
@@ -320,9 +355,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           selected.month == date.month &&
           selected.day == date.day;
 
-      _selectedDate = isSameDay ? null : date;
+      nextSelected = isSameDay ? null : date;
+      _selectedDate = nextSelected;
       _currentDate = date;
     });
+
+    // When selecting a day, snap the stage to the "hug calendar" position.
+    if (nextSelected != null && widget.variant == CalendarVariant.full) {
+      _snapSelectedDayStageToInitial();
+    }
   }
 
   void _onDoseTapInternal(CalculatedDose dose) {
@@ -907,12 +948,16 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final peekRatio = kCalendarSelectedDayStagePeekRatio;
+    final minRatio = peekRatio < initialRatio ? peekRatio : initialRatio;
+
     return DraggableScrollableSheet(
+      controller: _selectedDayStageController,
       initialChildSize: initialRatio,
-      minChildSize: initialRatio,
+      minChildSize: minRatio,
       maxChildSize: 1.0,
       snap: true,
-      snapSizes: [initialRatio, 1.0],
+      snapSizes: [minRatio, initialRatio, 1.0],
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
@@ -924,38 +969,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               ),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: kBottomSheetHandleWidth,
-                  height: kBottomSheetHandleHeight,
-                  margin: kBottomSheetHandleMargin,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withValues(
-                      alpha: kOpacityVeryLow,
-                    ),
-                    borderRadius: BorderRadius.circular(
-                      kBottomSheetHandleRadius,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: kCalendarSelectedDayHeaderPadding,
-                child: Text(
-                  _formatSelectedDate(),
-                  style: calendarSelectedDayHeaderTextStyle(context),
-                ),
-              ),
-              Expanded(
-                child: _buildSelectedDayStageList(
-                  selectedDate: selectedDate,
-                  scrollController: scrollController,
-                ),
-              ),
-            ],
+          child: _buildSelectedDayStageList(
+            selectedDate: selectedDate,
+            scrollController: scrollController,
           ),
         );
       },
@@ -979,12 +995,55 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
     final hours = dosesByHour.keys.toList()..sort();
 
-    if (dayDoses.isEmpty) {
-      return const CalendarNoDosesState(showIcon: false, compact: true);
-    }
-
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final listBottomPadding = safeBottom + kPageBottomPadding;
+
+    Widget buildHandle(BuildContext context) {
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+      return Center(
+        child: Container(
+          width: kBottomSheetHandleWidth,
+          height: kBottomSheetHandleHeight,
+          margin: kCalendarSelectedDayStageHandleMargin,
+          decoration: BoxDecoration(
+            color: cs.onSurface.withValues(alpha: kOpacityVeryLow),
+            borderRadius: BorderRadius.circular(kBottomSheetHandleRadius),
+          ),
+        ),
+      );
+    }
+
+    Widget buildHeader(BuildContext context) {
+      return Padding(
+        padding: kCalendarSelectedDayStageHeaderPadding,
+        child: Text(
+          _formatSelectedDate(),
+          style: calendarSelectedDayHeaderTextStyle(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }
+
+    if (dayDoses.isEmpty) {
+      return Scrollbar(
+        controller: scrollController,
+        thumbVisibility: true,
+        thickness: kCalendarStageScrollbarThickness,
+        radius: kCalendarStageScrollbarThumbRadius,
+        child: ListView(
+          controller: scrollController,
+          padding: calendarStageListPadding(listBottomPadding),
+          children: [
+            buildHandle(context),
+            buildHeader(context),
+            const SizedBox(height: kSpacingS),
+            const CalendarNoDosesState(showIcon: false, compact: true),
+          ],
+        ),
+      );
+    }
 
     return Scrollbar(
       controller: scrollController,
@@ -994,15 +1053,20 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       child: ListView.builder(
         controller: scrollController,
         padding: calendarStageListPadding(listBottomPadding),
-        itemCount: hours.length,
+        itemCount: hours.length + 2,
         itemBuilder: (context, index) {
-          final hour = hours[index];
+          if (index == 0) return buildHandle(context);
+          if (index == 1) return buildHeader(context);
+
+          final hourIndex = index - 2;
+          final hour = hours[hourIndex];
           final hourDoses = dosesByHour[hour] ?? const [];
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (index != 0)
+              if (hourIndex == 0) const SizedBox(height: kSpacingS),
+              if (hourIndex != 0)
                 Divider(
                   height: kSpacingM,
                   thickness: kBorderWidthThin,

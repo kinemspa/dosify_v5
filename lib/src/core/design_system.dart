@@ -273,6 +273,21 @@ const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
   bottom: kSpacingS,
 );
 
+/// Selected-day stage sizing (full-screen calendar).
+///
+/// When collapsed, the stage should leave a visible "tab" at the bottom to
+/// indicate it can be dragged upward.
+const double kCalendarSelectedDayStagePeekRatio = 0.10;
+
+/// Selected-day stage header spacing (kept compact so it fits in peek mode).
+const EdgeInsets kCalendarSelectedDayStageHandleMargin = EdgeInsets.symmetric(
+  vertical: kSpacingS,
+);
+const EdgeInsets kCalendarSelectedDayStageHeaderPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: 0,
+);
+
 /// Calendar stage scroll indicator (Scrollbar)
 const double kCalendarStageScrollbarThickness = 3;
 const Radius kCalendarStageScrollbarThumbRadius = Radius.circular(
