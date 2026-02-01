@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -19,6 +21,9 @@ import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/schedules_card.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/unified_tinted_card_surface.dart';
@@ -37,6 +42,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
   bool _isScheduleDetailsExpanded = true;
   bool _isTodayExpanded = true;
+  bool _isActivityExpanded = true;
+  bool _isSchedulesExpanded = true;
+  bool _isCalendarExpanded = true;
+
+  ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
 
   Future<void> _openEditScheduleDialog(Schedule schedule) async {
     await showModalBottomSheet<void>(
@@ -365,6 +375,57 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           onExpandedChanged: (expanded) {
             if (!mounted) return;
             setState(() => _isTodayExpanded = expanded);
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: ValueListenableBuilder(
+          valueListenable: Hive.box<Medication>('medications').listenable(),
+          builder: (context, Box<Medication> medBox, _) {
+            final medId = s.medicationId;
+            final med =
+                medId == null || medId.isEmpty ? null : medBox.get(medId);
+
+            final meds = med == null ? <Medication>[] : <Medication>[med];
+            final included = med == null ? <String>{} : <String>{med.id};
+
+            return ActivityCard(
+              medications: meds,
+              includedMedicationIds: included,
+              rangePreset: _activityRangePreset,
+              onRangePresetChanged: (next) {
+                if (!mounted) return;
+                setState(() => _activityRangePreset = next);
+              },
+              isExpanded: _isActivityExpanded,
+              onExpandedChanged: (expanded) {
+                if (!mounted) return;
+                setState(() => _isActivityExpanded = expanded);
+              },
+            );
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: SchedulesCard(
+          scope: SchedulesCardScope.schedule(s.id),
+          isExpanded: _isSchedulesExpanded,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isSchedulesExpanded = expanded);
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: CalendarCard(
+          scope: CalendarCardScope.schedule(s.id),
+          isExpanded: _isCalendarExpanded,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isCalendarExpanded = expanded);
           },
         ),
       ),

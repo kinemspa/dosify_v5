@@ -37,6 +37,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
+import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
@@ -47,6 +48,8 @@ import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
+import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
@@ -126,6 +129,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   bool _isReportsExpanded = true; // Collapsible state for reports card
   bool _isReconstitutionExpanded = true; // Collapsible state for reconstitution
   bool _isTodayExpanded = true; // Collapsible state for today card
+  bool _isActivityExpanded = true; // Collapsible state for activity card
+  bool _isCalendarExpanded = true; // Collapsible state for calendar card
+
+  ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
 
   late final List<String> _cardOrder;
 
@@ -134,6 +141,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   static const String _kCardDetails = 'details';
   static const String _kCardReconstitution = 'reconstitution';
   static const String _kCardToday = 'today';
+  static const String _kCardActivity = 'activity';
+  static const String _kCardCalendar = 'calendar';
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -145,6 +154,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     _cardOrder = <String>[
       _kCardReconstitution,
       _kCardToday,
+      _kCardActivity,
+      _kCardCalendar,
       _kCardReports,
       _kCardSchedule,
       _kCardDetails,
@@ -658,6 +669,31 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           if (!mounted) return;
           setState(() => _isTodayExpanded = expanded);
         },
+        reserveReorderHandleGutterWhenCollapsed: true,
+      ),
+      _kCardActivity: ActivityCard(
+        medications: [med],
+        includedMedicationIds: {med.id},
+        rangePreset: _activityRangePreset,
+        onRangePresetChanged: (next) {
+          if (!mounted) return;
+          setState(() => _activityRangePreset = next);
+        },
+        isExpanded: _isActivityExpanded,
+        reserveReorderHandleGutterWhenCollapsed: true,
+        onExpandedChanged: (expanded) {
+          if (!mounted) return;
+          setState(() => _isActivityExpanded = expanded);
+        },
+      ),
+      _kCardCalendar: CalendarCard(
+        scope: CalendarCardScope.medication(med.id),
+        isExpanded: _isCalendarExpanded,
+        reserveReorderHandleGutterWhenCollapsed: true,
+        onExpandedChanged: (expanded) {
+          if (!mounted) return;
+          setState(() => _isCalendarExpanded = expanded);
+        },
       ),
       _kCardReports: MedicationReportsWidget(
         medication: med,
@@ -678,8 +714,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final hasReconstitutionCard = cards.containsKey(_kCardReconstitution);
 
     final allCardsCollapsed =
+        !_isTodayExpanded &&
+        !_isActivityExpanded &&
+        !_isCalendarExpanded &&
         !_isReportsExpanded &&
-      !_isTodayExpanded &&
         !_isScheduleExpanded &&
         !_isDetailsExpanded &&
         (!hasReconstitutionCard || !_isReconstitutionExpanded);
@@ -690,6 +728,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           return _isReportsExpanded;
         case _kCardToday:
           return _isTodayExpanded;
+        case _kCardActivity:
+          return _isActivityExpanded;
+        case _kCardCalendar:
+          return _isCalendarExpanded;
         case _kCardSchedule:
           return _isScheduleExpanded;
         case _kCardDetails:

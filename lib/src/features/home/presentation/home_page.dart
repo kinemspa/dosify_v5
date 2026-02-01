@@ -4,10 +4,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -15,16 +15,13 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/combined_reports_history_widget.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/dose_action_legend_row.dart';
 import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
+import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/schedules_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -220,7 +217,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     ref.watch(schedulesBoxChangesProvider);
     ref.watch(medicationsBoxChangesProvider);
     ref.watch(doseLogsBoxChangesProvider);
-    final scheduleBox = ref.watch(schedulesBoxProvider);
 
     final allCardsCollapsed =
         !_isTodayExpanded &&
@@ -254,64 +250,24 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
     );
 
-    final schedulesCard = Builder(
-      builder: (context) {
-        final schedules = scheduleBox.values
-            .where((s) => s.medicationId != null)
-            .toList();
-
-        schedules.sort((a, b) {
-          final an = ScheduleOccurrenceService.nextOccurrence(a) ?? DateTime(9999);
-          final bn = ScheduleOccurrenceService.nextOccurrence(b) ?? DateTime(9999);
-          return an.compareTo(bn);
-        });
-
-        return CollapsibleSectionFormCard(
-          neutral: true,
-          frameless: true,
-          title: 'Schedules',
-          isExpanded: _isSchedulesExpanded,
-          reserveReorderHandleGutterWhenCollapsed: true,
-          onExpandedChanged: (expanded) {
-            if (!mounted) return;
-            setState(() => _isSchedulesExpanded = expanded);
-          },
-          children: [
-            if (schedules.isEmpty)
-              const UnifiedEmptyState(title: 'No schedules')
-            else
-              for (final schedule in schedules) ...[
-                ScheduleListCard(schedule: schedule, dense: true),
-                const SizedBox(height: kSpacingS),
-              ],
-          ],
-        );
+    final schedulesCard = SchedulesCard(
+      scope: const SchedulesCardScope.all(),
+      isExpanded: _isSchedulesExpanded,
+      reserveReorderHandleGutterWhenCollapsed: true,
+      onExpandedChanged: (expanded) {
+        if (!mounted) return;
+        setState(() => _isSchedulesExpanded = expanded);
       },
     );
 
-    final calendarCard = CollapsibleSectionFormCard(
-      neutral: true,
-      frameless: true,
-      title: 'Calendar',
+    final calendarCard = CalendarCard(
+      scope: const CalendarCardScope.all(),
       isExpanded: _isCalendarExpanded,
       reserveReorderHandleGutterWhenCollapsed: true,
       onExpandedChanged: (expanded) {
         if (!mounted) return;
         setState(() => _isCalendarExpanded = expanded);
       },
-      children: [
-        SizedBox(
-          height: kHomeMiniCalendarHeight,
-          child: const DoseCalendarWidget(
-            variant: CalendarVariant.mini,
-            defaultView: CalendarView.month,
-            showSelectedDayPanel: false,
-            showHeaderOverride: true,
-            showViewToggleOverride: true,
-            embedInParentCard: true,
-          ),
-        ),
-      ],
     );
 
     final activityCard = ValueListenableBuilder(
@@ -335,76 +291,22 @@ class _HomePageState extends ConsumerState<HomePage> {
 
         final included = _reportIncludedMedicationIds!;
 
-        return CollapsibleSectionFormCard(
-          neutral: true,
-          frameless: true,
-          title: 'Activity',
+        return ActivityCard(
+          medications: meds,
+          includedMedicationIds: included,
+          onTapSelectIncludedMeds: () =>
+              _showIncludedMedsSelector(context, meds),
+          rangePreset: _reportsRangePreset,
+          onRangePresetChanged: (next) {
+            if (!mounted) return;
+            setState(() => _reportsRangePreset = next);
+          },
           isExpanded: _isActivityExpanded,
           reserveReorderHandleGutterWhenCollapsed: true,
           onExpandedChanged: (expanded) {
             if (!mounted) return;
             setState(() => _isActivityExpanded = expanded);
           },
-          children: [
-            if (meds.isEmpty)
-              const UnifiedEmptyState(title: 'No medications')
-            else ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          _showIncludedMedsSelector(context, meds),
-                      icon: const Icon(
-                        Icons.tune_rounded,
-                        size: kIconSizeSmall,
-                      ),
-                      label: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '${included.length}/${meds.length} meds',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  SizedBox(
-                    width: kCompactControlMaxWidth,
-                    child: SmallDropdown36<ReportTimeRangePreset>(
-                      value: _reportsRangePreset,
-                      items: ReportTimeRangePreset.values
-                          .map(
-                            (p) => DropdownMenuItem(
-                              value: p,
-                              child: Text(ReportTimeRange(p).label),
-                            ),
-                          )
-                          .toList(growable: false),
-                      onChanged: (next) {
-                        if (next == null) return;
-                        if (!mounted) return;
-                        setState(() => _reportsRangePreset = next);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: kSpacingS),
-              const DoseActionLegendRow(includeInventory: true),
-              const SizedBox(height: kSpacingM),
-              if (included.isEmpty)
-                const UnifiedEmptyState(title: 'No medications selected')
-              else
-                CombinedReportsHistoryWidget(
-                  includedMedicationIds: included,
-                  embedInParentCard: true,
-                  rangePreset: _reportsRangePreset,
-                ),
-            ],
-          ],
         );
       },
     );
