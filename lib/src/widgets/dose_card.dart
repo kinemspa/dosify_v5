@@ -184,38 +184,15 @@ class DoseCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (medicationFormIcon != null)
-                        Row(
-                          children: [
-                            Icon(
-                              medicationFormIcon,
-                              size: kIconSizeSmall,
-                              color: takeColor,
-                            ),
-                            const SizedBox(width: kSpacingXS),
-                            Expanded(
-                              child: Text(
-                                takeText,
-                                style: doseCardTakeMetricsTextStyle(
-                                  context,
-                                  color: takeColor,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Text(
-                          takeText,
-                          style: doseCardTakeMetricsTextStyle(
-                            context,
-                            color: takeColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      Text(
+                        takeText,
+                        style: doseCardTakeMetricsTextStyle(
+                          context,
+                          color: takeColor,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
