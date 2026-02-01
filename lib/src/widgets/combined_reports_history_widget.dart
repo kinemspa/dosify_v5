@@ -281,6 +281,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                               nextDose: item.time,
                               isActive: true,
                               dense: true,
+                              denseContent: NextDoseBadgeDenseContent.time,
                               showNextLabel: false,
                               showTodayIcon: true,
                             ),

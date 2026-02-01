@@ -4,12 +4,15 @@ import 'package:intl/intl.dart';
 
 enum NextDoseBadgeLabelStyle { standard, tall }
 
+enum NextDoseBadgeDenseContent { date, time }
+
 class NextDoseDateBadge extends StatelessWidget {
   const NextDoseDateBadge({
     required this.nextDose,
     required this.isActive,
     required this.dense,
     this.activeColor,
+    this.denseContent = NextDoseBadgeDenseContent.date,
     this.showNextLabel = false,
     this.showTodayIcon = true,
     this.nextLabelStyle = NextDoseBadgeLabelStyle.standard,
@@ -20,6 +23,7 @@ class NextDoseDateBadge extends StatelessWidget {
   final bool isActive;
   final bool dense;
   final Color? activeColor;
+  final NextDoseBadgeDenseContent denseContent;
   final bool showNextLabel;
   final bool showTodayIcon;
   final NextDoseBadgeLabelStyle nextLabelStyle;
@@ -61,15 +65,44 @@ class NextDoseDateBadge extends StatelessWidget {
         ? TimeOfDay.fromDateTime(nextDose!).format(context)
         : 'No upcoming';
 
-    final circleCore = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: circleBg,
-        border: Border.all(width: kBorderWidthThin, color: circleBorder),
-      ),
-      child: Center(
+    final timeTextParts = timeText.split(' ');
+    final timeMain = timeTextParts.isNotEmpty ? timeTextParts.first : timeText;
+    final timeSuffix = timeTextParts.length > 1
+        ? timeTextParts.sublist(1).join(' ')
+        : null;
+
+    final Widget circleContent;
+    if (dense && denseContent == NextDoseBadgeDenseContent.time) {
+      circleContent = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                hasNext ? timeMain : '—',
+                style: nextDoseBadgeDayTextStyle(
+                  context,
+                  dense: true,
+                  color: primaryTextColor,
+                ),
+              ),
+            ),
+            if (timeSuffix != null && timeSuffix.trim().isNotEmpty)
+              Text(
+                timeSuffix.toUpperCase(),
+                style: nextDoseBadgeMonthTextStyle(
+                  context,
+                  dense: true,
+                  color:
+                      primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                ),
+              ),
+          ],
+        ),
+      );
+    } else {
+      circleContent = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -100,12 +133,24 @@ class NextDoseDateBadge extends StatelessWidget {
                 style: nextDoseBadgeMonthTextStyle(
                   context,
                   dense: dense,
-                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                  color:
+                      primaryTextColor.withValues(alpha: kOpacityMediumHigh),
                 ),
               ),
           ],
         ),
+      );
+    }
+
+    final circleCore = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: circleBg,
+        border: Border.all(width: kBorderWidthThin, color: circleBorder),
       ),
+      child: circleContent,
     );
 
     final nextLabelPadding = nextLabelStyle == NextDoseBadgeLabelStyle.tall
