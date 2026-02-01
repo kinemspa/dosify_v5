@@ -2864,8 +2864,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           child: Text(
             label,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMedium),
+              fontWeight: kFontWeightMedium,
             ),
           ),
         ),
@@ -2874,14 +2874,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           child: Text(
             value,
             style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: highlighted ? FontWeight.bold : FontWeight.w500,
+              fontWeight: highlighted ? kFontWeightBold : kFontWeightMedium,
               fontStyle: isItalic || isPlaceholder
                   ? FontStyle.italic
                   : FontStyle.normal,
               color: warning
                   ? theme.colorScheme.error
                   : isPlaceholder
-                  ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
+                  ? theme.colorScheme.onSurface.withValues(alpha: kOpacityLow)
                   : theme.colorScheme.onSurface,
             ),
             maxLines: 2,
@@ -2893,7 +2893,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           Icon(
             Icons.chevron_right,
             size: 18,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+            color: theme.colorScheme.onSurface.withValues(alpha: kOpacityVeryLow),
           ),
       ],
     );
@@ -2903,9 +2903,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         color: kColorTransparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            padding: const EdgeInsets.symmetric(
+              vertical: kSpacingM,
+              horizontal: kSpacingS,
+            ),
             child: content,
           ),
         ),
@@ -2913,7 +2916,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.symmetric(
+        vertical: kSpacingM,
+        horizontal: kSpacingS,
+      ),
       child: content,
     );
   }
