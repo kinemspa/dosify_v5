@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
@@ -83,6 +84,19 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
       frameless: widget.frameless,
       title: widget.title,
       isExpanded: _expanded,
+      trailing: IconButton(
+        onPressed: () => context.pushNamed(
+          'calendar',
+          extra: <String, dynamic>{
+            'scheduleId': scheduleId,
+            'medicationId': medicationId,
+          },
+        ),
+        tooltip: 'Open full calendar',
+        constraints: kTightIconButtonConstraints,
+        padding: kNoPadding,
+        icon: const Icon(Icons.open_in_new_rounded, size: kIconSizeMedium),
+      ),
       reserveReorderHandleGutterWhenCollapsed:
           widget.reserveReorderHandleGutterWhenCollapsed,
       onExpandedChanged: _setExpanded,

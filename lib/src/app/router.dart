@@ -63,7 +63,14 @@ final router = GoRouter(
         GoRoute(
           path: '/calendar',
           name: 'calendar',
-          builder: (context, state) => const CalendarPage(),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return CalendarPage(
+              initialDate: extra?['initialDate'] as DateTime?,
+              scheduleId: extra?['scheduleId'] as String?,
+              medicationId: extra?['medicationId'] as String?,
+            );
+          },
         ),
         GoRoute(
           path: '/schedules',
