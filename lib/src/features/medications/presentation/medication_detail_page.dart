@@ -47,6 +47,7 @@ import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
+import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
 /// Modern, revolutionized medication detail screen with:
@@ -124,6 +125,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   bool _isScheduleExpanded = true; // Collapsible state for schedule card
   bool _isReportsExpanded = true; // Collapsible state for reports card
   bool _isReconstitutionExpanded = true; // Collapsible state for reconstitution
+  bool _isTodayExpanded = true; // Collapsible state for today card
 
   late final List<String> _cardOrder;
 
@@ -131,6 +133,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   static const String _kCardSchedule = 'schedule';
   static const String _kCardDetails = 'details';
   static const String _kCardReconstitution = 'reconstitution';
+  static const String _kCardToday = 'today';
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -141,6 +144,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     _scrollController = ScrollController();
     _cardOrder = <String>[
       _kCardReconstitution,
+      _kCardToday,
       _kCardReports,
       _kCardSchedule,
       _kCardDetails,
@@ -647,6 +651,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final cards = <String, Widget>{
       if (med.form == MedicationForm.multiDoseVial)
         _kCardReconstitution: _buildReconstitutionCard(context, med),
+      _kCardToday: TodayDosesCard(
+        scope: TodayDosesScope.medication(med.id),
+        isExpanded: _isTodayExpanded,
+        onExpandedChanged: (expanded) {
+          if (!mounted) return;
+          setState(() => _isTodayExpanded = expanded);
+        },
+      ),
       _kCardReports: MedicationReportsWidget(
         medication: med,
         isExpanded: _isReportsExpanded,
@@ -667,6 +679,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final allCardsCollapsed =
         !_isReportsExpanded &&
+      !_isTodayExpanded &&
         !_isScheduleExpanded &&
         !_isDetailsExpanded &&
         (!hasReconstitutionCard || !_isReconstitutionExpanded);
@@ -675,6 +688,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       switch (id) {
         case _kCardReports:
           return _isReportsExpanded;
+        case _kCardToday:
+          return _isTodayExpanded;
         case _kCardSchedule:
           return _isScheduleExpanded;
         case _kCardDetails:

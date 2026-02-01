@@ -18,6 +18,7 @@ import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
+import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/unified_tinted_card_surface.dart';
@@ -33,6 +34,9 @@ class ScheduleDetailPage extends StatefulWidget {
 
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   late final DoseLogRepository _doseLogRepo;
+
+  bool _isScheduleDetailsExpanded = true;
+  bool _isTodayExpanded = true;
 
   Future<void> _openEditScheduleDialog(Schedule schedule) async {
     await showModalBottomSheet<void>(
@@ -341,11 +345,27 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: SectionFormCard(
+        child: CollapsibleSectionFormCard(
           neutral: true,
           title: 'Schedule Details',
           titleStyle: reviewCardTitleStyle(context),
+          isExpanded: _isScheduleDetailsExpanded,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isScheduleDetailsExpanded = expanded);
+          },
           children: _buildScheduleDetailsCardChildren(context, s),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: TodayDosesCard(
+          scope: TodayDosesScope.schedule(s.id),
+          isExpanded: _isTodayExpanded,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isTodayExpanded = expanded);
+          },
         ),
       ),
     ];

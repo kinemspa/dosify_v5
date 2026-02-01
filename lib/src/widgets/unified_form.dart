@@ -143,6 +143,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
     super.key,
     this.leading,
     this.trailing,
+    this.titleStyle,
     this.neutral = false,
     this.frameless = false,
     this.backgroundColor,
@@ -155,6 +156,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
   final ValueChanged<bool> onExpandedChanged;
   final Widget? leading;
   final Widget? trailing;
+  final TextStyle? titleStyle;
   final bool neutral;
   final bool frameless;
   final Color? backgroundColor;
@@ -181,7 +183,10 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                   const SizedBox(width: kSpacingS),
                 ],
                 Expanded(
-                  child: Text(title, style: sectionTitleStyle(context)),
+                  child: Text(
+                    title,
+                    style: titleStyle ?? sectionTitleStyle(context),
+                  ),
                 ),
                 if (trailing != null) trailing!,
                 AnimatedRotation(
