@@ -300,7 +300,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     collapsedHeight: _kDetailHeaderCollapsedHeight,
                     floating: false,
                     pinned: true,
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: kColorTransparent,
                     foregroundColor: headerForeground,
                     iconTheme: IconThemeData(color: headerForeground),
                     actionsIconTheme: IconThemeData(color: headerForeground),
@@ -1116,19 +1116,21 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     height: 28,
                     decoration: BoxDecoration(
                       color: onPrimary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                       border: Border.all(
                         color: onPrimary.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
                     child: Material(
-                      color: Colors.transparent,
+                      color: kColorTransparent,
                       child: InkWell(
                         onTap: () => _showRefillDialog(context, med),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: kSpacingM,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1138,7 +1140,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 size: 14,
                                 color: onPrimary,
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: kSpacingXS + kSpacingXXS),
                               Text(
                                 'Refill',
                                 style: helperTextStyle(
@@ -1153,25 +1155,27 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     ),
                   ),
                   if (med.form == MedicationForm.multiDoseVial) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: kSpacingS),
                     Container(
                       height: 28,
                       decoration: BoxDecoration(
                         color: onPrimary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                         border: Border.all(
                           color: onPrimary.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
                       child: Material(
-                        color: Colors.transparent,
+                        color: kColorTransparent,
                         child: InkWell(
                           onTap: () =>
                               _showRestockSealedVialsDialog(context, med),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: kSpacingM,
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1181,7 +1185,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                   size: 14,
                                   color: onPrimary,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: kSpacingXS + kSpacingXXS),
                                 Text(
                                   'Restock',
                                   style: helperTextStyle(
@@ -2896,7 +2900,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     if (isEditable) {
       return Material(
-        color: Colors.transparent,
+        color: kColorTransparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
