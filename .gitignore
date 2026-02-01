@@ -84,6 +84,9 @@ unlinked_spec.ds
 # Tooling artifacts
 undefined/
 
+# Widget test golden failure artifacts (local-only)
+test/widgets/failures/
+
 # Android related
 **/android/**/gradle-wrapper.jar
 .gradle/
