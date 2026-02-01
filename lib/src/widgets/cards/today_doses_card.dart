@@ -53,7 +53,7 @@ class TodayDosesCard extends ConsumerStatefulWidget {
   const TodayDosesCard({
     super.key,
     required this.scope,
-    this.title = 'Today',
+    this.title = 'Up next',
     this.isExpanded,
     this.onExpandedChanged,
     this.reserveReorderHandleGutterWhenCollapsed = false,
@@ -80,6 +80,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
   static const _prefsDismissedPrefix = 'today_card_dismissed:';
 
   bool _internalExpanded = true;
+  bool _showAll = false;
   final Set<String> _dismissedOccurrenceIds = <String>{};
 
   bool get _expanded => widget.isExpanded ?? _internalExpanded;
@@ -88,7 +89,10 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
     widget.onExpandedChanged?.call(expanded);
     if (widget.isExpanded != null) return;
     if (!mounted) return;
-    setState(() => _internalExpanded = expanded);
+    setState(() {
+      _internalExpanded = expanded;
+      if (!expanded) _showAll = false;
+    });
   }
 
   String get _prefsKeyDismissed =>
@@ -266,6 +270,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
 
     final hiddenCount = items.length - visibleItems.length;
     final hasMoreThanPreview = visibleItems.length > kHomeTodayMaxPreviewItems;
+    final showScrollablePreview = hasMoreThanPreview && !_showAll;
 
     Widget buildDoseRow(
       BuildContext context,
@@ -381,7 +386,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       onExpandedChanged: _setExpanded,
       children: [
         if (items.isEmpty)
-          const UnifiedEmptyState(title: 'No doses today')
+          const UnifiedEmptyState(title: 'No upcoming doses')
         else if (visibleItems.isEmpty)
           const UnifiedEmptyState(title: 'All doses hidden')
         else if (!hasMoreThanPreview)
@@ -390,26 +395,41 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
             const SizedBox(height: kSpacingS),
           ]
         else ...[
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: kHomeTodayDosePreviewListMaxHeight,
-            ),
-            child: Scrollbar(
-              thumbVisibility: true,
-              child: ListView.separated(
-                padding: kNoPadding,
-                itemCount: visibleItems.length,
-                separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
-                itemBuilder: (context, i) => buildDoseRow(context, visibleItems[i]),
-              ),
-            ),
+          buildHelperText(
+            context,
+            'Tip: swipe left on a dose to hide it.',
+            fullWidth: true,
           ),
-          const SizedBox(height: kSpacingXS),
-          Center(
-            child: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: kIconSizeLarge,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+          const SizedBox(height: kSpacingS),
+          if (showScrollablePreview)
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: kHomeTodayDosePreviewListMaxHeight,
+              ),
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: ListView.separated(
+                  padding: kNoPadding,
+                  itemCount: visibleItems.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
+                  itemBuilder: (context, i) =>
+                      buildDoseRow(context, visibleItems[i]),
+                ),
+              ),
+            )
+          else
+            for (final item in visibleItems) ...[
+              buildDoseRow(context, item),
+              const SizedBox(height: kSpacingS),
+            ],
+          if (showScrollablePreview) const MoreContentIndicator(),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                setState(() => _showAll = !_showAll);
+              },
+              child: Text(_showAll ? 'Show less' : 'Show all'),
             ),
           ),
         ],
