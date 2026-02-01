@@ -94,7 +94,7 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
             defaultView: CalendarView.month,
             scheduleId: scheduleId,
             medicationId: medicationId,
-            showSelectedDayPanel: false,
+            showSelectedDayPanel: true,
             showHeaderOverride: true,
             showViewToggleOverride: true,
             embedInParentCard: true,
