@@ -26,7 +26,7 @@
 - [ ] Needs to display the dose cards when a day is selected.
 
 ### Reports
-- [ ] Remove for now. 
+- [x] Remove for now. 
 ## Notes
 - 
 

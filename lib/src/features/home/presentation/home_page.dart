@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,16 +13,11 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
-import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -36,7 +30,6 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   static const _kCardToday = 'today';
   static const _kCardActivity = 'activity';
-  static const _kCardReports = 'reports';
   static const _kCardCalendar = 'calendar';
 
   late final List<String> _cardOrder;
@@ -44,109 +37,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   bool _isTodayExpanded = true;
   bool _isActivityExpanded = true;
-  bool _isReportsExpanded = true;
   bool _isCalendarExpanded = true;
 
   ReportTimeRangePreset _reportsRangePreset = ReportTimeRangePreset.allTime;
-
-  Future<void> _showIncludedMedsSelector(
-    BuildContext context,
-    List<Medication> meds,
-  ) async {
-    final selected = Set<String>.from(_reportIncludedMedicationIds ?? {});
-
-    final updated = await showModalBottomSheet<Set<String>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        final cs = Theme.of(context).colorScheme;
-        return SafeArea(
-          child: Padding(
-            padding: buildBottomSheetPagePadding(context),
-            child: StatefulBuilder(
-              builder: (context, setModalState) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text('Included meds', style: sectionTitleStyle(context)),
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      'Choose which medications appear in Reports.',
-                      style: helperTextStyle(
-                        context,
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMedium,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: kSpacingM),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 420),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: meds.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: kSpacingXS),
-                        itemBuilder: (context, i) {
-                          final med = meds[i];
-                          final isSelected = selected.contains(med.id);
-                          return CheckboxListTile(
-                            value: isSelected,
-                            onChanged: (v) {
-                              setModalState(() {
-                                if (v ?? false) {
-                                  selected.add(med.id);
-                                } else {
-                                  selected.remove(med.id);
-                                }
-                              });
-                            },
-                            dense: true,
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: kNoPadding,
-                            title: Text(
-                              med.name,
-                              style: bodyTextStyle(context),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: kSpacingM),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Cancel'),
-                          ),
-                        ),
-                        const SizedBox(width: kSpacingS),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () =>
-                                Navigator.of(context).pop(selected),
-                            child: const Text('Done'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-
-    if (!mounted) return;
-    if (updated == null) return;
-    setState(() => _reportIncludedMedicationIds = updated);
-  }
 
   @override
   void initState() {
@@ -154,7 +47,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     _cardOrder = <String>[
       _kCardToday,
       _kCardActivity,
-      _kCardReports,
       _kCardCalendar,
     ];
     unawaited(_restoreCardOrder());
@@ -179,7 +71,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final allowed = <String>{
       _kCardToday,
       _kCardActivity,
-      _kCardReports,
       _kCardCalendar,
     };
     final filtered = _dedupeCardIdsPreserveOrder(
@@ -216,7 +107,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     final allCardsCollapsed =
         !_isTodayExpanded &&
       !_isActivityExpanded &&
-        !_isReportsExpanded &&
         !_isCalendarExpanded;
 
     void showCollapseAllInstruction() {
@@ -297,130 +187,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
     );
 
-    final reportsCard = ValueListenableBuilder(
-      valueListenable: Hive.box<Medication>('medications').listenable(),
-      builder: (context, Box<Medication> medBox, _) {
-        final meds = medBox.values.toList()
-          ..sort(
-            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-          );
-
-        if (_reportIncludedMedicationIds == null) {
-          _reportIncludedMedicationIds = meds.map((m) => m.id).toSet();
-        } else {
-          final currentIds = meds.map((m) => m.id).toSet();
-          _reportIncludedMedicationIds = _reportIncludedMedicationIds!
-              .intersection(currentIds);
-          if (_reportIncludedMedicationIds!.isEmpty && currentIds.isNotEmpty) {
-            _reportIncludedMedicationIds = currentIds;
-          }
-        }
-
-        final included = _reportIncludedMedicationIds!;
-        final range = ReportTimeRange(_reportsRangePreset).toUtcTimeRange();
-
-        return ValueListenableBuilder(
-          valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
-          builder: (context, Box<DoseLog> logBox, _) {
-            final logs = logBox.values
-                .where((l) => included.contains(l.medicationId))
-                .where((l) => range == null || range.contains(l.actionTime))
-                .toList(growable: false);
-
-            final taken = logs.where((l) => l.action == DoseAction.taken).length;
-            final skipped =
-                logs.where((l) => l.action == DoseAction.skipped).length;
-            final snoozed =
-                logs.where((l) => l.action == DoseAction.snoozed).length;
-
-            return CollapsibleSectionFormCard(
-              neutral: true,
-              frameless: true,
-              title: 'Reports',
-              isExpanded: _isReportsExpanded,
-              reserveReorderHandleGutterWhenCollapsed: true,
-              onExpandedChanged: (expanded) {
-                if (!mounted) return;
-                setState(() => _isReportsExpanded = expanded);
-              },
-              children: [
-                if (meds.isEmpty)
-                  const UnifiedEmptyState(title: 'No medications')
-                else ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${included.length}/${meds.length} meds included',
-                          style: helperTextStyle(context),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: kSpacingS),
-                      OutlinedButton.icon(
-                        onPressed: () => _showIncludedMedsSelector(context, meds),
-                        icon: const Icon(
-                          Icons.tune_rounded,
-                          size: kIconSizeSmall,
-                        ),
-                        label: const Text('Included meds'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: kSpacingS),
-                  ReportTimeRangeSelectorRow(
-                    value: _reportsRangePreset,
-                    onChanged: (next) {
-                      if (!mounted) return;
-                      setState(() => _reportsRangePreset = next);
-                    },
-                  ),
-                  const SizedBox(height: kSpacingS),
-                  buildDetailInfoRow(
-                    context,
-                    label: 'Dose logs',
-                    value: logs.length.toString(),
-                  ),
-                  buildDetailInfoRow(
-                    context,
-                    label: 'Taken',
-                    value: taken.toString(),
-                  ),
-                  buildDetailInfoRow(
-                    context,
-                    label: 'Skipped',
-                    value: skipped.toString(),
-                  ),
-                  buildDetailInfoRow(
-                    context,
-                    label: 'Snoozed',
-                    value: snoozed.toString(),
-                  ),
-                  const SizedBox(height: kSpacingS),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: () => context.push('/analytics'),
-                      icon: const Icon(
-                        Icons.bar_chart_rounded,
-                        size: kIconSizeSmall,
-                      ),
-                      label: const Text('Open Analytics'),
-                    ),
-                  ),
-                ],
-              ],
-            );
-          },
-        );
-      },
-    );
-
     final cards = <String, Widget>{
       _kCardToday: todayCard,
       _kCardActivity: activityCard,
-      _kCardReports: reportsCard,
       _kCardCalendar: calendarCard,
     };
 
@@ -443,7 +212,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                 cards[entry.value]!,
                 if (!(entry.value == _kCardToday && _isTodayExpanded) &&
                     !(entry.value == _kCardActivity && _isActivityExpanded) &&
-                    !(entry.value == _kCardReports && _isReportsExpanded) &&
                     !(entry.value == _kCardCalendar && _isCalendarExpanded))
                   Positioned(
                     left: kSpacingS,
