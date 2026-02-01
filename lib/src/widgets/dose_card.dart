@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/widgets/dose_status_action_button.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
@@ -84,7 +83,6 @@ class DoseCard extends StatelessWidget {
     );
 
     final actionLabel = primaryActionLabel ?? 'Actions';
-    final hasQuickActions = onQuickAction != null;
 
     final takeText = 'Take $doseMetrics';
     final takeColor = isActive
@@ -226,32 +224,22 @@ class DoseCard extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (hasQuickActions)
-                        DoseStatusActionButton(
-                          currentStatus: effectiveStatus,
-                          onSelect: onQuickAction!,
-                          isActive: isActive,
-                          compact: compact,
-                        )
-                      else ...[
-                        
-                        DoseCardStatusChip(
-                          status: effectiveStatus,
-                          disabled: disabled,
-                          compact: compact,
+                      DoseCardStatusChip(
+                        status: effectiveStatus,
+                        disabled: disabled,
+                        compact: compact,
+                      ),
+                      const SizedBox(height: kSpacingXS),
+                      SizedBox(
+                        width: compact
+                            ? kDoseCardStatusChipWidthCompact
+                            : kDoseCardStatusChipWidth,
+                        height: kStandardButtonHeight,
+                        child: FilledButton(
+                          onPressed: onPrimaryAction ?? onTap,
+                          child: Text(actionLabel),
                         ),
-                        const SizedBox(height: kSpacingXS),
-                        SizedBox(
-                          width: compact
-                              ? kDoseCardStatusChipWidthCompact
-                              : kDoseCardStatusChipWidth,
-                          height: kStandardButtonHeight,
-                          child: FilledButton(
-                            onPressed: onPrimaryAction ?? onTap,
-                            child: Text(actionLabel),
-                          ),
-                        ),
-                      ],
+                      ),
                     ],
                   ),
                 ],
