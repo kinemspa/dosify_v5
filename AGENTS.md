@@ -96,6 +96,35 @@ For any new code you create (widgets, styling, layout, logic that has a visual r
 
 ---
 
+## Runtime Verification (required for backlog tasks)
+
+For each conversation where backlog tasks are being implemented (especially UI work), do this *before* concluding the task and before the final commit/push when feasible:
+
+1. **Check emulator/device is available**
+   - Prefer MCP tooling: `list_devices`.
+   - If no Android device/emulator is listed, try `flutter devices` / `flutter emulators`.
+   - If an emulator exists but is not running, start it (e.g. `flutter emulators --launch <id>`).
+
+2. **Check app is running**
+   - Prefer MCP tooling: `list_running_apps`.
+   - If not running, launch the app.
+
+3. **If running, hot reload**
+   - Prefer MCP tooling: `hot_reload`.
+   - Immediately check for runtime errors after reload.
+
+4. **Navigate to changed screens (if applicable)**
+   - Navigate manually or via tooling.
+   - Verify the updated UI section renders and behaves correctly.
+
+5. **Confirm no issues**
+   - No crashes, no red error screens, no obvious layout overflows.
+   - Check logs/runtime errors if available.
+
+If tooling cannot start an emulator or no Android devices are available in the current environment, explicitly state the limitation and proceed with `flutter analyze` + tests as the minimum safety bar.
+
+---
+
 # Task Tracking Workflow (backlog/)
 
 `backlog/` is the single source of truth for work requests.

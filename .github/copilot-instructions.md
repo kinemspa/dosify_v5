@@ -36,6 +36,26 @@
 - Run: `flutter run`
 - Build: `flutter build apk --debug|--release` / `flutter build appbundle --release`
 
+## Runtime verification (required for backlog tasks)
+
+For each conversation where backlog tasks are being implemented (especially UI work), perform this runtime sanity pass when feasible:
+
+1. Check an Android emulator/device is available.
+  - Prefer MCP: `list_devices`.
+  - If no Android device is listed, try `flutter devices` / `flutter emulators` and launch an emulator if available.
+2. Check the app is running.
+  - Prefer MCP: `list_running_apps`.
+  - If not running, launch it.
+3. If the app is running, hot reload.
+  - Prefer MCP: `hot_reload`.
+  - Then check for runtime errors.
+4. Navigate to the screens that were changed (when applicable) and visually confirm:
+  - No crashes / red screens
+  - No obvious layout overflows
+  - The target UI change looks correct
+
+If the environment lacks Android devices/emulators that can be launched via tooling, explicitly note the limitation and fall back to `flutter analyze` + targeted tests.
+
 ## Repo process constraints (agent mode)
 - Terminal is assumed at repo root; **do not** use `cd`, `pushd/popd`, or `git -C ...` (see `AGENTS.md`).
 - After each logical change: run analyze, then `git add . && git commit -m "Fix: <description>" && git push`.
