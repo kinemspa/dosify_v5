@@ -1462,7 +1462,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       ),
                       label: Text(
                         'Delete Medication',
-                        style: TextStyle(color: colorScheme.error),
+                        style: bodyTextStyle(context)?.copyWith(
+                          color: colorScheme.error,
+                        ),
                       ),
                     ),
                   ),
@@ -3247,7 +3249,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                 'Add stock after receiving a new prescription or restocking. "Add" will increase the stock by a specific amount (and update your maximum if it exceeds the current max). "Fill to Max" restores stock to your original maximum level.',
                 style: helperTextStyle(stateContext),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
 
               // Current stock info
               Container(
@@ -3262,7 +3264,9 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                         const Text('Current Stock:'),
                         Text(
                           '${_formatNumber(currentStock)} $unit',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: bodyTextStyle(
+                            stateContext,
+                          )?.copyWith(fontWeight: kFontWeightBold),
                         ),
                       ],
                     ),
@@ -3273,8 +3277,8 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                         const Text('Maximum Stock:'),
                         Text(
                           '${_formatNumber(maxStock)} $unit',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                          style: bodyTextStyle(stateContext)?.copyWith(
+                            fontWeight: kFontWeightBold,
                             color: theme.colorScheme.primary,
                           ),
                         ),
@@ -3283,14 +3287,14 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
 
               // Mode selection - Radio buttons instead of chips
               Text(
                 'Refill Method:',
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: fieldLabelStyle(stateContext),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingS),
               RadioListTile<String>(
                 title: const Text('Add to current stock'),
                 subtitle: const Text('Specify amount to add'),
@@ -3312,12 +3316,12 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
 
               // Amount input (only for Add mode)
               if (selectedMode == 'add') ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: kSpacingS),
                 Text(
                   'Amount to Add:',
-                  style: TextStyle(fontWeight: FontWeight.w500),
+                  style: fieldLabelStyle(stateContext),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: kSpacingS),
                 Center(
                   child: StepperRow36(
                     controller: controller,
@@ -3342,17 +3346,17 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                 const SizedBox(height: 4),
                 Center(child: Text(unit, style: helperTextStyle(stateContext))),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
 
               // Preview
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(kSpacingM),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer.withValues(
-                    alpha: 0.3,
+                    alpha: kOpacityVeryLow,
                   ),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -3360,8 +3364,8 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                     const Text('New Total:'),
                     Text(
                       '${_formatNumber(previewTotal)} $unit',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: bodyTextStyle(stateContext)?.copyWith(
+                        fontWeight: kFontWeightBold,
                         color: theme.colorScheme.primary,
                       ),
                     ),
