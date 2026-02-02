@@ -46,6 +46,7 @@ import 'package:dosifi_v5/src/widgets/selection_cards.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
+import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
@@ -1858,7 +1859,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           SizedBox(
-            width: 90,
+            width: kMedicationDetailInlineLabelWidth,
             child: Text(
               label,
               style: labelStyle,
@@ -1931,7 +1932,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
                 style: smallHelperTextStyle(
@@ -1940,7 +1941,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 ),
               ),
             ),
-            Wrap(spacing: 6, children: conditions),
+            Wrap(spacing: kFieldSpacing, children: conditions),
             const Spacer(),
             Icon(
               Icons.chevron_right,
@@ -1955,36 +1956,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  Widget _buildMiniChip(BuildContext context, String label, {IconData? icon}) {
-    final colorScheme = Theme.of(context).colorScheme;
+    Widget _buildMiniChip(BuildContext context, String label, {IconData? icon}) {
+      final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: kSpacingS,
-        vertical: kSpacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: BorderRadius.circular(kBorderRadiusChip),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14, color: colorScheme.onPrimary),
-            const SizedBox(width: kSpacingXS),
-          ],
-          Text(
-            label,
-            style: smallHelperTextStyle(
-              context,
-              color: colorScheme.onPrimary,
-            )?.copyWith(fontWeight: kFontWeightSemiBold),
-          ),
-        ],
-      ),
-    );
-  }
+      return StatusPill(
+        label: label,
+        color: cs.primary,
+        icon: icon,
+        dense: true,
+      );
+    }
 
   String _getStorageConditionsLabel(Medication med) {
     final conditions = <String>[];

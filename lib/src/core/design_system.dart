@@ -232,6 +232,11 @@ const double kMedicationDetailDonutSize = 112;
 const double kMedicationDetailDonutStrokeWidth = 14.0;
 const double kMedicationDetailDonutInnerStrokeWidth = 7.0;
 
+/// Default label width used by Medication Details inline rows.
+///
+/// Kept intentionally compact so values have room on small screens.
+const double kMedicationDetailInlineLabelWidth = 90;
+
 /// Medication header text limits
 const int kMedicationHeaderDescriptionMaxChars = 90;
 
