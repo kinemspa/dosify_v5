@@ -4185,28 +4185,38 @@ Future<void> _showRestockSealedVialsDialog(
               // Current stock
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(kSpacingM),
+                padding: kInsetSectionPadding,
                 decoration: buildInsetSectionDecoration(context: context),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Current Sealed Vials:'),
+                    Text(
+                      'Current Sealed Vials:',
+                      style: helperTextStyle(context),
+                    ),
                     Text(
                       '$currentStock',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: bodyTextStyle(context)?.copyWith(
+                        fontWeight: kFontWeightBold,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingM),
 
               // Amount input
-              Text('Add vials:', style: TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
+              Text(
+                'Add vials:',
+                style: bodyTextStyle(context)?.copyWith(
+                  fontWeight: kFontWeightMedium,
+                ),
+              ),
+              const SizedBox(height: kSpacingS),
               Center(
                 child: StepperRow36(
                   controller: controller,
-                  fixedFieldWidth: 80, // Required for dialog use
+                  fixedFieldWidth: kDialogStepperFieldWidth,
                   onDec: () {
                     final v = int.tryParse(controller.text) ?? 0;
                     if (v > 0) {
@@ -4226,22 +4236,20 @@ Future<void> _showRestockSealedVialsDialog(
 
               // Preview
               Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
+                padding: kInsetSectionPadding,
+                decoration: buildInsetSectionDecoration(
+                  context: context,
+                  backgroundOpacity: 0.9,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('New Total:'),
+                    Text('New Total:', style: helperTextStyle(context)),
                     Text(
                       '$previewTotal vials',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                      style: bodyTextStyle(context)?.copyWith(
+                        fontWeight: kFontWeightBold,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ],

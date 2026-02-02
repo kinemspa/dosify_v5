@@ -18,6 +18,12 @@ const double kLabelColWidth = 120;
 /// Default width for compact controls (dropdowns, numeric fields, date button)
 const double kSmallControlWidth = 120;
 
+/// Fixed field width for compact steppers when used inside dialogs.
+///
+/// Dialog layouts don't reliably support the IntrinsicWidth-based sizing used in
+/// normal pages, so we provide a centralized fallback width.
+const double kDialogStepperFieldWidth = 80;
+
 /// Responsive width fraction for compact controls (as percentage of available field space)
 /// Changed from 0.75 to 1.0 to use full available width up to max constraint
 const double kCompactControlWidthFraction = 1;
@@ -56,7 +62,7 @@ class SectionFormCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final content = Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(kSpacingS),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
