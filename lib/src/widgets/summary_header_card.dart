@@ -1,13 +1,18 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+
+// Package imports:
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 class SummaryHeaderCard extends StatelessWidget {
   const SummaryHeaderCard({
-    super.key,
     required this.title,
+    super.key,
     this.manufacturer,
     this.strengthValue,
     this.strengthUnitLabel,
@@ -33,6 +38,85 @@ class SummaryHeaderCard extends StatelessWidget {
     this.reconTotalIU,
     this.reconFillIU,
   });
+
+  // Convenience: build a header card directly from a Medication model
+  factory SummaryHeaderCard.fromMedication(
+    Medication m, {
+    bool neutral = false,
+    bool outlined = false,
+  }) {
+    String unitLabel;
+    switch (m.strengthUnit) {
+      case Unit.mcg:
+      case Unit.mcgPerMl:
+        unitLabel = 'mcg';
+      case Unit.mg:
+      case Unit.mgPerMl:
+        unitLabel = 'mg';
+      case Unit.g:
+      case Unit.gPerMl:
+        unitLabel = 'g';
+      case Unit.units:
+      case Unit.unitsPerMl:
+        unitLabel = 'units';
+    }
+    String stockUnitLabel;
+    switch (m.stockUnit) {
+      case StockUnit.tablets:
+        stockUnitLabel = 'tablets';
+      case StockUnit.preFilledSyringes:
+        stockUnitLabel = 'syringes';
+      case StockUnit.singleDoseVials:
+        stockUnitLabel = 'vials';
+      default:
+        stockUnitLabel = m.stockUnit.name;
+    }
+    final showDark =
+        m.storageInstructions?.toLowerCase().contains('light') ?? false;
+    final icon = () {
+      switch (m.form) {
+        case MedicationForm.tablet:
+          return Icons.add_circle;
+        case MedicationForm.capsule:
+          return MdiIcons.pill;
+        case MedicationForm.prefilledSyringe:
+          return Icons.colorize;
+        case MedicationForm.singleDoseVial:
+          return Icons.local_drink;
+        case MedicationForm.multiDoseVial:
+          return Icons.addchart;
+      }
+    }();
+
+    // Determine if this is a perMl medication and set perUnitLabel for injections
+    String? perUnitLabel;
+    if (m.form == MedicationForm.prefilledSyringe) {
+      perUnitLabel = 'Syringe';
+    } else if (m.form == MedicationForm.singleDoseVial) {
+      perUnitLabel = 'Vial';
+    }
+
+    return SummaryHeaderCard(
+      title: m.name,
+      manufacturer: m.manufacturer,
+      strengthValue: m.strengthValue,
+      strengthUnitLabel: unitLabel,
+      perMlValue: m.perMlValue,
+      stockCurrent: m.stockValue,
+      stockInitial: m.initialStockValue ?? m.stockValue,
+      stockUnitLabel: stockUnitLabel,
+      expiryDate: m.expiry,
+      showRefrigerate: m.requiresRefrigeration,
+      showDark: showDark,
+      lowStockEnabled: m.lowStockEnabled,
+      lowStockThreshold: m.lowStockThreshold,
+      neutral: neutral,
+      outlined: outlined,
+      leadingIcon: icon,
+      perTabletLabel: false,
+      perUnitLabel: perUnitLabel,
+    );
+  }
 
   final String title;
   final String? manufacturer;
@@ -69,105 +153,18 @@ class SummaryHeaderCard extends StatelessWidget {
     return v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
   }
 
-  // Convenience: build a header card directly from a Medication model
-  factory SummaryHeaderCard.fromMedication(
-    Medication m, {
-    bool neutral = false,
-    bool outlined = false,
-  }) {
-    String unitLabel;
-    switch (m.strengthUnit) {
-      case Unit.mcg:
-      case Unit.mcgPerMl:
-        unitLabel = 'mcg';
-        break;
-      case Unit.mg:
-      case Unit.mgPerMl:
-        unitLabel = 'mg';
-        break;
-      case Unit.g:
-      case Unit.gPerMl:
-        unitLabel = 'g';
-        break;
-      case Unit.units:
-      case Unit.unitsPerMl:
-        unitLabel = 'units';
-        break;
-    }
-    String stockUnitLabel;
-    switch (m.stockUnit) {
-      case StockUnit.tablets:
-        stockUnitLabel = 'tablets';
-        break;
-      case StockUnit.preFilledSyringes:
-        stockUnitLabel = 'syringes';
-        break;
-      case StockUnit.singleDoseVials:
-        stockUnitLabel = 'vials';
-        break;
-      default:
-        stockUnitLabel = m.stockUnit.name;
-    }
-    final showDark =
-        (m.storageInstructions?.toLowerCase().contains('light') ?? false);
-    final icon = () {
-      switch (m.form) {
-        case MedicationForm.tablet:
-          return Icons.add_circle;
-        case MedicationForm.capsule:
-          return MdiIcons.pill;
-        case MedicationForm.injectionPreFilledSyringe:
-          return Icons.colorize;
-        case MedicationForm.injectionSingleDoseVial:
-          return Icons.local_drink;
-        case MedicationForm.injectionMultiDoseVial:
-          return Icons.addchart;
-      }
-    }();
-
-    // Determine if this is a perMl medication and set perUnitLabel for injections
-    String? perUnitLabel;
-    if (m.form == MedicationForm.injectionPreFilledSyringe) {
-      perUnitLabel = 'Syringe';
-    } else if (m.form == MedicationForm.injectionSingleDoseVial) {
-      perUnitLabel = 'Vial';
-    }
-
-    return SummaryHeaderCard(
-      title: m.name,
-      manufacturer: m.manufacturer,
-      strengthValue: m.strengthValue,
-      strengthUnitLabel: unitLabel,
-      perMlValue: m.perMlValue,
-      stockCurrent: m.stockValue,
-      stockInitial: m.initialStockValue ?? m.stockValue,
-      stockUnitLabel: stockUnitLabel,
-      expiryDate: m.expiry,
-      showRefrigerate: m.requiresRefrigeration,
-      showFrozen: false, // not persisted in model currently
-      showDark: showDark,
-      lowStockEnabled: m.lowStockEnabled,
-      lowStockThreshold: m.lowStockThreshold,
-      neutral: neutral,
-      outlined: outlined,
-      leadingIcon: icon,
-      perTabletLabel: false,
-      perUnitLabel: perUnitLabel,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final bool lowStockActive =
+    final lowStockActive =
         lowStockEnabled &&
         stockCurrent != null &&
         lowStockThreshold != null &&
         stockCurrent! <= lowStockThreshold!;
 
-    final Color bg = neutral ? cs.surfaceContainerLowest : cs.primary;
-    final Color fg = neutral ? cs.onSurface : cs.onPrimary;
+    final bg = neutral ? cs.surfaceContainerLowest : cs.primary;
+    final fg = neutral ? cs.onSurface : cs.onPrimary;
 
     // Resolve localized expiry text if a DateTime was provided
     String? expDisplay;
@@ -223,99 +220,101 @@ class SummaryHeaderCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        title,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: neutral ? cs.primary : fg,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Top-right cluster: Expiry text only
+                        if (expDisplay != null && expDisplay.isNotEmpty)
+                          Text(
+                            'Exp: $expDisplay',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: fg,
+                            ),
+                          ),
+                      ],
+                    ),
+                    if ((manufacturer ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        manufacturer!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: neutral ? cs.primary : fg,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: fg.withValues(alpha: 0.9),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Top-right cluster: Expiry text only
-                    if (expDisplay != null && expDisplay.isNotEmpty)
-                      Text(
-                        'Exp: $expDisplay',
-                        style: theme.textTheme.bodySmall?.copyWith(color: fg),
-                      ),
-                  ],
-                ),
-                if ((manufacturer ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    manufacturer!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: fg.withValues(alpha: 0.9),
-                    ),
-                  ),
-                ],
-                // Bottom area: left side (multi-line details), right side (storage icons)
-                const SizedBox(height: 2),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // Left cluster: each item on its own line for clarity
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if ((strengthUnitLabel ?? '').isNotEmpty &&
-                              (includeNameInStrengthLine ||
-                                  (strengthValue != null)))
-                            RichText(
-                              text: TextSpan(
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: neutral ? cs.onSurfaceVariant : fg,
-                                ),
-                                children: includeNameInStrengthLine
-                                    ? [
-                                        TextSpan(
-                                          text: _fmt2(strengthValue ?? 0),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                        TextSpan(text: ' $strengthUnitLabel '),
-                                        if (perMlValue != null)
-                                          TextSpan(
-                                            text:
-                                                'in ${_fmt2(perMlValue)} mL, ',
-                                          ),
-                                        TextSpan(text: '$title '),
-                                        TextSpan(text: formLabelPlural ?? ''),
-                                      ]
-                                    : (perUnitLabel != null
-                                          ? [
-                                              TextSpan(
-                                                text: _fmt2(strengthValue ?? 0),
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w800,
-                                                ),
+                    ],
+                    // Bottom area: left side (multi-line details), right side (storage icons)
+                    const SizedBox(height: 2),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Left cluster: each item on its own line for clarity
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if ((strengthUnitLabel ?? '').isNotEmpty &&
+                                  (includeNameInStrengthLine ||
+                                      (strengthValue != null)))
+                                RichText(
+                                  text: TextSpan(
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: neutral ? cs.onSurfaceVariant : fg,
+                                    ),
+                                    children: includeNameInStrengthLine
+                                        ? [
+                                            TextSpan(
+                                              text: _fmt2(strengthValue ?? 0),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w800,
                                               ),
+                                            ),
+                                            TextSpan(
+                                              text: ' $strengthUnitLabel ',
+                                            ),
+                                            if (perMlValue != null)
                                               TextSpan(
-                                                text: ' $strengthUnitLabel',
+                                                text:
+                                                    'in ${_fmt2(perMlValue)} mL, ',
                                               ),
-                                              if (perMlValue != null)
-                                                TextSpan(
-                                                  text:
-                                                      ' in ${_fmt2(perMlValue)} mL',
-                                                ),
-                                              const TextSpan(text: ' per '),
-                                              TextSpan(text: perUnitLabel!),
-                                            ]
-                                          : (perTabletLabel
-                                                ? [
+                                            TextSpan(text: '$title '),
+                                            TextSpan(
+                                              text: formLabelPlural ?? '',
+                                            ),
+                                          ]
+                                        : (perUnitLabel != null
+                                              ? [
+                                                  // Show concentration format for injection vials
+                                                  if (perMlValue != null) ...[
+                                                    TextSpan(
+                                                      text: _fmt2(perMlValue),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                    TextSpan(
+                                                      text:
+                                                          ' $strengthUnitLabel/mL per ',
+                                                    ),
+                                                    TextSpan(text: perUnitLabel),
+                                                  ] else ...[
                                                     TextSpan(
                                                       text: _fmt2(
                                                         strengthValue ?? 0,
@@ -327,207 +326,238 @@ class SummaryHeaderCard extends StatelessWidget {
                                                     ),
                                                     TextSpan(
                                                       text:
-                                                          ' $strengthUnitLabel',
+                                                          ' $strengthUnitLabel per ',
                                                     ),
-                                                    if (perMlValue != null)
-                                                      TextSpan(
-                                                        text:
-                                                            ' in ${_fmt2(perMlValue)} mL',
-                                                      ),
-                                                    const TextSpan(
-                                                      text: ' per tablet',
-                                                    ),
-                                                  ]
-                                                : [
-                                                    TextSpan(
-                                                      text: _fmt2(
-                                                        strengthValue ?? 0,
-                                                      ),
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w800,
-                                                      ),
-                                                    ),
-                                                    TextSpan(
-                                                      text:
-                                                          ' $strengthUnitLabel',
-                                                    ),
-                                                    if (perMlValue != null)
-                                                      TextSpan(
-                                                        text:
-                                                            ' in ${_fmt2(perMlValue)} mL',
-                                                      ),
-                                                    TextSpan(
-                                                      text:
-                                                          formLabelPlural !=
-                                                                  null &&
-                                                              formLabelPlural!
-                                                                  .isNotEmpty
-                                                          ? ' $formLabelPlural'
-                                                          : '',
-                                                    ),
-                                                  ])),
-                              ),
-                            ),
-                          if (stockCurrent != null &&
-                              (stockUnitLabel ?? '').isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: RichText(
-                                text: TextSpan(
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: neutral
-                                        ? cs.onSurface
-                                        : cs.onPrimary,
+                                                    TextSpan(text: perUnitLabel),
+                                                  ],
+                                                ]
+                                              : (perTabletLabel
+                                                    ? [
+                                                        TextSpan(
+                                                          text: _fmt2(
+                                                            strengthValue ?? 0,
+                                                          ),
+                                                          style:
+                                                              const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w800,
+                                                              ),
+                                                        ),
+                                                        TextSpan(
+                                                          text:
+                                                              ' $strengthUnitLabel',
+                                                        ),
+                                                        if (perMlValue != null)
+                                                          TextSpan(
+                                                            text:
+                                                                ' in ${_fmt2(perMlValue)} mL',
+                                                          ),
+                                                        const TextSpan(
+                                                          text: ' per tablet',
+                                                        ),
+                                                      ]
+                                                    : [
+                                                        TextSpan(
+                                                          text: _fmt2(
+                                                            strengthValue ?? 0,
+                                                          ),
+                                                          style:
+                                                              const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w800,
+                                                              ),
+                                                        ),
+                                                        TextSpan(
+                                                          text:
+                                                              ' $strengthUnitLabel',
+                                                        ),
+                                                        if (perMlValue != null)
+                                                          TextSpan(
+                                                            text:
+                                                                ' in ${_fmt2(perMlValue)} mL',
+                                                          ),
+                                                        TextSpan(
+                                                          text:
+                                                              formLabelPlural !=
+                                                                      null &&
+                                                                  formLabelPlural!
+                                                                      .isNotEmpty
+                                                              ? ' $formLabelPlural'
+                                                              : '',
+                                                        ),
+                                                      ])),
                                   ),
-                                  children: [
-                                    TextSpan(
-                                      text: _fmt2(stockCurrent),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        color: () {
-                                          final total = stockInitial ?? 0;
-                                          if (total <= 0) {
-                                            // When no initial stock is set, ensure contrast on primary background
-                                            return neutral
-                                                ? cs.primary
-                                                : cs.onPrimary;
-                                          }
-                                          final pct = (stockCurrent! / total)
-                                              .clamp(0.0, 1.0);
-                                          if (!neutral) return cs.onPrimary;
-                                          if (pct <= 0.2) return cs.error;
-                                          if (pct <= 0.5) return Colors.orange;
-                                          return cs.primary;
-                                        }(),
-                                      ),
-                                    ),
-                                    if (stockInitial != null) ...[
-                                      const TextSpan(text: '/'),
-                                      TextSpan(
-                                        text: _fmt2(stockInitial),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          color: neutral
-                                              ? cs.primary
-                                              : cs.onPrimary,
-                                        ),
-                                      ),
-                                    ],
-                                    TextSpan(text: ' $stockUnitLabel remain'),
-                                  ],
                                 ),
-                              ),
-                            ),
-                          if (lowStockEnabled && lowStockThreshold != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (lowStockActive) ...[
-                                    Icon(
-                                      Icons.warning_amber_rounded,
-                                      size: 18,
-                                      color: Colors.amber.shade300,
-                                    ),
-                                    const SizedBox(width: 4),
-                                  ],
-                                  RichText(
+                              if (stockCurrent != null &&
+                                  (stockUnitLabel ?? '').isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: RichText(
                                     text: TextSpan(
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
-                                            color: lowStockActive
-                                                ? Colors.amber.shade200
-                                                : (neutral
-                                                      ? cs.onSurfaceVariant
-                                                            .withValues(
-                                                              alpha: 0.75,
-                                                            )
-                                                      : fg.withValues(
-                                                          alpha: 0.85,
-                                                        )),
-                                            fontWeight: lowStockActive
-                                                ? FontWeight.w600
-                                                : FontWeight.w500,
+                                            color: neutral
+                                                ? cs.onSurface
+                                                : cs.onPrimary,
                                           ),
                                       children: [
-                                        const TextSpan(text: 'Alert at '),
                                         TextSpan(
-                                          text: _fmt2(lowStockThreshold),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w700,
+                                          text: _fmt2(stockCurrent),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            color: () {
+                                              final total = stockInitial ?? 0;
+                                              if (total <= 0) {
+                                                // When no initial stock is set, ensure contrast on primary background
+                                                return neutral
+                                                    ? cs.primary
+                                                    : cs.onPrimary;
+                                              }
+                                              final pct =
+                                                  (stockCurrent! / total).clamp(
+                                                    0.0,
+                                                    1.0,
+                                                  );
+                                              if (!neutral) return cs.onPrimary;
+                                              if (pct <= 0.2) return cs.error;
+                                              if (pct <= 0.5)
+                                                return Colors.orange;
+                                              return cs.primary;
+                                            }(),
                                           ),
                                         ),
+                                        if (stockInitial != null) ...[
+                                          const TextSpan(text: '/'),
+                                          TextSpan(
+                                            text: _fmt2(stockInitial),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              color: neutral
+                                                  ? cs.primary
+                                                  : cs.onPrimary,
+                                            ),
+                                          ),
+                                        ],
                                         TextSpan(
-                                          text:
-                                              ' ${stockUnitLabel ?? 'left'} remaining',
+                                          text: ' $stockUnitLabel remain',
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
+                                ),
+                              if (lowStockEnabled && lowStockThreshold != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (lowStockActive) ...[
+                                        Icon(
+                                          Icons.warning_amber_rounded,
+                                          size: 18,
+                                          color: Colors.amber.shade300,
+                                        ),
+                                        const SizedBox(width: 4),
+                                      ],
+                                      RichText(
+                                        text: TextSpan(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: lowStockActive
+                                                    ? Colors.amber.shade200
+                                                    : (neutral
+                                                          ? cs.onSurfaceVariant
+                                                                .withValues(
+                                                                  alpha: 0.75,
+                                                                )
+                                                          : fg.withValues(
+                                                              alpha: 0.85,
+                                                            )),
+                                                fontWeight: lowStockActive
+                                                    ? FontWeight.w600
+                                                    : FontWeight.w500,
+                                              ),
+                                          children: [
+                                            const TextSpan(text: 'Alert at '),
+                                            TextSpan(
+                                              text: _fmt2(lowStockThreshold),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  ' ${stockUnitLabel ?? 'left'} remaining',
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        // Right cluster: storage icons inline on the same bottom row, aligned bottom-right
+                        if (showRefrigerate || showFrozen || showDark) ...[
+                          const SizedBox(width: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (showRefrigerate)
+                                Icon(
+                                  Icons.kitchen,
+                                  size: 18,
+                                  color: neutral ? cs.onSurfaceVariant : fg,
+                                ),
+                              if (showFrozen) ...[
+                                if (showRefrigerate) const SizedBox(width: 6),
+                                Icon(
+                                  Icons.ac_unit,
+                                  size: 18,
+                                  color: neutral ? cs.onSurfaceVariant : fg,
+                                ),
+                              ],
+                              if (showDark) ...[
+                                if (showRefrigerate || showFrozen)
+                                  const SizedBox(width: 6),
+                                Icon(
+                                  Icons.dark_mode,
+                                  size: 18,
+                                  color: neutral ? cs.onSurfaceVariant : fg,
+                                ),
+                              ],
+                            ],
+                          ),
                         ],
-                      ),
+                      ],
                     ),
-                    // Right cluster: storage icons inline on the same bottom row, aligned bottom-right
-                    if (showRefrigerate || showFrozen || showDark) ...[
-                      const SizedBox(width: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (showRefrigerate)
-                            Icon(
-                              Icons.kitchen,
-                              size: 18,
-                              color: neutral ? cs.onSurfaceVariant : fg,
-                            ),
-                          if (showFrozen) ...[
-                            if (showRefrigerate) const SizedBox(width: 6),
-                            Icon(
-                              Icons.ac_unit,
-                              size: 18,
-                              color: neutral ? cs.onSurfaceVariant : fg,
-                            ),
-                          ],
-                          if (showDark) ...[
-                            if (showRefrigerate || showFrozen)
-                              const SizedBox(width: 6),
-                            Icon(
-                              Icons.dark_mode,
-                              size: 18,
-                              color: neutral ? cs.onSurfaceVariant : fg,
-                            ),
-                          ],
-                        ],
+                    if ((additionalInfo ?? '').isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          additionalInfo!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: neutral
+                                ? cs.onSurfaceVariant.withValues(alpha: 0.75)
+                                : fg.withValues(alpha: 0.85),
+                          ),
+                        ),
                       ),
-                    ],
                   ],
                 ),
-                if ((additionalInfo ?? '').isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      additionalInfo!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: neutral
-                            ? cs.onSurfaceVariant.withValues(alpha: 0.75)
-                            : fg.withValues(alpha: 0.85),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+              ),
             ],
           ),
           // Reconstitution section: spans full width outside the Row
           if (reconTotalIU != null && reconFillIU != null) ...[
             const SizedBox(height: 4),
             Padding(
-              padding: const EdgeInsets.only(left: 48), // Align text with content
+              padding: const EdgeInsets.only(
+                left: 48,
+              ), // Align text with content
               child: RichText(
                 text: TextSpan(
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -540,11 +570,9 @@ class SummaryHeaderCard extends StatelessWidget {
                       text: 'Reconstitution: ',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    const TextSpan(
-                      text: 'Draw ',
-                    ),
+                    const TextSpan(text: 'Draw '),
                     TextSpan(
-                      text: '${reconFillIU!.toStringAsFixed(1)} IU',
+                      text: '${reconFillIU!.toStringAsFixed(1)} U',
                       style: TextStyle(
                         color: neutral ? cs.primary : fg,
                         fontWeight: FontWeight.w700,
@@ -566,9 +594,8 @@ class SummaryHeaderCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             WhiteSyringeGauge(
-              totalIU: reconTotalIU!,
-              fillIU: reconFillIU!,
-              interactive: false,
+              totalUnits: reconTotalIU!,
+              fillUnits: reconFillIU!,
             ),
           ],
         ],

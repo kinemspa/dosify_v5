@@ -1,0 +1,45 @@
+import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:flutter/material.dart';
+
+/// Shared "glass" card surface with soft gradient and halo shadow.
+///
+/// Wraps content with the concept 9 styling so feature code can focus on
+/// composing the inner layout.
+class GlassCardSurface extends StatelessWidget {
+  const GlassCardSurface({
+    required this.child,
+    this.onTap,
+    this.useGradient = true,
+    this.showBorder = true,
+    this.padding = const EdgeInsets.all(kCardPadding),
+    super.key,
+  });
+
+  final Widget child;
+  final VoidCallback? onTap;
+  final bool useGradient;
+  final bool showBorder;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(kBorderRadiusLarge);
+
+    final content = Padding(padding: padding, child: child);
+    return Container(
+      decoration: buildStandardCardDecoration(
+        context: context,
+        useGradient: useGradient,
+        showBorder: showBorder,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? content
+            : InkWell(onTap: onTap, borderRadius: borderRadius, child: content),
+      ),
+    );
+  }
+}

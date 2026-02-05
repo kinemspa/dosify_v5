@@ -33,6 +33,11 @@ Normal (Controls and actions)
 - Button: Filter → Needs design (TBD)
 - Button: Back (top-left app header) → Goes back to previous screen or Home
 
+Card behavior
+- Large card height: fixed height for consistent scan rhythm (current standard: 140 px).
+- Inventory fraction should show **Remaining / Originally Entered** (e.g., 18/30 tablets), not Remaining / Low-stock threshold.
+- MDV inventory fraction should show `current/total mL of vial` using up to 2 decimals (trim trailing zeros). Only the `current` value is color-coded: 0% = error, <20% = warning, otherwise primary.
+
 Select Medication Type Screen
 
 - Back button (top-left) → Goes back to previous screen or Home
@@ -45,6 +50,10 @@ Select Medication Type Screen
     - Encapsulated oral medication.
   - Injection
     - Injection medication.
+
+Selection screen affordances
+- Each option is presented as a primary, high-affordance button with an icon + short support text to reduce “empty” screens.
+- Spacing: comfortable vertical gaps between options; keep list padding generous (top/bottom).
 
 Select Injection Type Screen
 
@@ -258,6 +267,10 @@ Fields
   - Visual guidance: syringe graphic showing fill amount; display formula
   - Display formula (example):
     - Units = (Desired Dose (mg) ÷ (Peptide (mg) ÷ Solvent (mL))) × (Syringe Units ÷ Syringe Capacity (mL))
+
+Terminology and consistency
+- Use **units (U)** for syringe markings in the UI (not “IU”).
+- Strength and dose must use the same unit; if conversion is needed, make it explicit.
   - Display instruction text:
     - "Reconstitute <MEDNAME> with <RECONFLUIDNAME> with <X> mL for a target dose of <DOSE> to administer on a <SyringeSize> using <X> IU."
 - Precision: All results to 2 decimal places

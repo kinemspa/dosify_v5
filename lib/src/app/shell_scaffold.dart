@@ -1,8 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'nav_items.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/app/nav_items.dart';
 
 final bottomNavIdsProvider =
     StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
@@ -26,15 +31,29 @@ class BottomNavIdsController extends StateNotifier<List<String>> {
 }
 
 class ShellScaffold extends ConsumerWidget {
-  const ShellScaffold({super.key, required this.child});
+  const ShellScaffold({required this.child, super.key});
   final Widget child;
 
   int _locationToIndex(String location, List<NavItemConfig> items) {
-    // Find the first item whose location is a prefix of the current location
-    final index = items.indexWhere(
-      (e) => location == e.location || location.startsWith(e.location + '/'),
-    );
-    return index == -1 ? 0 : index;
+    // Choose the most specific match (longest location prefix).
+    // This prevents routes like '/medications/reconstitution' from matching
+    // '/medications' when both tabs are present.
+    var bestIndex = -1;
+    var bestLength = -1;
+
+    for (var i = 0; i < items.length; i++) {
+      final candidate = items[i].location;
+      final matches =
+          location == candidate || location.startsWith('$candidate/');
+      if (!matches) continue;
+
+      if (candidate.length > bestLength) {
+        bestLength = candidate.length;
+        bestIndex = i;
+      }
+    }
+
+    return bestIndex == -1 ? 0 : bestIndex;
   }
 
   @override

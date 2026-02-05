@@ -1,22 +1,29 @@
+// Dart imports:
+import 'dart:async';
 import 'dart:math';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
-import '../../../widgets/field36.dart';
-import '../../../widgets/unified_form.dart';
-import '../../../widgets/white_syringe_gauge.dart';
-import 'ui_consts.dart';
-import 'reconstitution_calculator_dialog.dart';
-import 'reconstitution_calculator_helpers.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_helpers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 /// Legacy local stepper replaced by shared StepperRow36 for consistency.
 
 /// Reusable reconstitution calculator widget used in both dialog and inline contexts
 class ReconstitutionCalculatorWidget extends StatefulWidget {
   const ReconstitutionCalculatorWidget({
-    super.key,
     required this.initialStrengthValue,
     required this.unitLabel,
+    super.key,
     this.medicationName,
+    this.initialDiluentName,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -30,6 +37,7 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
   final double initialStrengthValue;
   final String unitLabel;
   final String? medicationName;
+  final String? initialDiluentName;
   final double? initialDoseValue;
   final String? initialDoseUnit;
   final SyringeSizeMl? initialSyringeSize;
@@ -45,7 +53,8 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
 }
 
 class _ReconstitutionCalculatorWidgetState
-    extends State<ReconstitutionCalculatorWidget> {
+    extends State<ReconstitutionCalculatorWidget>
+    with SingleTickerProviderStateMixin {
   late final TextEditingController _doseCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
   final TextEditingController _diluentNameCtrl = TextEditingController();
@@ -53,6 +62,25 @@ class _ReconstitutionCalculatorWidgetState
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
   double _selectedUnits = 50;
   String? _selectedOption; // Track which option is selected
+  Timer? _repeatTimer;
+  bool _isIncrementing = true;
+
+  // Animation for smooth preset transitions
+  late AnimationController _transitionController;
+  late Animation<double> _unitsAnimation;
+  double _targetUnits = 50;
+
+  String _normalizeDoseUnit({required String? unit, required String unitLabel}) {
+    if (unitLabel == 'units') return 'units';
+    switch ((unit ?? '').trim().toLowerCase()) {
+      case 'mcg':
+      case 'mg':
+      case 'g':
+        return unit!.trim().toLowerCase();
+      default:
+        return 'mcg';
+    }
+  }
 
   @override
   void initState() {
@@ -64,23 +92,113 @@ class _ReconstitutionCalculatorWidgetState
           ? defaultDose.toInt().toString()
           : defaultDose.toStringAsFixed(2),
     );
-    // Set dose unit to match vial unit for IU medications, otherwise default to mcg
-    _doseUnit =
-        widget.initialDoseUnit ??
-        (widget.unitLabel == 'units' ? 'units' : 'mcg');
+    // Set dose unit to match vial unit for units-based medications, otherwise default to mcg
+    _doseUnit = _normalizeDoseUnit(
+      unit: widget.initialDoseUnit,
+      unitLabel: widget.unitLabel,
+    );
     _syringe = widget.initialSyringeSize ?? _syringe;
     if (widget.initialVialSize != null) {
       _vialSizeCtrl.text = widget.initialVialSize!.toStringAsFixed(2);
     }
+    final initialDiluentName = widget.initialDiluentName?.trim();
+    if (initialDiluentName != null && initialDiluentName.isNotEmpty) {
+      _diluentNameCtrl.text = initialDiluentName;
+    }
     _selectedUnits = _syringe.totalUnits * 0.5;
+    _targetUnits = _selectedUnits;
+
+    // Initialize animation controller
+    _transitionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _unitsAnimation =
+        Tween<double>(begin: _selectedUnits, end: _targetUnits).animate(
+          CurvedAnimation(
+            parent: _transitionController,
+            curve: Curves.easeInOutCubic,
+          ),
+        )..addListener(() {
+          setState(() {
+            _selectedUnits = _unitsAnimation.value;
+          });
+        });
+  }
+
+  @override
+  void didUpdateWidget(covariant ReconstitutionCalculatorWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.unitLabel != widget.unitLabel) {
+      final normalized = _normalizeDoseUnit(
+        unit: _doseUnit,
+        unitLabel: widget.unitLabel,
+      );
+      if (normalized != _doseUnit && mounted) {
+        setState(() {
+          _doseUnit = normalized;
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
+    _repeatTimer?.cancel();
+    _transitionController.dispose();
     _doseCtrl.dispose();
     _vialSizeCtrl.dispose();
     _diluentNameCtrl.dispose();
     super.dispose();
+  }
+
+  /// Starts repeating increment/decrement when user long-presses the syringe buttons.
+  ///
+  /// Provides continuous adjustment with an initial delay of 500ms before starting
+  /// rapid repeat at 100ms intervals. This allows for precise fine-tuning of values.
+  void _startRepeating(bool increment, double min, double max) {
+    _isIncrementing = increment;
+    // Initial delay before starting rapid repeat
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (_repeatTimer == null || !_repeatTimer!.isActive) {
+        _repeatTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+          if (mounted) {
+            final delta = _isIncrementing ? 1.0 : -1.0; // Change by whole units
+            final newValue = (_selectedUnits + delta)
+                .clamp(min, max)
+                .roundToDouble();
+            setState(() {
+              _selectedUnits = newValue;
+              _selectedOption = null;
+            });
+          }
+        });
+      }
+    });
+  }
+
+  /// Stops the repeating increment/decrement when user releases the long-press.
+  void _stopRepeating() {
+    _repeatTimer?.cancel();
+    _repeatTimer = null;
+  }
+
+  /// Animates the syringe slider smoothly to a target value.
+  ///
+  /// Used when selecting preset options (Concentrated, Balanced, Diluted) to provide
+  /// visual feedback and smooth transitions between values. Uses easeInOutCubic curve
+  /// for natural, professional motion over 400ms.
+  void _animateToUnits(double targetValue) {
+    _targetUnits = targetValue;
+    _unitsAnimation = Tween<double>(begin: _selectedUnits, end: _targetUnits)
+        .animate(
+          CurvedAnimation(
+            parent: _transitionController,
+            curve: Curves.easeInOutCubic,
+          ),
+        );
+    _transitionController.reset();
+    _transitionController.forward();
   }
 
   // Helper methods now imported from reconstitution_calculator_helpers.dart
@@ -89,21 +207,78 @@ class _ReconstitutionCalculatorWidgetState
   // - formatDouble() - Format for display (was _fmt)
   // - toBaseMass() - Convert units to mg (was _toBaseMass)
 
+  /// Formats a numeric value removing trailing zeros for cleaner display.
+  ///
+  /// Examples:
+  /// - 10.00 → "10"
+  /// - 10.50 → "10.5"
+  /// - 10.25 → "10.25"
+  String _formatNoTrailing(double value) {
+    final str = value.toStringAsFixed(2);
+    if (str.contains('.')) {
+      return str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return str;
+  }
+
+  /// Creates a subtle gradient divider line for visual section separation.
+  ///
+  /// Uses primary color with opacity fading to transparent on edges for elegant
+  /// visual hierarchy without harsh lines.
+  Widget _gradientDivider(BuildContext context) {
+    return Container(
+      height: kReconDividerHeight,
+      margin: EdgeInsets.symmetric(vertical: kReconDividerVerticalMargin),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: kReconDividerOpacity),
+            Colors.transparent,
+          ],
+          stops: kReconDividerStops,
+        ),
+      ),
+    );
+  }
+
+  /// Computes concentration and vial volume for reconstitution based on units.
+  ///
+  /// This is the core calculation that determines how much diluent to add to achieve
+  /// the desired concentration for the target dose.
+  ///
+  /// Parameters:
+  /// - [S]: Total strength in vial (in base mass units, typically mg)
+  /// - [D]: Desired dose per injection (in base mass units, typically mg)
+  /// - [U]: Insulin syringe units to draw (0-100 scale per mL)
+  ///
+  /// Formula:
+  /// - Vial Volume: V = (S / D) × (U / 100)
+  /// - Concentration: C = D × (100 / U)
+  ///
+  /// Returns a record with:
+  /// - [cPerMl]: Concentration per mL
+  /// - [vialVolume]: Total volume to add to vial in mL
   ({double cPerMl, double vialVolume}) _computeForUnits({
     required double S,
     required double D,
     required double U,
   }) {
-    // S = total strength in vial (mg)
-    // D = desired dose per injection (mg)
-    // U = IU units to draw from syringe
-    // Formula: V = (S / D) × (U / 100)
-    // Concentration: C = D × (100 / U)
     final c = (100 * D) / max(U, 0.01);
     final v = (S / max(D, 0.000001)) * (U / 100.0);
     return (cPerMl: c, vialVolume: v);
   }
 
+  /// Calculates the three preset syringe unit values for the current syringe size.
+  ///
+  /// Returns three values representing different reconstitution concentrations:
+  /// - Concentrated (5% or min 5 units): Strong, small doses
+  /// - Balanced (33%): Medium concentration
+  /// - Diluted (80%): Weaker, larger doses
+  ///
+  /// These presets give users quick options without manual slider adjustment.
   (double, double, double) _presetUnitsRaw() {
     final total = _syringe.totalUnits.toDouble();
     final minU = max(5, (total * 0.05).ceil()).toDouble();
@@ -114,26 +289,37 @@ class _ReconstitutionCalculatorWidgetState
 
   InputDecoration _fieldDecoration(BuildContext context, {String? hint}) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Keep the field readable in both light+dark themes:
+    // - Light theme: use surface (typically light)
+    // - Dark theme: use a subtle onSurface tint so the field is slightly
+    //   lighter than the dark calculator background
+    final fill = isDark
+        ? cs.onSurface.withValues(alpha: kOpacitySubtleLow)
+        : cs.surface;
+
     return InputDecoration(
       hintText: hint,
+      hintStyle: hintTextStyle(context),
       floatingLabelBehavior: FloatingLabelBehavior.never,
       isDense: false,
       isCollapsed: false,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       constraints: const BoxConstraints(minHeight: kFieldHeight),
       filled: true,
-      fillColor: cs.surfaceContainerLowest,
+      fillColor: fill,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: cs.outlineVariant.withOpacity(0.5),
-          width: 0.75,
+          color: cs.outlineVariant.withValues(alpha: 0.5),
+          width: kOutlineWidth,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2.0),
+        borderSide: BorderSide(color: cs.primary, width: kFocusedOutlineWidth),
       ),
     );
   }
@@ -143,30 +329,20 @@ class _ReconstitutionCalculatorWidgetState
     required String label,
     required Widget field,
   }) {
-    // Use unified row to ensure consistent label styling and spacing.
-    return LabelFieldRow(label: label, field: field);
+    // Use unified row with light text for dark background
+    return LabelFieldRow(label: label, field: field, lightText: true);
   }
 
   Widget _helperText(String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 128, bottom: 8, top: 2),
-      child: Text(text, style: kMutedLabelStyle(context)),
-    );
-  }
-
-  Widget _pillBtn(BuildContext context, String label, VoidCallback onTap) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      shape: const StadiumBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const StadiumBorder(),
-        child: SizedBox(
-          width: 36,
-          height: kFieldHeight,
-          child: Center(
-            child: Text(label, style: Theme.of(context).textTheme.titleMedium),
-          ),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: reconForegroundColor(
+            context,
+          ).withValues(alpha: kReconTextMediumOpacity),
+          fontStyle: FontStyle.italic,
         ),
       ),
     );
@@ -179,21 +355,22 @@ class _ReconstitutionCalculatorWidgetState
       return const SizedBox.shrink();
     }
 
-    // Sync dose unit with vial unit when vial changes to/from 'units'
-    // This handles the case where user changes medication strength unit
-    if (widget.unitLabel == 'units' && _doseUnit != 'units') {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = reconForegroundColor(context);
+
+    // Keep dose unit valid for the dropdown options.
+    // This avoids a common Flutter assertion when the current value is not
+    // present in the items list.
+    final normalizedDoseUnit = _normalizeDoseUnit(
+      unit: _doseUnit,
+      unitLabel: widget.unitLabel,
+    );
+    if (normalizedDoseUnit != _doseUnit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
-            _doseUnit = 'units';
-          });
-        }
-      });
-    } else if (widget.unitLabel != 'units' && _doseUnit == 'units') {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _doseUnit = 'mcg'; // Default back to mcg for mass-based units
+            _doseUnit = normalizedDoseUnit;
           });
         }
       });
@@ -203,24 +380,24 @@ class _ReconstitutionCalculatorWidgetState
     final Sraw = widget.initialStrengthValue;
     final Draw = double.tryParse(_doseCtrl.text) ?? 0;
 
-    double S = Sraw;
-    double D = Draw;
+    var S = Sraw;
+    var D = Draw;
     if (widget.unitLabel != 'units') {
-      final S_mg = toBaseMass(Sraw, widget.unitLabel);
-      final D_mg = toBaseMass(Draw, _doseUnit);
-      S = S_mg;
-      D = D_mg;
+      final sMg = toBaseMass(Sraw, widget.unitLabel);
+      final dMg = toBaseMass(Draw, _doseUnit);
+      S = sMg;
+      D = dMg;
     }
 
     final vialMax = double.tryParse(_vialSizeCtrl.text);
     final (minURaw, midURaw, highURaw) = _presetUnitsRaw();
 
-    double totalIU = _syringe.totalUnits.toDouble();
-    double iuMin = minURaw;
-    double iuMax = totalIU;
-    if (vialMax != null && S > 0 && D > 0) {
+    final totalUnits = _syringe.totalUnits.toDouble();
+    var iuMin = minURaw;
+    var iuMax = totalUnits;
+    if (vialMax != null && vialMax > 0 && S > 0 && D > 0) {
       final uMaxAllowed = (100 * D * vialMax) / S;
-      iuMax = uMaxAllowed.clamp(0, totalIU).toDouble();
+      iuMax = uMaxAllowed.clamp(0, totalUnits).toDouble();
       if (iuMax < iuMin) iuMin = iuMax;
     }
 
@@ -231,29 +408,29 @@ class _ReconstitutionCalculatorWidgetState
     final current = _computeForUnits(S: S, D: D, U: _selectedUnits);
     final currentC = round2(current.cPerMl);
     final currentV = current.vialVolume; // Use precise value for live display
-    final currentVRounded = roundToHalfMl(
-      current.vialVolume,
-    ); // Rounded for saving
     final fitsVial = vialMax == null || currentV <= vialMax + 1e-9;
 
-    // Notify parent of calculation result (use rounded value for saving)
+    // Notify parent of calculation result (use precise value for live display)
     final result = ReconstitutionResult(
       perMlConcentration: currentC,
-      solventVolumeMl: currentVRounded,
-      recommendedUnits: round2(_selectedUnits),
+      solventVolumeMl: currentV, // Use precise value not rounded
+      recommendedUnits: _selectedUnits.roundToDouble(), // Round to whole units
       syringeSizeMl: _syringe.ml,
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
           : null,
+      recommendedDose: Draw,
+      doseUnit: _doseUnit,
+      maxVialSizeMl: vialMax,
     );
     final isValid = S > 0 && D > 0 && fitsVial;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onCalculate?.call(result, isValid);
     });
 
-    double u1 = sliderMin;
-    double u3 = sliderMax;
-    double u2 = sliderMin + (sliderMax - sliderMin) / 2.0;
+    final u1 = sliderMin;
+    final u3 = sliderMax;
+    final u2 = sliderMin + (sliderMax - sliderMin) / 2.0;
 
     final conc = _computeForUnits(S: S, D: D, U: u1);
     final std = _computeForUnits(S: S, D: D, U: u2);
@@ -261,33 +438,54 @@ class _ReconstitutionCalculatorWidgetState
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 8),
-        Text(
-          'Reconstitution Calculator',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurfaceVariant.withOpacity(0.8),
+        // Strength value made prominent with larger font and bold - centered
+        Center(
+          child: Column(
+            children: [
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: fg.withValues(alpha: kReconTextMediumOpacity),
+                  ),
+                  children: [
+                    const TextSpan(text: 'Using vial strength: '),
+                    TextSpan(
+                      text:
+                          '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
+                      style: reconSummaryStrengthTextStyle(
+                        context,
+                        compact: true,
+                        color: theme.colorScheme.primary,
+                        fontWeight: kFontWeightBold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'To adjust, go to Strength section above',
+                textAlign: TextAlign.center,
+                style: helperTextStyle(context)?.copyWith(
+                  color: fg.withValues(alpha: kReconTextMutedOpacity),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            'Using vial strength: ${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-            style: kMutedLabelStyle(
-              context,
-            ).copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
+        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            'The calculator determines how much diluent to add for correct doses. Enter fluid name, desired dose, syringe size, optional max vial size, then select an option below or adjust with the slider.',
-            style: kMutedLabelStyle(context),
+            'The calculator determines how much diluent to add for correct doses. Enter diluent name (optional), desired dose (D), syringe size, and optional max vial size. Then pick an option below or fine-tune with the slider.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: kReconTextMediumOpacity),
+            ),
           ),
         ),
         _rowLabelField(
@@ -296,6 +494,7 @@ class _ReconstitutionCalculatorWidgetState
           field: Field36(
             child: TextField(
               controller: _diluentNameCtrl,
+              textCapitalization: kTextCapitalizationDefault,
               decoration: _fieldDecoration(
                 context,
                 hint: 'e.g., Sterile Water',
@@ -306,7 +505,7 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         ),
-        _helperText('Reconstitution fluid name'),
+        _helperText('Optional label for the mixing liquid (e.g., Sterile Water)'),
         _rowLabelField(
           context,
           label: 'Desired Dose',
@@ -366,7 +565,7 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Enter the amount per dose and select its unit'),
+        _helperText('Desired dose (D): amount per injection. Choose the unit that matches your dose.'),
         _rowLabelField(
           context,
           label: 'Syringe Size',
@@ -391,38 +590,44 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Select the syringe capacity'),
+        _helperText('Sets the syringe markings (100 units = 1.0 mL) and limits the maximum volume.'),
         _rowLabelField(
           context,
           label: 'Max Vial Size',
           field: StepperRow36(
             controller: _vialSizeCtrl,
             onDec: () {
-              final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-              setState(
-                () => _vialSizeCtrl.text = (v - 1).clamp(0, 100).toString(),
-              );
+              final v = double.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+              final newVal = (v - 1).clamp(0, 100);
+              setState(() {
+                _vialSizeCtrl.text = newVal == newVal.roundToDouble()
+                    ? newVal.toInt().toString()
+                    : newVal.toStringAsFixed(1);
+              });
             },
             onInc: () {
-              final v = int.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
-              setState(
-                () => _vialSizeCtrl.text = (v + 1).clamp(0, 100).toString(),
-              );
+              final v = double.tryParse(_vialSizeCtrl.text.trim()) ?? 0;
+              final newVal = (v + 1).clamp(0, 100);
+              setState(() {
+                _vialSizeCtrl.text = newVal == newVal.roundToDouble()
+                    ? newVal.toInt().toString()
+                    : newVal.toStringAsFixed(1);
+              });
             },
             decoration: _fieldDecoration(context, hint: 'mL'),
           ),
         ),
-        _helperText('Maximum capacity in mL of the vial (optional constraint)'),
-        Divider(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
-        ),
-        const SizedBox(height: 12),
+        _helperText('Optional. If set, options requiring more than this vial capacity are disabled.'),
+        _gradientDivider(context),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               'Select a reconstitution option',
-              style: kMutedLabelStyle(context),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: fg.withValues(alpha: kReconTextHighOpacity),
+              ),
             ),
           ),
           _buildOptionRow(
@@ -430,10 +635,12 @@ class _ReconstitutionCalculatorWidgetState
             'Concentrated',
             'concentrated',
             _selectedOption,
-            () => setState(() {
-              _selectedUnits = u1;
-              _selectedOption = 'concentrated';
-            }),
+            () {
+              setState(() {
+                _selectedOption = 'concentrated';
+              });
+              _animateToUnits(u1);
+            },
             conc,
             u1,
             isValid: u1 >= sliderMin && u1 <= sliderMax,
@@ -443,10 +650,12 @@ class _ReconstitutionCalculatorWidgetState
             'Balanced',
             'balanced',
             _selectedOption,
-            () => setState(() {
-              _selectedUnits = u2;
-              _selectedOption = 'balanced';
-            }),
+            () {
+              setState(() {
+                _selectedOption = 'balanced';
+              });
+              _animateToUnits(u2);
+            },
             std,
             u2,
             isValid: u2 >= sliderMin && u2 <= sliderMax,
@@ -456,212 +665,480 @@ class _ReconstitutionCalculatorWidgetState
             'Diluted',
             'diluted',
             _selectedOption,
-            () => setState(() {
-              _selectedUnits = u3;
-              _selectedOption = 'diluted';
-            }),
+            () {
+              setState(() {
+                _selectedOption = 'diluted';
+              });
+              _animateToUnits(u3);
+            },
             dil,
             u3,
             isValid: u3 >= sliderMin && u3 <= sliderMax,
           ),
         ] else
           Padding(
-            padding: const EdgeInsets.only(left: 0, bottom: 8),
+            padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               'No valid options — Check strength, dose, or syringe size',
-              style: kMutedLabelStyle(context),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
-        const SizedBox(height: 12),
-        // Support text above syringe
+        _gradientDivider(context),
+        // Target Dose heading
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
+          padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            'Drag the fill line or tap on the syringe to adjust diluent amount',
-            style: kMutedLabelStyle(context),
+            'Target Dose',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+        // Support text above syringe with U = Units explanation
+        Padding(
+          padding: const EdgeInsets.symmetric(),
+          child: Text(
+            'Drag the syringe or use +/- buttons for fine adjustments (U = Units)',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: fg.withValues(alpha: kReconTextMediumOpacity),
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ),
         // Range limit warning removed - using snackbar only for cleaner UI
         const SizedBox(height: 8),
-        // Live syringe gauge preview (interactive)
+        // Syringe gauge with fine-tune buttons
         if (S > 0 && D > 0 && !currentV.isNaN && !_selectedUnits.isNaN) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                WhiteSyringeGauge(
-                  totalIU: _syringe.totalUnits.toDouble(),
-                  fillIU: _selectedUnits,
-                  interactive: true,
-                  maxConstraint: sliderMax,
-                  onMaxConstraintHit: () {
-                    // Show snackbar when user hits constraint
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          vialMax != null
-                              ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
-                              : 'Limited by syringe capacity',
-                        ),
-                        duration: const Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
-                  onChanged: (newValue) {
-                    // Clamp to slider min/max
-                    final clampedValue = newValue.clamp(sliderMin, sliderMax);
-                    setState(() {
-                      _selectedUnits = clampedValue;
-                      _selectedOption =
-                          null; // Clear option selection on manual adjust
-                    });
-                  },
-                ),
-                Positioned(
-                  top: -2,
-                  right: 0,
-                  child: Text(
-                    '${_syringe.label} Syringe',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          // Fine-tune buttons with syringe gauge
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Decrement button - original style
+              GestureDetector(
+                onTap: () {
+                  final newValue = (_selectedUnits - 1.0)
+                      .clamp(sliderMin, sliderMax)
+                      .roundToDouble();
+                  setState(() {
+                    _selectedUnits = newValue;
+                    _selectedOption = null;
+                  });
+                },
+                onLongPressStart: (_) =>
+                    _startRepeating(false, sliderMin, sliderMax),
+                onLongPressEnd: (_) => _stopRepeating(),
+                child: SizedBox(
+                  height: 28,
+                  width: 28,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(
+                      minHeight: 28,
+                      minWidth: 28,
+                    ),
+                    onPressed: () {
+                      final rawValue =
+                          _selectedUnits - 1.0; // Decrement by whole unit
+                      final newValue = rawValue
+                          .clamp(sliderMin, sliderMax)
+                          .roundToDouble();
+
+                      // Show snackbar if hitting constraint
+                      if (rawValue != newValue) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              rawValue < sliderMin
+                                  ? 'Minimum value reached'
+                                  : (vialMax != null
+                                        ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                        : 'Limited by syringe capacity'),
+                            ),
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+
+                      setState(() {
+                        _selectedUnits = newValue;
+                        _selectedOption = null;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.remove,
+                      size: 18,
                       color: Theme.of(context).colorScheme.primary,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 11,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 28),
-          // Conversational explanation
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  textAlign: TextAlign.left,
-                  text: TextSpan(
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    WhiteSyringeGauge(
+                      totalUnits: _syringe.totalUnits.toDouble(),
+                      fillUnits: _selectedUnits,
+                      interactive: true,
+                      maxConstraint: sliderMax,
+                      onMaxConstraintHit: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              vialMax != null
+                                  ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                  : 'Limited by syringe capacity',
+                            ),
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      onChanged: (newValue) {
+                        final clampedValue = newValue
+                            .clamp(sliderMin, sliderMax)
+                            .roundToDouble(); // Round to whole units
+                        setState(() {
+                          _selectedUnits = clampedValue;
+                          _selectedOption = null;
+                        });
+                      },
                     ),
-                    children: [
-                      const TextSpan(text: 'Reconstitute '),
-                      TextSpan(
-                        text:
-                            '${formatDouble(widget.initialStrengthValue)} ${widget.unitLabel}',
-                        style: TextStyle(
+                    Positioned(
+                      top: -2,
+                      right: 0,
+                      child: Text(
+                        '${_syringe.label} Syringe',
+                        style: helperTextStyle(context)?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
-                      if (widget.medicationName != null &&
-                          widget.medicationName!.isNotEmpty) ...[
-                        const TextSpan(text: ' '),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Increment button - original style
+              GestureDetector(
+                onTap: () {
+                  final newValue = (_selectedUnits + 1.0)
+                      .clamp(sliderMin, sliderMax)
+                      .roundToDouble();
+                  setState(() {
+                    _selectedUnits = newValue;
+                    _selectedOption = null;
+                  });
+                },
+                onLongPressStart: (_) =>
+                    _startRepeating(true, sliderMin, sliderMax),
+                onLongPressEnd: (_) => _stopRepeating(),
+                child: SizedBox(
+                  height: 28,
+                  width: 28,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(
+                      minHeight: 28,
+                      minWidth: 28,
+                    ),
+                    onPressed: () {
+                      final rawValue =
+                          _selectedUnits + 1.0; // Increment by whole unit
+                      final newValue = rawValue
+                          .clamp(sliderMin, sliderMax)
+                          .roundToDouble();
+
+                      // Show snackbar if hitting constraint
+                      if (rawValue != newValue) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              vialMax != null
+                                  ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                  : 'Limited by syringe capacity',
+                            ),
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+
+                      setState(() {
+                        _selectedUnits = newValue;
+                        _selectedOption = null;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.add,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Reconstitution summary - featured section with emphasis
+          Center(
+            child: Container(
+              padding: kReconSummaryPadding,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.04),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(kReconSummaryBorderRadius),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                  width: kReconSummaryBorderWidth,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.shadow.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 4),
+                  // Summary header icon
+                  Icon(
+                    Icons.science_outlined,
+                    size: 32,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 12),
+                  // First line: Reconstitute X of MEDNAME
+                  Builder(
+                    builder: (context) {
+                      final cs = Theme.of(context).colorScheme;
+                      final baseTextColor = fg.withValues(
+                        alpha: kReconTextHighOpacity,
+                      );
+                      final baseStyle = reconSummaryBaseTextStyle(
+                        context,
+                        color: baseTextColor,
+                      );
+                      final strengthStyle = reconSummaryStrengthTextStyle(
+                        context,
+                        compact: false,
+                        color: cs.primary,
+                        fontWeight: kFontWeightExtraBold,
+                      );
+                      final ofStyle = reconSummaryOfTextStyle(
+                        context,
+                        compact: false,
+                        color: baseTextColor,
+                        fontWeight: kFontWeightNormal,
+                      );
+                      final medicationNameStyle =
+                          reconSummaryMedicationNameTextStyle(
+                            context,
+                            compact: false,
+                            color: cs.primary,
+                            fontWeight: kFontWeightBold,
+                          );
+                      final volumeHugeStyle = reconSummaryHugeVolumeTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontWeight: kFontWeightBlack,
+                      );
+                      final valueStyle = reconSummaryValueTextStyle(
+                        context,
+                        compact: false,
+                        color: cs.primary,
+                        fontWeight: kFontWeightBold,
+                      );
+                      final drawUnitsStyle = reconSummaryDrawUnitsTextStyle(
+                        context,
+                        color: cs.primary,
+                        fontWeight: kFontWeightExtraBold,
+                      );
+
+                        final summaryMedicationName =
+                          (widget.medicationName ?? '').trim();
+                        final hasMedicationName =
+                          summaryMedicationName.isNotEmpty;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'Reconstitute '),
+                                TextSpan(
+                                  text:
+                                      '${_formatNoTrailing(widget.initialStrengthValue)} ${widget.unitLabel}',
+                                  style: strengthStyle,
+                                ),
+                                if (hasMedicationName) ...[
+                                  TextSpan(text: '  of  ', style: ofStyle),
+                                  TextSpan(
+                                    text: summaryMedicationName,
+                                    style: medicationNameStyle,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'with '),
+                                TextSpan(
+                                  text: '${_formatNoTrailing(currentV)} mL',
+                                  style: volumeHugeStyle,
+                                ),
+                                TextSpan(text: '  of  ', style: ofStyle),
+                                TextSpan(
+                                  text: _diluentNameCtrl.text.trim().isNotEmpty
+                                      ? _diluentNameCtrl.text.trim()
+                                      : 'diluent',
+                                  style: valueStyle,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            height: kReconDividerHeight,
+                            margin: EdgeInsets.symmetric(
+                              vertical: kReconDividerVerticalMargin,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  cs.surface.withValues(
+                                    alpha: kOpacityTransparent,
+                                  ),
+                                  cs.primary.withValues(
+                                    alpha: kReconDividerOpacity,
+                                  ),
+                                  cs.surface.withValues(
+                                    alpha: kOpacityTransparent,
+                                  ),
+                                ],
+                                stops: kReconDividerStops,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'Draw '),
+                                TextSpan(
+                                  text:
+                                      '${_selectedUnits.round()} Units  ',
+                                  style: drawUnitsStyle,
+                                ),
+                                TextSpan(
+                                  text:
+                                      '${_formatNoTrailing((_selectedUnits / 100) * _syringe.ml)} mL',
+                                  style: valueStyle,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: baseStyle,
+                              children: [
+                                const TextSpan(text: 'into a '),
+                                TextSpan(
+                                  text: _syringe.label,
+                                  style: valueStyle,
+                                ),
+                                const TextSpan(text: ' syringe'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Dose amount on separate line
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: fg.withValues(alpha: kReconTextMediumOpacity),
+                        fontWeight: FontWeight.w500,
+                        height: 1.4,
+                      ),
+                      children: [
+                        const TextSpan(text: 'for a dose of '),
                         TextSpan(
-                          text: widget.medicationName!,
-                          style: TextStyle(
+                          text: '${_formatNoTrailing(Draw)} $_doseUnit',
+                          style: reconSummaryValueTextStyle(
+                            context,
+                            compact: false,
                             color: Theme.of(context).colorScheme.primary,
+                            fontWeight: kFontWeightBold,
                           ),
                         ),
                       ],
-                      const TextSpan(text: ' with '),
-                      TextSpan(
-                        text: '${currentV.toStringAsFixed(2)} mL',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      TextSpan(
-                        text: _diluentNameCtrl.text.trim().isNotEmpty
-                            ? ' ${_diluentNameCtrl.text.trim()}'
-                            : ' diluent',
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                // Split into 3 lines to prevent shifting
-                RichText(
-                  textAlign: TextAlign.left,
-                  text: TextSpan(
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    children: [
-                      const TextSpan(text: 'Draw '),
-                      TextSpan(
-                        text: '${_selectedUnits.toStringAsFixed(1)} IU',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const TextSpan(text: ' ('),
-                      TextSpan(
-                        text:
-                            '${((_selectedUnits / 100) * _syringe.ml).toStringAsFixed(2)} mL',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const TextSpan(text: ')'),
-                    ],
                   ),
-                ),
-                const SizedBox(height: 2),
-                RichText(
-                  textAlign: TextAlign.left,
-                  text: TextSpan(
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 16),
+                  // Clarification text
+                  Text(
+                    'This calculates the reconstitution volume needed to achieve the correct concentration for your target dose. '
+                    'This target dose will become your default dose in the schedule screen. '
+                    'Doses can be created, adjusted, and tracked on the schedule screen where all medication administration is managed.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: fg.withValues(alpha: kReconTextMutedOpacity),
+                      fontStyle: FontStyle.italic,
+                      height: 1.5,
                     ),
-                    children: [
-                      const TextSpan(text: 'into a '),
-                      TextSpan(
-                        text: _syringe.label,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const TextSpan(text: ' syringe'),
-                    ],
                   ),
-                ),
-                const SizedBox(height: 2),
-                RichText(
-                  textAlign: TextAlign.left,
-                  text: TextSpan(
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    children: [
-                      const TextSpan(text: 'for your '),
-                      TextSpan(
-                        text: '${formatDouble(Draw)} $_doseUnit',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const TextSpan(text: ' dose'),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 16),
         ],
         if (!fitsVial)
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Warning: Computed solvent volume (${currentV.toStringAsFixed(2)} mL) exceeds vial size. Try a more concentrated preset (lower IU).',
+              'Warning: Computed solvent volume (${currentV.toStringAsFixed(2)} mL) exceeds vial size. Try a more concentrated preset (lower units).',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -675,12 +1152,16 @@ class _ReconstitutionCalculatorWidgetState
                   ? () {
                       final result = ReconstitutionResult(
                         perMlConcentration: currentC,
-                        solventVolumeMl: currentV,
-                        recommendedUnits: round2(_selectedUnits),
+                        solventVolumeMl: currentV, // Use precise value
+                        recommendedUnits: _selectedUnits
+                            .roundToDouble(), // Round to whole units
                         syringeSizeMl: _syringe.ml,
                         diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                             ? _diluentNameCtrl.text.trim()
                             : null,
+                        recommendedDose: Draw,
+                        doseUnit: _doseUnit,
+                        maxVialSizeMl: vialMax,
                       );
                       widget.onApply?.call(result);
                     }
@@ -705,9 +1186,7 @@ class _ReconstitutionCalculatorWidgetState
   }) {
     final selected = selectedValue == optionValue;
     final theme = Theme.of(context);
-    final diluentName = _diluentNameCtrl.text.trim().isNotEmpty
-        ? _diluentNameCtrl.text.trim()
-        : 'Diluent';
+    final fg = reconForegroundColor(context);
     final roundedVolume = roundToHalfMl(calcResult.vialVolume);
     // Calculate actual mL to draw for the dose
     final mlToDraw = (units / 100) * _syringe.ml;
@@ -715,35 +1194,53 @@ class _ReconstitutionCalculatorWidgetState
     // Get explainer text based on label
     String explainerText;
     if (label == 'Concentrated') {
-      explainerText = 'Strong small dosage';
+      explainerText = 'High concentration, draw less volume (smaller doses)';
     } else if (label == 'Balanced') {
-      explainerText = 'Approx 50% syringe size dosage';
+      explainerText = 'Moderate concentration, balanced draw volume';
     } else if (label == 'Diluted') {
-      explainerText = 'Large doses';
+      explainerText = 'Low concentration, draw more volume (larger doses)';
     } else {
       explainerText = '';
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: isValid ? onTap : null,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: Opacity(
           opacity: isValid ? 1.0 : 0.4,
-          child: Container(
-            padding: const EdgeInsets.all(6),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: selected
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                  : Colors.transparent,
+              gradient: selected
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.colorScheme.primary.withValues(alpha: 0.15),
+                        theme.colorScheme.primary.withValues(alpha: 0.08),
+                      ],
+                    )
+                  : null,
+              color: selected ? null : fg.withValues(alpha: 0.03),
               border: Border.all(
                 color: selected
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.outlineVariant,
-                width: 2, // Consistent width to prevent nudging
+                    : fg.withValues(alpha: 0.15),
+                width: kReconOptionBorderWidth,
               ),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        spreadRadius: 0,
+                      ),
+                    ]
+                  : null,
             ),
             child: Row(
               children: [
@@ -752,31 +1249,34 @@ class _ReconstitutionCalculatorWidgetState
                   groupValue: selectedValue,
                   onChanged: isValid ? (_) => onTap() : null,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  fillColor: WidgetStateProperty.resolveWith<Color?>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return theme.colorScheme.primary;
+                    }
+                    return fg.withValues(alpha: 0.5);
+                  }),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         label,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: reconCalculatorOptionTitleTextStyle(
+                          context,
                           color: selected
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(
-                                  0.5,
-                                ),
+                              : fg.withValues(alpha: kReconTextHighOpacity),
                         ),
                       ),
                       if (explainerText.isNotEmpty) ...[
                         const SizedBox(height: 1),
                         Text(
                           explainerText,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          style: helperTextStyle(context)?.copyWith(
+                            color: fg.withValues(alpha: kReconTextMutedOpacity),
                             fontStyle: FontStyle.italic,
-                            fontSize: 11,
                           ),
                         ),
                       ],
@@ -785,9 +1285,8 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                ? fg.withValues(alpha: 0.9)
+                                : fg.withValues(alpha: 0.7),
                           ),
                           children: [
                             TextSpan(
@@ -796,8 +1295,11 @@ class _ReconstitutionCalculatorWidgetState
                             ),
                             TextSpan(
                               text: '${formatDouble(roundedVolume)} mL',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
                               ),
                             ),
                           ],
@@ -807,17 +1309,19 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                ? fg.withValues(alpha: kReconTextHighOpacity)
+                                : fg.withValues(alpha: kReconTextLowOpacity),
                           ),
                           children: [
-                            TextSpan(text: 'Concentration: '),
+                            const TextSpan(text: 'Concentration: '),
                             TextSpan(
                               text:
                                   '${formatDouble(calcResult.cPerMl)} ${widget.unitLabel}/mL',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
                               ),
                             ),
                           ],
@@ -827,17 +1331,19 @@ class _ReconstitutionCalculatorWidgetState
                         text: TextSpan(
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: selected
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurfaceVariant
-                                      .withOpacity(0.5),
+                                ? fg.withValues(alpha: kReconTextHighOpacity)
+                                : fg.withValues(alpha: kReconTextLowOpacity),
                           ),
                           children: [
                             TextSpan(text: 'Syringe (${_syringe.label}): '),
                             TextSpan(
                               text:
-                                  '${formatDouble(units)} IU / ${formatDouble(mlToDraw)} mL',
-                              style: const TextStyle(
+                                  '${formatDouble(units)} U / ${formatDouble(mlToDraw)} mL',
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: selected
+                                    ? theme.colorScheme.primary
+                                    : null,
                               ),
                             ),
                           ],

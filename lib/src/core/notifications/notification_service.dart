@@ -1,19 +1,118 @@
+// Dart imports:
 import 'dart:io' show Platform;
+
+// Flutter imports:
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+
+@pragma('vm:entry-point')
+void dosifiNotificationTapBackground(NotificationResponse response) {
+  debugPrint(
+    '[NotificationService] BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+  );
+}
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _fln =
       FlutterLocalNotificationsPlugin();
   static const MethodChannel _platform = MethodChannel('dosifi/notifications');
-  static void _log(String msg) => debugPrint('[NotificationService] ' + msg);
+  static void _log(String msg) => debugPrint('[NotificationService] $msg');
+
+  static void Function(NotificationResponse response)? _responseHandler;
+  static NotificationResponse? _pendingResponse;
+
+  static Future<void>? _tzInitFuture;
+
+  static void setNotificationResponseHandler(
+    void Function(NotificationResponse response) handler,
+  ) {
+    _responseHandler = handler;
+    final pending = _pendingResponse;
+    if (pending != null) {
+      _pendingResponse = null;
+      handler(pending);
+    }
+  }
+
+  static void _dispatchNotificationResponse(NotificationResponse response) {
+    final handler = _responseHandler;
+    if (handler == null) {
+      _pendingResponse = response;
+      return;
+    }
+    handler(response);
+  }
+
+  static Future<void> _ensureTimeZoneReady() {
+    // tz.local is a late-init field; if any scheduling path runs before init
+    // completes (or if init is skipped), using tz.local will throw.
+    return _tzInitFuture ??= () async {
+      _log('Ensuring TimeZones are initialized...');
+      try {
+        tz.initializeTimeZones();
+
+        String localTz;
+        try {
+          localTz = await FlutterTimezone.getLocalTimezone().timeout(
+            const Duration(seconds: 2),
+            onTimeout: () {
+              _log('Timeout getting local timezone (ensure)');
+              return 'UTC';
+            },
+          );
+          _log('Resolved local timezone (ensure): $localTz');
+        } catch (e) {
+          localTz = 'UTC';
+          _log('Failed to resolve timezone (ensure), defaulting to UTC: $e');
+        }
+
+        try {
+          tz.setLocalLocation(tz.getLocation(localTz));
+        } catch (e) {
+          _log('Unknown/invalid timezone "$localTz"; falling back to UTC: $e');
+          tz.setLocalLocation(tz.getLocation('UTC'));
+        }
+
+        final now = tz.TZDateTime.now(tz.local);
+        _log(
+          'tz.local ready: ${tz.local.name}, now=$now, offset=${now.timeZoneOffset}',
+        );
+      } catch (e) {
+        // Last-resort fallback.
+        _log('Timezone initialization failed; forcing UTC: $e');
+        try {
+          tz.initializeTimeZones();
+          tz.setLocalLocation(tz.getLocation('UTC'));
+        } catch (_) {
+          // If even this fails, let scheduling throw; but this should be extremely rare.
+        }
+      }
+    }();
+  }
+
+  static int stableIdForKey(String key) => _stableHash31(key);
+  // Test hooks: allow overriding scheduling/cancel behavior for tests. When non-null,
+  // the overrides will be called in place of the real plugin methods to avoid
+  // platform channel invocations during unit/widget tests.
+  static Future<void> Function(
+    int id,
+    DateTime when, {
+    required String title,
+    required String body,
+    String channelId,
+  })?
+  scheduleAtAlarmClockOverride;
+
+  static Future<void> Function(int id)? cancelOverride;
 
   static const AndroidNotificationChannel _upcomingDose =
       AndroidNotificationChannel(
@@ -27,13 +126,11 @@ class NotificationService {
         'low_stock',
         'Low Stock',
         description: 'Alerts for low medication stock',
-        importance: Importance.defaultImportance,
       );
   static const AndroidNotificationChannel _expiry = AndroidNotificationChannel(
     'expiry',
     'Expiry',
     description: 'Alerts for medication expiry',
-    importance: Importance.defaultImportance,
   );
   static const AndroidNotificationChannel _testAlarm =
       AndroidNotificationChannel(
@@ -44,34 +141,46 @@ class NotificationService {
       );
 
   static Future<void> init() async {
+    _log('Initializing NotificationService...');
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
-    await _fln.initialize(initSettings);
 
-    // Timezone for scheduled notifications
-    tz.initializeTimeZones();
-    String localTz;
+    _log('Initializing FlutterLocalNotificationsPlugin...');
     try {
-      localTz = await FlutterTimezone.getLocalTimezone();
-      _log('Resolved local timezone via flutter_timezone: ' + localTz);
+      await _fln
+          .initialize(
+            initSettings,
+            onDidReceiveNotificationResponse: (response) {
+              _log(
+                'NotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+              );
+              _dispatchNotificationResponse(response);
+            },
+            onDidReceiveBackgroundNotificationResponse:
+                dosifiNotificationTapBackground,
+          )
+          .timeout(const Duration(seconds: 3));
     } catch (e) {
-      // Fallback to system default if plugin fails
-      localTz = 'UTC';
-      _log(
-        'Failed to resolve timezone via plugin, defaulting to UTC. Error: ' +
-            e.toString(),
-      );
+      _log('FlutterLocalNotificationsPlugin.initialize failed/timeout: $e');
+      // Do not block app startup if the notifications plugin is unavailable.
+      return;
     }
-    tz.setLocalLocation(tz.getLocation(localTz));
-    final now = tz.TZDateTime.now(tz.local);
-    _log(
-      'tz.local set to ' +
-          tz.local.name +
-          ', now=' +
-          now.toString() +
-          ', offset=' +
-          now.timeZoneOffset.toString(),
-    );
+
+    try {
+      final launchDetails = await _fln.getNotificationAppLaunchDetails();
+      final launched = launchDetails?.didNotificationLaunchApp ?? false;
+      final response = launchDetails?.notificationResponse;
+      if (launched && response != null) {
+        _log(
+          'App launched from notification: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
+        );
+        _dispatchNotificationResponse(response);
+      }
+    } catch (e) {
+      _log('getNotificationAppLaunchDetails failed: $e');
+    }
+
+    await _ensureTimeZoneReady();
 
     final android = _fln
         .resolvePlatformSpecificImplementation<
@@ -88,23 +197,35 @@ class NotificationService {
     }
 
     // Do not request notification permissions here to avoid blocking app startup.
+    _log('NotificationService initialization complete');
   }
 
   static Future<bool> ensurePermissionGranted() async {
     final status = await Permission.notification.status;
-    _log('Notification permission status before request: ' + status.toString());
+    _log('Notification permission status before request: $status');
     if (status.isGranted) return true;
     final result = await Permission.notification.request();
-    _log('Notification permission result: ' + result.toString());
+    _log('Notification permission result: $result');
     return result.isGranted;
+  }
+
+  static Future<bool> isPermissionGranted() async {
+    try {
+      final status = await Permission.notification.status;
+      _log('Notification permission status (no prompt): $status');
+      return status.isGranted;
+    } catch (e) {
+      _log('Error checking notification permission status: $e');
+      return false;
+    }
   }
 
   static Future<bool> canScheduleExactAlarms() async {
     try {
       final res = await _platform.invokeMethod<bool>('canScheduleExactAlarms');
-      return res == true;
+      return res ?? false;
     } catch (e) {
-      _log('Error canScheduleExactAlarms: ' + e.toString());
+      _log('Error canScheduleExactAlarms: $e');
       return false;
     }
   }
@@ -120,7 +241,7 @@ class NotificationService {
       }
       return false;
     } catch (e) {
-      _log('Error areNotificationsEnabled: ' + e.toString());
+      _log('Error areNotificationsEnabled: $e');
       return false;
     }
   }
@@ -132,12 +253,12 @@ class NotificationService {
     try {
       final info = await PackageInfo.fromPlatform();
       pkg = info.packageName;
-      _log('Resolved package name: ' + pkg);
+      _log('Resolved package name: $pkg');
     } catch (e) {
       // If the package_info_plus plugin isn't available (e.g., after hot restart on some devices),
       // fall back to intents that don't require the package name.
       pkg = null;
-      _log('PackageInfo.fromPlatform failed: ' + e.toString());
+      _log('PackageInfo.fromPlatform failed: $e');
     }
 
     final intents = <AndroidIntent>[
@@ -187,18 +308,13 @@ class NotificationService {
       final intent = intents[i];
       try {
         _log(
-          'Launching settings intent #' +
-              i.toString() +
-              ': ' +
-              (intent.action ?? '') +
-              ' ' +
-              (intent.data ?? ''),
+          'Launching settings intent #$i: ${intent.action ?? ''} ${intent.data ?? ''}',
         );
         await intent.launch();
-        _log('Settings intent #' + i.toString() + ' launched successfully');
+        _log('Settings intent #$i launched successfully');
         return;
       } catch (e) {
-        _log('Settings intent #' + i.toString() + ' failed: ' + e.toString());
+        _log('Settings intent #$i failed: $e');
         // Try next fallback
         continue;
       }
@@ -212,9 +328,9 @@ class NotificationService {
     try {
       final info = await PackageInfo.fromPlatform();
       pkg = info.packageName;
-      _log('Resolved package name for channel settings: ' + pkg);
+      _log('Resolved package name for channel settings: $pkg');
     } catch (e) {
-      _log('PackageInfo.fromPlatform failed: ' + e.toString());
+      _log('PackageInfo.fromPlatform failed: $e');
       pkg = null;
     }
     final intents = <AndroidIntent>[
@@ -235,23 +351,100 @@ class NotificationService {
     ];
     for (var i = 0; i < intents.length; i++) {
       try {
-        _log('Launching channel settings intent #' + i.toString());
+        _log('Launching channel settings intent #$i');
         await intents[i].launch();
         return;
       } catch (e) {
-        _log(
-          'Channel settings intent #' +
-              i.toString() +
-              ' failed: ' +
-              e.toString(),
-        );
+        _log('Channel settings intent #$i failed: $e');
       }
     }
   }
 
   static Future<void> showTest() async {
     _log('showTest() called');
-    final details = NotificationDetails(
+
+    const title = 'Test Medication';
+    const body = 'Morning Dose • 5 mg • 8:00 AM';
+
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'upcoming_dose',
+        'Upcoming Dose',
+        icon: '@mipmap/ic_launcher',
+        largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+        actions: upcomingDoseActions,
+        styleInformation: BigTextStyleInformation(
+          body,
+          contentTitle: title,
+          summaryText: 'Take • Snooze • Skip',
+        ),
+      ),
+    );
+
+    await _fln.show(
+      1,
+      title,
+      body,
+      details,
+      payload: 'dose:test:${DateTime.now().millisecondsSinceEpoch}',
+    );
+    _log('showTest() completed');
+  }
+
+  static Future<void> showTestExpiryReminder() async {
+    final id = stableIdForKey('test|expiry');
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'expiry',
+        'Expiry',
+        icon: '@mipmap/ic_launcher',
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+      ),
+    );
+    await _fln.show(
+      id,
+      'Expiry reminder',
+      'A medication is expiring soon',
+      details,
+    );
+  }
+
+  static Future<void> showTestLowStockReminder() async {
+    final id = stableIdForKey('test|low_stock');
+    await showLowStockAlert(
+      id,
+      title: 'Low stock',
+      body: 'Medication stock is low',
+      payload: 'test|low_stock',
+    );
+  }
+
+  static Future<void> showTestGroupedUpcomingDoseReminders() async {
+    const groupKey = 'test_group|upcoming_dose';
+
+    final item1 = stableIdForKey('test_group|dose_1');
+    final item2 = stableIdForKey('test_group|dose_2');
+    final summary = stableIdForKey('test_group|dose_summary');
+
+    const itemDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'upcoming_dose',
+        'Upcoming Dose',
+        icon: '@mipmap/ic_launcher',
+        largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
+        category: AndroidNotificationCategory.alarm,
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+        groupKey: groupKey,
+        actions: upcomingDoseActions,
+      ),
+    );
+
+    const summaryDetails = NotificationDetails(
       android: AndroidNotificationDetails(
         'upcoming_dose',
         'Upcoming Dose',
@@ -259,10 +452,31 @@ class NotificationService {
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
+        groupKey: groupKey,
+        setAsGroupSummary: true,
       ),
     );
-    await _fln.show(1, 'Dosifi v5', 'Notifications initialized', details);
-    _log('showTest() completed');
+
+    await _fln.show(
+      item1,
+      'Medication A',
+      'Morning Dose • 5 mg • 8:00 AM',
+      itemDetails,
+      payload: 'dose:test_group_a:${DateTime.now().millisecondsSinceEpoch}',
+    );
+    await _fln.show(
+      item2,
+      'Medication B',
+      'Evening Dose • 10 mg • 8:00 PM',
+      itemDetails,
+      payload: 'dose:test_group_b:${DateTime.now().millisecondsSinceEpoch}',
+    );
+    await _fln.show(
+      summary,
+      '2 dose reminders',
+      'Open Dosifi to review',
+      summaryDetails,
+    );
   }
 
   static Future<void> showDelayed(
@@ -273,8 +487,8 @@ class NotificationService {
   }) async {
     // Best-effort backup banner after a short delay (useful for emulator/OEM diagnostics)
     final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-    _log('showDelayed in ' + seconds.toString() + 's, id=' + id.toString());
-    await Future.delayed(Duration(seconds: seconds));
+    _log('showDelayed in ${seconds}s, id=$id');
+    await Future<void>.delayed(Duration(seconds: seconds));
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
@@ -288,6 +502,57 @@ class NotificationService {
     await _fln.show(id, title, body, details);
   }
 
+  static Future<void> showLowStockAlert(
+    int id, {
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'low_stock',
+        'Low Stock',
+        icon: '@mipmap/ic_launcher',
+        // ignore: deprecated_member_use
+        priority: Priority.high,
+        actions: const [
+          AndroidNotificationAction(
+            'refill',
+            'Refill',
+            showsUserInterface: true,
+          ),
+          AndroidNotificationAction(
+            'restock',
+            'Restock',
+            showsUserInterface: true,
+          ),
+        ],
+      ),
+    );
+    await _fln.show(id, title, body, details, payload: payload);
+  }
+
+  static const List<AndroidNotificationAction> upcomingDoseActions = [
+    AndroidNotificationAction(
+      'take',
+      'Take',
+      showsUserInterface: true,
+      cancelNotification: true,
+    ),
+    AndroidNotificationAction(
+      'snooze',
+      'Snooze',
+      showsUserInterface: true,
+      cancelNotification: true,
+    ),
+    AndroidNotificationAction(
+      'skip',
+      'Skip',
+      showsUserInterface: true,
+      cancelNotification: true,
+    ),
+  ];
+
   // Schedule using a local DateTime (interpreted in the device's current timezone)
   static Future<void> scheduleAt(
     int id,
@@ -296,30 +561,15 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
-    _log(
-      'scheduleAt(id=' +
-          id.toString() +
-          ', when=' +
-          when.toIso8601String() +
-          ', title=' +
-          title +
-          ')',
-    );
+    _log('scheduleAt(id=$id, when=${when.toIso8601String()}, title=$title)');
     var tzTime = tz.TZDateTime.from(when, tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
       // Ensure in the future to avoid dropped schedules
       tzTime = now.add(const Duration(seconds: 5));
-      _log('Adjusted schedule time to future: ' + tzTime.toString());
+      _log('Adjusted schedule time to future: $tzTime');
     }
-    _log(
-      'Computed tzTime=' +
-          tzTime.toString() +
-          ', now=' +
-          now.toString() +
-          ', offset=' +
-          tzTime.timeZoneOffset.toString(),
-    );
+    _log('Computed tzTime=$tzTime, now=$now, offset=${tzTime.timeZoneOffset}');
 
     final exactDetails = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -346,9 +596,7 @@ class NotificationService {
       _log('Exact zonedSchedule call returned successfully');
     } catch (e) {
       _log(
-        'Exact schedule (local source) failed: ' +
-            e.toString() +
-            ' — falling back to inexact',
+        'Exact schedule (local source) failed: $e — falling back to inexact',
       );
       // Fallback to inexact scheduling if exact is not permitted
       final fallbackDetails = NotificationDetails(
@@ -406,20 +654,11 @@ class NotificationService {
     String channelId = 'upcoming_dose',
   }) async {
     _log(
-      'scheduleWeeklyAt(id=' +
-          id.toString() +
-          ', weekday=' +
-          weekday.toString() +
-          ', minutesOfDay=' +
-          minutesOfDay.toString() +
-          ')',
+      'scheduleWeeklyAt(id=$id, weekday=$weekday, minutesOfDay=$minutesOfDay)',
     );
     final tzTime = _nextForWeekdayAndMinutes(weekday, minutesOfDay);
     _log(
-      'Computed next weekly tzTime=' +
-          tzTime.toString() +
-          ', offset=' +
-          tzTime.timeZoneOffset.toString(),
+      'Computed next weekly tzTime=$tzTime, offset=${tzTime.timeZoneOffset}',
     );
 
     final details = NotificationDetails(
@@ -448,11 +687,7 @@ class NotificationService {
       );
       _log('Exact weekly zonedSchedule call returned successfully');
     } catch (e) {
-      _log(
-        'Exact weekly schedule failed: ' +
-            e.toString() +
-            ' — falling back to inexact',
-      );
+      _log('Exact weekly schedule failed: $e — falling back to inexact');
       // Fallback to inexact weekly scheduling
       final fbDetails = NotificationDetails(
         android: AndroidNotificationDetails(
@@ -477,7 +712,11 @@ class NotificationService {
   }
 
   static Future<void> cancel(int id) async {
-    _log('cancel(id=' + id.toString() + ')');
+    if (cancelOverride != null) {
+      await cancelOverride!(id);
+      return;
+    }
+    _log('cancel(id=$id)');
     await _fln.cancel(id);
   }
 
@@ -493,11 +732,10 @@ class NotificationService {
         'canScheduleExactAlarms',
       );
       _log(
-        'canScheduleExactAlarms (platform): ' +
-            (canExact?.toString() ?? 'null'),
+        'canScheduleExactAlarms (platform): ${canExact?.toString() ?? 'null'}',
       );
     } catch (e) {
-      _log('Error querying canScheduleExactAlarms: ' + e.toString());
+      _log('Error querying canScheduleExactAlarms: $e');
     }
     try {
       final importance = await _platform.invokeMethod<int>(
@@ -505,11 +743,10 @@ class NotificationService {
         {'channelId': 'upcoming_dose'},
       );
       _log(
-        'Channel "upcoming_dose" importance: ' +
-            (importance?.toString() ?? 'null'),
+        'Channel "upcoming_dose" importance: ${importance?.toString() ?? 'null'}',
       );
     } catch (e) {
-      _log('Error querying channel importance: ' + e.toString());
+      _log('Error querying channel importance: $e');
     }
     try {
       final android = _fln
@@ -518,50 +755,33 @@ class NotificationService {
           >();
       if (android != null) {
         final enabled = await android.areNotificationsEnabled();
-        _log('areNotificationsEnabled: ' + enabled.toString());
+        _log('areNotificationsEnabled: $enabled');
       } else {
         _log('Android-specific plugin not available');
       }
     } catch (e) {
-      _log('Error checking areNotificationsEnabled: ' + e.toString());
+      _log('Error checking areNotificationsEnabled: $e');
     }
     try {
       final pending = await _fln.pendingNotificationRequests();
-      _log('pendingNotificationRequests: ' + pending.length.toString());
+      _log('pendingNotificationRequests: ${pending.length}');
       for (final p in pending) {
         _log(
-          '  pending -> id=' +
-              p.id.toString() +
-              ', title=' +
-              (p.title ?? '') +
-              ', body=' +
-              (p.body ?? ''),
+          '  pending -> id=${p.id}, title=${p.title ?? ''}, body=${p.body ?? ''}',
         );
       }
     } catch (e) {
-      _log('Error fetching pending notifications: ' + e.toString());
+      _log('Error fetching pending notifications: $e');
     }
     try {
       final now = tz.TZDateTime.now(tz.local);
-      _log(
-        'tz.local=' +
-            tz.local.name +
-            ', now=' +
-            now.toString() +
-            ', offset=' +
-            now.timeZoneOffset.toString(),
-      );
+      _log('tz.local=${tz.local.name}, now=$now, offset=${now.timeZoneOffset}');
     } catch (e) {
-      _log('Error reading timezone data: ' + e.toString());
+      _log('Error reading timezone data: $e');
     }
     try {
       _log(
-        'Platform=' +
-            Platform.operatingSystem +
-            ', version=' +
-            Platform.version +
-            ', osVersion=' +
-            Platform.operatingSystemVersion,
+        'Platform=${Platform.operatingSystem}, version=${Platform.version}, osVersion=${Platform.operatingSystemVersion}',
       );
     } catch (_) {}
     _log('--- Notification Debug Dump END ---');
@@ -572,9 +792,9 @@ class NotificationService {
       final res = await _platform.invokeMethod<bool>(
         'isIgnoringBatteryOptimizations',
       );
-      return res == true;
+      return res ?? false;
     } catch (e) {
-      _log('Error isIgnoringBatteryOptimizations: ' + e.toString());
+      _log('Error isIgnoringBatteryOptimizations: $e');
       return false;
     }
   }
@@ -583,7 +803,7 @@ class NotificationService {
     try {
       await _platform.invokeMethod('requestIgnoreBatteryOptimizations');
     } catch (e) {
-      _log('Error requestIgnoreBatteryOptimizations: ' + e.toString());
+      _log('Error requestIgnoreBatteryOptimizations: $e');
     }
   }
 
@@ -598,7 +818,7 @@ class NotificationService {
       _log('Launching IGNORE_BATTERY_OPTIMIZATION_SETTINGS');
       await intent.launch();
     } catch (e) {
-      _log('Failed to launch battery optimization settings: ' + e.toString());
+      _log('Failed to launch battery optimization settings: $e');
     }
   }
 
@@ -611,19 +831,13 @@ class NotificationService {
     String channelId = 'upcoming_dose',
   }) async {
     _log(
-      'scheduleAtUtc(id=' +
-          id.toString() +
-          ', whenUtc=' +
-          whenUtc.toIso8601String() +
-          ', title=' +
-          title +
-          ')',
+      'scheduleAtUtc(id=$id, whenUtc=${whenUtc.toIso8601String()}, title=$title)',
     );
     var tzTime = tz.TZDateTime.from(whenUtc.toUtc(), tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
       tzTime = now.add(const Duration(seconds: 5));
-      _log('Adjusted scheduleAtUtc time to future: ' + tzTime.toString());
+      _log('Adjusted scheduleAtUtc time to future: $tzTime');
     }
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -636,12 +850,7 @@ class NotificationService {
       ),
     );
     _log(
-      'Computed tzTime(UTC source)->local=' +
-          tzTime.toString() +
-          ', now=' +
-          now.toString() +
-          ', offset=' +
-          tzTime.timeZoneOffset.toString(),
+      'Computed tzTime(UTC source)->local=$tzTime, now=$now, offset=${tzTime.timeZoneOffset}',
     );
     try {
       _log('Attempting exact zonedSchedule (UTC source)');
@@ -657,11 +866,7 @@ class NotificationService {
       );
       _log('Exact zonedSchedule (UTC source) returned successfully');
     } catch (e) {
-      _log(
-        'Exact schedule (UTC source) failed: ' +
-            e.toString() +
-            ' — falling back to inexact',
-      );
+      _log('Exact schedule (UTC source) failed: $e — falling back to inexact');
       final fb = NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
@@ -689,49 +894,112 @@ class NotificationService {
     required String title,
     required String body,
     String channelId = 'upcoming_dose',
+    String? groupKey,
+    bool setAsGroupSummary = false,
+    String? payload,
+    List<AndroidNotificationAction>? actions,
+    List<String>? expandedLines,
+    int? timeoutAfterMs,
   }) async {
+    await _ensureTimeZoneReady();
+    if (scheduleAtAlarmClockOverride != null) {
+      await scheduleAtAlarmClockOverride!(
+        id,
+        when,
+        title: title,
+        body: body,
+        channelId: channelId,
+      );
+      return;
+    }
     _log(
-      'scheduleAtAlarmClock(id=' +
-          id.toString() +
-          ', when=' +
-          when.toIso8601String() +
-          ', title=' +
-          title +
-          ')',
+      'scheduleAtAlarmClock(id=$id, when=${when.toIso8601String()}, title=$title)',
     );
     var tzTime = tz.TZDateTime.from(when, tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
       tzTime = now.add(const Duration(seconds: 5));
-      _log('Adjusted (alarm clock) time to future: ' + tzTime.toString());
+      _log('Adjusted (alarm clock) time to future: $tzTime');
     }
+    final shouldShowSyringeIcon =
+        Platform.isAndroid && channelId == _upcomingDose.id && !setAsGroupSummary;
+    final shouldUseExpandedStyle = shouldShowSyringeIcon;
+
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
         channelId,
         icon: '@mipmap/ic_launcher',
+        largeIcon: shouldShowSyringeIcon
+            ? const DrawableResourceAndroidBitmap('syringe')
+            : null,
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
+        groupKey: groupKey,
+        setAsGroupSummary: setAsGroupSummary,
+        actions: actions,
+        styleInformation: shouldUseExpandedStyle
+            ? (expandedLines != null && expandedLines.isNotEmpty
+                ? InboxStyleInformation(
+                    expandedLines,
+                    contentTitle: title,
+                    summaryText: 'Take • Snooze • Skip',
+                  )
+                : BigTextStyleInformation(
+                    body,
+                    contentTitle: title,
+                    summaryText: 'Take • Snooze • Skip',
+                  ))
+            : null,
+        timeoutAfter: timeoutAfterMs,
       ),
     );
     try {
-      _log(
-        'Attempting zonedSchedule with AndroidScheduleMode.alarmClock (local source)',
-      );
+      final canExact = Platform.isAndroid && await canScheduleExactAlarms();
+      final primaryMode = canExact
+          ? AndroidScheduleMode.alarmClock
+          : AndroidScheduleMode.inexact;
+
+      _log('Attempting zonedSchedule with $primaryMode (local source)');
       await _fln.zonedSchedule(
         id,
         title,
         body,
         tzTime,
         details,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        androidScheduleMode: primaryMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
       );
-      _log('AlarmClock zonedSchedule call returned successfully');
+      _log('zonedSchedule call returned successfully (local source)');
+    } on PlatformException catch (e) {
+      if (e.code == 'exact_alarms_not_permitted') {
+        _log(
+          'Exact alarms not permitted; falling back to AndroidScheduleMode.inexact (local source)',
+        );
+        try {
+          await _fln.zonedSchedule(
+            id,
+            title,
+            body,
+            tzTime,
+            details,
+            androidScheduleMode: AndroidScheduleMode.inexact,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            payload: payload,
+          );
+          _log('Inexact fallback zonedSchedule returned successfully');
+          return;
+        } catch (fallbackError) {
+          _log('Inexact fallback schedule failed: $fallbackError');
+        }
+      }
+      _log('AlarmClock schedule (local source) failed: $e');
     } catch (e) {
-      _log('AlarmClock schedule (local source) failed: ' + e.toString());
+      _log('AlarmClock schedule (local source) failed: $e');
     }
   }
 
@@ -743,20 +1011,15 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    await _ensureTimeZoneReady();
     _log(
-      'scheduleAtAlarmClockUtc(id=' +
-          id.toString() +
-          ', whenUtc=' +
-          whenUtc.toIso8601String() +
-          ', title=' +
-          title +
-          ')',
+      'scheduleAtAlarmClockUtc(id=$id, whenUtc=${whenUtc.toIso8601String()}, title=$title)',
     );
     var tzTime = tz.TZDateTime.from(whenUtc.toUtc(), tz.local);
     final now = tz.TZDateTime.now(tz.local);
     if (!tzTime.isAfter(now)) {
       tzTime = now.add(const Duration(seconds: 5));
-      _log('Adjusted (alarm clock UTC) time to future: ' + tzTime.toString());
+      _log('Adjusted (alarm clock UTC) time to future: $tzTime');
     }
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -769,22 +1032,50 @@ class NotificationService {
       ),
     );
     try {
-      _log(
-        'Attempting zonedSchedule with AndroidScheduleMode.alarmClock (UTC source)',
-      );
+      final canExact = Platform.isAndroid && await canScheduleExactAlarms();
+      final primaryMode = canExact
+          ? AndroidScheduleMode.alarmClock
+          : AndroidScheduleMode.inexact;
+
+      _log('Attempting zonedSchedule with $primaryMode (UTC source)');
       await _fln.zonedSchedule(
         id,
         title,
         body,
         tzTime,
         details,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        androidScheduleMode: primaryMode,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
-      _log('AlarmClock zonedSchedule (UTC source) returned successfully');
+      _log('zonedSchedule call returned successfully (UTC source)');
+    } on PlatformException catch (e) {
+      if (e.code == 'exact_alarms_not_permitted') {
+        _log(
+          'Exact alarms not permitted; falling back to AndroidScheduleMode.inexact (UTC source)',
+        );
+        try {
+          await _fln.zonedSchedule(
+            id,
+            title,
+            body,
+            tzTime,
+            details,
+            androidScheduleMode: AndroidScheduleMode.inexact,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+          );
+          _log(
+            'Inexact fallback zonedSchedule returned successfully (UTC source)',
+          );
+          return;
+        } catch (fallbackError) {
+          _log('Inexact fallback schedule failed (UTC source): $fallbackError');
+        }
+      }
+      _log('AlarmClock schedule (UTC source) failed: $e');
     } catch (e) {
-      _log('AlarmClock schedule (UTC source) failed: ' + e.toString());
+      _log('AlarmClock schedule (UTC source) failed: $e');
     }
   }
 
@@ -796,16 +1087,11 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    await _ensureTimeZoneReady();
     final nowTz = tz.TZDateTime.now(tz.local);
     final tzWhen = nowTz.add(Duration(seconds: seconds));
     _log(
-      'scheduleInSecondsExact(id=' +
-          id.toString() +
-          ', tzWhen=' +
-          tzWhen.toString() +
-          ', offset=' +
-          tzWhen.timeZoneOffset.toString() +
-          ')',
+      'scheduleInSecondsExact(id=$id, tzWhen=$tzWhen, offset=${tzWhen.timeZoneOffset})',
     );
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -830,7 +1116,7 @@ class NotificationService {
       );
       _log('scheduleInSecondsExact scheduled successfully');
     } catch (e) {
-      _log('scheduleInSecondsExact failed: ' + e.toString());
+      _log('scheduleInSecondsExact failed: $e');
     }
   }
 
@@ -841,16 +1127,11 @@ class NotificationService {
     required String body,
     String channelId = 'upcoming_dose',
   }) async {
+    await _ensureTimeZoneReady();
     final nowTz = tz.TZDateTime.now(tz.local);
     final tzWhen = nowTz.add(Duration(seconds: seconds));
     _log(
-      'scheduleInSecondsAlarmClock(id=' +
-          id.toString() +
-          ', tzWhen=' +
-          tzWhen.toString() +
-          ', offset=' +
-          tzWhen.timeZoneOffset.toString() +
-          ')',
+      'scheduleInSecondsAlarmClock(id=$id, tzWhen=$tzWhen, offset=${tzWhen.timeZoneOffset})',
     );
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -875,7 +1156,22 @@ class NotificationService {
       );
       _log('scheduleInSecondsAlarmClock scheduled successfully');
     } catch (e) {
-      _log('scheduleInSecondsAlarmClock failed: ' + e.toString());
+      _log('scheduleInSecondsAlarmClock failed: $e');
     }
+  }
+
+  static int _stableHash31(String input) {
+    // Deterministic, platform-independent hash for stable notification IDs.
+    // Keeps values within signed 32-bit positive range.
+    var hash = 0;
+    for (final unit in input.codeUnits) {
+      hash = 0x1fffffff & hash + unit;
+      hash = 0x1fffffff & hash + (0x0007ffff & hash) << 10;
+      hash ^= hash >> 6;
+    }
+    hash = 0x1fffffff & hash + (0x03ffffff & hash) << 3;
+    hash ^= hash >> 11;
+    hash = 0x1fffffff & hash + (0x00003fff & hash) << 15;
+    return hash;
   }
 }

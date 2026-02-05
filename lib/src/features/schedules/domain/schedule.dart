@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'schedule.g.dart';
@@ -16,6 +17,7 @@ class Schedule {
     this.daysOfWeekUtc,
     this.medicationId,
     this.active = true,
+    this.pausedUntil,
     this.timesOfDay,
     this.timesOfDayUtc,
     this.cycleEveryNDays,
@@ -32,6 +34,9 @@ class Schedule {
     this.doseIU,
     this.displayUnitCode,
     this.inputModeCode,
+    this.startAt,
+    this.endAt,
+    this.monthlyMissingDayBehaviorCode,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -51,8 +56,34 @@ class Schedule {
   final List<int> daysOfWeek; // 1=Mon..7=Sun (local, legacy)
   @HiveField(7)
   final bool active;
+
+  /// If set and [active] is false, the schedule is paused until this moment.
+  ///
+  /// When this moment is in the past, the schedule may be auto-resumed by the
+  /// scheduler on app startup.
+  @HiveField(30)
+  final DateTime? pausedUntil;
   @HiveField(8)
   final DateTime createdAt;
+
+  /// Optional schedule start boundary.
+  ///
+  /// If set, occurrences before this moment are ignored.
+  @HiveField(27)
+  final DateTime? startAt;
+
+  /// Optional schedule end boundary.
+  ///
+  /// If set, occurrences after this moment are ignored.
+  @HiveField(28)
+  final DateTime? endAt;
+
+  /// Monthly schedules (days-of-month): what to do when a selected day does not
+  /// exist in a given month (e.g., 31st in April).
+  ///
+  /// Stored as an int code to avoid introducing a new adapter.
+  @HiveField(29)
+  final int? monthlyMissingDayBehaviorCode;
 
   // UTC storage (new)
   @HiveField(9)
@@ -97,7 +128,7 @@ class Schedule {
   @HiveField(22)
   final int? doseVials; // whole vials (single-dose)
   @HiveField(23)
-  final int? doseIU; // IU/units
+  final int? doseIU; // units (medication potency)
   @HiveField(24)
   final int? displayUnitCode; // maps to DoseUnit index for display preference
   @HiveField(25)
@@ -107,6 +138,176 @@ class Schedule {
   bool get hasMultipleTimes => timesOfDay != null && timesOfDay!.isNotEmpty;
   bool get hasCycle => cycleEveryNDays != null && cycleEveryNDays! > 0;
   bool get hasDaysOfMonth => daysOfMonth != null && daysOfMonth!.isNotEmpty;
+
+  bool get hasStartAt => startAt != null;
+  bool get hasEndAt => endAt != null;
+
+  ScheduleStatus get status {
+    final now = DateTime.now();
+    final end = endAt;
+    if (end != null && end.isBefore(now)) {
+      return ScheduleStatus.completed;
+    }
+    if (active) return ScheduleStatus.active;
+    final until = pausedUntil;
+    if (until != null && until.isAfter(now)) {
+      return ScheduleStatus.paused;
+    }
+    return ScheduleStatus.disabled;
+  }
+
+  bool get isActive => status == ScheduleStatus.active;
+  bool get isPaused => status == ScheduleStatus.paused;
+  bool get isDisabled => status == ScheduleStatus.disabled;
+  bool get isCompleted => status == ScheduleStatus.completed;
+
+  static const Object _noChange = Object();
+
+  Schedule copyWith({bool? active, Object? pausedUntil = _noChange}) {
+    return Schedule(
+      id: id,
+      name: name,
+      medicationName: medicationName,
+      doseValue: doseValue,
+      doseUnit: doseUnit,
+      minutesOfDay: minutesOfDay,
+      daysOfWeek: daysOfWeek,
+      minutesOfDayUtc: minutesOfDayUtc,
+      daysOfWeekUtc: daysOfWeekUtc,
+      medicationId: medicationId,
+      active: active ?? this.active,
+      pausedUntil: pausedUntil == _noChange
+          ? this.pausedUntil
+          : pausedUntil as DateTime?,
+      timesOfDay: timesOfDay,
+      timesOfDayUtc: timesOfDayUtc,
+      cycleEveryNDays: cycleEveryNDays,
+      cycleAnchorDate: cycleAnchorDate,
+      daysOfMonth: daysOfMonth,
+      doseUnitCode: doseUnitCode,
+      doseMassMcg: doseMassMcg,
+      doseVolumeMicroliter: doseVolumeMicroliter,
+      doseTabletQuarters: doseTabletQuarters,
+      doseCapsules: doseCapsules,
+      doseSyringes: doseSyringes,
+      doseVials: doseVials,
+      doseIU: doseIU,
+      displayUnitCode: displayUnitCode,
+      inputModeCode: inputModeCode,
+      startAt: startAt,
+      endAt: endAt,
+      monthlyMissingDayBehaviorCode: monthlyMissingDayBehaviorCode,
+      createdAt: createdAt,
+    );
+  }
+
+  Schedule copyWithDetails({
+    String? name,
+    String? medicationName,
+    double? doseValue,
+    String? doseUnit,
+    Object? doseUnitCode = _noChange,
+    Object? doseMassMcg = _noChange,
+    Object? doseVolumeMicroliter = _noChange,
+    Object? doseTabletQuarters = _noChange,
+    Object? doseCapsules = _noChange,
+    Object? doseSyringes = _noChange,
+    Object? doseVials = _noChange,
+    Object? doseIU = _noChange,
+    Object? displayUnitCode = _noChange,
+    Object? inputModeCode = _noChange,
+    int? minutesOfDay,
+    List<int>? daysOfWeek,
+    Object? minutesOfDayUtc = _noChange,
+    Object? daysOfWeekUtc = _noChange,
+    Object? timesOfDay = _noChange,
+    Object? timesOfDayUtc = _noChange,
+    Object? cycleEveryNDays = _noChange,
+    Object? cycleAnchorDate = _noChange,
+    Object? daysOfMonth = _noChange,
+    Object? startAt = _noChange,
+    Object? endAt = _noChange,
+    Object? monthlyMissingDayBehaviorCode = _noChange,
+    bool? active,
+    Object? pausedUntil = _noChange,
+  }) {
+    return Schedule(
+      id: id,
+      name: name ?? this.name,
+      medicationName: medicationName ?? this.medicationName,
+      doseValue: doseValue ?? this.doseValue,
+      doseUnit: doseUnit ?? this.doseUnit,
+      minutesOfDay: minutesOfDay ?? this.minutesOfDay,
+      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
+      minutesOfDayUtc: minutesOfDayUtc == _noChange
+        ? this.minutesOfDayUtc
+        : minutesOfDayUtc as int?,
+      daysOfWeekUtc: daysOfWeekUtc == _noChange
+        ? this.daysOfWeekUtc
+        : daysOfWeekUtc as List<int>?,
+      medicationId: medicationId,
+      active: active ?? this.active,
+      pausedUntil: pausedUntil == _noChange
+          ? this.pausedUntil
+          : pausedUntil as DateTime?,
+      timesOfDay: timesOfDay == _noChange
+          ? this.timesOfDay
+          : timesOfDay as List<int>?,
+      timesOfDayUtc: timesOfDayUtc == _noChange
+          ? this.timesOfDayUtc
+          : timesOfDayUtc as List<int>?,
+      cycleEveryNDays: cycleEveryNDays == _noChange
+          ? this.cycleEveryNDays
+          : cycleEveryNDays as int?,
+      cycleAnchorDate: cycleAnchorDate == _noChange
+          ? this.cycleAnchorDate
+          : cycleAnchorDate as DateTime?,
+      daysOfMonth: daysOfMonth == _noChange
+          ? this.daysOfMonth
+          : daysOfMonth as List<int>?,
+      doseUnitCode: doseUnitCode == _noChange
+        ? this.doseUnitCode
+        : doseUnitCode as int?,
+      doseMassMcg: doseMassMcg == _noChange
+        ? this.doseMassMcg
+        : doseMassMcg as int?,
+      doseVolumeMicroliter: doseVolumeMicroliter == _noChange
+        ? this.doseVolumeMicroliter
+        : doseVolumeMicroliter as int?,
+      doseTabletQuarters: doseTabletQuarters == _noChange
+        ? this.doseTabletQuarters
+        : doseTabletQuarters as int?,
+      doseCapsules: doseCapsules == _noChange
+        ? this.doseCapsules
+        : doseCapsules as int?,
+      doseSyringes: doseSyringes == _noChange
+        ? this.doseSyringes
+        : doseSyringes as int?,
+      doseVials: doseVials == _noChange ? this.doseVials : doseVials as int?,
+      doseIU: doseIU == _noChange ? this.doseIU : doseIU as int?,
+      displayUnitCode: displayUnitCode == _noChange
+        ? this.displayUnitCode
+        : displayUnitCode as int?,
+      inputModeCode: inputModeCode == _noChange
+        ? this.inputModeCode
+        : inputModeCode as int?,
+      startAt: startAt == _noChange ? this.startAt : startAt as DateTime?,
+      endAt: endAt == _noChange ? this.endAt : endAt as DateTime?,
+      monthlyMissingDayBehaviorCode: monthlyMissingDayBehaviorCode == _noChange
+          ? this.monthlyMissingDayBehaviorCode
+          : monthlyMissingDayBehaviorCode as int?,
+      createdAt: createdAt,
+    );
+  }
+
+  MonthlyMissingDayBehavior get monthlyMissingDayBehavior {
+    final code = monthlyMissingDayBehaviorCode;
+    if (code == null) return MonthlyMissingDayBehavior.skip;
+    if (code < 0 || code >= MonthlyMissingDayBehavior.values.length) {
+      return MonthlyMissingDayBehavior.skip;
+    }
+    return MonthlyMissingDayBehavior.values[code];
+  }
 
   // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
   DoseUnit? get doseUnitEnum =>
@@ -123,8 +324,8 @@ enum DoseUnit {
   mg,
   g,
   ml,
-  iu, // International Units
-  units, // alias for IU if needed in UI
+  iu, // units (medication potency)
+  units, // alias for iu if needed in UI
   tablets,
   capsules,
   syringes,
@@ -132,3 +333,13 @@ enum DoseUnit {
 }
 
 enum DoseInputMode { tablets, capsules, mass, volume, iuUnits, count }
+
+enum MonthlyMissingDayBehavior {
+  /// Skip the month if the selected day does not exist (legacy behavior).
+  skip,
+
+  /// Move the dose to the last day of the month.
+  lastDay,
+}
+
+enum ScheduleStatus { active, paused, disabled, completed }

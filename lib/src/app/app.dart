@@ -1,7 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/app/router.dart';
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
 
 class DosifiApp extends ConsumerWidget {
   const DosifiApp({super.key});
@@ -9,38 +15,87 @@ class DosifiApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const primarySeed = Color(0xFF09A8BD);
-    // const secondary = Color(0xFFEC873F);
+    const secondarySeed = Color(0xFFEC873F);
 
-    final schemeLight =
-        ColorScheme.fromSeed(
-          seedColor: primarySeed,
-          brightness: Brightness.light,
-        ).copyWith(
-          // Pin the primary color exactly to the brand seed to avoid tonal shifts
-          primary: primarySeed,
-        );
+    final schemeLight = ColorScheme.fromSeed(seedColor: primarySeed).copyWith(
+      // Pin the primary/secondary colors exactly to the brand seeds to avoid tonal shifts
+      primary: primarySeed,
+      secondary: secondarySeed,
+    );
     final baseLight = ThemeData(
       colorScheme: schemeLight,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-    final lightTextTheme = baseLight.textTheme.copyWith(
-      bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(fontSize: 13),
-      bodySmall: baseLight.textTheme.bodySmall?.copyWith(fontSize: 11),
-      titleSmall: baseLight.textTheme.titleSmall?.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-      ),
-      labelLarge: baseLight.textTheme.labelLarge?.copyWith(fontSize: 12),
+
+    final lightOnSurfaceTextColor = schemeLight.onSurface.withValues(
+      alpha: kOpacityMediumHigh,
     );
+    final lightTextTheme = baseLight.textTheme
+        .apply(
+          bodyColor: lightOnSurfaceTextColor,
+          displayColor: lightOnSurfaceTextColor,
+        )
+        .copyWith(
+          bodyMedium: baseLight.textTheme.bodyMedium?.copyWith(
+            fontSize: kFontSizeMedium,
+          ),
+          bodySmall: baseLight.textTheme.bodySmall?.copyWith(
+            fontSize: kFontSizeSmall,
+          ),
+          titleSmall: baseLight.textTheme.titleSmall?.copyWith(
+            fontSize: kFontSizeLarge,
+            fontWeight: FontWeight.w700,
+          ),
+          labelLarge: baseLight.textTheme.labelLarge?.copyWith(
+            fontSize: kFontSizeSmallPlus,
+          ),
+        );
     final light = baseLight.copyWith(
       textTheme: lightTextTheme,
-      appBarTheme: const AppBarTheme(
+      iconTheme: IconThemeData(color: lightOnSurfaceTextColor),
+      primaryIconTheme: IconThemeData(color: lightOnSurfaceTextColor),
+      appBarTheme: AppBarTheme(
         centerTitle: true,
         toolbarHeight: 48,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        foregroundColor: lightOnSurfaceTextColor,
+      ),
+      timePickerTheme: TimePickerThemeData(
+        dialTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeLight.onPrimary;
+          }
+          return schemeLight.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeLight.onPrimaryContainer;
+          }
+          return schemeLight.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        entryModeIconColor: schemeLight.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
+        dayPeriodColor: schemeLight.primary,
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeLight.onPrimary;
+          }
+          return schemeLight.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        dayPeriodBorderSide: BorderSide(
+          color: schemeLight.outlineVariant.withValues(alpha: 0.50),
+          width: 0.75,
+        ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F3D5B),
@@ -61,7 +116,7 @@ class DosifiApp extends ConsumerWidget {
             color: states.contains(WidgetState.selected)
                 ? schemeLight.primary
                 : Colors.white70,
-            fontSize: 10,
+            fontSize: kFontSizeCaption,
           ),
         ),
       ),
@@ -99,7 +154,7 @@ class DosifiApp extends ConsumerWidget {
             width: 2,
           ),
         ),
-        errorStyle: const TextStyle(fontSize: 0, height: 0),
+        errorStyle: const TextStyle(fontSize: kFontSizeZero, height: 0),
         filled: true,
         fillColor: baseLight.colorScheme.surfaceContainerLowest,
         hintStyle: lightTextTheme.bodyMedium?.copyWith(
@@ -121,6 +176,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -130,6 +188,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -139,6 +200,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -150,10 +214,11 @@ class DosifiApp extends ConsumerWidget {
         }),
         checkColor: WidgetStatePropertyAll(baseLight.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseLight.colorScheme.onSurfaceVariant.withValues(
+          // Match design system border width (0.75px) for consistency with text fields
+          final color = baseLight.colorScheme.outlineVariant.withValues(
             alpha: 0.50,
           );
-          return BorderSide(color: color, width: 1.5);
+          return BorderSide(color: color, width: 0.75);
         }),
         overlayColor: WidgetStatePropertyAll(
           baseLight.colorScheme.primary.withValues(alpha: 0.08),
@@ -162,28 +227,42 @@ class DosifiApp extends ConsumerWidget {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseLight.colorScheme.primary,
         foregroundColor: baseLight.colorScheme.onPrimary,
+        sizeConstraints: kFabSizeConstraints,
+        extendedSizeConstraints: kFabExtendedSizeConstraints,
+        extendedPadding: kFabExtendedPadding,
       ),
     );
 
     final schemeDark = ColorScheme.fromSeed(
       seedColor: primarySeed,
       brightness: Brightness.dark,
-    ).copyWith(primary: primarySeed);
+    ).copyWith(primary: primarySeed, secondary: secondarySeed);
     final baseDark = ThemeData(
       colorScheme: schemeDark,
       useMaterial3: true,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-    final darkTextTheme = baseDark.textTheme.copyWith(
-      bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(fontSize: 13),
-      bodySmall: baseDark.textTheme.bodySmall?.copyWith(fontSize: 11),
-      titleSmall: baseDark.textTheme.titleSmall?.copyWith(
-        fontSize: 15,
-        fontWeight: FontWeight.w700,
-      ),
-      labelLarge: baseDark.textTheme.labelLarge?.copyWith(fontSize: 12),
-    );
+    final darkTextTheme = baseDark.textTheme
+        .apply(
+          bodyColor: schemeDark.onSurface.withValues(alpha: kOpacityHigh),
+          displayColor: schemeDark.onSurface.withValues(alpha: kOpacityHigh),
+        )
+        .copyWith(
+          bodyMedium: baseDark.textTheme.bodyMedium?.copyWith(
+            fontSize: kFontSizeMedium,
+          ),
+          bodySmall: baseDark.textTheme.bodySmall?.copyWith(
+            fontSize: kFontSizeSmall,
+          ),
+          titleSmall: baseDark.textTheme.titleSmall?.copyWith(
+            fontSize: kFontSizeLarge,
+            fontWeight: FontWeight.w700,
+          ),
+          labelLarge: baseDark.textTheme.labelLarge?.copyWith(
+            fontSize: kFontSizeSmallPlus,
+          ),
+        );
     final dark = baseDark.copyWith(
       textTheme: darkTextTheme,
       appBarTheme: const AppBarTheme(
@@ -191,6 +270,40 @@ class DosifiApp extends ConsumerWidget {
         toolbarHeight: 48,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
+      ),
+      timePickerTheme: TimePickerThemeData(
+        dialTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeDark.onPrimary;
+          }
+          return schemeDark.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        hourMinuteTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeDark.onPrimaryContainer;
+          }
+          return schemeDark.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        entryModeIconColor: schemeDark.onSurfaceVariant.withValues(
+          alpha: kOpacityMediumHigh,
+        ),
+        dayPeriodColor: schemeDark.primary,
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return schemeDark.onPrimary;
+          }
+          return schemeDark.onSurfaceVariant.withValues(
+            alpha: kOpacityMediumHigh,
+          );
+        }),
+        dayPeriodBorderSide: BorderSide(
+          color: schemeDark.outlineVariant.withValues(alpha: 0.50),
+          width: 0.75,
+        ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF0F3D5B),
@@ -211,7 +324,7 @@ class DosifiApp extends ConsumerWidget {
             color: states.contains(WidgetState.selected)
                 ? schemeDark.primary
                 : Colors.white70,
-            fontSize: 10,
+            fontSize: kFontSizeCaption,
           ),
         ),
       ),
@@ -243,7 +356,7 @@ class DosifiApp extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: baseDark.colorScheme.primary, width: 2),
         ),
-        errorStyle: const TextStyle(fontSize: 0, height: 0),
+        errorStyle: const TextStyle(fontSize: kFontSizeZero, height: 0),
         filled: true,
         fillColor: baseDark.colorScheme.surfaceContainerHigh,
         hintStyle: darkTextTheme.bodyMedium?.copyWith(
@@ -265,6 +378,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -274,6 +390,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -283,6 +402,9 @@ class DosifiApp extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           minimumSize: const Size(0, 36),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -294,10 +416,11 @@ class DosifiApp extends ConsumerWidget {
         }),
         checkColor: WidgetStatePropertyAll(baseDark.colorScheme.onPrimary),
         side: WidgetStateBorderSide.resolveWith((states) {
-          final color = baseDark.colorScheme.onSurfaceVariant.withValues(
+          // Match design system border width (0.75px) for consistency with text fields
+          final color = baseDark.colorScheme.outlineVariant.withValues(
             alpha: 0.50,
           );
-          return BorderSide(color: color, width: 1.5);
+          return BorderSide(color: color, width: 0.75);
         }),
         overlayColor: WidgetStatePropertyAll(
           baseDark.colorScheme.primary.withValues(alpha: 0.12),
@@ -306,6 +429,9 @@ class DosifiApp extends ConsumerWidget {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: baseDark.colorScheme.primary,
         foregroundColor: baseDark.colorScheme.onPrimary,
+        sizeConstraints: kFabSizeConstraints,
+        extendedSizeConstraints: kFabExtendedSizeConstraints,
+        extendedPadding: kFabExtendedPadding,
       ),
     );
 
@@ -317,17 +443,28 @@ class DosifiApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final clampedTextScaler = mq.textScaler.clamp(
+          minScaleFactor: kTextScaleFactorMin,
+          maxScaleFactor: kTextScaleFactorMax,
+        );
+
+        final clampedMq = mq.copyWith(textScaler: clampedTextScaler);
+
         // Wrap with GestureDetector to dismiss keyboard on tap outside fields
-        return GestureDetector(
-          onTap: () {
-            // Unfocus any active input field
-            final currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus &&
-                currentFocus.focusedChild != null) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            }
-          },
-          child: child,
+        return MediaQuery(
+          data: clampedMq,
+          child: GestureDetector(
+            onTap: () {
+              // Unfocus any active input field
+              final currentFocus = FocusScope.of(context);
+              if (!currentFocus.hasPrimaryFocus &&
+                  currentFocus.focusedChild != null) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
+            },
+            child: child,
+          ),
         );
       },
     );

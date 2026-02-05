@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 
 part 'medication.g.dart';
@@ -9,20 +12,24 @@ class Medication {
     required this.id,
     required this.form,
     required this.name,
+    required this.strengthValue,
+    required this.strengthUnit,
+    required this.stockValue,
+    required this.stockUnit,
     this.manufacturer,
     this.description,
     this.notes,
-    required this.strengthValue,
-    required this.strengthUnit,
     this.perMlValue,
-    required this.stockValue,
-    required this.stockUnit,
+    this.volumePerDose,
+    this.volumeUnit,
     this.lowStockEnabled = false,
     this.lowStockThreshold,
     this.expiry,
     this.batchNumber,
     this.storageLocation,
     this.requiresRefrigeration = false,
+    this.requiresFreezer = false,
+    this.lightSensitive = false,
     this.storageInstructions,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -32,6 +39,20 @@ class Medication {
     this.initialStockValue,
     this.reconstitutedAt,
     this.reconstitutedVialExpiry,
+    this.activeVialLowStockMl,
+    this.activeVialBatchNumber,
+    this.activeVialStorageLocation,
+    this.activeVialRequiresRefrigeration = false,
+    this.activeVialRequiresFreezer = false,
+    this.activeVialLightSensitive = false,
+    this.backupVialsExpiry,
+    this.backupVialsBatchNumber,
+    this.backupVialsStorageLocation,
+    this.backupVialsRequiresRefrigeration = false,
+    this.backupVialsRequiresFreezer = false,
+    this.backupVialsLightSensitive = false,
+    this.activeVialVolume,
+    this.diluentName,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -63,6 +84,19 @@ class Medication {
   @HiveField(8)
   final double? perMlValue;
 
+  @HiveField(38)
+  final double? volumePerDose;
+
+  @HiveField(39)
+  final VolumeUnit? volumeUnit;
+
+  // For MDV: The remaining volume (mL) in the currently open/active vial.
+  @HiveField(40)
+  final double? activeVialVolume;
+
+  @HiveField(41)
+  final String? diluentName;
+
   @HiveField(9)
   final double stockValue;
 
@@ -86,6 +120,12 @@ class Medication {
 
   @HiveField(16)
   final bool requiresRefrigeration;
+
+  @HiveField(42)
+  final bool requiresFreezer;
+
+  @HiveField(43)
+  final bool lightSensitive;
 
   @HiveField(17)
   final String? storageInstructions;
@@ -120,6 +160,44 @@ class Medication {
   @HiveField(25)
   final DateTime? reconstitutedVialExpiry;
 
+  // Active/Reconstituted vial fields (MDV only)
+  @HiveField(26)
+  final double? activeVialLowStockMl; // Low stock threshold for active vial volume in mL
+
+  @HiveField(27)
+  final String? activeVialBatchNumber;
+
+  @HiveField(28)
+  final String? activeVialStorageLocation;
+
+  @HiveField(29)
+  final bool activeVialRequiresRefrigeration;
+
+  @HiveField(30)
+  final bool activeVialRequiresFreezer;
+
+  @HiveField(31)
+  final bool activeVialLightSensitive;
+
+  // Backup stock vials fields (MDV only)
+  @HiveField(32)
+  final DateTime? backupVialsExpiry; // Expiry for sealed backup vials
+
+  @HiveField(33)
+  final String? backupVialsBatchNumber;
+
+  @HiveField(34)
+  final String? backupVialsStorageLocation;
+
+  @HiveField(35)
+  final bool backupVialsRequiresRefrigeration;
+
+  @HiveField(36)
+  final bool backupVialsRequiresFreezer;
+
+  @HiveField(37)
+  final bool backupVialsLightSensitive;
+
   Medication copyWith({
     String? id,
     MedicationForm? form,
@@ -130,6 +208,8 @@ class Medication {
     double? strengthValue,
     Unit? strengthUnit,
     double? perMlValue,
+    double? volumePerDose,
+    VolumeUnit? volumeUnit,
     double? stockValue,
     StockUnit? stockUnit,
     bool? lowStockEnabled,
@@ -138,6 +218,8 @@ class Medication {
     String? batchNumber,
     String? storageLocation,
     bool? requiresRefrigeration,
+    bool? requiresFreezer,
+    bool? lightSensitive,
     String? storageInstructions,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -147,6 +229,20 @@ class Medication {
     double? initialStockValue,
     DateTime? reconstitutedAt,
     DateTime? reconstitutedVialExpiry,
+    double? activeVialLowStockMl,
+    String? activeVialBatchNumber,
+    String? activeVialStorageLocation,
+    bool? activeVialRequiresRefrigeration,
+    bool? activeVialRequiresFreezer,
+    bool? activeVialLightSensitive,
+    DateTime? backupVialsExpiry,
+    String? backupVialsBatchNumber,
+    String? backupVialsStorageLocation,
+    bool? backupVialsRequiresRefrigeration,
+    bool? backupVialsRequiresFreezer,
+    bool? backupVialsLightSensitive,
+    double? activeVialVolume,
+    String? diluentName,
     bool clearReconstitution = false,
   }) {
     return Medication(
@@ -159,6 +255,8 @@ class Medication {
       strengthValue: strengthValue ?? this.strengthValue,
       strengthUnit: strengthUnit ?? this.strengthUnit,
       perMlValue: perMlValue ?? this.perMlValue,
+      volumePerDose: volumePerDose ?? this.volumePerDose,
+      volumeUnit: volumeUnit ?? this.volumeUnit,
       stockValue: stockValue ?? this.stockValue,
       stockUnit: stockUnit ?? this.stockUnit,
       lowStockEnabled: lowStockEnabled ?? this.lowStockEnabled,
@@ -168,6 +266,8 @@ class Medication {
       storageLocation: storageLocation ?? this.storageLocation,
       requiresRefrigeration:
           requiresRefrigeration ?? this.requiresRefrigeration,
+      requiresFreezer: requiresFreezer ?? this.requiresFreezer,
+      lightSensitive: lightSensitive ?? this.lightSensitive,
       storageInstructions: storageInstructions ?? this.storageInstructions,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
@@ -177,8 +277,38 @@ class Medication {
       lowStockVialsThresholdCount:
           lowStockVialsThresholdCount ?? this.lowStockVialsThresholdCount,
       initialStockValue: initialStockValue ?? this.initialStockValue,
-      reconstitutedAt: clearReconstitution ? null : (reconstitutedAt ?? this.reconstitutedAt),
-      reconstitutedVialExpiry: clearReconstitution ? null : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
+      reconstitutedAt: clearReconstitution
+          ? null
+          : (reconstitutedAt ?? this.reconstitutedAt),
+      reconstitutedVialExpiry: clearReconstitution
+          ? null
+          : (reconstitutedVialExpiry ?? this.reconstitutedVialExpiry),
+      activeVialLowStockMl: activeVialLowStockMl ?? this.activeVialLowStockMl,
+      activeVialBatchNumber:
+          activeVialBatchNumber ?? this.activeVialBatchNumber,
+      activeVialStorageLocation:
+          activeVialStorageLocation ?? this.activeVialStorageLocation,
+      activeVialRequiresRefrigeration:
+          activeVialRequiresRefrigeration ??
+          this.activeVialRequiresRefrigeration,
+      activeVialRequiresFreezer:
+          activeVialRequiresFreezer ?? this.activeVialRequiresFreezer,
+      activeVialLightSensitive:
+          activeVialLightSensitive ?? this.activeVialLightSensitive,
+      backupVialsExpiry: backupVialsExpiry ?? this.backupVialsExpiry,
+      backupVialsBatchNumber:
+          backupVialsBatchNumber ?? this.backupVialsBatchNumber,
+      backupVialsStorageLocation:
+          backupVialsStorageLocation ?? this.backupVialsStorageLocation,
+      backupVialsRequiresRefrigeration:
+          backupVialsRequiresRefrigeration ??
+          this.backupVialsRequiresRefrigeration,
+      backupVialsRequiresFreezer:
+          backupVialsRequiresFreezer ?? this.backupVialsRequiresFreezer,
+      backupVialsLightSensitive:
+          backupVialsLightSensitive ?? this.backupVialsLightSensitive,
+      activeVialVolume: activeVialVolume ?? this.activeVialVolume,
+      diluentName: diluentName ?? this.diluentName,
     );
   }
 }

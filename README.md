@@ -51,6 +51,8 @@ Documentation (canonical)
 - CHANGELOG: docs/CHANGELOG.md (all release notes and technical updates)
 - Product design: docs/product-design.md (full UI/UX spec, consolidated module specs)
 - Notifications: docs/NOTIFICATIONS.md (scheduling behavior, diagnostics, current status)
+- Archive: removed (legacy progress notes were consolidated and deleted)
+- Screenshots: docs/assets/
 
 Notes
 - Dependency versions: see pubspec.yaml

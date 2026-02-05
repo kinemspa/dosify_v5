@@ -20,20 +20,24 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       id: fields[0] as String,
       form: fields[1] as MedicationForm,
       name: fields[2] as String,
+      strengthValue: fields[6] as double,
+      strengthUnit: fields[7] as Unit,
+      stockValue: fields[9] as double,
+      stockUnit: fields[10] as StockUnit,
       manufacturer: fields[3] as String?,
       description: fields[4] as String?,
       notes: fields[5] as String?,
-      strengthValue: fields[6] as double,
-      strengthUnit: fields[7] as Unit,
       perMlValue: fields[8] as double?,
-      stockValue: fields[9] as double,
-      stockUnit: fields[10] as StockUnit,
+      volumePerDose: fields[38] as double?,
+      volumeUnit: fields[39] as VolumeUnit?,
       lowStockEnabled: fields[11] as bool,
       lowStockThreshold: fields[12] as double?,
       expiry: fields[13] as DateTime?,
       batchNumber: fields[14] as String?,
       storageLocation: fields[15] as String?,
       requiresRefrigeration: fields[16] as bool,
+      requiresFreezer: fields[42] as bool,
+      lightSensitive: fields[43] as bool,
       storageInstructions: fields[17] as String?,
       createdAt: fields[18] as DateTime?,
       updatedAt: fields[19] as DateTime?,
@@ -43,13 +47,27 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       initialStockValue: fields[23] as double?,
       reconstitutedAt: fields[24] as DateTime?,
       reconstitutedVialExpiry: fields[25] as DateTime?,
+      activeVialLowStockMl: fields[26] as double?,
+      activeVialBatchNumber: fields[27] as String?,
+      activeVialStorageLocation: fields[28] as String?,
+      activeVialRequiresRefrigeration: fields[29] as bool,
+      activeVialRequiresFreezer: fields[30] as bool,
+      activeVialLightSensitive: fields[31] as bool,
+      backupVialsExpiry: fields[32] as DateTime?,
+      backupVialsBatchNumber: fields[33] as String?,
+      backupVialsStorageLocation: fields[34] as String?,
+      backupVialsRequiresRefrigeration: fields[35] as bool,
+      backupVialsRequiresFreezer: fields[36] as bool,
+      backupVialsLightSensitive: fields[37] as bool,
+      activeVialVolume: fields[40] as double?,
+      diluentName: fields[41] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(26)
+      ..writeByte(44)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,6 +86,14 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..write(obj.strengthUnit)
       ..writeByte(8)
       ..write(obj.perMlValue)
+      ..writeByte(38)
+      ..write(obj.volumePerDose)
+      ..writeByte(39)
+      ..write(obj.volumeUnit)
+      ..writeByte(40)
+      ..write(obj.activeVialVolume)
+      ..writeByte(41)
+      ..write(obj.diluentName)
       ..writeByte(9)
       ..write(obj.stockValue)
       ..writeByte(10)
@@ -84,6 +110,10 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..write(obj.storageLocation)
       ..writeByte(16)
       ..write(obj.requiresRefrigeration)
+      ..writeByte(42)
+      ..write(obj.requiresFreezer)
+      ..writeByte(43)
+      ..write(obj.lightSensitive)
       ..writeByte(17)
       ..write(obj.storageInstructions)
       ..writeByte(18)
@@ -101,7 +131,31 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(24)
       ..write(obj.reconstitutedAt)
       ..writeByte(25)
-      ..write(obj.reconstitutedVialExpiry);
+      ..write(obj.reconstitutedVialExpiry)
+      ..writeByte(26)
+      ..write(obj.activeVialLowStockMl)
+      ..writeByte(27)
+      ..write(obj.activeVialBatchNumber)
+      ..writeByte(28)
+      ..write(obj.activeVialStorageLocation)
+      ..writeByte(29)
+      ..write(obj.activeVialRequiresRefrigeration)
+      ..writeByte(30)
+      ..write(obj.activeVialRequiresFreezer)
+      ..writeByte(31)
+      ..write(obj.activeVialLightSensitive)
+      ..writeByte(32)
+      ..write(obj.backupVialsExpiry)
+      ..writeByte(33)
+      ..write(obj.backupVialsBatchNumber)
+      ..writeByte(34)
+      ..write(obj.backupVialsStorageLocation)
+      ..writeByte(35)
+      ..write(obj.backupVialsRequiresRefrigeration)
+      ..writeByte(36)
+      ..write(obj.backupVialsRequiresFreezer)
+      ..writeByte(37)
+      ..write(obj.backupVialsLightSensitive);
   }
 
   @override

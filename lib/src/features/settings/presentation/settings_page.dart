@@ -1,27 +1,164 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
 
+// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+// Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
+import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
+import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
+
+    Future<void> editPercentSetting({
+      required String title,
+      required String description,
+      required int currentValue,
+      required ValueChanged<int> onSave,
+      int min = 0,
+      int max = 100,
+      int step = 5,
+    }) async {
+      var selected = currentValue.clamp(min, max);
+
+      final nextValue = await showModalBottomSheet<int>(
+        context: context,
+        builder: (context) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(kSpacingM),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  final divisions = ((max - min) / step).round();
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: cardTitleStyle(context)?.copyWith(
+                          fontWeight: kFontWeightBold,
+                        ),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      Text(description),
+                      const SizedBox(height: kSpacingM),
+                      Text(
+                        '$selected%',
+                        style: cardTitleStyle(context)?.copyWith(
+                          color: cs.primary,
+                          fontWeight: kFontWeightBold,
+                        ),
+                      ),
+                      Slider(
+                        value: selected.toDouble(),
+                        min: min.toDouble(),
+                        max: max.toDouble(),
+                        divisions: divisions,
+                        label: '$selected%',
+                        onChanged: (v) {
+                          setState(() {
+                            final snapped =
+                                (v / step).round() * step;
+                            selected = snapped.clamp(min, max);
+                          });
+                        },
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () =>
+                                  Navigator.of(context).pop(selected),
+                              child: const Text('Save'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      );
+
+      if (nextValue == null) return;
+      onSave(nextValue);
+    }
+
+    Future<void> runNotificationTest(Future<void> Function() action) async {
+      final ok = await NotificationService.ensurePermissionGranted();
+      if (!ok) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Notification permission denied')),
+        );
+        return;
+      }
+      await action();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Test notification sent')));
+    }
+
+    Future<void> showAbout() async {
+      final info = await PackageInfo.fromPlatform();
+      if (!context.mounted) return;
+
+      final versionText = info.buildNumber.trim().isEmpty
+          ? info.version
+          : '${info.version} (${info.buildNumber})';
+
+      showAboutDialog(
+        context: context,
+        applicationName: info.appName,
+        applicationVersion: versionText,
+        applicationIcon: Image.asset(
+          kPrimaryLogoAssetPath,
+          height: kAboutDialogLogoSize,
+          width: kAboutDialogLogoSize,
+          filterQuality: FilterQuality.high,
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: const GradientAppBar(title: 'Settings', forceBackButton: true),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(kSpacingM),
         children: [
-          const Text(
+          Text(
             'UI Customization',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
             title: const Text('Theme mode'),
@@ -67,39 +204,14 @@ class SettingsPage extends ConsumerWidget {
               }
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.view_comfortable),
-            title: const Text('Large Card Styles'),
-            subtitle: const Text(
-              'Choose how large medication cards look in lists',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/large-card-styles'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.tune),
-            title: const Text('Strength Input Styles'),
-            subtitle: const Text(
-              'Style variations for amount stepper + unit dropdown',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/strength-input-styles'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.text_fields),
-            title: const Text('Form Field Styles'),
-            subtitle: const Text(
-              '10 distinct styles for add/edit medication input fields',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/form-field-styles'),
-          ),
-          const SizedBox(height: 24),
-          const Text(
+          const SizedBox(height: kSpacingL),
+          Text(
             'Navigation',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: kSpacingS),
           ListTile(
             leading: const Icon(Icons.tab_outlined),
             title: const Text('Bottom navigation tabs'),
@@ -107,409 +219,263 @@ class SettingsPage extends ConsumerWidget {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/bottom-nav'),
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'Diagnostics',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          const SizedBox(height: kSpacingL),
+          Text(
+            'UI Components',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 8),
-          FilledButton.icon(
-            onPressed: () async {
-              final ok = await NotificationService.ensurePermissionGranted();
-              if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notification permission denied'),
-                  ),
-                );
-                return;
+          const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<ExperimentalUiConfig>(
+            valueListenable: ExperimentalUiSettings.value,
+            builder: (context, config, _) {
+              if (!config.showWideCardSamplesEntry) {
+                return const SizedBox.shrink();
               }
-              await NotificationService.showTest();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Test notification sent')),
-                );
-              }
+              return ListTile(
+                leading: const Icon(Icons.view_carousel_outlined),
+                title: const Text('Wide Card Samples'),
+                subtitle: const Text('Preview large medication card layouts'),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () => context.push('/settings/wide-card-samples'),
+              );
             },
-            icon: const Icon(Icons.notifications_active),
-            label: const Text('Send test notification'),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              await NotificationService.cancelAll();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Cancelled all scheduled notifications'),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.cancel_schedule_send_outlined),
-            label: const Text('Cancel all scheduled notifications'),
+          ListTile(
+            leading: const Icon(Icons.verified_outlined),
+            title: const Text('Final Card Decisions'),
+            subtitle: const Text('View locked-in card concepts for launch'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () => context.push('/settings/final-card-decisions'),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final ok = await NotificationService.ensurePermissionGranted();
-              if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notification permission denied'),
-                  ),
-                );
-                return;
-              }
-
-              // Preflight checks to avoid silent drops
-              final enabled =
-                  await NotificationService.areNotificationsEnabled();
-              final canExact =
-                  await NotificationService.canScheduleExactAlarms();
-              if (!enabled || !canExact) {
-                if (!context.mounted) return;
-                await showDialog<void>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Allow reminders'),
-                    content: Text(
-                      !enabled
-                          ? 'Notifications are disabled for Dosifi. Enable notifications to receive the test reminder.'
-                          : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver the test at the exact time.',
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Experimental',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<ExperimentalUiConfig>(
+            valueListenable: ExperimentalUiSettings.value,
+            builder: (context, config, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwitchListTile(
+                    secondary: const Icon(Icons.sell_outlined),
+                    title: const Text('Medication list status badges'),
+                    subtitle: const Text(
+                      'Show compact badges like Low stock, Expiring, Fridge, etc.',
                     ),
-                    actionsAlignment: MainAxisAlignment.center,
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Later'),
-                      ),
-                      FilledButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          if (!enabled) {
-                            await NotificationService.openChannelSettings(
-                              'upcoming_dose',
+                    value: config.showMedicationListStatusBadges,
+                    onChanged:
+                        ExperimentalUiSettings.setShowMedicationListStatusBadges,
+                  ),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.view_carousel_outlined),
+                    title: const Text('Wide Card Samples entry'),
+                    subtitle: const Text(
+                      'Show the exploratory card mockups page in Settings',
+                    ),
+                    value: config.showWideCardSamplesEntry,
+                    onChanged:
+                        ExperimentalUiSettings.setShowWideCardSamplesEntry,
+                  ),
+                ],
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.science_outlined),
+            title: const Text('Test Data'),
+            subtitle: const Text(
+              'Add or remove sample medications & schedules',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              if (!context.mounted) return;
+              await showModalBottomSheet<void>(
+                context: context,
+                builder: (context) {
+                  return SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.add_circle_outline),
+                          title: const Text('Add test data'),
+                          subtitle: const Text(
+                            'Creates 5 medications and 5 schedules',
+                          ),
+                          onTap: () async {
+                            Navigator.of(context).pop();
+                            await TestDataSeedService.seed();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Test data added')),
                             );
-                          }
-                          if (!canExact) {
-                            await NotificationService.openExactAlarmsSettings();
-                          }
-                        },
-                        child: const Text('Open settings'),
-                      ),
-                    ],
-                  ),
-                );
-                return;
-              }
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.delete_outline),
+                          title: const Text('Remove test data'),
+                          subtitle: const Text('Deletes the seeded items only'),
+                          onTap: () async {
+                            Navigator.of(context).pop();
+                            await TestDataSeedService.clear();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Test data removed'),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Notifications',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<DoseTimingConfig>(
+            valueListenable: DoseTimingSettings.value,
+            builder: (context, config, _) {
+              final missedSubtitle =
+                  '${config.missedGracePercent}% of time until next dose';
+              final overdueSubtitle = config.overdueReminderPercent <= 0
+                  ? 'Disabled'
+                  : '${config.overdueReminderPercent}% of grace window';
 
-              // Use a unique id to avoid overwriting or colliding with pending requests from earlier tests
-              final id =
-                  DateTime.now().millisecondsSinceEpoch %
-                  100000000; // <= 8 digits
-              await NotificationService.scheduleInSecondsExact(
-                id,
-                30,
-                title: 'Dosifi test',
-                body: 'This should appear in ~30 seconds',
-              );
-              if (!context.mounted) return;
-              final t = TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(seconds: 30)),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Scheduled test for ${t.format(context)} (~30s, exactAllowWhileIdle)',
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.timer_outlined),
+                    title: const Text('Missed dose grace period'),
+                    subtitle: Text(missedSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => editPercentSetting(
+                      title: 'Missed dose grace period',
+                      description:
+                          'How long after the scheduled time a dose stays "Due" before it becomes "Missed" (based on time until the next scheduled dose).',
+                      currentValue: config.missedGracePercent,
+                      onSave: (v) =>
+                          DoseTimingSettings.setMissedGracePercent(v),
+                    ),
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.notifications_none_outlined),
+                    title: const Text('Overdue reminder timing'),
+                    subtitle: Text(overdueSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => editPercentSetting(
+                      title: 'Overdue reminder timing',
+                      description:
+                          'Optional reminder after the scheduled time but before a dose is marked missed. Set to 0% to disable.',
+                      currentValue: config.overdueReminderPercent,
+                      onSave: (v) =>
+                          DoseTimingSettings.setOverdueReminderPercent(v),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          ValueListenableBuilder<SnoozeConfig>(
+            valueListenable: SnoozeSettings.value,
+            builder: (context, config, _) {
+              final pct = config.defaultSnoozePercent;
+              final subtitle = '$pct% of time until next scheduled dose';
+              return ListTile(
+                leading: const Icon(Icons.snooze_outlined),
+                title: const Text('Snooze timing (default)'),
+                subtitle: Text(subtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => editPercentSetting(
+                  title: 'Snooze timing (default)',
+                  description:
+                      'Sets the default snooze time as a percentage of the window until the next scheduled dose. Snooze will always clamp to before the next dose.',
+                  currentValue: pct,
+                  onSave: (v) => SnoozeSettings.setDefaultSnoozePercent(v),
+                  min: 0,
+                  max: 100,
+                  step: 5,
                 ),
               );
-              // Dump state to console right after scheduling for diagnostics
-              await NotificationService.debugDumpStatus();
             },
-            icon: const Icon(Icons.timer_outlined),
-            label: const Text('Schedule test in 30s'),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              // Ladder: T+5 exact, T+6 alarmClock, T+7 backup banner — all on test_alarm channel
-              final base =
-                  DateTime.now().millisecondsSinceEpoch %
-                  100000000; // <= 8 digits
-              await NotificationService.scheduleInSecondsExact(
-                base,
-                5,
-                title: 'Dosifi test (exact)',
-                body: 'Exact in ~5s',
-                channelId: 'test_alarm',
-              );
-              await NotificationService.scheduleInSecondsAlarmClock(
-                base + 1,
-                6,
-                title: 'Dosifi test (alarm)',
-                body: 'AlarmClock in ~6s',
-                channelId: 'test_alarm',
-              );
-              // Backup banner in case OEM suppresses scheduled delivery
-              // ignore: unawaited_futures
-              NotificationService.showDelayed(
-                7,
-                title: 'Dosifi test (backup)',
-                body: 'Backup banner after 7s',
-                channelId: 'test_alarm',
-              );
-              if (!context.mounted) return;
-              final t5 = TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(seconds: 5)),
-              );
-              final t6 = TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(seconds: 6)),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Scheduled: exact @ ${t5.format(context)}, alarm @ ${t6.format(context)}, backup @ +7s',
-                  ),
-                ),
-              );
-              await NotificationService.debugDumpStatus();
-            },
-            icon: const Icon(Icons.timer_outlined),
-            label: const Text('Schedule test in 5s (exact)'),
+          ListTile(
+            leading: const Icon(Icons.notifications_active_outlined),
+            title: const Text('Show test dose reminder'),
+            subtitle: const Text('Preview the Upcoming Dose notification'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () => runNotificationTest(NotificationService.showTest),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              // Ladder: T+5 alarmClock, T+6 exact, T+7 backup banner — all on test_alarm channel
-              final base = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleInSecondsAlarmClock(
-                base,
-                5,
-                title: 'Dosifi test (alarm)',
-                body: 'AlarmClock in ~5s',
-                channelId: 'test_alarm',
-              );
-              await NotificationService.scheduleInSecondsExact(
-                base + 1,
-                6,
-                title: 'Dosifi test (exact)',
-                body: 'Exact in ~6s',
-                channelId: 'test_alarm',
-              );
-              // Backup banner in case OEM suppresses scheduled delivery
-              // ignore: unawaited_futures
-              NotificationService.showDelayed(
-                7,
-                title: 'Dosifi test (backup)',
-                body: 'Backup banner after 7s',
-                channelId: 'test_alarm',
-              );
-              if (context.mounted) {
-                final t5 = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(seconds: 5)),
-                );
-                final t6 = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(seconds: 6)),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Scheduled: alarm @ ${t5.format(context)}, exact @ ${t6.format(context)}, backup @ +7s',
-                    ),
-                  ),
-                );
-              }
-              await NotificationService.debugDumpStatus();
-            },
-            icon: const Icon(Icons.alarm_on),
-            label: const Text('Schedule test in 5s (AlarmClock)'),
+          ListTile(
+            leading: const Icon(Icons.stacked_bar_chart_outlined),
+            title: const Text('Show test grouped reminders'),
+            subtitle: const Text('Preview grouped upcoming doses'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () => runNotificationTest(
+              NotificationService.showTestGroupedUpcomingDoseReminders,
+            ),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              // Direct, no-schedule 5s test on test_alarm channel (diagnostics only)
-              // ignore: unawaited_futures
-              NotificationService.showDelayed(
-                5,
-                title: 'Dosifi test (direct)',
-                body: 'Direct show after 5s',
-                channelId: 'test_alarm',
-              );
-              if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(seconds: 5)),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Direct (no schedule) test will show at ${t.format(context)}',
-                    ),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.timer),
-            label: const Text('Direct test in 5s (no scheduling)'),
+          ListTile(
+            leading: const Icon(Icons.inventory_2_outlined),
+            title: const Text('Show test low stock'),
+            subtitle: const Text('Preview Refill/Restock actions'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () => runNotificationTest(
+              NotificationService.showTestLowStockReminder,
+            ),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleInSecondsAlarmClock(
-                id,
-                120,
-                title: 'Dosifi test (alarm clock)',
-                body: '2m via AlarmClock',
-                channelId: 'test_alarm',
-              );
-              if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(minutes: 2)),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Scheduled 2m AlarmClock test for ${t.format(context)} (test_alarm channel)',
-                    ),
-                  ),
-                );
-              }
-              // Dump state to console right after scheduling for diagnostics
-              await NotificationService.debugDumpStatus();
-            },
-            icon: const Icon(Icons.schedule_send),
-            label: const Text('Schedule test in 2m (AlarmClock)'),
+          ListTile(
+            leading: const Icon(Icons.event_busy_outlined),
+            title: const Text('Show test expiry reminder'),
+            subtitle: const Text('Preview an Expiry notification'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () =>
+                runNotificationTest(NotificationService.showTestExpiryReminder),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleInSecondsExact(
-                id,
-                120,
-                title: 'Dosifi test (exact)',
-                body: '2m exact',
-                channelId: 'test_alarm',
-              );
-              if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(minutes: 2)),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Scheduled 2m exact test for ${t.format(context)} (test_alarm channel)',
-                    ),
-                  ),
-                );
-              }
-              await NotificationService.debugDumpStatus();
-            },
-            icon: const Icon(Icons.timer_10),
-            label: const Text('Schedule test in 2m (exact)'),
+          ListTile(
+            leading: const Icon(Icons.bug_report),
+            title: const Text('Debug & Diagnostics'),
+            subtitle: const Text('Notification testing and system diagnostics'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/debug'),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleInSecondsAlarmClock(
-                id,
-                30,
-                title: 'Dosifi test (alarm clock)',
-                body: '30s via AlarmClock',
-              );
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Scheduled 30s test via AlarmClock (local, non-tz)',
-                    ),
-                  ),
-                );
-              }
-              // Dump state to console right after scheduling for diagnostics
-              await NotificationService.debugDumpStatus();
-            },
-            icon: const Icon(Icons.alarm_on),
-            label: const Text('Schedule test in 30s (AlarmClock)'),
+
+          const SizedBox(height: kSpacingL),
+          Text(
+            'About',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              await NotificationService.openExactAlarmsSettings();
-            },
-            icon: const Icon(Icons.alarm_on_outlined),
-            label: const Text('Open Alarms & reminders settings'),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              await NotificationService.openChannelSettings('upcoming_dose');
-            },
-            icon: const Icon(Icons.settings_applications_outlined),
-            label: const Text('Open "Upcoming Dose" channel settings'),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              await NotificationService.debugDumpStatus();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Dumped notification debug info to console'),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.bug_report_outlined),
-            label: const Text('Dump notification debug info'),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final id = DateTime.now().millisecondsSinceEpoch % 100000000;
-              await NotificationService.scheduleInSecondsAlarmClock(
-                id,
-                30,
-                title: 'Dosifi test (alarm clock)',
-                body: '30s via AlarmClock',
-              );
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Scheduled 30s test via AlarmClock (local, non-tz)',
-                    ),
-                  ),
-                );
-              }
-              // Dump state to console right after scheduling for diagnostics
-              await NotificationService.debugDumpStatus();
-            },
-            icon: const Icon(Icons.alarm_on),
-            label: const Text('Schedule test in 30s (AlarmClock)'),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: () async {
-              final ignoring =
-                  await NotificationService.isIgnoringBatteryOptimizations();
-              if (!ignoring) {
-                await NotificationService.requestIgnoreBatteryOptimizations();
-                // Also open the general settings page as some OEMs/emulators need manual toggle
-                await NotificationService.openBatteryOptimizationSettings();
-              } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Battery optimizations already ignored'),
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.battery_alert_outlined),
-            label: const Text('Request battery optimization exemption'),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: Image.asset(
+              kPrimaryLogoAssetPath,
+              height: kSettingsAboutTileLogoSize,
+              width: kSettingsAboutTileLogoSize,
+              filterQuality: FilterQuality.high,
+            ),
+            title: const Text('About Dosifi'),
+            subtitle: const Text('App version and licenses'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: showAbout,
           ),
         ],
       ),

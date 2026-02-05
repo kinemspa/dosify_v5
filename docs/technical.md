@@ -1,5 +1,43 @@
 # Technical Overview — Dosifi v5
 
+## Recent Changes
+
+### Dose Logging System (2025-11-05)
+
+**Added comprehensive dose history tracking:**
+
+- **DoseLog Domain Model** (`lib/src/features/schedules/domain/dose_log.dart`):
+  - Tracks every dose action: taken, skipped, snoozed
+  - Stores medication/schedule names (not just IDs) for historical reporting
+  - Persists even after medication or schedule deletion
+  - Records scheduled vs actual time (calculates on-time adherence)
+  - Supports actual dose amount if different from scheduled
+  - Hive typeId: 41 (DoseLog), 42 (DoseAction enum)
+  
+- **Key Fields**:
+  - `scheduleId`, `scheduleName` - preserved after deletion
+  - `medicationId`, `medicationName` - preserved after deletion  
+  - `scheduledTime` (UTC) - when dose should be taken
+  - `actionTime` (UTC) - when action recorded
+  - `doseValue`, `doseUnit` - scheduled dose
+  - `actualDoseValue`, `actualDoseUnit` - optional actual dose
+  - `action` - taken/skipped/snoozed
+  - `wasOnTime` - calculated (within 30min window)
+  - `minutesOffset` - early/late offset
+
+- **DoseLogRepository** (`lib/src/features/schedules/data/dose_log_repository.dart`):
+  - Query by schedule, medication, date, or date range
+  - Calculate adherence statistics (adherence %, on-time %)
+  - Never deletes logs (preserves history for reporting)
+
+- **Implementation**:
+  - Schedule detail page: Take/Snooze/Skip buttons now record to dose_logs Hive box
+  - Generates unique IDs using timestamp + random suffix
+  - Shows snackbar confirmation after action
+  - Ready for adherence reporting and calendar color-coding
+
+---
+
 Architecture
 - Flutter (Dart 3.x) mobile app, Android-first
 - State management: Riverpod
@@ -32,6 +70,28 @@ Medications module (unified architecture)
   - add_edit_tablet_hybrid_page.dart, add_edit_tablet_details_style_page.dart
 - Shared components: unified_form.dart widgets, MedEditorTemplate, reconstitution calculator
 - Design spec reference: docs/product-design.md
+
+Medication inventory rules (implementation)
+- For count-based meds (tablets/capsules/PFS/single-dose vials): inventory decrements directly from `stockValue`.
+- For Multi-Dose Vials (MDV):
+  - `activeVialVolume` is the primary tracking target (mL remaining in the currently open vial).
+  - `stockValue` represents reserve sealed vials (count).
+  - When a draw drives `activeVialVolume <= 0`, the app should “open” a new vial (decrement reserve count and reset/add volume based on vial capacity).
+  - Legacy migration: if `form == MDV` and `activeVialVolume == null`, treat the old `stockValue` as active mL (and reserve count as 0) to avoid showing “0 mL”.
+
+Syringe terminology (UX + correctness)
+- Use **units (U)** for syringe markings (e.g., U-100 insulin syringes). Avoid labeling syringe markings as “IU” in UI; IU describes medication potency and can be misleading.
+
+Reconstitution calculator math (reference)
+- Concentration: $C = S / V_{add}$ (e.g., mg/mL or IU/mL)
+- Volume per dose: $V_{dose} = D / C$
+- Syringe markings are derived from volume (mL), not IU; only coincide at specific concentrations (e.g., U-100).
+
+Reconstitution calculator critical rules
+- Strength and dose must use the same unit (mg/mcg/g/IU); do not implicitly mix units.
+- IU (potency) is not the same thing as syringe markings (volume); they only coincide at special concentrations (e.g., U-100).
+- This calculator is for powder vials requiring reconstitution; pre-filled solutions should use their existing concentration.
+- Changes to reconstitution math should be treated as safety-critical: validate against known examples and do not modify without review.
 
 Conventions
 - Use package: imports for files under lib/
@@ -73,7 +133,19 @@ Notifications (architecture and delivery)
   - low_stock, expiry (Default)
   - test_alarm (Max) for diagnostics with short delays
 
+Reports & export (CSV)
+- Exports are intended to be spreadsheet-friendly backups and audits.
+- Timestamps are exported in ISO-8601 **UTC**.
+- Dose logs export includes both `scheduledTimeUtc` and `actionTimeUtc` on every row.
+- Inventory logs export includes `timestampUtc`.
+- Time range filtering (when enabled): include rows where the relevant timestamp is within the range **start inclusive** and **end exclusive**.
+
 Schedules Module Enhancements
+- Schedule dose entry rules (high-level)
+  - Schedule names should be auto-generated from dose + medication name, but user-editable.
+  - Tablet doses support quarter increments (0.25); capsule doses are whole numbers.
+  - Dose entry should show a summary that includes both discrete units and total strength when applicable (e.g., tablets + mg).
+  - Persist typed dose fields (e.g., mcg, microliters, tablet quarters) to keep calculations consistent across screens.
 - **Medication Selector Redesign**: Replaced navigation-based card selector with inline expandable UI
   - _MedicationSummaryDisplay widget shows selected medication details inline
   - _InlineMedicationSelector provides scrollable medication list (max 400px height)
@@ -607,4 +679,139 @@ Schedules Module Improvements (Enhanced UX)
     - Fixed endDate nullable access in summary card
     - Removed unused material_design_icons_flutter import
     - Fixed type errors in stock depletion calculation
+
+- **Add/Edit Medication Page Fixes** (Git commit: e98b10b):
+  - Removed invalid vialVolumeMl parameter from SummaryHeaderCard (does not exist in widget)
+  - Removed invalid reconResult parameter from SummaryHeaderCard
+  - Removed _showReconCalculator check that referenced non-existent variable
+  - SummaryHeaderCard properly displays reconstitution data via reconTotalIU and reconFillIU parameters
+  - Fixed compilation errors preventing app from building
+
+- **Calculator UI Improvements** (Git commits: e11233b, fac5f8d):
+  - Added calculator visibility tracking via onCalculatorVisibilityChanged callback
+  - Summary card (Add Summary) now hides when reconstitution calculator is open
+  - Save button (FAB) now hides when reconstitution calculator is open
+  - Fixed: Save button and summary card now return after calculator closes
+  - Removed excessive 200px spacing at bottom of calculator widget
+  - Removed redundant helper text at top of MDV section
+  - Simplified vial volume field helper text to "Total volume after reconstitution"
+  - Cleaner UI with better focus when calculator is active
+  - Prevents user confusion about what actions are available while calculating
+
+- **MDV Data Model Expansion** (Git commit: 69fd5ab):
+  - Added separate tracking for active/reconstituted vial and backup stock vials
+  - **Active Vial Fields** (HiveFields 26-31):
+    - activeVialLowStockMl: Low stock threshold for active vial volume in mL
+    - activeVialBatchNumber: Batch number for the active reconstituted vial
+    - activeVialStorageLocation: Storage location for active vial (e.g., "Refrigerator")
+    - activeVialRequiresRefrigeration: Whether active vial needs refrigeration
+    - activeVialRequiresFreezer: Whether active vial needs freezer storage
+    - activeVialLightSensitive: Whether active vial is light-sensitive
+  - **Backup Stock Vials Fields** (HiveFields 32-37):
+    - backupVialsExpiry: Expiry date for sealed backup vials (typically months/years)
+    - backupVialsBatchNumber: Batch number for backup stock vials
+    - backupVialsStorageLocation: Storage location for backup vials (e.g., "Freezer")
+    - backupVialsRequiresRefrigeration: Whether backup vials need refrigeration
+    - backupVialsRequiresFreezer: Whether backup vials need freezer storage
+    - backupVialsLightSensitive: Whether backup vials are light-sensitive
+  - Enables separate inventory and storage management for active vs backup MDV tracking
+  - UI implementation pending: will add separate Inventory and Storage sections for MDV
+
+- **Hive Schema Migration System** (Git commit: 72fa642):
+  - Created `HiveMigrationManager` for production-ready database migrations
+  - **Migration Strategy**:
+    - Tracks schema version using SharedPreferences (currentVersion = 2)
+    - Runs sequential migrations on app startup if version mismatch detected
+    - Validates migration success after completion
+    - Preserves all existing user data during schema updates
+  - **v1→v2 Migration** (MDV Fields):
+    - Opens existing medications box before migration
+    - Iterates through all medications and applies default values for new fields
+    - Uses copyWith to ensure all medications have updated schema
+    - Explicitly sets default values: false for boolean fields, null for optional fields
+  - **Error Handling**:
+    - Catches and logs migration errors without crashing app
+    - Allows app to continue if migration fails (TypeAdapter handles missing fields)
+    - Validation check after migration with warning if unsuccessful
+  - **Future-Proof Design**:
+    - Easy to add new migrations by incrementing version and adding migration method
+  - Sequential migration execution ensures smooth upgrades across multiple versions
+  - Template for v2→v3 migrations included in code comments
+  - Location: `lib/src/core/hive/hive_migration_manager.dart`
+  - Integrated into `HiveBootstrap.init()` for automatic execution on app startup
+
+- **MDV Wizard Step-by-Step Flow** (Git commit: b84765e):
+  - Location: `lib/src/features/medications/presentation/add_mdv_wizard_page.dart`
+  - Alternative entry point for multi-dose vials with guided 5-step wizard
+  - Routes: `/medications/add/injection/multi` (standard form) and `/medications/add/injection/multi/wizard` (wizard)
+  - **Integrated Step Indicator Design**:
+    - Removed separate top-of-page step indicator component
+    - Step progress dots integrated into enhanced summary card header
+    - Summary card displays at top with primary color gradient background
+    - Step circles (28x28) with white theme on primary background
+    - Active steps show primary color fill, completed steps show checkmark icon
+    - Inactive steps appear semi-transparent (20% opacity)
+    - Active step has 2px border, others have 1px border
+    - Step connector lines shown between circles (2px height)
+  - **Step Label Banner**:
+    - Current step name displayed below progress dots
+    - Format: "STEP 1: BASIC INFORMATION", "STEP 2: STRENGTH & RECONSTITUTION", etc.
+    - Uses labelMedium font with letter spacing (0.5)
+    - White text at 90% opacity for readability on primary background
+    - Centered alignment for prominence
+  - **Enhanced Summary Card Layout**:
+    - Rounded corners (16px radius) with subtle shadow for elevation
+    - Three-section vertical layout:
+      1. Step indicator row (top section with semi-transparent white overlay)
+      2. Step label banner (centered text)
+      3. Medication summary content (icon, name, strength, volume, alerts, gauge)
+    - Divider line between step label and content (1px, 15% opacity)
+    - Consistent 12-16px padding throughout sections
+    - Professional card styling matching SummaryHeaderCard conventions
+  - **Wizard Steps**:
+    1. Basic Information (Name, Manufacturer, Description)
+    2. Strength & Reconstitution (Drug strength, calculator, vial volume)
+    3. Reconstituted Vial Details (Active vial tracking, low stock, expiry, storage)
+    4. Sealed Inventory - Optional (Backup vials stock management)
+    5. Review & Save (Final summary before saving)
+  - **Navigation Controls**:
+    - Bottom bar with Back/Continue buttons
+    - Continue button disabled until step requirements met
+    - Final step shows "Save Medication" instead of "Continue"
+    - Confirmation dialog before saving
+  - **Visual Hierarchy**:
+    - Step progress always visible at top of screen
+    - Clear indication of current position in workflow
+    - Summary card provides live preview of entered data
+    - Improved user confidence during multi-step data entry
+
+- **MDV Inventory Section Fixes** (Git commit: 581c00a):
+  - Fixed compilation errors in `lib/src/features/medications/presentation/sections/mdv_inventory_section.dart`
+  - Added required onDec/onInc callbacks to StepperRow36 widgets:
+    - Active vial low stock: 0.5 mL step increments, clamped at 0.0-999.0 mL
+    - Backup vials quantity: integer step increments, clamped at 0-1000000
+    - Backup low stock threshold: integer step increments, clamped at 0-1000000
+  - Replaced `Function(bool)` with `ValueChanged<bool>` for better type safety
+  - Fixed undefined method: replaced `kCheckboxLabelStyle` with `checkboxLabelStyle(context)` per design system
+  - All callbacks are optional with default inline implementations
+  - Formatted with `dart format` and verified with `flutter analyze` (0 errors)
+
+- **MDV Wizard UX Improvements** (Git commit: 1649a9d):
+  - **Storage Conditions**: Replaced single-select dropdowns with multi-select checkboxes (Refrigerate, Freeze, Protect from Light)
+    - Allows multiple storage conditions per medication (e.g., refrigerate AND protect from light)
+    - Separate checkbox sets for active vial and backup vials
+  - **Helper Text**: Added `fullWidth` parameter to `buildHelperText()` in design system
+    - When `fullWidth: true`, removes left padding so text spans entire card width
+    - Applied to all wizard screens for better readability
+  - **Reconstitution Display**:
+    - Removed hidden text at bottom of summary card that was causing extra padding
+    - Simplified summary card text: "Total vial: X mL (reconstituted with Y mL)"
+    - Moved syringe gauge and calculation details to _ReconstitutionInfoCard (blue card)
+    - Calculator now shows saved results with "Draw X U (Y mL)" and syringe gauge after saving
+  - **Calculator Persistence**: Pass saved reconstitution values when reopening calculator
+    - Parameters: `initialSyringeSizeMl`, `initialRecommendedUnits`, `initialSolventVolumeMl`
+    - Calculator now restores previous settings instead of resetting
+  - **Backup Vials in Summary**: Display "Backup: X sealed vials" in summary card when enabled
+  - **Code Cleanup**: Removed obsolete `_buildStorageInstructions()` method
+  - Location: `lib/src/features/medications/presentation/add_mdv_wizard_page.dart`
 

@@ -1,0 +1,7 @@
+[submodule "FutterTestMcp"]
+	path = FutterTestMcp
+	url = https://github.com/cape2333/FutterTestMcp.git
+
+[submodule "mcp_flutter"]
+	path = mcp_flutter
+	url = https://github.com/Arenukvern/mcp_flutter.git

@@ -156,11 +156,11 @@ class MedicationFormAdapter extends TypeAdapter<MedicationForm> {
       case 1:
         return MedicationForm.capsule;
       case 2:
-        return MedicationForm.injectionPreFilledSyringe;
+        return MedicationForm.prefilledSyringe;
       case 3:
-        return MedicationForm.injectionSingleDoseVial;
+        return MedicationForm.singleDoseVial;
       case 4:
-        return MedicationForm.injectionMultiDoseVial;
+        return MedicationForm.multiDoseVial;
       default:
         return MedicationForm.tablet;
     }
@@ -175,13 +175,13 @@ class MedicationFormAdapter extends TypeAdapter<MedicationForm> {
       case MedicationForm.capsule:
         writer.writeByte(1);
         break;
-      case MedicationForm.injectionPreFilledSyringe:
+      case MedicationForm.prefilledSyringe:
         writer.writeByte(2);
         break;
-      case MedicationForm.injectionSingleDoseVial:
+      case MedicationForm.singleDoseVial:
         writer.writeByte(3);
         break;
-      case MedicationForm.injectionMultiDoseVial:
+      case MedicationForm.multiDoseVial:
         writer.writeByte(4);
         break;
     }
@@ -194,6 +194,45 @@ class MedicationFormAdapter extends TypeAdapter<MedicationForm> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is MedicationFormAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class VolumeUnitAdapter extends TypeAdapter<VolumeUnit> {
+  @override
+  final int typeId = 4;
+
+  @override
+  VolumeUnit read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return VolumeUnit.ml;
+      case 1:
+        return VolumeUnit.l;
+      default:
+        return VolumeUnit.ml;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, VolumeUnit obj) {
+    switch (obj) {
+      case VolumeUnit.ml:
+        writer.writeByte(0);
+        break;
+      case VolumeUnit.l:
+        writer.writeByte(1);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VolumeUnitAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

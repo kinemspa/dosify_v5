@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 @HiveType(typeId: 52)
@@ -29,10 +30,8 @@ class SupplyTypeAdapter extends TypeAdapter<SupplyType> {
     switch (obj) {
       case SupplyType.item:
         writer.writeByte(0);
-        break;
       case SupplyType.fluid:
         writer.writeByte(1);
-        break;
     }
   }
 }
@@ -60,13 +59,10 @@ class SupplyUnitAdapter extends TypeAdapter<SupplyUnit> {
     switch (obj) {
       case SupplyUnit.pcs:
         writer.writeByte(0);
-        break;
       case SupplyUnit.ml:
         writer.writeByte(1);
-        break;
       case SupplyUnit.l:
         writer.writeByte(2);
-        break;
     }
   }
 }
@@ -142,8 +138,8 @@ class Supply {
     required this.id,
     required this.name,
     required this.type,
-    this.category,
     required this.unit,
+    this.category,
     this.reorderThreshold,
     this.expiry,
     this.storageLocation,

@@ -3,6 +3,83 @@
 All notable changes to this project will be documented in this file. Dates in UTC.
 
 ## Unreleased
+
+### Medication List Cards (2025-02-14)
+- Added a quick toggle between Halo and Concept-9 Focus cards, persisting the last selection between sessions.
+- Rebuilt the Halo card to match the flattened Concept-9 baseline: conditional adherence, inline fact rows, and clearer MDV stock signals.
+- Introduced the Focus card variant that mirrors Concept-9 copy, hero text, and single-row statistic layout.
+- Updated the compact card layout with the approved form chip, concise strength/next dose labels, and aligned expiry + stock copy.
+
+### Dose Logging System (2025-11-05)
+- **Added comprehensive dose history tracking**
+  - New `DoseLog` domain model with Hive persistence (typeId: 41, 42)
+  - Stores medication/schedule names (not just IDs) for historical reporting after deletion
+  - Records scheduled vs actual time with automatic on-time calculation (30min window)
+  - Tracks action type: taken, skipped, snoozed
+  - Supports actual dose amount if different from scheduled
+  - `DoseLogRepository` with adherence statistics calculation
+  - Schedule detail page: Take/Snooze/Skip buttons now record to dose_logs Hive box
+  - Preserves full history even when medications or schedules are deleted
+  - Foundation for adherence reporting and calendar color-coding
+
+- **Multi-Dose Vial Wizard: Complete UX Overhaul**
+  - Summary card improvements:
+    - Removed reconstitution info from summary - shows only total vial volume
+    - Storage condition icons now show only active vial conditions (prevents clashing with sealed vial storage)
+    - Icons aligned with expiry date for clean visual hierarchy
+  - Saved reconstitution card simplified and refined:
+    - Shows only "with X mL" or "with X mL of diluent" for clean minimal display
+    - Matches calculator summary styling (fontSize, fontWeight, colors)
+    - Uses _formatNoTrailing helper for clean number formatting (no trailing zeros)
+    - Dynamically updates when vial volume is manually changed
+    - Added text controller listener to keep reconstitution result in sync with vial volume changes
+  - Step 5 (Review & Save) completely expanded:
+    - Changed title to "Review & Save" for clarity
+    - Each section prefixed with step number (e.g., "Step 1: Basic Information")
+    - Shows ALL fields including empty ones with clear placeholders:
+      - "(Not set)" for optional empty fields
+      - "(Disabled)" for disabled options
+      - "(None)" for no selections
+    - Displays complete reconstitution details including diluent name if available
+    - Shows backup vials section with all details even when not configured
+    - Improved helper text explaining users can go back to any step to edit
+    - Comprehensive review of all 4 configuration steps before saving
+  - Code quality improvements:
+    - Fixed null safety for optional recommendedDose field
+    - Fixed deprecated API usage (withOpacity → withValues)
+    - Removed unused imports
+    - Proper listener cleanup in dispose method
+- **Multi-Dose Vial: Separate Active Vial and Backup Stock UI**
+  - Created `MdvInventorySection` widget with split inventory fields:
+    - **Active vial**: Low volume alert (mL threshold), dedicated expiry date
+    - **Backup stock**: Stock quantity, low stock alert with threshold, separate expiry date
+  - Created `MdvStorageSection` widget with split storage fields:
+    - **Active vial**: Storage location, storage condition dropdown (Room Temp/Refrigerated/Frozen/Light Protection)
+    - **Backup stock**: Separate location and storage condition controls
+  - Updated `MedEditorTemplate` to optionally replace standard Inventory and Storage sections with MDV-specific variants
+  - Integrated MDV sections into `add_edit_medication_page` with proper state management
+  - Updated save method to persist all new MDV fields (active vial and backup stock separately)
+  - Applied design system constants throughout (kFieldSpacing, kSectionSpacing, kHelperTextOpacity)
+  - Fixed deprecated API usage (replaced `withOpacity` with `withValues(alpha:)`)
+  - Clearer separation improves user understanding of reconstituted vial vs sealed backup inventory
+- Reconstitution Calculator: Major UX overhaul with visual polish and precision controls
+  - **Dark blue-black background** (0xFF0A0E27) for entire calculator with excellent contrast
+  - **Split line layout**: 'Reconstitute X of MEDNAME' on line 1, 'with X mL of DILUENT' on line 2
+  - **Typography hierarchy**: 'of' text smaller (14px) and black vs. huge bold colored values (22-26px)
+  - **No trailing zeros**: All numbers formatted cleanly (10.5 not 10.50, 5 not 5.0)
+  - **Fine-tune controls**: Small +/- 0.01 Units buttons (28x28) flanking syringe, aligned to bottom
+  - **Single syringe**: One interactive gauge with buttons, drag/tap/click functionality preserved
+  - **Perfect syringe markers**:
+    - 0.3ml/0.5ml: 1U intervals, label every 5U (5, 10, 15...) with smaller 7px font
+    - 1ml: 5U intervals, label every 10U (10, 20, 30, 40, 50, 100)
+    - 3ml/5ml: 10U intervals, label only 50U marks (unlabeled ticks between for precision)
+  - **No text jumping**: Summary properly centered with Column crossAxisAlignment
+  - **Clarification added**: "This calculates reconstitution volume only. Set actual dose amounts in the scheduling screen."
+  - Calculator title center-aligned with bold primary color (titleMedium)
+  - Vial strength value made prominent (16px, bold, primary color)
+  - All text uses design system theme styles consistently
+  - Added "U = Units" explanation in syringe instruction text
+- Multi-dose vial: Vial volume field now restricts manual input to 2 decimal places while maintaining 0.5 increment/decrement steps via +/- buttons (improved validation without breaking user workflow)
 - Schedules: Enhanced Add/Edit Schedule screen with custom floating summary card
   - Created custom ScheduleSummaryCard widget specifically for schedules (doesn't affect medication screens)
   - Card floats at top of screen using Stack/Positioned layout

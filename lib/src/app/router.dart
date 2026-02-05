@@ -1,39 +1,44 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import '../features/home/presentation/home_page.dart';
-import '../features/medications/presentation/medication_list_page.dart';
-import '../features/medications/presentation/medication_detail_page.dart';
-import '../features/medications/presentation/select_medication_type_page.dart';
-import '../features/medications/presentation/med_editor_template_demo_page.dart';
-import '../features/medications/presentation/select_injection_type_page.dart';
-import '../features/medications/presentation/unified_add_edit_medication_page.dart';
-import '../features/medications/presentation/unified_add_edit_medication_page_template.dart';
-import '../features/medications/domain/enums.dart';
-import '../features/medications/presentation/reconstitution_calculator_page.dart';
-import '../features/medications/presentation/reconstitution_calculator_dialog.dart';
-import '../features/medications/domain/medication.dart';
-import '../features/schedules/presentation/schedules_page.dart';
-import '../features/schedules/presentation/add_edit_schedule_page.dart';
-import '../features/schedules/presentation/select_medication_for_schedule_page.dart';
-import '../features/schedules/domain/schedule.dart';
-import '../features/settings/presentation/settings_page.dart';
-import '../features/settings/presentation/large_card_styles_page.dart';
-import '../features/settings/presentation/strength_input_styles_page.dart';
-import '../features/settings/presentation/form_field_styles_page.dart';
-import '../features/settings/presentation/bottom_nav_settings_page.dart';
-import '../features/supplies/presentation/supplies_page.dart';
+// Project imports:
+import 'package:dosifi_v5/src/app/app_navigator.dart';
+import 'package:dosifi_v5/src/app/shell_scaffold.dart';
+import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
+import 'package:dosifi_v5/src/features/inventory/presentation/inventory_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/calendar_page.dart';
+import 'package:dosifi_v5/src/features/home/presentation/home_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/med_editor_template_demo_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_detail_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_list_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/select_injection_type_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/select_medication_type_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_mdv_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_tablet_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_capsule_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_syringe_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/add_single_dose_vial_wizard_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_detail_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/select_medication_for_schedule_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/bottom_nav_settings_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/debug_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/settings_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/wide_card_samples_page.dart';
+import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart';
+
 // Removed incorrect import
-import '../features/calendar/presentation/calendar_page.dart';
-import '../features/analytics/presentation/analytics_page.dart';
-import 'shell_scaffold.dart';
-
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 final router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   // Start at home by default
   initialLocation: '/',
   routes: [
@@ -52,9 +57,21 @@ final router = GoRouter(
           builder: (context, state) => const MedicationListPage(),
         ),
         GoRoute(
+          path: '/reconstitution',
+          name: 'reconstitutionAlias',
+          redirect: (context, state) => '/medications/reconstitution',
+        ),
+        GoRoute(
           path: '/calendar',
           name: 'calendar',
-          builder: (context, state) => const CalendarPage(),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return CalendarPage(
+              initialDate: extra?['initialDate'] as DateTime?,
+              scheduleId: extra?['scheduleId'] as String?,
+              medicationId: extra?['medicationId'] as String?,
+            );
+          },
         ),
         GoRoute(
           path: '/schedules',
@@ -67,6 +84,11 @@ final router = GoRouter(
           builder: (context, state) => const SuppliesPage(),
         ),
         GoRoute(
+          path: '/inventory',
+          name: 'inventory',
+          builder: (context, state) => const InventoryPage(),
+        ),
+        GoRoute(
           path: '/supplies/add',
           name: 'addSupply',
           builder: (context, state) => const AddEditSupplyPage(),
@@ -74,7 +96,48 @@ final router = GoRouter(
         GoRoute(
           path: '/schedules/add',
           name: 'addSchedule',
-          builder: (context, state) => const AddEditSchedulePage(),
+          builder: (context, state) => const AddScheduleWizardPage(),
+        ),
+        GoRoute(
+          path: '/schedules/detail/:id',
+          name: 'scheduleDetail',
+          builder: (context, state) {
+            final id = state.pathParameters['id'];
+            if (id == null || id.trim().isEmpty) {
+              return Scaffold(
+                body: SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(kSpacingXXL),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: kEmptyStateIconSize,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: kSpacingM),
+                          Text(
+                            'Invalid schedule link',
+                            style: sectionTitleStyle(context),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: kSpacingM),
+                          FilledButton(
+                            onPressed: () => context.pop(),
+                            child: const Text('Back'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ScheduleDetailPage(scheduleId: id);
+          },
         ),
         GoRoute(
           path: '/schedules/select-medication',
@@ -86,10 +149,8 @@ final router = GoRouter(
           name: 'editSchedule',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            if (id == null) return const AddEditSchedulePage();
-            final box = Hive.box<Schedule>('schedules');
-            final initial = box.get(id);
-            return AddEditSchedulePage(initial: initial);
+            if (id == null) return const AddScheduleWizardPage();
+            return AddScheduleWizardPage(initialScheduleId: id);
           },
         ),
         GoRoute(
@@ -103,19 +164,19 @@ final router = GoRouter(
           builder: (context, state) => const BottomNavSettingsPage(),
         ),
         GoRoute(
-          path: '/settings/large-card-styles',
-          name: 'largeCardStyles',
-          builder: (context, state) => const LargeCardStylesPage(),
+          path: '/settings/wide-card-samples',
+          name: 'wideCardSamples',
+          builder: (context, state) => const WideCardSamplesPage(),
         ),
         GoRoute(
-          path: '/settings/strength-input-styles',
-          name: 'strengthInputStyles',
-          builder: (context, state) => const StrengthInputStylesPage(),
+          path: '/settings/debug',
+          name: 'debug',
+          builder: (context, state) => const DebugPage(),
         ),
         GoRoute(
-          path: '/settings/form-field-styles',
-          name: 'formFieldStyles',
-          builder: (context, state) => const FormFieldStylesPage(),
+          path: '/settings/final-card-decisions',
+          name: 'finalCardDecisions',
+          builder: (context, state) => const FinalCardDecisionsPage(),
         ),
         // Nested under shell so bottom nav persists
         GoRoute(
@@ -133,38 +194,31 @@ final router = GoRouter(
           name: 'selectInjectionType',
           builder: (context, state) => const SelectInjectionTypePage(),
         ),
+        // Wizard routes (preferred)
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
-          builder: (context, state) =>
-              const UnifiedAddEditMedicationPageTemplate(form: MedicationForm.tablet),
+          builder: (context, state) => const AddTabletWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/capsule',
           name: 'addCapsule',
-          builder: (context, state) =>
-              const UnifiedAddEditMedicationPageTemplate(form: MedicationForm.capsule),
+          builder: (context, state) => const AddCapsuleWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
-          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
-            form: MedicationForm.injectionPreFilledSyringe,
-          ),
+          builder: (context, state) => const AddPrefilledSyringeWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
-          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
-            form: MedicationForm.injectionSingleDoseVial,
-          ),
+          builder: (context, state) => const AddSingleDoseVialWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
-          builder: (context, state) => const UnifiedAddEditMedicationPageTemplate(
-            form: MedicationForm.injectionMultiDoseVial,
-          ),
+          builder: (context, state) => const AddMdvWizardPage(),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
         GoRoute(
@@ -172,12 +226,7 @@ final router = GoRouter(
           name: 'editTablet',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.tablet,
-              initial: med,
-            );
+            return AddTabletWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -185,12 +234,7 @@ final router = GoRouter(
           name: 'editCapsule',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.capsule,
-              initial: med,
-            );
+            return AddCapsuleWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -198,12 +242,7 @@ final router = GoRouter(
           name: 'editInjectionPfs',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.injectionPreFilledSyringe,
-              initial: med,
-            );
+            return AddPrefilledSyringeWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -211,12 +250,7 @@ final router = GoRouter(
           name: 'editInjectionSingle',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.injectionSingleDoseVial,
-              initial: med,
-            );
+            return AddSingleDoseVialWizardPage(initialMedicationId: id);
           },
         ),
         GoRoute(
@@ -224,12 +258,7 @@ final router = GoRouter(
           name: 'editInjectionMulti',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return UnifiedAddEditMedicationPageTemplate(
-              form: MedicationForm.injectionMultiDoseVial,
-              initial: med,
-            );
+            return AddMdvWizardPage(initialMedicationId: id);
           },
         ),
         // Reconstitution calculator must be above the dynamic '/medications/:id' route
@@ -254,9 +283,7 @@ final router = GoRouter(
           name: 'medicationDetail',
           builder: (context, state) {
             final id = state.pathParameters['id'];
-            final box = Hive.box<Medication>('medications');
-            final med = id != null ? box.get(id) : null;
-            return MedicationDetailPage(medicationId: id, initial: med);
+            return MedicationDetailPage(medicationId: id);
           },
         ),
       ],

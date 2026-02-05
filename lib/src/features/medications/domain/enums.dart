@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'enums.g.dart';
@@ -49,9 +50,17 @@ enum MedicationForm {
   @HiveField(1)
   capsule,
   @HiveField(2)
-  injectionPreFilledSyringe,
+  prefilledSyringe,
   @HiveField(3)
-  injectionSingleDoseVial,
+  singleDoseVial,
   @HiveField(4)
-  injectionMultiDoseVial,
+  multiDoseVial,
+}
+
+@HiveType(typeId: 4)
+enum VolumeUnit {
+  @HiveField(0)
+  ml,
+  @HiveField(1)
+  l,
 }

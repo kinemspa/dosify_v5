@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'reconstitution_calculator_widget.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 
 enum SyringeSizeMl { ml0_3, ml0_5, ml1, ml3, ml5 }
 
@@ -12,7 +17,8 @@ extension SyringeSizeX on SyringeSizeMl {
     SyringeSizeMl.ml5 => 5.0,
   };
 
-  int get totalUnits => (ml * 100).round(); // assume 100 IU per mL mapping
+  int get totalUnits =>
+      (ml * SyringeType.ml_1_0.unitsPerMl).round(); // 100 units per mL mapping
 
   String get label => '${ml.toStringAsFixed(1)} mL';
 }
@@ -31,12 +37,13 @@ class ReconstitutionResult {
 
   final double perMlConcentration; // same base unit as dose/strength (per mL)
   final double solventVolumeMl; // mL to add to vial
-  final double recommendedUnits; // IU fill for the dose
+  final double recommendedUnits; // syringe units fill for the dose
   final double syringeSizeMl; // chosen syringe size mL
   final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
   final double? recommendedDose; // desired dose value for reopening calculator
   final String? doseUnit; // dose unit (mcg/mg/g) for reopening calculator
-  final double? maxVialSizeMl; // max vial size constraint for reopening calculator
+  final double?
+  maxVialSizeMl; // max vial size constraint for reopening calculator
 }
 
 class ReconstitutionCalculatorDialog extends StatefulWidget {
@@ -44,6 +51,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
     super.key,
     required this.initialStrengthValue,
     required this.unitLabel, // e.g., mg, mcg, g, units
+    this.initialDiluentName,
     this.initialDoseValue,
     this.initialDoseUnit,
     this.initialSyringeSize,
@@ -52,6 +60,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
 
   final double initialStrengthValue; // total quantity in the vial (S)
   final String unitLabel;
+  final String? initialDiluentName;
   final double? initialDoseValue;
   final String? initialDoseUnit; // 'mcg'|'mg'|'g'|'units'
   final SyringeSizeMl? initialSyringeSize;
@@ -76,35 +85,126 @@ class _ReconstitutionCalculatorDialogState
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Reconstitution Calculator'),
-      content: SingleChildScrollView(
-        child: ReconstitutionCalculatorWidget(
-          initialStrengthValue: widget.initialStrengthValue,
-          unitLabel: widget.unitLabel,
-          initialDoseValue: widget.initialDoseValue,
-          initialDoseUnit: widget.initialDoseUnit,
-          initialSyringeSize: widget.initialSyringeSize,
-          initialVialSize: widget.initialVialSize,
-          showSummary: true,
-          showApplyButton: false,
-          onCalculate: _onCalculation,
-        ),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = reconForegroundColor(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: reconBackgroundDarkColor(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop<ReconstitutionResult>(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _canSubmit
-              ? () {
-                  Navigator.of(context).pop(_lastResult);
-                }
-              : null,
-          child: const Text('Save Reconstitution'),
-        ),
-      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: fg.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calculate,
+                  color: fg.withValues(alpha: 0.9),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Reconstitution Calculator',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: fg,
+                    fontWeight: kFontWeightBold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Helper text
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Text(
+              'Select a reconstitution option below or fine-tune the values',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: fg.withValues(alpha: 0.7),
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Divider(
+            color: theme.brightness == Brightness.dark
+                ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
+                : fg.withValues(alpha: 0.12),
+            height: 1,
+          ),
+          // Content
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: ReconstitutionCalculatorWidget(
+                initialStrengthValue: widget.initialStrengthValue,
+                unitLabel: widget.unitLabel,
+                initialDiluentName: widget.initialDiluentName,
+                initialDoseValue: widget.initialDoseValue,
+                initialDoseUnit: widget.initialDoseUnit,
+                initialSyringeSize: widget.initialSyringeSize,
+                initialVialSize: widget.initialVialSize,
+                onCalculate: _onCalculation,
+              ),
+            ),
+          ),
+          // Actions
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: theme.brightness == Brightness.dark
+                      ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
+                      : fg.withValues(alpha: 0.1),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () =>
+                        Navigator.of(context).pop<ReconstitutionResult>(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: fg,
+                      side: BorderSide(color: fg.withValues(alpha: 0.3)),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton(
+                    onPressed: _canSubmit
+                        ? () {
+                            Navigator.of(context).pop(_lastResult);
+                          }
+                        : null,
+                    child: const Text('Save Reconstitution'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

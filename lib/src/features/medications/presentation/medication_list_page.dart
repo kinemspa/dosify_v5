@@ -1,27 +1,43 @@
+import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/format.dart';
+import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
+import 'package:dosifi_v5/src/widgets/large_card.dart';
+import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
+import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
+import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/utils/format.dart';
-import '../../../widgets/app_header.dart';
-import '../domain/medication.dart';
-import '../domain/enums.dart';
-import '../../../widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 
 enum _MedView { list, compact, large }
 
-enum _SortBy { name, stock, strength, expiry }
+enum _SortBy { name, nextDose, mostUsed, manufacturer, form, stock, strength, expiry }
 
-enum _FilterBy { all, lowStock, expiringSoon, refrigerated }
-
-const double _kLargeCardHeight = 140.0;
+enum _FilterBy {
+  all,
+  lowStock,
+  expiringSoon,
+  refrigerated,
+  freezer,
+  lightSensitive,
+  formTablet,
+  formCapsule,
+  formPrefilledSyringe,
+  formSingleDoseVial,
+  formMultiDoseVial,
+}
 
 class MedicationListPage extends ConsumerStatefulWidget {
   const MedicationListPage({super.key});
@@ -38,34 +54,145 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   String _query = '';
   bool _searchExpanded = false;
 
+  static const _kPrefsViewKey = 'medication_list_view';
+  static const _kPrefsSortByKey = 'medication_list_sort_by';
+  static const _kPrefsSortAscKey = 'medication_list_sort_asc';
+
+  IconData _viewIcon(_MedView v) => switch (v) {
+    _MedView.list => Icons.view_list,
+    _MedView.compact => Icons.view_comfy_alt,
+    _MedView.large => Icons.view_comfortable,
+  };
+
+  void _cycleView() {
+    final next = switch (_view) {
+      _MedView.large => _MedView.compact,
+      _MedView.compact => _MedView.list,
+      _MedView.list => _MedView.large,
+    };
+    _saveView(next);
+  }
+
+  ({int fieldPriority, int startsWithPriority, int indexPriority})
+  _searchRelevanceKey(Medication m, String qLower) {
+    final name = m.name.toLowerCase();
+    final manufacturer = (m.manufacturer ?? '').toLowerCase();
+    final description = (m.description ?? '').toLowerCase();
+
+    // Lower tuple values are higher priority.
+    // Field priority: name -> manufacturer -> description.
+    // Within a field: startsWith beats contains; earlier index beats later.
+    if (name.contains(qLower)) {
+      final idx = name.indexOf(qLower);
+      return (
+        fieldPriority: 0,
+        startsWithPriority: name.startsWith(qLower) ? 0 : 1,
+        indexPriority: idx < 0 ? 9999 : idx,
+      );
+    }
+    if (manufacturer.contains(qLower)) {
+      final idx = manufacturer.indexOf(qLower);
+      return (
+        fieldPriority: 1,
+        startsWithPriority: manufacturer.startsWith(qLower) ? 0 : 1,
+        indexPriority: idx < 0 ? 9999 : idx,
+      );
+    }
+    if (description.contains(qLower)) {
+      final idx = description.indexOf(qLower);
+      return (
+        fieldPriority: 2,
+        startsWithPriority: description.startsWith(qLower) ? 0 : 1,
+        indexPriority: idx < 0 ? 9999 : idx,
+      );
+    }
+
+    return (fieldPriority: 999, startsWithPriority: 1, indexPriority: 9999);
+  }
+
+  bool _matchesSearchQuery(Medication m, String qLower) {
+    return m.name.toLowerCase().contains(qLower) ||
+        (m.manufacturer ?? '').toLowerCase().contains(qLower) ||
+        (m.description ?? '').toLowerCase().contains(qLower);
+  }
+
+  bool _isRefrigerated(Medication m) {
+    return m.requiresRefrigeration == true ||
+        m.activeVialRequiresRefrigeration ||
+        m.backupVialsRequiresRefrigeration;
+  }
+
+  bool _isFrozen(Medication m) {
+    return m.requiresFreezer == true ||
+        m.activeVialRequiresFreezer ||
+        m.backupVialsRequiresFreezer;
+  }
+
+  bool _isLightSensitive(Medication m) {
+    return m.lightSensitive == true ||
+        m.activeVialLightSensitive ||
+        m.backupVialsLightSensitive;
+  }
+
+  DateTime? _effectiveExpiry(Medication m) {
+    final candidates = <DateTime?>[
+      m.expiry,
+      m.reconstitutedVialExpiry,
+      m.backupVialsExpiry,
+    ].whereType<DateTime>().toList(growable: false);
+    if (candidates.isEmpty) return null;
+    candidates.sort();
+    return candidates.first;
+  }
+
   @override
   void initState() {
     super.initState();
-    _loadSavedView();
+    _loadSavedViewAndSort();
   }
 
-  Future<void> _loadSavedView() async {
+  Future<void> _loadSavedViewAndSort() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedView = prefs.getString('medication_list_view') ?? 'large';
+    final savedView = prefs.getString(_kPrefsViewKey) ?? 'large';
+    final savedSortBy = prefs.getString(_kPrefsSortByKey) ?? _SortBy.name.name;
+    final savedSortAsc = prefs.getBool(_kPrefsSortAscKey) ?? true;
     setState(() {
       _view = _MedView.values.firstWhere(
         (v) => v.name == savedView,
         orElse: () => _MedView.large,
       );
+
+      _sortBy = _SortBy.values.firstWhere(
+        (v) => v.name == savedSortBy,
+        orElse: () => _SortBy.name,
+      );
+      _sortAsc = savedSortAsc;
     });
   }
 
   Future<void> _saveView(_MedView view) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('medication_list_view', view.name);
+    await prefs.setString(_kPrefsViewKey, view.name);
     setState(() => _view = view);
+  }
+
+  Future<void> _saveSort({_SortBy? sortBy, bool? sortAsc}) async {
+    final nextSortBy = sortBy ?? _sortBy;
+    final nextSortAsc = sortAsc ?? _sortAsc;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kPrefsSortByKey, nextSortBy.name);
+    await prefs.setBool(_kPrefsSortAscKey, nextSortAsc);
+    setState(() {
+      _sortBy = nextSortBy;
+      _sortAsc = nextSortAsc;
+    });
   }
 
   // Ensure we have an original stock value for count-based units so that we can
   // display Remaining / Original correctly. This sets it lazily to the first
   // observed value and updates it when the current stock increases (restock).
   void _ensureInitialStockValues(List<Medication> items) {
-    final box = Hive.box<Medication>('medications');
+    final box = ref.read(medicationsBoxProvider);
     for (final m in items) {
       final isCountUnit =
           m.stockUnit == StockUnit.preFilledSyringes ||
@@ -76,7 +203,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       if (!isCountUnit) continue;
       final cur = m.stockValue;
       final init = m.initialStockValue;
-      double? nextInit = init;
+      var nextInit = init;
       if (init == null || init <= 0) {
         nextInit = cur;
       } else if (cur > init) {
@@ -91,22 +218,22 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<Medication>('medications');
+    ref.watch(medicationsBoxChangesProvider);
+    ref.watch(schedulesBoxChangesProvider);
+
+    final box = ref.watch(medicationsBoxProvider);
+    final schedulesBox = ref.watch(schedulesBoxProvider);
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Medications', forceBackButton: true),
-      body: ValueListenableBuilder(
-        valueListenable: box.listenable(),
-        builder: (context, Box<Medication> b, _) {
-          var items = _getFilteredAndSortedMedications(
-            b.values.toList(growable: false),
-          );
-          // Ensure initial stock values so large cards can show current/initial remain
-          _ensureInitialStockValues(items);
+      body: Builder(
+        builder: (context) {
+          final meds = box.values.toList(growable: false);
 
-          // Show initial state if no medications at all, or filtered state if search has no results
-          if (items.isEmpty) {
-            if (_query.isEmpty && b.values.isEmpty) {
+          // Show initial state if no medications exist, or the filtered
+          // empty state when search removes everything.
+          if (meds.isEmpty) {
+            if (_query.isEmpty) {
               // No medications at all - show initial state
               return Center(
                 child: Column(
@@ -133,16 +260,18 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.search_off, size: 48),
-                          const SizedBox(height: 12),
-                          Text('No medications found for "$_query"'),
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: () => setState(() {
-                              _query = '';
-                              _searchExpanded = false;
-                            }),
-                            child: const Text('Clear search'),
+                          Icon(
+                            Icons.search_off,
+                            size: kEmptyStateIconSize,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: kOpacityMedium),
+                          ),
+                          const SizedBox(height: kSpacingM),
+                          Text(
+                            'No medications found for "$_query"',
+                            style: mutedTextStyle(context),
                           ),
                         ],
                       ),
@@ -152,9 +281,50 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               );
             }
           }
+
+          final schedules = schedulesBox.values.toList(growable: false);
+          final items = _getFilteredAndSortedMedications(
+            meds,
+            schedules: schedules,
+          );
+
+              // Ensure initial stock values so large cards can show current vs
+              // initial amounts.
+              _ensureInitialStockValues(items);
+
+          if (items.isEmpty) {
+            return Column(
+              children: [
+                _buildToolbar(context),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: kEmptyStateIconSize,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withValues(alpha: kOpacityMedium),
+                        ),
+                        const SizedBox(height: kSpacingM),
+                        Text(
+                          'No medications found for "$_query"',
+                          style: mutedTextStyle(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+
           return Stack(
             children: [
-              _buildMedList(context, items),
+              _buildMedList(context, items, schedules),
               Positioned(
                 top: 0,
                 left: 0,
@@ -165,98 +335,78 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/medications/select-type'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Medication'),
       ),
     );
   }
 
   Widget _buildToolbar(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final iconColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+      padding: const EdgeInsets.fromLTRB(
+        kPageHorizontalPadding,
+        kSpacingXS,
+        kSpacingXS,
+        kSpacingXS,
+      ),
       child: Row(
         children: [
-          // Search section - expands to layout button when activated
           if (_searchExpanded)
             Expanded(
-              child: SizedBox(
-                height: 36,
-                child: TextField(
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, size: 20, color: kTextLighterGrey(context)),
-                    hintText: 'Search medications',
-                    isDense: true,
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    suffixIcon: IconButton(
-                      iconSize: 20,
-                      icon: Icon(Icons.close, color: kTextLighterGrey(context)),
-                      onPressed: () => setState(() {
-                        _searchExpanded = false;
-                        _query = '';
-                      }),
-                    ),
+              child: TextField(
+                autofocus: true,
+                textCapitalization: kTextCapitalizationDefault,
+                decoration: buildFieldDecoration(
+                  context,
+                  hint: 'Search medications',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: kIconSizeMedium,
+                    color: iconColor,
                   ),
-                  onChanged: (v) => setState(() => _query = v.trim()),
+                  suffixIcon: IconButton(
+                    iconSize: kIconSizeMedium,
+                    icon: Icon(Icons.close, color: iconColor),
+                    onPressed: () => setState(() {
+                      _searchExpanded = false;
+                      _query = '';
+                    }),
+                  ),
                 ),
+                onChanged: (v) => setState(() => _query = v.trim()),
               ),
             )
           else
             IconButton(
-              icon: Icon(Icons.search, color: kTextLighterGrey(context)),
+              icon: Icon(Icons.search, color: iconColor),
               onPressed: () => setState(() => _searchExpanded = true),
               tooltip: 'Search medications',
             ),
-          // When search is expanded, only show layout button
-          if (_searchExpanded) const SizedBox(width: 8),
+          if (_searchExpanded) const SizedBox(width: kSpacingS),
           if (_searchExpanded)
             IconButton(
-              icon: Icon(_getViewIcon(_view), color: kTextLighterGrey(context)),
+              icon: Icon(_viewIcon(_view), color: iconColor),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
           if (!_searchExpanded) const Spacer(),
-
-          // Layout toggle as popup menu
           if (!_searchExpanded)
             IconButton(
-              icon: Icon(_getViewIcon(_view), color: kTextLighterGrey(context)),
+              icon: Icon(_viewIcon(_view), color: iconColor),
               tooltip: 'Change layout',
               onPressed: _cycleView,
             ),
-
-          if (!_searchExpanded) const SizedBox(width: 8),
-
-          // Filter button
+          if (!_searchExpanded) const SizedBox(width: kSpacingS),
           if (!_searchExpanded)
             PopupMenuButton<_FilterBy>(
               icon: Icon(
                 Icons.filter_list,
-                color: _filterBy != _FilterBy.all
-                    ? Theme.of(context).colorScheme.primary
-                    : kTextLighterGrey(context),
+                color: _filterBy != _FilterBy.all ? cs.primary : iconColor,
               ),
               tooltip: 'Filter medications',
               onSelected: (filter) => setState(() => _filterBy = filter),
@@ -277,25 +427,74 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   value: _FilterBy.refrigerated,
                   child: Text('Refrigerated'),
                 ),
+                const PopupMenuItem(
+                  value: _FilterBy.freezer,
+                  child: Text('Freezer'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.lightSensitive,
+                  child: Text('Light sensitive'),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: _FilterBy.formTablet,
+                  child: Text('Tablets'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formCapsule,
+                  child: Text('Capsules'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formPrefilledSyringe,
+                  child: Text('Pre-filled syringes'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formSingleDoseVial,
+                  child: Text('Single dose vials'),
+                ),
+                const PopupMenuItem(
+                  value: _FilterBy.formMultiDoseVial,
+                  child: Text('Multi-dose vials'),
+                ),
               ],
             ),
-
-          // Sort button
           if (!_searchExpanded)
             PopupMenuButton<Object>(
-              icon: Icon(Icons.sort, color: kTextLighterGrey(context)),
+              icon: Icon(Icons.sort, color: iconColor),
               tooltip: 'Sort medications',
-              onSelected: (value) => setState(() {
+              onSelected: (value) {
                 if (value is _SortBy) {
-                  _sortBy = value;
+                  final nextSortAsc = switch (value) {
+                    _SortBy.mostUsed => false,
+                    _SortBy.nextDose => true,
+                    _ => _sortAsc,
+                  };
+                  _saveSort(sortBy: value, sortAsc: nextSortAsc);
                 } else if (value == 'toggle_dir') {
-                  _sortAsc = !_sortAsc;
+                  _saveSort(sortAsc: !_sortAsc);
                 }
-              }),
+              },
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: _SortBy.name,
                   child: Text('Sort by name'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.nextDose,
+                  child: Text('Sort by next dose'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.mostUsed,
+                  child: Text('Sort by most used'),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: _SortBy.manufacturer,
+                  child: Text('Sort by manufacturer'),
+                ),
+                const PopupMenuItem(
+                  value: _SortBy.form,
+                  child: Text('Sort by form'),
                 ),
                 const PopupMenuItem(
                   value: _SortBy.stock,
@@ -313,8 +512,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   value: 'toggle_dir',
                   child: Row(
                     children: [
-                      Icon(_sortAsc ? Icons.arrow_upward : Icons.arrow_downward, size: 18),
-                      const SizedBox(width: 8),
+                      Icon(
+                        _sortAsc ? Icons.arrow_upward : Icons.arrow_downward,
+                        size: kIconSizeSmall,
+                      ),
+                      const SizedBox(width: kSpacingS),
                       Text(_sortAsc ? 'Ascending' : 'Descending'),
                     ],
                   ),
@@ -328,14 +530,51 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
   List<Medication> _getFilteredAndSortedMedications(
     List<Medication> medications,
+    {required List<Schedule> schedules}
   ) {
     var items = List<Medication>.from(medications);
 
+    final nextDoseByMedId = <String, DateTime>{};
+    final scheduledDoses7dByMedId = <String, int>{};
+    if (_sortBy == _SortBy.nextDose || _sortBy == _SortBy.mostUsed) {
+      final now = DateTime.now();
+      final horizonEnd = now.add(const Duration(days: 30));
+      final usageWindowEnd = now.add(const Duration(days: 7));
+
+      for (final s in schedules) {
+        if (!s.isActive) continue;
+        final medId = s.medicationId;
+        if (medId == null) continue;
+
+        final occurrences = ScheduleOccurrenceService.occurrencesInRange(
+          s,
+          now,
+          horizonEnd,
+        );
+        if (occurrences.isEmpty) continue;
+
+        final nextOccurrence = occurrences.first;
+        final existingNext = nextDoseByMedId[medId];
+        if (existingNext == null || nextOccurrence.isBefore(existingNext)) {
+          nextDoseByMedId[medId] = nextOccurrence;
+        }
+
+        var count7d = 0;
+        for (final dt in occurrences) {
+          if (dt.isAfter(usageWindowEnd)) break;
+          count7d++;
+        }
+        if (count7d > 0) {
+          scheduledDoses7dByMedId[medId] =
+              (scheduledDoses7dByMedId[medId] ?? 0) + count7d;
+        }
+      }
+    }
+
     // Apply search filter
     if (_query.isNotEmpty) {
-      items = items
-          .where((m) => m.name.toLowerCase().contains(_query.toLowerCase()))
-          .toList();
+      final qLower = _query.toLowerCase();
+      items = items.where((m) => _matchesSearchQuery(m, qLower)).toList();
     }
 
     // Apply category filter
@@ -350,216 +589,328 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   m.stockValue <= (m.lowStockThreshold ?? 0),
             )
             .toList();
-        break;
       case _FilterBy.expiringSoon:
         final now = DateTime.now();
         final soon = now.add(const Duration(days: 30));
-        items = items
-            .where((m) => m.expiry != null && m.expiry!.isBefore(soon))
-            .toList();
-        break;
+        items = items.where((m) {
+          final exp = _effectiveExpiry(m);
+          return exp != null && exp.isBefore(soon);
+        }).toList();
       case _FilterBy.refrigerated:
-        items = items.where((m) => m.requiresRefrigeration == true).toList();
-        break;
+        items = items.where(_isRefrigerated).toList();
+      case _FilterBy.freezer:
+        items = items.where(_isFrozen).toList();
+      case _FilterBy.lightSensitive:
+        items = items.where(_isLightSensitive).toList();
+      case _FilterBy.formTablet:
+        items = items.where((m) => m.form == MedicationForm.tablet).toList();
+      case _FilterBy.formCapsule:
+        items = items.where((m) => m.form == MedicationForm.capsule).toList();
+      case _FilterBy.formPrefilledSyringe:
+        items = items
+            .where((m) => m.form == MedicationForm.prefilledSyringe)
+            .toList();
+      case _FilterBy.formSingleDoseVial:
+        items = items
+            .where((m) => m.form == MedicationForm.singleDoseVial)
+            .toList();
+      case _FilterBy.formMultiDoseVial:
+        items = items
+            .where((m) => m.form == MedicationForm.multiDoseVial)
+            .toList();
     }
 
     // Apply sorting
     int dir(int v) => _sortAsc ? v : -v;
-    switch (_sortBy) {
-      case _SortBy.name:
-        items.sort((a, b) => dir(a.name.compareTo(b.name)));
-        break;
-      case _SortBy.stock:
-        items.sort((a, b) => dir(a.stockValue.compareTo(b.stockValue)));
-        break;
-      case _SortBy.strength:
-        items.sort((a, b) => dir(a.strengthValue.compareTo(b.strengthValue)));
-        break;
-      case _SortBy.expiry:
-        items.sort((a, b) {
-          if (a.expiry == null && b.expiry == null) return 0;
-          if (a.expiry == null) return dir(1);
-          if (b.expiry == null) return dir(-1);
-          return dir(a.expiry!.compareTo(b.expiry!));
-        });
-        break;
+
+    int compareBySelectedSort(Medication a, Medication b) {
+      switch (_sortBy) {
+        case _SortBy.name:
+          return dir(a.name.compareTo(b.name));
+        case _SortBy.nextDose:
+          final an = nextDoseByMedId[a.id];
+          final bn = nextDoseByMedId[b.id];
+          if (an == null && bn == null) return 0;
+          if (an == null) return dir(1);
+          if (bn == null) return dir(-1);
+          return dir(an.compareTo(bn));
+        case _SortBy.mostUsed:
+          final ac = scheduledDoses7dByMedId[a.id] ?? 0;
+          final bc = scheduledDoses7dByMedId[b.id] ?? 0;
+          return dir(ac.compareTo(bc));
+        case _SortBy.manufacturer:
+          final am = (a.manufacturer ?? '').trim();
+          final bm = (b.manufacturer ?? '').trim();
+          final aEmpty = am.isEmpty;
+          final bEmpty = bm.isEmpty;
+          if (aEmpty != bEmpty) {
+            return aEmpty ? dir(1) : dir(-1);
+          }
+          return dir(am.compareTo(bm));
+        case _SortBy.form:
+          final byForm = dir(a.form.index.compareTo(b.form.index));
+          if (byForm != 0) return byForm;
+          return dir(a.name.compareTo(b.name));
+        case _SortBy.stock:
+          return dir(a.stockValue.compareTo(b.stockValue));
+        case _SortBy.strength:
+          return dir(a.strengthValue.compareTo(b.strengthValue));
+        case _SortBy.expiry:
+          final ae = _effectiveExpiry(a);
+          final be = _effectiveExpiry(b);
+          if (ae == null && be == null) return 0;
+          if (ae == null) return dir(1);
+          if (be == null) return dir(-1);
+          return dir(ae.compareTo(be));
+      }
     }
+
+    items.sort((a, b) {
+      if (_query.isNotEmpty) {
+        final qLower = _query.toLowerCase();
+        final ak = _searchRelevanceKey(a, qLower);
+        final bk = _searchRelevanceKey(b, qLower);
+        final byField = ak.fieldPriority.compareTo(bk.fieldPriority);
+        if (byField != 0) return byField;
+        final byStartsWith = ak.startsWithPriority.compareTo(
+          bk.startsWithPriority,
+        );
+        if (byStartsWith != 0) return byStartsWith;
+        final byIndex = ak.indexPriority.compareTo(bk.indexPriority);
+        if (byIndex != 0) return byIndex;
+      }
+      final bySelectedSort = compareBySelectedSort(a, b);
+      if (bySelectedSort != 0) return bySelectedSort;
+      return a.name.compareTo(b.name);
+    });
 
     return items;
   }
 
-  IconData _getViewIcon(_MedView view) {
-    switch (view) {
-      case _MedView.list:
-        return Icons.view_list;
-      case _MedView.compact:
-        return Icons.view_comfy_alt;
-      case _MedView.large:
-        return Icons.view_comfortable;
-    }
-  }
-
-  // Icon per medication form for list tiles
-  IconData _iconForForm(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return Icons.add_circle;
-      case MedicationForm.capsule:
-        return Icons.bubble_chart;
-      case MedicationForm.injectionPreFilledSyringe:
-        return Icons.colorize;
-      case MedicationForm.injectionSingleDoseVial:
-        return Icons.local_drink;
-      case MedicationForm.injectionMultiDoseVial:
-        return Icons.addchart;
-    }
-  }
-
-  Future<void> _cycleView() async {
-    final order = [_MedView.large, _MedView.compact, _MedView.list];
-    final idx = order.indexOf(_view);
-    final next = order[(idx + 1) % order.length];
-    await _saveView(next);
-  }
-
   // Helpers for list view formatting (duplicated from card helpers)
-  String _unitLabel(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'units';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'units/mL';
-    }
-  }
-
-  String _formLabelPlural(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablets';
-      case MedicationForm.capsule:
-        return 'Capsules';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'Pre-Filled Syringes';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'Single Dose Vials';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'Multi Dose Vials';
-    }
-  }
-
-  String _stockStatusShortTextFor(Medication m) {
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      return '$current/$total ${_stockUnitLabel(m.stockUnit)}';
-    }
-    return '${fmt2(m.stockValue)} ${_stockUnitLabel(m.stockUnit)}';
-  }
-
-  String _stockUnitLabel(StockUnit unit) {
-    switch (unit) {
-      case StockUnit.tablets:
-        return 'tablets';
-      case StockUnit.capsules:
-        return 'capsules';
-      case StockUnit.preFilledSyringes:
-        return 'syringes';
-      case StockUnit.singleDoseVials:
-        return 'vials';
-      case StockUnit.multiDoseVials:
-        return 'vials';
-      case StockUnit.mcg:
-        return 'mcg';
-      case StockUnit.mg:
-        return 'mg';
-      case StockUnit.g:
-        return 'g';
-    }
-  }
-
-  String _formatDateDdMmYy(DateTime d) => DateFormat('dd/MM/yy').format(d);
   String _formatDateDdMm(DateTime d) => DateFormat('dd/MM').format(d);
 
-  Color _stockStatusColorFor(BuildContext context, Medication m) {
-    final theme = Theme.of(context);
-    final baseline = m.lowStockThreshold;
-    if (baseline != null && baseline > 0) {
-      final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
-      if (pct <= 0.2) return theme.colorScheme.error;
-      if (pct <= 0.5) return Colors.orange;
-      return theme.colorScheme.primary;
-    }
-    if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
-      return theme.colorScheme.error;
-    }
-    return theme.colorScheme.onSurface;
+  TextSpan _stockStatusTextSpanFor(
+    BuildContext context,
+    Medication m, {
+    TextStyle? baseStyle,
+  }) {
+    return _MedicationStockStatusText.textSpanFor(
+      context,
+      m,
+      baseStyle: baseStyle,
+    );
   }
 
-  TextSpan _stockStatusTextSpanFor(BuildContext context, Medication m) {
-    final theme = Theme.of(context);
-    final baseStyle = theme.textTheme.bodySmall?.copyWith(
-      fontWeight: FontWeight.w600,
-      color: theme.colorScheme.onSurface,
-    );
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      final colored = _stockStatusColorFor(context, m);
-      return TextSpan(
-        style: baseStyle,
-        children: [
-          TextSpan(
-            text: '$current',
-            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+  DateTime _effectiveCreatedAtForExpiry(Medication m, DateTime expiry) {
+    if (m.reconstitutedVialExpiry == expiry && m.reconstitutedAt != null) {
+      return m.reconstitutedAt!;
+    }
+    return m.createdAt;
+  }
+
+  Widget? _buildMedicationStatusBadgesRow(BuildContext context, Medication m) {
+    if (!ExperimentalUiSettings.value.value.showMedicationListStatusBadges) {
+      return null;
+    }
+
+    final cs = Theme.of(context).colorScheme;
+    final pills = <Widget>[];
+
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    if (stockInfo.current <= 0) {
+      pills.add(
+        StatusPill(
+          label: 'Empty',
+          color: cs.error,
+          icon: Icons.inventory_2_outlined,
+        ),
+      );
+    } else if (stockInfo.percentage <= (kStockWarningRemainingRatio * 100)) {
+      pills.add(
+        StatusPill(
+          label: 'Low stock',
+          color: stockStatusColorFromPercentage(
+            context,
+            percentage: stockInfo.percentage,
           ),
-          TextSpan(text: '/$total ${_stockUnitLabel(m.stockUnit)}'),
-        ],
+          icon: Icons.inventory_2_outlined,
+        ),
       );
     }
-    return TextSpan(
-      style: baseStyle,
-      children: [
-        TextSpan(
-          text: fmt2(m.stockValue),
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: _stockStatusColorFor(context, m),
+
+    final effectiveExpiry = _effectiveExpiry(m);
+    if (effectiveExpiry != null) {
+      final createdAt = _effectiveCreatedAtForExpiry(m, effectiveExpiry);
+      final now = DateTime.now();
+      if (!effectiveExpiry.isAfter(now)) {
+        pills.add(
+          StatusPill(
+            label: 'Expired',
+            color: cs.error,
+            icon: Icons.event_busy,
           ),
+        );
+      } else {
+        final ratio = expiryRemainingRatio(
+          createdAt: createdAt,
+          expiry: effectiveExpiry,
+          now: now,
+        );
+        if (ratio <= kExpiryWarningRemainingRatio) {
+          pills.add(
+            StatusPill(
+              label: ratio <= kExpiryCriticalRemainingRatio
+                  ? 'Expiring'
+                  : 'Soon',
+              color: expiryStatusColor(
+                context,
+                createdAt: createdAt,
+                expiry: effectiveExpiry,
+                now: now,
+              ),
+              icon: Icons.event,
+            ),
+          );
+        }
+      }
+    }
+
+    if (_isFrozen(m)) {
+      pills.add(
+        StatusPill(
+          label: 'Freezer',
+          color: cs.secondary,
+          icon: Icons.severe_cold,
         ),
-        TextSpan(text: ' ${_stockUnitLabel(m.stockUnit)}'),
-      ],
+      );
+    } else if (_isRefrigerated(m)) {
+      pills.add(
+        StatusPill(
+          label: 'Fridge',
+          color: cs.primary,
+          icon: Icons.ac_unit,
+        ),
+      );
+    }
+
+    if (_isLightSensitive(m)) {
+      pills.add(
+        StatusPill(
+          label: 'Light',
+          color: cs.tertiary,
+          icon: Icons.wb_sunny_outlined,
+        ),
+      );
+    }
+
+    if (pills.isEmpty) return null;
+    return Wrap(
+      spacing: kSpacingXXS,
+      runSpacing: kSpacingXXS,
+      children: pills,
     );
   }
 
-  Widget _buildMedList(BuildContext context, List<Medication> items) {
+  Widget _buildCompactListRow(BuildContext context, Medication m) {
+    final cs = Theme.of(context).colorScheme;
+
+    final strengthLabel =
+        '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
+        '${MedicationDisplayHelpers.formLabel(m.form, plural: true)}';
+    final manufacturer = (m.manufacturer ?? '').trim();
+    final detailLabel = manufacturer.isEmpty
+        ? strengthLabel
+        : '$manufacturer · $strengthLabel';
+
+    final badges = _buildMedicationStatusBadgesRow(context, m);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.push('/medications/${m.id}'),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingS,
+            vertical: kSpacingXS,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      m.name,
+                      style: cardTitleStyle(context)?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      detailLabel,
+                      style: helperTextStyle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (badges != null) ...[
+                      const SizedBox(height: kSpacingXXS),
+                      badges,
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RichText(
+                    text: _stockStatusTextSpanFor(
+                      context,
+                      m,
+                      baseStyle: helperTextStyle(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                  ),
+                  if (m.expiry != null) ...[
+                    const SizedBox(height: kSpacingXS),
+                    Text(
+                      _formatDateDdMm(m.expiry!),
+                      style: smallHelperTextStyle(
+                        context,
+                        color: expiryStatusColor(
+                          context,
+                          createdAt: m.createdAt,
+                          expiry: m.expiry!,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMedList(
+    BuildContext context,
+    List<Medication> items,
+    List<Schedule> schedules,
+  ) {
     switch (_view) {
       case _MedView.list:
         return ListView.separated(
@@ -569,107 +920,104 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           separatorBuilder: (_, __) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final m = items[index];
-return ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
-              title: RichText(
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  text: m.name,
-style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  children: [
-                    if (m.manufacturer?.isNotEmpty == true)
-                      TextSpan(
-                        text: '  •  ${m.manufacturer!}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${fmt2(m.strengthValue)} ${_unitLabel(m.strengthUnit)} ${_formLabelPlural(m.form)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: kTextLightGrey(context),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RichText(
-                          text: _stockStatusTextSpanFor(context, m),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (m.expiry != null)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Text(
-                            _formatDateDdMm(m.expiry!),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color:
-                                      (m.expiry!.isBefore(
-                                        DateTime.now().add(
-                                          const Duration(days: 30),
-                                        ),
-                                      ))
-                                      ? Theme.of(context).colorScheme.error
-                                  : kTextLightGrey(context),
-                                ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-              onTap: () => context.push('/medications/${m.id}'),
-            );
+            return _buildCompactListRow(context, m);
           },
         );
       case _MedView.compact:
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
-          physics: const AlwaysScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 900
-                ? 4
-                : MediaQuery.of(context).size.width > 600
-                ? 3
-                : 2,
-            childAspectRatio:
-                2.1, // shorter tiles to reduce bottom empty space while avoiding overflow
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: items.length,
-          itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
-        );
-      case _MedView.large:
-        // Large view uses summary-style neutral cards.
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) => _MedCard(m: items[i], dense: false),
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (context, i) => _MedCard(m: items[i], dense: true),
+        );
+      case _MedView.large:
+        // Large view uses centralized LargeCard layout.
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 56, 16, 120),
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
+          itemBuilder: (context, i) =>
+              _MedLargeCard(m: items[i], schedules: schedules),
         );
     }
+  }
+}
+
+class _MedicationStockStatusText {
+  static Color colorFor(BuildContext context, Medication m) {
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    return stockStatusColorFromPercentage(
+      context,
+      percentage: stockInfo.percentage,
+    );
+  }
+
+  static TextSpan textSpanFor(
+    BuildContext context,
+    Medication m, {
+    TextStyle? baseStyle,
+  }) {
+    final theme = Theme.of(context);
+    final resolvedBaseStyle = (baseStyle ?? helperTextStyle(context))?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+    );
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+
+    if (m.form == MedicationForm.multiDoseVial &&
+        m.containerVolumeMl != null &&
+        m.containerVolumeMl! > 0) {
+      final totalMl = m.containerVolumeMl!.toDouble();
+      final currentRaw = (m.activeVialVolume ?? totalMl).toDouble();
+      final currentMl = currentRaw.clamp(0.0, totalMl);
+      final colored = colorFor(context, m);
+
+      return TextSpan(
+        style: resolvedBaseStyle,
+        children: [
+          TextSpan(
+            text: fmt2(currentMl),
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(text: '/${fmt2(totalMl)} mL of vial'),
+        ],
+      );
+    }
+
+    if (stockInfo.isCountUnit) {
+      final colored = colorFor(context, m);
+      return TextSpan(
+        style: resolvedBaseStyle,
+        children: [
+          TextSpan(
+            text: '${stockInfo.current.floor()}',
+            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
+          ),
+          TextSpan(
+            text:
+                '/${stockInfo.total.floor()} ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
+          ),
+        ],
+      );
+    }
+
+    return TextSpan(
+      style: resolvedBaseStyle,
+      children: [
+        TextSpan(
+          text: fmt2(m.stockValue),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: colorFor(context, m),
+          ),
+        ),
+        TextSpan(
+          text: ' ${MedicationDisplayHelpers.stockUnitLabel(m.stockUnit)}',
+        ),
+      ],
+    );
   }
 }
 
@@ -678,503 +1026,473 @@ class _MedCard extends StatelessWidget {
   final Medication m;
   final bool dense;
 
-  TextSpan _stockSpan(BuildContext context) {
-    final theme = Theme.of(context);
-    // Count-based units show current/total unit
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      final colored = _stockStatusColor(Theme.of(context));
-      return TextSpan(
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              height: 1.0,
-              fontSize: 9,
-            ),
-        children: [
-          TextSpan(
-            text: '$current',
-            style: TextStyle(fontWeight: FontWeight.w800, color: colored),
-          ),
-          TextSpan(text: '/$total ${_getStockUnitLabel(m.stockUnit)}'),
-        ],
-      );
+  @override
+  Widget build(BuildContext context) {
+    if (!dense) {
+      return _MedLargeCard(m: m);
     }
-    return TextSpan(
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-            height: 1.0,
-            fontSize: 9,
-          ),
-      children: [
-        TextSpan(
-          text: fmt2(m.stockValue),
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: _stockStatusColor(Theme.of(context)),
-          ),
-        ),
-        TextSpan(text: ' ${_getStockUnitLabel(m.stockUnit)}'),
-      ],
+
+    final cs = Theme.of(context).colorScheme;
+
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    final stockColor = stockStatusColorFromPercentage(
+      context,
+      percentage: stockInfo.percentage,
     );
+
+    final strengthAndFormLabel =
+        '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)} '
+        '${MedicationDisplayHelpers.formLabel(m.form)}';
+
+    return GlassCardSurface(
+      onTap: () => context.push('/medications/${m.id}'),
+      useGradient: false,
+      padding: kCompactCardPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  m.name,
+                  style: cardTitleStyle(
+                    context,
+                  )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (m.manufacturer?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    m.manufacturer!.trim(),
+                    style: helperTextStyle(context),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: kSpacingXS),
+                RichText(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: helperTextStyle(context),
+                    children: [
+                      _MedicationStockStatusText.textSpanFor(
+                        context,
+                        m,
+                        baseStyle: helperTextStyle(context),
+                      ),
+                      TextSpan(text: ' · $strengthAndFormLabel'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: kSpacingS),
+          MiniStockGauge(
+            percentage: stockInfo.percentage,
+            color: stockColor,
+            size: kStandardFieldHeight,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MedLargeCard extends StatelessWidget {
+  const _MedLargeCard({required this.m, this.schedules = const []});
+
+  final Medication m;
+  final List<Schedule> schedules;
+
+  int _totalScheduleCount() {
+    return schedules.where((s) => s.medicationId == m.id).length;
+  }
+
+  int _activeScheduleCount() {
+    return schedules.where((s) => s.medicationId == m.id && s.active).length;
+  }
+
+  int _pausedScheduleCount() {
+    return schedules.where((s) => s.medicationId == m.id && !s.active).length;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!dense) {
-      return GestureDetector(
-        onTap: () => context.push('/medications/${m.id}'),
-        child: SummaryHeaderCard.fromMedication(m, neutral: true, outlined: true),
-      );
+    final footer = _buildFooter(context);
+    return LargeCard(
+      onTap: () => context.push('/medications/${m.id}'),
+      dense: true,
+      leading: _buildLeading(context),
+      trailing: _buildTrailing(context),
+      footer: footer,
+    );
+  }
+
+  List<IconData> _storageConditionIconsFor({
+    required bool requiresFreezer,
+    required bool requiresRefrigeration,
+    required bool lightSensitive,
+  }) {
+    final icons = <IconData>[];
+    if (requiresFreezer) {
+      icons.add(Icons.severe_cold);
+    }
+    if (requiresRefrigeration) {
+      icons.add(Icons.ac_unit);
+    }
+    if (lightSensitive) {
+      icons.add(Icons.dark_mode);
+    }
+    if (icons.isEmpty) {
+      icons.add(Icons.thermostat);
     }
 
-    // Fallback: keep existing dense implementation
-    final theme = Theme.of(context);
-    final isLowStock =
-        m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0);
-    final isExpiringSoon =
-        m.expiry != null &&
-        m.expiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
+    // Cap at 3 icons to allow for more info.
+    return icons.take(3).toList();
+  }
 
-    return Container(
-      decoration: softWhiteCardDecoration(context),
-      child: InkWell(
-        onTap: () => context.push('/medications/${m.id}'),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Column(
+  List<IconData> _combinedStorageConditionIcons() {
+    return _storageConditionIconsFor(
+      requiresFreezer:
+          m.activeVialRequiresFreezer || m.backupVialsRequiresFreezer,
+      requiresRefrigeration:
+          m.requiresRefrigeration == true ||
+          m.activeVialRequiresRefrigeration ||
+          m.backupVialsRequiresRefrigeration,
+      lightSensitive: m.activeVialLightSensitive || m.backupVialsLightSensitive,
+    );
+  }
+
+  List<IconData> _activeVialStorageConditionIcons() {
+    return _storageConditionIconsFor(
+      requiresFreezer: m.activeVialRequiresFreezer,
+      requiresRefrigeration: m.activeVialRequiresRefrigeration,
+      lightSensitive: m.activeVialLightSensitive,
+    );
+  }
+
+  List<IconData> _sealedVialsStorageConditionIcons() {
+    return _storageConditionIconsFor(
+      requiresFreezer: m.backupVialsRequiresFreezer,
+      requiresRefrigeration: m.backupVialsRequiresRefrigeration,
+      lightSensitive: m.backupVialsLightSensitive,
+    );
+  }
+
+  String? _cleanText(String? value) {
+    final v = value?.trim();
+    if (v == null || v.isEmpty) return null;
+    return v;
+  }
+
+  String? _pickLocation(String? primary, String? fallback) {
+    return _cleanText(primary) ?? _cleanText(fallback);
+  }
+
+  TextSpan _mdvRemainingMlSpan(BuildContext context) {
+    final theme = Theme.of(context);
+    final colored = _MedicationStockStatusText.colorFor(context, m);
+    final resolvedBaseStyle = microHelperTextStyle(context)?.copyWith(
+      fontWeight: kFontWeightSemiBold,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+    );
+
+    final totalMl = (m.containerVolumeMl ?? 0).toDouble();
+    final currentRaw = (m.activeVialVolume ?? totalMl).toDouble();
+    final currentMl = totalMl > 0 ? currentRaw.clamp(0.0, totalMl) : 0.0;
+
+    if (totalMl <= 0) {
+      return TextSpan(style: resolvedBaseStyle, text: '');
+    }
+
+    return TextSpan(
+      style: resolvedBaseStyle,
+      children: [
+        TextSpan(
+          text: fmt2(currentMl),
+          style: TextStyle(fontWeight: kFontWeightExtraBold, color: colored),
+        ),
+        TextSpan(text: '/${fmt2(totalMl)} mL'),
+      ],
+    );
+  }
+
+  TextSpan _mdvRemainingVialsSpan(BuildContext context) {
+    final theme = Theme.of(context);
+    final colored = _MedicationStockStatusText.colorFor(context, m);
+    final resolvedBaseStyle = microHelperTextStyle(context)?.copyWith(
+      fontWeight: kFontWeightSemiBold,
+      color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+    );
+
+    final hasMdvUnit = m.stockUnit == StockUnit.multiDoseVials;
+    final count = hasMdvUnit ? m.stockValue.floor() : null;
+    if (count == null || count <= 0) {
+      return TextSpan(style: resolvedBaseStyle, text: '');
+    }
+
+    final label = count == 1 ? 'vial' : 'vials';
+    return TextSpan(
+      style: resolvedBaseStyle,
+      children: [
+        TextSpan(
+          text: '$count',
+          style: TextStyle(fontWeight: kFontWeightExtraBold, color: colored),
+        ),
+        TextSpan(text: ' $label'),
+      ],
+    );
+  }
+
+  Widget _buildCompactStorageLine(
+    BuildContext context, {
+    required List<IconData> icons,
+    required String label,
+    required String? location,
+    required DateTime? createdAt,
+    required DateTime? expiry,
+    Widget? trailing,
+  }) {
+    return CompactStorageLine(
+      icons: icons,
+      label: label,
+      location: location,
+      createdAt: createdAt,
+      expiry: expiry,
+      trailing: trailing,
+    );
+  }
+
+  Widget _buildStorageInsetSection(
+    BuildContext context, {
+    required List<IconData> activeIcons,
+    required List<IconData> sealedIcons,
+    required List<IconData> combinedIcons,
+  }) {
+    final activeCreatedAt = m.reconstitutedAt ?? m.createdAt;
+    final activeExpiry = m.reconstitutedVialExpiry;
+
+    final sealedCreatedAt = m.createdAt;
+    final sealedExpiry = m.backupVialsExpiry ?? m.expiry;
+
+    final location = _pickLocation(
+      m.storageLocation,
+      m.activeVialStorageLocation,
+    );
+    final activeLocation = _pickLocation(
+      m.activeVialStorageLocation,
+      m.storageLocation,
+    );
+    final sealedLocation = _pickLocation(
+      m.backupVialsStorageLocation,
+      m.storageLocation,
+    );
+
+    final baseRemainingStyle = microHelperTextStyle(context);
+
+    final body = m.form == MedicationForm.multiDoseVial
+        ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              // Name
-              Text(
-                m.name,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  height: 1.0,
-                  fontSize: 12,
-                  color: theme.colorScheme.primary,
+              _buildCompactStorageLine(
+                context,
+                label: 'Active',
+                icons: activeIcons,
+                location: activeLocation,
+                createdAt: activeCreatedAt,
+                expiry: activeExpiry,
+                trailing: RichText(
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: _mdvRemainingMlSpan(context),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
-              // Expiry (trailing) without chip
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (m.expiry != null)
-                    Text(
-                      _formatDateDayMonth(m.expiry!),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isExpiringSoon
-                            ? theme.colorScheme.error
-                            : theme.colorScheme.onSurfaceVariant,
-                        height: 1.0,
-                        fontSize: 9,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              // Strength
-              Text(
-                '${fmt2(m.strengthValue)} ${_getUnitLabel(m.strengthUnit)}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.0,
+              const SizedBox(height: kSpacingXS),
+              _buildCompactStorageLine(
+                context,
+                label: 'Sealed',
+                icons: sealedIcons,
+                location: sealedLocation,
+                createdAt: sealedCreatedAt,
+                expiry: sealedExpiry,
+                trailing: RichText(
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: _mdvRemainingVialsSpan(context),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 2),
-              // Stock
-              RichText(
-                text: _stockSpan(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            ],
+          )
+        : _buildCompactStorageLine(
+            context,
+            label: 'Storage',
+            icons: combinedIcons,
+            location: location,
+            createdAt: m.createdAt,
+            expiry: m.expiry,
+            trailing: RichText(
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              text: _MedicationStockStatusText.textSpanFor(
+                context,
+                m,
+                baseStyle: baseRemainingStyle,
+              ),
+            ),
+          );
+
+    // Intentionally borderless/compact: keep storage details inline without an inset card.
+    return body;
+  }
+
+  Widget _buildLeading(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final activeScheduleCount = _activeScheduleCount();
+    final pausedScheduleCount = _pausedScheduleCount();
+    final totalScheduleCount = _totalScheduleCount();
+    final strengthQuantityLabel =
+        '${fmt2(m.strengthValue)} ${MedicationDisplayHelpers.unitLabel(m.strengthUnit)}';
+
+    final hasActiveSchedules = activeScheduleCount > 0;
+    final hasPausedSchedules = !hasActiveSchedules && pausedScheduleCount > 0;
+    final scheduleIconColor = hasActiveSchedules
+        ? cs.primary
+        : hasPausedSchedules
+        ? cs.onSurfaceVariant.withValues(alpha: kOpacityMedium)
+        : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+    final scheduleTextColor = hasActiveSchedules
+        ? cs.primary
+        : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+
+    final scheduleLabel = hasActiveSchedules
+        ? (activeScheduleCount == 1
+              ? '1 active schedule'
+              : '$activeScheduleCount active schedules')
+        : hasPausedSchedules
+        ? (pausedScheduleCount == 1
+              ? '1 paused schedule'
+              : '$pausedScheduleCount paused schedules')
+        : (totalScheduleCount == 0 ? 'No schedules' : '0 active schedules');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          m.name,
+          style: cardTitleStyle(
+            context,
+          )?.copyWith(fontWeight: FontWeight.w800, color: cs.primary),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingS),
+        if (m.manufacturer != null && m.manufacturer!.isNotEmpty) ...[
+          Text(
+            m.manufacturer!,
+            style: smallHelperTextStyle(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: kSpacingXS),
+        ],
+        RichText(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            style: bodyTextStyle(context),
+            children: [
+              TextSpan(
+                text: strengthQuantityLabel,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              TextSpan(
+                text:
+                    ' ${MedicationDisplayHelpers.formLabel(m.form, plural: true)}',
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  String _getFormLabel(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablet';
-      case MedicationForm.capsule:
-        return 'Capsule';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'Pre-Filled Syringe';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'Single Dose Vial';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'Multi Dose Vial';
-    }
-  }
-
-  // Plural label for strength line
-  String _getFormLabelPlural(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tablets';
-      case MedicationForm.capsule:
-        return 'Capsules';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'Pre-Filled Syringes';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'Single Dose Vials';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'Multi Dose Vials';
-    }
-  }
-
-  // Abbreviated form label for dense tiles
-  String _getFormAbbr(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return 'Tab';
-      case MedicationForm.capsule:
-        return 'Cap';
-      case MedicationForm.injectionPreFilledSyringe:
-        return 'PFS';
-      case MedicationForm.injectionSingleDoseVial:
-        return 'SDV';
-      case MedicationForm.injectionMultiDoseVial:
-        return 'MDV';
-    }
-  }
-
-  // Icon per medication form
-  IconData _getFormIcon(MedicationForm form) {
-    switch (form) {
-      case MedicationForm.tablet:
-        return Icons.add_circle;
-      case MedicationForm.capsule:
-        return MdiIcons.pill;
-      case MedicationForm.injectionPreFilledSyringe:
-        return Icons.colorize;
-      case MedicationForm.injectionSingleDoseVial:
-        return Icons.local_drink;
-      case MedicationForm.injectionMultiDoseVial:
-        return Icons.addchart;
-    }
-  }
-
-  String _getUnitLabel(Unit unit) {
-    switch (unit) {
-      case Unit.mcg:
-        return 'mcg';
-      case Unit.mg:
-        return 'mg';
-      case Unit.g:
-        return 'g';
-      case Unit.units:
-        return 'units';
-      case Unit.mcgPerMl:
-        return 'mcg/mL';
-      case Unit.mgPerMl:
-        return 'mg/mL';
-      case Unit.gPerMl:
-        return 'g/mL';
-      case Unit.unitsPerMl:
-        return 'units/mL';
-    }
-  }
-
-  String _getStockUnitLabel(StockUnit unit) {
-    switch (unit) {
-      case StockUnit.tablets:
-        return 'tablets';
-      case StockUnit.capsules:
-        return 'capsules';
-      case StockUnit.preFilledSyringes:
-        return 'syringes';
-      case StockUnit.singleDoseVials:
-        return 'vials';
-      case StockUnit.multiDoseVials:
-        return 'vials';
-      case StockUnit.mcg:
-        return 'mcg';
-      case StockUnit.mg:
-        return 'mg';
-      case StockUnit.g:
-        return 'g';
-    }
-  }
-
-  String _formatExpiryDate(DateTime expiry) {
-    final now = DateTime.now();
-    final difference = expiry.difference(now).inDays;
-    if (difference <= 0) return 'today';
-    if (difference == 1) return 'tomorrow';
-    if (difference <= 7) return 'in $difference days';
-    return '${expiry.month}/${expiry.day}';
-  }
-
-  // Schedule summary single line with actions (all forms)
-  Widget _buildScheduleLine(BuildContext context) {
-    final theme = Theme.of(context);
-    final box = Hive.box<Schedule>('schedules');
-    final linked = box.values
-        .where((s) => s.active && s.medicationId == m.id)
-        .toList(growable: false);
-
-    DateTime? next;
-    DateTime? last;
-    int? daysLeft;
-    int? dosesLeft;
-
-    final now = DateTime.now();
-    // Next within 60 days
-    for (final s in linked) {
-      final times = s.timesOfDay ?? [s.minutesOfDay];
-      for (int d = 0; d < 60; d++) {
-        final date = DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).add(Duration(days: d));
-        final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-            ? (() {
-                final anchor = s.cycleAnchorDate ?? now;
-                final a = DateTime(anchor.year, anchor.month, anchor.day);
-                final d0 = DateTime(date.year, date.month, date.day);
-                final diff = d0.difference(a).inDays;
-                return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-              })()
-            : s.daysOfWeek.contains(date.weekday);
-        if (onDay) {
-          for (final minutes in times) {
-            final dt = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              minutes ~/ 60,
-              minutes % 60,
-            );
-            if (dt.isAfter(now) && (next == null || dt.isBefore(next!)))
-              next = dt;
-          }
-        }
-      }
-    }
-    // Last within previous 60 days
-    for (final s in linked) {
-      final times = s.timesOfDay ?? [s.minutesOfDay];
-      for (int d = 0; d < 60; d++) {
-        final date = DateTime(
-          now.year,
-          now.month,
-          now.day,
-        ).subtract(Duration(days: d));
-        final onDay = s.cycleEveryNDays != null && s.cycleEveryNDays! > 0
-            ? (() {
-                final anchor = s.cycleAnchorDate ?? now;
-                final a = DateTime(anchor.year, anchor.month, anchor.day);
-                final d0 = DateTime(date.year, date.month, date.day);
-                final diff = d0.difference(a).inDays;
-                return diff >= 0 && diff % s.cycleEveryNDays! == 0;
-              })()
-            : s.daysOfWeek.contains(date.weekday);
-        if (onDay) {
-          for (final minutes in times) {
-            final dt = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              minutes ~/ 60,
-              minutes % 60,
-            );
-            if (dt.isBefore(now) && (last == null || dt.isAfter(last!)))
-              last = dt;
-          }
-        }
-      }
-    }
-
-    // Estimate daysLeft
-    if (linked.isNotEmpty) {
-      double occPerWeek = 0;
-      for (final s in linked) {
-        final times = (s.timesOfDay?.isNotEmpty == true)
-            ? s.timesOfDay!.length
-            : 1;
-        if (s.cycleEveryNDays != null && s.cycleEveryNDays! > 0) {
-          occPerWeek += (7 / s.cycleEveryNDays!) * times;
-        } else {
-          occPerWeek += s.daysOfWeek.length * times;
-        }
-      }
-      if (occPerWeek > 0) {
-        final dosePerOcc = 1.0; // heuristic for now (1 unit per occurrence)
-        final dailyUse = (occPerWeek * dosePerOcc) / 7.0;
-        if (dailyUse > 0) {
-          daysLeft = (m.stockValue / dailyUse).floor();
-          if (daysLeft < 1) daysLeft = 1;
-          // For count-based units, estimate doses left ~ current stock
-          final isCountUnit =
-              m.stockUnit == StockUnit.tablets ||
-              m.stockUnit == StockUnit.capsules ||
-              m.stockUnit == StockUnit.preFilledSyringes ||
-              m.stockUnit == StockUnit.singleDoseVials ||
-              m.stockUnit == StockUnit.multiDoseVials;
-          if (isCountUnit) {
-            dosesLeft = m.stockValue.floor();
-          }
-        }
-      }
-    }
-
-    String fmtWhen(DateTime dt) {
-      final isToday =
-          dt.year == now.year && dt.month == now.month && dt.day == now.day;
-      final time = DateFormat('HH:mm').format(dt);
-      if (isToday) return 'Today $time';
-      final tomorrow = now.add(const Duration(days: 1));
-      final isTomorrow =
-          dt.year == tomorrow.year &&
-          dt.month == tomorrow.month &&
-          dt.day == tomorrow.day;
-      if (isTomorrow) return 'Tomorrow $time';
-      return DateFormat('dd MMM, HH:mm').format(dt);
-    }
-
-    String fmtDur(int d) {
-      if (d < 14) return '$d days';
-      final w = (d / 7).toStringAsFixed(1);
-      return '$w weeks';
-    }
-
-    final lastStr = last != null ? fmtWhen(last!) : '—';
-    final nextStr = next != null ? fmtWhen(next!) : '—';
-    final lastsStr = daysLeft != null ? fmtDur(daysLeft!) : '—';
-
-    final runOutDate = daysLeft != null
-        ? DateFormat('dd MMM').format(now.add(Duration(days: daysLeft!)))
-        : '—';
-    final dosesStr = dosesLeft != null ? '~$dosesLeft left' : '~$lastsStr left';
-    final summaryText = 'Last: $lastStr  •  Next: $nextStr';
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Text(
-        summaryText,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: kTextLightGrey(context),
-                  height: 1.0,
+        const SizedBox(height: kSpacingXS),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.calendar_month_rounded,
+              size: kIconSizeSmall,
+              color: scheduleIconColor,
+            ),
+            const SizedBox(width: kSpacingXS),
+            Expanded(
+              child: Text(
+                scheduleLabel,
+                style: smallHelperTextStyle(
+                  context,
+                  color: scheduleTextColor,
                 ),
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-
-  // Date format helpers (TODO: read from Settings later)
-  String _formatDateDdMmYy(DateTime d) => DateFormat('dd/MM/yy').format(d);
-  String _formatDateDayMonth(DateTime d) => DateFormat('d/M').format(d);
-
-  // Stock status helpers
-  String _stockStatusText() {
-    // For count-based units, express as X out of Y remaining; Y = originally entered amount when available
-    String baseUnit = _getStockUnitLabel(m.stockUnit);
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current; // fallback to current if unknown
-      return '$current/$total $baseUnit remaining';
-    }
-    return '${fmt2(m.stockValue)} $baseUnit remaining';
-  }
-
-  String _stockStatusShortText() {
-    // Shorter form for dense tiles; Y = originally entered amount when available
-    final isCountUnit =
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials ||
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules;
-    if (isCountUnit) {
-      final current = m.stockValue.floor();
-      final total = (m.initialStockValue != null && m.initialStockValue! > 0)
-          ? m.initialStockValue!.ceil()
-          : current;
-      return '$current/$total ${_getStockUnitLabel(m.stockUnit)}';
-    }
-    return '${fmt2(m.stockValue)} ${_getStockUnitLabel(m.stockUnit)}';
-  }
-
-  Color _stockStatusColor(ThemeData theme) {
-    // Color by percentage of baseline when available
-    double? baseline = m.lowStockThreshold;
-    if (baseline != null && baseline > 0) {
-      final pct = (m.stockValue / baseline).clamp(0.0, 1.0);
-      if (pct <= 0.2) return theme.colorScheme.error;
-      if (pct <= 0.5) return Colors.orange;
-      return theme.colorScheme.primary;
-    }
-    // Fall back to lowStock flag
-    if (m.lowStockEnabled && m.stockValue <= (m.lowStockThreshold ?? 0)) {
-      return theme.colorScheme.error;
-    }
-    return theme.colorScheme.onSurface;
-  }
-
-  Future<void> _onTake(BuildContext context) async {
-    final box = Hive.box<Medication>('medications');
-    // Decrement by 1 for count-based units; otherwise decrement by 1.0 generically
-    final isCountUnit =
-        m.stockUnit == StockUnit.tablets ||
-        m.stockUnit == StockUnit.capsules ||
-        m.stockUnit == StockUnit.preFilledSyringes ||
-        m.stockUnit == StockUnit.singleDoseVials ||
-        m.stockUnit == StockUnit.multiDoseVials;
-    final dec = 1.0;
-    final newValue = m.stockValue - dec;
-    final updated = m.copyWith(stockValue: newValue < 0 ? 0 : newValue);
-    await box.put(updated.id, updated);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Recorded dose. Stock: ${newValue < 0 ? 0 : newValue} ${_getStockUnitLabel(m.stockUnit)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
-      ),
+      ],
     );
   }
 
-  void _onDoseAction(
-    BuildContext context,
-    String action,
-    DateTime scheduledAt,
-  ) {
-    // Placeholder: integrate with schedules/logging later
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${action[0].toUpperCase()}${action.substring(1)} dose @ ${DateFormat('dd MMM, HH:mm').format(scheduledAt)}',
-        ),
-      ),
+  Widget _buildTrailing(BuildContext context) {
+    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
+    final pctRounded = stockInfo.percentage.clamp(0, 100).round();
+    final isMdv = m.form == MedicationForm.multiDoseVial;
+    final stockColor = stockStatusColorFromPercentage(
+      context,
+      percentage: stockInfo.percentage,
     );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Single ring for all: shows Active Vial % for MDV, overall stock % for others
+        Align(
+          alignment: Alignment.centerRight,
+          child: StockDonutGauge(
+            percentage: stockInfo.percentage,
+            primaryLabel: '$pctRounded%',
+            size: kStockDonutGaugeSizeCompact,
+            strokeWidth: kStockDonutGaugeStrokeWidth,
+            color: stockColor,
+            textColor: stockColor,
+          ),
+        ),
+        if (!isMdv) const SizedBox(height: kSpacingXS),
+      ],
+    );
+  }
+
+  Widget? _buildFooter(BuildContext context) {
+    final isMdv = m.form == MedicationForm.multiDoseVial;
+
+    final storageSection = _buildStorageInsetSection(
+      context,
+      activeIcons: isMdv
+          ? _activeVialStorageConditionIcons()
+          : const <IconData>[],
+      sealedIcons: isMdv
+          ? _sealedVialsStorageConditionIcons()
+          : const <IconData>[],
+      combinedIcons: _combinedStorageConditionIcons(),
+    );
+
+    return storageSection;
   }
 }

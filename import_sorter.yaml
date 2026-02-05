@@ -1,0 +1,5 @@
+emojis: false
+comments: false
+ignored_files:
+  - \/\/*.g.dart/
+  - \/\/*.freezed.dart/

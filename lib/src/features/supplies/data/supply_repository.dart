@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import '../domain/supply.dart';
-import '../domain/stock_movement.dart';
+
+// Project imports:
+import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
+import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 
 class SupplyRepository {
   static const suppliesBoxName = 'supplies';
