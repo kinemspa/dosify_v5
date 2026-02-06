@@ -10,6 +10,7 @@ class DoseTimingConfig {
   const DoseTimingConfig({
     required this.missedGracePercent,
     required this.overdueReminderPercent,
+    required this.followUpReminderCount,
   });
 
   /// Percentage (0..100) of the time until the next scheduled dose
@@ -28,14 +29,25 @@ class DoseTimingConfig {
   /// Set to 0 to disable.
   final int overdueReminderPercent;
 
+  /// Number of follow-up (overdue) reminders to send.
+  /// 
+  /// - 0 = Off (no follow-up reminders)
+  /// - 1 = Once (one follow-up reminder)
+  /// - 2 = Twice (two follow-up reminders)
+  /// etc.
+  final int followUpReminderCount;
+
   DoseTimingConfig copyWith({
     int? missedGracePercent,
     int? overdueReminderPercent,
+    int? followUpReminderCount,
   }) {
     return DoseTimingConfig(
       missedGracePercent: missedGracePercent ?? this.missedGracePercent,
       overdueReminderPercent:
           overdueReminderPercent ?? this.overdueReminderPercent,
+      followUpReminderCount:
+          followUpReminderCount ?? this.followUpReminderCount,
     );
   }
 }
@@ -47,9 +59,12 @@ class DoseTimingSettings {
       'dose_timing.missed_grace_percent_v1';
   static const String _prefsKeyOverdueReminderPercent =
       'dose_timing.overdue_reminder_percent_v1';
+  static const String _prefsKeyFollowUpReminderCount =
+      'dose_timing.follow_up_reminder_count_v1';
 
   static const int defaultMissedGracePercent = 50;
   static const int defaultOverdueReminderPercent = 50;
+  static const int defaultFollowUpReminderCount = 1;
 
   /// Used when the schedule cannot be resolved or has no upcoming occurrence.
   static const Duration fallbackGraceWindow = Duration(minutes: 60);
@@ -58,6 +73,7 @@ class DoseTimingSettings {
     const DoseTimingConfig(
       missedGracePercent: defaultMissedGracePercent,
       overdueReminderPercent: defaultOverdueReminderPercent,
+      followUpReminderCount: defaultFollowUpReminderCount,
     ),
   );
 
@@ -68,9 +84,12 @@ class DoseTimingSettings {
           prefs.getInt(_prefsKeyMissedGracePercent) ?? defaultMissedGracePercent;
       final overdue = prefs.getInt(_prefsKeyOverdueReminderPercent) ??
           defaultOverdueReminderPercent;
+      final followUpCount = prefs.getInt(_prefsKeyFollowUpReminderCount) ??
+          defaultFollowUpReminderCount;
       value.value = value.value.copyWith(
         missedGracePercent: _clampPercent(missed),
         overdueReminderPercent: _clampPercent(overdue),
+        followUpReminderCount: _clampCount(followUpCount),
       );
     } catch (_) {
       // Best-effort; keep defaults.
@@ -78,6 +97,7 @@ class DoseTimingSettings {
   }
 
   static int _clampPercent(int raw) => raw.clamp(0, 100);
+  static int _clampCount(int raw) => raw.clamp(0, 10);
 
   static Future<void> setMissedGracePercent(int percent) async {
     final next = _clampPercent(percent);
@@ -96,6 +116,17 @@ class DoseTimingSettings {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_prefsKeyOverdueReminderPercent, next);
+    } catch (_) {
+      // Best-effort.
+    }
+  }
+
+  static Future<void> setFollowUpReminderCount(int count) async {
+    final next = _clampCount(count);
+    value.value = value.value.copyWith(followUpReminderCount: next);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_prefsKeyFollowUpReminderCount, next);
     } catch (_) {
       // Best-effort.
     }
@@ -143,6 +174,44 @@ class DoseTimingSettings {
     if (!reminder.isBefore(missed)) return null;
 
     return reminder;
+  }
+
+  /// Computes multiple overdue reminder times based on the follow-up count setting.
+  ///
+  /// Returns a list of reminder times. Empty list if reminders are disabled.
+  static List<DateTime> overdueRemindersAt({
+    required Schedule schedule,
+    required DateTime scheduledTime,
+  }) {
+    final count = value.value.followUpReminderCount;
+    if (count <= 0) return [];
+
+    final overduePct = value.value.overdueReminderPercent;
+    if (overduePct <= 0) return [];
+
+    final missed = missedAt(schedule: schedule, scheduledTime: scheduledTime);
+    if (!missed.isAfter(scheduledTime)) return [];
+
+    final window = missed.difference(scheduledTime);
+    if (window.inSeconds <= 0) return [];
+
+    final reminders = <DateTime>[];
+    
+    // Spread reminders evenly based on count:
+    // - count=1: single reminder at overdueReminderPercent% (e.g., 50%)
+    // - count=2: reminders at 33% and 67% of overdueReminderPercent
+    // - count=3: reminders at 25%, 50%, and 75% of overdueReminderPercent
+    for (var i = 1; i <= count; i++) {
+      final segmentPercent = (overduePct * i / count).round();
+      final seconds = (window.inSeconds * segmentPercent / 100).round();
+      final reminder = scheduledTime.add(Duration(seconds: seconds));
+      
+      if (reminder.isAfter(scheduledTime) && reminder.isBefore(missed)) {
+        reminders.add(reminder);
+      }
+    }
+
+    return reminders;
   }
 
   /// Best-effort helper for status computation when you only have a scheduleId.

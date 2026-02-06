@@ -52,6 +52,7 @@ void main() {
     DoseTimingSettings.value.value = const DoseTimingConfig(
       missedGracePercent: 50,
       overdueReminderPercent: 50,
+      followUpReminderCount: 1,
     );
 
     // Daily schedule at 00:30 (minutesOfDay) with multiple times per day.
@@ -90,6 +91,67 @@ void main() {
     expect(overdueAt, isNotNull);
     expect(overdueAt!.isAfter(scheduledTime), isTrue);
     expect(overdueAt.isBefore(missedAt), isTrue);
+  });
+
+  test('DoseTimingSettings overdueRemindersAt returns correct count', () {
+    // Test with count=0 (off)
+    DoseTimingSettings.value.value = const DoseTimingConfig(
+      missedGracePercent: 50,
+      overdueReminderPercent: 50,
+      followUpReminderCount: 0,
+    );
+
+    final schedule = Schedule(
+      id: 's1',
+      name: 'Dose',
+      medicationName: 'Med',
+      doseValue: 1,
+      doseUnit: 'mg',
+      minutesOfDay: 30,
+      timesOfDay: const [30],
+      daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
+    );
+
+    final scheduledTime = DateTime(2026, 1, 1, 23, 30);
+    var reminders = DoseTimingSettings.overdueRemindersAt(
+      schedule: schedule,
+      scheduledTime: scheduledTime,
+    );
+    expect(reminders, isEmpty);
+
+    // Test with count=1 (once)
+    DoseTimingSettings.value.value = const DoseTimingConfig(
+      missedGracePercent: 50,
+      overdueReminderPercent: 50,
+      followUpReminderCount: 1,
+    );
+    reminders = DoseTimingSettings.overdueRemindersAt(
+      schedule: schedule,
+      scheduledTime: scheduledTime,
+    );
+    expect(reminders.length, equals(1));
+    expect(reminders[0].isAfter(scheduledTime), isTrue);
+
+    // Test with count=2 (twice)
+    DoseTimingSettings.value.value = const DoseTimingConfig(
+      missedGracePercent: 50,
+      overdueReminderPercent: 50,
+      followUpReminderCount: 2,
+    );
+    reminders = DoseTimingSettings.overdueRemindersAt(
+      schedule: schedule,
+      scheduledTime: scheduledTime,
+    );
+    expect(reminders.length, equals(2));
+    expect(reminders[0].isAfter(scheduledTime), isTrue);
+    expect(reminders[1].isAfter(reminders[0]), isTrue);
+    
+    final missedAt = DoseTimingSettings.missedAt(
+      schedule: schedule,
+      scheduledTime: scheduledTime,
+    );
+    expect(reminders[0].isBefore(missedAt), isTrue);
+    expect(reminders[1].isBefore(missedAt), isTrue);
   });
 
   test('ScheduleScheduler dose notification id is stable', () {
