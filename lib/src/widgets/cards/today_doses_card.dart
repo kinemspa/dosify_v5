@@ -82,6 +82,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
 
   bool _internalExpanded = true;
   bool _showAll = false;
+  final ScrollController _previewScrollController = ScrollController();
   final Set<String> _dismissedOccurrenceIds = <String>{};
 
   bool get _expanded => widget.isExpanded ?? _internalExpanded;
@@ -103,6 +104,12 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
   void initState() {
     super.initState();
     unawaited(_restoreDismissed());
+  }
+
+  @override
+  void dispose() {
+    _previewScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _restoreDismissed() async {
@@ -140,7 +147,8 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       String strengthLabel,
       String metrics,
     })
-  > _resolveTodayDoses(
+  >
+  _resolveTodayDoses(
     Iterable<Schedule> schedules,
     Map<String, Medication> medsById,
     Map<String, DoseLog> logsById,
@@ -244,7 +252,9 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
         break;
       case TodayDosesScopeType.medication:
         schedules = schedules.where(
-          (s) => s.medicationId != null && s.medicationId == widget.scope.medicationId,
+          (s) =>
+              s.medicationId != null &&
+              s.medicationId == widget.scope.medicationId,
         );
       case TodayDosesScopeType.schedule:
         schedules = schedules.where((s) => s.id == widget.scope.scheduleId);
@@ -254,20 +264,19 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       for (final m in medBox.values) m.id: m,
     };
 
-    final logsById = <String, DoseLog>{
-      for (final l in logBox.values) l.id: l,
-    };
+    final logsById = <String, DoseLog>{for (final l in logBox.values) l.id: l};
 
     final items = _resolveTodayDoses(schedules, medsById, logsById);
 
-    final visibleItems =
-        items.where((item) {
+    final visibleItems = items
+        .where((item) {
           final id = DoseLogIds.occurrenceId(
             scheduleId: item.dose.scheduleId,
             scheduledTime: item.dose.scheduledTime,
           );
           return !_dismissedOccurrenceIds.contains(id);
-        }).toList(growable: false);
+        })
+        .toList(growable: false);
 
     final hiddenCount = items.length - visibleItems.length;
     final hasMoreThanPreview = visibleItems.length > kHomeTodayMaxPreviewItems;
@@ -281,7 +290,8 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
         Medication medication,
         String strengthLabel,
         String metrics,
-      }) item,
+      })
+      item,
     ) {
       final occurrenceId = DoseLogIds.occurrenceId(
         scheduleId: item.dose.scheduleId,
@@ -415,11 +425,14 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
                 maxHeight: kHomeTodayDosePreviewListMaxHeight,
               ),
               child: Scrollbar(
+                controller: _previewScrollController,
                 thumbVisibility: true,
                 child: ListView.separated(
+                  controller: _previewScrollController,
                   padding: kNoPadding,
                   itemCount: visibleItems.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: kSpacingS),
                   itemBuilder: (context, i) =>
                       buildDoseRow(context, visibleItems[i]),
                 ),
