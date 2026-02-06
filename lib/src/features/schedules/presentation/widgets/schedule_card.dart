@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_serv
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
+import 'package:dosifi_v5/src/widgets/next_dose_row.dart';
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard({
@@ -37,9 +38,13 @@ class ScheduleCard extends StatelessWidget {
 
     if (dense) {
       // Compact Card (Concept 9)
-      final firstMinutes =
-          ScheduleOccurrenceService.normalizedTimesOfDay(s).first;
-      final timeLabel = DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, firstMinutes ~/ 60, firstMinutes % 60));
+      final firstMinutes = ScheduleOccurrenceService.normalizedTimesOfDay(
+        s,
+      ).first;
+      final timeLabel = DateTimeFormatter.formatTime(
+        context,
+        DateTime(0, 1, 1, firstMinutes ~/ 60, firstMinutes % 60),
+      );
 
       return GlassCardSurface(
         onTap: () =>
@@ -118,10 +123,7 @@ class ScheduleCard extends StatelessWidget {
                       final success = await applyStockDecrement(context, s);
 
                       if (success && context.mounted) {
-                        showAppSnackBar(
-                          context,
-                          'Marked as taken: ${s.name}',
-                        );
+                        showAppSnackBar(context, 'Marked as taken: ${s.name}');
                       }
                     },
                   ),
@@ -188,7 +190,7 @@ class ScheduleCard extends StatelessWidget {
           const SizedBox(height: kFieldSpacing),
           Text(
             '${_doseLine(s)} · ${_timesLine(context, s)}',
-            style: theme.textTheme.bodySmall,
+            style: helperTextStyle(context),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -199,16 +201,7 @@ class ScheduleCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      next == null
-                          ? 'No upcoming dose'
-                          : 'Next: ${_fmtWhen(context, next)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    NextDoseRow(schedule: s, nextDose: next, dense: true),
                     if (!dense && last != null)
                       Text(
                         'Last: ${_fmtWhen(context, last)}',
@@ -282,7 +275,12 @@ class ScheduleCard extends StatelessWidget {
   String _timesLine(BuildContext context, Schedule s) {
     final ts = ScheduleOccurrenceService.normalizedTimesOfDay(s);
     final label = ts
-        .map((m) => DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, m ~/ 60, m % 60)))
+        .map(
+          (m) => DateTimeFormatter.formatTime(
+            context,
+            DateTime(0, 1, 1, m ~/ 60, m % 60),
+          ),
+        )
         .join(', ');
     if (s.hasCycle && s.cycleEveryNDays != null) {
       final n = s.cycleEveryNDays!;
@@ -419,7 +417,10 @@ class ScheduleCard extends StatelessWidget {
     final next = occ?.dt;
     if (next == null) return;
 
-    final logId = DoseLogIds.occurrenceId(scheduleId: s.id, scheduledTime: next);
+    final logId = DoseLogIds.occurrenceId(
+      scheduleId: s.id,
+      scheduledTime: next,
+    );
     final log = DoseLog(
       id: logId,
       scheduleId: s.id,
@@ -475,7 +476,10 @@ class ScheduleCard extends StatelessWidget {
 
     final snoozeUntil = next.add(const Duration(minutes: 15));
 
-    final logId = DoseLogIds.occurrenceId(scheduleId: s.id, scheduledTime: next);
+    final logId = DoseLogIds.occurrenceId(
+      scheduleId: s.id,
+      scheduledTime: next,
+    );
     final log = DoseLog(
       id: logId,
       scheduleId: s.id,
@@ -557,7 +561,10 @@ class ScheduleCard extends StatelessWidget {
       return;
     }
 
-    final logId = DoseLogIds.occurrenceId(scheduleId: s.id, scheduledTime: next);
+    final logId = DoseLogIds.occurrenceId(
+      scheduleId: s.id,
+      scheduledTime: next,
+    );
     final log = DoseLog(
       id: logId,
       scheduleId: s.id,

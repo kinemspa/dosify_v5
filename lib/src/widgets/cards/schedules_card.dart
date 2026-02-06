@@ -74,9 +74,10 @@ class _SchedulesCardState extends ConsumerState<SchedulesCard> {
     final schedules = scheduleBox.values.where((s) {
       switch (widget.scope.type) {
         case SchedulesCardScopeType.all:
-          return s.medicationId != null;
+          return s.medicationId != null && (s.isActive || s.isPaused);
         case SchedulesCardScopeType.medication:
-          return s.medicationId == widget.scope.medicationId;
+          return s.medicationId == widget.scope.medicationId &&
+              (s.isActive || s.isPaused);
         case SchedulesCardScopeType.schedule:
           return s.id == widget.scope.scheduleId;
       }
