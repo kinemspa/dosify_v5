@@ -130,10 +130,11 @@ void main() {
     testWidgets('expanded state - standard width', (tester) async {
       await tester.pumpWidget(
         _wrapForGolden(
-          const CollapsibleSectionFormCard(
+          CollapsibleSectionFormCard(
             title: 'Collapsible Section',
             isExpanded: true,
-            children: [
+            onExpandedChanged: (_) {},
+            children: const [
               Text('Field 1: Value'),
               SizedBox(height: kSpacingS),
               Text('Field 2: Another Value'),
@@ -155,10 +156,11 @@ void main() {
         (tester) async {
       await tester.pumpWidget(
         _wrapForGolden(
-          const CollapsibleSectionFormCard(
+          CollapsibleSectionFormCard(
             title: 'Collapsible Section',
             isExpanded: false,
-            children: [
+            onExpandedChanged: (_) {},
+            children: const [
               Text('This content should be hidden'),
             ],
           ),
@@ -179,11 +181,12 @@ void main() {
     testWidgets('expanded neutral variant with long title', (tester) async {
       await tester.pumpWidget(
         _wrapForGolden(
-          const CollapsibleSectionFormCard(
+          CollapsibleSectionFormCard(
             title: 'Very Long Section Title That Might Wrap or Ellipsize',
             isExpanded: true,
             neutral: true,
-            children: [
+            onExpandedChanged: (_) {},
+            children: const [
               Text('Content 1'),
               SizedBox(height: kSpacingS),
               Text('Content 2'),

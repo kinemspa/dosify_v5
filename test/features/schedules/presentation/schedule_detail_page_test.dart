@@ -15,7 +15,7 @@ void main() {
   setUpAll(() async {
     // Initialize Hive with a temporary directory for better test isolation
     final tempDir = await Directory.systemTemp.createTemp('hive_test_');
-    await Hive.init(tempDir.path);
+    Hive.init(tempDir.path);
     
     // Register adapters
     if (!Hive.isAdapterRegistered(1)) {

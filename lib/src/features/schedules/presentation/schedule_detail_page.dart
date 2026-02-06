@@ -976,12 +976,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return '$med - $name';
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
-  }
-
   /// Check if there's already a log for this scheduled time
   DoseLog? _getExistingLog(DateTime scheduledTime) {
     final logs = _doseLogRepo.getByScheduleId(widget.scheduleId);

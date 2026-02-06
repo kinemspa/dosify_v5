@@ -54,7 +54,6 @@ Widget _wrapForGolden(
 Schedule _createTestSchedule({
   bool active = true,
   bool? pausedUntil,
-  DateTime? endAt,
   String name = 'Morning Dose',
 }) {
   return Schedule(

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -742,7 +741,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                         Icons.calendar_today,
                         size: kIconSizeSmall,
                       ),
-                      label: Text(dateFormat.format(selected)),
+                      label: Text(DateTimeFormatter.formatDate(selected)),
                     ),
                   ),
                   const SizedBox(height: kSpacingS),

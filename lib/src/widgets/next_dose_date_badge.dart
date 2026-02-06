@@ -1,7 +1,6 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 enum NextDoseBadgeLabelStyle { standard, tall }
 
