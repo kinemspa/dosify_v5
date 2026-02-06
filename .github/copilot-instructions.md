@@ -169,6 +169,8 @@ For every task (especially UI work), perform this runtime verification workflow:
 
 **GitHub Issues** are the single source of truth for all work requests.
 
+Backlog markdown files are no longer used; do not reference or depend on a `backlog/` folder.
+
 ### When the user reports a bug or requests a change:
 1. **Create a GitHub Issue first** — `gh issue create --title "..." --body "..." --label "..."`.
 2. **Fix it** in code.
