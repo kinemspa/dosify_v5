@@ -45,25 +45,20 @@ class UnifiedStatusBadge extends StatelessWidget {
         ? kSpacingXXS
         : baseHorizontalPadding;
 
-    final row = LayoutBuilder(
-      builder: (context, constraints) {
-        final hasBoundedWidth = constraints.hasBoundedWidth;
-        return Row(
-          mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
-          children: [
-            Icon(icon, size: kIconSizeXXSmall, color: color),
-            const SizedBox(width: kSpacingXS),
-            Flexible(
-              child: Text(
-                label,
-                style: resolvedTextStyle?.copyWith(fontWeight: kFontWeightBold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        );
-      },
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: kIconSizeXXSmall, color: color),
+        const SizedBox(width: kSpacingXS),
+        Flexible(
+          child: Text(
+            label,
+            style: resolvedTextStyle?.copyWith(fontWeight: kFontWeightBold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
 
     final widget = decorate
