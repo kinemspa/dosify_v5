@@ -357,6 +357,12 @@ class SettingsPage extends ConsumerWidget {
               final overdueSubtitle = config.overdueReminderPercent <= 0
                   ? 'Disabled'
                   : '${config.overdueReminderPercent}% of grace window';
+              final followUpSubtitle = switch (config.followUpReminderCount) {
+                0 => 'Off',
+                1 => 'Once',
+                2 => 'Twice',
+                _ => '${config.followUpReminderCount} times',
+              };
 
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -388,6 +394,56 @@ class SettingsPage extends ConsumerWidget {
                       onSave: (v) =>
                           DoseTimingSettings.setOverdueReminderPercent(v),
                     ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.repeat_outlined),
+                    title: const Text('Follow-up reminders'),
+                    subtitle: Text(followUpSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final count = await showModalBottomSheet<int>(
+                        context: context,
+                        builder: (context) {
+                          return SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.block_outlined),
+                                  title: const Text('Off'),
+                                  subtitle: const Text(
+                                    'No follow-up reminders',
+                                  ),
+                                  onTap: () => Navigator.of(context).pop(0),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.looks_one_outlined),
+                                  title: const Text('Once'),
+                                  subtitle: const Text(
+                                    'One follow-up reminder',
+                                  ),
+                                  onTap: () => Navigator.of(context).pop(1),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.looks_two_outlined),
+                                  title: const Text('Twice'),
+                                  subtitle: const Text(
+                                    'Two follow-up reminders',
+                                  ),
+                                  onTap: () => Navigator.of(context).pop(2),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                      if (count != null) {
+                        await DoseTimingSettings.setFollowUpReminderCount(
+                          count,
+                        );
+                      }
+                    },
                   ),
                 ],
               );
