@@ -509,8 +509,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             // Keep the same title-fade behavior without rebuilding the whole page on scroll.
                             Positioned(
                               top: top,
-                              left: 0,
-                              right: 0,
+                              left: kDetailHeaderCollapsedHeight +
+                                  kSpacingS, // Account for back button (48px) + spacing
+                              right: kDetailHeaderCollapsedHeight +
+                                  kSpacingS, // Account for menu button symmetrically
                               height: _kDetailHeaderCollapsedHeight,
                               child: IgnorePointer(
                                 child: Opacity(
@@ -523,6 +525,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             context,
                                             color: onPrimary,
                                           ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ),
