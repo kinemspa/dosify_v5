@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 class NextDoseRow extends StatelessWidget {
@@ -125,7 +126,7 @@ class NextDoseRow extends StatelessWidget {
         ? 'Today'
         : MaterialLocalizations.of(context).formatShortMonthDay(local);
 
-    final timeText = TimeOfDay.fromDateTime(local).format(context);
+    final timeText = DateTimeFormatter.formatTime(context, local);
 
     return '$dateText • $timeText';
   }
@@ -143,7 +144,7 @@ class NextDoseRow extends StatelessWidget {
         ? 'Today'
         : MaterialLocalizations.of(context).formatShortMonthDay(local);
 
-    final timeText = TimeOfDay.fromDateTime(local).format(context);
+    final timeText = DateTimeFormatter.formatTime(context, local);
 
     return '$dateText • $timeText';
   }

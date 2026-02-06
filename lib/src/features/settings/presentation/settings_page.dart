@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 
@@ -202,6 +203,145 @@ class SettingsPage extends ConsumerWidget {
               if (mode != null) {
                 await ref.read(themeModeProvider.notifier).setThemeMode(mode);
               }
+            },
+          ),
+          const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<DateTimeFormatConfig>(
+            valueListenable: DateTimeFormatSettings.value,
+            builder: (context, config, _) {
+              String timeFormatLabel;
+              switch (config.timeFormat) {
+                case TimeFormat.system:
+                  timeFormatLabel = 'System default';
+                  break;
+                case TimeFormat.hour12:
+                  timeFormatLabel = '12-hour (3:45 PM)';
+                  break;
+                case TimeFormat.hour24:
+                  timeFormatLabel = '24-hour (15:45)';
+                  break;
+              }
+
+              String dateFormatLabel;
+              switch (config.dateFormat) {
+                case DateFormat.system:
+                  dateFormatLabel = 'System default';
+                  break;
+                case DateFormat.mdy:
+                  dateFormatLabel = 'MM/DD/YYYY';
+                  break;
+                case DateFormat.dmy:
+                  dateFormatLabel = 'DD/MM/YYYY';
+                  break;
+                case DateFormat.ymd:
+                  dateFormatLabel = 'YYYY-MM-DD';
+                  break;
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.access_time_outlined),
+                    title: const Text('Time format'),
+                    subtitle: Text(timeFormatLabel),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () async {
+                      final format = await showModalBottomSheet<TimeFormat>(
+                        context: context,
+                        builder: (context) {
+                          return SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.phone_android),
+                                  title: const Text('System default'),
+                                  subtitle: const Text(
+                                    'Use device time format',
+                                  ),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(TimeFormat.system),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.schedule),
+                                  title: const Text('12-hour'),
+                                  subtitle: const Text('3:45 PM'),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(TimeFormat.hour12),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.access_time),
+                                  title: const Text('24-hour'),
+                                  subtitle: const Text('15:45'),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(TimeFormat.hour24),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                      if (format != null) {
+                        await DateTimeFormatSettings.setTimeFormat(format);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.calendar_today_outlined),
+                    title: const Text('Date format'),
+                    subtitle: Text(dateFormatLabel),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () async {
+                      final format = await showModalBottomSheet<DateFormat>(
+                        context: context,
+                        builder: (context) {
+                          return SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.phone_android),
+                                  title: const Text('System default'),
+                                  subtitle: const Text(
+                                    'Use device date format',
+                                  ),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(DateFormat.system),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.today),
+                                  title: const Text('MM/DD/YYYY'),
+                                  subtitle: const Text('12/31/2024'),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(DateFormat.mdy),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.today),
+                                  title: const Text('DD/MM/YYYY'),
+                                  subtitle: const Text('31/12/2024'),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(DateFormat.dmy),
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.today),
+                                  title: const Text('YYYY-MM-DD'),
+                                  subtitle: const Text('2024-12-31'),
+                                  onTap: () => Navigator.of(context)
+                                      .pop(DateFormat.ymd),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                      if (format != null) {
+                        await DateTimeFormatSettings.setDateFormat(format);
+                      }
+                    },
+                  ),
+                ],
+              );
             },
           ),
           const SizedBox(height: kSpacingL),
