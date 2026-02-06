@@ -140,6 +140,14 @@ class SectionFormCard extends StatelessWidget {
 ///
 /// This is used for reorderable/collapsible sections (e.g. Home screen cards)
 /// where dragging should only be enabled when all cards are collapsed.
+///
+/// Usage notes:
+/// - For trailing actions, prefer a tight icon button: `constraints: kTightIconButtonConstraints` + `padding: kNoPadding`.
+/// - For reorderable lists, keep the reorder affordance hidden while expanded.
+///   You can do that either externally (like Home's overlay drag handle) or by
+///   passing `leadingCollapsedOnly: true` when the `leading` widget is a drag handle.
+/// - For preview lists that can scroll, show a [MoreContentIndicator] at the
+///   bottom of the card.
 class CollapsibleSectionFormCard extends StatelessWidget {
   const CollapsibleSectionFormCard({
     required this.title,
@@ -154,6 +162,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
     this.frameless = false,
     this.backgroundColor,
     this.reserveReorderHandleGutterWhenCollapsed = false,
+    this.leadingCollapsedOnly = false,
   });
 
   final String title;
@@ -167,10 +176,12 @@ class CollapsibleSectionFormCard extends StatelessWidget {
   final bool frameless;
   final Color? backgroundColor;
   final bool reserveReorderHandleGutterWhenCollapsed;
+  final bool leadingCollapsedOnly;
 
   Widget? _normalizeTrailing(Widget? trailing) {
     if (trailing == null) return null;
     if (trailing is IconButton) {
+      if (trailing.constraints != null) return trailing;
       return ConstrainedBox(
         constraints: kTightIconButtonConstraints,
         child: Center(child: trailing),
@@ -185,39 +196,49 @@ class CollapsibleSectionFormCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final normalizedTrailing = _normalizeTrailing(trailing);
+    final showLeading =
+        leading != null && (!leadingCollapsedOnly || !isExpanded);
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
-          onTap: () => onExpandedChanged(!isExpanded),
-          child: Padding(
-            padding: const EdgeInsets.all(kSpacingM),
-            child: Row(
-              children: [
-                if (!isExpanded && reserveReorderHandleGutterWhenCollapsed)
-                  const SizedBox(width: kDetailCardReorderHandleGutterWidth),
-                if (leading != null) ...[
-                  leading!,
-                  const SizedBox(width: kSpacingS),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    style: titleStyle ?? sectionTitleStyle(context),
-                  ),
+        Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () => onExpandedChanged(!isExpanded),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: kMinTapTargetSize),
+              child: Padding(
+                padding: const EdgeInsets.all(kSpacingM),
+                child: Row(
+                  children: [
+                    if (!isExpanded && reserveReorderHandleGutterWhenCollapsed)
+                      const SizedBox(
+                        width: kDetailCardReorderHandleGutterWidth,
+                      ),
+                    if (showLeading) ...[
+                      leading!,
+                      const SizedBox(width: kSpacingS),
+                    ],
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: titleStyle ?? sectionTitleStyle(context),
+                      ),
+                    ),
+                    if (normalizedTrailing != null) normalizedTrailing,
+                    AnimatedRotation(
+                      turns: isExpanded ? 0 : -0.25,
+                      duration: kAnimationNormal,
+                      child: Icon(
+                        Icons.keyboard_arrow_down,
+                        size: kIconSizeLarge,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                if (normalizedTrailing != null) normalizedTrailing,
-                AnimatedRotation(
-                  turns: isExpanded ? 0 : -0.25,
-                  duration: kAnimationNormal,
-                  child: Icon(
-                    Icons.keyboard_arrow_down,
-                    size: kIconSizeLarge,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -228,7 +249,12 @@ class CollapsibleSectionFormCard extends StatelessWidget {
               : CrossFadeState.showFirst,
           firstChild: const SizedBox.shrink(),
           secondChild: Padding(
-            padding: const EdgeInsets.fromLTRB(kSpacingM, 0, kSpacingM, kSpacingM),
+            padding: const EdgeInsets.fromLTRB(
+              kSpacingM,
+              0,
+              kSpacingM,
+              kSpacingM,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,
@@ -311,10 +337,7 @@ class MoreContentIndicator extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: helperTextStyle(context)?.copyWith(color: fg),
-            ),
+            Text(label, style: helperTextStyle(context)?.copyWith(color: fg)),
             const SizedBox(width: kSpacingXS),
             Icon(icon, size: kIconSizeLarge, color: fg),
           ],
@@ -839,10 +862,7 @@ class _SyringePainter extends CustomPainter {
       canvas.drawLine(Offset(x, tickTop), Offset(x, tickBottom), tickPaint);
       if (isMajor) {
         final tp = TextPainter(
-          text: TextSpan(
-            text: units.toStringAsFixed(0),
-            style: labelTextStyle,
-          ),
+          text: TextSpan(text: units.toStringAsFixed(0), style: labelTextStyle),
           textDirection: TextDirection.ltr,
         )..layout();
         tp.paint(canvas, Offset(x - tp.width / 2, 0));

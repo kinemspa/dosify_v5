@@ -147,6 +147,11 @@ const EdgeInsets kDetailCardCollapsedHeaderPadding = EdgeInsets.symmetric(
 /// a reorder drag handle.
 const double kDetailCardReorderHandleGutterWidth = kIconSizeMedium + kSpacingS;
 
+/// Minimum tap target size for interactive header rows.
+///
+/// Centralized wrapper around Material's default minimum interactive dimension.
+const double kMinTapTargetSize = kMinInteractiveDimension;
+
 /// Tight icon button sizing (avoids default 48px IconButton height).
 const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
   width: kIconButtonSize,
