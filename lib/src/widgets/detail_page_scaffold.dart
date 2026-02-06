@@ -201,7 +201,10 @@ class DetailPageScaffold extends StatelessWidget {
                             kPageHorizontalPadding,
                             kPageHorizontalPadding,
                           ),
-                          child: statsBannerContent,
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: statsBannerContent,
+                          ),
                         ),
                       ),
                     ],
