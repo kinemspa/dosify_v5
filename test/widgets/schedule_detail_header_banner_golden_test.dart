@@ -55,20 +55,21 @@ Schedule _createTestSchedule({
   bool active = true,
   bool? pausedUntil,
   DateTime? endAt,
+  String name = 'Morning Dose',
 }) {
   return Schedule(
     id: 'test-schedule-1',
-    medicationId: 'test-med-1',
-    name: 'Morning Dose',
+    name: name,
+    medicationName: 'Test Medication',
     doseValue: 1.0,
     doseUnit: 'tablet',
-    timesOfDay: [540], // 9:00 AM
-    daysOfWeek: {1, 2, 3, 4, 5}, // Mon-Fri
+    minutesOfDay: 540, // 9:00 AM
+    daysOfWeek: const [1, 2, 3, 4, 5], // Mon-Fri
+    medicationId: 'test-med-1',
     active: active,
     pausedUntil: pausedUntil != null
         ? DateTime.now().add(const Duration(days: 2))
         : null,
-    endAt: endAt,
   );
 }
 
@@ -156,8 +157,8 @@ void main() {
 
     testWidgets('completed schedule - compact width', (tester) async {
       final schedule = _createTestSchedule(
-        active: true,
-        endAt: DateTime.now().subtract(const Duration(days: 1)),
+        active: false,
+        name: 'Completed Schedule',
       );
 
       await tester.pumpWidget(
@@ -182,7 +183,10 @@ void main() {
     });
 
     testWidgets('long medication name - text wrapping', (tester) async {
-      final schedule = _createTestSchedule(active: true);
+      final schedule = _createTestSchedule(
+        active: true,
+        name: 'Very Long Medication Name That Should Wrap or Ellipsize',
+      );
       final nextDose = DateTime.now().add(const Duration(hours: 4));
 
       await tester.pumpWidget(
