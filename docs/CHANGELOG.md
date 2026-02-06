@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. Dates in UT
 
 ## Unreleased
 
+### Dose Action Sheet UI Fix (2026-02-06)
+- **Fixed save button being obscured by Android navigation bar**
+  - Wrapped `DraggableScrollableSheet` content with `SafeArea` widget in dose action sheet
+  - Ensures bottom buttons (Close, Save & Close) are always visible above system navigation bar
+  - Removed redundant manual viewPadding calculation in favor of SafeArea's automatic handling
+  - Affected component: `lib/src/widgets/dose_action_sheet.dart`
+
 ### Medication List Cards (2025-02-14)
 - Added a quick toggle between Halo and Concept-9 Focus cards, persisting the last selection between sessions.
 - Rebuilt the Halo card to match the flattened Concept-9 baseline: conditional adherence, inline fact rows, and clearer MDV stock signals.
