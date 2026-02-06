@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/unified_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -419,15 +420,12 @@ class _SupplyCard extends StatelessWidget {
       );
     }
 
-    return Card(
-      elevation: dense ? kElevationNone : kElevationLow,
-      child: InkWell(
-        onTap: openAdjustSheet,
-        child: Padding(
-          padding: dense ? kCompactCardPadding : kStandardCardPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return UnifiedCardSurface(
+      variant: dense ? UnifiedCardVariant.compact : UnifiedCardVariant.standard,
+      onTap: openAdjustSheet,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
               if (!dense)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -572,7 +570,7 @@ class _SupplyCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
