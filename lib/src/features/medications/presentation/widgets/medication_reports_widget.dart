@@ -432,7 +432,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     DoseStatusChangeLog log,
   ) {
     final cs = Theme.of(context).colorScheme;
-        return Padding(
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,7 +481,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildMissedDoseRow(BuildContext context, CalculatedDose dose) {
     final cs = Theme.of(context).colorScheme;
-        final scheduleName = _effectiveScheduleName(
+    final scheduleName = _effectiveScheduleName(
       scheduleId: dose.scheduleId,
       scheduleName: dose.scheduleName,
     );
@@ -554,7 +554,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildDoseLogItem(BuildContext context, DoseLog log) {
     final cs = Theme.of(context).colorScheme;
-        final displayValue = log.actualDoseValue ?? log.doseValue;
+    final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
     final isAdHoc = log.scheduleId == 'ad_hoc';
 
@@ -680,7 +680,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       useRootNavigator: true,
       builder: (dialogContext) {
         final cs = Theme.of(dialogContext).colorScheme;
-                        return StatefulBuilder(
+        return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             Future<void> pickDate() async {
               final picked = await showDatePicker(
@@ -1704,7 +1704,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildInventoryEventRow(BuildContext context, InventoryLog log) {
     final cs = Theme.of(context).colorScheme;
-        final canEditAdHoc = log.changeType == InventoryChangeType.adHocDose;
+    final canEditAdHoc = log.changeType == InventoryChangeType.adHocDose;
     final linkedAdHocDoseLog = canEditAdHoc
         ? Hive.box<DoseLog>('dose_logs').get(log.id)
         : null;
