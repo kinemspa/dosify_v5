@@ -252,13 +252,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             children: [
               Icon(
                 Icons.medication_outlined,
-                size: 64,
+                size: kEmptyStateIconSizeLarge,
                 color: Theme.of(context).colorScheme.outline,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
               Text(
                 'Medication not found',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: cardTitleStyle(context),
               ),
             ],
           ),
@@ -2289,24 +2289,28 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showActiveVialConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingL,
+          vertical: kSpacingS,
+        ),
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: smallHelperTextStyle(
+                  context,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            Wrap(spacing: 6, children: conditions),
+            Wrap(spacing: kFieldSpacing, children: conditions),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
             ),
           ],
         ),
@@ -2410,24 +2414,28 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showBackupStockConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingL,
+          vertical: kSpacingS,
+        ),
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: smallHelperTextStyle(
+                  context,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            Wrap(spacing: 6, children: conditions),
+            Wrap(spacing: kFieldSpacing, children: conditions),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
             ),
           ],
         ),
