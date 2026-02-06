@@ -10,6 +10,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
@@ -101,6 +102,59 @@ class SettingsPage extends ConsumerWidget {
                   );
                 },
               ),
+            ),
+          );
+        },
+      );
+
+      if (nextValue == null) return;
+      onSave(nextValue);
+    }
+
+    Future<void> editDaysSetting({
+      required String title,
+      required String description,
+      required int currentValue,
+      required ValueChanged<int> onSave,
+      required List<int> options,
+    }) async {
+      final nextValue = await showModalBottomSheet<int>(
+        context: context,
+        builder: (context) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(kSpacingM),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: cardTitleStyle(context)?.copyWith(
+                          fontWeight: kFontWeightBold,
+                        ),
+                      ),
+                      const SizedBox(height: kSpacingS),
+                      Text(description),
+                    ],
+                  ),
+                ),
+                ...options.map(
+                  (days) => ListTile(
+                    title: Text('$days days'),
+                    leading: Radio<int>(
+                      value: days,
+                      groupValue: currentValue,
+                      onChanged: (_) => Navigator.of(context).pop(days),
+                    ),
+                    onTap: () => Navigator.of(context).pop(days),
+                  ),
+                ),
+                const SizedBox(height: kSpacingS),
+              ],
             ),
           );
         },
@@ -412,6 +466,27 @@ class SettingsPage extends ConsumerWidget {
                   min: 0,
                   max: 100,
                   step: 5,
+                ),
+              );
+            },
+          ),
+          ValueListenableBuilder<ExpiryNotificationConfig>(
+            valueListenable: ExpiryNotificationSettings.value,
+            builder: (context, config, _) {
+              final days = config.leadTimeDays;
+              final subtitle = '$days days before expiry';
+              return ListTile(
+                leading: const Icon(Icons.event_busy_outlined),
+                title: const Text('Expiry notification timing'),
+                subtitle: Text(subtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => editDaysSetting(
+                  title: 'Expiry notification timing',
+                  description:
+                      'How far in advance of medication expiry you receive a notification.',
+                  currentValue: days,
+                  onSave: (v) => ExpiryNotificationSettings.setLeadTimeDays(v),
+                  options: const [7, 14, 30, 60, 90],
                 ),
               );
             },
