@@ -628,7 +628,7 @@ const LinearGradient kDetailHeaderGradient = LinearGradient(
   colors: [kDetailHeaderGradientStart, kDetailHeaderGradientEnd],
 );
 const double kDetailHeaderExpandedHeight = 280;
-const double kDetailHeaderExpandedHeightCompact = 240;
+const double kDetailHeaderExpandedHeightCompact = 280;
 const double kDetailHeaderCollapsedHeight = 48;
 
 /// Semantic status colors
