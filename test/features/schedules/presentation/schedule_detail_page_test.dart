@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -11,8 +13,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    // Initialize Hive for testing
-    await Hive.initFlutter();
+    // Initialize Hive with a temporary directory for better test isolation
+    final tempDir = await Directory.systemTemp.createTemp('hive_test_');
+    await Hive.init(tempDir.path);
     
     // Register adapters
     if (!Hive.isAdapterRegistered(1)) {
@@ -44,6 +47,19 @@ void main() {
       await Hive.box<DoseLog>('dose_logs').clear();
     } else {
       await Hive.openBox<DoseLog>('dose_logs');
+    }
+  });
+
+  tearDown(() async {
+    // Close boxes after each test for better isolation
+    if (Hive.isBoxOpen('medications')) {
+      await Hive.box<Medication>('medications').close();
+    }
+    if (Hive.isBoxOpen('schedules')) {
+      await Hive.box<Schedule>('schedules').close();
+    }
+    if (Hive.isBoxOpen('dose_logs')) {
+      await Hive.box<DoseLog>('dose_logs').close();
     }
   });
 
