@@ -209,13 +209,14 @@ class ScheduleScheduler {
       if (reminderAt == null) return;
       if (!reminderAt.isAfter(DateTime.now())) return;
 
-      final reminderId = overdueNotificationIdFor(s.id, when);
+      // Reuse the same notification ID so the overdue reminder
+      // *replaces* the original in the notification shade.
       final reminderTimeoutMs = missedAt.isAfter(reminderAt)
           ? missedAt.difference(reminderAt).inMilliseconds
           : null;
 
       await NotificationService.scheduleAtAlarmClock(
-        reminderId,
+        id,
         reminderAt,
         title: 'Overdue: ${s.medicationName}',
         body: '${s.name} • $metrics • due $dueAt',
