@@ -28,7 +28,7 @@ void showAppSnackBar(
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message, style: appSnackBarTextStyle(context)),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: kAppSnackBarBackgroundColor,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -39,9 +39,6 @@ void showAppSnackBar(
 
   final entry = OverlayEntry(
     builder: (context) {
-      final theme = Theme.of(context);
-      final cs = theme.colorScheme;
-
       return Positioned(
         top: 0,
         left: 0,
@@ -55,7 +52,7 @@ void showAppSnackBar(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: kCardMaxWidth),
                 child: Material(
-                  color: cs.primary,
+                  color: kAppSnackBarBackgroundColor,
                   borderRadius: BorderRadius.circular(kBorderRadiusMedium),
                   child: Padding(
                     padding: kAppSnackBarInnerPadding,
@@ -73,7 +70,7 @@ void showAppSnackBar(
                           TextButton(
                             style: TextButton.styleFrom(
                               padding: kTightTextButtonPadding,
-                              foregroundColor: cs.onPrimary,
+                              foregroundColor: kAppSnackBarForegroundColor,
                             ),
                             onPressed: () {
                               clearAppSnackBars();

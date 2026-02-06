@@ -564,6 +564,12 @@ const EdgeInsets kAppSnackBarInnerPadding = EdgeInsets.symmetric(
   vertical: kSpacingS,
 );
 
+/// App snackbar colors.
+///
+/// Used by [showAppSnackBar] to ensure the snackbar is clearly visible.
+const Color kAppSnackBarBackgroundColor = kDetailHeaderGradientEnd;
+const Color kAppSnackBarForegroundColor = Colors.white;
+
 // ============================================================================
 // BORDER CONSTANTS
 // ============================================================================
@@ -2192,9 +2198,8 @@ TextStyle? bodyTextStyle(BuildContext context) {
 
 /// App snackbar text style (used for top-of-screen snackbars).
 TextStyle? appSnackBarTextStyle(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
   return bodyTextStyle(context)?.copyWith(
-    color: cs.onPrimary,
+    color: kAppSnackBarForegroundColor,
     fontWeight: kFontWeightSemiBold,
   );
 }
