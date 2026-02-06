@@ -53,7 +53,7 @@ class TodayDosesCard extends ConsumerStatefulWidget {
   const TodayDosesCard({
     super.key,
     required this.scope,
-    this.title = 'Up next',
+    this.title = 'Today',
     this.isExpanded,
     this.onExpandedChanged,
     this.reserveReorderHandleGutterWhenCollapsed = false,
@@ -395,10 +395,22 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
             const SizedBox(height: kSpacingS),
           ]
         else ...[
-          buildHelperText(
-            context,
-            'Tip: swipe left on a dose to hide it.',
-            fullWidth: true,
+          Row(
+            children: [
+              Expanded(
+                child: buildHelperText(
+                  context,
+                  'Swipe left to hide',
+                  fullWidth: true,
+                ),
+              ),
+              const SizedBox(width: kSpacingS),
+              Icon(
+                Icons.swipe_left_rounded,
+                size: kIconSizeSmall,
+                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+              ),
+            ],
           ),
           const SizedBox(height: kSpacingS),
           if (showScrollablePreview)
