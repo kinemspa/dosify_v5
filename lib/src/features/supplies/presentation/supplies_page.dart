@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 class SuppliesPage extends StatefulWidget {
@@ -133,23 +134,11 @@ class _SuppliesPageState extends State<SuppliesPage> {
                     _buildToolbar(context),
                     Expanded(
                       child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.inventory_2,
-                              size: kEmptyStateIconSize,
-                            ),
-                            const SizedBox(height: kSpacingM),
-                            const Text(
-                              'Add your first supply to begin tracking',
-                            ),
-                            const SizedBox(height: kSpacingM),
-                            FilledButton(
-                              onPressed: () => context.push('/supplies/add'),
-                              child: const Text('Add Supply'),
-                            ),
-                          ],
+                        child: UnifiedEmptyState(
+                          icon: Icons.inventory_2,
+                          title: 'Add your first supply to begin tracking',
+                          actionLabel: 'Add Supply',
+                          onAction: () => context.push('/supplies/add'),
                         ),
                       ),
                     ),
@@ -431,7 +420,7 @@ class _SupplyCard extends StatelessWidget {
     }
 
     return Card(
-      elevation: dense ? 1 : 2,
+      elevation: dense ? kElevationNone : kElevationLow,
       child: InkWell(
         onTap: openAdjustSheet,
         child: Padding(
