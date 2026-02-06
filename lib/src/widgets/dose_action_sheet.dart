@@ -1313,8 +1313,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 top: Radius.circular(kBorderRadiusLarge),
               ),
             ),
-            child: Column(
-              children: [
+            child: SafeArea(
+              child: Column(
+                children: [
                 // Handle bar
                 Container(
                   width: kBottomSheetHandleWidth,
@@ -1359,10 +1360,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 ),
                 Expanded(child: formContent(context, scrollController)),
                 Padding(
-                  padding: kBottomSheetContentPadding.copyWith(
-                    bottom: kBottomSheetContentPadding.bottom +
-                        MediaQuery.of(context).viewPadding.bottom,
-                  ),
+                  padding: kBottomSheetContentPadding,
                   child: Row(
                     children: [
                       Expanded(
@@ -1393,6 +1391,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   ),
                 ),
               ],
+            ),
             ),
           );
         },
