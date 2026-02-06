@@ -197,12 +197,12 @@ class DoseTimingSettings {
 
     final reminders = <DateTime>[];
     
-    // Divide the window into equal segments for multiple reminders
-    // For example, if count=2 and window is 60 minutes:
-    // - First reminder at 20 minutes (33%)
-    // - Second reminder at 40 minutes (67%)
+    // Spread reminders evenly based on count:
+    // - count=1: single reminder at overdueReminderPercent% (e.g., 50%)
+    // - count=2: reminders at 33% and 67% of overdueReminderPercent
+    // - count=3: reminders at 25%, 50%, and 75% of overdueReminderPercent
     for (var i = 1; i <= count; i++) {
-      final segmentPercent = (overduePct * i / (count + 1)).round();
+      final segmentPercent = (overduePct * i / count).round();
       final seconds = (window.inSeconds * segmentPercent / 100).round();
       final reminder = scheduledTime.add(Duration(seconds: seconds));
       
