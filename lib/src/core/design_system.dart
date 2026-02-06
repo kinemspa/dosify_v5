@@ -107,6 +107,9 @@ const double kIconSizeLarge = 24;
 /// Empty state icon size
 const double kEmptyStateIconSize = 48;
 
+/// Empty state icon size (large)
+const double kEmptyStateIconSizeLarge = 64;
+
 /// Card/Container constraints
 const double kCardMinHeight = 48;
 const double kCardMaxWidth = 800;
